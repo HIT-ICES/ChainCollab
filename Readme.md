@@ -4,7 +4,7 @@
 
 ![Framework](./Readme_img/IBC.svg)
 
-[![video](./Readme_img/player.png)](https://youtu.be/e_SzCcc3ndg)
+[![video](./Readme_img/player.png)](https://www.youtube.com/watch?v=NukOZ39KPiE)
 
 ## Main Features
 
