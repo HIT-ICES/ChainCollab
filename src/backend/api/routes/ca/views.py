@@ -46,7 +46,7 @@ class FabricCAViewSet(viewsets.ViewSet):
                 "ca_name": ca_name,
                 "port_map": port_map,
             }
-            response = post("{}/api/v1/ca".format("http://localhost:7001"), data=data)
+            response = post("{}/api/v1/ca".format("http://192.168.1.177:7001"), data=data)
             if response.status_code == 200:
                 txt = json.loads(response.text)
                 return txt["res"]
@@ -63,7 +63,7 @@ class FabricCAViewSet(viewsets.ViewSet):
                 "action": "start",
             }
             response = post(
-                "{}/api/v1/ca/{}/operation".format("http://localhost:7001", ca_name),
+                "{}/api/v1/ca/{}/operation".format("http://192.168.1.177:7001", ca_name),
                 data=data,
             )
 

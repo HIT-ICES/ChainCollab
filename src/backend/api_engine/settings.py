@@ -63,9 +63,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-CORS_ORIGIN_WHITELIST = [
-    "http://127.0.0.1:8001",
-]
+# CORS_ORIGIN_WHITELIST = [
+#     ".*",
+# ]
 
 CORS_ALLOW_CREDENTIALS = True
 
