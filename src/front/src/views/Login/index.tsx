@@ -1,6 +1,6 @@
 // import styles from "./index.module.scss";
 import LoginForm from "./LoginForm/index.tsx";
-import LoginBackground from "./LoginBackground/index.tsx";
+import LoginBackground from "./LoginBackground";
 
 const LoginBoxView: React.FC = () => {
   return (

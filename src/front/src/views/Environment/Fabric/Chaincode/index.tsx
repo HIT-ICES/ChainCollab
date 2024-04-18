@@ -14,12 +14,10 @@ import {
 import { UploadOutlined } from "@ant-design/icons";
 import type { TableProps } from "antd";
 import type { GetProp, UploadFile, UploadProps } from "antd";
-import { useNavigate } from "react-router-dom";
 import Detail from "./Detail/index";
 import { useAppSelector } from "@/redux/hooks";
 import { packageChaincode } from '@/api/resourceAPI'
 import { useChaincodeData } from './hooks'
-import TestModal from "../../../BPMN/Translation/Detail/test";
 interface DataType {
   key: string;
   name: string;

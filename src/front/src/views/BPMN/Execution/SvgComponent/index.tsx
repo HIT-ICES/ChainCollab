@@ -3,7 +3,7 @@ import { css } from "@emotion/css";
 import { Button, Input, Form, Upload, Tag, Typography, Table } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { useLocation } from "react-router-dom";
-import { useBPMNIntanceDetailData, useBPMNDetailData } from "./hook.ts";
+import { useBPMNIntanceDetailData, useBPMNDetailData } from "./hook";
 import { getFireflyWithMSP } from '@/api/externalResource.ts'
 import JSZip from "jszip";
 const TestMode = true;
@@ -154,19 +154,19 @@ const InputComponentForMessage = (
                     testFunction={async () => {
 
                         const theRes = {}
-                        const observer = new PerformanceObserver(list => {
-                            list.getEntries().forEach(
-                                (entry) => {
-                                    if (entry.name.includes("_Complete")) {
-                                        theRes["timeCost"] = entry.responseStart - entry.requestStart;
-                                    }
-                                }
-                            );
-                        });
-                        observer.observe({ entryTypes: ["resource"] });
+                        // const observer = new PerformanceObserver(list => {
+                        //     list.getEntries().forEach(
+                        //         (entry) => {
+                        //             if (entry.name.includes("_Complete")) {
+                        //                 theRes["timeCost"] = entry.responseStart - entry.requestStart;
+                        //             }
+                        //         }
+                        //     );
+                        // });
+                        // observer.observe({ entryTypes: ["resource"] });
                         await confirmMessage();
                         await sleep(300);
-                        observer.disconnect();
+                        // observer.disconnect();
                         return { ...theRes }
                     }}
                     columns={TestConfirmResultColumns}
@@ -208,23 +208,23 @@ const InputComponentForMessage = (
             messageCostTime: 0,
             chainCodeCostTime: 0
         };
-        const observer = new PerformanceObserver(list => {
-            list.getEntries().forEach(
-                (entry) => {
-                    if (entry.name.includes("private")) {
-                        theRes["messageCostTime"] = entry.responseStart - entry.requestStart;
-                    }
-                    if (entry.name.includes("invoke/Message")) {
-                        theRes["chainCodeCostTime"] = entry.responseStart - entry.requestStart;
-                    }
-                    if (entry.name.includes("default/data")){
-                        // console.log(entry)
-                        theRes["fileCostTime"].push(entry.responseStart - entry.requestStart);
-                    }
-                }
-            );
-        });
-        observer.observe({ entryTypes: ["resource"] });
+        // const observer = new PerformanceObserver(list => {
+        //     list.getEntries().forEach(
+        //         (entry) => {
+        //             if (entry.name.includes("private")) {
+        //                 theRes["messageCostTime"] = entry.responseStart - entry.requestStart;
+        //             }
+        //             if (entry.name.includes("invoke/Message")) {
+        //                 theRes["chainCodeCostTime"] = entry.responseStart - entry.requestStart;
+        //             }
+        //             if (entry.name.includes("default/data")){
+        //                 // console.log(entry)
+        //                 theRes["fileCostTime"].push(entry.responseStart - entry.requestStart);
+        //             }
+        //         }
+        //     );
+        // });
+        // observer.observe({ entryTypes: ["resource"] });
         for (let key in format.properties) {
             values[key] = generateRandomString(10);
         }
@@ -232,11 +232,11 @@ const InputComponentForMessage = (
         for (let key in format.files) {
             // generate file
             // 1, 5 , 10, 50, 100
-            values[key] ={file:generateRandomFile(50)} 
+            values[key] ={file:generateRandomFile(100)} 
         }
         await onHandleMessage(values);
         await sleep(500);
-        observer.disconnect();
+        // observer.disconnect();
         return theRes;
     }
 
@@ -473,21 +473,21 @@ const ControlPanel = ({
                         bpmnInstance={bpmnInstance}
                         testFunction={async () => {
                             const theRes = {}
-                            const observer = new PerformanceObserver(list => {
-                                list.getEntries().forEach(
-                                    (entry) => {
-                                        if (entry.name.includes("invoke/Event")) {
-                                            theRes["timeCost"] = entry.responseStart - entry.requestStart;
-                                        }
-                                    }
-                                );
-                            });
-                            observer.observe({ entryTypes: ["resource"] });
+                            // const observer = new PerformanceObserver(list => {
+                            //     list.getEntries().forEach(
+                            //         (entry) => {
+                            //             if (entry.name.includes("invoke/Event")) {
+                            //                 theRes["timeCost"] = entry.responseStart - entry.requestStart;
+                            //             }
+                            //         }
+                            //     );
+                            // });
+                            // observer.observe({ entryTypes: ["resource"] });
                             await invokeEventAction(coreURL,
                                 contractName
                                 , currentElement.eventID);
                             await sleep(300);
-                            observer.disconnect();
+                            // observer.disconnect();
                             return { ...theRes }
                         }}
                         columns={TestResultColumns}
@@ -522,21 +522,21 @@ const ControlPanel = ({
                     bpmnInstance={bpmnInstance}
                     testFunction={async () => {
                         const theRes = {}
-                        const observer = new PerformanceObserver(list => {
-                            list.getEntries().forEach(
-                                (entry) => {
-                                    if (entry.name.includes("invoke/Gateway")) {
-                                        theRes["timeCost"] = entry.responseStart - entry.requestStart;
-                                    }
-                                }
-                            );
-                        });
-                        observer.observe({ entryTypes: ["resource"] });
+                        // const observer = new PerformanceObserver(list => {
+                        //     list.getEntries().forEach(
+                        //         (entry) => {
+                        //             if (entry.name.includes("invoke/Gateway")) {
+                        //                 theRes["timeCost"] = entry.responseStart - entry.requestStart;
+                        //             }
+                        //         }
+                        //     );
+                        // });
+                        // observer.observe({ entryTypes: ["resource"] });
                         await invokeGatewayAction(coreURL,
                             contractName
                             , currentElement.gatewayID);
                         await sleep(300);
-                        observer.disconnect();
+                        // observer.disconnect();
                         return { ...theRes }
                     }}
                     columns={TestResultColumns} />
@@ -565,7 +565,7 @@ const ControlPanel = ({
         );
 }
 
-import { useAllFireflyData } from './hook.ts'
+import { useAllFireflyData } from './hook'
 import axios from "axios";
 import { includes } from "lodash";
 

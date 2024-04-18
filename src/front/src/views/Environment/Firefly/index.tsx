@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Card, Flex, Typography } from "antd";
 import { BankOutlined, LineChartOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import DelFireflyNode from "./delete.tsx";
+import DelFireflyNode from "./delete";
 
 const { Link } = Typography
 

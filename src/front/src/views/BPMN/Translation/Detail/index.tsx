@@ -29,7 +29,7 @@ import { useFireflyData } from "./hooks";
 
 import { getAllMessages, registerDataType, initLedger } from "@/api/executionAPI"
 import { useBPMNBindingDataReverse } from './hooks'
-import TestModal from "./test";
+// import TestModal from "./test";
 import JSZip from 'jszip';
 
 const MembershipModal = ({
@@ -395,9 +395,9 @@ const BPMNInstanceOverview = () => {
                 onCancel={handleTestCancel}
                 style={{ width: '100%' }}
                 width={' 85%'}>
-                <TestModal
+                {/* <TestModal
                     envId={instance.environment_id}
-                    bpmnInstanceId={instance.id} />
+                    bpmnInstanceId={instance.id} /> */}
             </Modal>
             {
                 ModifyModal()

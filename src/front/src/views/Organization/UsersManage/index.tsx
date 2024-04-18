@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import UserInfoCard from './UserInfoCard.tsx';
+import UserInfoCard from './UserInfoCard';
 import InviteModal from './InviteModal.tsx';
 import { useUserListData } from './hooks.ts';
 import { useAppSelector } from '@/redux/hooks.ts';
