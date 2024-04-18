@@ -6,10 +6,10 @@ const paramTypes = [
     value: 'boolean',
     label: 'boolean',
   },
-  // {
-  //   value: 'json',
-  //   label: 'json',
-  // },
+  {
+    value: 'json',
+    label: 'json',
+  },
   {
     value: 'string',
     label: 'string',
@@ -26,11 +26,48 @@ const paramTypes = [
 ];
 
 export default function MessageModal({ dataElementId, open: isModalOpen, onClose }) {
+  const [title, setTitle] = React.useState(`message id: ${dataElementId}`);
+
+  // //用于选择要添加元素的type
+  // const [paramType, setParamType] = React.useState("");
+  // const [paramListOptions, setParamListOptions] = React.useState(
+  //   [
+  //     { label: 'Vue', value: 'Vue', type: 'boolean' },
+  //     { label: 'React', value: 'React', type: 'number' },
+  //     { label: 'Angular', value: 'Angular', type: 'string' },
+  //   ]
+  // );
+
   const modeler = window.bpmnjs;
   const elementRegistry = modeler.get('elementRegistry');
   const commandStack = modeler.get('commandStack');
   const shape = elementRegistry.get(dataElementId);
   console.log(dataElementId, shape)
+
+
+  // React.useEffect(() => {
+  //   if (shape != null) {
+  //     commandStack.execute('element.updateProperties', {
+  //       element: shape,
+  //       properties: {
+  //         // 修改的内容是 shape.businessObject
+  //         // 可以修改ID， 但感觉不必要
+  //         // 'id': newId,
+  //         // 也可以用这个修改title
+  //         // 'name': newTitle, // 即element.updateLabel的功能
+  //         // 修改 documentation, 数组，每行1个
+  //         'documentation': [
+  //           modeler._moddle.create("bpmn:Documentation", {
+  //             text: JSON.stringify(paramListOptions)
+  //           })
+  //         ]
+  //       }
+  //     });
+  //   }
+  // }, [paramListOptions]);
+
+
+
   const [name, setName] = React.useState(shape !== null ? shape.businessObject.name : "");
   const [dataSource, setDataSource] = React.useState([]);
 
@@ -67,7 +104,7 @@ export default function MessageModal({ dataElementId, open: isModalOpen, onClose
   }
 
   React.useEffect(() => {
-    if (shape != null) {
+    if (shape !=null){
       setName(shape.businessObject.name)
     }
   }, [shape]);
@@ -226,15 +263,6 @@ export default function MessageModal({ dataElementId, open: isModalOpen, onClose
     onClose && onClose(false);
   };
 
-  const handleGenerate = () => {
-    const copy = [...dataSource];
-    for (let i = 0; i < 1000; i++) {
-      copy.push({ key: copy.length, name: `field${copy.length}`, type: 'string', description: '', required: false });
-    }
-    setDataSource(copy);
-  }
-
-  const TestMode = false;
 
 
 
@@ -253,24 +281,30 @@ export default function MessageModal({ dataElementId, open: isModalOpen, onClose
       }
     />
     <br />
+
     Parameter List
-    {!TestMode ? (
-      <Table
-        dataSource={dataSource}
-        columns={columns}
-        pagination={false}
-      />
-    ) : null
-    }
-    {dataSource.length}
-    <div style={{ display: 'flex', justifyContent: "flex-end", marginTop: "10px", gap: "10px" }} >
+    {/* <List
+      bordered
+      dataSource={paramListOptions}
+      renderItem={(item) => (
+        <List.Item>
+          <Typography.Text mark>{item.type}</Typography.Text> {item.value}
+        </List.Item>
+      )}
+    /> */}
+    <Table
+      dataSource={dataSource}
+      columns={columns}
+      pagination={false}
+    />
+    <div style={{ display: 'flex', justifyContent: "flex-end", marginTop: "10px" }} >
       <Button type="primary" onClick={() => {
         // ADD New ITEM INTO dataSource
         const copy = [...dataSource];
         copy.push({ key: copy.length, name: '', type: 'string', description: '', required: false });
         setDataSource(copy);
       }}>Add New Field</Button>
-      <Button type="primary" onClick={handleGenerate} disabled={!TestMode} >Generate Test Field</Button>
+      {/* delete Last Line */}
     </div>
   </Modal>);
 }
