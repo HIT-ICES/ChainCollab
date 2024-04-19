@@ -4,6 +4,7 @@ import { FloatButton } from "antd";
 import UploadBPMN from "./Upload";
 import { set } from "lodash";
 import { useAppSelector } from "@/redux/hooks.ts";
+import { current_ip } from "@/api/apiConfig";
 
 const Darwing = () => {
   // TODO: request new BPMN Model and get ID
@@ -12,7 +13,7 @@ const Darwing = () => {
 
   const consortiumid = useAppSelector((state) => state.consortium).currentConsortiumId;
   const orgid = useAppSelector((state) => state.org).currentOrgId;
-  const iframeSrc = "http://localhost:4913?consortiumid=" + consortiumid + "&orgid=" + orgid;
+  const iframeSrc = `http://${current_ip}:4913?consortiumid=` + consortiumid + "&orgid=" + orgid;
   return (
     <div>
       <div

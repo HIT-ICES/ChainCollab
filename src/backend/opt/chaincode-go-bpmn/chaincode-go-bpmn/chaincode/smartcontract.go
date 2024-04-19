@@ -11,7 +11,6 @@ import (
 // SmartContract provides functions for managing an Asset
 type SmartContract struct {
 	contractapi.Contract
-	currentMemory StateMemory
 }
 
 type ElementState int
@@ -43,9 +42,9 @@ type ActionEvent struct {
 }
 
 type StateMemory struct { 
-	need_external_provider		bool		`json:"need_external_provider"`
-	invoice		bool		`json:"invoice"`
-	is_available		bool		`json:"is_available"`
+	NeedExternalProvider		bool		`json:"need_external_provider"`
+	Invoice		bool		`json:"invoice"`
+	IsAvailable		bool		`json:"is_available"`
 }
 
 func (cc *SmartContract) CreateMessage(ctx contractapi.TransactionContextInterface, messageID string, sendMspID string, receiveMspID string, fireflyTranID string, msgState ElementState, format string) (*Message, error) {
@@ -136,6 +135,25 @@ func (cc *SmartContract) CreateActionEvent(ctx contractapi.TransactionContextInt
 	return actionEvent, nil
 }
 
+func (s *SmartContract) InitStateMemory(ctx contractapi.TransactionContextInterface) error {
+	stub := ctx.GetStub()
+	currentMemory := StateMemory{	
+		NeedExternalProvider: false,
+		Invoice: false,
+		IsAvailable: false,
+	}
+	memoryJSON, err := json.Marshal(currentMemory)
+	if err != nil {
+		return fmt.Errorf("failed to marshal memory state: %s", err)
+	}
+	err = stub.PutState("currentMemory", memoryJSON)
+	if err != nil {	
+		return fmt.Errorf("failed to save memory state: %s", err)
+	}
+	// 这里你可以添加将stateMemory保存到区块链状态数据库的代码
+	return nil
+}
+
 // Read function
 func (c *SmartContract) ReadMsg(ctx contractapi.TransactionContextInterface, messageID string) (*Message, error) {
 	msgJSON, err := ctx.GetStub().GetState(messageID)
@@ -206,24 +224,23 @@ func (c *SmartContract) ReadEvent(ctx contractapi.TransactionContextInterface, e
 	return &event, nil
 }
 
-func (c *SmartContract) ReadCurrentMemory(ctx contractapi.TransactionContextInterface) (*StateMemory, error) {
+func (c *SmartContract) ReadMemory(ctx contractapi.TransactionContextInterface) (*StateMemory, error) {
 	memoryJSON, err := ctx.GetStub().GetState("currentMemory")
+    if err != nil {
+        return nil, fmt.Errorf("failed to read memory from world state: %v", err)
+    }
 
-	if err != nil {
-		return nil, fmt.Errorf("failed to read current memory from state: %s", err)
-	}
+    if memoryJSON == nil {
+        return nil, fmt.Errorf("memory state not found")
+    }
 
-	if memoryJSON == nil {
-		return nil, fmt.Errorf("current memory does not exists")
-	}
+    var memory StateMemory
+    err = json.Unmarshal(memoryJSON, &memory)
+    if err != nil {
+        return nil, err
+    }
 
-	var memory StateMemory
-	err = json.Unmarshal(memoryJSON, &memory)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal memory state: %s", err)
-	}
-
-	return &memory, nil
+    return &memory, nil
 }
 
 // Change State  function
@@ -406,30 +423,31 @@ func (cc *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface)
 		return fmt.Errorf(errorMessage)
 	}
 
-	cc.CreateMessage(ctx, "Message_1em0ee4", "Org-1.org.comMSP", "Org-2.org.comMSP", "", DISABLE, "{\"properties\":{\"service plan\":{\"type\":\"string\",\"description\":\"service plan\"},\"price_quotation\":{\"type\":\"number\",\"description\":\"Price quotation\"},\"need_external_provider\":{\"type\":\"boolean\",\"description\":\"Whether external service providers are required\"}},\"required\":[\"service plan\",\"price_quotation\",\"need_external_provider\"],\"files\":{},\"file required\":[]}")
-	cc.CreateMessage(ctx, "Message_1nlagx2", "Org-2.org.comMSP", "Org-1.org.comMSP", "", DISABLE, "{\"properties\":{\"confirmation\":{\"type\":\"boolean\",\"description\":\"Whether to accept the service plan\"}},\"required\":[\"confirmation\"],\"files\":{},\"file required\":[]}")
-	cc.CreateMessage(ctx, "Message_045i10y", "Org-2.org.comMSP", "Org-1.org.comMSP", "", DISABLE, "{\"properties\":{\"serviceId\":{\"type\":\"string\",\"description\":\"The required service id\"}},\"required\":[\"serviceId\"],\"files\":{},\"file required\":[]}")
-	cc.CreateMessage(ctx, "Message_0r9lypd", "Org-1.org.comMSP", "Org-2.org.comMSP", "", DISABLE, "{\"properties\":{\"is_available\":{\"type\":\"boolean\",\"description\":\"Is the service available?\"}},\"required\":[\"is_available\"],\"files\":{},\"file required\":[]}")
+	cc.CreateMessage(ctx, "Message_1em0ee4", "Hos.org.comMSP", "Old-man.org.comMSP", "", DISABLE, "{\"properties\":{\"service plan\":{\"type\":\"string\",\"description\":\"service plan\"},\"price_quotation\":{\"type\":\"number\",\"description\":\"Price quotation\"},\"need_external_provider\":{\"type\":\"boolean\",\"description\":\"Whether external service providers are required\"}},\"required\":[\"service plan\",\"price_quotation\",\"need_external_provider\"],\"files\":{},\"file required\":[]}")
+	cc.CreateMessage(ctx, "Message_1nlagx2", "Old-man.org.comMSP", "Hos.org.comMSP", "", DISABLE, "{\"properties\":{\"confirmation\":{\"type\":\"boolean\",\"description\":\"Whether to accept the service plan\"}},\"required\":[\"confirmation\"],\"files\":{},\"file required\":[]}")
+	cc.CreateMessage(ctx, "Message_045i10y", "Old-man.org.comMSP", "Hos.org.comMSP", "", DISABLE, "{\"properties\":{\"serviceId\":{\"type\":\"string\",\"description\":\"The required service id\"}},\"required\":[\"serviceId\"],\"files\":{},\"file required\":[]}")
+	cc.CreateMessage(ctx, "Message_0r9lypd", "Hos.org.comMSP", "Old-man.org.comMSP", "", DISABLE, "{\"properties\":{\"is_available\":{\"type\":\"boolean\",\"description\":\"Is the service available?\"}},\"required\":[\"is_available\"],\"files\":{},\"file required\":[]}")
 	cc.CreateGateway(ctx, "ExclusiveGateway_0hs3ztq", DISABLE)
 	cc.CreateActionEvent(ctx, "Event_1jtgn3j", ENABLE)
 	cc.CreateGateway(ctx, "EventBasedGateway_1fxpmyn", DISABLE)
-	cc.CreateMessage(ctx, "Message_0o8eyir", "Org-2.org.comMSP", "Org-1.org.comMSP", "", DISABLE, "{\"properties\":{\"payment amount\":{\"type\":\"number\",\"description\":\"payment amount\"},\"orderID\":{\"type\":\"number\",\"description\":\"The order id of payment\"}},\"required\":[\"payment amount\",\"orderID\"],\"files\":{},\"file required\":[]}")
-	cc.CreateMessage(ctx, "Message_1xm9dxy", "Org-2.org.comMSP", "Org-1.org.comMSP", "", DISABLE, "{\"properties\":{\"motivation\":{\"type\":\"string\",\"description\":\"Motivation for Canceling orders\"}},\"required\":[\"motivation\"],\"files\":{},\"file required\":[]}")
+	cc.CreateMessage(ctx, "Message_0o8eyir", "Old-man.org.comMSP", "Hos.org.comMSP", "", DISABLE, "{\"properties\":{\"payment amount\":{\"type\":\"number\",\"description\":\"payment amount\"},\"orderID\":{\"type\":\"number\",\"description\":\"The order id of payment\"}},\"required\":[\"payment amount\",\"orderID\"],\"files\":{},\"file required\":[]}")
+	cc.CreateMessage(ctx, "Message_1xm9dxy", "Old-man.org.comMSP", "Hos.org.comMSP", "", DISABLE, "{\"properties\":{\"motivation\":{\"type\":\"string\",\"description\":\"Motivation for Canceling orders\"}},\"required\":[\"motivation\"],\"files\":{},\"file required\":[]}")
 	cc.CreateActionEvent(ctx, "Event_0366pfz", DISABLE)
 	cc.CreateGateway(ctx, "ExclusiveGateway_0nzwv7v", DISABLE)
 	cc.CreateActionEvent(ctx, "Event_08edp7f", DISABLE)
-	cc.CreateMessage(ctx, "Message_1joj7ca", "Org-2.org.comMSP", "Org-1.org.comMSP", "", DISABLE, "{\"properties\":{\"invoice information\":{\"type\":\"string\",\"description\":\"Invoice related information\"}},\"required\":[\"invoice information\"],\"files\":{},\"file required\":[]}")
-	cc.CreateMessage(ctx, "Message_1etcmvl", "Org-1.org.comMSP", "Org-2.org.comMSP", "", DISABLE, "{\"properties\":{\"invoice_id\":{\"type\":\"string\",\"description\":\"Invoice Id\"},\"invoice_data\":{\"type\":\"number\",\"description\":\"Date of invoice issuance\"}},\"required\":[\"invoice_id\"],\"files\":{\"invoice\":{\"type\":\"file\",\"description\":\"Invoice documents\"}},\"file required\":[\"invoice\"]}")
+	cc.CreateMessage(ctx, "Message_1joj7ca", "Old-man.org.comMSP", "Hos.org.comMSP", "", DISABLE, "{\"properties\":{\"invoice information\":{\"type\":\"string\",\"description\":\"Invoice related information\"}},\"required\":[\"invoice information\"],\"files\":{},\"file required\":[]}")
+	cc.CreateMessage(ctx, "Message_1etcmvl", "Hos.org.comMSP", "Old-man.org.comMSP", "", DISABLE, "{\"properties\":{\"invoice_id\":{\"type\":\"string\",\"description\":\"Invoice Id\"},\"invoice_data\":{\"type\":\"number\",\"description\":\"Date of invoice issuance\"}},\"required\":[\"invoice_id\"],\"files\":{\"invoice\":{\"type\":\"file\",\"description\":\"Invoice documents\"}},\"file required\":[\"invoice\"]}")
 	cc.CreateActionEvent(ctx, "Event_146eii4", DISABLE)
 	cc.CreateGateway(ctx, "ExclusiveGateway_106je4z", DISABLE)
 	cc.CreateGateway(ctx, "Gateway_1bhtapl", DISABLE)
-	cc.CreateMessage(ctx, "Message_1i8rlqn", "Org-1.org.comMSP", "Org-con.org.comMSP", "", DISABLE, "{\"properties\":{\"external service Id\":{\"type\":\"string\",\"description\":\"The requested external service information\"}},\"required\":[\"external service Id\"],\"files\":{},\"file required\":[]}")
-	cc.CreateMessage(ctx, "Message_1ljlm4g", "Org-1.org.comMSP", "Org-2.org.comMSP", "", DISABLE, "{\"properties\":{\"delivered_product_id\":{\"type\":\"string\",\"description\":\"delivered_product_id\"}},\"required\":[\"delivered_product_id\"],\"files\":{},\"file required\":[]}")
-	cc.CreateMessage(ctx, "Message_0m9p3da", "Org-2.org.comMSP", "Org-1.org.comMSP", "", DISABLE, "{\"properties\":{\"invoice\":{\"type\":\"boolean\",\"description\":\"Do you need an invoice?\"}},\"required\":[\"invoice\"],\"files\":{},\"file required\":[]}")
+	cc.CreateMessage(ctx, "Message_1i8rlqn", "Hos.org.comMSP", "Org1-con.org.comMSP", "", DISABLE, "{\"properties\":{\"external service Id\":{\"type\":\"string\",\"description\":\"The requested external service information\"}},\"required\":[\"external service Id\"],\"files\":{},\"file required\":[]}")
+	cc.CreateMessage(ctx, "Message_1ljlm4g", "Hos.org.comMSP", "Old-man.org.comMSP", "", DISABLE, "{\"properties\":{\"delivered_product_id\":{\"type\":\"string\",\"description\":\"delivered_product_id\"}},\"required\":[\"delivered_product_id\"],\"files\":{},\"file required\":[]}")
+	cc.CreateMessage(ctx, "Message_0m9p3da", "Old-man.org.comMSP", "Hos.org.comMSP", "", DISABLE, "{\"properties\":{\"invoice\":{\"type\":\"boolean\",\"description\":\"Do you need an invoice?\"}},\"required\":[\"invoice\"],\"files\":{},\"file required\":[]}")
 	cc.CreateGateway(ctx, "Gateway_04h9e6e", DISABLE)
-	cc.CreateMessage(ctx, "Message_1q05nnw", "Org-1.org.comMSP", "Org-con.org.comMSP", "", DISABLE, "{\"properties\":{\"payment amount\":{\"type\":\"number\",\"description\":\"payment amount\"}},\"required\":[\"payment amount\"],\"files\":{},\"file required\":[]}")
-	cc.CreateMessage(ctx, "Message_1qbk325", "Org-con.org.comMSP", "Org-1.org.comMSP", "", DISABLE, "{\"properties\":{\"product Id\":{\"type\":\"string\",\"description\":\"Delivered product id\"}},\"required\":[\"product Id\"],\"files\":{},\"file required\":[]}")
-	
+	cc.CreateMessage(ctx, "Message_1q05nnw", "Hos.org.comMSP", "Org1-con.org.comMSP", "", DISABLE, "{\"properties\":{\"payment amount\":{\"type\":\"number\",\"description\":\"payment amount\"}},\"required\":[\"payment amount\"],\"files\":{},\"file required\":[]}")
+	cc.CreateMessage(ctx, "Message_1qbk325", "Org1-con.org.comMSP", "Hos.org.comMSP", "", DISABLE, "{\"properties\":{\"product Id\":{\"type\":\"string\",\"description\":\"Delivered product id\"}},\"required\":[\"product Id\"],\"files\":{},\"file required\":[]}")
+	cc.InitStateMemory(ctx)
+
 	isInited = true
 
 	stub.SetEvent("initContractEvent", []byte("Contract has been initialized successfully"))
@@ -462,9 +480,14 @@ func (cc *SmartContract) Message_1em0ee4_Send(ctx contractapi.TransactionContext
 	stub.PutState("Message_1em0ee4", msgJSON)
 	stub.SetEvent("Message_1em0ee4", []byte("Message wait for confirming"))
 
-	cc.currentMemory.need_external_provider = need_external_provider
-		memoryJSON, err := json.Marshal(cc.currentMemory)
-		if err != nil {
+	currentMemory,err:=cc.ReadMemory(ctx)
+	if err != nil {	
+		fmt.Println(err)
+		return err
+	}
+	currentMemory.NeedExternalProvider = need_external_provider
+	memoryJSON, err := json.Marshal(currentMemory)
+	if err != nil {
 		return fmt.Errorf("failed to marshal memory state: %s", err)
 	}
 
@@ -531,16 +554,6 @@ func (cc *SmartContract) Message_1nlagx2_Send(ctx contractapi.TransactionContext
 	stub.PutState("Message_1nlagx2", msgJSON)
 	stub.SetEvent("Message_1nlagx2", []byte("Message wait for confirming"))
 
-	memoryJSON, err := json.Marshal(cc.currentMemory)
-		if err != nil {
-		return fmt.Errorf("failed to marshal memory state: %s", err)
-	}
-
-	err = stub.PutState("currentMemory", memoryJSON)
-		if err != nil {
-		return fmt.Errorf("failed to save memory state: %s", err)
-	}
-
 	
 return nil
 }
@@ -602,16 +615,6 @@ func (cc *SmartContract) Message_045i10y_Send(ctx contractapi.TransactionContext
 	stub.PutState("Message_045i10y", msgJSON)
 	stub.SetEvent("Message_045i10y", []byte("Message wait for confirming"))
 
-	memoryJSON, err := json.Marshal(cc.currentMemory)
-		if err != nil {
-		return fmt.Errorf("failed to marshal memory state: %s", err)
-	}
-
-	err = stub.PutState("currentMemory", memoryJSON)
-		if err != nil {
-		return fmt.Errorf("failed to save memory state: %s", err)
-	}
-
 
 return nil
 }
@@ -670,9 +673,14 @@ func (cc *SmartContract) Message_0r9lypd_Send(ctx contractapi.TransactionContext
 	stub.PutState("Message_0r9lypd", msgJSON)
 	stub.SetEvent("Message_0r9lypd", []byte("Message wait for confirming"))
 
-	cc.currentMemory.is_available = is_available
-		memoryJSON, err := json.Marshal(cc.currentMemory)
-		if err != nil {
+	currentMemory,err:=cc.ReadMemory(ctx)
+	if err != nil {	
+		fmt.Println(err)
+		return err
+	}
+	currentMemory.IsAvailable = is_available
+	memoryJSON, err := json.Marshal(currentMemory)
+	if err != nil {
 		return fmt.Errorf("failed to marshal memory state: %s", err)
 	}
 
@@ -807,16 +815,6 @@ func (cc *SmartContract) Message_0o8eyir_Send(ctx contractapi.TransactionContext
 	stub.PutState("Message_0o8eyir", msgJSON)
 		stub.SetEvent("ChoreographyTask_177ikw5", []byte("Message wait for confirming"))
 
-	memoryJSON, err := json.Marshal(cc.currentMemory)
-		if err != nil {
-		return fmt.Errorf("failed to marshal memory state: %s", err)
-	}
-
-	err = stub.PutState("currentMemory", memoryJSON)
-		if err != nil {
-		return fmt.Errorf("failed to save memory state: %s", err)
-	}
-
         cc.ChangeMsgState(ctx, "Message_1xm9dxy" ,DISABLE)
 
 	
@@ -878,16 +876,6 @@ func (cc *SmartContract) Message_1xm9dxy_Send(ctx contractapi.TransactionContext
 	msgJSON, _ := json.Marshal(msg)
 	stub.PutState("Message_1xm9dxy", msgJSON)
 		stub.SetEvent("ChoreographyTask_09lf521", []byte("Message wait for confirming"))
-
-	memoryJSON, err := json.Marshal(cc.currentMemory)
-		if err != nil {
-		return fmt.Errorf("failed to marshal memory state: %s", err)
-	}
-
-	err = stub.PutState("currentMemory", memoryJSON)
-		if err != nil {
-		return fmt.Errorf("failed to save memory state: %s", err)
-	}
 
         cc.ChangeMsgState(ctx, "Message_0o8eyir" ,DISABLE)
 
@@ -958,11 +946,15 @@ func (cc *SmartContract) ExclusiveGateway_0nzwv7v(ctx contractapi.TransactionCon
 
 	cc.ChangeGtwState(ctx, "ExclusiveGateway_0nzwv7v", DONE)
 	stub.SetEvent("ExclusiveGateway_0nzwv7v", []byte("ExclusiveGateway has been done"))
-
-if cc.currentMemory.invoice==false {
+	currentMemory,err:=cc.ReadMemory(ctx)
+	if err != nil {	
+		fmt.Println(err)
+		return err
+	}
+	if currentMemory.Invoice==false {
         cc.ChangeEventState(ctx, "Event_08edp7f" ,ENABLE)
 
-} else if cc.currentMemory.invoice==true {
+	} else if currentMemory.Invoice==true {
         cc.ChangeMsgState(ctx, "Message_1joj7ca" ,ENABLE)
 
 } 
@@ -1013,16 +1005,6 @@ func (cc *SmartContract) Message_1joj7ca_Send(ctx contractapi.TransactionContext
 	msgJSON, _ := json.Marshal(msg)
 	stub.PutState("Message_1joj7ca", msgJSON)
 	stub.SetEvent("Message_1joj7ca", []byte("Message wait for confirming"))
-
-	memoryJSON, err := json.Marshal(cc.currentMemory)
-		if err != nil {
-		return fmt.Errorf("failed to marshal memory state: %s", err)
-	}
-
-	err = stub.PutState("currentMemory", memoryJSON)
-		if err != nil {
-		return fmt.Errorf("failed to save memory state: %s", err)
-	}
 
 
 return nil
@@ -1081,16 +1063,6 @@ func (cc *SmartContract) Message_1etcmvl_Send(ctx contractapi.TransactionContext
 	msgJSON, _ := json.Marshal(msg)
 	stub.PutState("Message_1etcmvl", msgJSON)
 	stub.SetEvent("Message_1etcmvl", []byte("Message wait for confirming"))
-
-	memoryJSON, err := json.Marshal(cc.currentMemory)
-		if err != nil {
-		return fmt.Errorf("failed to marshal memory state: %s", err)
-	}
-
-	err = stub.PutState("currentMemory", memoryJSON)
-		if err != nil {
-		return fmt.Errorf("failed to save memory state: %s", err)
-	}
 
 	
 return nil
@@ -1159,11 +1131,15 @@ func (cc *SmartContract) ExclusiveGateway_106je4z(ctx contractapi.TransactionCon
 
 	cc.ChangeGtwState(ctx, "ExclusiveGateway_106je4z", DONE)
 	stub.SetEvent("ExclusiveGateway_106je4z", []byte("ExclusiveGateway has been done"))
-
-if cc.currentMemory.is_available==true {
+	currentMemory,err:=cc.ReadMemory(ctx)
+	if err != nil {	
+		fmt.Println(err)
+		return err
+	}
+	if currentMemory.IsAvailable==true {
         cc.ChangeMsgState(ctx, "Message_1em0ee4" ,ENABLE)
 
-} else if cc.currentMemory.is_available==false {
+	} else if currentMemory.IsAvailable==false {
         cc.ChangeGtwState(ctx, "ExclusiveGateway_0hs3ztq" ,ENABLE)
 
 } 
@@ -1185,11 +1161,15 @@ func (cc *SmartContract) Gateway_1bhtapl(ctx contractapi.TransactionContextInter
 
 	cc.ChangeGtwState(ctx, "Gateway_1bhtapl", DONE)
 	stub.SetEvent("Gateway_1bhtapl", []byte("ExclusiveGateway has been done"))
-
-if cc.currentMemory.need_external_provider==true {
+	currentMemory,err:=cc.ReadMemory(ctx)
+	if err != nil {	
+		fmt.Println(err)
+		return err
+	}
+	if currentMemory.NeedExternalProvider==true {
         cc.ChangeMsgState(ctx, "Message_1i8rlqn" ,ENABLE)
 
-} else if cc.currentMemory.need_external_provider==false {
+	} else if currentMemory.NeedExternalProvider==false {
         cc.ChangeGtwState(ctx, "Gateway_04h9e6e" ,ENABLE)
 
 } 
@@ -1221,16 +1201,6 @@ func (cc *SmartContract) Message_1i8rlqn_Send(ctx contractapi.TransactionContext
 	msgJSON, _ := json.Marshal(msg)
 	stub.PutState("Message_1i8rlqn", msgJSON)
 		stub.SetEvent("ChoreographyTask_1khafgk", []byte("Message wait for confirming"))
-
-	memoryJSON, err := json.Marshal(cc.currentMemory)
-		if err != nil {
-		return fmt.Errorf("failed to marshal memory state: %s", err)
-	}
-
-	err = stub.PutState("currentMemory", memoryJSON)
-		if err != nil {
-		return fmt.Errorf("failed to save memory state: %s", err)
-	}
 
 	
 return nil
@@ -1293,16 +1263,6 @@ func (cc *SmartContract) Message_1ljlm4g_Send(ctx contractapi.TransactionContext
 	stub.PutState("Message_1ljlm4g", msgJSON)
 	stub.SetEvent("Message_1ljlm4g", []byte("Message wait for confirming"))
 
-	memoryJSON, err := json.Marshal(cc.currentMemory)
-		if err != nil {
-		return fmt.Errorf("failed to marshal memory state: %s", err)
-	}
-
-	err = stub.PutState("currentMemory", memoryJSON)
-		if err != nil {
-		return fmt.Errorf("failed to save memory state: %s", err)
-	}
-
 
 return nil
 }
@@ -1361,8 +1321,13 @@ func (cc *SmartContract) Message_0m9p3da_Send(ctx contractapi.TransactionContext
 	stub.PutState("Message_0m9p3da", msgJSON)
 	stub.SetEvent("Message_0m9p3da", []byte("Message wait for confirming"))
 
-	cc.currentMemory.invoice = invoice
-		memoryJSON, err := json.Marshal(cc.currentMemory)
+	currentMemory,err:=cc.ReadMemory(ctx)
+	if err != nil {	
+		fmt.Println(err)
+		return err
+	}
+	currentMemory.Invoice = invoice
+		memoryJSON, err := json.Marshal(currentMemory)
 		if err != nil {
 		return fmt.Errorf("failed to marshal memory state: %s", err)
 	}
@@ -1455,16 +1420,6 @@ func (cc *SmartContract) Message_1q05nnw_Send(ctx contractapi.TransactionContext
 	stub.PutState("Message_1q05nnw", msgJSON)
 	stub.SetEvent("Message_1q05nnw", []byte("Message wait for confirming"))
 
-	memoryJSON, err := json.Marshal(cc.currentMemory)
-		if err != nil {
-		return fmt.Errorf("failed to marshal memory state: %s", err)
-	}
-
-	err = stub.PutState("currentMemory", memoryJSON)
-		if err != nil {
-		return fmt.Errorf("failed to save memory state: %s", err)
-	}
-
 
 return nil
 }
@@ -1522,16 +1477,6 @@ func (cc *SmartContract) Message_1qbk325_Send(ctx contractapi.TransactionContext
 	msgJSON, _ := json.Marshal(msg)
 	stub.PutState("Message_1qbk325", msgJSON)
 	stub.SetEvent("Message_1qbk325", []byte("Message wait for confirming"))
-
-	memoryJSON, err := json.Marshal(cc.currentMemory)
-		if err != nil {
-		return fmt.Errorf("failed to marshal memory state: %s", err)
-	}
-
-	err = stub.PutState("currentMemory", memoryJSON)
-		if err != nil {
-		return fmt.Errorf("failed to save memory state: %s", err)
-	}
 
 	
 return nil
