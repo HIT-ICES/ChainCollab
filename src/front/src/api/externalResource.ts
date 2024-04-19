@@ -1,4 +1,4 @@
-import api from "./apiConfig";
+import api, { current_ip } from "./apiConfig";
 
 export const getBPMNList = async (consortiumId: string) => {
     try {
@@ -51,7 +51,7 @@ export const addBPMNInstance = async (bpmnId: string, name: string, currentEnvId
 
 export const generateChaincode = async (bpmnContent: string, mapInfo: string) => {
     try {
-        const res = await api.post(`http://localhost:9999/chaincode/generate`, {
+        const res = await api.post(`http://${current_ip}:9999/chaincode/generate`, {
             bpmnContent: bpmnContent,
             participantMspMap: mapInfo
         })

@@ -1,5 +1,5 @@
 # Add One Host to /etc/hosts
-from IBC.src.backend.api.config import CURRENT_IP
+from api.config import CURRENT_IP
 
 
 def add_host(domain, ip=CURRENT_IP):

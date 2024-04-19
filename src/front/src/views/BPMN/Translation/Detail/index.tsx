@@ -31,6 +31,7 @@ import { getAllMessages, registerDataType, initLedger } from "@/api/executionAPI
 import { useBPMNBindingDataReverse } from './hooks'
 // import TestModal from "./test";
 import JSZip from 'jszip';
+import { current_ip } from "@/api/apiConfig";
 
 const MembershipModal = ({
     open, setOpen, envId, bpmnInstanceId
@@ -192,7 +193,7 @@ const BPMNInstanceOverview = () => {
         const mapInfo = await getMapInfoofBPMNInstance(bpmnInstanceId);
         const mapInfoString = JSON.stringify(mapInfo);
         const bpmn = await retrieveBPMN(instance.bpmn);
-        
+
         const record = []
         for (let i = 0; i < 50; i++) {
             // var start = performance.now();
@@ -233,11 +234,11 @@ const BPMNInstanceOverview = () => {
             const parsedFFIContent = JSON.parse(ffiContent);
             const chaincodeIdPrefix = instance.chaincode_name + instance.chaincode_id.substring(0, 6);
             parsedFFIContent.name = chaincodeIdPrefix
-            const response = await axios.post("http://127.0.0.1:5000/api/v1/namespaces/default/contracts/interfaces",
+            const response = await axios.post(`http://${current_ip}:5000/api/v1/namespaces/default/contracts/interfaces`,
                 parsedFFIContent)
             const interfaceid = response.data.id;
             const location = {
-                channel: "default1",        //写死在后端
+                channel: "default",        //写死在后端
                 chaincode: instance.chaincode_name
             };
             const jsonData = {
@@ -248,16 +249,16 @@ const BPMNInstanceOverview = () => {
                 location: location
             };
             await new Promise(resolve => setTimeout(resolve, 4000));
-            const response2 = await axios.post("http://127.0.0.1:5000/api/v1/namespaces/default/apis",
+            const response2 = await axios.post(`http://${current_ip}:5000/api/v1/namespaces/default/apis`,
                 jsonData)
             const fireflyUrl = response2.data.urls.ui
             await new Promise(resolve => setTimeout(resolve, 4000));
-            const fireflyUrlForRegister = "http://127.0.0.1:5000"
+            const fireflyUrlForRegister = `http://${current_ip}:5000`
             await initLedger(fireflyUrlForRegister, chaincodeIdPrefix);
             await new Promise(resolve => setTimeout(resolve, 4000));
             const messages = await getAllMessages(fireflyUrlForRegister, chaincodeIdPrefix);
 
-            const all_requests =messages? messages.map(
+            const all_requests = messages ? messages.map(
                 (msg) => {
                     console.log()
                     const data1 = {
@@ -291,7 +292,7 @@ const BPMNInstanceOverview = () => {
                         mergeData
                     )
                 }
-            ): [];
+            ) : [];
             const res2 = await Promise.all(all_requests)
             await updateBPMNInstanceFireflyUrl(bpmnInstanceId, bpmnId, fireflyUrl);
             const res = await updateBPMNInstanceStatus(bpmnInstanceId, bpmnId, "Registered");

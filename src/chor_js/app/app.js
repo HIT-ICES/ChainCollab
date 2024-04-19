@@ -242,7 +242,7 @@ renderModel(blankXml);
 ReactDOM.render(<MainPage />, document.getElementById('app'),);
 
 function upload_bpmn_post(result, params, bpmnName, resultOfSvg) {
-  return axios.post('http://localhost:9999/chaincode/getPartByBpmnC', {
+  return axios.post('http://192.168.1.177:9999/chaincode/getPartByBpmnC', {
     bpmnContent: result.xml
   })
     .then((response) => {

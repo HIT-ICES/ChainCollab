@@ -1,8 +1,9 @@
 import axios from "axios";
 
+export const current_ip = "192.168.1.177"
 const api = axios.create({
   // baseURL: "https://ae702a09-b9ea-40d0-858c-2f6bb82702d8.mock.pstmn.io/api/v1",
-  baseURL: "http://192.168.1.177:8000/api/v1",
+  baseURL: "http://" + current_ip + ":8000/api/v1",
   headers: {
     "Content-Type": "application/json",
   },
