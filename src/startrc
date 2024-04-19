@@ -1,0 +1,30 @@
+export WorkDir=$(pwd)
+
+alias clean='cd $WorkDir &&sudo ./clean.sh'
+alias start_dashboard='cd $WorkDir/src/dashboard && npm run start'
+alias start_agent='cd $WorkDir/src/agent/docker-rest-agent && source venv/bin/activate && gunicorn server:app -c ./gunicorn.conf.py'
+alias start_database='cd $WorkDir/backend && docker-compose up -d'
+alias prepare_api='cd $WorkDir/backend && source venv_heyibo/bin/activate && python3 manage.py makemigrations && python3 manage.py migrate'
+alias start_api='cd $WorkDir/backend && source venv_heyibo/bin/activate && python manage.py runserver'
+
+alias export_ER='cd $WorkDir/backend && source venv/bin/activate && python manage.py graph_models -a -g -o er.png'
+
+alias export_ER_Dot='cd $WorkDir/backend && source venv/bin/activate && python manage.py graph_models -a -o er.dot'
+
+alias start_trans='cd ~/translator-springboot && mvn spring-boot:run'
+alias start_chor='cd ~/chor_js_modify && npm run dev'
+
+# start_database then wait for 3 seconds
+alias start_backend='start_database &&sleep 1&& prepare_api && start_api'
+
+add_host_mapping() {
+    if [ $# -eq 0 ]; then
+        echo "请提供插件名称作为参数"
+        return 1
+    fi
+
+    for plugin in "$@"; do
+        echo "127.0.0.1 $plugin" | sudo tee -a /etc/hosts >/dev/null
+        echo "已将 $plugin 添加到hosts文件"
+    done
+}

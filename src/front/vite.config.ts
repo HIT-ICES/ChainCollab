@@ -17,4 +17,9 @@ export default defineConfig({
       '~': path.resolve(__dirname, './'),
     },
   },
+  server: {
+  fs: {
+    cachedChecks: false
+  }
+}
 });

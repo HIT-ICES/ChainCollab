@@ -56,7 +56,7 @@ class Channel(Command):
                         ORDERER_CA,
                     )
                 )
-
+                os.system("echo $http_proxy")
             # The return value of os.system is not the result of executing the program. It is a 16 bit number,
             #  and its high bit is the return code
             res = res >> 8

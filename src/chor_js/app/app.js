@@ -247,7 +247,7 @@ function upload_bpmn_post(result, params, bpmnName, resultOfSvg) {
   })
     .then((response) => {
       console.log('Post getParticipant request success:', response.data);
-      axios.post(`http://127.0.0.1:8000/api/v1/consortiums/${params["consortiumid"]}/bpmns/_upload`, {
+      axios.post(`http://192.168.1.177:8000/api/v1/consortiums/${params["consortiumid"]}/bpmns/_upload`, {
         bpmnContent: result.xml,
         consortiumid: params["consortiumid"],
         orgid: params["orgid"],
