@@ -57,6 +57,8 @@ from api.routes.bpmn.views import (
     BPMNInstanceViewSet,
     BPMNBindingRecordViewSet,
 )
+from api.routes.fabric_identity.views import FabricIdentityViewSet
+from api.routes.api_secret_key.views import APISecretKeyViewSet
 
 DEBUG = getattr(settings, "DEBUG")
 API_VERSION = os.getenv("API_VERSION")
@@ -86,6 +88,9 @@ router.register("files", FileViewSet, basename="file")
 router.register("register", RegisterViewSet, basename="register")
 
 router.register("agents", AgentViewSet, basename="agent")  # No Change
+
+router.register("api_secret_keys", APISecretKeyViewSet, basename="api_secret_key")
+router.register("fabric_identities", FabricIdentityViewSet, basename="fabric_identity")
 
 router.register(
     "fabric_resource_sets", FabricResourceSetViewSet, basename="fabric_resource_set"

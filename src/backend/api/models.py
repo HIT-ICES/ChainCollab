@@ -6,7 +6,7 @@ import shutil
 import tarfile
 from unittest.util import _MAX_LENGTH
 from zipfile import ZipFile
-
+from requests import get, post
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
@@ -16,6 +16,7 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.contrib.postgres.fields import ArrayField
 from api.common.enums import FabricCAEnrollType, FabricCARegisterType, FabricCAOrgType
+import json
 
 from api.common.enums import (
     HostStatus,
@@ -78,6 +79,7 @@ class FabricResourceSet(models.Model):
         related_name="sub_resource_set",
         on_delete=models.SET_NULL,
     )
+
     class Meta:
         ordering = ("-created_at",)
 
@@ -948,6 +950,7 @@ class Firefly(models.Model):
         help_text="related resource_set id",
         null=False,
         on_delete=models.CASCADE,
+        related_name="firefly",
     )
     core_url = models.TextField(
         help_text="name of core url",
@@ -955,6 +958,60 @@ class Firefly(models.Model):
     sandbox_url = models.TextField(
         help_text="name of sandbox url",
     )
+    fab_connect_url = models.TextField(
+        help_text="name of fabconnect url",
+        blank=True,
+        null=True,
+    )
+    # to add fab_connect_address
+
+    def register_certificate(self, name, attributes, type="client", maxEnrollments=-1):
+        if attributes is None:
+            attributes = []
+        fab_connect_address = f"http://{self.fab_connect_url}/identities"
+        response = post(
+            fab_connect_address,
+            data=json.dumps(
+                {
+                    "name": name,
+                    "attributes": attributes,
+                    "type": type,
+                    "maxEnrollments": maxEnrollments,
+                }
+            ),
+        )
+        # print(response.json())
+        return response.json()["name"], response.json()["secret"]
+
+    def enroll_certificate(self, name, secret, attributes):
+        fab_connect_address = f"http://{self.fab_connect_url}/identities/{name}/enroll"
+        response = post(
+            fab_connect_address,
+            data=json.dumps(
+                {"secret": secret, "attributes": {k: True for k in attributes}}
+            ),
+        )
+        return response.json()["success"]
+
+    def register_to_firefly(self, key):
+        org_name = self.org_name
+        address = f"http://{self.core_url}/api/v1/identities"
+        print(self.core_url, address, org_name, key)
+        print(org_name, key)
+        response = post(
+            address,
+            data=json.dumps({"parent": org_name, "key": key, "name": key + "123"}),
+            headers={"Content-Type": "application/json"},
+        )
+        print({"parent": org_name, "key": key, "name": key + "FF"})
+        print(response.json())
+        return response.json().get("id", False)
+
+    # def invoke_chaincode(self, ):
+    #     address = f"http://{self.core_url}/api/v1/chaincodes/{name}/invoke"
+    #     response = post(address, data={"args": args})
+    #     # TO MODIFY
+    #     return response.json()
 
 
 class UserPreference(models.Model):
@@ -1233,3 +1290,109 @@ class BPMNBindingRecord(models.Model):
         null=False,
         on_delete=models.CASCADE,
     )
+
+
+class APISecretKey(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        help_text="ID of APISecretKey",
+        default=make_uuid,
+        editable=False,
+        unique=True,
+    )
+    user = models.ForeignKey(
+        UserProfile,
+        help_text="related user_id",
+        null=False,
+        on_delete=models.CASCADE,
+    )
+    key = models.CharField(
+        help_text="key of APISecretKey",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+    # key secret will be hashed before save
+    key_secret = models.CharField(
+        help_text="key_secret of APISecretKey",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+    environment = models.ForeignKey(
+        Environment,
+        help_text="related environment_id",
+        null=True,
+        on_delete=models.CASCADE,
+    )
+    membership = models.ForeignKey(
+        Membership,
+        help_text="related membership_id",
+        null=True,
+        on_delete=models.CASCADE,
+    )
+    create_at = models.DateTimeField(
+        help_text="Create time of APISecretKey", auto_now_add=True
+    )
+
+    def save(self, *args, **kwargs):
+        import hashlib
+        print("START")
+        print(self.key_secret)
+        print(hashlib.md5(self.key_secret.encode("utf-8")).hexdigest())
+        print("END")
+        self.key_secret = hashlib.md5(self.key_secret.encode("utf-8")).hexdigest()
+        super(APISecretKey, self).save(*args, **kwargs)
+
+    def verifyKeySecret(self, key_secret):
+        import hashlib
+        print(key_secret)
+        print(hashlib.md5(key_secret.encode("utf-8")).hexdigest())
+        return self.key_secret == hashlib.md5(key_secret.encode("utf-8")).hexdigest()
+
+
+class FabricIdentity(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        help_text="ID of FabricIdentity",
+        default=make_uuid,
+        editable=False,
+        unique=True,
+    )
+    name = models.TextField(help_text="name of FabricIdentity")
+    signer = models.TextField(
+        help_text="signer of FabricIdentity",
+        null=True,
+        blank=True,
+    )
+    secret = models.TextField(
+        help_text="secret of FabricIdentity",
+        null=True,
+        blank=True,
+    )
+    environment = models.ForeignKey(
+        Environment,
+        help_text="related environment_id",
+        null=True,
+        on_delete=models.CASCADE,
+    )
+    membership = models.ForeignKey(
+        Membership,
+        help_text="related membership_id",
+        null=True,
+        on_delete=models.CASCADE,
+    )
+    create_at = models.DateTimeField(
+        help_text="Create time of FabricIdentity", auto_now_add=True
+    )
+
+    def save(self, *args, **kwargs):
+        import hashlib
+
+        self.secret = hashlib.md5(self.secret.encode("utf-8")).hexdigest()
+        super(FabricIdentity, self).save(*args, **kwargs)
+
+    def verifySecret(self, secret):
+        import hashlib
+
+        return self.secret == hashlib.md5(secret.encode("utf-8")).hexdigest()
