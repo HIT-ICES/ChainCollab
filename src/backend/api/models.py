@@ -1000,7 +1000,7 @@ class Firefly(models.Model):
         print(org_name, key)
         response = post(
             address,
-            data=json.dumps({"parent": org_name, "key": key, "name": key + "123"}),
+            data=json.dumps({"parent": org_name, "key": key, "name": key + "FF"}),
             headers={"Content-Type": "application/json"},
         )
         print({"parent": org_name, "key": key, "name": key + "FF"})

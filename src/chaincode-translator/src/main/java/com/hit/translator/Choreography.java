@@ -158,136 +158,7 @@ public class Choreography {
         allNodes = modelInstance.getModelElementsByType(FlowNode.class);
     }
 
-    // private static String initial(String filename, Map<String, User>
-    // participants, List<String> optionalRoles,
-    // List<String> mandatoryRoles) {
     private static String initial(String filename, String participantMspMap) {
-        // String intro = "pragma solidity ^0.5.3; \n" + " pragma experimental
-        // ABIEncoderV2;\n" + " contract "
-        // + parseName(filename, "") + "{\n" + //parseName方法是否可以加到自身类
-        // //" uint counter;\r\n"
-        // //+ " event stateChanged(uint); \n"
-        // " event functionDone(string);\n"
-        // + " mapping (string=>uint) position;\n"
-        // + "\n enum State {DISABLED, ENABLED, DONE} State s; \n" + " mapping(string =>
-        // string) operator; \n"
-        // + " struct Element{\n string ID;\n State status;\n}\n" + " struct
-        // StateMemory{\n ";
-        // for (String guard : gatewayGuards) {
-        // intro += guard + ";\n";
-        // }
-        // intro += "}\n" + " Element[] elements;\n StateMemory currentMemory;\n" + "
-        // string[] elementsID = [";
-        // for (String elID : elementsID) { //所有元素的
-        // // System.out.println();
-        // if (elID.equals(elementsID.get(elementsID.size() - 1))) {
-        // // System.out.println("sono uguale: " + elID + " e: " +
-        // // elementsID.get(elementsID.size()-1));
-        // intro += "\"" + elID + "\"];\n";
-        // } else
-        // intro += "\"" + elID + "\", ";
-        //
-        // }
-        //
-        // intro += " string[] roleList = [ ";
-        //
-        // for (int i = 0; i < mandatoryRoles.size(); i++) {
-        // intro += "\"" + mandatoryRoles.get(i) + "\"";
-        // if ((i + 1) < mandatoryRoles.size())
-        // intro += ", ";
-        // }
-        // intro += " ]; \n";
-        // intro += " string[] optionalList = [";
-        // if (optionalRoles.isEmpty()) {
-        // intro += "\"\"";
-        // } else {
-        // for (int i = 0; i < optionalRoles.size(); i++) {
-        // intro += "\"" + optionalRoles.get(i) + "\"";
-        // if ((i + 1) < optionalRoles.size())
-        // intro += ", ";
-        // }
-        // }
-        //
-        // intro += " ]; \n" + " mapping(string=>address payable) roles; \r\n"
-        // + " mapping(string=>address payable) optionalRoles; \r\n";
-        // String constr = "constructor() public{\r\n" + " //struct instantiation\r\n"
-        // + " for (uint i = 0; i < elementsID.length; i ++) {\r\n"
-        // + " elements.push(Element(elementsID[i], State.DISABLED));\r\n"
-        // + " position[elementsID[i]]=i;\r\n" + " }\r\n" + " \r\n"
-        // + " //roles definition\r\n" + " //mettere address utenti in base ai
-        // ruoli\r\n";
-        // int i = 0;
-        // for (Map.Entry<String, User> sub : participants.entrySet()) {
-        //
-        // constr += " roles[\"" + sub.getKey() + "\"] = " + sub.getValue().getAddress()
-        // + ";\n";
-        // i++;
-        // }
-        // for (String optional : optionalRoles) {
-        // constr += " optionalRoles[\"" + optional + "\"] =
-        // 0x0000000000000000000000000000000000000000;";
-        // }
-        //
-        // /*
-        // * " roles[\"Buyer\"] = 0x0000000000000000000000000000000000000000;\r\n"
-        // * +
-        // * " roles[\"Buyer\"] = 0x0000000000000000000000000000000000000000;\r\n"
-        // * +
-        // * " roles[\"Buyer\"] = 0x0000000000000000000000000000000000000000;\r\n"
-        // * +
-        // * " roles[\"Buyer\"] = 0x0000000000000000000000000000000000000000;\r\n"
-        // * +
-        // */
-        //
-        // constr += " \r\n" + " //enable the start process\r\n" + " init();\r\n" + "
-        // }\r\n"
-        // + " ";
-        //
-        // String other = "modifier checkMand(string memory role){ \n" +
-        // " require(msg.sender == roles[role]); \n\t_; }\n" +
-        // "modifier checkOpt(string memory role){\n" +
-        // " require(msg.sender == optionalRoles[role]); \n\t_; }\n" +
-        // "modifier Owner(string memory task) \n"
-        // + "{ \n\trequire(elements[position[task]].status==State.ENABLED);\n\t_;\n}\n"
-        // + "function init() internal{\r\n" + " bool result=true;\r\n"
-        // + " for(uint i=0; i<roleList.length;i++){\r\n"
-        // + " if(roles[roleList[i]]==0x0000000000000000000000000000000000000000){\r\n"
-        // + " result=false;\r\n" + " break;\r\n" + " }\r\n"
-        // + " }\r\n" + " if(result){\r\n" + " enable(\"" + startEventAdd + "\");\r\n"
-        // + " " + parseSid(startEventAdd) + "();\r\n" + " }\r\n"
-        // + " emit functionDone(\"Contract creation\"); \n "
-        // + " }\r\n"
-        // + " function getRoles() public view returns( string[] memory, address[]
-        // memory){\n" +
-        // " uint c = roleList.length;\n" +
-        // " string[] memory allRoles = new string[](c);\n" +
-        // " address[] memory allAddresses = new address[](c);\n" +
-        // " \n" +
-        // " for(uint i = 0; i < roleList.length; i ++){\n" +
-        // " allRoles[i] = roleList[i];\n" +
-        // " allAddresses[i] = roles[roleList[i]];\n" +
-        // " }\n" +
-        // " return (allRoles, allAddresses);\n" +
-        // "}" +
-        // " function getOptionalRoles() public view returns( string[] memory, address[]
-        // memory){\n" +
-        // " require(optionalList.length > 0);\n" +
-        // " uint c = optionalList.length;\n" +
-        // " string[] memory allRoles = new string[](c);\n" +
-        // " address[] memory allAddresses = new address[](c);\n" +
-        // " \n" +
-        // " for(uint i = 0; i < optionalList.length; i ++){\n" +
-        // " allRoles[i] = optionalList[i];\n" +
-        // " allAddresses[i] = optionalRoles[optionalList[i]];\n" +
-        // " }\n" +
-        // " \n" +
-        // " return (allRoles, allAddresses);\n" +
-        // " }\n"
-        // + "\nfunction subscribe_as_participant(string memory _role) public {\r\n"
-        // + "
-        // if(optionalRoles[_role]==0x0000000000000000000000000000000000000000){\r\n"
-        // + " optionalRoles[_role]=msg.sender;\r\n" + " }\r\n" + " }\n"
-        // + "function() external payable{\r\n" + " \r\n" + "}";
 
         String intro = "package chaincode\n" +
                 "\n" +
@@ -986,56 +857,6 @@ public class Choreography {
                     tasks.add(start.getAttributeValue("name"));
 
                     startEventAdd = start.getAttributeValue("id");
-                    //
-
-                    // nextNode = checkType(nextNode);
-
-                    // System.out.println("NEXT NODE ID AFTER CHECK TYPE: " +
-                    // nextNode.getAttributeValue("id"));
-                    // id = getNextId(nextNode);
-
-                    // String descr = "function " + parseSid(getNextId(start, false)) + "() private
-                    // {\n"
-                    // + " require(elements[position[\"" + start.getAttributeValue("id")
-                    // + "\"]].status==State.ENABLED);\n" + " done(\"" +
-                    // start.getAttributeValue("id") + "\");\n"
-                    // + "\tenable(\"" + getNextId(nextNode, false) + "\"); \n\t";
-                    // if (nextNode instanceof Gateway)
-                    // descr += parseSid(nextNode.getAttributeValue("id")) + " (); \n}\n\n";
-                    // else
-                    // descr += "\n}\n\n";
-
-                    // java版
-                    // String descr = TRANSSUBMIT + " public void " + parseSid(getNextId(start,
-                    // false)) + "(final Context ctx) {\n"
-                    // + " ChaincodeStub stub = ctx.getStub();\n"
-                    // + " ActionEvent actionEvent = ReadEvent(ctx, \"" +
-                    // start.getAttributeValue("id") + "\");\n\n"
-                    // + " if(actionEvent.getEventState()!=ElementState.ENABLE){\n"
-                    // + " String errorMessage = String.format(\"Event state %s does not allowed\",
-                    // actionEvent.getEventID());\n"
-                    // + " System.out.println(errorMessage);\n"
-                    // + " throw new ChaincodeException(errorMessage,
-                    // MsgTransferErrors.EVENT_TRANSFER_FAILED.toString());\n"
-                    // + " }\n\n"
-                    // + " ChangeEventState(ctx, actionEvent, ElementState.DONE);\n\n"
-                    // + " stub.setEvent(\"" + start.getAttributeValue("id") + "\", \"Contract has
-                    // been started successfully\".getBytes());\n\n";
-                    // if (nextNode instanceof Gateway)
-                    // descr += " ChangeGtwState(ctx, \"" + getNextId(nextNode, false) + "\"
-                    // ,ElementState.ENABLE);\n\n"
-                    // + " " + parseSid(nextNode.getAttributeValue("id")) + " (); \n}\n\n";
-                    // else
-                    // descr += " ChangeMsgState(ctx, \"" + getNextId(nextNode, false) + "\"
-                    // ,ElementState.ENABLE);\n\n}\n\n";
-
-                    // + " if (MsgExists(ctx, messageID)) {\n"
-                    // + " String errorMessage = String.format(\"Msg %s already exists\",
-                    // messageID);\n"
-                    // + " System.out.println(errorMessage);\n"
-                    // + " throw new ChaincodeException(errorMessage,
-                    // MsgTransferErrors.MESSAGE_ALREADY_EXISTS.toString());\n"
-                    // + " }\n";
 
                     String descr = "func (cc *SmartContract) " + lowercaseFirstChar(parseSid(getNextId(start, false)))
                             + "(ctx contractapi.TransactionContextInterface) error { \n"
@@ -1085,125 +906,6 @@ public class Choreography {
                 // roleFortask.add("internal");
                 // mergeMap(getNextId(node, false), "internal");
                 tasks.add(node.getAttributeValue("name"));
-
-                // String descr = "function " + parseSid(getNextId(node, false)) + "() private
-                // {\n"
-                // + " require(elements[position[\"" + node.getAttributeValue("id")
-                // + "\"]].status==State.ENABLED);\n" + " done(\"" +
-                // node.getAttributeValue("id") + "\");\n";
-                // int countIf = 0;
-                // for (SequenceFlow outgoing : ((ExclusiveGateway) node).getOutgoing()) {
-                // //向下转型
-                // ModelElementInstance nextElement = modelInstance
-                // .getModelElementById(outgoing.getAttributeValue("targetRef"));
-                // // checking if there are conditions on the next element, conditions are
-                // setted
-                // // in the name of the sequence flow
-                // if (outgoing.getAttributeValue("name") != null) {
-                // String condition = "";
-                // if(countIf > 0){
-                // condition = "else if";
-                // }else{
-                // condition = "if";
-                // }
-                //
-                // //注意addCompareString
-                // descr += condition +"(" +
-                // addCompareString(outgoing.getAttributeValue("name")) + "){" + "enable(\"" +
-                // getNextId(nextElement, false)
-                // + "\"); \n ";
-                // if (nextElement instanceof Gateway || nextElement instanceof EndEvent) {
-                // descr += parseSid(getNextId(nextElement, false)) + "(); \n";
-                // }
-                // descr += "}\n";
-                // countIf++;
-                // } else { //无name
-                // descr += "\tenable(\"" + getNextId(nextElement, false) + "\"); \n";
-                // if (nextElement instanceof Gateway || nextElement instanceof EndEvent) {
-                // descr += parseSid(getNextId(nextElement, false)) + "(); \n";
-                // }
-                // }
-                //
-                // }
-                // descr += "}\n\n";
-                // java version
-                // String descr = TRANSSUBMIT + " public void " + parseSid(getNextId(start,
-                // false)) + "(final Context ctx) {\n"
-                // + " ChaincodeStub stub = ctx.getStub();\n"
-                // + " Gateway gtw = ReadGtw(ctx, \"" + node.getAttributeValue("id") +
-                // "\");\n\n"
-                // + " if(gtw.getGatewayState()!=ElementState.ENABLE){\n"
-                // + " String errorMessage = String.format(\"Gateway state %s does not
-                // allowed\", gtw.getGatewayID());\n"
-                // + " System.out.println(errorMessage);\n"
-                // + " throw new ChaincodeException(errorMessage,
-                // MsgTransferErrors.GATEWAY_TRANSFER_FAILED.toString());\n"
-                // + " }\n\n"
-                // + " ChangeGtwState(ctx, \"" + node.getAttributeValue("id") + "\"
-                // ,ElementState.DONE);\n\n"
-                // + " stub.setEvent(\"" + node.getAttributeValue("id") + "\",
-                // \"ExclusiveGateway has been done successfully\".getBytes());\n\n"
-                // + "";//注意这里需要参数判断
-                // int countIf = 0;
-                // for (SequenceFlow outgoing : ((ExclusiveGateway) node).getOutgoing()) {
-                // //向下转型
-                // ModelElementInstance nextElement = modelInstance
-                // .getModelElementById(outgoing.getAttributeValue("targetRef"));
-                // if (outgoing.getAttributeValue("name") != null) {
-                // String condition = "";
-                // if(countIf > 0){
-                // condition = "else if";
-                // }else{
-                // condition = "if";
-                // }
-                //
-                // //注意addCompareString
-                // descr += condition +"(" +
-                // addCompareString(outgoing.getAttributeValue("name")) + "){\n";
-                //// + "enable(\"" + getNextId(nextElement, false) //需要判断是三个中的哪一个
-                //// + "\"); \n ";
-                // if (nextElement instanceof Gateway) {
-                // descr+=" ChangeGtwState(ctx, \"" + getNextId(nextElement, false) + "\"
-                // ,ElementState.ENABLE);\n\n"
-                // ;
-                // } else if (nextElement instanceof EndEvent) {
-                // descr+=" ChangeEventState(ctx, \"" + getNextId(nextElement, false) + "\"
-                // ,ElementState.ENABLE);\n\n"
-                // ;
-                // } else if(nextElement instanceof Message){
-                // descr+=" ChangeMsgState(ctx, \"" + getNextId(nextElement, false) + "\"
-                // ,ElementState.ENABLE);\n\n"
-                // ;
-                // }
-                //
-                // if (nextElement instanceof Gateway || nextElement instanceof EndEvent) {
-                // descr += parseSid(getNextId(nextElement, false)) + "(); \n";
-                // }
-                // countIf++;
-                // } else { //无name,则直接enable（一般只有一个流）
-                // if (nextElement instanceof Gateway) {
-                // descr+=" ChangeGtwState(ctx, \"" + getNextId(nextElement, false) + "\"
-                // ,ElementState.ENABLE);\n\n"
-                // ;
-                // } else if (nextElement instanceof EndEvent) {
-                // descr+=" ChangeEventState(ctx, \"" + getNextId(nextElement, false) + "\"
-                // ,ElementState.ENABLE);\n\n"
-                // ;
-                // } else if(nextElement instanceof Message){
-                // descr+=" ChangeMsgState(ctx, \"" + getNextId(nextElement, false) + "\"
-                // ,ElementState.ENABLE);\n\n"
-                // ;
-                // }
-                //
-                // if (nextElement instanceof Gateway || nextElement instanceof EndEvent) {
-                // descr += parseSid(getNextId(nextElement, false)) + "(); \n";
-                // }
-                // }
-                //
-                // }
-                // descr += "}\n\n";
-                //
-                // choreographyFile += descr;
 
                 String descr = "func (cc *SmartContract) " + lowercaseFirstChar(parseSid(getNextId(node, false)))
                         + "(ctx contractapi.TransactionContextInterface) error { \n"
@@ -1298,43 +1000,6 @@ public class Choreography {
                 // roleFortask.add("internal");
                 // mergeMap(getNextId(node, false), "internal");
                 tasks.add(node.getAttributeValue("name"));
-
-                // String descr = "function " + parseSid(getNextId(node, false)) + "() private
-                // {\n"
-                // + " require(elements[position[\"" + node.getAttributeValue("id")
-                // + "\"]].status==State.ENABLED);\n" + " done(\"" +
-                // node.getAttributeValue("id") + "\");\n";
-                // for (SequenceFlow outgoing : ((EventBasedGateway) node).getOutgoing()) {
-                // ModelElementInstance nextElement = modelInstance
-                // .getModelElementById(outgoing.getAttributeValue("targetRef"));
-                // descr += "\tenable(\"" + getNextId(nextElement, false) + "\"); \n";
-                // }
-                // descr += "}\n\n";
-                // choreographyFile += descr;
-                // java version
-                // String descr = TRANSSUBMIT + " public void " + parseSid(getNextId(start,
-                // false)) + "(final Context ctx) {\n"
-                // + " ChaincodeStub stub = ctx.getStub();\n"
-                // + " Gateway gtw = ReadGtw(ctx, \"" + node.getAttributeValue("id") +
-                // "\");\n\n"
-                // + " if(gtw.getGatewayState()!=ElementState.ENABLE){\n"
-                // + " String errorMessage = String.format(\"Gateway state %s does not
-                // allowed\", gtw.getGatewayID());\n"
-                // + " System.out.println(errorMessage);\n"
-                // + " throw new ChaincodeException(errorMessage,
-                // MsgTransferErrors.GATEWAY_TRANSFER_FAILED.toString());\n"
-                // + " }\n\n"
-                // + " ChangeGtwState(ctx, \"" + node.getAttributeValue("id") + "\"
-                // ,ElementState.DONE);\n\n"
-                // + " stub.setEvent(\"" + node.getAttributeValue("id") + "\",
-                // \"EventbasedGateway has been done successfully\".getBytes());\n\n";
-                // for (SequenceFlow outgoing : ((EventBasedGateway) node).getOutgoing()) {
-                // ModelElementInstance nextElement = modelInstance
-                // .getModelElementById(outgoing.getAttributeValue("targetRef"));
-                //
-                // descr += " ChangeGtwState(ctx, \"" + getNextId(nextElement, false) + "\"
-                // ,ElementState.ENABLE);\n\n";
-                // }
 
                 String descr = "func (cc *SmartContract) " + lowercaseFirstChar(parseSid(getNextId(node, false)))
                         + "(ctx contractapi.TransactionContextInterface) error { \n"
@@ -1514,33 +1179,7 @@ public class Choreography {
                 }
                 nodeSet.add(getNextId(node, false));
                 elementsID.add(getNextId(node, false));
-                // roleFortask.add("internal");
-                // mergeMap(getNextId(node, false), "internal");
                 tasks.add(node.getAttributeValue("name"));
-
-                // String descr = "function " + parseSid(getNextId(node, false)) + "() private
-                // {\n"
-                // + " require(elements[position[\"" + node.getAttributeValue("id")
-                // + "\"]].status==State.ENABLED);\n" + " done(\"" +
-                // node.getAttributeValue("id") + "\"); }\n\n";
-                // choreographyFile += descr;
-                // java version
-                // String descr = TRANSSUBMIT + " public void " + parseSid(getNextId(node,
-                // false)) + "(final Context ctx) {\n"
-                // + " ChaincodeStub stub = ctx.getStub();\n"
-                // + " ActionEvent actionEvent = ReadEvent(ctx, \"" +
-                // node.getAttributeValue("id") + "\");\n\n"
-                // + " if(actionEvent.getEventState()!=ElementState.ENABLE){\n"
-                // + " String errorMessage = String.format(\"Event state %s does not allowed\",
-                // actionEvent.getEventID());\n"
-                // + " System.out.println(errorMessage);\n"
-                // + " throw new ChaincodeException(errorMessage,
-                // MsgTransferErrors.EVENT_TRANSFER_FAILED.toString());\n"
-                // + " }\n\n"
-                // + " ChangeEventState(ctx, actionEvent, ElementState.DONE);\n\n"
-                // + " stub.setEvent(\"" + start.getAttributeValue("id") + "\", \"Contract has
-                // ended successfully\".getBytes());\n\n}\n\n";
-                // choreographyFile += descr;
 
                 String descr = "func (cc *SmartContract) " + lowercaseFirstChar(parseSid(getNextId(node, false)))
                         + "(ctx contractapi.TransactionContextInterface) error { \n"
@@ -1589,194 +1228,9 @@ public class Choreography {
                 participantName = participant.getAttributeValue("name");
 
                 String[] req = response.split(" ");
-                // String res = typeParse(request);
                 String ret = ""; // 目前看暂时没用
                 String call = "";
                 String eventBlock = ""; // 之后被加末尾的片段（基于事件阻塞-使状态disable
-
-                // if (start instanceof EventBasedGateway) {
-                // for (SequenceFlow block : ((EventBasedGateway) start).getOutgoing()) {
-                // ModelElementInstance nextElement = modelInstance
-                // .getModelElementById(block.getAttributeValue("targetRef"));
-                // if (!(getNextId(nextElement, false).equals(getNextId(node, false)))) {
-                // eventBlock += "disable(\"" + getNextId(nextElement, false) + "\");\n";
-                // }
-                // }
-                // }
-                // // if there isn't a response the function created is void
-                //
-                // // da cambiare se funziona, levare 'if-else （如果工作了就改变它，去掉‘if-else）
-                // if (task.getType() == ChoreographyTask.TaskType.ONEWAY) { //没有response
-                // //System.out.println("Task � 1 way");
-                // taskNull = false;
-                // String pName = getRole(participantName, optionalRoles, mandatoryRoles);
-                //
-                // if (request.contains("payment")) {
-                // //System.out.println("nome richiesta: " + request);
-                // descr += "function " + parseSid(getNextId(node, false)) +
-                // addMemory(getPrameters(request))
-                // + " public payable " + pName + ") {\n";
-                // descr += " require(elements[position[\"" + getNextId(node, false)
-                // + "\"]].status==State.ENABLED); \n" + " done(\"" + getNextId(node, false) +
-                // "\");\n"
-                // + createTransaction(task, optionalRoles, mandatoryRoles) + "\n" + eventBlock;
-                // } else {
-                //
-                // descr += "function " + parseSid(getNextId(node, false)) +
-                // addMemory(getPrameters(request))
-                // + " public " + pName + ") {\n";
-                // descr += " require(elements[position[\"" + getNextId(node, false)
-                // + "\"]].status==State.ENABLED); \n" + " done(\"" + getNextId(node, false) +
-                // "\");\n"
-                // + addToMemory(request) + eventBlock; //没有ENABLE后面？
-                //
-                // addGlobal(request);
-                // }
-                // // roleFortask.add(participantName);
-                //
-                // } else if (task.getType() == ChoreographyTask.TaskType.TWOWAY) {
-                // taskNull = false;
-                // //System.out.println("Task � 2 way");
-                //
-                // String pName = getRole(participantName, optionalRoles, mandatoryRoles);
-                //
-                // if (!request.isEmpty()) {
-                // //System.out.println("RICHIESTA NON VUOTA");
-                // if (request.contains("payment")) {
-                // //System.out.println(request);
-                // //System.out.println("RICHIESTA CONTIENE PAGAMENTO");
-                // taskNull = false;
-                // descr += "function " + parseSid(getNextId(node, false)) +
-                // addMemory(getPrameters(request))
-                // + " public payable " + pName + ") {\n";
-                // descr += " require(elements[position[\"" + getNextId(node, false)
-                // + "\"]].status==State.ENABLED); \n" + " done(\"" + getNextId(node, false) +
-                // "\");\n"
-                // + createTransaction(task, optionalRoles, mandatoryRoles) + "\n"
-                // + " enable(\"" + getNextId(node, true) + "\");\n"
-                // + eventBlock + "}\n";
-                // } else {
-                // taskNull = false;
-                //
-                // descr += "function " + parseSid(getNextId(node, false)) +
-                // addMemory(getPrameters(request))
-                // + " public " + pName + "){\n";
-                // descr += " require(elements[position[\"" + getNextId(node, false)
-                // + "\"]].status==State.ENABLED); \n" + " done(\"" + getNextId(node, false)
-                // + "\");\n" + " enable(\"" + getNextId(node, true) + "\");\n" +
-                // addToMemory(request)
-                // + eventBlock + "}\n";
-                // addGlobal(request);
-                // }
-                // } else {
-                // taskNull = true;
-                // }
-                //
-                // if (!response.isEmpty()) {
-                // //System.out.println("RISPOSTA NON VUOTA");
-                // if (response.contains("payment")) {
-                // //System.out.println(response);
-                // //System.out.println("RISPOSTA CONTIENE PAGAMENTO");
-                // taskNull = false;
-                // descr += "function " + parseSid(getNextId(node, true)) +
-                // addMemory(getPrameters(response))
-                // + " public payable " + pName + ") {\n";
-                // descr += " require(elements[position[\"" + getNextId(node, true)
-                // + "\"]].status==State.ENABLED); \n" + " done(\"" + getNextId(node, true) +
-                // "\");\n"
-                // + createTransaction(task, optionalRoles, mandatoryRoles) + "\n" + eventBlock;
-                // } else {
-                // taskNull = false;
-                // pName = getRole(task.getParticipantRef().getName(), optionalRoles,
-                // mandatoryRoles);
-                // descr += "function " + parseSid(getNextId(node, true)) +
-                // addMemory(getPrameters(response))
-                // + " public " + pName + "){\n" + " require(elements[position[\""
-                // + getNextId(node, true) + "\"]].status==State.ENABLED);\n" + " done(\""
-                // + getNextId(node, true) + "\");\n" + addToMemory(response) + eventBlock;
-                // addGlobal(response);
-                // }
-                // } else {
-                // taskNull = true;
-                // }
-                //
-                // }
-                // choreographyFile += descr;
-                // descr = "";
-                // // checking the outgoing elements from the task
-                // //System.out.println("TASK NULL � : " + taskNull);
-                // if (taskNull == false) { //补上enable
-                //
-                // for (SequenceFlow out : task.getOutgoing()) {
-                // ModelElementInstance nextElement = modelInstance
-                // .getModelElementById(out.getAttributeValue("targetRef"));
-                // descr += "\tenable(\"" + getNextId(nextElement, false) + "\");\n";
-                // if (nextElement instanceof Gateway || nextElement instanceof EndEvent) {
-                // // nextElement = checkType(nextElement);
-                // // creates the call to the next function
-                // descr += parseSid(getNextId(nextElement, false)) + "(); \n";
-                //
-                // }
-                // descr += ret;
-                // descr += "}\n\n";
-                // choreographyFile += descr;
-                //
-                // }
-                // }
-
-                // java version
-                // if (start instanceof EventBasedGateway) {
-                // for (SequenceFlow block : ((EventBasedGateway) start).getOutgoing()) {
-                // ModelElementInstance nextElement = modelInstance
-                // .getModelElementById(block.getAttributeValue("targetRef"));
-                // if (!(getNextId(nextElement, false).equals(getNextId(node, false)))) {
-                //
-                // if (nextElement instanceof Gateway) {
-                // eventBlock+=" ChangeGtwState(ctx, \"" + getNextId(nextElement, false) + "\"
-                // ,ElementState.DISABLE);\n\n"
-                // ;
-                // } else if (nextElement instanceof EndEvent) {
-                // eventBlock+=" ChangeEventState(ctx, \"" + getNextId(nextElement, false) + "\"
-                // ,ElementState.DISABLE);\n\n"
-                // ;
-                // } else if(nextElement instanceof Message){
-                // eventBlock+=" ChangeMsgState(ctx, \"" + getNextId(nextElement, false) + "\"
-                // ,ElementState.DISABLE);\n\n"
-                // ;
-                // }
-                // }
-                // }
-                // }
-                //
-                // if (task.getType() == ChoreographyTask.TaskType.ONEWAY) { //没有response
-                // //System.out.println("Task � 1 way");
-                // taskNull = false;
-                // String pName = getRole(participantName, optionalRoles, mandatoryRoles);
-                //
-                // if (request.contains("payment")) {
-                // //System.out.println("nome richiesta: " + request);
-                // descr += "function " + parseSid(getNextId(node, false)) +
-                // addMemory(getPrameters(request))
-                // + " public payable " + pName + ") {\n";
-                // descr += " require(elements[position[\"" + getNextId(node, false)
-                // + "\"]].status==State.ENABLED); \n" + " done(\"" + getNextId(node, false) +
-                // "\");\n"
-                // + createTransaction(task, optionalRoles, mandatoryRoles) + "\n" + eventBlock;
-                // } else {
-                //
-                // descr += "function " + parseSid(getNextId(node, false)) +
-                // addMemory(getPrameters(request))
-                // + " public " + pName + ") {\n";
-                // descr += " require(elements[position[\"" + getNextId(node, false)
-                // + "\"]].status==State.ENABLED); \n" + " done(\"" + getNextId(node, false) +
-                // "\");\n"
-                // + addToMemory(request) + eventBlock;
-                //
-                // addGlobal(request);
-                // }
-                // // roleFortask.add(participantName);
-                //
-                // }
 
                 if (start instanceof EventBasedGateway) {
                     for (SequenceFlow block : ((EventBasedGateway) start).getOutgoing()) {
@@ -1940,18 +1394,6 @@ public class Choreography {
                                 + "\", []byte(\"Message has been done\"))\n\n"
                                 + "\tcc.ChangeMsgState(ctx, \"" + getNextId(node, true)
                                 + "\", ENABLE)\n\treturn nil\n}\n\n";
-
-                        // descr += "function " + parseSid(getNextId(node, false)) +
-                        // addMemory(getPrameters(request))
-                        // + " public " + pName + "){\n";
-                        // descr += " require(elements[position[\"" + getNextId(node, false)
-                        // + "\"]].status==State.ENABLED); \n" + " done(\"" + getNextId(node, false)
-                        // + "\");\n" + " enable(\"" + getNextId(node, true) + "\");\n" +
-                        // addToMemory(request)
-                        // + eventBlock + "}\n";
-
-                        // addGlobal(request);
-
                     } else {
                         taskNull = true;
                     }
@@ -2071,14 +1513,6 @@ public class Choreography {
                                     "      \"pathname\": \"\",\n" +
                                     "      \"description\": \"\",\n" +
                                     "      \"params\": [],\n" +
-                                    // " {\n" +
-                                    // " \"name\": \"fireflyTranID\",\n" +
-                                    // " \"schema\": {\n" +
-                                    // " \"type\": \"string\"\n" +
-                                    // " }\n" +
-                                    // " }\n" +
-                                    //// extractFFIJsonGatewayGuards(getNextId(node, false)) +
-                                    // " ],\n" +
                                     "      \"returns\": []\n" +
                                     "    }";
                         }
@@ -2104,14 +1538,6 @@ public class Choreography {
                                     "      \"pathname\": \"\",\n" +
                                     "      \"description\": \"\",\n" +
                                     "      \"params\": [],\n" +
-                                    // " {\n" +
-                                    // " \"name\": \"fireflyTranID\",\n" +
-                                    // " \"schema\": {\n" +
-                                    // " \"type\": \"string\"\n" +
-                                    // " }\n" +
-                                    // " }\n" +
-                                    //// extractFFIJsonGatewayGuards(getNextId(node, false)) +
-                                    // " ],\n" +
                                     "      \"returns\": []\n" +
                                     "    }";
                         }
@@ -2155,15 +1581,6 @@ public class Choreography {
                                 || nextElement.getAttributeValue("id").startsWith("ChoreographyTask")) {
                             descr += "\tcc.ChangeMsgState(ctx, \"" + getNextId(nextElement, false) + "\" ,ENABLE)\n\n";
                         }
-
-                        // if (nextElement instanceof Gateway || nextElement instanceof EndEvent) {
-                        // // nextElement = checkType(nextElement);
-                        // // creates the call to the next function
-                        //// descr += parseSid(getNextId(nextElement, false)) + "(); \n";
-                        // descr += "cc." + lowercaseFirstChar(parseSid(getNextId(nextElement, false)))
-                        // + "(ctx) \n";
-                        //
-                        // }
                         descr += ret; // 这里好像有错误？
 
                     }
@@ -2171,44 +1588,6 @@ public class Choreography {
                 }
                 descr += "\nreturn nil\n}\t//编排任务的最后一个消息\n\n";
                 choreographyFile += descr;
-                //
-                // Message messageChildElement =
-                // modelInstance.getModelElementById(getNextId(node, false));
-                // for (DomElement childElement :
-                // messageChildElement.getDomElement().getChildElements()) {
-                // String type=childElement.getLocalName();
-                // switch (type) {
-                // case "documentation":
-                // System.out.println(childElement.getTextContent()+"!!!!!!!!\n\n\n\n\n\n\n\n\n\n\n!!!!!!");
-                // boolean isValid = isValidJson(childElement.getTextContent());
-                // System.out.println("Is Valid JSON? " + isValid);
-                //
-                // Map<String, String> resultMap =
-                // genson.deserialize(childElement.getTextContent(), Map.class);
-                // messageParasMap.putAll(resultMap);
-                // }
-                // }
-                // if (task.getType() == ChoreographyTask.TaskType.TWOWAY) {
-                // Message messageChild2Element =
-                // modelInstance.getModelElementById(getNextId(node, true));
-                // for (DomElement childElement :
-                // messageChild2Element.getDomElement().getChildElements()) {
-                // String type=childElement.getLocalName();
-                // switch (type) {
-                // case "documentation":
-                // System.out.println(childElement.getTextContent()+"!!!!!!!!\n\n\n\n\n\n\n\n\n\n\n!!!!!!");
-                // boolean isValid = isValidJson(childElement.getTextContent());
-                // System.out.println("Response Is Valid JSON? " + isValid);
-                //
-                // Map<String, String> resultMap =
-                // genson.deserialize(childElement.getTextContent(), Map.class);
-                // messageParasMap.putAll(resultMap);
-                //
-                // }
-                // }
-                // }
-                // System.out.println(messageParasMap);
-
             }
 
         }
@@ -2464,22 +1843,6 @@ public class Choreography {
         return type;
     }
 
-    // private static Map<String, String> findCommonEntries(Map<String, String>
-    // tempMap, Map<String, String> resultMap) {
-    // Map<String, String> commonEntries = new HashMap<>();
-    //
-    // for (Map.Entry<String, String> entry : tempMap.entrySet()) {
-    // String key = entry.getKey();
-    // String value = entry.getValue();
-    //
-    // if (resultMap.containsKey(key) && resultMap.get(key).equals(value)) {
-    // commonEntries.put(key, value);
-    // }
-    // }
-    //
-    // return commonEntries;
-    // }
-
     private static Map<String, String> findCommonEntries(Map<String, String> tempMap) {
         Map<String, String> commonEntries = new HashMap<>();
 
@@ -2529,11 +1892,6 @@ public class Choreography {
                     // }
 
                 }
-
-                // System.out.println("ID MESSAGE REF: " + id + "uguale a?" +
-                // requestMessageFlow.getAttributeValue("messageRef"));
-                // System.out.println(requestMessage.getName());
-
             } else if (task.getRequest() == null && msg == false || task.getResponse() != null && msg == true) {
                 // System.out.println("SONO DENTRO GETREQUEST == NULL");
                 MessageFlow responseMessageFlowRef = task.getResponse();
@@ -2545,11 +1903,6 @@ public class Choreography {
                 }
 
             } //
-            /*
-             * else if(task.getResponse()!= null && msg == true) { MessageFlow
-             * responseMessageFlowRef = task.getResponse(); id =
-             * responseMessageFlowRef.getId(); }
-             */
         } else {
             id = nextNode.getAttributeValue("id");
         }
@@ -2562,13 +1915,6 @@ public class Choreography {
         // String guards = outgoing.getAttributeValue("name");
 
         String res = "";
-        /*
-         * if(guards.contains("&&")){
-         * String and = addCompareString(guards.split("&&")[1]);
-         * }else if(guards.contains("||")){
-         * String or = addCompareString(guards.split("or")[1]);
-         * }
-         */
         // solidity中字符串不能比较相同，先abi编码哈希值比较是否相同compareStrings
         if (guards.contains("\"")) { // 处理字符串等值比较
             // String[] guardValue = guards.split("==");
@@ -2850,11 +2196,6 @@ public class Choreography {
             }
         }
     }
-
-    // private static String initial(String filename, Map<String, User>
-    // participants, List<String> optionalRoles,
-    // List<String> mandatoryRoles){
-    //
     // }
 
 }

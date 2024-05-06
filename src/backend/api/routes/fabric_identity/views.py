@@ -20,11 +20,12 @@ class FabricIdentityViewSet(viewsets.ViewSet):
 
     # platform method
     def create(self, request):
+        
         serializer = FabricIdentityCreateSerializer(data=request.data)
         if serializer.is_valid():
             resource_set_id = serializer.data["resource_set_id"]
             resource_set = ResourceSet.objects.get(id=resource_set_id)
-
+            
             # register
             target_firefly = resource_set.firefly.get()
             if target_firefly is None:
@@ -40,6 +41,7 @@ class FabricIdentityViewSet(viewsets.ViewSet):
                 return Response(
                     {"error": "enroll failed"}, status=status.HTTP_400_BAD_REQUEST
                 )
+            
             # register to firefly
             success = target_firefly.register_to_firefly(name)
             if not success:

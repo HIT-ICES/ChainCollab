@@ -24,22 +24,35 @@ class ResourceSetViewSet(viewsets.ViewSet):
         """
         获取ResourceSet列表
         """
+        environment_id = request.parser_context["kwargs"].get("environment_id")
+        queryset = ResourceSet.objects.filter(
+            environment_id=environment_id
+        )
         org_id = request.query_params.get("org_id",None)
-        if org_id is None:
-            memberships = Membership.objects.all()
-        else:
+        membership_id = request.query_params.get("membership_id", None)
+
+        params = []
+
+        if membership_id is not None:
+            params.append(membership_id)
+        elif org_id is not None:
             try:
                 org = LoleidoOrganization.objects.get(pk=org_id)
             except LoleidoOrganization.DoesNotExist:
                 return Response(status=status.HTTP_404_NOT_FOUND)
             memberships = Membership.objects.filter(loleido_organization=org)
-
-        environment_id = request.parser_context["kwargs"].get("environment_id")
-        queryset = ResourceSet.objects.filter(
-            environment_id=environment_id, membership__in=memberships
-        )
+            params = [membership.id for membership in memberships]
+        else:
+            serializer = ResourceSetSerializer(queryset, many=True)
+            return Response(serializer.data)
+        
+        queryset = queryset.filter(membership_id__in=params)
         serializer = ResourceSetSerializer(queryset, many=True)
         return Response(serializer.data)
+            
+
+
+
 
     def create(self, request, *args, **kwargs):
         """

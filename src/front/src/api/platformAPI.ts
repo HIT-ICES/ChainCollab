@@ -1,5 +1,6 @@
 import { result } from "lodash";
 import api from "./apiConfig";
+import { env } from "process";
 
 export const createOrg = async (orgName: string) => {
   const response = await api.post("/organizations", {
@@ -313,3 +314,61 @@ export const updateEnvironment = async (
 ) => { };
 
 export const deleteEnvironment = async (environmentId: string) => { };
+
+
+export const getFabricIdentityList = async (resourceSetId) => {
+  try {
+    const res = await api.get(`/fabric_identities`);
+    return res.data;
+  } catch (err) {
+    console.error("获取fabricIdentityList失败", err);
+  }
+}
+
+export const createFabricIdentity = async (resourceSetId, info = {
+  nameOfFabricIdentity: "",
+  nameOfIdentity: "",
+  secretOfIdentity: "",
+  attributes: {
+  }
+}) => {
+  try {
+    const res = await api.post(`/fabric_identities`, {
+      resource_set_id: resourceSetId,
+      name_of_fabric_identity: info.nameOfFabricIdentity,
+      name_of_identity: info.nameOfIdentity,
+      secret_of_identity: info.secretOfIdentity,
+      attributes: info.attributes
+    });
+    return res.data;
+  } catch (err) {
+    console.error("创建fabricIdentity失败", err);
+  }
+}
+
+export const registerAPIKey = async (membershipId, envId) => {
+  try {
+    const res = await api.post(`/api_secret_keys`, {
+      membership_id: membershipId
+    });
+    return res.data;
+  } catch (err) {
+    console.error("注册API Key失败", err);
+  }
+}
+
+export const getAPIKeyList = async (membershipId, envId) => {
+  if (envId === '') {
+    return [];
+  }
+  try {
+    const res = await api.get(`/api_secret_keys`, {
+      params: {
+        membership_id: membershipId
+      }
+    });
+    return res.data;
+  } catch (err) {
+    console.error("获取API Key失败", err);
+  }
+}

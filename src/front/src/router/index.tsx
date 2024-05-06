@@ -19,6 +19,7 @@ const OrgDashboard = lazy(() => import("@/views/Organization/Dashboard"));
 const Home = lazy(() => import("@/views/Home"));
 const NetworkDashboard = lazy(() => import("@/views/Network/Dashboard"));
 const Memberships = lazy(() => import("@/views/Network/Memberships"));
+const FabricUsers = lazy(() => import("@/views/Network/FabricUsers"));
 const MembershipDetail = lazy(
   () => import("@/views/Network/Memberships/Detail")
 );
@@ -122,6 +123,13 @@ const routes: routesType[] = [
                 element: withLoadingComponent(<MembershipDetail />),
                 meta: {
                   title: "Detail",
+                },
+              },
+              {
+                path: "/orgs/:org_id/consortia/:consortium_id/memberships/:membership_id/fabricusers",
+                element: withLoadingComponent(<FabricUsers />),
+                meta: {
+                  title: "FabricUsers",
                 },
               },
               {

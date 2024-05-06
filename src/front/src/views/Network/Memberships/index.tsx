@@ -132,6 +132,11 @@ const Memberships: React.FC = () => {
               VIEW DETAILS
             </Link>
           </Card.Grid>
+          <Card.Grid style={gridDetailStyle}>
+            <Link strong onClick={() => navigate(`./${item.id}/fabricUsers`)} disabled={false}>
+              MANAGE FABRIC USERS
+            </Link>
+          </Card.Grid>
           <Card.Grid style={gridDeleteStyle}>
             <DelMembership
               onDelete={() => handleDelete(consortiumId, item.id)}
