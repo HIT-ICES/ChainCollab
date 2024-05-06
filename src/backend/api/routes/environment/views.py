@@ -440,10 +440,10 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
             headers={"Authorization": headers["Authorization"]},
         )
 
-        post(
-            f"http://192.168.1.177:8000/api/v1/environments/{env.id}/fireflys/start",
-            headers={"Authorization": headers["Authorization"]},
-        )
+        # post(
+        #     f"http://192.168.1.177:8000/api/v1/environments/{env.id}/fireflys/start",
+        #     headers={"Authorization": headers["Authorization"]},
+        # )
 
         env.status = "FIREFLY"
         env.save()
