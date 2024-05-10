@@ -49,45 +49,86 @@ class Choreography:
                     self, element.attrib["id"], element.attrib.get("name", "")
                 )
             case NodeType.MESSAGE.value:
+                documentation_list = element.findall(f"./{bpmn2prefix}documentation")
+                documentation = documentation_list[0].text if documentation_list else None
                 return Message(
-                    self, element.attrib["id"], element.attrib.get("name", "")
+                    self,
+                    element.attrib["id"],
+                    element.attrib.get("name", ""),
+                    documentation=documentation if documentation is not None else "{}",
                 )
             case NodeType.START_EVENT.value:
                 return StartEvent(
-                    self, element.attrib["id"], element.attrib.get("name", ""),
-                    outgoing=element.findall(f"./{bpmn2prefix}outgoing")[0].text
+                    self,
+                    element.attrib["id"],
+                    element.attrib.get("name", ""),
+                    outgoing=element.findall(f"./{bpmn2prefix}outgoing")[0].text,
                 )
             case NodeType.END_EVENT.value:
                 return EndEvent(
-                    self, element.attrib["id"], element.attrib.get("name", ""),
-                    incoming=element.findall(f"./{bpmn2prefix}incoming")[0].text
+                    self,
+                    element.attrib["id"],
+                    element.attrib.get("name", ""),
+                    incoming=element.findall(f"./{bpmn2prefix}incoming")[0].text,
                 )
             case NodeType.CHOREOGRAPHY_TASK.value:
                 return ChoreographyTask(
-                    self, element.attrib["id"], element.attrib.get("name", ""),
+                    self,
+                    element.attrib["id"],
+                    element.attrib.get("name", ""),
                     incoming=element.findall(f"./{bpmn2prefix}incoming")[0].text,
                     outgoing=element.findall(f"./{bpmn2prefix}outgoing")[0].text,
-                    participants=[element.text for element in element.findall(f"./{bpmn2prefix}participantRef")],
-                    message_flows=[element.text for element in element.findall(f"./{bpmn2prefix}messageFlowRef")],
-                    init_participant=element.attrib.get("initiatingParticipantRef", "")
+                    participants=[
+                        element.text
+                        for element in element.findall(f"./{bpmn2prefix}participantRef")
+                    ],
+                    message_flows=[
+                        element.text
+                        for element in element.findall(f"./{bpmn2prefix}messageFlowRef")
+                    ],
+                    init_participant=element.attrib.get("initiatingParticipantRef", ""),
                 )
             case NodeType.EXCLUSIVE_GATEWAY.value:
                 return ExclusiveGateway(
-                    self, element.attrib["id"], element.attrib.get("name", ""),
-                    incomings = [element.text for element in element.findall(f"./{bpmn2prefix}incoming")],
-                    outgoings = [element.text for element in element.findall(f"./{bpmn2prefix}outgoing")]
+                    self,
+                    element.attrib["id"],
+                    element.attrib.get("name", ""),
+                    incomings=[
+                        element.text
+                        for element in element.findall(f"./{bpmn2prefix}incoming")
+                    ],
+                    outgoings=[
+                        element.text
+                        for element in element.findall(f"./{bpmn2prefix}outgoing")
+                    ],
                 )
             case NodeType.PARALLEL_GATEWAY.value:
                 return ParallelGateway(
-                    self, element.attrib["id"], element.attrib.get("name", ""),
-                    incomings = [element.text for element in element.findall(f"./{bpmn2prefix}incoming")],
-                    outgoings = [element.text for element in element.findall(f"./{bpmn2prefix}outgoing")]
+                    self,
+                    element.attrib["id"],
+                    element.attrib.get("name", ""),
+                    incomings=[
+                        element.text
+                        for element in element.findall(f"./{bpmn2prefix}incoming")
+                    ],
+                    outgoings=[
+                        element.text
+                        for element in element.findall(f"./{bpmn2prefix}outgoing")
+                    ],
                 )
             case NodeType.EVENT_BASED_GATEWAY.value:
                 return EventBasedGateway(
-                    self, element.attrib["id"], element.attrib.get("name", ""),
-                    incomings = [element.text for element in element.findall(f"./{bpmn2prefix}incoming")],
-                    outgoings = [element.text for element in element.findall(f"./{bpmn2prefix}outgoing")]
+                    self,
+                    element.attrib["id"],
+                    element.attrib.get("name", ""),
+                    incomings=[
+                        element.text
+                        for element in element.findall(f"./{bpmn2prefix}incoming")
+                    ],
+                    outgoings=[
+                        element.text
+                        for element in element.findall(f"./{bpmn2prefix}outgoing")
+                    ],
                 )
 
     def _parse_edge(self, element):
@@ -100,6 +141,7 @@ class Choreography:
                     element.attrib.get("name", ""),
                     element.attrib["sourceRef"],
                     element.attrib["targetRef"],
+                    element.attrib.get("messageRef"),
                 )
 
             case EdgeType.SEQUENCE_FLOW.value:

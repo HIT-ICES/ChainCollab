@@ -36,7 +36,7 @@ class PropertyMeta(type):
                 def getter(self, attr_name=attr_name) -> Optional[List["Element"]]:
                     if isinstance(getattr(self, "_" + attr_name), list):
                         return [
-                            getattr(self, "_" + attr_name)["element"]
+                            attr["element"]
                             for attr in getattr(self, "_" + attr_name)
                         ]
                     else:
@@ -108,12 +108,13 @@ class Participant(Element):
 
 class Message(Element):
     _type: NodeType = NodeType.MESSAGE
-    _properties: List[str] = ["id", "name", "type"]
+    _properties: List[str] = ["id", "name", "type", "documentation"]
     _object_properties: List[str] = []
 
-    def __init__(self, graph, id: str, name: str = ""):
+    def __init__(self, graph, id: str, name: str = "", documentation: str = ""):
         super().__init__(graph, id)
         self._name: str = name
+        self._documentation: str = documentation
 
 
 class StartEvent(Element):
@@ -177,6 +178,20 @@ class ChoreographyTask(Element):
         self._message_flows: List[dict] = [
             initObjectProperties(message_flow) for message_flow in message_flows
         ]
+
+    @property
+    def init_message_flow(self):
+        for message_flow in self.message_flows:
+            if message_flow.source == self.init_participant:
+                return message_flow
+        return None
+    
+    @property
+    def return_message_flow(self):
+        for message_flow in self.message_flows:
+            if message_flow.target == self.init_participant:
+                return message_flow
+        return None
 
 
 class ExclusiveGateway(Element):
@@ -250,8 +265,8 @@ class EventBasedGateway(Element):
 
 class MessageFlow(Element):
     _type: EdgeType = EdgeType.MESSAGE_FLOW
-    _object_properties: List[str] = ["source", "target"]
-    _properties: List[str] = ["id", "name", "type", "source", "target"]
+    _object_properties: List[str] = ["source", "target", "message"]
+    _properties: List[str] = ["id", "name", "type", "source", "target", "message"]
 
     def __init__(
         self,
@@ -260,10 +275,12 @@ class MessageFlow(Element):
         name: str = "",
         source: str = "",
         target: str = "",
+        message: str = "",
     ):
         super().__init__(graph, id, name)
         self._source: dict = initObjectProperties(source)
         self._target: dict = initObjectProperties(target)
+        self._message: dict = initObjectProperties(message)
 
 
 class SequenceFlow(Element):
