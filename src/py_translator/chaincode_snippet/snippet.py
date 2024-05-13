@@ -23,6 +23,9 @@ def package_code():
 def state_read_and_put_code():
     return content["StateReadAndSetFunc"]
 
+def globale_variable_read_and_set_code():
+    return content["ReadAndSetGloablVariable"]
+
 
 def InitLedger_code(
     start_event: str, end_event: str, messages: list[dict[str, str]], gateways: list
@@ -251,8 +254,13 @@ def StateMemoryParameterDefinition_code(name: str, type: str):
     return '{name} {type} `json:"{name}"`'.format(name=name, type=type)
 
 
+# deprecated
 def PutState_code(name: str, value: str):
     return content["PutStateFuncFrame"].format(name=name, value=value)
+
+
+def SetGlobalVariable_code(name: str, value: str):
+    return content["SetGlobalVariableFuncFrame"].format(name=name, value=value)
 
 
 def ReadState_code(name: str):
