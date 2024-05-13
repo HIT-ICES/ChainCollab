@@ -42,7 +42,7 @@ class GoChaincodeTranslator:
         self,
         bpmn_file_path: str,
         bindings: dict[str, str],
-        output_path: str = "./chaincode.go",
+        output_path: str = "resource/chaincode.go",
     ):
         choreography: Choreography = Choreography()
         choreography.load_diagram_from_xml_file(bpmn_file_path)
@@ -640,4 +640,6 @@ class GoChaincodeTranslator:
 if __name__ == "__main__":
     go_chaincode_translator = GoChaincodeTranslator()
     bindings = {}
-    go_chaincode_translator.generate_chaincode("PizzaOrder.bpmn", bindings=bindings)
+    go_chaincode_translator.generate_chaincode(
+        "resource/bpmn/service provider running time example.bpmn", bindings=bindings
+    )

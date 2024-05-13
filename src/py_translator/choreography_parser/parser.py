@@ -50,7 +50,9 @@ class Choreography:
                 )
             case NodeType.MESSAGE.value:
                 documentation_list = element.findall(f"./{bpmn2prefix}documentation")
-                documentation = documentation_list[0].text if documentation_list else None
+                documentation = (
+                    documentation_list[0].text if documentation_list else None
+                )
                 return Message(
                     self,
                     element.attrib["id"],
@@ -155,13 +157,13 @@ class Choreography:
 
     def _parse_element(self, element):
         split_tag = element.tag.split("}")[1]
-        if split_tag in TerminalType.__members__.values():
+        if split_tag in [member.value for member in TerminalType.__members__.values()]:
             return
-        if split_tag in NodeType.__members__.values():
+        if split_tag in [member.value for member in NodeType.__members__.values()]:
             self.nodes.append(self._parse_node(element))
             self._id2nodes[self.nodes[-1].id] = self.nodes[-1]
             return
-        if split_tag in EdgeType.__members__.values():
+        if split_tag in [member.value for member in EdgeType.__members__.values()]:
             self.edges.append(self._parse_edge(element))
             self._id2edges[self.edges[-1].id] = self.edges[-1]
             return

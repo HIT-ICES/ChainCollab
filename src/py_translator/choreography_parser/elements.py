@@ -2,12 +2,12 @@
 
 # Type Enum
 
-from enum import StrEnum
+from enum import Enum
 from typing import List, Optional, Tuple, Any, Protocol
 from .protocals import ElementProtocol, GraphProtocol
 
 
-class NodeType(StrEnum):
+class NodeType(Enum):
     PARTICIPANT = "participant"
     MESSAGE = "message"
     START_EVENT = "startEvent"
@@ -18,12 +18,12 @@ class NodeType(StrEnum):
     EVENT_BASED_GATEWAY = "eventBasedGateway"
 
 
-class EdgeType(StrEnum):
+class EdgeType(Enum):
     MESSAGE_FLOW = "messageFlow"
     SEQUENCE_FLOW = "sequenceFlow"
 
 
-class TerminalType(StrEnum):
+class TerminalType(Enum):
     BPMNDiagram = "BPMNDiagram"
 
 
@@ -36,8 +36,7 @@ class PropertyMeta(type):
                 def getter(self, attr_name=attr_name) -> Optional[List["Element"]]:
                     if isinstance(getattr(self, "_" + attr_name), list):
                         return [
-                            attr["element"]
-                            for attr in getattr(self, "_" + attr_name)
+                            attr["element"] for attr in getattr(self, "_" + attr_name)
                         ]
                     else:
                         return getattr(self, "_" + attr_name)["element"]
@@ -185,7 +184,7 @@ class ChoreographyTask(Element):
             if message_flow.source == self.init_participant:
                 return message_flow
         return None
-    
+
     @property
     def return_message_flow(self):
         for message_flow in self.message_flows:

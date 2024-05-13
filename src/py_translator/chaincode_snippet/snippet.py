@@ -1,6 +1,6 @@
 import json
 
-with open("./snippet.json", "r") as f:
+with open("chaincode_snippet/snippet.json", "r") as f:
     content = json.load(f)
 
 
@@ -257,6 +257,7 @@ def PutState_code(name: str, value: str):
 
 def ReadState_code(name: str):
     return content["ReadStateFuncFrame"].format(stateName=name)
+
 
 def ReadCurrentMemory_code():
     return content["ReadCurrentMemoryCode"]
