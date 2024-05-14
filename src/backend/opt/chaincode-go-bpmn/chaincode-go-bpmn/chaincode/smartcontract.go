@@ -1,5 +1,6 @@
 package chaincode
 
+
 import (
 	"encoding/json"
 	"errors"
@@ -9,18 +10,25 @@ import (
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
-// SmartContract provides functions for managing an Asset
+
 type SmartContract struct {
 	contractapi.Contract
+}
+
+
+type StateMemory struct {
+    Is_available bool `json:"Is_available"`
+	Invoice bool `json:"Invoice"`
+	Need_external_provider bool `json:"Need_external_provider"`
 }
 
 type ElementState int
 
 const (
-	DISABLE = iota
-	ENABLE
-	WAITFORCONFIRM
-	DONE
+	DISABLED = iota
+	ENABLED
+	WAITINGFORCONFIRMATION
+	COMPLETED
 )
 
 type Message struct {
@@ -40,9 +48,6 @@ type Gateway struct {
 type ActionEvent struct {
 	EventID    string       `json:"eventID"`
 	EventState ElementState `json:"eventState"`
-}
-
-type StateMemory struct {
 }
 
 func (cc *SmartContract) CreateMessage(ctx contractapi.TransactionContextInterface, messageID string, sendMspID string, receiveMspID string, fireflyTranID string, msgState ElementState, format string) (*Message, error) {
@@ -133,25 +138,6 @@ func (cc *SmartContract) CreateActionEvent(ctx contractapi.TransactionContextInt
 	return actionEvent, nil
 }
 
-func (s *SmartContract) InitStateMemory(ctx contractapi.TransactionContextInterface) error {
-	stub := ctx.GetStub()
-	currentMemory := StateMemory{
-		NeedExternalProvider: false,
-		Invoice:              false,
-		IsAvailable:          false,
-	}
-	memoryJSON, err := json.Marshal(currentMemory)
-	if err != nil {
-		return fmt.Errorf("failed to marshal memory state: %s", err)
-	}
-	err = stub.PutState("currentMemory", memoryJSON)
-	if err != nil {
-		return fmt.Errorf("failed to save memory state: %s", err)
-	}
-	// 这里你可以添加将stateMemory保存到区块链状态数据库的代码
-	return nil
-}
-
 // Read function
 func (c *SmartContract) ReadMsg(ctx contractapi.TransactionContextInterface, messageID string) (*Message, error) {
 	msgJSON, err := ctx.GetStub().GetState(messageID)
@@ -220,25 +206,6 @@ func (c *SmartContract) ReadEvent(ctx contractapi.TransactionContextInterface, e
 	}
 
 	return &event, nil
-}
-
-func (c *SmartContract) ReadMemory(ctx contractapi.TransactionContextInterface) (*StateMemory, error) {
-	memoryJSON, err := ctx.GetStub().GetState("currentMemory")
-	if err != nil {
-		return nil, fmt.Errorf("failed to read memory from world state: %v", err)
-	}
-
-	if memoryJSON == nil {
-		return nil, fmt.Errorf("memory state not found")
-	}
-
-	var memory StateMemory
-	err = json.Unmarshal(memoryJSON, &memory)
-	if err != nil {
-		return nil, err
-	}
-
-	return &memory, nil
 }
 
 // Change State  function
@@ -408,50 +375,116 @@ func (cc *SmartContract) GetAllActionEvents(ctx contractapi.TransactionContextIn
 	return events, nil
 }
 
-// InitLedger adds a base set of elements to the ledger
 
-var isInited bool = false
+func (cc *SmartContract) ReadGlobalVariable(ctx contractapi.TransactionContextInterface) (*StateMemory, error) {
+	stateJSON, err := ctx.GetStub().GetState("currentMemory")
+	if err != nil {
+		return nil, err
+	}
+
+	if stateJSON == nil {
+		// return a empty stateMemory
+		return &StateMemory{}, nil
+	}
+
+	var stateMemory StateMemory
+	err = json.Unmarshal(stateJSON, &stateMemory)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+
+	return &stateMemory, nil
+}
+
+func (cc *SmartContract) SetGlobalVariable(ctx contractapi.TransactionContextInterface, globalVariable *StateMemory) error {
+	stub := ctx.GetStub()
+	globaleMemoryJson, err := json.Marshal(globalVariable)
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+	err = stub.PutState("currentMemory", globaleMemoryJson)
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+	return nil
+}
 
 func (cc *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
 	stub := ctx.GetStub()
-	if isInited {
+
+	// isInited in state
+	isInitedBytes, err := stub.GetState("isInited")
+	if err != nil {
+		return fmt.Errorf("Failed to get isInited: %v", err)
+	}
+	if isInitedBytes != nil {
 		errorMessage := "Chaincode has already been initialized"
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
-	cc.CreateActionEvent(ctx, "Event_07p8use", ENABLE)
-	cc.CreateMessage(ctx, "Message_1xm2zol", "Org1-consor1.org.comMSP", "Member1.org.comMSP", "", DISABLE, "{\"properties\":{\"123\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}")
-	cc.CreateActionEvent(ctx, "Event_09mx8cj", DISABLE)
+	cc.CreateActionEvent(ctx, "Event_1jtgn3j", ENABLED)
 
-	isInited = true
+	cc.CreateActionEvent(ctx, "Event_0366pfz", DISABLED)
+	cc.CreateMessage(ctx, "Message_1qbk325", "Org1-con1.org.comMSP", "Org1-2.org.comMSP", "", DISABLED, `{"properties":{"product Id":{"type":"string","description":"Delivered product id"}},"required":["product Id"],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, "Message_1q05nnw", "Org1-2.org.comMSP", "Org1-con1.org.comMSP", "", DISABLED, `{"properties":{"payment amount":{"type":"number","description":"payment amount"}},"required":["payment amount"],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, "Message_1i8rlqn", "Org1-2.org.comMSP", "Org1-con1.org.comMSP", "", DISABLED, `{"properties":{"external service Id":{"type":"string","description":"The requested external service information"}},"required":["external service Id"],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, "Message_0m9p3da", "Org1-3.org.comMSP", "Org1-2.org.comMSP", "", DISABLED, `{"properties":{"invoice":{"type":"boolean","description":"Do you need an invoice?"}},"required":["invoice"],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, "Message_1etcmvl", "Org1-2.org.comMSP", "Org1-3.org.comMSP", "", DISABLED, `{"properties":{"invoice_id":{"type":"string","description":"Invoice Id"},"invoice_data":{"type":"number","description":"Date of invoice issuance"}},"required":["invoice_id"],"files":{"invoice":{"type":"file","description":"Invoice documents"}},"file required":["invoice"]}`)
+	cc.CreateMessage(ctx, "Message_1joj7ca", "Org1-3.org.comMSP", "Org1-2.org.comMSP", "", DISABLED, `{"properties":{"invoice information":{"type":"string","description":"Invoice related information"}},"required":["invoice information"],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, "Message_1ljlm4g", "Org1-2.org.comMSP", "Org1-3.org.comMSP", "", DISABLED, `{"properties":{"delivered_product_id":{"type":"string","description":"delivered_product_id"}},"required":["delivered_product_id"],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, "Message_1xm9dxy", "Org1-3.org.comMSP", "Org1-2.org.comMSP", "", DISABLED, `{"properties":{"motivation":{"type":"string","description":"Motivation for Canceling orders"}},"required":["motivation"],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, "Message_0o8eyir", "Org1-3.org.comMSP", "Org1-2.org.comMSP", "", DISABLED, `{"properties":{"payment amount":{"type":"number","description":"payment amount"},"orderID":{"type":"number","description":"The order id of payment"}},"required":["payment amount","orderID"],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, "Message_1nlagx2", "Org1-3.org.comMSP", "Org1-2.org.comMSP", "", DISABLED, `{"properties":{"confirmation":{"type":"boolean","description":"Whether to accept the service plan"}},"required":["confirmation"],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, "Message_1em0ee4", "Org1-2.org.comMSP", "Org1-3.org.comMSP", "", DISABLED, `{"properties":{"service plan":{"type":"string","description":"service plan"},"price_quotation":{"type":"number","description":"Price quotation"},"need_external_provider":{"type":"boolean","description":"Whether external service providers are required"}},"required":["service plan","price_quotation","need_external_provider"],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, "Message_0r9lypd", "Org1-2.org.comMSP", "Org1-3.org.comMSP", "", DISABLED, `{"properties":{"is_available":{"type":"boolean","description":"Is the service available?"}},"required":["is_available"],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, "Message_045i10y", "Org1-3.org.comMSP", "Org1-2.org.comMSP", "", DISABLED, `{"properties":{"serviceId":{"type":"string","description":"The required service id"}},"required":["serviceId"],"files":{},"file required":[]}`)
+cc.CreateGateway(ctx, "ExclusiveGateway_106je4z", DISABLED)
+
+cc.CreateGateway(ctx, "ExclusiveGateway_0hs3ztq", DISABLED)
+
+cc.CreateGateway(ctx, "ExclusiveGateway_0nzwv7v", DISABLED)
+
+cc.CreateGateway(ctx, "Gateway_1bhtapl", DISABLED)
+
+cc.CreateGateway(ctx, "Gateway_04h9e6e", DISABLED)
+
+cc.CreateGateway(ctx, "EventBasedGateway_1fxpmyn", DISABLED)
+
+	stub.PutState("isInited", []byte("true"))
 
 	stub.SetEvent("initContractEvent", []byte("Contract has been initialized successfully"))
 	return nil
 }
-func (cc *SmartContract) Event_07p8use(ctx contractapi.TransactionContextInterface) error {
+
+
+func (cc *SmartContract) Event_1jtgn3j(ctx contractapi.TransactionContextInterface) error {
 	stub := ctx.GetStub()
-	actionEvent, err := cc.ReadEvent(ctx, "Event_07p8use")
+	actionEvent, err := cc.ReadEvent(ctx, "Event_1jtgn3j")
 	if err != nil {
 		return err
 	}
 
-	if actionEvent.EventState != ENABLE {
+	if actionEvent.EventState != ENABLED {
 		errorMessage := fmt.Sprintf("Event state %s is not allowed", actionEvent.EventID)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
-	cc.ChangeEventState(ctx, "Event_07p8use", DONE)
-	stub.SetEvent("Event_07p8use", []byte("Contract has been started successfully"))
-
-	cc.ChangeMsgState(ctx, "Message_1xm2zol", ENABLE)
+		cc.ChangeMsgState(ctx, "Event_1jtgn3j", COMPLETED)
+	stub.SetEvent("Event_1jtgn3j", []byte("Contract has been started successfully"))
+	
+	    cc.ChangeGtwState(ctx, "ExclusiveGateway_0hs3ztq", ENABLED)
+	
 	return nil
 }
 
-func (cc *SmartContract) Message_1xm2zol_Send(ctx contractapi.TransactionContextInterface, fireflyTranID string) error {
+func (cc *SmartContract) Message_045i10y_Send(ctx contractapi.TransactionContextInterface, fireflyTranID string , ) error {
 	stub := ctx.GetStub()
-	msg, err := cc.ReadMsg(ctx, "Message_1xm2zol")
+	msg, err := cc.ReadMsg(ctx, "Message_045i10y")
 	if err != nil {
 		return err
 	}
@@ -463,24 +496,26 @@ func (cc *SmartContract) Message_1xm2zol_Send(ctx contractapi.TransactionContext
 		fmt.Println(errorMessage)
 		return errors.New(fmt.Sprintf("Msp denied"))
 	}
-	if msg.MsgState != ENABLE {
+	if msg.MsgState != ENABLED {
 		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
-	msg.MsgState = WAITFORCONFIRM
+	msg.MsgState = WAITINGFORCONFIRMATION
 	msg.FireflyTranID = fireflyTranID
 	msgJSON, _ := json.Marshal(msg)
-	stub.PutState("Message_1xm2zol", msgJSON)
-	stub.SetEvent("ChoreographyTask_04v0g4z", []byte("Message wait for confirming"))
+	stub.PutState("Message_045i10y", msgJSON)
+	
+	stub.SetEvent("Message_045i10y", []byte("Message is waiting for confirmation"))
 
+	
 	return nil
 }
 
-func (cc *SmartContract) Message_1xm2zol_Complete(ctx contractapi.TransactionContextInterface) error {
+func (cc *SmartContract) Message_045i10y_Complete(ctx contractapi.TransactionContextInterface) error {
 	stub := ctx.GetStub()
-	msg, err := cc.ReadMsg(ctx, "Message_1xm2zol")
+	msg, err := cc.ReadMsg(ctx, "Message_045i10y")
 	if err != nil {
 		return err
 	}
@@ -493,89 +528,25 @@ func (cc *SmartContract) Message_1xm2zol_Complete(ctx contractapi.TransactionCon
 		return errors.New(fmt.Sprintf("Msp denied"))
 	}
 
-	if msg.MsgState != WAITFORCONFIRM {
+	if msg.MsgState != WAITINGFORCONFIRMATION {
 		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
-	cc.ChangeMsgState(ctx, "Message_1xm2zol", DONE)
-	stub.SetEvent("Message_1xm2zol", []byte("Message has been done"))
+	cc.ChangeMsgState(ctx, "Message_045i10y", COMPLETED)
+	stub.SetEvent("Message_045i10y", []byte("Message has been done"))
 
-	cc.ChangeEventState(ctx, "Event_09mx8cj", ENABLE)
+	
+	    cc.ChangeMsgState(ctx, "Message_0r9lypd", ENABLED)
 
-	return nil
-} //编排任务的最后一个消息
-
-func (cc *SmartContract) Event_09mx8cj(ctx contractapi.TransactionContextInterface) error {
-	stub := ctx.GetStub()
-	event, err := cc.ReadEvent(ctx, "Event_09mx8cj")
-	if err != nil {
-		return err
-	}
-
-	if event.EventState != ENABLE {
-		errorMessage := fmt.Sprintf("Event state %s is not allowed", event.EventID)
-		fmt.Println(errorMessage)
-		return fmt.Errorf(errorMessage)
-	}
-
-	cc.ChangeEventState(ctx, "Event_09mx8cj", DONE)
-	stub.SetEvent("Event_09mx8cj", []byte("EndEvent has been done"))
+	
 	return nil
 }
 
-func (cc *SmartContract) ExclusiveGateway_0nzwv7v(ctx contractapi.TransactionContextInterface) error {
+func (cc *SmartContract) Message_0r9lypd_Send(ctx contractapi.TransactionContextInterface, fireflyTranID string , Is_available bool) error {
 	stub := ctx.GetStub()
-	gtw, err := cc.ReadGtw(ctx, "ExclusiveGateway_0nzwv7v")
-	if err != nil {
-		return err
-	}
-
-	if gtw.GatewayState != ENABLE {
-		errorMessage := fmt.Sprintf("Gateway state %s is not allowed", gtw.GatewayID)
-		fmt.Println(errorMessage)
-		return fmt.Errorf(errorMessage)
-	}
-
-	cc.ChangeGtwState(ctx, "ExclusiveGateway_0nzwv7v", DONE)
-	stub.SetEvent("ExclusiveGateway_0nzwv7v", []byte("ExclusiveGateway has been done"))
-	currentMemory, err := cc.ReadMemory(ctx)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	if currentMemory.Invoice == false {
-		cc.ChangeEventState(ctx, "Event_08edp7f", ENABLE)
-
-	} else if currentMemory.Invoice == true {
-		cc.ChangeMsgState(ctx, "Message_1joj7ca", ENABLE)
-
-	}
-	return nil
-}
-
-func (cc *SmartContract) Event_08edp7f(ctx contractapi.TransactionContextInterface) error {
-	stub := ctx.GetStub()
-	event, err := cc.ReadEvent(ctx, "Event_08edp7f")
-	if err != nil {
-		return err
-	}
-
-	if event.EventState != ENABLE {
-		errorMessage := fmt.Sprintf("Event state %s is not allowed", event.EventID)
-		fmt.Println(errorMessage)
-		return fmt.Errorf(errorMessage)
-	}
-
-	cc.ChangeEventState(ctx, "Event_08edp7f", DONE)
-	stub.SetEvent("Event_08edp7f", []byte("EndEvent has been done"))
-	return nil
-}
-
-func (cc *SmartContract) Message_1joj7ca_Send(ctx contractapi.TransactionContextInterface, fireflyTranID string) error {
-	stub := ctx.GetStub()
-	msg, err := cc.ReadMsg(ctx, "Message_1joj7ca")
+	msg, err := cc.ReadMsg(ctx, "Message_0r9lypd")
 	if err != nil {
 		return err
 	}
@@ -587,25 +558,36 @@ func (cc *SmartContract) Message_1joj7ca_Send(ctx contractapi.TransactionContext
 		fmt.Println(errorMessage)
 		return errors.New(fmt.Sprintf("Msp denied"))
 	}
-
-	if msg.MsgState != ENABLE {
+	if msg.MsgState != ENABLED {
 		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
-	msg.MsgState = WAITFORCONFIRM
+	msg.MsgState = WAITINGFORCONFIRMATION
 	msg.FireflyTranID = fireflyTranID
 	msgJSON, _ := json.Marshal(msg)
-	stub.PutState("Message_1joj7ca", msgJSON)
-	stub.SetEvent("Message_1joj7ca", []byte("Message wait for confirming"))
+	stub.PutState("Message_0r9lypd", msgJSON)
+		globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx)
+	if readGloabolError != nil {
+		fmt.Println(readGloabolError.Error())
+		return readGloabolError
+	}
+	globalMemory.Is_available = Is_available
+	setGloabolErrror :=cc.SetGlobalVariable(ctx, globalMemory)
+	if setGloabolErrror != nil {
+		fmt.Println(setGloabolErrror.Error())
+		return setGloabolErrror
+	}
+	stub.SetEvent("Message_0r9lypd", []byte("Message is waiting for confirmation"))
 
+	
 	return nil
 }
 
-func (cc *SmartContract) Message_1joj7ca_Complete(ctx contractapi.TransactionContextInterface) error {
+func (cc *SmartContract) Message_0r9lypd_Complete(ctx contractapi.TransactionContextInterface) error {
 	stub := ctx.GetStub()
-	msg, err := cc.ReadMsg(ctx, "Message_1joj7ca")
+	msg, err := cc.ReadMsg(ctx, "Message_0r9lypd")
 	if err != nil {
 		return err
 	}
@@ -618,92 +600,19 @@ func (cc *SmartContract) Message_1joj7ca_Complete(ctx contractapi.TransactionCon
 		return errors.New(fmt.Sprintf("Msp denied"))
 	}
 
-	if msg.MsgState != WAITFORCONFIRM {
+	if msg.MsgState != WAITINGFORCONFIRMATION {
 		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
-	cc.ChangeMsgState(ctx, "Message_1joj7ca", DONE)
-	stub.SetEvent("Message_1joj7ca", []byte("Message has been done"))
+	cc.ChangeMsgState(ctx, "Message_0r9lypd", COMPLETED)
+	stub.SetEvent("Message_0r9lypd", []byte("Message has been done"))
 
-	cc.ChangeMsgState(ctx, "Message_1etcmvl", ENABLE)
-	return nil
-}
+	
+	    cc.ChangeGtwState(ctx, "ExclusiveGateway_106je4z", ENABLED)
 
-func (cc *SmartContract) Message_1etcmvl_Send(ctx contractapi.TransactionContextInterface, fireflyTranID string) error {
-	stub := ctx.GetStub()
-	msg, err := cc.ReadMsg(ctx, "Message_1etcmvl")
-	if err != nil {
-		return err
-	}
-
-	clientIdentity := ctx.GetClientIdentity()
-	clientMspID, _ := clientIdentity.GetMSPID()
-	if clientMspID != msg.SendMspID {
-		errorMessage := fmt.Sprintf("Msp denied")
-		fmt.Println(errorMessage)
-		return errors.New(fmt.Sprintf("Msp denied"))
-	}
-	if msg.MsgState != ENABLE {
-		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
-		fmt.Println(errorMessage)
-		return fmt.Errorf(errorMessage)
-	}
-
-	msg.MsgState = WAITFORCONFIRM
-	msg.FireflyTranID = fireflyTranID
-	msgJSON, _ := json.Marshal(msg)
-	stub.PutState("Message_1etcmvl", msgJSON)
-	stub.SetEvent("Message_1etcmvl", []byte("Message wait for confirming"))
-
-	return nil
-}
-
-func (cc *SmartContract) Message_1etcmvl_Complete(ctx contractapi.TransactionContextInterface) error {
-	stub := ctx.GetStub()
-	msg, err := cc.ReadMsg(ctx, "Message_1etcmvl")
-	if err != nil {
-		return err
-	}
-
-	clientIdentity := ctx.GetClientIdentity()
-	clientMspID, _ := clientIdentity.GetMSPID()
-	if clientMspID != msg.ReceiveMspID {
-		errorMessage := fmt.Sprintf("Msp denied")
-		fmt.Println(errorMessage)
-		return errors.New(fmt.Sprintf("Msp denied"))
-	}
-
-	if msg.MsgState != WAITFORCONFIRM {
-		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
-		fmt.Println(errorMessage)
-		return fmt.Errorf(errorMessage)
-	}
-
-	cc.ChangeMsgState(ctx, "Message_1etcmvl", DONE)
-	stub.SetEvent("Message_1etcmvl", []byte("Message has been done"))
-
-	cc.ChangeEventState(ctx, "Event_146eii4", ENABLE)
-
-	return nil
-} //编排任务的最后一个消息
-
-func (cc *SmartContract) Event_146eii4(ctx contractapi.TransactionContextInterface) error {
-	stub := ctx.GetStub()
-	event, err := cc.ReadEvent(ctx, "Event_146eii4")
-	if err != nil {
-		return err
-	}
-
-	if event.EventState != ENABLE {
-		errorMessage := fmt.Sprintf("Event state %s is not allowed", event.EventID)
-		fmt.Println(errorMessage)
-		return fmt.Errorf(errorMessage)
-	}
-
-	cc.ChangeEventState(ctx, "Event_146eii4", DONE)
-	stub.SetEvent("Event_146eii4", []byte("EndEvent has been done"))
+	
 	return nil
 }
 
@@ -714,62 +623,37 @@ func (cc *SmartContract) ExclusiveGateway_106je4z(ctx contractapi.TransactionCon
 		return err
 	}
 
-	if gtw.GatewayState != ENABLE {
+	if gtw.GatewayState != ENABLED {
 		errorMessage := fmt.Sprintf("Gateway state %s is not allowed", gtw.GatewayID)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
-	cc.ChangeGtwState(ctx, "ExclusiveGateway_106je4z", DONE)
+	cc.ChangeGtwState(ctx, "ExclusiveGateway_106je4z", COMPLETED)
 	stub.SetEvent("ExclusiveGateway_106je4z", []byte("ExclusiveGateway has been done"))
-	currentMemory, err := cc.ReadMemory(ctx)
+
+    
+    	currentMemory, err := cc.ReadGlobalVariable(ctx)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
-	if currentMemory.IsAvailable == true {
-		cc.ChangeMsgState(ctx, "Message_1em0ee4", ENABLE)
 
-	} else if currentMemory.IsAvailable == false {
-		cc.ChangeGtwState(ctx, "ExclusiveGateway_0hs3ztq", ENABLE)
+    Is_available:=currentMemory.Is_available
 
-	}
+if Is_available==true {
+	    cc.ChangeMsgState(ctx, "Message_1em0ee4", ENABLED)
+}
+if Is_available==false {
+	    cc.ChangeGtwState(ctx, "ExclusiveGateway_0hs3ztq", ENABLED)
+}
+    
+
 	return nil
 }
 
-func (cc *SmartContract) Gateway_1bhtapl(ctx contractapi.TransactionContextInterface) error {
+func (cc *SmartContract) Message_1em0ee4_Send(ctx contractapi.TransactionContextInterface, fireflyTranID string , Need_external_provider bool) error {
 	stub := ctx.GetStub()
-	gtw, err := cc.ReadGtw(ctx, "Gateway_1bhtapl")
-	if err != nil {
-		return err
-	}
-
-	if gtw.GatewayState != ENABLE {
-		errorMessage := fmt.Sprintf("Gateway state %s is not allowed", gtw.GatewayID)
-		fmt.Println(errorMessage)
-		return fmt.Errorf(errorMessage)
-	}
-
-	cc.ChangeGtwState(ctx, "Gateway_1bhtapl", DONE)
-	stub.SetEvent("Gateway_1bhtapl", []byte("ExclusiveGateway has been done"))
-	currentMemory, err := cc.ReadMemory(ctx)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	if currentMemory.NeedExternalProvider == true {
-		cc.ChangeMsgState(ctx, "Message_1i8rlqn", ENABLE)
-
-	} else if currentMemory.NeedExternalProvider == false {
-		cc.ChangeGtwState(ctx, "Gateway_04h9e6e", ENABLE)
-
-	}
-	return nil
-}
-
-func (cc *SmartContract) Message_1i8rlqn_Send(ctx contractapi.TransactionContextInterface, fireflyTranID string) error {
-	stub := ctx.GetStub()
-	msg, err := cc.ReadMsg(ctx, "Message_1i8rlqn")
+	msg, err := cc.ReadMsg(ctx, "Message_1em0ee4")
 	if err != nil {
 		return err
 	}
@@ -781,24 +665,36 @@ func (cc *SmartContract) Message_1i8rlqn_Send(ctx contractapi.TransactionContext
 		fmt.Println(errorMessage)
 		return errors.New(fmt.Sprintf("Msp denied"))
 	}
-	if msg.MsgState != ENABLE {
+	if msg.MsgState != ENABLED {
 		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
-	msg.MsgState = WAITFORCONFIRM
+	msg.MsgState = WAITINGFORCONFIRMATION
 	msg.FireflyTranID = fireflyTranID
 	msgJSON, _ := json.Marshal(msg)
-	stub.PutState("Message_1i8rlqn", msgJSON)
-	stub.SetEvent("ChoreographyTask_1khafgk", []byte("Message wait for confirming"))
+	stub.PutState("Message_1em0ee4", msgJSON)
+		globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx)
+	if readGloabolError != nil {
+		fmt.Println(readGloabolError.Error())
+		return readGloabolError
+	}
+	globalMemory.Need_external_provider = Need_external_provider
+	setGloabolErrror :=cc.SetGlobalVariable(ctx, globalMemory)
+	if setGloabolErrror != nil {
+		fmt.Println(setGloabolErrror.Error())
+		return setGloabolErrror
+	}
+	stub.SetEvent("Message_1em0ee4", []byte("Message is waiting for confirmation"))
 
+	
 	return nil
 }
 
-func (cc *SmartContract) Message_1i8rlqn_Complete(ctx contractapi.TransactionContextInterface) error {
+func (cc *SmartContract) Message_1em0ee4_Complete(ctx contractapi.TransactionContextInterface) error {
 	stub := ctx.GetStub()
-	msg, err := cc.ReadMsg(ctx, "Message_1i8rlqn")
+	msg, err := cc.ReadMsg(ctx, "Message_1em0ee4")
 	if err != nil {
 		return err
 	}
@@ -811,21 +707,275 @@ func (cc *SmartContract) Message_1i8rlqn_Complete(ctx contractapi.TransactionCon
 		return errors.New(fmt.Sprintf("Msp denied"))
 	}
 
-	if msg.MsgState != WAITFORCONFIRM {
+	if msg.MsgState != WAITINGFORCONFIRMATION {
 		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
-	cc.ChangeMsgState(ctx, "Message_1i8rlqn", DONE)
-	stub.SetEvent("Message_1i8rlqn", []byte("Message has been done"))
+	cc.ChangeMsgState(ctx, "Message_1em0ee4", COMPLETED)
+	stub.SetEvent("Message_1em0ee4", []byte("Message has been done"))
 
-	cc.ChangeMsgState(ctx, "Message_1q05nnw", ENABLE)
+	
+	    cc.ChangeMsgState(ctx, "Message_1nlagx2", ENABLED)
+
+	
+	return nil
+}
+
+func (cc *SmartContract) Message_1nlagx2_Send(ctx contractapi.TransactionContextInterface, fireflyTranID string , ) error {
+	stub := ctx.GetStub()
+	msg, err := cc.ReadMsg(ctx, "Message_1nlagx2")
+	if err != nil {
+		return err
+	}
+
+	clientIdentity := ctx.GetClientIdentity()
+	clientMspID, _ := clientIdentity.GetMSPID()
+	if clientMspID != msg.SendMspID {
+		errorMessage := fmt.Sprintf("Msp denied")
+		fmt.Println(errorMessage)
+		return errors.New(fmt.Sprintf("Msp denied"))
+	}
+	if msg.MsgState != ENABLED {
+		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	msg.MsgState = WAITINGFORCONFIRMATION
+	msg.FireflyTranID = fireflyTranID
+	msgJSON, _ := json.Marshal(msg)
+	stub.PutState("Message_1nlagx2", msgJSON)
+	
+	stub.SetEvent("Message_1nlagx2", []byte("Message is waiting for confirmation"))
+
+	
+	return nil
+}
+
+func (cc *SmartContract) Message_1nlagx2_Complete(ctx contractapi.TransactionContextInterface) error {
+	stub := ctx.GetStub()
+	msg, err := cc.ReadMsg(ctx, "Message_1nlagx2")
+	if err != nil {
+		return err
+	}
+
+	clientIdentity := ctx.GetClientIdentity()
+	clientMspID, _ := clientIdentity.GetMSPID()
+	if clientMspID != msg.ReceiveMspID {
+		errorMessage := fmt.Sprintf("Msp denied")
+		fmt.Println(errorMessage)
+		return errors.New(fmt.Sprintf("Msp denied"))
+	}
+
+	if msg.MsgState != WAITINGFORCONFIRMATION {
+		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeMsgState(ctx, "Message_1nlagx2", COMPLETED)
+	stub.SetEvent("Message_1nlagx2", []byte("Message has been done"))
+
+	
+	    cc.ChangeGtwState(ctx, "EventBasedGateway_1fxpmyn", ENABLED)
+
+	
+	return nil
+}
+
+func (cc *SmartContract) ExclusiveGateway_0hs3ztq(ctx contractapi.TransactionContextInterface) error {
+	stub := ctx.GetStub()
+	gtw, err := cc.ReadGtw(ctx, "ExclusiveGateway_0hs3ztq")
+	if err != nil {
+		return err
+	}
+
+	if gtw.GatewayState != ENABLED {
+		errorMessage := fmt.Sprintf("Gateway state %s is not allowed", gtw.GatewayID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeGtwState(ctx, "ExclusiveGateway_0hs3ztq", COMPLETED)
+	stub.SetEvent("ExclusiveGateway_0hs3ztq", []byte("ExclusiveGateway has been done"))
+
+    
+        cc.ChangeMsgState(ctx, "Message_045i10y", ENABLED)
+    
 
 	return nil
-} //编排任务的最后一个消息
+}
 
-func (cc *SmartContract) Message_1ljlm4g_Send(ctx contractapi.TransactionContextInterface, fireflyTranID string) error {
+func (cc *SmartContract) EventBasedGateway_1fxpmyn(ctx contractapi.TransactionContextInterface) error { 
+	stub := ctx.GetStub()
+	gtw, err := cc.ReadGtw(ctx, "EventBasedGateway_1fxpmyn")
+	if err != nil {
+		return err
+	}
+
+	if gtw.GatewayState != ENABLED {
+		errorMessage := fmt.Sprintf("Gateway state %s is not allowed", gtw.GatewayID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeGtwState(ctx, "EventBasedGateway_1fxpmyn", COMPLETED)
+	stub.SetEvent("EventBasedGateway_1fxpmyn", []byte("EventbasedGateway has been done"))
+
+ 
+        cc.ChangeMsgState(ctx, "Message_0o8eyir", ENABLED)
+    cc.ChangeMsgState(ctx, "Message_1xm9dxy", ENABLED)
+    
+
+    return nil
+}
+
+func (cc *SmartContract) Message_0o8eyir_Send(ctx contractapi.TransactionContextInterface, fireflyTranID string , ) error {
+	stub := ctx.GetStub()
+	msg, err := cc.ReadMsg(ctx, "Message_0o8eyir")
+	if err != nil {
+		return err
+	}
+
+	clientIdentity := ctx.GetClientIdentity()
+	clientMspID, _ := clientIdentity.GetMSPID()
+	if clientMspID != msg.SendMspID {
+		errorMessage := fmt.Sprintf("Msp denied")
+		fmt.Println(errorMessage)
+		return errors.New(fmt.Sprintf("Msp denied"))
+	}
+	if msg.MsgState != ENABLED {
+		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	msg.MsgState = WAITINGFORCONFIRMATION
+	msg.FireflyTranID = fireflyTranID
+	msgJSON, _ := json.Marshal(msg)
+	stub.PutState("Message_0o8eyir", msgJSON)
+	
+	stub.SetEvent("Message_0o8eyir", []byte("Message is waiting for confirmation"))
+
+	    cc.ChangeMsgState(ctx, "Message_1xm9dxy", DISABLED)
+	return nil
+}
+
+func (cc *SmartContract) Message_0o8eyir_Complete(ctx contractapi.TransactionContextInterface) error {
+	stub := ctx.GetStub()
+	msg, err := cc.ReadMsg(ctx, "Message_0o8eyir")
+	if err != nil {
+		return err
+	}
+
+	clientIdentity := ctx.GetClientIdentity()
+	clientMspID, _ := clientIdentity.GetMSPID()
+	if clientMspID != msg.ReceiveMspID {
+		errorMessage := fmt.Sprintf("Msp denied")
+		fmt.Println(errorMessage)
+		return errors.New(fmt.Sprintf("Msp denied"))
+	}
+
+	if msg.MsgState != WAITINGFORCONFIRMATION {
+		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeMsgState(ctx, "Message_0o8eyir", COMPLETED)
+	stub.SetEvent("Message_0o8eyir", []byte("Message has been done"))
+
+	
+	    cc.ChangeGtwState(ctx, "Gateway_1bhtapl", ENABLED)
+
+	
+	return nil
+}
+
+func (cc *SmartContract) Message_1xm9dxy_Send(ctx contractapi.TransactionContextInterface, fireflyTranID string , ) error {
+	stub := ctx.GetStub()
+	msg, err := cc.ReadMsg(ctx, "Message_1xm9dxy")
+	if err != nil {
+		return err
+	}
+
+	clientIdentity := ctx.GetClientIdentity()
+	clientMspID, _ := clientIdentity.GetMSPID()
+	if clientMspID != msg.SendMspID {
+		errorMessage := fmt.Sprintf("Msp denied")
+		fmt.Println(errorMessage)
+		return errors.New(fmt.Sprintf("Msp denied"))
+	}
+	if msg.MsgState != ENABLED {
+		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	msg.MsgState = WAITINGFORCONFIRMATION
+	msg.FireflyTranID = fireflyTranID
+	msgJSON, _ := json.Marshal(msg)
+	stub.PutState("Message_1xm9dxy", msgJSON)
+	
+	stub.SetEvent("Message_1xm9dxy", []byte("Message is waiting for confirmation"))
+
+	    cc.ChangeMsgState(ctx, "Message_0o8eyir", DISABLED)
+	return nil
+}
+
+func (cc *SmartContract) Message_1xm9dxy_Complete(ctx contractapi.TransactionContextInterface) error {
+	stub := ctx.GetStub()
+	msg, err := cc.ReadMsg(ctx, "Message_1xm9dxy")
+	if err != nil {
+		return err
+	}
+
+	clientIdentity := ctx.GetClientIdentity()
+	clientMspID, _ := clientIdentity.GetMSPID()
+	if clientMspID != msg.ReceiveMspID {
+		errorMessage := fmt.Sprintf("Msp denied")
+		fmt.Println(errorMessage)
+		return errors.New(fmt.Sprintf("Msp denied"))
+	}
+
+	if msg.MsgState != WAITINGFORCONFIRMATION {
+		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeMsgState(ctx, "Message_1xm9dxy", COMPLETED)
+	stub.SetEvent("Message_1xm9dxy", []byte("Message has been done"))
+
+	
+	    cc.ChangeEventState(ctx, "Event_0366pfz", ENABLED)
+
+	
+	return nil
+}
+
+func (cc *SmartContract) Event_0366pfz(ctx contractapi.TransactionContextInterface) error {
+	stub := ctx.GetStub()
+	event, err := cc.ReadEvent(ctx, "Event_0366pfz")
+	if err != nil {
+		return err
+	}
+
+	if event.EventState != ENABLED {
+		errorMessage := fmt.Sprintf("Event state %s is not allowed", event.EventID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeEventState(ctx, "Event_0366pfz", COMPLETED)
+	stub.SetEvent("Event_0366pfz", []byte("EndEvent has been done"))
+	
+	return nil
+}
+
+func (cc *SmartContract) Message_1ljlm4g_Send(ctx contractapi.TransactionContextInterface, fireflyTranID string , ) error {
 	stub := ctx.GetStub()
 	msg, err := cc.ReadMsg(ctx, "Message_1ljlm4g")
 	if err != nil {
@@ -839,19 +989,20 @@ func (cc *SmartContract) Message_1ljlm4g_Send(ctx contractapi.TransactionContext
 		fmt.Println(errorMessage)
 		return errors.New(fmt.Sprintf("Msp denied"))
 	}
-
-	if msg.MsgState != ENABLE {
+	if msg.MsgState != ENABLED {
 		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
-	msg.MsgState = WAITFORCONFIRM
+	msg.MsgState = WAITINGFORCONFIRMATION
 	msg.FireflyTranID = fireflyTranID
 	msgJSON, _ := json.Marshal(msg)
 	stub.PutState("Message_1ljlm4g", msgJSON)
-	stub.SetEvent("Message_1ljlm4g", []byte("Message wait for confirming"))
+	
+	stub.SetEvent("Message_1ljlm4g", []byte("Message is waiting for confirmation"))
 
+	
 	return nil
 }
 
@@ -870,20 +1021,23 @@ func (cc *SmartContract) Message_1ljlm4g_Complete(ctx contractapi.TransactionCon
 		return errors.New(fmt.Sprintf("Msp denied"))
 	}
 
-	if msg.MsgState != WAITFORCONFIRM {
+	if msg.MsgState != WAITINGFORCONFIRMATION {
 		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
-	cc.ChangeMsgState(ctx, "Message_1ljlm4g", DONE)
+	cc.ChangeMsgState(ctx, "Message_1ljlm4g", COMPLETED)
 	stub.SetEvent("Message_1ljlm4g", []byte("Message has been done"))
 
-	cc.ChangeMsgState(ctx, "Message_0m9p3da", ENABLE)
+	
+	    cc.ChangeMsgState(ctx, "Message_0m9p3da", ENABLED)
+
+	
 	return nil
 }
 
-func (cc *SmartContract) Message_0m9p3da_Send(ctx contractapi.TransactionContextInterface, fireflyTranID string, invoice bool) error {
+func (cc *SmartContract) Message_0m9p3da_Send(ctx contractapi.TransactionContextInterface, fireflyTranID string , Invoice bool) error {
 	stub := ctx.GetStub()
 	msg, err := cc.ReadMsg(ctx, "Message_0m9p3da")
 	if err != nil {
@@ -897,34 +1051,30 @@ func (cc *SmartContract) Message_0m9p3da_Send(ctx contractapi.TransactionContext
 		fmt.Println(errorMessage)
 		return errors.New(fmt.Sprintf("Msp denied"))
 	}
-	if msg.MsgState != ENABLE {
+	if msg.MsgState != ENABLED {
 		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
-	msg.MsgState = WAITFORCONFIRM
+	msg.MsgState = WAITINGFORCONFIRMATION
 	msg.FireflyTranID = fireflyTranID
 	msgJSON, _ := json.Marshal(msg)
 	stub.PutState("Message_0m9p3da", msgJSON)
-	stub.SetEvent("Message_0m9p3da", []byte("Message wait for confirming"))
-
-	currentMemory, err := cc.ReadMemory(ctx)
-	if err != nil {
-		fmt.Println(err)
-		return err
+		globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx)
+	if readGloabolError != nil {
+		fmt.Println(readGloabolError.Error())
+		return readGloabolError
 	}
-	currentMemory.Invoice = invoice
-	memoryJSON, err := json.Marshal(currentMemory)
-	if err != nil {
-		return fmt.Errorf("failed to marshal memory state: %s", err)
+	globalMemory.Invoice = Invoice
+	setGloabolErrror :=cc.SetGlobalVariable(ctx, globalMemory)
+	if setGloabolErrror != nil {
+		fmt.Println(setGloabolErrror.Error())
+		return setGloabolErrror
 	}
+	stub.SetEvent("Message_0m9p3da", []byte("Message is waiting for confirmation"))
 
-	err = stub.PutState("currentMemory", memoryJSON)
-	if err != nil {
-		return fmt.Errorf("failed to save memory state: %s", err)
-	}
-
+	
 	return nil
 }
 
@@ -943,19 +1093,315 @@ func (cc *SmartContract) Message_0m9p3da_Complete(ctx contractapi.TransactionCon
 		return errors.New(fmt.Sprintf("Msp denied"))
 	}
 
-	if msg.MsgState != WAITFORCONFIRM {
+	if msg.MsgState != WAITINGFORCONFIRMATION {
 		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
-	cc.ChangeMsgState(ctx, "Message_0m9p3da", DONE)
+	cc.ChangeMsgState(ctx, "Message_0m9p3da", COMPLETED)
 	stub.SetEvent("Message_0m9p3da", []byte("Message has been done"))
 
-	cc.ChangeGtwState(ctx, "ExclusiveGateway_0nzwv7v", ENABLE)
+	
+	    cc.ChangeGtwState(ctx, "ExclusiveGateway_0nzwv7v", ENABLED)
+
+	
+	return nil
+}
+
+func (cc *SmartContract) ExclusiveGateway_0nzwv7v(ctx contractapi.TransactionContextInterface) error {
+	stub := ctx.GetStub()
+	gtw, err := cc.ReadGtw(ctx, "ExclusiveGateway_0nzwv7v")
+	if err != nil {
+		return err
+	}
+
+	if gtw.GatewayState != ENABLED {
+		errorMessage := fmt.Sprintf("Gateway state %s is not allowed", gtw.GatewayID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeGtwState(ctx, "ExclusiveGateway_0nzwv7v", COMPLETED)
+	stub.SetEvent("ExclusiveGateway_0nzwv7v", []byte("ExclusiveGateway has been done"))
+
+    
+    	currentMemory, err := cc.ReadGlobalVariable(ctx)
+	if err != nil {
+		return err
+	}
+
+    Invoice:=currentMemory.Invoice
+
+if Invoice==false {
+	    cc.ChangeEventState(ctx, "Event_08edp7f", ENABLED)
+}
+if Invoice==true {
+	    cc.ChangeMsgState(ctx, "Message_1joj7ca", ENABLED)
+}
+    
 
 	return nil
-} //编排任务的最后一个消息
+}
+
+func (cc *SmartContract) Event_08edp7f(ctx contractapi.TransactionContextInterface) error {
+	stub := ctx.GetStub()
+	event, err := cc.ReadEvent(ctx, "Event_08edp7f")
+	if err != nil {
+		return err
+	}
+
+	if event.EventState != ENABLED {
+		errorMessage := fmt.Sprintf("Event state %s is not allowed", event.EventID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeEventState(ctx, "Event_08edp7f", COMPLETED)
+	stub.SetEvent("Event_08edp7f", []byte("EndEvent has been done"))
+	
+	return nil
+}
+
+func (cc *SmartContract) Message_1joj7ca_Send(ctx contractapi.TransactionContextInterface, fireflyTranID string , ) error {
+	stub := ctx.GetStub()
+	msg, err := cc.ReadMsg(ctx, "Message_1joj7ca")
+	if err != nil {
+		return err
+	}
+
+	clientIdentity := ctx.GetClientIdentity()
+	clientMspID, _ := clientIdentity.GetMSPID()
+	if clientMspID != msg.SendMspID {
+		errorMessage := fmt.Sprintf("Msp denied")
+		fmt.Println(errorMessage)
+		return errors.New(fmt.Sprintf("Msp denied"))
+	}
+	if msg.MsgState != ENABLED {
+		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	msg.MsgState = WAITINGFORCONFIRMATION
+	msg.FireflyTranID = fireflyTranID
+	msgJSON, _ := json.Marshal(msg)
+	stub.PutState("Message_1joj7ca", msgJSON)
+	
+	stub.SetEvent("Message_1joj7ca", []byte("Message is waiting for confirmation"))
+
+	
+	return nil
+}
+
+func (cc *SmartContract) Message_1joj7ca_Complete(ctx contractapi.TransactionContextInterface) error {
+	stub := ctx.GetStub()
+	msg, err := cc.ReadMsg(ctx, "Message_1joj7ca")
+	if err != nil {
+		return err
+	}
+
+	clientIdentity := ctx.GetClientIdentity()
+	clientMspID, _ := clientIdentity.GetMSPID()
+	if clientMspID != msg.ReceiveMspID {
+		errorMessage := fmt.Sprintf("Msp denied")
+		fmt.Println(errorMessage)
+		return errors.New(fmt.Sprintf("Msp denied"))
+	}
+
+	if msg.MsgState != WAITINGFORCONFIRMATION {
+		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeMsgState(ctx, "Message_1joj7ca", COMPLETED)
+	stub.SetEvent("Message_1joj7ca", []byte("Message has been done"))
+
+	
+	    cc.ChangeMsgState(ctx, "Message_1etcmvl", ENABLED)
+
+	
+	return nil
+}
+
+func (cc *SmartContract) Message_1etcmvl_Send(ctx contractapi.TransactionContextInterface, fireflyTranID string , ) error {
+	stub := ctx.GetStub()
+	msg, err := cc.ReadMsg(ctx, "Message_1etcmvl")
+	if err != nil {
+		return err
+	}
+
+	clientIdentity := ctx.GetClientIdentity()
+	clientMspID, _ := clientIdentity.GetMSPID()
+	if clientMspID != msg.SendMspID {
+		errorMessage := fmt.Sprintf("Msp denied")
+		fmt.Println(errorMessage)
+		return errors.New(fmt.Sprintf("Msp denied"))
+	}
+	if msg.MsgState != ENABLED {
+		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	msg.MsgState = WAITINGFORCONFIRMATION
+	msg.FireflyTranID = fireflyTranID
+	msgJSON, _ := json.Marshal(msg)
+	stub.PutState("Message_1etcmvl", msgJSON)
+	
+	stub.SetEvent("Message_1etcmvl", []byte("Message is waiting for confirmation"))
+
+	
+	return nil
+}
+
+func (cc *SmartContract) Message_1etcmvl_Complete(ctx contractapi.TransactionContextInterface) error {
+	stub := ctx.GetStub()
+	msg, err := cc.ReadMsg(ctx, "Message_1etcmvl")
+	if err != nil {
+		return err
+	}
+
+	clientIdentity := ctx.GetClientIdentity()
+	clientMspID, _ := clientIdentity.GetMSPID()
+	if clientMspID != msg.ReceiveMspID {
+		errorMessage := fmt.Sprintf("Msp denied")
+		fmt.Println(errorMessage)
+		return errors.New(fmt.Sprintf("Msp denied"))
+	}
+
+	if msg.MsgState != WAITINGFORCONFIRMATION {
+		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeMsgState(ctx, "Message_1etcmvl", COMPLETED)
+	stub.SetEvent("Message_1etcmvl", []byte("Message has been done"))
+
+	
+	    cc.ChangeEventState(ctx, "Event_146eii4", ENABLED)
+
+	
+	return nil
+}
+
+func (cc *SmartContract) Event_146eii4(ctx contractapi.TransactionContextInterface) error {
+	stub := ctx.GetStub()
+	event, err := cc.ReadEvent(ctx, "Event_146eii4")
+	if err != nil {
+		return err
+	}
+
+	if event.EventState != ENABLED {
+		errorMessage := fmt.Sprintf("Event state %s is not allowed", event.EventID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeEventState(ctx, "Event_146eii4", COMPLETED)
+	stub.SetEvent("Event_146eii4", []byte("EndEvent has been done"))
+	
+	return nil
+}
+
+func (cc *SmartContract) Message_1i8rlqn_Send(ctx contractapi.TransactionContextInterface, fireflyTranID string , ) error {
+	stub := ctx.GetStub()
+	msg, err := cc.ReadMsg(ctx, "Message_1i8rlqn")
+	if err != nil {
+		return err
+	}
+
+	clientIdentity := ctx.GetClientIdentity()
+	clientMspID, _ := clientIdentity.GetMSPID()
+	if clientMspID != msg.SendMspID {
+		errorMessage := fmt.Sprintf("Msp denied")
+		fmt.Println(errorMessage)
+		return errors.New(fmt.Sprintf("Msp denied"))
+	}
+	if msg.MsgState != ENABLED {
+		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	msg.MsgState = WAITINGFORCONFIRMATION
+	msg.FireflyTranID = fireflyTranID
+	msgJSON, _ := json.Marshal(msg)
+	stub.PutState("Message_1i8rlqn", msgJSON)
+	
+	stub.SetEvent("Message_1i8rlqn", []byte("Message is waiting for confirmation"))
+
+	
+	return nil
+}
+
+func (cc *SmartContract) Message_1i8rlqn_Complete(ctx contractapi.TransactionContextInterface) error {
+	stub := ctx.GetStub()
+	msg, err := cc.ReadMsg(ctx, "Message_1i8rlqn")
+	if err != nil {
+		return err
+	}
+
+	clientIdentity := ctx.GetClientIdentity()
+	clientMspID, _ := clientIdentity.GetMSPID()
+	if clientMspID != msg.ReceiveMspID {
+		errorMessage := fmt.Sprintf("Msp denied")
+		fmt.Println(errorMessage)
+		return errors.New(fmt.Sprintf("Msp denied"))
+	}
+
+	if msg.MsgState != WAITINGFORCONFIRMATION {
+		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeMsgState(ctx, "Message_1i8rlqn", COMPLETED)
+	stub.SetEvent("Message_1i8rlqn", []byte("Message has been done"))
+
+	
+	    cc.ChangeMsgState(ctx, "Message_1q05nnw", ENABLED)
+
+	
+	return nil
+}
+
+func (cc *SmartContract) Gateway_1bhtapl(ctx contractapi.TransactionContextInterface) error {
+	stub := ctx.GetStub()
+	gtw, err := cc.ReadGtw(ctx, "Gateway_1bhtapl")
+	if err != nil {
+		return err
+	}
+
+	if gtw.GatewayState != ENABLED {
+		errorMessage := fmt.Sprintf("Gateway state %s is not allowed", gtw.GatewayID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeGtwState(ctx, "Gateway_1bhtapl", COMPLETED)
+	stub.SetEvent("Gateway_1bhtapl", []byte("ExclusiveGateway has been done"))
+
+    
+    	currentMemory, err := cc.ReadGlobalVariable(ctx)
+	if err != nil {
+		return err
+	}
+
+    Need_external_provider:=currentMemory.Need_external_provider
+
+if Need_external_provider==true {
+	    cc.ChangeMsgState(ctx, "Message_1i8rlqn", ENABLED)
+}
+if Need_external_provider==false {
+	    cc.ChangeGtwState(ctx, "Gateway_04h9e6e", ENABLED)
+}
+    
+
+	return nil
+}
 
 func (cc *SmartContract) Gateway_04h9e6e(ctx contractapi.TransactionContextInterface) error {
 	stub := ctx.GetStub()
@@ -964,21 +1410,23 @@ func (cc *SmartContract) Gateway_04h9e6e(ctx contractapi.TransactionContextInter
 		return err
 	}
 
-	if gtw.GatewayState != ENABLE {
+	if gtw.GatewayState != ENABLED {
 		errorMessage := fmt.Sprintf("Gateway state %s is not allowed", gtw.GatewayID)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
-	cc.ChangeGtwState(ctx, "Gateway_04h9e6e", DONE)
+	cc.ChangeGtwState(ctx, "Gateway_04h9e6e", COMPLETED)
 	stub.SetEvent("Gateway_04h9e6e", []byte("ExclusiveGateway has been done"))
 
-	cc.ChangeMsgState(ctx, "Message_1ljlm4g", ENABLE)
+    
+        cc.ChangeMsgState(ctx, "Message_1ljlm4g", ENABLED)
+    
 
 	return nil
 }
 
-func (cc *SmartContract) Message_1q05nnw_Send(ctx contractapi.TransactionContextInterface, fireflyTranID string) error {
+func (cc *SmartContract) Message_1q05nnw_Send(ctx contractapi.TransactionContextInterface, fireflyTranID string , ) error {
 	stub := ctx.GetStub()
 	msg, err := cc.ReadMsg(ctx, "Message_1q05nnw")
 	if err != nil {
@@ -992,19 +1440,20 @@ func (cc *SmartContract) Message_1q05nnw_Send(ctx contractapi.TransactionContext
 		fmt.Println(errorMessage)
 		return errors.New(fmt.Sprintf("Msp denied"))
 	}
-
-	if msg.MsgState != ENABLE {
+	if msg.MsgState != ENABLED {
 		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
-	msg.MsgState = WAITFORCONFIRM
+	msg.MsgState = WAITINGFORCONFIRMATION
 	msg.FireflyTranID = fireflyTranID
 	msgJSON, _ := json.Marshal(msg)
 	stub.PutState("Message_1q05nnw", msgJSON)
-	stub.SetEvent("Message_1q05nnw", []byte("Message wait for confirming"))
+	
+	stub.SetEvent("Message_1q05nnw", []byte("Message is waiting for confirmation"))
 
+	
 	return nil
 }
 
@@ -1023,20 +1472,23 @@ func (cc *SmartContract) Message_1q05nnw_Complete(ctx contractapi.TransactionCon
 		return errors.New(fmt.Sprintf("Msp denied"))
 	}
 
-	if msg.MsgState != WAITFORCONFIRM {
+	if msg.MsgState != WAITINGFORCONFIRMATION {
 		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
-	cc.ChangeMsgState(ctx, "Message_1q05nnw", DONE)
+	cc.ChangeMsgState(ctx, "Message_1q05nnw", COMPLETED)
 	stub.SetEvent("Message_1q05nnw", []byte("Message has been done"))
 
-	cc.ChangeMsgState(ctx, "Message_1qbk325", ENABLE)
+	
+	    cc.ChangeMsgState(ctx, "Message_1qbk325", ENABLED)
+
+	
 	return nil
 }
 
-func (cc *SmartContract) Message_1qbk325_Send(ctx contractapi.TransactionContextInterface, fireflyTranID string) error {
+func (cc *SmartContract) Message_1qbk325_Send(ctx contractapi.TransactionContextInterface, fireflyTranID string , ) error {
 	stub := ctx.GetStub()
 	msg, err := cc.ReadMsg(ctx, "Message_1qbk325")
 	if err != nil {
@@ -1050,18 +1502,20 @@ func (cc *SmartContract) Message_1qbk325_Send(ctx contractapi.TransactionContext
 		fmt.Println(errorMessage)
 		return errors.New(fmt.Sprintf("Msp denied"))
 	}
-	if msg.MsgState != ENABLE {
+	if msg.MsgState != ENABLED {
 		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
-	msg.MsgState = WAITFORCONFIRM
+	msg.MsgState = WAITINGFORCONFIRMATION
 	msg.FireflyTranID = fireflyTranID
 	msgJSON, _ := json.Marshal(msg)
 	stub.PutState("Message_1qbk325", msgJSON)
-	stub.SetEvent("Message_1qbk325", []byte("Message wait for confirming"))
+	
+	stub.SetEvent("Message_1qbk325", []byte("Message is waiting for confirmation"))
 
+	
 	return nil
 }
 
@@ -1080,16 +1534,18 @@ func (cc *SmartContract) Message_1qbk325_Complete(ctx contractapi.TransactionCon
 		return errors.New(fmt.Sprintf("Msp denied"))
 	}
 
-	if msg.MsgState != WAITFORCONFIRM {
+	if msg.MsgState != WAITINGFORCONFIRMATION {
 		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
-	cc.ChangeMsgState(ctx, "Message_1qbk325", DONE)
+	cc.ChangeMsgState(ctx, "Message_1qbk325", COMPLETED)
 	stub.SetEvent("Message_1qbk325", []byte("Message has been done"))
 
-	cc.ChangeGtwState(ctx, "Gateway_04h9e6e", ENABLE)
+	
+	    cc.ChangeGtwState(ctx, "Gateway_04h9e6e", ENABLED)
 
+	
 	return nil
-} //编排任务的最后一个消息
+}
