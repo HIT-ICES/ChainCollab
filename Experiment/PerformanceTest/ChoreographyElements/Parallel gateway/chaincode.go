@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"strings"
+
+	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
 // SmartContract provides functions for managing an Asset
@@ -42,7 +43,7 @@ type ActionEvent struct {
 	EventState ElementState `json:"eventState"`
 }
 
-type StateMemory struct { 
+type StateMemory struct {
 }
 
 func (cc *SmartContract) CreateMessage(ctx contractapi.TransactionContextInterface, messageID string, sendMspID string, receiveMspID string, fireflyTranID string, msgState ElementState, format string) (*Message, error) {
@@ -64,7 +65,7 @@ func (cc *SmartContract) CreateMessage(ctx contractapi.TransactionContextInterfa
 		ReceiveMspID:  receiveMspID,
 		FireflyTranID: fireflyTranID,
 		MsgState:      msgState,
-		Format:      format,
+		Format:        format,
 	}
 
 	// 将消息对象序列化为JSON字符串并保存在状态数据库中
@@ -312,7 +313,7 @@ func (cc *SmartContract) GetAllMessages(ctx contractapi.TransactionContextInterf
 func (cc *SmartContract) GetAllGateways(ctx contractapi.TransactionContextInterface) ([]*Gateway, error) {
 	resultsIterator, err := ctx.GetStub().GetStateByRange("", "")
 	if err != nil {
-		return nil, fmt.Errorf("获取状态数据时出错: %v", err) 
+		return nil, fmt.Errorf("获取状态数据时出错: %v", err)
 	}
 	defer resultsIterator.Close()
 
@@ -370,7 +371,6 @@ func (cc *SmartContract) GetAllActionEvents(ctx contractapi.TransactionContextIn
 	return events, nil
 }
 
-
 // InitLedger adds a base set of elements to the ledger
 
 var isInited bool = false
@@ -395,7 +395,7 @@ func (cc *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface)
 	stub.SetEvent("initContractEvent", []byte("Contract has been initialized successfully"))
 	return nil
 }
-func (cc *SmartContract) Event_129hvdl(ctx contractapi.TransactionContextInterface) error { 
+func (cc *SmartContract) Event_129hvdl(ctx contractapi.TransactionContextInterface) error {
 	stub := ctx.GetStub()
 	actionEvent, err := cc.ReadEvent(ctx, "Event_129hvdl")
 	if err != nil {
@@ -415,7 +415,7 @@ func (cc *SmartContract) Event_129hvdl(ctx contractapi.TransactionContextInterfa
 	return nil
 }
 
-func (cc *SmartContract) Gateway_0og04ux(ctx contractapi.TransactionContextInterface) error { 
+func (cc *SmartContract) Gateway_0og04ux(ctx contractapi.TransactionContextInterface) error {
 	stub := ctx.GetStub()
 	gtw, err := cc.ReadGtw(ctx, "Event_129hvdl")
 	if err != nil {
@@ -431,12 +431,11 @@ func (cc *SmartContract) Gateway_0og04ux(ctx contractapi.TransactionContextInter
 	cc.ChangeGtwState(ctx, "Gateway_0og04ux", ENABLE)
 	stub.SetEvent("Gateway_0og04ux", []byte("Gateway has been done"))
 
-        cc.ChangeMsgState(ctx, "Message_0gpiru4" ,DISABLE)
+	cc.ChangeMsgState(ctx, "Message_0gpiru4", DISABLE)
 
-        cc.ChangeMsgState(ctx, "Message_1hzruzz" ,DISABLE)
+	cc.ChangeMsgState(ctx, "Message_1hzruzz", DISABLE)
 
-
-return nil
+	return nil
 }
 
 func (cc *SmartContract) Message_0gpiru4_Send(ctx contractapi.TransactionContextInterface, fireflyTranID string) error {
@@ -463,10 +462,9 @@ func (cc *SmartContract) Message_0gpiru4_Send(ctx contractapi.TransactionContext
 	msg.FireflyTranID = fireflyTranID
 	msgJSON, _ := json.Marshal(msg)
 	stub.PutState("Message_0gpiru4", msgJSON)
-		stub.SetEvent("ChoreographyTask_00bnkwc", []byte("Message wait for confirming"))
+	stub.SetEvent("ChoreographyTask_00bnkwc", []byte("Message wait for confirming"))
 
-	
-return nil
+	return nil
 }
 
 func (cc *SmartContract) Message_0gpiru4_Complete(ctx contractapi.TransactionContextInterface) error {
@@ -493,11 +491,10 @@ func (cc *SmartContract) Message_0gpiru4_Complete(ctx contractapi.TransactionCon
 	cc.ChangeMsgState(ctx, "Message_0gpiru4", DONE)
 	stub.SetEvent("Message_0gpiru4", []byte("Message has been done"))
 
-	cc.ChangeGtwState(ctx, "Gateway_1vhmdy5" ,ENABLE)
+	cc.ChangeGtwState(ctx, "Gateway_1vhmdy5", ENABLE)
 
-
-return nil
-}	//编排任务的最后一个消息
+	return nil
+} //编排任务的最后一个消息
 
 func (cc *SmartContract) Message_1hzruzz_Send(ctx contractapi.TransactionContextInterface, fireflyTranID string) error {
 	stub := ctx.GetStub()
@@ -523,10 +520,9 @@ func (cc *SmartContract) Message_1hzruzz_Send(ctx contractapi.TransactionContext
 	msg.FireflyTranID = fireflyTranID
 	msgJSON, _ := json.Marshal(msg)
 	stub.PutState("Message_1hzruzz", msgJSON)
-		stub.SetEvent("ChoreographyTask_1ut9fws", []byte("Message wait for confirming"))
+	stub.SetEvent("ChoreographyTask_1ut9fws", []byte("Message wait for confirming"))
 
-	
-return nil
+	return nil
 }
 
 func (cc *SmartContract) Message_1hzruzz_Complete(ctx contractapi.TransactionContextInterface) error {
@@ -553,13 +549,12 @@ func (cc *SmartContract) Message_1hzruzz_Complete(ctx contractapi.TransactionCon
 	cc.ChangeMsgState(ctx, "Message_1hzruzz", DONE)
 	stub.SetEvent("Message_1hzruzz", []byte("Message has been done"))
 
-	cc.ChangeGtwState(ctx, "Gateway_1vhmdy5" ,ENABLE)
+	cc.ChangeGtwState(ctx, "Gateway_1vhmdy5", ENABLE)
 
+	return nil
+} //编排任务的最后一个消息
 
-return nil
-}	//编排任务的最后一个消息
-
-func (cc *SmartContract) Gateway_1vhmdy5(ctx contractapi.TransactionContextInterface) error { 
+func (cc *SmartContract) Gateway_1vhmdy5(ctx contractapi.TransactionContextInterface) error {
 	stub := ctx.GetStub()
 	gtw, err := cc.ReadGtw(ctx, "ChoreographyTask_00bnkwc")
 	if err != nil {
@@ -575,14 +570,14 @@ func (cc *SmartContract) Gateway_1vhmdy5(ctx contractapi.TransactionContextInter
 	cc.ChangeGtwState(ctx, "Gateway_1vhmdy5", DONE)
 	stub.SetEvent("Gateway_1vhmdy5", []byte("Gateway has been done"))
 
-	if func() bool { msg, err := cc.ReadMsg(ctx, "Message_0gpiru4"); return err == nil && msg.MsgState == DONE }() && func() bool { msg, err := cc.ReadMsg(ctx, "Message_1hzruzz"); return err == nil && msg.MsgState == DONE }()  { 
-        cc.ChangeEventState(ctx, "Event_0btml5q" ,ENABLE)
+	if func() bool { msg, err := cc.ReadMsg(ctx, "Message_0gpiru4"); return err == nil && msg.MsgState == DONE }() && func() bool { msg, err := cc.ReadMsg(ctx, "Message_1hzruzz"); return err == nil && msg.MsgState == DONE }() {
+		cc.ChangeEventState(ctx, "Event_0btml5q", ENABLE)
 
+	}
+	return nil
 }
-return nil
-} 
 
-func (cc *SmartContract) Event_0btml5q(ctx contractapi.TransactionContextInterface) error { 
+func (cc *SmartContract) Event_0btml5q(ctx contractapi.TransactionContextInterface) error {
 	stub := ctx.GetStub()
 	event, err := cc.ReadEvent(ctx, "Event_0btml5q")
 	if err != nil {
@@ -599,4 +594,3 @@ func (cc *SmartContract) Event_0btml5q(ctx contractapi.TransactionContextInterfa
 	stub.SetEvent("Event_0btml5q", []byte("EndEvent has been done"))
 	return nil
 }
-

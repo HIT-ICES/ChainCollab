@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"strings"
+
+	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
 // SmartContract provides functions for managing an Asset
@@ -25,11 +26,11 @@ const (
 
 type Message struct {
 	MessageID     string       `json:"messageID"`
-	SendMspID     string       `json:"sendMspID"`
-	ReceiveMspID  string       `json:"receiveMspID"`
-	FireflyTranID string       `json:"fireflyTranID"`
-	MsgState      ElementState `json:"msgState"`
-	Format        string       `json:"format"`
+	SendMspID     string       `json:"sendMspID"`     //实例信息 in
+	ReceiveMspID  string       `json:"receiveMspID"`  //实例信息 in
+	FireflyTranID string       `json:"fireflyTranID"` //实例信息 out
+	MsgState      ElementState `json:"msgState"`      //实例信息 inout
+	Format        string       `json:"format"`        //实例信息 in
 }
 
 type Gateway struct {
@@ -40,9 +41,6 @@ type Gateway struct {
 type ActionEvent struct {
 	EventID    string       `json:"eventID"`
 	EventState ElementState `json:"eventState"`
-}
-
-type StateMemory struct { 
 }
 
 func (cc *SmartContract) CreateMessage(ctx contractapi.TransactionContextInterface, messageID string, sendMspID string, receiveMspID string, fireflyTranID string, msgState ElementState, format string) (*Message, error) {
@@ -64,7 +62,7 @@ func (cc *SmartContract) CreateMessage(ctx contractapi.TransactionContextInterfa
 		ReceiveMspID:  receiveMspID,
 		FireflyTranID: fireflyTranID,
 		MsgState:      msgState,
-		Format:      format,
+		Format:        format,
 	}
 
 	// 将消息对象序列化为JSON字符串并保存在状态数据库中
@@ -312,7 +310,7 @@ func (cc *SmartContract) GetAllMessages(ctx contractapi.TransactionContextInterf
 func (cc *SmartContract) GetAllGateways(ctx contractapi.TransactionContextInterface) ([]*Gateway, error) {
 	resultsIterator, err := ctx.GetStub().GetStateByRange("", "")
 	if err != nil {
-		return nil, fmt.Errorf("获取状态数据时出错: %v", err) 
+		return nil, fmt.Errorf("获取状态数据时出错: %v", err)
 	}
 	defer resultsIterator.Close()
 
@@ -370,7 +368,6 @@ func (cc *SmartContract) GetAllActionEvents(ctx contractapi.TransactionContextIn
 	return events, nil
 }
 
-
 // InitLedger adds a base set of elements to the ledger
 
 var isInited bool = false
@@ -392,7 +389,7 @@ func (cc *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface)
 	stub.SetEvent("initContractEvent", []byte("Contract has been initialized successfully"))
 	return nil
 }
-func (cc *SmartContract) Event_0yvuoj9(ctx contractapi.TransactionContextInterface) error { 
+func (cc *SmartContract) Event_0yvuoj9(ctx contractapi.TransactionContextInterface) error {
 	stub := ctx.GetStub()
 	actionEvent, err := cc.ReadEvent(ctx, "Event_0yvuoj9")
 	if err != nil {
@@ -436,10 +433,9 @@ func (cc *SmartContract) Message_0wk0hjx_Send(ctx contractapi.TransactionContext
 	msg.FireflyTranID = fireflyTranID
 	msgJSON, _ := json.Marshal(msg)
 	stub.PutState("Message_0wk0hjx", msgJSON)
-		stub.SetEvent("ChoreographyTask_1t3oouf", []byte("Message wait for confirming"))
+	stub.SetEvent("ChoreographyTask_1t3oouf", []byte("Message wait for confirming"))
 
-	
-return nil
+	return nil
 }
 
 func (cc *SmartContract) Message_0wk0hjx_Complete(ctx contractapi.TransactionContextInterface) error {
@@ -466,13 +462,12 @@ func (cc *SmartContract) Message_0wk0hjx_Complete(ctx contractapi.TransactionCon
 	cc.ChangeMsgState(ctx, "Message_0wk0hjx", DONE)
 	stub.SetEvent("Message_0wk0hjx", []byte("Message has been done"))
 
-	cc.ChangeEventState(ctx, "Event_0zbimwf" ,ENABLE)
+	cc.ChangeEventState(ctx, "Event_0zbimwf", ENABLE)
 
+	return nil
+} //编排任务的最后一个消息
 
-return nil
-}	//编排任务的最后一个消息
-
-func (cc *SmartContract) Event_0zbimwf(ctx contractapi.TransactionContextInterface) error { 
+func (cc *SmartContract) Event_0zbimwf(ctx contractapi.TransactionContextInterface) error {
 	stub := ctx.GetStub()
 	event, err := cc.ReadEvent(ctx, "Event_0zbimwf")
 	if err != nil {
@@ -489,4 +484,3 @@ func (cc *SmartContract) Event_0zbimwf(ctx contractapi.TransactionContextInterfa
 	stub.SetEvent("Event_0zbimwf", []byte("EndEvent has been done"))
 	return nil
 }
-

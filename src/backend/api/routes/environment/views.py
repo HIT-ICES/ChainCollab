@@ -297,7 +297,7 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         env = Environment.objects.get(pk=pk)
         env.status = "STARTED"
         env.save()
-
+        
         return Response(status=status.HTTP_201_CREATED)
 
     @action(methods=["post"], detail=True, url_path="activate")

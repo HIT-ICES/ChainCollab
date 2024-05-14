@@ -139,6 +139,11 @@ class FireflyViewSet(viewsets.ModelViewSet):
                 core_port = core_port.split(":")[2]
                 sandbox_port = data["services"]["sandbox_" + str(index)]["ports"]
                 sandbox_port = int(sandbox_port[0].split(":")[0])
+                fab_connect_port = int(
+                    data["services"]["fabconnect_" + str(index)]["ports"][0].split(":")[
+                        0
+                    ]
+                )
                 firefly = Firefly(
                     resource_set=peer_resource_set,
                     org_name=account_names[index],

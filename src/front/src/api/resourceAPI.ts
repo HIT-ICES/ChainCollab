@@ -18,13 +18,18 @@ export const createResourceSet = async (resourceSet: any) => {
 
 }
 
-export const getResourceSets = async (envId: string, orgId: string = null) => {
-    let params = {
-
+export const getResourceSets = async (envId: string, orgId: string = null, membershipId = null) => {
+    if (envId === "") {
+        return [];
     }
+    let params = {}
 
     if (orgId) {
         params["org_id"] = orgId;
+    }
+
+    if (membershipId) {
+        params["membership_id"] = membershipId;
     }
 
     try {
@@ -41,6 +46,7 @@ export const getResourceSets = async (envId: string, orgId: string = null) => {
                 org_type: item.org_type,
                 orgId: item.org_id,
                 msp: item.msp,
+                environment: item.environment,
             }
         })
     } catch (error) {
