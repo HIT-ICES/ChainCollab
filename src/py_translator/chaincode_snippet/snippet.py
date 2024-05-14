@@ -23,12 +23,16 @@ def package_code():
 def state_read_and_put_code():
     return content["StateReadAndSetFunc"]
 
+
 def globale_variable_read_and_set_code():
     return content["ReadAndSetGloablVariable"]
 
 
 def InitLedger_code(
-    start_event: str, end_event: str, messages: list[dict[str, str]], gateways: list
+    start_event: str,
+    end_events: list[str],
+    messages: list[dict[str, str]],
+    gateways: list,
 ):
     def InitStartEvent(event: str) -> str:
         return content["InitStart"].format(event)
@@ -44,7 +48,8 @@ def InitLedger_code(
 
     return content["InitFuncFrame"].format(
         "\n".join(
-            [InitStartEvent(start_event), InitEndEvent(end_event)]
+            [InitStartEvent(start_event)]
+            + [InitEndEvent(end_event) for end_event in end_events]
             + [
                 InitMessage(
                     message=message["name"],
@@ -266,9 +271,11 @@ def SetGlobalVariable_code(name: str, value: str):
 def ReadState_code(name: str):
     return content["ReadStateFuncFrame"].format(stateName=name)
 
+
 @DeprecationWarning
 def ReadCurrentMemory_code():
     return content["ReadCurrentMemoryCode"]
+
 
 def ReadGlobalMemory_code():
     return content["ReadGlobalVariable"]
