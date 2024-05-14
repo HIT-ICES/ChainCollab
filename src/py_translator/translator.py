@@ -201,9 +201,7 @@ class GoChaincodeTranslator:
         start_event: StartEvent = choreography.query_element_with_type(
             NodeType.START_EVENT
         )[0]
-        end_event: EndEvent = choreography.query_element_with_type(NodeType.END_EVENT)[
-            0
-        ]
+        end_events: EndEvent = choreography.query_element_with_type(NodeType.END_EVENT)
         message_flows: List[MessageFlow] = choreography.query_element_with_type(
             EdgeType.MESSAGE_FLOW
         )
@@ -216,7 +214,7 @@ class GoChaincodeTranslator:
         temp_list.append(
             snippet.InitLedger_code(
                 start_event=start_event.id,
-                end_event=end_event.id,
+                end_events=[end_event.id for end_event in end_events],
                 messages=[
                     {
                         "name": message_flow.message.id,
@@ -604,15 +602,13 @@ class GoChaincodeTranslator:
         chaincode_list.append(snippet.package_code())
         chaincode_list.append(snippet.import_code())
         chaincode_list.append(snippet.contract_definition_code())
-                # global variable definition
+        # global variable definition
         chaincode_list.append(
             snippet.StateMemoryDefinition_code(self._generate_parameters_code())
         )
         chaincode_list.append(snippet.fix_part_code())
         # chaincode_list.append(snippet.state_read_and_put_code())
         chaincode_list.append(snippet.globale_variable_read_and_set_code())
-
-
 
         # generate InitLedger
 
@@ -683,9 +679,8 @@ class GoChaincodeTranslator:
         with open(output_path, "w") as f:
             f.write("\n\n".join(chaincode_list))
 
-    def generate_ffi(self)->str:
+    def generate_ffi(self) -> str:
         pass
-
 
 
 if __name__ == "__main__":
