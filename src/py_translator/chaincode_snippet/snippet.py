@@ -266,6 +266,9 @@ def SetGlobalVariable_code(name: str, value: str):
 def ReadState_code(name: str):
     return content["ReadStateFuncFrame"].format(stateName=name)
 
-
+@DeprecationWarning
 def ReadCurrentMemory_code():
     return content["ReadCurrentMemoryCode"]
+
+def ReadGlobalMemory_code():
+    return content["ReadGlobalVariable"]

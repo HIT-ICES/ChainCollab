@@ -193,7 +193,7 @@ class GoChaincodeTranslator:
                     public_the_name(name), type_change_from_bpmn_to_go(type)
                 )
             )
-        return "\n".join(temp_list)
+        return "\n\t".join(temp_list)
 
     def _generate_InitLedger(self):
         choreography = self._choreography
@@ -219,7 +219,7 @@ class GoChaincodeTranslator:
                 end_event=end_event.id,
                 messages=[
                     {
-                        "name": message_flow.message.name,
+                        "name": message_flow.message.id,
                         "sender": bindings.get(
                             message_flow.source.id, message_flow.source.id
                         ),
@@ -439,7 +439,7 @@ class GoChaincodeTranslator:
             code = snippet.ExclusiveGateway_split_code(
                 gateway=exclusive_gateway.id,
                 change_next_state_code="\n".join(
-                    [snippet.ReadCurrentMemory_code()]
+                    [snippet.ReadGlobalMemory_code()]
                     + list(
                         set(
                             [
@@ -604,14 +604,15 @@ class GoChaincodeTranslator:
         chaincode_list.append(snippet.package_code())
         chaincode_list.append(snippet.import_code())
         chaincode_list.append(snippet.contract_definition_code())
-        chaincode_list.append(snippet.fix_part_code())
-        chaincode_list.append(snippet.state_read_and_put_code())
-        chaincode_list.append(snippet.globale_variable_read_and_set_code())
-
-        # global variable definition
+                # global variable definition
         chaincode_list.append(
             snippet.StateMemoryDefinition_code(self._generate_parameters_code())
         )
+        chaincode_list.append(snippet.fix_part_code())
+        # chaincode_list.append(snippet.state_read_and_put_code())
+        chaincode_list.append(snippet.globale_variable_read_and_set_code())
+
+
 
         # generate InitLedger
 
@@ -681,6 +682,10 @@ class GoChaincodeTranslator:
         # OutPut the chaincode
         with open(output_path, "w") as f:
             f.write("\n\n".join(chaincode_list))
+
+    def generate_ffi(self)->str:
+        pass
+
 
 
 if __name__ == "__main__":
