@@ -190,6 +190,12 @@ class Choreography:
         for element in root:
             self._parse_element(element)
         self._init_element_properties()
+    
+    def load_diagram_from_string(self, xml_string):
+        root = ET.fromstring(xml_string)
+        for element in root:
+            self._parse_element(element)
+        self._init_element_properties()
 
 
 if __name__ == "__main__":

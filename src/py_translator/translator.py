@@ -36,11 +36,25 @@ def public_the_name(name: str) -> str:
 
 
 class GoChaincodeTranslator:
-    def __init__(self):
+    def __init__(self, bpmnContent: str, bpmn_file: str = None):
         self._choreography: Choreography = None
         self._global_variabels: dict = None
         self._judge_parameters: dict = None
         self._hook_codes: dict = None
+        choreography: Choreography = Choreography()
+        if bpmnContent:
+            choreography.load_diagram_from_string(bpmnContent)
+        elif bpmn_file:
+            choreography.load_diagram_from_xml_file(bpmn_file)
+        else:
+            pass
+        # add choreography to self
+        self._choreography = choreography
+        # analyze parameter from properties and sequence flow
+        self._global_parameters, self._judge_parameters = (
+            self._extract_global_parameters()
+        )
+
 
     def _extract_global_parameters(self) -> dict:
         choreography = self._choreography
@@ -195,7 +209,7 @@ class GoChaincodeTranslator:
             )
         return "\n\t".join(temp_list)
 
-    def _generate_InitLedger(self):
+    def _generate_InitLedger(self, bindings: dict[str, str] = {}):
         choreography = self._choreography
         temp_list = []
         start_event: StartEvent = choreography.query_element_with_type(
@@ -267,18 +281,23 @@ class GoChaincodeTranslator:
             case NodeType.END_EVENT:
                 return snippet.CheckEventState_code(element.id, state)
 
-    def _generate_message_record_parameters_code(self, message: Message):
+
+    def _get_message_params (self, message: Message):
         global_parameters = self._global_parameters
         params_to_add = []
         for parameter in global_parameters:
             if message.id in global_parameters[parameter]["definition"]["message_id"]:
-                params_to_add.append((parameter, global_parameters[parameter]))
+                params_to_add.append((parameter, global_parameters[parameter]["definition"]["type"]))
+        return params_to_add
+
+    def _generate_message_record_parameters_code(self, message: Message):
+        params_to_add = self._get_message_params(message)
         # generate parameters code
         more_params_code = ", " + ", ".join(
             [
                 public_the_name(param[0])
                 + " "
-                + type_change_from_bpmn_to_go(param[1]["definition"]["type"])
+                + type_change_from_bpmn_to_go(param[1])
                 for param in params_to_add
             ]
         )
@@ -570,32 +589,22 @@ class GoChaincodeTranslator:
             )
         )
         return temp_list
-
+    
     def generate_chaincode(
         self,
-        bpmn_file_path: str,
         bindings: dict[str, str],
         output_path: str = "resource/chaincode.go",
     ):
         ############
         # Init: Set general state
         ############
-        choreography: Choreography = Choreography()
-        choreography.load_diagram_from_xml_file(bpmn_file_path)
-        # add choreography to self
-        self._choreography = choreography
-        # analyze parameter from properties and sequence flow
-        self._global_parameters, self._judge_parameters = (
-            self._extract_global_parameters()
-        )
         # init Hook
         self._hook_codes = {
             key: {"pre_activate_next": [], "when_triggered": []}
-            for key in [node.id for node in choreography.nodes]
+            for key in [node.id for node in self._choreography.nodes]
         }
 
         chaincode_list = []
-
         ########
         # Generate Part: Add common code to chaincode
         ########
@@ -612,14 +621,14 @@ class GoChaincodeTranslator:
 
         # generate InitLedger
 
-        chaincode_list.extend(self._generate_InitLedger())
+        chaincode_list.extend(self._generate_InitLedger(bindings=bindings))
 
         #########
         # Hook Generate: check structure caused hook code to be inserted into the chaincode, prepare code for real generation
         #########
 
         # find all event based gateways, and set after_all hook to turn off other branches
-        for event_based_gateway in choreography.query_element_with_type(
+        for event_based_gateway in self._choreography.query_element_with_type(
             NodeType.EVENT_BASED_GATEWAY
         ):
             if len(event_based_gateway.outgoings) > 1:
@@ -635,7 +644,7 @@ class GoChaincodeTranslator:
 
         # find all parallel to parrallel gateways, and set pre_activate_next hook to check if other branch finished
 
-        for parallel_gateway in choreography.query_element_with_type(
+        for parallel_gateway in self._choreography.query_element_with_type(
             NodeType.PARALLEL_GATEWAY
         ):
             if len(parallel_gateway.incomings) > 1:
@@ -653,7 +662,7 @@ class GoChaincodeTranslator:
         # Real Generate Code: from start event to end event to create the chaincode for every element
         #####
 
-        for element in choreography.nodes:
+        for element in self._choreography.nodes:
             if element.type == NodeType.CHOREOGRAPHY_TASK:
                 chaincode_list.extend(
                     self._generate_chaincode_for_choreography_task(element)
@@ -678,14 +687,120 @@ class GoChaincodeTranslator:
         # OutPut the chaincode
         with open(output_path, "w") as f:
             f.write("\n\n".join(chaincode_list))
+        return "\n\n".join(chaincode_list)
 
-    def generate_ffi(self) -> str:
-        pass
+    def _fireflytran_ffi_param(self):
+        return ("fireflyTranID", "string")
+
+    def _generate_ffi_item(
+        self,
+        name: str,
+        pathname: str = "",
+        description: str = "",
+        params: list[tuple[str, str]] = None,
+        returns: list[str] = None,
+    ):
+        params = params if params else []
+        returns = returns if returns else []
+        item = {
+            "name": name,
+            "pathname": pathname,
+            "description": description,
+            "params": [
+                {"name": param[0], "schema": {"type": param[1]}} for param in params
+            ],
+            "returns": returns,
+        }
+        return item
+
+    def generate_ffi_items_for_choreography_task(self, choreography_task: ChoreographyTask):
+        items = []
+        next_element = choreography_task.outgoing.target
+        init_message_flow = choreography_task.init_message_flow
+        return_message_flow = choreography_task.return_message_flow
+
+        if not init_message_flow:
+            return items
+
+        if not return_message_flow:
+            params = self._get_message_params(init_message_flow.message)
+            # find parameters
+            items.append(
+                self._generate_ffi_item(
+                    name=init_message_flow.message.id+"_Send",
+                    params=[self._fireflytran_ffi_param(), *params],
+                )
+            )
+            items.append(
+                self._generate_ffi_item(
+                    name=init_message_flow.message.id+"_Complete",
+                    params=[],
+                )
+            )
+            return items
+
+        params = self._get_message_params(init_message_flow.message)
+        items.append(
+            self._generate_ffi_item(
+                name=init_message_flow.message.id+"_Send",
+                params=[self._fireflytran_ffi_param(), *params],
+            )
+        )
+        items.append(
+            self._generate_ffi_item(
+                name=init_message_flow.message.id+"_Complete",
+                params=[],
+            )
+        )
+
+        params = self._get_message_params(return_message_flow.message)
+        items.append(
+            self._generate_ffi_item(
+                name=return_message_flow.message.id+"_Send",
+                params=[self._fireflytran_ffi_param(), *params],
+            )
+        )
+        items.append(
+            self._generate_ffi_item(
+                name=return_message_flow.message.id+"_Complete",
+                params=[],
+            )
+        )
+        return items
+
+
+    def generate_ffi(self)->str:
+        ffi_items = []
+
+        for element in self._choreography.nodes:
+            match element.type:
+                case NodeType.CHOREOGRAPHY_TASK:
+                    ffi_items.extend(
+                        self.generate_ffi_items_for_choreography_task(element)
+                    )
+                case NodeType.EXCLUSIVE_GATEWAY | NodeType.PARALLEL_GATEWAY | NodeType.EVENT_BASED_GATEWAY | NodeType.START_EVENT | NodeType.END_EVENT:
+                    ffi_items.append(
+                        self._generate_ffi_item(
+                            name=element.id,
+                            params=[],
+                        )
+                    )
+
+        with open("chaincode_snippet/ffiframe.json", "r") as f:
+            frame = json.load(f)
+        frame["methods"].extend(ffi_items)
+        with open("resource/ffi.json", "w") as f:
+            json.dump(frame, f)
+        return json.dumps(frame)
+
+    def get_participants(self):
+        return {participant.id: participant.name for participant in self._choreography.query_element_with_type(NodeType.PARTICIPANT)}
 
 
 if __name__ == "__main__":
-    go_chaincode_translator = GoChaincodeTranslator()
+    go_chaincode_translator = GoChaincodeTranslator("resource/bpmn/service provider running time example.bpmn")
     bindings = {}
     go_chaincode_translator.generate_chaincode(
-        "resource/bpmn/service provider running time example.bpmn", bindings=bindings
+        bindings=bindings
     )
+    go_chaincode_translator.generate_ffi()
