@@ -1,4 +1,5 @@
 import api from "./apiConfig";
+import {translatorAPI} from "./apiConfig";
 
 export const getBPMNList = async (consortiumId: string) => {
     try {
@@ -51,7 +52,7 @@ export const addBPMNInstance = async (bpmnId: string, name: string, currentEnvId
 
 export const generateChaincode = async (bpmnContent: string, mapInfo: string) => {
     try {
-        const res = await api.post(`http://localhost:9999/chaincode/generate`, {
+        const res = await translatorAPI.post(`/chaincode/generate`, {
             bpmnContent: bpmnContent,
             participantMspMap: mapInfo
         })
@@ -111,7 +112,7 @@ export const updateBPMNInstanceFireflyUrl = async (bpmnInstanceId: string, bpmnI
 
 export const getParticipantsByContent = async (bpmnContent: string) => {
     try {
-        const response = await api.post(`http://localhost:9999/chaincode/getPartByBpmnC`, {
+        const response = await translatorAPI.post(`/chaincode/getPartByBpmnC`, {
             bpmnContent: bpmnContent
         })
         return response.data;

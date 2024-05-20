@@ -1,21 +1,39 @@
 export WorkDir=$(pwd)
-
 alias clean='cd $WorkDir &&sudo ./clean.sh'
-alias start_dashboard='cd $WorkDir/src/dashboard && npm run start'
-alias start_agent='cd $WorkDir/agent/docker-rest-agent && source venv/bin/activate && gunicorn server:app -c ./gunicorn.conf.py'
+
+
+if [ -z "local" ]; then
+    alias start_front='cd $WorkDir/front && npm run dev-local'
+    alias start_agent='cd $WorkDir/agent/docker-rest-agent && source venv/bin/activate && gunicorn server:app -c ./gunicorn.conf.py:config_local_dev'
+    alias start_trans='cd $WorkDir/py_translator && source venv/bin/activate && uvicorn server:app --reload -c ./config.py:config_local_dev'
+fi
+
+if [ -z "server" ]; then
+    alias start_front='cd $WorkDir/front && npm run dev-server'
+    alias start_agent='cd $WorkDir/agent/docker-rest-agent && source venv/bin/activate && gunicorn server:app -c ./gunicorn.conf.py:config_lab_server'
+    alias start_trans='cd $WorkDir/py_translator && source venv/bin/activate && uvicorn server:app --reload -c ./config.py:config_lab_server'
+fi
+
+# COMMON PART
+
+
 alias start_database='cd $WorkDir/backend && docker-compose up -d'
-alias prepare_api='cd $WorkDir/backend && source venv/bin/activate && python3 manage.py makemigrations && python3 manage.py migrate'
-alias start_api='cd $WorkDir/backend && source venv/bin/activate && python manage.py runserver'
+alias prepare_api='cd $WorkDir/backend && source venv/bin/activate && python3.10 manage.py makemigrations && python3.10 manage.py migrate'
+alias start_api='cd $WorkDir/backend && source venv/bin/activate && python3.10 manage.py runserver'
+alias start_backend='start_database &&sleep 1&& prepare_api && start_api'
 
-alias export_ER='cd $WorkDir/backend && source venv/bin/activate && python manage.py graph_models -a -g -o er.png'
+alias start_oldtrans='cd ~/translator-springboot && mvn spring-boot:run'
 
-alias export_ER_Dot='cd $WorkDir/backend && source venv/bin/activate && python manage.py graph_models -a -o er.dot'
+alias start_chor='cd $WorkDir/chor_js_modify && npm run dev'
 
-alias start_trans='cd ~/translator-springboot && mvn spring-boot:run'
-alias start_chor='cd ~/chor_js_modify && npm run dev'
+
+alias export_ER='cd $WorkDir/backend && source venv/bin/activate && python3.10 manage.py graph_models -a -g -o er.png'
+alias export_ER_Dot='cd $WorkDir/backend && source venv/bin/activate && python3.10 manage.py graph_models -a -o er.dot'
+
+
 
 # start_database then wait for 3 seconds
-alias start_backend='start_database &&sleep 1&& prepare_api && start_api'
+
 
 add_host_mapping() {
     if [ $# -eq 0 ]; then

@@ -1,8 +1,20 @@
 import axios from "axios";
 
+
+const backendUrl = process.env.ENV === "local" ? "http://localhost:8000" : "http://192.168.1.177:8000";
+const translatorUrl = process.env.ENV === "local" ? "http://localhost:9999" : "http://192.168.1.177:9999";
+
+export const translatorAPI = axios.create({
+  baseURL: `${translatorUrl}/api/v1`,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+
 const api = axios.create({
   // baseURL: "https://ae702a09-b9ea-40d0-858c-2f6bb82702d8.mock.pstmn.io/api/v1",
-  baseURL: "http://localhost:8000/api/v1",
+  baseURL: `${backendUrl}/api/v1`,
   headers: {
     "Content-Type": "application/json",
   },
@@ -46,3 +58,5 @@ api.interceptors.response.use((response) => {
 });
 
 export default api;
+
+
