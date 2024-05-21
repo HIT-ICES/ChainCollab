@@ -5,7 +5,7 @@ import json
 import os
 
 args = os.sys.argv  # get the arguments
-file_name = "test.go"
+file_name = "chaincode_snippet/test.go"
 
 
 while True:
@@ -34,7 +34,7 @@ while True:
                         line = line.replace("^", "}")
                     json_string += line
 
-                with open("snippet.json", "r") as f:
+                with open("chaincode_snippet/snippet.json", "r") as f:
                     # judge is json otherwise get an empty json
                     try:
                         content = json.load(f)
@@ -43,17 +43,17 @@ while True:
 
                 content.update({json_key: json_string})
 
-                with open("snippet.json", "w") as f:
+                with open("chaincode_snippet/snippet.json", "w") as f:
                     json.dump(content, f)
         case "Delete":
-            with open("snippet.json", "r") as f:
+            with open("chaincode_snippet/snippet.json", "r") as f:
                 content = json.load(f)
             content.pop(json_key)
-            with open("snippet.json", "w") as f:
+            with open("chaincode_snippet/snippet.json", "w") as f:
                 json.dump(content, f)
             break
         case "Output":
-            with open("snippet.json", "r") as f:
+            with open("chaincode_snippet/snippet.json", "r") as f:
                 content = json.load(f)
             with open(file_name, "w") as f:
                 f.write(content[json_key])

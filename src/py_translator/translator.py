@@ -37,7 +37,7 @@ def public_the_name(name: str) -> str:
 
 class GoChaincodeTranslator:
     def __init__(self, bpmnContent: str, bpmn_file: str = None):
-        self._choreography: Choreography = None
+        self._choreography: Optional[Choreography] = None
         self._global_variabels: dict = None
         self._judge_parameters: dict = None
         self._hook_codes: dict = None
@@ -54,7 +54,6 @@ class GoChaincodeTranslator:
         self._global_parameters, self._judge_parameters = (
             self._extract_global_parameters()
         )
-
 
     def _extract_global_parameters(self) -> dict:
         choreography = self._choreography
@@ -209,7 +208,7 @@ class GoChaincodeTranslator:
             )
         return "\n\t".join(temp_list)
 
-    def _generate_InitLedger(self, bindings: dict[str, str] = {}):
+    def _generate_InitLedger(self, bindings: dict[str, dict] = {}):
         choreography = self._choreography
         temp_list = []
         start_event: StartEvent = choreography.query_element_with_type(
@@ -225,6 +224,36 @@ class GoChaincodeTranslator:
             + choreography.query_element_with_type(NodeType.EVENT_BASED_GATEWAY)
         )
 
+        participants_exist = set(
+            [
+                element.id
+                for element in choreography.query_element_with_type(
+                    NodeType.PARTICIPANT
+                )
+            ]
+        )
+        participants_in_bindings = set(bindings.keys())
+        participant_assigned_in_bindings = participants_exist & participants_in_bindings
+        participant_left_for_init = participants_exist - participants_in_bindings
+        # print(participants_exist)
+        # print(participants_in_bindings)
+        # print(participant_assigned_in_bindings)
+        participant_to_be_added = [
+            {
+                "id": participant,
+                "msp": bindings[participant]["msp"],
+                "attributes": bindings[participant]["attributes"],
+            }
+            for participant in participant_assigned_in_bindings
+        ] + [
+            {
+                "id": participant,
+                "msp": "",
+                "attributes": {},
+            }
+            for participant in participant_left_for_init
+        ]
+
         temp_list.append(
             snippet.InitLedger_code(
                 start_event=start_event.id,
@@ -232,17 +261,14 @@ class GoChaincodeTranslator:
                 messages=[
                     {
                         "name": message_flow.message.id,
-                        "sender": bindings.get(
-                            message_flow.source.id, message_flow.source.id
-                        ),
-                        "receiver": bindings.get(
-                            message_flow.target.id, message_flow.target.id
-                        ),
+                        "sender": message_flow.source.id,
+                        "receiver": message_flow.target.id,
                         "properties": message_flow.message.documentation,
                     }
                     for message_flow in message_flows
                 ],
                 gateways=[gateway.id for gateway in gateways],
+                participants=participant_to_be_added,
             )
         )
         return temp_list
@@ -281,13 +307,14 @@ class GoChaincodeTranslator:
             case NodeType.END_EVENT:
                 return snippet.CheckEventState_code(element.id, state)
 
-
-    def _get_message_params (self, message: Message):
+    def _get_message_params(self, message: Message):
         global_parameters = self._global_parameters
         params_to_add = []
         for parameter in global_parameters:
             if message.id in global_parameters[parameter]["definition"]["message_id"]:
-                params_to_add.append((parameter, global_parameters[parameter]["definition"]["type"]))
+                params_to_add.append(
+                    (parameter, global_parameters[parameter]["definition"]["type"])
+                )
         return params_to_add
 
     def _generate_message_record_parameters_code(self, message: Message):
@@ -295,9 +322,7 @@ class GoChaincodeTranslator:
         # generate parameters code
         more_params_code = ", " + ", ".join(
             [
-                public_the_name(param[0])
-                + " "
-                + type_change_from_bpmn_to_go(param[1])
+                public_the_name(param[0]) + " " + type_change_from_bpmn_to_go(param[1])
                 for param in params_to_add
             ]
         )
@@ -589,10 +614,10 @@ class GoChaincodeTranslator:
             )
         )
         return temp_list
-    
+
     def generate_chaincode(
         self,
-        bindings: dict[str, str],
+        bindings: dict[str, dict],
         output_path: str = "resource/chaincode.go",
     ):
         ############
@@ -713,7 +738,9 @@ class GoChaincodeTranslator:
         }
         return item
 
-    def generate_ffi_items_for_choreography_task(self, choreography_task: ChoreographyTask):
+    def generate_ffi_items_for_choreography_task(
+        self, choreography_task: ChoreographyTask
+    ):
         items = []
         next_element = choreography_task.outgoing.target
         init_message_flow = choreography_task.init_message_flow
@@ -727,13 +754,13 @@ class GoChaincodeTranslator:
             # find parameters
             items.append(
                 self._generate_ffi_item(
-                    name=init_message_flow.message.id+"_Send",
+                    name=init_message_flow.message.id + "_Send",
                     params=[self._fireflytran_ffi_param(), *params],
                 )
             )
             items.append(
                 self._generate_ffi_item(
-                    name=init_message_flow.message.id+"_Complete",
+                    name=init_message_flow.message.id + "_Complete",
                     params=[],
                 )
             )
@@ -742,13 +769,13 @@ class GoChaincodeTranslator:
         params = self._get_message_params(init_message_flow.message)
         items.append(
             self._generate_ffi_item(
-                name=init_message_flow.message.id+"_Send",
+                name=init_message_flow.message.id + "_Send",
                 params=[self._fireflytran_ffi_param(), *params],
             )
         )
         items.append(
             self._generate_ffi_item(
-                name=init_message_flow.message.id+"_Complete",
+                name=init_message_flow.message.id + "_Complete",
                 params=[],
             )
         )
@@ -756,20 +783,19 @@ class GoChaincodeTranslator:
         params = self._get_message_params(return_message_flow.message)
         items.append(
             self._generate_ffi_item(
-                name=return_message_flow.message.id+"_Send",
+                name=return_message_flow.message.id + "_Send",
                 params=[self._fireflytran_ffi_param(), *params],
             )
         )
         items.append(
             self._generate_ffi_item(
-                name=return_message_flow.message.id+"_Complete",
+                name=return_message_flow.message.id + "_Complete",
                 params=[],
             )
         )
         return items
 
-
-    def generate_ffi(self)->str:
+    def generate_ffi(self) -> str:
         ffi_items = []
 
         for element in self._choreography.nodes:
@@ -778,7 +804,13 @@ class GoChaincodeTranslator:
                     ffi_items.extend(
                         self.generate_ffi_items_for_choreography_task(element)
                     )
-                case NodeType.EXCLUSIVE_GATEWAY | NodeType.PARALLEL_GATEWAY | NodeType.EVENT_BASED_GATEWAY | NodeType.START_EVENT | NodeType.END_EVENT:
+                case (
+                    NodeType.EXCLUSIVE_GATEWAY
+                    | NodeType.PARALLEL_GATEWAY
+                    | NodeType.EVENT_BASED_GATEWAY
+                    | NodeType.START_EVENT
+                    | NodeType.END_EVENT
+                ):
                     ffi_items.append(
                         self._generate_ffi_item(
                             name=element.id,
@@ -794,13 +826,23 @@ class GoChaincodeTranslator:
         return json.dumps(frame)
 
     def get_participants(self):
-        return {participant.id: participant.name for participant in self._choreography.query_element_with_type(NodeType.PARTICIPANT)}
+        return {
+            participant.id: participant.name
+            for participant in self._choreography.query_element_with_type(
+                NodeType.PARTICIPANT
+            )
+        }
 
 
 if __name__ == "__main__":
-    go_chaincode_translator = GoChaincodeTranslator("resource/bpmn/service provider running time example.bpmn")
-    bindings = {}
-    go_chaincode_translator.generate_chaincode(
-        bindings=bindings
+    go_chaincode_translator = GoChaincodeTranslator(
+        None, bpmn_file="resource/bpmn/service provider running time example.bpmn"
     )
+    bindings = {
+        "Participant_1gcdqza": {
+            "msp": "",
+            "attributes": {"name": "logres"},
+        }
+    }
+    go_chaincode_translator.generate_chaincode(bindings=bindings)
     go_chaincode_translator.generate_ffi()

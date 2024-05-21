@@ -53,7 +53,7 @@ class PropertyMeta(type):
 class Element(metaclass=PropertyMeta):
     _properties: List[str] = ["id", "name", "type"]
     _object_properties: List[str] = []
-    _type: str = "element"
+    _type: str = "element" # type: ignore
 
     def __init__(self, graph: GraphProtocol, id: str, name: str = ""):
         self._id: str = id

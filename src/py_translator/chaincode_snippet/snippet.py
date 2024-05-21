@@ -33,6 +33,7 @@ def InitLedger_code(
     end_events: list[str],
     messages: list[dict[str, str]],
     gateways: list,
+    participants: list[dict[str, str]],
 ):
     def InitStartEvent(event: str) -> str:
         return content["InitStart"].format(event)
@@ -46,9 +47,24 @@ def InitLedger_code(
     def InitGateway(gateway: str) -> str:
         return content["InitGateway"].format(gateway)
 
+    def InitParticipant(participant: str, msp: str, attributes: dict[str, str]) -> str:
+        """cc.CreateParticipant(ctx, "Participant_1gcdqza", "Org1MSP", map[string]string{"role": "customer"})"""
+        attributes_str = ", ".join(
+            [f'"{key}": "{value}"' for key, value in attributes.items()]
+        )
+        return content["InitParticipant"].format(
+            participant_id=participant, participant_msp=msp, participant_attrs=attributes_str
+        )
+
     return content["InitFuncFrame"].format(
         "\n".join(
-            [InitStartEvent(start_event)]
+            [
+                InitParticipant(
+                    participant["id"], participant["msp"], participant["attributes"]
+                )
+                for participant in participants
+            ]
+            + [InitStartEvent(start_event)]
             + [InitEndEvent(end_event) for end_event in end_events]
             + [
                 InitMessage(
