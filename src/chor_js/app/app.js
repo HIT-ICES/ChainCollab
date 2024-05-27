@@ -16,6 +16,7 @@ import PropertiesPanelModule from 'bpmn-js-properties-panel';
 
 import Reporter from './lib/validator/Validator.js';
 import PropertiesProviderModule from './lib/properties-provider';
+import TestPaletteProvider from './lib/external-elements'
 
 import xml from './diagrams/pizzaDelivery.bpmn';
 import blankXml from './diagrams/newDiagram.bpmn';
@@ -39,7 +40,8 @@ const modeler = new ChoreoModeler({
   // or NavigatedViewer modules of chor-js
   additionalModules: [
     PropertiesPanelModule,
-    PropertiesProviderModule
+    PropertiesProviderModule,
+    TestPaletteProvider
   ],
   keyboard: {
     bindTo: document
