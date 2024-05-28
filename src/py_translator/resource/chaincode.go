@@ -13,7 +13,7 @@ type SmartContract struct {
 	contractapi.Contract
 }
 
-type StateMemory struct {
+type StateMemory struct { // 你好
 	Is_available           bool `json:"Is_available"`
 	Invoice                bool `json:"Invoice"`
 	Need_external_provider bool `json:"Need_external_provider"`
@@ -319,33 +319,33 @@ func (c *SmartContract) ChangeEventState(ctx contractapi.TransactionContextInter
 
 //get all message
 
-func (cc *SmartContract) GetAllMessages(ctx contractapi.TransactionContextInterface) ([]*Message, error) {
-	resultsIterator, err := ctx.GetStub().GetStateByRange("", "")
-	if err != nil {
-		return nil, fmt.Errorf("获取状态数据时出错: %v", err) //直接err也行
-	}
-	defer resultsIterator.Close()
+// func (cc *SmartContract) GetAllMessages(ctx contractapi.TransactionContextInterface) ([]*Message, error) {
+// 	resultsIterator, err := ctx.GetStub().GetStateByRange("", "")
+// 	if err != nil {
+// 		return nil, fmt.Errorf("获取状态数据时出错: %v", err) //直接err也行
+// 	}
+// 	defer resultsIterator.Close()
 
-	var messages []*Message
-	for resultsIterator.HasNext() {
-		queryResponse, err := resultsIterator.Next()
-		if err != nil {
-			return nil, fmt.Errorf("迭代状态数据时出错: %v", err)
-		}
+// 	var messages []*Message
+// 	for resultsIterator.HasNext() {
+// 		queryResponse, err := resultsIterator.Next()
+// 		if err != nil {
+// 			return nil, fmt.Errorf("迭代状态数据时出错: %v", err)
+// 		}
 
-		var message Message
-		err = json.Unmarshal(queryResponse.Value, &message)
-		if strings.HasPrefix(message.MessageID, "Message") {
-			if err != nil {
-				return nil, fmt.Errorf("反序列化消息数据时出错: %v", err)
-			}
+// 		var message Message
+// 		err = json.Unmarshal(queryResponse.Value, &message)
+// 		if strings.HasPrefix(message.MessageID, "Message") {
+// 			if err != nil {
+// 				return nil, fmt.Errorf("反序列化消息数据时出错: %v", err)
+// 			}
 
-			messages = append(messages, &message)
-		}
-	}
+// 			messages = append(messages, &message)
+// 		}
+// 	}
 
-	return messages, nil
-}
+// 	return messages, nil
+// }
 
 func (cc *SmartContract) GetAllGateways(ctx contractapi.TransactionContextInterface) ([]*Gateway, error) {
 	resultsIterator, err := ctx.GetStub().GetStateByRange("", "")

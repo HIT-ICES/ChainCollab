@@ -38,9 +38,9 @@ def public_the_name(name: str) -> str:
 class GoChaincodeTranslator:
     def __init__(self, bpmnContent: str, bpmn_file: str = None):
         self._choreography: Optional[Choreography] = None
-        self._global_variabels: dict = None
-        self._judge_parameters: dict = None
-        self._hook_codes: dict = None
+        self._global_variabels: Optional[dict] = None
+        self._judge_parameters: Optional[dict] = None
+        self._hook_codes: Optional[dict] = None
         choreography: Choreography = Choreography()
         if bpmnContent:
             choreography.load_diagram_from_string(bpmnContent)
