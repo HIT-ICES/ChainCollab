@@ -18,7 +18,7 @@ while True:
         """
     )
     action = command.split(" ")[0]
-    json_key = command.split(" ")[1]
+    json_key = command.split(" ")[1] if len(command.split(" ")) > 1 else None
     other_params = command.split(" ")[2] if len(command.split(" ")) > 2 else None
 
     match action:
@@ -53,6 +53,13 @@ while True:
                 json.dump(content, f)
             break
         case "Output":
+            if json_key is None:
+                # list all the keys and let user choose
+                with open("chaincode_snippet/snippet.json", "r") as f:
+                    content = json.load(f)
+                print(content.keys())
+                # move cursor to choose
+                json_key = input("Please choose a json key: ")
             with open("chaincode_snippet/snippet.json", "r") as f:
                 content = json.load(f)
             with open(file_name, "w") as f:

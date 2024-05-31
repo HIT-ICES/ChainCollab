@@ -642,11 +642,11 @@ class GoChaincodeTranslator:
         )
         chaincode_list.append(snippet.fix_part_code())
         # chaincode_list.append(snippet.state_read_and_put_code())
-        chaincode_list.append(snippet.globale_variable_read_and_set_code())
+        # chaincode_list.append(snippet.globale_variable_read_and_set_code())
 
         # generate InitLedger
 
-        chaincode_list.extend(self._generate_InitLedger(bindings=bindings))
+        # chaincode_list.extend(self._generate_InitLedger(bindings=bindings))
 
         #########
         # Hook Generate: check structure caused hook code to be inserted into the chaincode, prepare code for real generation
