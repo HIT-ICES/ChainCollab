@@ -16,6 +16,11 @@ const (
 	COMPLETED
 )
 
+type Participant struct {
+	MSP        string            `json:"msp"`
+	Attributes map[string]string `json:"attributes"`
+}
+
 type Message struct {
 	MessageID     string       `json:"messageID"`
 	SendMspID     string       `json:"sendMspID"`
@@ -33,6 +38,37 @@ type Gateway struct {
 type ActionEvent struct {
 	EventID    string       `json:"eventID"`
 	EventState ElementState `json:"eventState"`
+}
+
+func (cc *SmartContract) CreateParticipant(ctx contractapi.TransactionContextInterface, instanceID string, participantID string, msp string, attributes map[string]string) (*Participant, error) {
+	stub := ctx.GetStub()
+
+	// 检查是否存在具有相同ID的记录
+	existingData, err := stub.GetState(participantID)
+	if err != nil {
+		return nil, fmt.Errorf("获取状态数据时出错: %v", err)
+	}
+	if existingData != nil {
+		return nil, fmt.Errorf("参与者 %s 已存在", participantID)
+	}
+
+	// 创建参与者对象
+	participant := &Participant{
+		MSP:        msp,
+		Attributes: attributes,
+	}
+
+	// 将参与者对象序列化为JSON字符串并保存在状态数据库中
+	participantJSON, err := json.Marshal(participant)
+	if err != nil {
+		return nil, fmt.Errorf("序列化参与者数据时出错: %v", err)
+	}
+	err = stub.PutState(participantID, participantJSON)
+	if err != nil {
+		return nil, fmt.Errorf("保存参与者数据时出错: %v", err)
+	}
+
+	return participant, nil
 }
 
 func (cc *SmartContract) CreateMessage(ctx contractapi.TransactionContextInterface, instanceID string, messageID string, sendMspID string, receiveMspID string, fireflyTranID string, msgState ElementState, format string) (*Message, error) {
@@ -537,6 +573,75 @@ func (cc *SmartContract) SetGlobalVariable(ctx contractapi.TransactionContextInt
 
 	return nil
 
+}
+
+func (cc *SmartContract) ReadParticipant(ctx contractapi.TransactionContextInterface, participantID string) (*Participant, error) {
+	participantJSON, err := ctx.GetStub().GetState(participantID)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+
+	if participantJSON == nil {
+		errorMessage := fmt.Sprintf("Participant %s does not exist", participantID)
+		fmt.Println(errorMessage)
+		return nil, errors.New(errorMessage)
+	}
+
+	var participant Participant
+	err = json.Unmarshal(participantJSON, &participant)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+
+	return &participant, nil
+}
+
+func (cc *SmartContract) check_msp(ctx contractapi.TransactionContextInterface, target_participant string) bool {
+	// Read the target participant's msp
+	targetParticipant, err := cc.ReadParticipant(ctx, target_participant)
+	if err != nil {
+		return false
+	}
+	mspID, err := ctx.GetClientIdentity().GetMSPID()
+	if err != nil {
+		return false
+	}
+	return mspID == targetParticipant.MSP
+}
+
+func (cc *SmartContract) check_attribute(ctx contractapi.TransactionContextInterface, target_participant string, attributeName string) bool {
+	targetParticipant, err := cc.ReadParticipant(ctx, target_participant)
+	if err != nil {
+		return false
+	}
+	if ctx.GetClientIdentity().AssertAttributeValue(attributeName, targetParticipant.Attributes[attributeName]) != nil {
+		return false
+	}
+
+	return true
+}
+
+func (cc *SmartContract) check_participant(ctx contractapi.TransactionContextInterface, target_participant string) bool {
+	// Read the target participant's msp
+	targetParticipant, err := cc.ReadParticipant(ctx, target_participant)
+	if err != nil {
+		return false
+	}
+	// check MSP if msp!=''
+	if targetParticipant.MSP != "" && cc.check_msp(ctx, target_participant) == false {
+		return false
+	}
+
+	// check all attributes
+	for key, _ := range targetParticipant.Attributes {
+		if cc.check_attribute(ctx, target_participant, key) == false {
+			return false
+		}
+	}
+
+	return true
 }
 
 func (cc *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {

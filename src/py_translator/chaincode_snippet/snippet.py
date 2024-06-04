@@ -28,39 +28,50 @@ def globale_variable_read_and_set_code():
     return content["ReadAndSetGloablVariable"]
 
 
-def InitLedger_code(
+def CreateInstance_code(
     start_event: str,
     end_events: list[str],
     messages: list[dict[str, str]],
     gateways: list,
-    participants: list[dict[str, str]],
+    participants: list,
 ):
     def InitStartEvent(event: str) -> str:
-        return content["InitStart"].format(event)
+        return content["InitStartFrame"].format(start_event=event)
 
     def InitEndEvent(event: str) -> str:
-        return content["InitEnd"].format(event)
+        return content["InitEndFrame"].format(end_event=event)
 
     def InitMessage(message: str, sender: str, receiver: str, properties) -> str:
-        return content["InitMessage"].format(message, sender, receiver, properties)
+        return content["InitMessageFrame"].format(
+            message=message, sender=sender, receiver=receiver, format=properties
+        )
 
     def InitGateway(gateway: str) -> str:
-        return content["InitGateway"].format(gateway)
+        return content["InitGatewayFrame"].format(gateway=gateway)
 
-    def InitParticipant(participant: str, msp: str, attributes: dict[str, str]) -> str:
-        """cc.CreateParticipant(ctx, "Participant_1gcdqza", "Org1MSP", map[string]string{"role": "customer"})"""
-        attributes_str = ", ".join(
-            [f'"{key}": "{value}"' for key, value in attributes.items()]
-        )
-        return content["InitParticipant"].format(
-            participant_id=participant, participant_msp=msp, participant_attrs=attributes_str
+    def InitParticipant(
+        participant: str,
+        is_multi: bool,
+        multi_maximum: int,
+        multi_minimum: int,
+    ) -> str:
+        """cc.CreateParticipant(ctx, "Participant_1gcdqza", "Org1MSP", map[string]string{"role": "customer"}, is_multi, multi_maximum, multi_minimum)"""
+
+        return content["InitParticipantFrame"].format(
+            participant_id=participant,
+            is_multi=is_multi,
+            multi_maximum=multi_maximum,
+            multi_minimum=multi_minimum,
         )
 
-    return content["InitFuncFrame"].format(
-        "\n".join(
+    return content["CreateInstanceFuncFrame"].format(
+        create_elements_code="\n".join(
             [
                 InitParticipant(
-                    participant["id"], participant["msp"], participant["attributes"]
+                    participant["id"],
+                    participant["is_multi"],
+                    participant["multi_maximum"],
+                    participant["multi_minimum"],
                 )
                 for participant in participants
             ]
@@ -81,15 +92,15 @@ def InitLedger_code(
 
 
 def ChangeEventState_code(event, state: str):
-    return content["ChangeEventState"].format(event=event, state=state)
+    return content["ChangeEventStateFrame"].format(event=event, state=state)
 
 
 def ChangeMsgState_code(msg, state: str):
-    return content["ChangeMsgState"].format(message=msg, state=state)
+    return content["ChangeMsgStateFrame"].format(message=msg, state=state)
 
 
 def ChangeGtwState_code(gtw, state: str):
-    return content["ChangeGtwState"].format(gateway=gtw, state=state)
+    return content["ChangeGtwStateFrame"].format(gateway=gtw, state=state)
 
 
 def StartEvent_code(
@@ -256,7 +267,7 @@ def CombineConditions_All_False_code(conditions: list[str]):
 
 
 def ConditionToDo_code(condition: str, todo: str):
-    return content["ConditionToDo"].format(condition=condition, todo=todo)
+    return content["ConditionToDoFrame"].format(condition=condition, todo=todo)
 
 
 def ConditionToHalt_code(condition: str):
@@ -267,7 +278,7 @@ def ConditionToHalt_code(condition: str):
 
 
 def StateMemoryDefinition_code(fields: str):
-    return content["StateMemoryDefinitionFrame"].format(fields)
+    return content["StateMemoryDefinitionFrame"].format(fields=fields)
 
 
 def StateMemoryParameterDefinition_code(name: str, type: str):
@@ -295,3 +306,17 @@ def ReadCurrentMemory_code():
 
 def ReadGlobalMemory_code():
     return content["ReadGlobalVariable"]
+
+
+def InitParametersTypeDefFrame_code(fields: str):
+    return content["InitParametersTypeDefFrame"].format(fields=fields)
+
+
+def InitParametersDefinition_code(name: str, type: str):
+    return '{name} {type} `json:"{name}"`'.format(name=name, type=type)
+
+def RegisterFunc_code():
+    return content["RegisterFunc"]
+
+def CheckRegisterFunc_code():
+    return content["CheckRegisterFunc"]

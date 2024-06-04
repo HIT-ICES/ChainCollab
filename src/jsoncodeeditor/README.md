@@ -1,0 +1,3 @@
+# jsoncodeeditor README
+
+**Enjoy!**

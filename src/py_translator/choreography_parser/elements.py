@@ -53,7 +53,7 @@ class PropertyMeta(type):
 class Element(metaclass=PropertyMeta):
     _properties: List[str] = ["id", "name", "type"]
     _object_properties: List[str] = []
-    _type: str = "element" # type: ignore
+    _type: str = "element"  # type: ignore
 
     def __init__(self, graph: GraphProtocol, id: str, name: str = ""):
         self._id: str = id
@@ -98,11 +98,21 @@ def initObjectProperties(id: str) -> dict:
 
 class Participant(Element):
     _type: NodeType = NodeType.PARTICIPANT
-    _properties: List[str] = ["id", "name", "type"]
+    _properties: List[str] = [
+        "id",
+        "name",
+        "type",
+        "is_multi",
+        "multi_minimum",
+        "multi_maximum",
+    ]
     _object_properties: List[str] = []
 
-    def __init__(self, graph, id: str, name: str = ""):
+    def __init__(self, graph, id: str, name: str = "", is_multi: bool = False,  multi_minimum: int = 0, multi_maximum: int = 0):
         super().__init__(graph, id, name)
+        self._is_multi: bool = is_multi
+        self._multi_minimum: int = multi_minimum
+        self._multi_maximum: int = multi_maximum
 
 
 class Message(Element):

@@ -1,0 +1,101 @@
+{
+  "name": "jsoncodeeditor",
+  "displayName": "JsonCodeEditor",
+  "description": "nothing",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.89.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "JsonCodeEditorContainer",
+          "title": "JsonCodeEditorContainer",
+          "icon": "assets/json.svg"
+        }
+      ]
+    },
+    "views": {
+      "JsonCodeEditorContainer": [
+        {
+          "id": "JsonCodeEditor",
+          "name": "JsonCodeEditor"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "title": "TreeView",
+        "command": "extension.TreeView"
+      },
+      {
+        "title": "deleteKey",
+        "command": "extension.deleteKey"
+      },
+      {
+        "title": "addKey",
+        "command": "extension.addKey"
+      },
+      {
+        "title": "editKey",
+        "command": "extension.editKey"
+      }
+    ],
+    "menus":{
+      "view/item/context": [
+        {
+          "command": "extension.deleteKey",
+          "when": "view == JsonCodeEditor",
+          "group": "inline"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "extension.addKey",
+          "when": "view == JsonCodeEditor",
+          "group": "inline",
+          "parameters": [
+            {
+              "key": "key",
+              "value": "value"
+            }
+          ]
+        }
+      ]
+    },
+    "languages": [
+      {
+        "id": "jsonc",
+        "aliases": [
+          "JSONC",
+          "jsonc"
+        ],
+        "extensions": [
+          ".json",
+          ".jsonc"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ]
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.89.0",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "18.x",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.5",
+    "@vscode/test-cli": "^0.0.9",
+    "@vscode/test-electron": "^2.3.9"
+  }
+}

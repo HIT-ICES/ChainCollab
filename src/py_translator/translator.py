@@ -35,6 +35,10 @@ def public_the_name(name: str) -> str:
     return name.capitalize()
 
 
+def bool_handle(origin: bool) -> str:
+    return "true" if origin else "false"
+
+
 class GoChaincodeTranslator:
     def __init__(self, bpmnContent: str, bpmn_file: str = None):
         self._choreography: Optional[Choreography] = None
@@ -54,6 +58,7 @@ class GoChaincodeTranslator:
         self._global_parameters, self._judge_parameters = (
             self._extract_global_parameters()
         )
+        self._instance_initparameters = self._extract_instance_initparameters()
 
     def _extract_global_parameters(self) -> dict:
         choreography = self._choreography
@@ -195,7 +200,7 @@ class GoChaincodeTranslator:
         global_parameters = self._global_parameters
         temp_list = []
         for name, prop in global_parameters.items():
-            type = prop["definition"]["type"]
+            _type = prop["definition"]["type"]
             # type may need to be converted to golang type
             # boolean -> bool
             # integer -> int
@@ -203,12 +208,41 @@ class GoChaincodeTranslator:
             # float -> float64
             temp_list.append(
                 snippet.StateMemoryParameterDefinition_code(
-                    public_the_name(name), type_change_from_bpmn_to_go(type)
+                    public_the_name(name), type_change_from_bpmn_to_go(_type)
                 )
             )
         return "\n\t".join(temp_list)
 
-    def _generate_InitLedger(self, bindings: dict[str, dict] = {}):
+    def _extract_instance_initparameters(self) -> dict:
+        # How to extract instance parameters?
+        # Get all participant elements
+        instance_initparameters = {}
+        participants = self._choreography.query_element_with_type(NodeType.PARTICIPANT)
+        instance_initparameters["Participant"] = {}
+        for participant in participants:
+            instance_initparameters["Participant"][participant.id] = {
+                "is_multi": participant.is_multi,
+                "multi_minimum": participant.multi_minimum,
+                "multi_maximum": participant.multi_maximum,
+            }
+        # DMN ELEMENTS: TODO
+
+        return instance_initparameters
+
+    def _generate_instance_initparameters_code(self) -> str:
+        instance_initparameters = self._instance_initparameters
+        temp_list = []
+        # add Participant
+        for name, prop in instance_initparameters["Participant"].items():
+            temp_list.append(
+                snippet.StateMemoryParameterDefinition_code(
+                    public_the_name(name), "Participant"
+                )
+            )
+        # DMN ELEMENTS: TODO
+        return "\n\t".join(temp_list)
+
+    def _generate_create_instance_code(self):
         choreography = self._choreography
         temp_list = []
         start_event: StartEvent = choreography.query_element_with_type(
@@ -224,38 +258,30 @@ class GoChaincodeTranslator:
             + choreography.query_element_with_type(NodeType.EVENT_BASED_GATEWAY)
         )
 
-        participants_exist = set(
-            [
-                element.id
-                for element in choreography.query_element_with_type(
-                    NodeType.PARTICIPANT
-                )
-            ]
-        )
-        participants_in_bindings = set(bindings.keys())
-        participant_assigned_in_bindings = participants_exist & participants_in_bindings
-        participant_left_for_init = participants_exist - participants_in_bindings
-        # print(participants_exist)
-        # print(participants_in_bindings)
-        # print(participant_assigned_in_bindings)
+        participants_exist = [
+            element.id
+            for element in choreography.query_element_with_type(NodeType.PARTICIPANT)
+        ]
+
         participant_to_be_added = [
             {
                 "id": participant,
-                "msp": bindings[participant]["msp"],
-                "attributes": bindings[participant]["attributes"],
+                "is_multi": bool_handle(
+                    self._instance_initparameters["Participant"][participant][
+                        "is_multi"
+                    ]
+                ),
+                "multi_maximum": self._instance_initparameters["Participant"][
+                    participant
+                ]["multi_maximum"],
+                "multi_minimum": self._instance_initparameters["Participant"][
+                    participant
+                ]["multi_minimum"],
             }
-            for participant in participant_assigned_in_bindings
-        ] + [
-            {
-                "id": participant,
-                "msp": "",
-                "attributes": {},
-            }
-            for participant in participant_left_for_init
+            for participant in participants_exist
         ]
-
         temp_list.append(
-            snippet.InitLedger_code(
+            snippet.CreateInstance_code(
                 start_event=start_event.id,
                 end_events=[end_event.id for end_event in end_events],
                 messages=[
@@ -271,6 +297,7 @@ class GoChaincodeTranslator:
                 participants=participant_to_be_added,
             )
         )
+
         return temp_list
 
     def _generate_change_state_code(
@@ -317,14 +344,23 @@ class GoChaincodeTranslator:
                 )
         return params_to_add
 
-    def _generate_message_record_parameters_code(self, message: Message):
+    def _generate_message_record_parameters_code(
+        self, message: Message
+    ) -> Tuple[str, str]:
         params_to_add = self._get_message_params(message)
         # generate parameters code
-        more_params_code = ", " + ", ".join(
-            [
-                public_the_name(param[0]) + " " + type_change_from_bpmn_to_go(param[1])
-                for param in params_to_add
-            ]
+        more_params_code = (
+            ", "
+            + ", ".join(
+                [
+                    public_the_name(param[0])
+                    + " "
+                    + type_change_from_bpmn_to_go(param[1])
+                    for param in params_to_add
+                ]
+            )
+            if params_to_add
+            else ""
         )
         # generate put state code
         put_more_params_code = "\n".join(
@@ -617,7 +653,6 @@ class GoChaincodeTranslator:
 
     def generate_chaincode(
         self,
-        bindings: dict[str, dict],
         output_path: str = "resource/chaincode.go",
     ):
         ############
@@ -640,13 +675,18 @@ class GoChaincodeTranslator:
         chaincode_list.append(
             snippet.StateMemoryDefinition_code(self._generate_parameters_code())
         )
+        chaincode_list.append(
+            snippet.InitParametersTypeDefFrame_code(
+                self._generate_instance_initparameters_code()
+            )
+        )
         chaincode_list.append(snippet.fix_part_code())
-        # chaincode_list.append(snippet.state_read_and_put_code())
-        # chaincode_list.append(snippet.globale_variable_read_and_set_code())
+        chaincode_list.append(snippet.CheckRegisterFunc_code())
+        chaincode_list.append(snippet.RegisterFunc_code())
 
         # generate InitLedger
 
-        # chaincode_list.extend(self._generate_InitLedger(bindings=bindings))
+        chaincode_list.extend(self._generate_create_instance_code())
 
         #########
         # Hook Generate: check structure caused hook code to be inserted into the chaincode, prepare code for real generation
@@ -710,6 +750,7 @@ class GoChaincodeTranslator:
                 chaincode_list.extend(self._generate_chaincode_for_end_event(element))
 
         # OutPut the chaincode
+
         with open(output_path, "w") as f:
             f.write("\n\n".join(chaincode_list))
         return "\n\n".join(chaincode_list)
@@ -838,11 +879,5 @@ if __name__ == "__main__":
     go_chaincode_translator = GoChaincodeTranslator(
         None, bpmn_file="resource/bpmn/service provider running time example.bpmn"
     )
-    bindings = {
-        "Participant_1gcdqza": {
-            "msp": "",
-            "attributes": {"name": "logres"},
-        }
-    }
-    go_chaincode_translator.generate_chaincode(bindings=bindings)
+    go_chaincode_translator.generate_chaincode()
     go_chaincode_translator.generate_ffi()

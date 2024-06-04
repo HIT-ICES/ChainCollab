@@ -40,13 +40,35 @@ class Choreography:
             element for element in self.edges if element.type == element_type
         ]
 
-    def _parse_node(self, element):
+    def _parse_node(self, element: ET.Element):
         bpmn2prefix = "{http://www.omg.org/spec/BPMN/20100524/MODEL}"
         split_tag = element.tag.split("}")[1]
         match split_tag:
             case NodeType.PARTICIPANT.value:
+                participant_multiplicity = element.findall(
+                    f"./{bpmn2prefix}participantMultiplicity"
+                )
+
+                is_multi = False
+                multi_maximum = 0
+                multi_minimum = 0
+
+                if participant_multiplicity:
+                    is_multi = True
+                    multi_maximum = int(
+                        participant_multiplicity[0].attrib.get("maximum", 0)
+                    )
+                    multi_minimum = int(
+                        participant_multiplicity[0].attrib.get("minimum", 0)
+                    )
+
                 return Participant(
-                    self, element.attrib["id"], element.attrib.get("name", "")
+                    self,
+                    element.attrib["id"],
+                    element.attrib.get("name", ""),
+                    is_multi,
+                    multi_minimum,
+                    multi_maximum,
                 )
             case NodeType.MESSAGE.value:
                 documentation_list = element.findall(f"./{bpmn2prefix}documentation")
@@ -190,7 +212,7 @@ class Choreography:
         for element in root:
             self._parse_element(element)
         self._init_element_properties()
-    
+
     def load_diagram_from_string(self, xml_string):
         root = ET.fromstring(xml_string)
         for element in root:
