@@ -3,7 +3,7 @@ func (cc *SmartContract) RegisterParticipant(ctx contractapi.TransactionContextI
 		// check if the participant is single
 		var targetParticipant Participant
 		participant, _ := cc.ReadParticipant(ctx, instanceID, targetParticipantID)
-		if !participant.IsMulti {
+		if participant.IsMulti {
 			{
 				return fmt.Errorf("The participant is not multi")
 			}
