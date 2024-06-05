@@ -9,6 +9,12 @@ func (cc *SmartContract) RegisterParticipant(ctx contractapi.TransactionContextI
 			}
 		}
 
+		// check ACL
+
+		if !cc.check_participant(ctx, instanceID, targetParticipantID) {
+			return fmt.Errorf("The participant is not allowed to be registered")
+		}
+
 		// Read the identity of invoker ,and binding it's identity to the participant
 
 		// Get the identity of the invoker

@@ -2,21 +2,30 @@ package main
 
 import "fmt"
 
-type A struct {
+type Person struct {
 	Name string
-}
-
-type B struct {
-	Age int
+	Age  int
 }
 
 func main() {
-	a := &A{Name: "Alice"}
-	pA := interface{}(a)
-	b, ok := pA.(*B)
-	if !ok {
-		fmt.Println("类型转换失败")
-		return
-	}
-	fmt.Println(b)
+	var i interface{} = Person{"Alice", 30}
+
+	// 类型断言为 Person 类型的值
+	p := i.(Person)
+
+	// 修改原始值
+	p.Name = "Bob"
+
+	// 查看原始值是否发生改变
+	fmt.Println(i.(Person).Name) // 输出 Alice
+
+	i = &Person{"Alice", 30}
+	// 类型断言为 Person 类型的指针
+	pPointer := i.(*Person)
+
+	// 通过指针修改原始值
+	pPointer.Name = "Charlie"
+
+	// 查看原始值是否发生改变
+	fmt.Println(i.(*Person).Name) // 输出 Charlie
 }
