@@ -778,7 +778,7 @@ func (cc *SmartContract) check_participant(ctx contractapi.TransactionContextInt
 		return false
 	}
 
-	if targetParticipant.IsMulti {
+	if !targetParticipant.IsMulti {
 		// check X509 = MSPID + @ + ID
 		mspID, _ := ctx.GetClientIdentity().GetMSPID()
 		pid, _ := ctx.GetClientIdentity().GetID()
@@ -848,7 +848,7 @@ func (cc *SmartContract) CheckRegister(ctx contractapi.TransactionContextInterfa
 	// set State depend on Participant with IsMulti=true
 
 	for element, value := range instance.InstanceElements {
-		participant, ok := value.(Participant)
+		participant, ok := value.(*Participant)
 		if ok {
 			if !participant.IsMulti && participant.X509 == "" {
 				return false, fmt.Errorf("The participant %s is not registered.", element)
@@ -876,10 +876,16 @@ func (cc *SmartContract) RegisterParticipant(ctx contractapi.TransactionContextI
 		// check if the participant is single
 		var targetParticipant Participant
 		participant, _ := cc.ReadParticipant(ctx, instanceID, targetParticipantID)
-		if !participant.IsMulti {
+		if participant.IsMulti {
 			{
 				return fmt.Errorf("The participant is not multi")
 			}
+		}
+
+		// check ACL
+
+		if !cc.check_participant(ctx, instanceID, targetParticipantID) {
+			return fmt.Errorf("The participant is not allowed to be registered")
 		}
 
 		// Read the identity of invoker ,and binding it's identity to the participant
