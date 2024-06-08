@@ -19,6 +19,8 @@ echo "Remove opt/cello"
 rm -rf ./backend/opt/cello/*
 
 # Remove opt/chaincode
+echo "Remove opt/chaincode"
+rm -rf ./backend/opt/chaincode/*
 
 # Remove pgdata
 

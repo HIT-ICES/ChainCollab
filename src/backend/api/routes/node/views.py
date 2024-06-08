@@ -356,6 +356,7 @@ class NodeViewSet(viewsets.ViewSet):
                         ok(response.validated_data), status=status.HTTP_201_CREATED
                     )
         except (ResourceExists, NoResource) as e:
+            traceback.print_exc()
             raise e
         except Exception as e:
             traceback.print_exc()

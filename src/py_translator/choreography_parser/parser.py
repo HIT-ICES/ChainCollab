@@ -17,6 +17,7 @@ from .elements import (
     MessageFlow,
     SequenceFlow,
     TerminalType,
+    BusinessRuleTask,
 )
 
 from typing import List, Optional, Tuple, Any, Protocol
@@ -153,6 +154,14 @@ class Choreography:
                         element.text
                         for element in element.findall(f"./{bpmn2prefix}outgoing")
                     ],
+                )
+            case NodeType.BUSINESS_RULE_TASK.value:
+                return BusinessRuleTask(
+                    self,
+                    element.attrib["id"],
+                    element.attrib.get("name", ""),
+                    incoming=element.findall(f"./{bpmn2prefix}incoming")[0].text,
+                    outgoing=element.findall(f"./{bpmn2prefix}outgoing")[0].text,
                 )
 
     def _parse_edge(self, element):

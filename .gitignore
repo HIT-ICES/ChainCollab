@@ -81,7 +81,7 @@ celerybeat-schedule
 .env
 
 # virtualenv
-venv/
+venv*/
 ENV/
 
 # Spyder project settings
@@ -247,6 +247,7 @@ src/dashboard/lambda/mock/index.js
 
 # Cello local storage
 src/backend/opt/cello/
+src/backend/opt/cello/
 
 # STORAGE
 Storage/
@@ -261,22 +262,18 @@ pgdata/
 **/AGENT/
 *venv/
 
-!src/backend/opt/bin/*
+# !src/backend/opt/bin/*
 
 # chaincode
 src/backend/opt/chaincode/
+src/backend/opt/chaincode/
 # migrations
 src/backend/api/migrations/*_auto_*.py
-# ca_client
-src/backend/opt/ca_client/
 # chaincode bpmn.zip
 src/backend/opt/bpmn_chaincode.zip
 
 src/backend/opt/chaincode-go-bpmn/vendor
-
-CA_related/
-storage/
-migrations/
-
-bpmn_chaincode.zip
-bpmn_chaincode/
+src/backend/opt/chaincode-go-bpmn/chaincode-go-bpmn/chaincode/smartcontract.go
+src/front/nohup.out
+src/chor_js/nohup.out
+src/backend/opt/bpmn_chaincode.zip

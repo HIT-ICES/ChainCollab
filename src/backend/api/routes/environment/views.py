@@ -136,20 +136,20 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         # # TODO access api from backend for CA
         headers = request.headers
         post(
-            f"http://127.0.0.1:8000/api/v1/resource_sets/{resource_set.id}/cas/ca_create",
+            f"http://192.168.1.177:8000/api/v1/resource_sets/{resource_set.id}/cas/ca_create",
             data={},
             headers={"Authorization": headers["Authorization"]},
         )
 
         post(
-            f"http://127.0.0.1:8000/api/v1/resource_sets/{resource_set.id}/cas/enroll_org_ca_admin",
+            f"http://192.168.1.177:8000/api/v1/resource_sets/{resource_set.id}/cas/enroll_org_ca_admin",
             data={},
             headers={"Authorization": headers["Authorization"]},
         )
 
         # Register Org Admin
         post(
-            f"http://127.0.0.1:8000/api/v1/resource_sets/{resource_set.id}/cas/org_user_admin/register_enroll",
+            f"http://192.168.1.177:8000/api/v1/resource_sets/{resource_set.id}/cas/org_user_admin/register_enroll",
             data={},
             headers={"Authorization": headers["Authorization"]},
         )
@@ -161,7 +161,7 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
 
         # # Register Orderer Node
         post(
-            f"http://127.0.0.1:8000/api/v1/resource_sets/{resource_set.id}/cas/register_enroll",
+            f"http://192.168.1.177:8000/api/v1/resource_sets/{resource_set.id}/cas/register_enroll",
             data={
                 "node_url": orderer_domain_name,
             },
@@ -170,7 +170,7 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
 
         # 创建节点
         post(
-            f"http://127.0.0.1:8000/api/v1/resource_sets/{resource_set.id}/nodes",
+            f"http://192.168.1.177:8000/api/v1/resource_sets/{resource_set.id}/nodes",
             data={
                 "num": 1,
                 "type": "orderer",
@@ -230,19 +230,19 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         # Create CA for it
         headers = request.headers
         post(
-            f"http://127.0.0.1:8000/api/v1/resource_sets/{resource_set.id}/cas/ca_create",
+            f"http://192.168.1.177:8000/api/v1/resource_sets/{resource_set.id}/cas/ca_create",
             data={},
             headers={"Authorization": headers["Authorization"]},
         )
         post(
-            f"http://127.0.0.1:8000/api/v1/resource_sets/{resource_set.id}/cas/enroll_org_ca_admin",
+            f"http://192.168.1.177:8000/api/v1/resource_sets/{resource_set.id}/cas/enroll_org_ca_admin",
             data={},
             headers={"Authorization": headers["Authorization"]},
         )
 
         # Register Org Admin
         post(
-            f"http://127.0.0.1:8000/api/v1/resource_sets/{resource_set.id}/cas/org_user_admin/register_enroll",
+            f"http://192.168.1.177:8000/api/v1/resource_sets/{resource_set.id}/cas/org_user_admin/register_enroll",
             data={},
             headers={"Authorization": headers["Authorization"]},
         )
@@ -251,7 +251,7 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         peer_domain_name = node_name + "0." + fabric_resource_set.name
         # # Register Peer Node
         post(
-            f"http://127.0.0.1:8000/api/v1/resource_sets/{resource_set.id}/cas/register_enroll",
+            f"http://192.168.1.177:8000/api/v1/resource_sets/{resource_set.id}/cas/register_enroll",
             data={
                 "node_url": peer_domain_name,
             },
@@ -260,7 +260,7 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
 
         # 创建节点
         post(
-            f"http://127.0.0.1:8000/api/v1/resource_sets/{resource_set.id}/nodes",
+            f"http://192.168.1.177:8000/api/v1/resource_sets/{resource_set.id}/nodes",
             data={"num": 1, "type": "peer", "name": node_name},
             headers={"Authorization": headers["Authorization"]},
         )
@@ -286,7 +286,7 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
 
         headers = request.headers
         post(
-            f"http://127.0.0.1:8000/api/v1/environments/{env.id}/networks",
+            f"http://192.168.1.177:8000/api/v1/environments/{env.id}/networks",
             data={
                 "consensus": "raft",
                 "database": "leveldb",
@@ -351,7 +351,7 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         )
         channel_name = DEFAULT_CHANNEL_NAME
         response = post(
-            f"http://127.0.0.1:8000/api/v1/environments/{env.id}/channels",
+            f"http://192.168.1.177:8000/api/v1/environments/{env.id}/channels",
             data={
                 "orderers": orderer_ids,
                 "peers": peer_ids,
@@ -365,7 +365,7 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
 
         for peer_resource_set in peer_resource_sets:
             post(
-                f"http://127.0.0.1:8000/api/v1/environments/{env.id}/channels/{response.json()['data']['id']}/anchors",
+                f"http://192.168.1.177:8000/api/v1/environments/{env.id}/channels/{response.json()['data']['id']}/anchors",
                 data={
                     "anchor_peers": [
                         peer_resource_set.sub_resource_set.get().node.all()[0].id
@@ -376,7 +376,7 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
                 headers={"Authorization": headers["Authorization"]},
             )
             post(
-                f"http://127.0.0.1:8000/api/v1/resource_sets/{peer_resource_set.id}/cas/ccp/generate",
+                f"http://192.168.1.177:8000/api/v1/resource_sets/{peer_resource_set.id}/cas/ccp/generate",
                 data={
                     "channel_name": channel_name,
                     "peer_id": peer_resource_set.sub_resource_set.get()
@@ -409,7 +409,7 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         files = {"file": ("firefly.tar.gz", chaincode, "application/octet-stream")}
 
         post(
-            f"http://127.0.0.1:8000/api/v1/environments/{env.id}/chaincodes/package",
+            f"http://192.168.1.177:8000/api/v1/environments/{env.id}/chaincodes/package",
             data=data,
             files=files,
             headers={"Authorization": headers["Authorization"]},
@@ -436,14 +436,14 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
 
         headers = request.headers
         post(
-            f"http://127.0.0.1:8000/api/v1/environments/{env.id}/fireflys/init",
+            f"http://192.168.1.177:8000/api/v1/environments/{env.id}/fireflys/init",
             headers={"Authorization": headers["Authorization"]},
         )
 
-        post(
-            f"http://127.0.0.1:8000/api/v1/environments/{env.id}/fireflys/start",
-            headers={"Authorization": headers["Authorization"]},
-        )
+        # post(
+        #     f"http://192.168.1.177:8000/api/v1/environments/{env.id}/fireflys/start",
+        #     headers={"Authorization": headers["Authorization"]},
+        # )
 
         env.status = "FIREFLY"
         env.save()

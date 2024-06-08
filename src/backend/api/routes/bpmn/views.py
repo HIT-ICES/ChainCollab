@@ -18,7 +18,7 @@ from api.routes.bpmn.serializers import (
     BpmnInstanceSerializer,
 )
 import yaml
-from api.config import BASE_PATH, BPMN_CHAINCODE_STORE
+from api.config import BASE_PATH, BPMN_CHAINCODE_STORE,CURRENT_IP
 from api.common import ok, err
 from api.models import (
     BPMN,
@@ -34,7 +34,6 @@ from api.models import (
 )
 from zipfile import ZipFile
 import json
-
 
 # from api.routes.bpmn  import BpmnCreateBody
 from rest_framework import viewsets, status
@@ -309,7 +308,7 @@ class BPMNInstanceViewSet(viewsets.ModelViewSet):
                 "file": open(file=BASE_PATH + "/opt//bpmn_chaincode.zip", mode="rb")
             }
             response = post(
-                f"http://127.0.0.1:8000/api/v1/environments/{env_id}/chaincodes/package",
+                f"http://{CURRENT_IP}:8000/api/v1/environments/{env_id}/chaincodes/package",
                 data={
                     "name": bpmn.name.replace(".bpmn", "") + "-" + bpmn_instance.name,
                     "version": 1,

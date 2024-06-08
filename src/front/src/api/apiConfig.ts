@@ -1,5 +1,6 @@
 import axios from "axios";
 
+<<<<<<< HEAD
 
 const backendUrl = process.env.ENV === "local" ? "http://localhost:8000" : "http://192.168.1.177:8000";
 const translatorUrl = process.env.ENV === "local" ? "http://localhost:9999" : "http://192.168.1.177:9999";
@@ -15,6 +16,12 @@ export const translatorAPI = axios.create({
 const api = axios.create({
   // baseURL: "https://ae702a09-b9ea-40d0-858c-2f6bb82702d8.mock.pstmn.io/api/v1",
   baseURL: `${backendUrl}/api/v1`,
+=======
+export const current_ip = "192.168.1.177"
+const api = axios.create({
+  // baseURL: "https://ae702a09-b9ea-40d0-858c-2f6bb82702d8.mock.pstmn.io/api/v1",
+  baseURL: "http://" + current_ip + ":8000/api/v1",
+>>>>>>> chorjs-new-element
   headers: {
     "Content-Type": "application/json",
   },

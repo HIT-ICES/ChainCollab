@@ -23,9 +23,10 @@ FABRIC_CHAINCODE_STORE = os.path.join(BASE_PATH, "opt", "chaincode")
 BPMN_CHAINCODE_STORE = os.path.join(BASE_PATH, "opt", "chaincode-go-bpmn")
 DEFAULT_AGENT = default_agent = {
     "name": "default_agent",
-    "urls": "http://127.0.0.1:7001",
+    "urls": "http://192.168.1.177:7001",
     "type": "docker",
     "status": "active",
 }
 
-DEFAULT_CHANNEL_NAME = "default1"
+DEFAULT_CHANNEL_NAME = "default"
+CURRENT_IP = "192.168.1.177"

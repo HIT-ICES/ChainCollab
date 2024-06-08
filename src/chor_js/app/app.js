@@ -16,6 +16,7 @@ import PropertiesPanelModule from 'bpmn-js-properties-panel';
 
 import Reporter from './lib/validator/Validator.js';
 import PropertiesProviderModule from './lib/properties-provider';
+import TestPaletteProvider from './lib/external-elements'
 
 import xml from './diagrams/pizzaDelivery.bpmn';
 import blankXml from './diagrams/newDiagram.bpmn';
@@ -39,7 +40,8 @@ const modeler = new ChoreoModeler({
   // or NavigatedViewer modules of chor-js
   additionalModules: [
     PropertiesPanelModule,
-    PropertiesProviderModule
+    PropertiesProviderModule,
+    TestPaletteProvider
   ],
   keyboard: {
     bindTo: document
@@ -242,12 +244,12 @@ renderModel(blankXml);
 ReactDOM.render(<MainPage />, document.getElementById('app'),);
 
 function upload_bpmn_post(result, params, bpmnName, resultOfSvg) {
-  return axios.post('http://localhost:9999/chaincode/getPartByBpmnC', {
+  return axios.post('http://192.168.1.177:9999/chaincode/getPartByBpmnC', {
     bpmnContent: result.xml
   })
     .then((response) => {
       console.log('Post getParticipant request success:', response.data);
-      axios.post(`http://127.0.0.1:8000/api/v1/consortiums/${params["consortiumid"]}/bpmns/_upload`, {
+      axios.post(`http://192.168.1.177:8000/api/v1/consortiums/${params["consortiumid"]}/bpmns/_upload`, {
         bpmnContent: result.xml,
         consortiumid: params["consortiumid"],
         orgid: params["orgid"],

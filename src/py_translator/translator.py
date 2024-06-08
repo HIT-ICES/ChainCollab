@@ -318,6 +318,8 @@ class GoChaincodeTranslator:
                 return snippet.ChangeEventState_code(element.id, state)
             case NodeType.MESSAGE:
                 return snippet.ChangeMsgState_code(element.id, state)
+            case NodeType.BUSINESS_RULE_TASK:
+                return snippet.ChangeMsgState_code(element.id, state)
 
     def _generate_check_state_code(self, element: Element, state: str = "ENABLED"):
         match element.type:
@@ -877,7 +879,7 @@ class GoChaincodeTranslator:
 
 if __name__ == "__main__":
     go_chaincode_translator = GoChaincodeTranslator(
-        None, bpmn_file="resource/bpmn/service provider running time example.bpmn"
+        None, bpmn_file="resource/bpmn/Coffee_machine.bpmn"
     )
     go_chaincode_translator.generate_chaincode()
     go_chaincode_translator.generate_ffi()

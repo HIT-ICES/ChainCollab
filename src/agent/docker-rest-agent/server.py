@@ -114,6 +114,7 @@ def create_node():
             environment=env,
             ports=port_map,
         )
+        print("create node container {} success".format(request.form.get("name")))
     except:
         res["code"] = FAIL_CODE
         res["data"] = sys.exc_info()[0]

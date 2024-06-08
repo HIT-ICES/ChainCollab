@@ -4,6 +4,7 @@ import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import {useAppSelector} from "@/redux/hooks.ts";
 import { getBPMNInstanceList, getBPMNList } from "@/api/externalResource";
+import { current_ip } from "@/api/apiConfig";
 const { Link } = Typography;
 
 // interface DataType {
@@ -137,7 +138,7 @@ const Execution: React.FC = () => {
 
     const fetchFireflyData = async () => {
         try {
-            const res = await fetch("http://127.0.0.1:8000/api/v1/fireflys/1/start");
+            const res = await fetch(`http://${current_ip}:8000/api/v1/fireflys/1/start`);
             const data = await res.json();
             setFireflyData(data); // 保存从API返回的数据到状态中
         } catch (error) {

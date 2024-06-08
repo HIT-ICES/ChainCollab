@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 import api from "./apiConfig";
 import {translatorAPI} from "./apiConfig";
+=======
+import api, { current_ip } from "./apiConfig";
+>>>>>>> chorjs-new-element
 
 export const getBPMNList = async (consortiumId: string) => {
     try {
@@ -52,7 +56,11 @@ export const addBPMNInstance = async (bpmnId: string, name: string, currentEnvId
 
 export const generateChaincode = async (bpmnContent: string, mapInfo: string) => {
     try {
+<<<<<<< HEAD
         const res = await translatorAPI.post(`/chaincode/generate`, {
+=======
+        const res = await api.post(`http://${current_ip}:9999/chaincode/generate`, {
+>>>>>>> chorjs-new-element
             bpmnContent: bpmnContent,
             participantMspMap: mapInfo
         })
