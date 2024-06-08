@@ -315,13 +315,27 @@ def InitParametersTypeDefFrame_code(fields: str):
 def InitParametersDefinition_code(name: str, type: str):
     return '{name} {type} `json:"{name}"`'.format(name=name, type=type)
 
+
 def RegisterFunc_code():
     return content["RegisterFunc"]
+
 
 def CheckRegisterFunc_code():
     return content["CheckRegisterFunc"]
 
-def BusinessRuleFuncFrame_code(business_rule: str):
+
+def BusinessRuleFuncFrame_code(
+    business_rule: str,
+    pre_activate_next_hook: str = "",
+    after_all_hook: str = "",
+    change_next_state_code: str = "",
+):
     return content["BusinessRuleFuncFrame"].format(
-        business_rule=business_rule
+        business_rule=business_rule,
+        pre_activate_next_hook=pre_activate_next_hook,
+        after_all_hook=after_all_hook,
+        change_next_state_code=change_next_state_code,
     )
+
+def InvokeChaincodeFunc_code():
+    return content["InvokeChaincodeFunc"]

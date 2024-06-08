@@ -1,8 +1,7 @@
 func (cc *SmartContract) #business_rule#(ctx contractapi.TransactionContextInterface, instanceID string, ContentOfDmn string) error {
-	stub := ctx.GetStub()
 
 	// Read Business Info
-	businessRule, err := cc.ReadBusinessRule(ctx, instanceID)
+	businessRule, err := cc.ReadBusinessRule(ctx, instanceID, "#business_rule#")
 	if err != nil {
 		return err
 	}
@@ -45,7 +44,7 @@ func (cc *SmartContract) #business_rule#(ctx contractapi.TransactionContextInter
 
 	// Invoke DMN Engine Chaincode
 	var resJson string
-	resJson, err=cc.Invoke_Other_chaincode(ctx, "default", "asset:v1", ContentOfDmn, ParamMapping)
+	resJson, err=cc.Invoke_Other_chaincode(ctx, "asset:v1","default", _args)
 
 	// Set the Result
 	var res map[string]interface{}
@@ -66,7 +65,7 @@ func (cc *SmartContract) #business_rule#(ctx contractapi.TransactionContextInter
 	err = cc.SetGlobalVariable(ctx, instanceID, globalVariable)
 
 	// Change the BusinessRule State
-	cc.ChangeBusinessRuleState(ctx, instanceID, #business_rule#, COMPLETED)
+	cc.ChangeBusinessRuleState(ctx, instanceID, "#business_rule#", COMPLETED)
 
     #pre_activate_next_hook#
     #change_next_state_code#

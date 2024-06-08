@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strconv" 
+	"strconv"
+	"reflect"
+	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
@@ -21,6 +23,7 @@ type StateMemory struct {
 type InitParameters struct {
     Participant_1pasf6v Participant `json:"Participant_1pasf6v"`
 	Participant_1tddbk5 Participant `json:"Participant_1tddbk5"`
+	Activity_0ysk2q6 BusinessRule `json:"Activity_0ysk2q6"`
 }
 
 type ContractInstance struct {
@@ -1035,6 +1038,20 @@ func (cc *SmartContract) RegisterParticipant(ctx contractapi.TransactionContextI
 	}
 }
 
+func (cc *SmartContract) Invoke_Other_chaincode(ctx contractapi.TransactionContextInterface, chaincodeName string, channel string, _args [][]byte) (string, error) {
+	stub := ctx.GetStub()
+	response := stub.InvokeChaincode(chaincodeName, _args, channel)
+
+	if response.Status != shim.OK {
+		return "", fmt.Errorf("failed to invoke chaincode. Response status: %d. Response message: %s", response.Status, response.Message)
+	}
+
+	fmt.Print("response.Payload: ")
+	fmt.Println(string(response.Payload))
+
+	return string(response.Payload), nil
+}
+
 func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterface, initParametersBytes string) (string, error) {
 	stub := ctx.GetStub()
 
@@ -1537,5 +1554,81 @@ func (cc *SmartContract) EndEvent_17h95ah(ctx contractapi.TransactionContextInte
 	cc.ChangeEventState(ctx, instanceID, event.EventID, COMPLETED) 
 	stub.SetEvent("EndEvent_17h95ah", []byte("EndEvent has been done"))
 	
+	return nil
+}
+
+func (cc *SmartContract) Activity_0ysk2q6(ctx contractapi.TransactionContextInterface, instanceID string, ContentOfDmn string) error {
+
+	// Read Business Info
+	businessRule, err := cc.ReadBusinessRule(ctx, instanceID, "Activity_0ysk2q6")
+	if err != nil {
+		return err
+	}
+
+	// Check the BusinessRule State
+	if businessRule.State != ENABLED {
+		return fmt.Errorf("The BusinessRule is not ENABLED")
+	}
+
+	// Combine the Parameters
+	_args := make([][]byte, 4)
+	_args[0] = []byte("createRecord")
+	// input in json format
+	ParamMapping := businessRule.ParamMapping
+	realParamMapping := make(map[string]interface{})
+	globalVariable, _err := cc.ReadGlobalVariable(ctx, instanceID)
+	if _err != nil {
+		return _err
+	}
+
+	for key, value := range ParamMapping {
+		field := reflect.ValueOf(globalVariable).FieldByName(value)
+		if !field.IsValid() {
+			return fmt.Errorf("The field %s is not valid", value)
+		}
+		realParamMapping[key] = field.Interface()		
+	}
+	var inputJsonBytes []byte
+	inputJsonBytes, err= json.Marshal(realParamMapping)
+	if err != nil {
+		return err
+	}
+	_args[1] = inputJsonBytes
+
+	// DMN Content
+	_args[2] = []byte(ContentOfDmn)
+
+	// decisionId
+	_args[3] = []byte(businessRule.DecisionId)
+
+	// Invoke DMN Engine Chaincode
+	var resJson string
+	resJson, err=cc.Invoke_Other_chaincode(ctx, "asset:v1","default", _args)
+
+	// Set the Result
+	var res map[string]interface{}
+	err = json.Unmarshal([]byte(resJson), &res)
+	if err != nil {
+		return err
+	}
+
+	for key, value := range res {
+		field := reflect.ValueOf(globalVariable).FieldByName(key)
+		if !field.IsValid() {
+			return fmt.Errorf("The field %s is not valid", key)
+		}
+		field.Set(reflect.ValueOf(value))
+	}
+
+	// Update the GlobalVariable
+	err = cc.SetGlobalVariable(ctx, instanceID, globalVariable)
+
+	// Change the BusinessRule State
+	cc.ChangeBusinessRuleState(ctx, instanceID, "Activity_0ysk2q6", COMPLETED)
+
+    
+        cc.ChangeMsgState(ctx, instanceID, "Message_1e90tfn", ENABLED)
+    
+
 	return nil
 }

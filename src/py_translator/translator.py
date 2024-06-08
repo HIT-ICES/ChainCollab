@@ -13,7 +13,7 @@ from choreography_parser.elements import (
     MessageFlow,
     SequenceFlow,
     Element,
-    BusinessRule,
+    BusinessRuleTask,
 )
 from choreography_parser.parser import Choreography
 from chaincode_snippet import snippet
@@ -228,11 +228,11 @@ class GoChaincodeTranslator:
             }
         # DMN ELEMENTS: TODO
         business_rules = self._choreography.query_element_with_type(
-            NodeType.BUSINESS_RULE
+            NodeType.BUSINESS_RULE_TASK
         )
-        instance_initparameters["BusinessRule"] = {}
+        instance_initparameters["BusinessRuleTask"] = {}
         for business_rule in business_rules:
-            instance_initparameters["BusinessRule"][business_rule.id] = {}
+            instance_initparameters["BusinessRuleTask"][business_rule.id] = {}
         return instance_initparameters
 
     def _generate_instance_initparameters_code(self) -> str:
@@ -246,7 +246,7 @@ class GoChaincodeTranslator:
                 )
             )
         # DMN ELEMENTS: TODO
-        for name, prop in instance_initparameters["BusinessRule"].items():
+        for name, prop in instance_initparameters["BusinessRuleTask"].items():
             temp_list.append(
                 snippet.StructParameterDefinition_code(
                     public_the_name(name), "BusinessRule"
@@ -665,12 +665,21 @@ class GoChaincodeTranslator:
         )
         return temp_list
 
-    def _generate_chaincode_for_business_rule(self, business_rule: BusinessRule):
+    def _generate_chaincode_for_business_rule(self, business_rule: BusinessRuleTask):
         temp_list = []
         # TODO: Implement Business Rule
+        pre_activate_next_hook = self._hook_codes[business_rule.id]["pre_activate_next"]
+        when_triggered_code = self._hook_codes[business_rule.id]["when_triggered"]
+
+
         temp_list.append(
             snippet.BusinessRuleFuncFrame_code(
                 business_rule.id,
+                pre_activate_next_hook="\n\t".join(pre_activate_next_hook),
+                after_all_hook="\n\t".join(when_triggered_code),
+                change_next_state_code=self._generate_change_state_code(
+                    business_rule.outgoing.target
+                ),
             )
         )
 
@@ -708,6 +717,7 @@ class GoChaincodeTranslator:
         chaincode_list.append(snippet.fix_part_code())
         chaincode_list.append(snippet.CheckRegisterFunc_code())
         chaincode_list.append(snippet.RegisterFunc_code())
+        chaincode_list.append(snippet.InvokeChaincodeFunc_code())
 
         # generate InitLedger
 
@@ -773,7 +783,7 @@ class GoChaincodeTranslator:
                 chaincode_list.extend(self._generate_chaincode_for_start_event(element))
             if element.type == NodeType.END_EVENT:
                 chaincode_list.extend(self._generate_chaincode_for_end_event(element))
-            if element.type == NodeType.BUSINESS_RULE:
+            if element.type == NodeType.BUSINESS_RULE_TASK:
                 chaincode_list.extend(
                     self._generate_chaincode_for_business_rule(element)
                 )
