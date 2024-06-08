@@ -85,7 +85,7 @@ type ActionEvent struct {
 type BusinessRule struct {
 	CID          string            `json:"cid"`
 	Hash         string            `json:"hash"`
-	DecisionId   string            `json:"decisionId"`
+	DecisionID   string            `json:"decisionId"`
 	ParamMapping map[string]string `json:"mapping"`
 	State        ElementState      `json:"state"`
 }
@@ -112,7 +112,7 @@ func (cc *SmartContract) CreateBusinessRule(ctx contractapi.TransactionContextIn
 	instance.InstanceElements[BusinessRuleID] = &BusinessRule{
 		CID:          CID,
 		Hash:         Hash,
-		DecisionId:   "",
+		DecisionID:   "",
 		ParamMapping: ParamMapping,
 		State:        DISABLED,
 	}
@@ -1128,6 +1128,7 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 
 	cc.CreateGateway(ctx, instanceID, "ExclusiveGateway_1sp1v7s", DISABLED)
 
+cc.CreateBusinessRule(ctx, instanceID, "Activity_0ysk2q6", initParameters.Activity_0ysk2q6.CID, initParameters.Activity_0ysk2q6.Hash, initParameters.Activity_0ysk2q6.DecisionID, initParameters.Activity_0ysk2q6.ParamMapping)
 
 	instanceIDInt, err := strconv.Atoi(instanceID)
 	if err != nil {
@@ -1599,7 +1600,7 @@ func (cc *SmartContract) Activity_0ysk2q6(ctx contractapi.TransactionContextInte
 	_args[2] = []byte(ContentOfDmn)
 
 	// decisionId
-	_args[3] = []byte(businessRule.DecisionId)
+	_args[3] = []byte(businessRule.DecisionID)
 
 	// Invoke DMN Engine Chaincode
 	var resJson string

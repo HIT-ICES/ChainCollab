@@ -292,6 +292,10 @@ class GoChaincodeTranslator:
             }
             for participant in participants_exist
         ]
+        business_rules = [
+            business_rule
+            for business_rule in self._instance_initparameters["BusinessRuleTask"]
+        ]
         temp_list.append(
             snippet.CreateInstance_code(
                 start_event=start_event.id,
@@ -307,6 +311,7 @@ class GoChaincodeTranslator:
                 ],
                 gateways=[gateway.id for gateway in gateways],
                 participants=participant_to_be_added,
+                business_rules=business_rules,
             )
         )
 
@@ -670,7 +675,6 @@ class GoChaincodeTranslator:
         # TODO: Implement Business Rule
         pre_activate_next_hook = self._hook_codes[business_rule.id]["pre_activate_next"]
         when_triggered_code = self._hook_codes[business_rule.id]["when_triggered"]
-
 
         temp_list.append(
             snippet.BusinessRuleFuncFrame_code(

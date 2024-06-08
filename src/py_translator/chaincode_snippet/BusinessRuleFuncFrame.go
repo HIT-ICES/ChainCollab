@@ -40,7 +40,7 @@ func (cc *SmartContract) #business_rule#(ctx contractapi.TransactionContextInter
 	_args[2] = []byte(ContentOfDmn)
 
 	// decisionId
-	_args[3] = []byte(businessRule.DecisionId)
+	_args[3] = []byte(businessRule.DecisionID)
 
 	// Invoke DMN Engine Chaincode
 	var resJson string

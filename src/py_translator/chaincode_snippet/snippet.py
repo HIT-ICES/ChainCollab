@@ -34,6 +34,7 @@ def CreateInstance_code(
     messages: list[dict[str, str]],
     gateways: list,
     participants: list,
+    business_rules: list,
 ):
     def InitStartEvent(event: str) -> str:
         return content["InitStartFrame"].format(start_event=event)
@@ -63,6 +64,9 @@ def CreateInstance_code(
             multi_maximum=multi_maximum,
             multi_minimum=multi_minimum,
         )
+    
+    def InitBusinessRule(business_rule: str) -> str:
+        return content["InitBusinessRuleFrame"].format(business_rule=business_rule)
 
     return content["CreateInstanceFuncFrame"].format(
         create_elements_code="\n".join(
@@ -86,7 +90,8 @@ def CreateInstance_code(
                 )
                 for message in messages
             ]
-            + [InitGateway(gateway) for gateway in gateways]
+            + [InitGateway(gateway) for gateway in gateways]+
+            [InitBusinessRule(business_rule) for business_rule in business_rules]
         ),
     )
 
