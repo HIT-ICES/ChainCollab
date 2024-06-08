@@ -79,6 +79,59 @@ type ActionEvent struct {
 	EventState ElementState `json:"eventState"`
 }
 
+type BusinessRule struct {
+	CID          string            `json:"cid"`
+	Hash         string            `json:"hash"`
+	DecisionId   string            `json:"decisionId"`
+	ParamMapping map[string]string `json:"mapping"`
+	State        ElementState      `json:"state"`
+}
+
+func (cc *SmartContract) CreateBusinessRule(ctx contractapi.TransactionContextInterface, InstanceID string, BusinessRuleID string, CID string, Hash string, DecisionId string, ParamMapping map[string]string) (*BusinessRule, error) {
+	stub := ctx.GetStub()
+
+	existingData, err := stub.GetState(InstanceID)
+	if err != nil {
+		return nil, fmt.Errorf("获取状态数据时出错: %v", err)
+	}
+	if existingData == nil {
+		return nil, fmt.Errorf("实例 %s 不存在", InstanceID)
+	}
+
+	// 从现有实例中读取
+	var instance ContractInstance
+	err = json.Unmarshal(existingData, &instance)
+	if err != nil {
+		return nil, fmt.Errorf("反序列化实例数据时出错: %v", err)
+	}
+
+	// 创建业务规则对象
+	instance.InstanceElements[BusinessRuleID] = &BusinessRule{
+		CID:          CID,
+		Hash:         Hash,
+		DecisionId:   "",
+		ParamMapping: ParamMapping,
+		State:        DISABLED,
+	}
+
+	instanceJson, err := json.Marshal(instance)
+	if err != nil {
+		return nil, fmt.Errorf("序列化实例数据时出错: %v", err)
+	}
+	// 将业务规则对象序列化为JSON字符串并保存在状态数据库中
+	err = stub.PutState(InstanceID, instanceJson)
+	if err != nil {
+		return nil, fmt.Errorf("保存实例数据时出错: %v", err)
+	}
+
+	returnBusinessRule, ok := instance.InstanceElements[BusinessRuleID].(*BusinessRule)
+	if !ok {
+		return nil, fmt.Errorf("无法将实例元素转换为BusinessRule")
+	}
+
+	return returnBusinessRule, nil
+}
+
 func (cc *SmartContract) CreateParticipant(ctx contractapi.TransactionContextInterface, instanceID string, participantID string, msp string, attributes map[string]string, IsMulti bool, MultiMaximum int, MultiMinimum int) (*Participant, error) {
 	stub := ctx.GetStub()
 
@@ -521,6 +574,52 @@ func (c *SmartContract) ChangeEventState(ctx contractapi.TransactionContextInter
 
 }
 
+func (cc *SmartContract) ChangeBusinessRuleState(ctx contractapi.TransactionContextInterface, instanceID string, BusinessRuleID string, state ElementState) error {
+
+	stub := ctx.GetStub()
+
+	instanceJson, err := stub.GetState(instanceID)
+	if err != nil {
+		return err
+	}
+	if instanceJson == nil {
+		errorMessage := fmt.Sprintf("Instance %s does not exist", instanceID)
+		fmt.Println(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	var instance ContractInstance
+	err = json.Unmarshal(instanceJson, &instance)
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+
+	businessRule, ok := instance.InstanceElements[BusinessRuleID].(*BusinessRule)
+	if !ok {
+		errorMessage := fmt.Sprintf("BusinessRule %s does not exist", BusinessRuleID)
+		fmt.Println(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	businessRule.State = state
+
+	instanceJson, err = json.Marshal(instance)
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+
+	err = stub.PutState(instanceID, instanceJson)
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+
+	return nil
+
+}
+
 //get all message
 
 func (cc *SmartContract) GetAllMessages(ctx contractapi.TransactionContextInterface, instanceID string) ([]*Message, error) {
@@ -673,6 +772,34 @@ func (cc *SmartContract) SetGlobalVariable(ctx contractapi.TransactionContextInt
 
 	return nil
 
+}
+
+func (cc *SmartContract) ReadBusinessRule(ctx contractapi.TransactionContextInterface, instanceID string, BusinessRuleID string) (*BusinessRule, error) {
+	instanceJson, err := ctx.GetStub().GetState(instanceID)
+	if err != nil {
+		return nil, err
+	}
+	if instanceJson == nil {
+		errorMessage := fmt.Sprintf("Instance %s does not exist", instanceID)
+		fmt.Println(errorMessage)
+		return nil, errors.New(errorMessage)
+	}
+
+	var instance ContractInstance
+	err = json.Unmarshal(instanceJson, &instance)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+
+	businessRule, ok := instance.InstanceElements[BusinessRuleID].(*BusinessRule)
+	if !ok {
+		errorMessage := fmt.Sprintf("BusinessRule %s does not exist", BusinessRuleID)
+		fmt.Println(errorMessage)
+		return nil, errors.New(errorMessage)
+	}
+
+	return businessRule, nil
 }
 
 func (cc *SmartContract) ReadParticipant(ctx contractapi.TransactionContextInterface, instanceID string, participantID string) (*Participant, error) {

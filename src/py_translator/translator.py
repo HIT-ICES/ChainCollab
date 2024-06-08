@@ -13,6 +13,7 @@ from choreography_parser.elements import (
     MessageFlow,
     SequenceFlow,
     Element,
+    BusinessRule,
 )
 from choreography_parser.parser import Choreography
 from chaincode_snippet import snippet
@@ -207,7 +208,7 @@ class GoChaincodeTranslator:
             # string -> string
             # float -> float64
             temp_list.append(
-                snippet.StateMemoryParameterDefinition_code(
+                snippet.StructParameterDefinition_code(
                     public_the_name(name), type_change_from_bpmn_to_go(_type)
                 )
             )
@@ -226,7 +227,12 @@ class GoChaincodeTranslator:
                 "multi_maximum": participant.multi_maximum,
             }
         # DMN ELEMENTS: TODO
-
+        business_rules = self._choreography.query_element_with_type(
+            NodeType.BUSINESS_RULE
+        )
+        instance_initparameters["BusinessRule"] = {}
+        for business_rule in business_rules:
+            instance_initparameters["BusinessRule"][business_rule.id] = {}
         return instance_initparameters
 
     def _generate_instance_initparameters_code(self) -> str:
@@ -235,11 +241,17 @@ class GoChaincodeTranslator:
         # add Participant
         for name, prop in instance_initparameters["Participant"].items():
             temp_list.append(
-                snippet.StateMemoryParameterDefinition_code(
+                snippet.StructParameterDefinition_code(
                     public_the_name(name), "Participant"
                 )
             )
         # DMN ELEMENTS: TODO
+        for name, prop in instance_initparameters["BusinessRule"].items():
+            temp_list.append(
+                snippet.StructParameterDefinition_code(
+                    public_the_name(name), "BusinessRule"
+                )
+            )
         return "\n\t".join(temp_list)
 
     def _generate_create_instance_code(self):
@@ -653,6 +665,17 @@ class GoChaincodeTranslator:
         )
         return temp_list
 
+    def _generate_chaincode_for_business_rule(self, business_rule: BusinessRule):
+        temp_list = []
+        # TODO: Implement Business Rule
+        temp_list.append(
+            snippet.BusinessRuleFuncFrame_code(
+                business_rule.id,
+            )
+        )
+
+        return temp_list
+
     def generate_chaincode(
         self,
         output_path: str = "resource/chaincode.go",
@@ -750,6 +773,10 @@ class GoChaincodeTranslator:
                 chaincode_list.extend(self._generate_chaincode_for_start_event(element))
             if element.type == NodeType.END_EVENT:
                 chaincode_list.extend(self._generate_chaincode_for_end_event(element))
+            if element.type == NodeType.BUSINESS_RULE:
+                chaincode_list.extend(
+                    self._generate_chaincode_for_business_rule(element)
+                )
 
         # OutPut the chaincode
 

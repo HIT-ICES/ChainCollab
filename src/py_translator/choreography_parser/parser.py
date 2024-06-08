@@ -156,7 +156,7 @@ class Choreography:
                     ],
                 )
             case NodeType.BUSINESS_RULE_TASK.value:
-                return BusinessRuleTask(
+                return BusinessRuleTask (
                     self,
                     element.attrib["id"],
                     element.attrib.get("name", ""),

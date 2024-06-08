@@ -50,7 +50,6 @@ class PropertyMeta(type):
             attrs[attr_name] = property(getter)
         return super().__new__(cls, name, bases, attrs)
 
-
 class Element(metaclass=PropertyMeta):
     _properties: List[str] = ["id", "name", "type"]
     _object_properties: List[str] = []

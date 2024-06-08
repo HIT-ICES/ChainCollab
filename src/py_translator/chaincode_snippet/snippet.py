@@ -281,7 +281,7 @@ def StateMemoryDefinition_code(fields: str):
     return content["StateMemoryDefinitionFrame"].format(fields=fields)
 
 
-def StateMemoryParameterDefinition_code(name: str, type: str):
+def StructParameterDefinition_code(name: str, type: str):
     # <name> bool `json:"<name>"`
     return '{name} {type} `json:"{name}"`'.format(name=name, type=type)
 
@@ -320,3 +320,8 @@ def RegisterFunc_code():
 
 def CheckRegisterFunc_code():
     return content["CheckRegisterFunc"]
+
+def BusinessRuleFuncFrame_code(business_rule: str):
+    return content["BusinessRuleFuncFrame"].format(
+        business_rule=business_rule
+    )
