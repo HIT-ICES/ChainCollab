@@ -18,14 +18,8 @@ fi
 
 
 alias start_database='cd $WorkDir/backend && docker-compose up -d'
-<<<<<<< HEAD
-alias prepare_api='cd $WorkDir/backend && source venv/bin/activate && python3.10 manage.py makemigrations && python3.10 manage.py migrate'
-alias start_api='cd $WorkDir/backend && source venv/bin/activate && python3.10 manage.py runserver'
-alias start_backend='start_database &&sleep 1&& prepare_api && start_api'
-=======
 alias prepare_api='cd $WorkDir/backend && source venv/bin/activate && python3 manage.py makemigrations && python3 manage.py migrate'
 alias start_api='cd $WorkDir/backend && source venv/bin/activate && python manage.py runserver 0.0.0.0:8000'
->>>>>>> chorjs-new-element
 
 alias start_oldtrans='cd ~/translator-springboot && mvn spring-boot:run'
 
