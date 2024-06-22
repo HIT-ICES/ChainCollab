@@ -20,7 +20,12 @@ from api.config import CELLO_HOME, FABRIC_CONFIG
 
 # custom CA
 from api.lib.ca.ca import FabricCA
-from api.common.enums import FabricCAEnrollType, FabricCARegisterType, FabricCAOrgType
+from api.common.enums import (
+    FabricCAEnrollType,
+    FabricCARegisterType,
+    FabricCAOrgType,
+    FabricNodeType,
+)
 from api.utils.port_picker import set_ports_mapping, find_available_ports
 from requests import get, post
 import json
@@ -46,7 +51,9 @@ class FabricCAViewSet(viewsets.ViewSet):
                 "ca_name": ca_name,
                 "port_map": port_map,
             }
-            response = post("{}/api/v1/ca".format("http://192.168.1.177:7001"), data=data)
+            response = post(
+                "{}/api/v1/ca".format("http://192.168.1.177:7001"), data=data
+            )
             if response.status_code == 200:
                 txt = json.loads(response.text)
                 return txt["res"]
@@ -63,7 +70,9 @@ class FabricCAViewSet(viewsets.ViewSet):
                 "action": "start",
             }
             response = post(
-                "{}/api/v1/ca/{}/operation".format("http://192.168.1.177:7001", ca_name),
+                "{}/api/v1/ca/{}/operation".format(
+                    "http://192.168.1.177:7001", ca_name
+                ),
                 data=data,
             )
 
@@ -139,9 +148,9 @@ class FabricCAViewSet(viewsets.ViewSet):
             file = self._ca_start(ca_name)
             ca_server_file_path = org_path + "ca-server-cert.pem"
             # 将证书存到指定的路径
+            print("copy ca server.pem")
             with open(ca_server_file_path, "wb") as f:
                 f.write(file)
-            # print("copy ca server.pem")
             os.system(
                 f"""mkdir -p {org_path}msp/tlscacerts ; mkdir -p {org_path}tlsca ; mkdir -p {org_path}ca"""
             )
@@ -150,7 +159,29 @@ class FabricCAViewSet(viewsets.ViewSet):
                 cp {ca_server_file_path} {org_path}tlsca/tlsca.{org_name}-cert.pem ;
                 cp {ca_server_file_path} {org_path}ca/ca.{org_name}-cert.pem"""
             )
-            # print("start ca done")
+
+            # System 类型组织也创建peer组织的文件夹
+            if type is FabricCAOrgType.SYSTEMORG:
+                sys_org_path = "{}/{}/crypto-config/peerOrganizations/{}/".format(
+                    CELLO_HOME, org_name, org_name
+                )
+                self._create_folders_up_to_path(
+                    "{}/crypto-config/peerOrganizations/{}/".format(org_name, org_name)
+                )
+                ca_server_file_path = sys_org_path + "ca-server-cert.pem"
+                # 将证书存到指定的路径
+                print("copy ca server.pem to system org peer")
+                with open(ca_server_file_path, "wb") as f:
+                    f.write(file)
+                os.system(
+                    f"""mkdir -p {sys_org_path}msp/tlscacerts ; mkdir -p {sys_org_path}tlsca ; mkdir -p {sys_org_path}ca"""
+                )
+                os.system(
+                    f"""cp {ca_server_file_path} {sys_org_path}msp/tlscacerts/ca.crt ;
+                    cp {ca_server_file_path} {sys_org_path}tlsca/tlsca.{org_name}-cert.pem ;
+                    cp {ca_server_file_path} {sys_org_path}ca/ca.{org_name}-cert.pem"""
+                )
+            print("start ca done")
         except Exception as e:
             print(traceback.format_exc())
             err_msg = "ca server start failed {}!".format(e)
@@ -209,7 +240,16 @@ class FabricCAViewSet(viewsets.ViewSet):
             with open(f"{org_path}/msp/config.yaml", "w") as f:
                 yaml.dump(config, f)
             print("export msp config file yaml success")
-
+            # 如果是系统组织，将msp文件夹复制到peer组织
+            if type is FabricCAOrgType.SYSTEMORG:
+                sys_peer_org_path = "{}/{}/crypto-config/peerOrganizations/{}/".format(
+                    CELLO_HOME, org_name, org_name
+                )
+                os.system(f"""cp -r {org_path}/msp {sys_peer_org_path}""")
+                os.system(f"""rm {sys_peer_org_path}/msp/tlscacerts/tlsca.*-cert.pem""")
+                os.system(
+                    f"""cp {org_path}/fabric-ca-client-config.yaml {sys_peer_org_path}/fabric-ca-client-config.yaml"""
+                )
         except Exception as e:
             traceback.print_exc(e)
             err_msg = "ca client enroll oderer org ca admin for {}!".format(e)
@@ -232,16 +272,15 @@ class FabricCAViewSet(viewsets.ViewSet):
                     CELLO_HOME, org_name, org_name.split(".", 1)[1]
                 )
                 org_name_path = org_name.split(".", 1)[1]
-                enroll_admin_path = org_path + f"""users/Admin@{org_name_path}/msp"""
             elif type is FabricCAOrgType.USERORG:
                 org_path = "{}/{}/crypto-config/peerOrganizations/{}/".format(
                     CELLO_HOME, org_name, org_name
                 )
                 org_name_path = org_name
-                enroll_admin_path = org_path + f"""users/Admin@{org_name_path}/msp"""
             else:
                 raise "error org type"
             # register enroll admin
+            enroll_admin_path = org_path + f"""users/Admin@{org_name_path}/msp"""
             admin_register_name = org_name.split(".")[0] + "admin"
             FabricCA(org_name).register(
                 ca_name=ca_name,
@@ -264,6 +303,26 @@ class FabricCAViewSet(viewsets.ViewSet):
                 f"""cp {org_path}msp/config.yaml {org_path}/users/Admin@{org_name_path}/msp/config.yaml"""
             )
             print(res)
+
+            if type is FabricCAOrgType.SYSTEMORG:
+                print("cp order admin to peer org admin")
+                sys_peer_org_path = "{}/{}/crypto-config/peerOrganizations/{}/".format(
+                    CELLO_HOME, org_name, org_name
+                )
+                FabricCA(org_name).enroll(
+                    register_name=admin_register_name,
+                    ca_server_address_port=ca_server_address_port,
+                    ca_name=ca_name,
+                    generate_path=sys_peer_org_path + f"""users/Admin@{org_name}/msp""",
+                    enroll_type=FabricCAEnrollType.ADMIN_USER,
+                    org_path=sys_peer_org_path,
+                )
+                # cp org admin msp config.yaml to Admin
+                print("cp org admin msp config.yaml to Admin")
+                res = os.system(
+                    f"""cp {sys_peer_org_path}msp/config.yaml {sys_peer_org_path}/users/Admin@{org_name}/msp/config.yaml"""
+                )
+                print(res)
 
             if type is FabricCAOrgType.USERORG:
                 # 注册client类型的user
@@ -334,6 +393,7 @@ class FabricCAViewSet(viewsets.ViewSet):
             else:
                 raise "error org type"
 
+            print("begin register node")
             FabricCA(org_name).register(
                 ca_name=ca_name,
                 register_name=register_name,
@@ -541,7 +601,7 @@ class FabricCAViewSet(viewsets.ViewSet):
             )
             ca.save()
             # add ca to host
-            add_host("ca."+org_name)
+            add_host("ca." + org_name)
 
             # port_map = {"7054/tcp": 17054}.__repr__()
 
@@ -576,7 +636,9 @@ class FabricCAViewSet(viewsets.ViewSet):
             fabric_resource_set = resource_set.sub_resource_set.get()
             org_name = fabric_resource_set.name
 
-            ca = FabricCAModel.objects.get(node__fabric_resource_set=fabric_resource_set)
+            ca = FabricCAModel.objects.get(
+                node__fabric_resource_set=fabric_resource_set
+            )
             port = Port.objects.get(node=ca.node, internal=7054)
             ca_server_address_port = ca.hosts[0] + ":" + str(port.external)
             print(ca_server_address_port)
@@ -600,8 +662,9 @@ class FabricCAViewSet(viewsets.ViewSet):
             fabric_resource_set = resource_set.sub_resource_set.get()
             org_name = fabric_resource_set.name
 
-
-            ca = FabricCAModel.objects.get(node__fabric_resource_set=fabric_resource_set)
+            ca = FabricCAModel.objects.get(
+                node__fabric_resource_set=fabric_resource_set
+            )
             port = Port.objects.get(node=ca.node, internal=7054)
             ca_server_address_port = ca.hosts[0] + ":" + str(port.external)
             self._registerAndEnroll_org_UserAdmin(
@@ -618,19 +681,29 @@ class FabricCAViewSet(viewsets.ViewSet):
         print("begin register enroll org_user_admin post api")
         try:
             node_url = request.data["node_url"]
+            node_type = int(request.data["node_type"])
             resource_set_id = request.parser_context["kwargs"].get("resource_set_id")
             resource_set = ResourceSet.objects.get(pk=resource_set_id)
             fabric_resource_set = resource_set.sub_resource_set.get()
             org_name = fabric_resource_set.name
             # port_map = [{"internal": 7054, "external": 17054}].__repr__()
-            ca = FabricCAModel.objects.get(node__fabric_resource_set=fabric_resource_set)
+            ca = FabricCAModel.objects.get(
+                node__fabric_resource_set=fabric_resource_set
+            )
             port = Port.objects.get(node=ca.node, internal=7054)
             ca_server_address_port = ca.hosts[0] + ":" + str(port.external)
+
+            if node_type == FabricNodeType.Orderer.value:
+                node_type = FabricCAOrgType.SYSTEMORG
+            else:
+                node_type = FabricCAOrgType.USERORG
+
+            FabricCAOrgType(int(fabric_resource_set.org_type))
             self._registerAndEnroll_node(
                 org_name=org_name,
                 ca_server_address_port=ca_server_address_port,
                 node_url=node_url,
-                node_type=FabricCAOrgType(int(fabric_resource_set.org_type)),
+                node_type=node_type,
             )
             return Response(
                 data=ok("Register and Enroll Success"), status=status.HTTP_202_ACCEPTED
@@ -654,7 +727,9 @@ class FabricCAViewSet(viewsets.ViewSet):
 
             # fabric_resource_set = request.user.organization
             org_name = fabric_resource_set.name
-            ca = FabricCAModel.objects.get(node__fabric_resource_set=fabric_resource_set)
+            ca = FabricCAModel.objects.get(
+                node__fabric_resource_set=fabric_resource_set
+            )
             port = Port.objects.get(node=ca.node, internal=7054)
             ca_server_address_port = ca.hosts[0] + ":" + str(port.external)
 
@@ -665,7 +740,9 @@ class FabricCAViewSet(viewsets.ViewSet):
             orderer_fabric_resource_set = orderer_resource_set.sub_resource_set.get()
 
             # orderer0.sys.edu.com
-            orderer = Node.objects.get(fabric_resource_set=orderer_fabric_resource_set, type="orderer")
+            orderer = Node.objects.get(
+                fabric_resource_set=orderer_fabric_resource_set, type="orderer"
+            )
             port = Port.objects.get(node=orderer, internal=7050)
             print("_____________________")
             print(orderer.urls)
@@ -676,11 +753,7 @@ class FabricCAViewSet(viewsets.ViewSet):
             #     + ":"
             #     + str(port.external)
             # )
-            orderer_url_port = (
-                orderer.urls
-                + ":"
-                + str(port.external)
-            )
+            orderer_url_port = orderer.urls + ":" + str(port.external)
 
             peer = Node.objects.get(id=peer_id)
             port = Port.objects.get(node=peer, internal=7051)

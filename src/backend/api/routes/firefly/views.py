@@ -105,9 +105,10 @@ class FireflyViewSet(viewsets.ModelViewSet):
             firefly_chaincode_name = "Firefly"
             env = Environment.objects.get(id=env_id)
             # find orgs by env
-            peer_resource_sets = env.resource_sets.all().filter(
-                sub_resource_set__org_type=0
-            )
+            # peer_resource_sets = env.resource_sets.all().filter(
+            #     sub_resource_set__org_type=0
+            # )
+            peer_resource_sets = env.resource_sets.all()
             ccp_file_paths = []
             for peer_resource_set in peer_resource_sets:
                 org_name = peer_resource_set.sub_resource_set.get().name
