@@ -2,6 +2,8 @@ from requests import get, post
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 
+from api.common.enums import FabricNodeType
+
 from .serializers import EnvironmentSerializer
 from rest_framework.decorators import action
 
@@ -164,6 +166,7 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
             f"http://192.168.1.177:8000/api/v1/resource_sets/{resource_set.id}/cas/register_enroll",
             data={
                 "node_url": orderer_domain_name,
+                "node_type": FabricNodeType.Orderer.value,
             },
             headers={"Authorization": headers["Authorization"]},
         )
@@ -178,6 +181,27 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
             },
             headers={"Authorization": headers["Authorization"]},
         )
+
+        # Register System peer node
+        node_name = "peer1"
+        peer_domain_name = node_name + "0." + fabric_resource_set.name
+        # # Register Peer Node
+        post(
+            f"http://192.168.1.177:8000/api/v1/resource_sets/{resource_set.id}/cas/register_enroll",
+            data={
+                "node_url": peer_domain_name,
+                "node_type": FabricNodeType.Peer.value,
+            },
+            headers={"Authorization": headers["Authorization"]},
+        )
+
+        # 创建节点
+        post(
+            f"http://192.168.1.177:8000/api/v1/resource_sets/{resource_set.id}/nodes",
+            data={"num": 1, "type": "peer", "name": node_name},
+            headers={"Authorization": headers["Authorization"]},
+        )
+
         env.status = "INITIALIZED"
         env.save()
         return Response(status=status.HTTP_201_CREATED)
@@ -254,6 +278,7 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
             f"http://192.168.1.177:8000/api/v1/resource_sets/{resource_set.id}/cas/register_enroll",
             data={
                 "node_url": peer_domain_name,
+                "node_type": FabricNodeType.Peer.value,
             },
             headers={"Authorization": headers["Authorization"]},
         )
@@ -297,7 +322,7 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         env = Environment.objects.get(pk=pk)
         env.status = "STARTED"
         env.save()
-        
+
         return Response(status=status.HTTP_201_CREATED)
 
     @action(methods=["post"], detail=True, url_path="activate")
@@ -331,7 +356,7 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
                 [
                     node.id
                     for node in orderer_resource_set.sub_resource_set.get().node.all()
-                    if node.type != "ca"
+                    if node.type != "ca" and node.type != "peer"
                 ]
                 for orderer_resource_set in orderer_resource_sets
             ]
@@ -349,6 +374,20 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
                 for peer_resource_set in peer_resource_sets
             ]
         )
+
+        # append orderer resource peers
+        peer_ids.append(
+            flatten(
+                [
+                    [
+                        node.id
+                        for node in orderer_resource_set.sub_resource_set.get().node.all()
+                        if node.type != "ca" and node.type != "orderer"
+                    ]
+                    for orderer_resource_set in orderer_resource_sets
+                ]
+            )
+        )
         channel_name = DEFAULT_CHANNEL_NAME
         response = post(
             f"http://192.168.1.177:8000/api/v1/environments/{env.id}/channels",
@@ -362,13 +401,17 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         )
 
         # print(response.json())
-
-        for peer_resource_set in peer_resource_sets:
+        def _generateAnchorPeers(peer_resource_set):
             post(
                 f"http://192.168.1.177:8000/api/v1/environments/{env.id}/channels/{response.json()['data']['id']}/anchors",
                 data={
                     "anchor_peers": [
-                        peer_resource_set.sub_resource_set.get().node.all()[0].id
+                        [
+                            node.id
+                            for node in peer_resource_set.sub_resource_set.get().node.all()
+                            if node.type != "ca" and node.type != "orderer"
+                        ][0]
+                        # peer_resource_set.sub_resource_set.get().node.all()[0].id
                     ],
                     "orderers": orderer_ids,
                     "resource_set_id": peer_resource_set.id,
@@ -379,12 +422,20 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
                 f"http://192.168.1.177:8000/api/v1/resource_sets/{peer_resource_set.id}/cas/ccp/generate",
                 data={
                     "channel_name": channel_name,
-                    "peer_id": peer_resource_set.sub_resource_set.get()
-                    .node.all()[0]
-                    .id,
+                    "peer_id": [
+                        node.id
+                        for node in peer_resource_set.sub_resource_set.get().node.all()
+                        if node.type != "ca" and node.type != "orderer"
+                    ][0],
                 },
                 headers={"Authorization": headers["Authorization"]},
             )
+
+        for peer_resource_set in peer_resource_sets:
+            _generateAnchorPeers(peer_resource_set)
+
+        for orderer_resource_set in orderer_resource_sets:
+            _generateAnchorPeers(orderer_resource_set)
 
         env.status = "ACTIVATED"
         env.save()
@@ -408,13 +459,47 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         }
         files = {"file": ("firefly.tar.gz", chaincode, "application/octet-stream")}
 
-        post(
+        res = post(
             f"http://192.168.1.177:8000/api/v1/environments/{env.id}/chaincodes/package",
             data=data,
             files=files,
             headers={"Authorization": headers["Authorization"]},
         )
 
+        # install chaincode for system org peers
+        print("install chaincode for system org peers")
+        data = {
+            "id": res.json()["data"]["id"],
+            "peer_node_list": [
+                str(node.id)
+                for node in orderer_resource_sets[0]
+                .sub_resource_set.get()
+                .node.all()
+                .filter(type="peer")
+            ],
+        }
+        res = post(
+            f"http://192.168.1.177:8000/api/v1/environments/{env.id}/chaincodes/install",
+            data=data,
+            headers={"Authorization": headers["Authorization"]},
+        )
+        print(res.json())
+
+        # approve chaincode for system org peers
+        print("approve chaincode for system org peers")
+        data = {
+            "channel_name": channel_name,
+            "chaincode_name": "Firefly",
+            "chaincode_version": "1.0",
+            "sequence": 1,
+            "resource_set_id": orderer_resource_sets[0].id,
+        }
+        res = post(
+            f"http://192.168.1.177:8000/api/v1/environments/{env.id}/chaincodes/approve_for_my_org",
+            data=data,
+            headers={"Authorization": headers["Authorization"]},
+        )
+        print(res.json())
         return Response(status=status.HTTP_201_CREATED)
 
     @action(methods=["post"], detail=True, url_path="start_firefly")

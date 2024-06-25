@@ -209,6 +209,8 @@ class ChainCodeViewSet(viewsets.ViewSet):
         chaincode_id = request.data.get("id")
         peer_node_list = request.data.get("peer_node_list")
         try:
+            if isinstance(peer_node_list, str):
+                peer_node_list = [peer_node_list]
             cc_targz = ""
             file_path = os.path.join(FABRIC_CHAINCODE_STORE, chaincode_id)
             for _, _, files in os.walk(file_path):
@@ -376,7 +378,10 @@ class ChainCodeViewSet(viewsets.ViewSet):
                 )  # 0: UserOrg 1: SystemOrg
 
                 orderer_node = (
-                    orderer_resource_set.sub_resource_set.get().node.all().first()
+                    orderer_resource_set.sub_resource_set.get()
+                    .node.all()
+                    .filter(type="orderer")
+                    .first()
                 )
                 # org = request.user.organization
                 # qs = Node.objects.filter(type="orderer", organization=org)
@@ -607,7 +612,10 @@ class ChainCodeViewSet(viewsets.ViewSet):
                 )  # 0: UserOrg 1: SystemOrg
 
                 orderer_node = (
-                    orderer_resource_set.sub_resource_set.get().node.all().first()
+                    orderer_resource_set.sub_resource_set.get()
+                    .node.all()
+                    .filter(type="orderer")
+                    .first()
                 )
                 # org = request.user.organization
                 # qs = Node.objects.filter(type="orderer", organization=org)
