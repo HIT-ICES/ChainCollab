@@ -1,0 +1,158 @@
+{
+  "namespace": "default",
+  "name": "asset_transfer_event1",
+  "description": "Spec interface for the asset-transfer-basic golang chaincode",
+  "version": "1.0",
+  "methods": [
+    {
+      "name": "ReadAsset",
+      "pathname": "",
+      "description": "",
+      "params": [
+        {
+          "name": "id",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "schema": {
+            "type": "array",
+            "details": {
+              "type": "object",
+              "properties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CreateAsset",
+      "pathname": "",
+      "description": "",
+      "params": [
+        {
+          "name": "id",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "color",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "size",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "owner",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "value",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "returns": []
+    },
+    {
+      "name": "TransferAsset",
+      "pathname": "",
+      "description": "",
+      "params": [
+        {
+          "name": "id",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "newOwner",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "returns": []
+    },
+    {
+      "name": "CreateDMNContent",
+      "pathname": "",
+      "description": "",
+      "params": [
+        {
+          "name": "id",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "dmnContent",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "returns": []
+    },
+    {
+      "name": "UpdateCid",
+      "pathname": "",
+      "description": "",
+      "params": [
+        {
+          "name": "id",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "cid",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "returns": []
+    },
+    {
+      "name": "QueryDMNContentRecord",
+      "pathname": "",
+      "description": "",
+      "params": [
+        {
+          "name": "id",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "returns": []
+    }
+  ],
+  "events": [
+    {
+      "name": "CreateAsset"
+    },
+    {
+      "name": "TransferAsset"
+    },
+    {
+      "name": "DMNContentCreated"
+    }
+  ]
+}

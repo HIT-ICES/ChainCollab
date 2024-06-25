@@ -178,10 +178,10 @@ def encode_decode_xml_string(xml_string):
 
 def invoke_chaincode():
     # 目标URL
-    url = "http://127.0.0.1:5000/api/v1/namespaces/default/apis/DMNEvent/invoke/CreateDMNContent"
+    url = "http://127.0.0.1:5000/api/v1/namespaces/default/apis/event2-test/invoke/CreateDMNContent"
 
     # JSON请求体
-    request_body = {"input": {"dmnContent": xml_string, "id": "6"}}
+    request_body = {"input": {"dmnContent": xml_string, "id": "1"}}
 
     # 将JSON请求体转为字符串
     json_data = json.dumps(request_body)

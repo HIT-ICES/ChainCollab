@@ -137,9 +137,9 @@ func (s *SmartContract) TransferAsset(ctx contractapi.TransactionContextInterfac
 
 // DMNContentRecord describes a simple asset to be stored in the ledger
 type DMNContentRecord struct {
-	ID         string `json:"id"`
-	DMNContent string `json:"dmnContent"`
-	Hash       string `json:"hash"`
+	ID   string `json:"id"`
+	Hash string `json:"hash"`
+	Cid  string `json:"cid"`
 }
 
 // CreateDMNContent adds a new DMNContentRecord to the ledger and emits an event
@@ -148,9 +148,8 @@ func (s *SmartContract) CreateDMNContent(ctx contractapi.TransactionContextInter
 	fmt.Print(hashString)
 
 	record := DMNContentRecord{
-		ID:         id,
-		DMNContent: dmnContent,
-		Hash:       hashString,
+		ID:   id,
+		Hash: hashString,
 	}
 
 	recordAsBytes, err := json.Marshal(record)
@@ -190,4 +189,61 @@ func (s *SmartContract) hashXML(ctx contractapi.TransactionContextInterface, xml
 	hashString := hex.EncodeToString(hashInBytes)
 	fmt.Print(hashString)
 	return hashString, nil
+}
+
+// UpdateCid updates the Cid field of the DMNContentRecord with the given id
+func (s *SmartContract) UpdateCid(ctx contractapi.TransactionContextInterface, id string, cid string) error {
+	// Retrieve the DMNContentRecord from the ledger using the ID
+	recordJSON, err := ctx.GetStub().GetState(id)
+	if err != nil {
+		return fmt.Errorf("failed to read from world state: %v", err)
+	}
+	if recordJSON == nil {
+		return fmt.Errorf("the record %s does not exist", id)
+	}
+
+	// Unmarshal the JSON to a DMNContentRecord struct
+	var record DMNContentRecord
+	err = json.Unmarshal(recordJSON, &record)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal JSON: %v", err)
+	}
+
+	// Update the Cid field
+	record.Cid = cid
+
+	// Marshal the updated struct to JSON
+	recordJSON, err = json.Marshal(record)
+	if err != nil {
+		return fmt.Errorf("failed to marshal JSON: %v", err)
+	}
+
+	// Put the updated record back into the ledger
+	err = ctx.GetStub().PutState(id, recordJSON)
+	if err != nil {
+		return fmt.Errorf("failed to update record in world state: %v", err)
+	}
+
+	return nil
+}
+
+// QueryDMNContentRecord retrieves a DMNContentRecord from the ledger by ID
+func (s *SmartContract) QueryDMNContentRecord(ctx contractapi.TransactionContextInterface, id string) (*DMNContentRecord, error) {
+	// Retrieve the DMNContentRecord from the ledger using the ID
+	recordJSON, err := ctx.GetStub().GetState(id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read from world state: %v", err)
+	}
+	if recordJSON == nil {
+		return nil, fmt.Errorf("the record %s does not exist", id)
+	}
+
+	// Unmarshal the JSON to a DMNContentRecord struct
+	var record DMNContentRecord
+	err = json.Unmarshal(recordJSON, &record)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal JSON: %v", err)
+	}
+
+	return &record, nil
 }
