@@ -3,16 +3,14 @@ from time import sleep
 import requests
 import websockets
 import json
-import threading
 from concurrent.futures import ThreadPoolExecutor
 
 core_url = "http://127.0.0.1:5000/"
-chaincode_url = f"""{core_url}api/v1/namespaces/default/apis/event2-test/"""
+chaincode_url = f"""{core_url}api/v1/namespaces/default/apis/event4-test/"""
+ipfs_url = "http://127.0.0.1:10207/ipfs/"
 
 
-async def listen(executor):
-    uri = "ws://localhost:5000/ws"  # 替换为你的 WebSocket 服务器地址
-    listen_subscription_name = "dmn_create2"
+async def listen(executor, uri, listen_subscription_name, listen_action):
     async with websockets.connect(uri) as websocket:
         # 连接后发送一条消息
         message_to_send = {
@@ -31,13 +29,13 @@ async def listen(executor):
                 print(f"Received message: {message}")
                 # 在接收到消息后启动一个线程执行send_post_request
                 loop = asyncio.get_event_loop()
-                await loop.run_in_executor(executor, handle_message, message)
+                await loop.run_in_executor(executor, listen_action, message)
             except websockets.ConnectionClosed:
                 print("Connection closed")
                 break
 
 
-def handle_message(message):
+def handle_upload_dmn(message):
     print(f"Received message: {message}")
     # 将字符串转换为字典
     data = json.loads(message)
@@ -105,5 +103,14 @@ def update_chaincode_cid(id, cid):
 
 # 创建线程池执行器
 executor = ThreadPoolExecutor()
+uri = "ws://localhost:5000/ws"  # 替换为你的 WebSocket 服务器地址
+listen_subscription_name = "dmn_create4"
 # 运行 WebSocket 监听器
-asyncio.get_event_loop().run_until_complete(listen(executor=executor))
+asyncio.get_event_loop().run_until_complete(
+    listen(
+        executor=executor,
+        uri=uri,
+        listen_subscription_name=listen_subscription_name,
+        listen_action=handle_upload_dmn,
+    )
+)

@@ -247,3 +247,98 @@ func (s *SmartContract) QueryDMNContentRecord(ctx contractapi.TransactionContext
 
 	return &record, nil
 }
+
+// DMN execute phase
+func (cc *SmartContract) Activity_0ysk2q6(ctx contractapi.TransactionContextInterface, dmnId string) error {
+
+	// Read Business Info
+	// businessRule, err := cc.ReadBusinessRule(ctx, instanceID, "Activity_0ysk2q6")
+	DMNContentRecord, err := cc.QueryDMNContentRecord(ctx, dmnId)
+	if err != nil {
+		return err
+	}
+
+	// // Check the BusinessRule State
+	// if businessRule.State != ENABLED {
+	// 	return fmt.Errorf("The BusinessRule is not ENABLED")
+	// }
+	eventPayload := map[string]string{
+		"ID":  dmnId,
+		"CID": DMNContentRecord.Cid,
+	}
+
+	eventPayloadAsBytes, err := json.Marshal(eventPayload)
+	if err != nil {
+		return fmt.Errorf("failed to marshal event payload: %v", err)
+	}
+
+	err = ctx.GetStub().SetEvent("DMNContentRead", eventPayloadAsBytes)
+	if err != nil {
+		return fmt.Errorf("failed to set event: %v", err)
+	}
+	return nil
+}
+
+func (cc *SmartContract) InvokeDmnContract(ctx contractapi.TransactionContextInterface, dmnContent string, dmnId string) error {
+	fmt.Print("Invoke DMN Contract success")
+	fmt.Print("DMN ID: ", dmnId, "DMN Content: ", dmnContent)
+	// // Combine the Parameters
+	// _args := make([][]byte, 4)
+	// _args[0] = []byte("createRecord")
+	// // input in json format
+	// ParamMapping := businessRule.ParamMapping
+	// realParamMapping := make(map[string]interface{})
+	// globalVariable, _err := cc.ReadGlobalVariable(ctx, instanceID)
+	// if _err != nil {
+	// 	return _err
+	// }
+
+	// for key, value := range ParamMapping {
+	// 	field := reflect.ValueOf(globalVariable).FieldByName(value)
+	// 	if !field.IsValid() {
+	// 		return fmt.Errorf("The field %s is not valid", value)
+	// 	}
+	// 	realParamMapping[key] = field.Interface()
+	// }
+	// var inputJsonBytes []byte
+	// inputJsonBytes, err = json.Marshal(realParamMapping)
+	// if err != nil {
+	// 	return err
+	// }
+	// _args[1] = inputJsonBytes
+
+	// // DMN Content
+	// _args[2] = []byte(ContentOfDmn)
+
+	// // decisionId
+	// _args[3] = []byte(businessRule.DecisionID)
+
+	// // Invoke DMN Engine Chaincode
+	// var resJson string
+	// resJson, err = cc.Invoke_Other_chaincode(ctx, "asset:v1", "default", _args)
+
+	// // Set the Result
+	// var res map[string]interface{}
+	// err = json.Unmarshal([]byte(resJson), &res)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// for key, value := range res {
+	// 	field := reflect.ValueOf(globalVariable).FieldByName(key)
+	// 	if !field.IsValid() {
+	// 		return fmt.Errorf("The field %s is not valid", key)
+	// 	}
+	// 	field.Set(reflect.ValueOf(value))
+	// }
+
+	// // Update the GlobalVariable
+	// err = cc.SetGlobalVariable(ctx, instanceID, globalVariable)
+
+	// // Change the BusinessRule State
+	// cc.ChangeBusinessRuleState(ctx, instanceID, "Activity_0ysk2q6", COMPLETED)
+
+	// cc.ChangeMsgState(ctx, instanceID, "Message_1e90tfn", ENABLED)
+
+	return nil
+}
