@@ -342,5 +342,18 @@ def BusinessRuleFuncFrame_code(
         change_next_state_code=change_next_state_code,
     )
 
+def BusinessRuleContinueFuncFrame_code(
+    business_rule: str,
+    pre_activate_next_hook: str = "",
+    after_all_hook: str = "",
+    change_next_state_code: str = "",
+):
+    return content["BusinessRuleContinueFuncFrame"].format(
+        business_rule=business_rule,
+        pre_activate_next_hook=pre_activate_next_hook,
+        after_all_hook=after_all_hook,
+        change_next_state_code=change_next_state_code,
+    )
+
 def InvokeChaincodeFunc_code():
     return content["InvokeChaincodeFunc"]

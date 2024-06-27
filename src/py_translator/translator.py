@@ -686,6 +686,14 @@ class GoChaincodeTranslator:
             snippet.BusinessRuleFuncFrame_code(
                 business_rule.id,
                 pre_activate_next_hook="\n\t".join(pre_activate_next_hook),
+                after_all_hook="",
+                change_next_state_code=""
+            )
+        )
+        temp_list.append(
+            snippet.BusinessRuleContinueFuncFrame_code(
+                business_rule.id,
+                pre_activate_next_hook="",
                 after_all_hook="\n\t".join(when_triggered_code),
                 change_next_state_code=self._generate_change_state_code(
                     business_rule.outgoing.target
@@ -725,8 +733,8 @@ class GoChaincodeTranslator:
             )
         )
         chaincode_list.append(snippet.fix_part_code())
-        chaincode_list.append(snippet.CheckRegisterFunc_code())
-        chaincode_list.append(snippet.RegisterFunc_code())
+        # chaincode_list.append(snippet.CheckRegisterFunc_code())
+        # chaincode_list.append(snippet.RegisterFunc_code())
         chaincode_list.append(snippet.InvokeChaincodeFunc_code())
 
         # generate InitLedger

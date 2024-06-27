@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strconv"
 	"reflect"
+	"crypto/sha256"
+	"encoding/hex"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
@@ -43,7 +45,7 @@ type ElementState int
 const (
 	DISABLED = iota
 	ENABLED
-	WAITINGFORCONFIRMATION
+	WAITINGFORCONFIRMATION // means wait continue in BusinessRule
 	COMPLETED
 )
 
@@ -91,7 +93,7 @@ type BusinessRule struct {
 	State        ElementState      `json:"state"`
 }
 
-func (cc *SmartContract) CreateBusinessRule(ctx contractapi.TransactionContextInterface, InstanceID string, BusinessRuleID string, CID string, Hash string, DecisionId string, ParamMapping map[string]string) (*BusinessRule, error) {
+func (cc *SmartContract) CreateBusinessRule(ctx contractapi.TransactionContextInterface, InstanceID string, BusinessRuleID string, CID string, DMNContent string, DecisionId string, ParamMapping map[string]string) (*BusinessRule, error) {
 	stub := ctx.GetStub()
 
 	existingData, err := stub.GetState(InstanceID)
@@ -107,6 +109,12 @@ func (cc *SmartContract) CreateBusinessRule(ctx contractapi.TransactionContextIn
 	err = json.Unmarshal(existingData, &instance)
 	if err != nil {
 		return nil, fmt.Errorf("反序列化实例数据时出错: %v", err)
+	}
+
+	Hash, err := cc.hashXML(ctx, DMNContent)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
 	}
 
 	// 创建业务规则对象
@@ -126,6 +134,22 @@ func (cc *SmartContract) CreateBusinessRule(ctx contractapi.TransactionContextIn
 	err = stub.PutState(InstanceID, instanceJson)
 	if err != nil {
 		return nil, fmt.Errorf("保存实例数据时出错: %v", err)
+	}
+
+	eventPayload := map[string]string{
+		"InstanceID": InstanceID,
+		"ID":         BusinessRuleID,
+		"DMNContent": DMNContent,
+	}
+
+	eventPayloadAsBytes, err := json.Marshal(eventPayload)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal event payload: %v", err)
+	}
+
+	err = ctx.GetStub().SetEvent("DMNContentCreated", eventPayloadAsBytes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to set event: %v", err)
 	}
 
 	returnBusinessRule, ok := instance.InstanceElements[BusinessRuleID].(*BusinessRule)
@@ -966,90 +990,6 @@ func (s *SmartContract) hashXML(ctx contractapi.TransactionContextInterface, xml
 
 
 
-func (cc *SmartContract) CheckRegister(ctx contractapi.TransactionContextInterface, instanceID string) (bool, error) {
-	stub := ctx.GetStub()
-
-	// Check if the instance has been registered
-	instanceBytes, err := stub.GetState(instanceID)
-	if err != nil {
-		return false, fmt.Errorf("Failed to read from world state. %s", err.Error())
-	}
-	var instance ContractInstance
-	err = json.Unmarshal(instanceBytes, &instance)
-	if err != nil {
-		return false, fmt.Errorf("Failed to unmarshal. %s", err.Error())
-	}
-
-	if instance.InstanceState == READY {
-		return true, nil
-	}
-
-	// set State depend on Participant with IsMulti=true
-
-	for element, value := range instance.InstanceElements {
-		participant, ok := value.(*Participant)
-		if ok {
-			if !participant.IsMulti && participant.X509 == "" {
-				return false, fmt.Errorf("The participant %s is not registered.", element)
-			}
-		}
-	}
-
-	// set State depend on Participant with IsMulti=false
-	instance.InstanceState = READY
-	instanceBytes, err = json.Marshal(instance)
-	if err != nil {
-		return false, fmt.Errorf("Failed to marshal. %s", err.Error())
-	}
-
-	err = stub.PutState(instanceID, instanceBytes)
-	if err != nil {
-		return false, fmt.Errorf("Failed to put state. %s", err.Error())
-	}
-
-	return true, nil
-}
-
-func (cc *SmartContract) RegisterParticipant(ctx contractapi.TransactionContextInterface, instanceID string, targetParticipantID string) error {
-	{
-		// check if the participant is single
-		var targetParticipant Participant
-		participant, _ := cc.ReadParticipant(ctx, instanceID, targetParticipantID)
-		if participant.IsMulti {
-			{
-				return fmt.Errorf("The participant is not multi")
-			}
-		}
-
-		// check ACL
-
-		if !cc.check_participant(ctx, instanceID, targetParticipantID) {
-			return fmt.Errorf("The participant is not allowed to be registered")
-		}
-
-		// Read the identity of invoker ,and binding it's identity to the participant
-
-		// Get the identity of the invoker
-		invokerIdentity, err := ctx.GetClientIdentity().GetID()
-		mspIndentity, err := ctx.GetClientIdentity().GetMSPID()
-
-		X509 := invokerIdentity + "@" + mspIndentity
-
-		// save the identity to the participant
-		targetParticipant.X509 = X509
-
-		// save the participant
-		err = cc.WriteParticipant(ctx, instanceID, targetParticipantID, &targetParticipant)
-		if err != nil {
-			{
-				return err
-			}
-		}
-
-		return nil
-	}
-}
-
 func (cc *SmartContract) Invoke_Other_chaincode(ctx contractapi.TransactionContextInterface, chaincodeName string, channel string, _args [][]byte) (string, error) {
 	stub := ctx.GetStub()
 	response := stub.InvokeChaincode(chaincodeName, _args, channel)
@@ -1140,7 +1080,7 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 
 	cc.CreateGateway(ctx, instanceID, "ExclusiveGateway_1sp1v7s", DISABLED)
 
-cc.CreateBusinessRule(ctx, instanceID, "Activity_0ysk2q6", initParameters.Activity_0ysk2q6.CID, initParameters.Activity_0ysk2q6.Hash, initParameters.Activity_0ysk2q6.DecisionID, initParameters.Activity_0ysk2q6.ParamMapping)
+	cc.CreateBusinessRule(ctx, instanceID, "Activity_0ysk2q6", initParameters.Activity_0ysk2q6.CID, initParameters.Activity_0ysk2q6_Content, initParameters.Activity_0ysk2q6.DecisionID, initParameters.Activity_0ysk2q6.ParamMapping)
 
 	instanceIDInt, err := strconv.Atoi(instanceID)
 	if err != nil {
@@ -1166,13 +1106,6 @@ cc.CreateBusinessRule(ctx, instanceID, "Activity_0ysk2q6", initParameters.Activi
 
 func (cc *SmartContract) StartEvent_1v2ab61(ctx contractapi.TransactionContextInterface, instanceID string) error {
 	stub := ctx.GetStub()
-	isRegistered, err := cc.CheckRegister(ctx, instanceID)
-	if !isRegistered {
-		errorMessage := fmt.Sprintf("Instance %s is not registered fully", instanceID)
-		fmt.Println(errorMessage)
-		return fmt.Errorf(errorMessage)
-	}
-
 
 	actionEvent, err := cc.ReadEvent(ctx, instanceID, "StartEvent_1v2ab61")
 	if err != nil {
@@ -1583,6 +1516,45 @@ func (cc *SmartContract) Activity_0ysk2q6(ctx contractapi.TransactionContextInte
 		return fmt.Errorf("The BusinessRule is not ENABLED")
 	}
 
+	eventPayload := map[string]string{
+		"ID":         instanceID,
+		"InstanceID": instanceID,
+		"Func":	   "Activity_0ysk2q6_Continue",
+	}
+
+	eventPayloadAsBytes, err := json.Marshal(eventPayload)
+	if err != nil {
+		return fmt.Errorf("failed to marshal event payload: %v", err)
+	}
+
+	err = ctx.GetStub().SetEvent("DMNContentRequired", eventPayloadAsBytes)
+	if err != nil {
+		return fmt.Errorf("failed to set event: %v", err)
+	}
+
+	cc.ChangeBusinessRuleState(ctx, instanceID, "Activity_0ysk2q6", WAITINGFORCONFIRMATION)
+
+	return nil
+}
+
+func (cc *SmartContract) Activity_0ysk2q6_Continue(ctx contractapi.TransactionContextInterface, instanceID string, ContentOfDmn string) error {
+	// Read Business Info
+	businessRule, err := cc.ReadBusinessRule(ctx, instanceID, "Activity_0ysk2q6")
+	if err != nil {
+		return err
+	}
+
+	// Check the BusinessRule State
+	if businessRule.State != WAITINGFORCONFIRMATION {
+		return fmt.Errorf("The BusinessRule is not Actived")
+	}
+
+	// check the hash
+	hashString, _ := cc.hashXML(ctx, ContentOfDmn)
+	if hashString != businessRule.Hash {
+		return fmt.Errorf("The hash is not matched")
+	}
+
 	// Combine the Parameters
 	_args := make([][]byte, 4)
 	_args[0] = []byte("createRecord")
@@ -1644,4 +1616,5 @@ func (cc *SmartContract) Activity_0ysk2q6(ctx contractapi.TransactionContextInte
     
 
 	return nil
+
 }
