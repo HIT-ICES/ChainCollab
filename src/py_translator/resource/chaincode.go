@@ -24,6 +24,7 @@ type InitParameters struct {
     Participant_1pasf6v Participant `json:"Participant_1pasf6v"`
 	Participant_1tddbk5 Participant `json:"Participant_1tddbk5"`
 	Activity_0ysk2q6 BusinessRule `json:"Activity_0ysk2q6"`
+	Activity_0ysk2q6_Content string `json:"Activity_0ysk2q6_Content"`
 }
 
 type ContractInstance struct {
@@ -952,6 +953,17 @@ func (cc *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface)
 	stub.SetEvent("initContractEvent", []byte("Contract has been initialized successfully"))
 	return nil
 }
+
+func (s *SmartContract) hashXML(ctx contractapi.TransactionContextInterface, xmlString string) (string, error) {
+	// Calculate SHA-256 hash
+	hash := sha256.New()
+	hash.Write([]byte(xmlString))
+	hashInBytes := hash.Sum(nil)
+	hashString := hex.EncodeToString(hashInBytes)
+	fmt.Print(hashString)
+	return hashString, nil
+}
+
 
 
 func (cc *SmartContract) CheckRegister(ctx contractapi.TransactionContextInterface, instanceID string) (bool, error) {

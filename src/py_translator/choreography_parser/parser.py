@@ -6,6 +6,7 @@ import xml.etree.ElementTree as ET
 from .elements import (
     NodeType,
     EdgeType,
+    RootType,
     Participant,
     Message,
     StartEvent,
@@ -156,7 +157,7 @@ class Choreography:
                     ],
                 )
             case NodeType.BUSINESS_RULE_TASK.value:
-                return BusinessRuleTask (
+                return BusinessRuleTask(
                     self,
                     element.attrib["id"],
                     element.attrib.get("name", ""),
@@ -168,6 +169,7 @@ class Choreography:
         bpmn2prefix = "{http://www.omg.org/spec/BPMN/20100524/MODEL}"
         match element.tag.split("}")[1]:
             case EdgeType.MESSAGE_FLOW.value:
+                self.message_to_add.append(element.attrib.get("messageRef"))
                 return MessageFlow(
                     self,
                     element.attrib["id"],
@@ -201,6 +203,14 @@ class Choreography:
         # recursively parse the children of the element
         for child in element:
             self._parse_element(child)
+    
+    def _parse_messages(self, root):
+        # Add Message to Graph base on demand of MessageFlow
+        message_to_add = [element for element in root if element.tag.split("}")[1] == NodeType.MESSAGE.value and element.attrib.get("id", "") in self.message_to_add]
+        for message in message_to_add:
+            message_node = self._parse_node(message)
+            self.nodes.append(message_node)
+            self._id2nodes[message_node.id] = message_node
 
     def _init_graph(self):
         for node in self.nodes:
@@ -214,19 +224,34 @@ class Choreography:
         for edge in self.edges:
             edge.deferred_init()
 
-    def load_diagram_from_xml_file(self, file_path):
-        document = ET.parse(file_path)
-        root = document.getroot()
-        # throught all the document, get all the elements, split as nodes and edges by their type(tag)
-        for element in root:
-            self._parse_element(element)
+    def load_from_root(self, root, target=""):
+
+        # if no target, load all, and if there are more than one, throw error
+
+        target_elements = [
+            element
+            for element in root
+            if element.tag.split("}")[1] == RootType.CHOREOGRAPHY.value
+            and (target == "" or element.attrib.get("id", "") == target)
+        ]
+        if len(target_elements) != 1:
+            # parse error, end
+            print("Error: target not found or multiple targets found")
+            return
+        target_element = target_elements[0]
+        self.message_to_add = []
+        self._parse_element(target_element)
+        self._parse_messages(root)
         self._init_element_properties()
 
-    def load_diagram_from_string(self, xml_string):
+    def load_diagram_from_xml_file(self, file_path, target=""):
+        document = ET.parse(file_path)
+        root = document.getroot()
+        self.load_from_root(root, target)
+
+    def load_diagram_from_string(self, xml_string, target=""):
         root = ET.fromstring(xml_string)
-        for element in root:
-            self._parse_element(element)
-        self._init_element_properties()
+        self.load_from_root(root, target)
 
 
 if __name__ == "__main__":

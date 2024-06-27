@@ -252,6 +252,12 @@ class GoChaincodeTranslator:
                     public_the_name(name), "BusinessRule"
                 )
             )
+            # content field of DMN
+            temp_list.append(
+                snippet.StructParameterDefinition_code(
+                    public_the_name(name) + "_Content", "string"
+                )
+            )
         return "\n\t".join(temp_list)
 
     def _generate_create_instance_code(self):

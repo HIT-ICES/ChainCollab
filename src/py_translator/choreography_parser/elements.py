@@ -6,6 +6,9 @@ from enum import Enum
 from typing import List, Optional, Tuple, Any, Protocol
 from .protocals import ElementProtocol, GraphProtocol
 
+class RootType(Enum):
+    CHOREOGRAPHY = "choreography"
+    BPMNDIAGRAM = "BPMNDiagram"
 
 class NodeType(Enum):
     PARTICIPANT = "participant"
@@ -17,7 +20,6 @@ class NodeType(Enum):
     PARALLEL_GATEWAY = "parallelGateway"
     EVENT_BASED_GATEWAY = "eventBasedGateway"
     BUSINESS_RULE_TASK = "businessRuleTask"
-
 
 class EdgeType(Enum):
     MESSAGE_FLOW = "messageFlow"
