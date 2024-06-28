@@ -8,6 +8,7 @@ import blankXml from '../../../../src/assets/bpmns/newDiagram.bpmn'; // Adjust t
 import Reporter from './lib-provider/validator/Validator.js';
 import axios from 'axios';
 import MainPage from './pop-up/MainPage.js'
+import TestPaletteProvider from './lib-provider/external-elements'
 
 const ChorJs = () => {
 
@@ -293,7 +294,8 @@ const ChorJs = () => {
         },
         additionalModules: [
           PropertiesPanelModule,
-          PropertiesProviderModule
+          PropertiesProviderModule,
+          TestPaletteProvider
         ],
         keyboard: {
           bindTo: document
@@ -327,6 +329,7 @@ const ChorJs = () => {
         while (isModelerHandling.current) {
           await new Promise(resolve => setTimeout(resolve, 10));
         }
+        isModelerHandling.current = true;
         console.log("Start removeModeler");
         console.log('Remove modeler', modeler.current)
         if (modeler.current !== null && modeler.current !== undefined) {

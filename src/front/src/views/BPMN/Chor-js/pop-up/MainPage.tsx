@@ -3,6 +3,7 @@ import $ from 'jquery';
 import { Button } from 'antd';
 
 import MessageModal from './MessageModal';
+import DmnModal from './DmnModal'
 import TaskModal from './TaskModal';
 import ParticipantModal from './ParticipantModal';
 
@@ -12,9 +13,9 @@ export default function MainPage() {
   const [modalOpen, setModalOpen] = React.useState(false);
 
   React.useEffect(() => {
-    $(document).on('dblclick', '.djs-element.djs-shape', function (e) {
+    const handleDoubleClick = (e) => {
       e.stopPropagation();
-      const data_element_id = $(this).attr('data-element-id');
+      const data_element_id = $(e.target).closest('.djs-element.djs-shape').attr('data-element-id');
       // console.log('click task done', this, e, data_element_id)
       // debugger
       const ids = data_element_id.split('_');
@@ -23,19 +24,31 @@ export default function MainPage() {
       setDataElementId(data_element_id);
       setDataElementType(type);
       setModalOpen(true);
-    });
-    return () => $(document).off('dblclick');
-  }, []);
+    }
+
+    if (!modalOpen) {
+      $(document).on('dblclick', '.djs-element.djs-shape', handleDoubleClick);
+    } else {
+      $(document).off('dblclick', '.djs-element.djs-shape', handleDoubleClick);
+
+    } return () => $(document).off('dblclick', '.djs-element.djs-shape', handleDoubleClick);
+  }, [modalOpen]);
 
   return (
     <div>
-      {dataElementId ? (
+      {dataElementType === 'Message' && dataElementId ? (
         <MessageModal
           dataElementId={dataElementId}
           open={modalOpen && 'Message' === dataElementType}
           onClose={() => setModalOpen(false)}
         />
       ) : null}
+      {dataElementType === 'Activity' && dataElementId ? (
+        <DmnModal
+          dataElementId={dataElementId}
+          open={modalOpen && 'Activity' === dataElementType}
+          onClose={() => setModalOpen(false)}
+        />) : null}
       {/* <ParticipantModal
         dataElementId={dataElementId}
         open={modalOpen && 'Participant' === dataElementType}
