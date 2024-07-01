@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "web-pack": "webpack serve --open",
-    "dev-server": "nohup vite --host --port 3000 --open &",
-    "dev": "vite --host --port 3000 --open --force",
+    "dev-server": "export ENV=server && vite --host --port 3000 --open",
+    "dev": "export ENV=local && vite --host --port 3000 --open --force",
     "build": "tsc && vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",

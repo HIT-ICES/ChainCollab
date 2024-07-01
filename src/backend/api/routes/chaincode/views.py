@@ -281,6 +281,7 @@ class ChainCodeViewSet(viewsets.ViewSet):
             res, installed_chaincodes = peer_channel_cli.lifecycle_query_installed(
                 timeout
             )
+            print("installed_chaincodes", installed_chaincodes)
             installed_chaincodes = installed_chaincodes.get("installed_chaincodes", {})
             if res != 0:
                 return Response(
