@@ -385,7 +385,6 @@ const MainMenu: React.FC = () => {
     <SubMenu key="/bpmn" icon={<DesktopOutlined />} title="BPMN">
       <Menu.Item key="/bpmn/drawing">Drawing</Menu.Item>
       <Menu.Item key="/bpmn/translation">Deploy</Menu.Item>
-      <Menu.Item key="/bpmn/chor-js">Chor-js</Menu.Item>
     </SubMenu>
   );
 

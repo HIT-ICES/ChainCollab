@@ -232,18 +232,18 @@ const routes: routesType[] = [
           title: "BPMN",
         },
         children: [
+          // {
+          //   path: "/bpmn/drawing",
+          //   element: withLoadingComponent(<Drawing />),
+          //   meta: {
+          //     title: "Drawing",
+          //   },
+          // },
           {
             path: "/bpmn/drawing",
-            element: withLoadingComponent(<Drawing />),
-            meta: {
-              title: "Drawing",
-            },
-          },
-          {
-            path: "/bpmn/chor-js",
             element: withLoadingComponent(<ChorJs />),
             meta: {
-              title: "Chor-js",
+              title: "Drawing",
             },
           },
           {
