@@ -7,11 +7,11 @@ import DmnModal from './DmnModal'
 import TaskModal from './TaskModal';
 import ParticipantModal from './ParticipantModal';
 
-export default function MainPage() {
+export default function MainPage({ xmlDataMap, onSave }) {
   const [dataElementId, setDataElementId] = React.useState(null);
   const [dataElementType, setDataElementType] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
-
+  
   React.useEffect(() => {
     const handleDoubleClick = (e) => {
       e.stopPropagation();
@@ -19,7 +19,7 @@ export default function MainPage() {
       // console.log('click task done', this, e, data_element_id)
       // debugger
       const ids = data_element_id.split('_');
-      console.log(ids)
+      // console.log(ids)
       const type = ids[0];
       setDataElementId(data_element_id);
       setDataElementType(type);
@@ -46,8 +46,10 @@ export default function MainPage() {
       {dataElementType === 'Activity' && dataElementId ? (
         <DmnModal
           dataElementId={dataElementId}
+          xmlData={xmlDataMap.get(dataElementId)}
           open={modalOpen && 'Activity' === dataElementType}
           onClose={() => setModalOpen(false)}
+          onSave={onSave}
         />) : null}
       {/* <ParticipantModal
         dataElementId={dataElementId}

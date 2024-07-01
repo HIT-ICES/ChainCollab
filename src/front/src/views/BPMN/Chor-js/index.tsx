@@ -20,6 +20,22 @@ const ChorJs = () => {
   let lastFile = null;
   let isValidating = false;
 
+  // map store dmn-elementID and xml content
+  const [dmnIdXmlMap, setDmnIdXmlMap] = useState(new Map());
+
+  // 向 Map 中添加一个键值对
+  const addToDmnMap = (key, value) => {
+    setDmnIdXmlMap(prevMap => {
+      const newMap = new Map(prevMap);
+      newMap.set(key, value);
+      return newMap;
+    });
+  };
+
+  useEffect(() => {
+    console.log('dmnIdXmlMap:', dmnIdXmlMap);
+  }, [dmnIdXmlMap]);
+
   async function renderModel(newXml) {
     await modeler.current.importXML(newXml);
     isDirty = false;
@@ -375,7 +391,9 @@ const ChorJs = () => {
           <input id="file-input" name="name" type="file" accept=".bpmn, .xml" style={{ display: "none" }} />
         </div>
       </div>
-      <MainPage />
+      <MainPage
+        xmlDataMap={dmnIdXmlMap}
+        onSave={addToDmnMap} />
     </div >
   );
 };

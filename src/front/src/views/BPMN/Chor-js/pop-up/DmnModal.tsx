@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useLayoutEffect } from 'react';
 import DmnJS from 'dmn-js/lib/Modeler';
-import { Modal } from 'antd'
+import { Modal, Input } from 'antd'
 import "dmn-js/dist/assets/diagram-js.css";
 import "dmn-js/dist/assets/dmn-font/css/dmn-embedded.css";
 import "dmn-js/dist/assets/dmn-js-decision-table-controls.css";
@@ -9,8 +9,9 @@ import "dmn-js/dist/assets/dmn-js-drd.css";
 import "dmn-js/dist/assets/dmn-js-literal-expression.css";
 import "dmn-js/dist/assets/dmn-js-shared.css";
 import { migrateDiagram } from '@bpmn-io/dmn-migrate';
+import { set } from 'lodash';
 
-const DmnModal = ({ dataElementId, open: isModalOpen, onClose }) => {
+const DmnModal = ({ dataElementId, xmlData, open: isModalOpen, onClose, onSave }) => {
     const blankXml = `<?xml version="1.0" encoding="UTF-8"?>
                 <definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" id="definitions_1olsuce" name="definitions" namespace="http://camunda.org/schema/1.0/dmn" exporter="dmn-js (https://demo.bpmn.io/dmn)" exporterVersion="16.4.0">
                 <decision id="decision_0tybghz" name="">
@@ -28,13 +29,18 @@ const DmnModal = ({ dataElementId, open: isModalOpen, onClose }) => {
     const viewer = useRef(null);
     const containerRef = useRef(null);
     const isModelerHandling = useRef(false);
+    // to update name in bpmnjs
+    const modeler = window.bpmnjs;
+    const elementRegistry = modeler.get('elementRegistry');
+    const commandStack = modeler.get('commandStack');
+    const shape = elementRegistry.get(dataElementId);
+    const [name, setName] = React.useState(shape !== null ? shape.businessObject.name : "");
 
     const renderModel = async (xml) => {
         try {
             // (1.1) migrate to DMN 1.3 if necessary
             xml = await migrateDiagram(xml);
             await viewer.current.importXML(xml);
-            console.log('rendered');
         } catch (err) {
             console.log('error rendering', err);
         }
@@ -68,10 +74,6 @@ const DmnModal = ({ dataElementId, open: isModalOpen, onClose }) => {
                 console.log("attach viewer")
                 viewer.current.attachTo(containerRef.current);
             };
-
-
-            // Import XML and render the DMN diagram
-            await renderModel(blankXml);
             attachViewer();
             isModelerHandling.current = false;
         }
@@ -94,6 +96,21 @@ const DmnModal = ({ dataElementId, open: isModalOpen, onClose }) => {
             detachViewer();
         };
     }, []);
+
+    useEffect(() => {
+        // console.log("xmlData", xmlData)
+        const loadDiagram = async () => {
+            // Import XML and render the DMN diagram
+            if (xmlData !== null && xmlData !== undefined) {
+                await renderModel(xmlData);
+            } else {
+                await renderModel(blankXml);
+            }
+        }
+        loadDiagram()
+        setName(shape !== null ? shape.businessObject.name : "");
+    }, [xmlData]);
+
 
     let lastFile = null;
     let isDirty = false;
@@ -183,9 +200,22 @@ const DmnModal = ({ dataElementId, open: isModalOpen, onClose }) => {
         }
     }, []);
 
+    const updateBpmnName = async () => {
+        // update标题
+        if (shape != null) {
+            console.log('update bpmn name', name);
+            commandStack.execute('element.updateLabel', {
+                element: shape,
+                newLabel: name,
+            });
+        }
+    }
+
     const handleOk = async () => {
         const xml = await viewer.current.saveXML({ format: true });
-        console.log('xml', xml);
+        // console.log('xml', xml);
+        onSave(dataElementId, xml.xml);
+        updateBpmnName();
         onClose && onClose(true);
     };
 
@@ -209,12 +239,24 @@ const DmnModal = ({ dataElementId, open: isModalOpen, onClose }) => {
                 centered
                 width={1800}
             >
+                Business Rule Task Name<br />
+                <Input
+                    placeholder="Change Business Rule Task Name"
+                    style={{ width: '50%', }}
+                    value={name}
+                    onChange={
+                        (e) => {
+                            setName(e.target.value);
+                        }
+                    }
+                />
+                <br />
                 <div
                     id='container'
                     ref={containerRef}
                     style={{
                         width: "100%",
-                        height: "100%",
+                        height: "95%",
                         background: "white",
                     }}>
                 </div>
