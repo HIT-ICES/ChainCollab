@@ -1,1 +1,336 @@
-{"namespace": "default", "name": "message_transfer", "description": "Spec interface for the message-transfer-basic golang chaincode", "version": "1.0", "methods": [{"name": "GetAllMessages", "pathname": "", "description": "", "params": [], "returns": [{"name": "", "schema": {"type": "array", "details": {"type": "object", "properties": {"type": "string"}}}}]}, {"name": "GetAllGateways", "pathname": "", "description": "", "params": [], "returns": [{"name": "", "schema": {"type": "array", "details": {"type": "object", "properties": {"type": "string"}}}}]}, {"name": "GetAllActionEvents", "pathname": "", "description": "", "params": [], "returns": [{"name": "", "schema": {"type": "array", "details": {"type": "object", "properties": {"type": "string"}}}}]}, {"name": "InitLedger", "pathname": "", "description": "", "params": [], "returns": []}, {"name": "StartEvent_1v2ab61", "pathname": "", "description": "", "params": [], "returns": []}, {"name": "Message_1e90tfn_Send", "pathname": "", "description": "", "params": [{"name": "fireflyTranID", "schema": {"type": "string"}}, {"name": "error", "schema": {"type": "boolean"}}], "returns": []}, {"name": "Message_1e90tfn_Complete", "pathname": "", "description": "", "params": [], "returns": []}, {"name": "Message_1uiozoi_Send", "pathname": "", "description": "", "params": [{"name": "fireflyTranID", "schema": {"type": "string"}}], "returns": []}, {"name": "Message_1uiozoi_Complete", "pathname": "", "description": "", "params": [], "returns": []}, {"name": "Message_0i0xp6a_Send", "pathname": "", "description": "", "params": [{"name": "fireflyTranID", "schema": {"type": "string"}}], "returns": []}, {"name": "Message_0i0xp6a_Complete", "pathname": "", "description": "", "params": [], "returns": []}, {"name": "Message_0gg08bf_Send", "pathname": "", "description": "", "params": [{"name": "fireflyTranID", "schema": {"type": "string"}}], "returns": []}, {"name": "Message_0gg08bf_Complete", "pathname": "", "description": "", "params": [], "returns": []}, {"name": "Message_1j4s0qh_Send", "pathname": "", "description": "", "params": [{"name": "fireflyTranID", "schema": {"type": "string"}}], "returns": []}, {"name": "Message_1j4s0qh_Complete", "pathname": "", "description": "", "params": [], "returns": []}, {"name": "ExclusiveGateway_0c8hy9b", "pathname": "", "description": "", "params": [], "returns": []}, {"name": "ExclusiveGateway_1sp1v7s", "pathname": "", "description": "", "params": [], "returns": []}, {"name": "EndEvent_17h95ah", "pathname": "", "description": "", "params": [], "returns": []}]}
+{
+    "namespace": "default",
+    "name": "example",
+    "description": "Spec interface for the message-transfer-basic golang chaincode",
+    "version": "1.0",
+    "methods": [
+        {
+            "name": "Init",
+            "pathname": "Init",
+            "description": "Init the chaincode",
+            "params": [],
+            "returns": []
+        },
+        {
+            "name": "CreateInstance",
+            "pathname": "CreateInstance",
+            "description": "Create a new instance",
+            "params": [
+                {
+                    "name": "initParametersBytes",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "GetMethod",
+            "pathname": "GetMethod",
+            "description": "Get all methods",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "GetAllMessages",
+            "pathname": "GetAllMessages",
+            "description": "Get all messages",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "GetAllGateways",
+            "pathname": "GetAllGateways",
+            "description": "Get all gateways",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "StartEvent_1v2ab61",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Message_1e90tfn_Send",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "FireFlyTran",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                [
+                    "error",
+                    "boolean"
+                ]
+            ],
+            "returns": []
+        },
+        {
+            "name": "Message_1e90tfn_Complete",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Message_1uiozoi_Send",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "FireFlyTran",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Message_1uiozoi_Complete",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Message_0i0xp6a_Send",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "FireFlyTran",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Message_0i0xp6a_Complete",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Message_0gg08bf_Send",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "FireFlyTran",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Message_0gg08bf_Complete",
+            "pathname": "",
+            "description": "",
+            "params": [],
+            "returns": []
+        },
+        {
+            "name": "Message_1j4s0qh_Send",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "FireFlyTran",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Message_1j4s0qh_Complete",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "ExclusiveGateway_0c8hy9b",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "ExclusiveGateway_1sp1v7s",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "EndEvent_17h95ah",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Activity_Activity_0ysk2q6",
+            "pathname": "Activity_Activity_0ysk2q6",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "DmnID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Activity_Activity_0ysk2q6_Continue",
+            "pathname": "Activity_Activity_0ysk2q6_Continue",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "ContentOfDmn",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        }
+    ],
+    "events": [
+        {
+            "name": "DMNContentCreated"
+        },
+        {
+            "name": "DMNContentRequired"
+        }
+    ]
+}

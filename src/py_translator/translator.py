@@ -678,7 +678,6 @@ class GoChaincodeTranslator:
 
     def _generate_chaincode_for_business_rule(self, business_rule: BusinessRuleTask):
         temp_list = []
-        # TODO: Implement Business Rule
         pre_activate_next_hook = self._hook_codes[business_rule.id]["pre_activate_next"]
         when_triggered_code = self._hook_codes[business_rule.id]["when_triggered"]
 
@@ -687,7 +686,7 @@ class GoChaincodeTranslator:
                 business_rule.id,
                 pre_activate_next_hook="\n\t".join(pre_activate_next_hook),
                 after_all_hook="",
-                change_next_state_code=""
+                change_next_state_code="",
             )
         )
         temp_list.append(
@@ -813,14 +812,23 @@ class GoChaincodeTranslator:
         return "\n\n".join(chaincode_list)
 
     def _fireflytran_ffi_param(self):
-        return ("fireflyTranID", "string")
+        return {
+            "name": "FireFlyTran",
+            "schema": {"type": "string"},
+        }
+
+    def _instance_id_param(self):
+        return {
+            "name": "InstanceID",
+            "schema": {"type": "string"},
+        }
 
     def _generate_ffi_item(
         self,
         name: str,
         pathname: str = "",
         description: str = "",
-        params: list[tuple[str, str]] = None,
+        params: list[tuple[str, str]] = [],
         returns: list[str] = None,
     ):
         params = params if params else []
@@ -829,9 +837,7 @@ class GoChaincodeTranslator:
             "name": name,
             "pathname": pathname,
             "description": description,
-            "params": [
-                {"name": param[0], "schema": {"type": param[1]}} for param in params
-            ],
+            "params": params,
             "returns": returns,
         }
         return item
@@ -853,13 +859,19 @@ class GoChaincodeTranslator:
             items.append(
                 self._generate_ffi_item(
                     name=init_message_flow.message.id + "_Send",
-                    params=[self._fireflytran_ffi_param(), *params],
+                    params=[
+                        self._instance_id_param(),
+                        self._fireflytran_ffi_param(),
+                        *params,
+                    ],
                 )
             )
             items.append(
                 self._generate_ffi_item(
                     name=init_message_flow.message.id + "_Complete",
-                    params=[],
+                    params=[
+                        self._instance_id_param(),
+                    ],
                 )
             )
             return items
@@ -868,13 +880,19 @@ class GoChaincodeTranslator:
         items.append(
             self._generate_ffi_item(
                 name=init_message_flow.message.id + "_Send",
-                params=[self._fireflytran_ffi_param(), *params],
+                params=[
+                    self._instance_id_param(),
+                    self._fireflytran_ffi_param(),
+                    *params,
+                ],
             )
         )
         items.append(
             self._generate_ffi_item(
                 name=init_message_flow.message.id + "_Complete",
-                params=[],
+                params=[
+                    self._instance_id_param(),
+                ],
             )
         )
 
@@ -893,8 +911,99 @@ class GoChaincodeTranslator:
         )
         return items
 
+    def _generate_ffi_items_for_business_rule_task(
+        self, business_rule_task: NodeType.BUSINESS_RULE_TASK
+    ) -> list:
+        first_name = "Activity_" + business_rule_task.id
+        continue_method = "Activity_" + business_rule_task.id + "_Continue"
+        return [
+            self._generate_ffi_item(
+                name=first_name,
+                pathname=first_name,
+                description="",
+                params=[
+                    {
+                        "name": "InstanceID",
+                        "schema": {"type": "string"},
+                    },
+                    {
+                        "name": "DmnID",
+                        "schema": {"type": "string"},
+                    },
+                ],
+            ),
+            self._generate_ffi_item(
+                name=continue_method,
+                pathname=continue_method,
+                description="",
+                params=[
+                    {
+                        "name": "InstanceID",
+                        "schema": {"type": "string"},
+                    },
+                    {
+                        "name": "ContentOfDmn",
+                        "schema": {"type": "string"},
+                    },
+                ],
+            ),
+        ]
+
+    def _generate_ffi_events(self) -> list:
+        return [{"name": "DMNContentCreated"}, {"name": "DMNContentRequired"}]
+
     def generate_ffi(self) -> str:
         ffi_items = []
+
+        # Init
+        ffi_items.append(
+            self._generate_ffi_item(
+                name="Init",
+                pathname="Init",
+                description="Init the chaincode",
+                params=[],
+            )
+        )
+        # Create Instance
+        ffi_items.append(
+            self._generate_ffi_item(
+                name="CreateInstance",
+                pathname="CreateInstance",
+                description="Create a new instance",
+                params=[{"name": "initParametersBytes", "schema": {"type": "string"}}],
+            )
+        )
+        # GetMethod GetAllMessages GetAllGateways GetAllActionEvents
+        ffi_items.append(
+            self._generate_ffi_item(
+                name="GetMethod",
+                pathname="GetMethod",
+                description="Get all methods",
+                params=[
+                    self._instance_id_param(),
+                ],
+            )
+        )
+        ffi_items.append(
+            self._generate_ffi_item(
+                name="GetAllMessages",
+                pathname="GetAllMessages",
+                description="Get all messages",
+                params=[
+                    self._instance_id_param(),
+                ],
+            )
+        )
+        ffi_items.append(
+            self._generate_ffi_item(
+                name="GetAllGateways",
+                pathname="GetAllGateways",
+                description="Get all gateways",
+                params=[
+                    self._instance_id_param(),
+                ],
+            )
+        )
 
         for element in self._choreography.nodes:
             match element.type:
@@ -902,6 +1011,11 @@ class GoChaincodeTranslator:
                     ffi_items.extend(
                         self.generate_ffi_items_for_choreography_task(element)
                     )
+                case NodeType.BUSINESS_RULE_TASK:
+                    ffi_items.extend(
+                        self._generate_ffi_items_for_business_rule_task(element)
+                    )
+                    pass
                 case (
                     NodeType.EXCLUSIVE_GATEWAY
                     | NodeType.PARALLEL_GATEWAY
@@ -912,13 +1026,19 @@ class GoChaincodeTranslator:
                     ffi_items.append(
                         self._generate_ffi_item(
                             name=element.id,
-                            params=[],
+                            params=[
+                                self._instance_id_param(),
+                            ],
                         )
                     )
+
+        ffi_events = []
+        ffi_events.extend(self._generate_ffi_events())
 
         with open("chaincode_snippet/ffiframe.json", "r") as f:
             frame = json.load(f)
         frame["methods"].extend(ffi_items)
+        frame["events"].extend(ffi_events)
         with open("resource/ffi.json", "w") as f:
             json.dump(frame, f)
         return json.dumps(frame)
