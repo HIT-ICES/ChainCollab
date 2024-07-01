@@ -3,6 +3,8 @@ import axios from "axios";
 const backendUrl = import.meta.env.ENV === "local" ? "http://localhost:8000" : "http://192.168.1.177:8000";
 const translatorUrl = import.meta.env.ENV === "local" ? "http://localhost:9999" : "http://192.168.1.177:9999";
 
+export const current_ip = import.meta.env.ENV === "local" ? "http://localhost" :"http://192.168.1.177"
+
 export const translatorAPI = axios.create({
   baseURL: `${translatorUrl}/api/v1`,
   headers: {

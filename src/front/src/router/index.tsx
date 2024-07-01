@@ -24,7 +24,7 @@ const MembershipDetail = lazy(
   () => import("@/views/Network/Memberships/Detail")
 );
 const NetworkSettings = lazy(() => import("@/views/Network/Settings"));
-const Drawing = lazy(() => import("@/views/BPMN/Drawing"));
+// const Drawing = lazy(() => import("@/views/BPMN/Drawing"));
 const Execution = lazy(() => import("@/views/BPMN/Execution"));
 const Translation = lazy(() => import("@/views/BPMN/Translation"));
 const SvgComponent = lazy(() => import("@/views/BPMN/Execution/SvgComponent"));

@@ -139,28 +139,48 @@ class ChainCodeViewSet(viewsets.ViewSet):
                 for filename in zipped_file.namelist():
                     zipped_file.extract(filename, file_path)
 
-                # When there is go.mod in the chain code, execute the go mod vendor command to obtain dependencies.
-                chaincode_path = file_path
-                found = False
-                for _, dirs, _ in os.walk(file_path):
-                    if found:
-                        break
-                    elif dirs:
-                        for each in dirs:
-                            chaincode_path += "/" + each
-                            if os.path.exists(chaincode_path + "/go.mod"):
-                                cwd = os.getcwd()
-                                print("cwd:", cwd)
-                                os.chdir(chaincode_path)
-                                os.system("go mod vendor")
-                                found = True
-                                os.chdir(cwd)
+                match language:
+                    case "golang":
+                        # When there is go.mod in the chain code, execute the go mod vendor command to obtain dependencies.
+                        chaincode_path = file_path
+                        found = False
+                        for _, dirs, _ in os.walk(file_path):
+                            if found:
                                 break
-                # if can not find go.mod, use the dir after extract zipped_file
-                if not found:
-                    for _, dirs, _ in os.walk(file_path):
-                        chaincode_path = file_path + "/" + dirs[0]
-                        break
+                            elif dirs:
+                                for each in dirs:
+                                    chaincode_path += "/" + each
+                                    if os.path.exists(chaincode_path + "/go.mod"):
+                                        cwd = os.getcwd()
+                                        print("cwd:", cwd)
+                                        os.chdir(chaincode_path)
+                                        os.system("go mod vendor")
+                                        found = True
+                                        os.chdir(cwd)
+                                        break
+                        # if can not find go.mod, use the dir after extract zipped_file
+                        if not found:
+                            for _, dirs, _ in os.walk(file_path):
+                                chaincode_path = file_path + "/" + dirs[0]
+                                break
+                    case "java":
+                        chaincode_path = file_path
+                        found = False
+                        for _, dirs, _ in os.walk(file_path):
+                            if found:
+                                break
+                            elif dirs:
+                                for each in dirs:
+                                    chaincode_path += "/" + each
+                                    if os.path.exists(chaincode_path + "/build.gradle"):
+                                        cwd = os.getcwd()
+                                        print("cwd:", cwd)
+                                        os.chdir(chaincode_path)
+                                        # os.system("gradle build")
+                                        found = True
+                                        os.chdir(cwd)
+                                        break
+
                 # find a resource_set.sub_resource_set in env
                 # fabric_resource_set = request.user.organization
                 fabric_resource_set = env_resource_set.sub_resource_set.get()
