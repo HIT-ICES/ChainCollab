@@ -1,17 +1,17 @@
 export WorkDir=$(pwd)
 alias clean='cd $WorkDir &&sudo ./clean.sh'
+export MODE="server"  # 或者设置为 'server'
 
-
-if [ -z "local" ]; then
+if [  "$MODE" == "local" ]; then
     alias start_front='cd $WorkDir/front && npm run dev-local'
-    alias start_agent='cd $WorkDir/agent/docker-rest-agent && source venv/bin/activate && gunicorn server:app -c ./gunicorn.conf.py:config_local_dev'
-    alias start_trans='cd $WorkDir/py_translator && source venv/bin/activate && uvicorn server:app --reload -c ./config.py:config_local_dev'
+    alias start_agent='cd $WorkDir/agent/docker-rest-agent && source venv/bin/activate && gunicorn server:app -c ./gunicorn.conf.py'
+    alias start_trans='cd $WorkDir/py_translator && source venv/bin/activate && uvicorn server:app --reload -c ./config.py'
 fi
 
-if [ -z "server" ]; then
+if [ "$MODE" == "server" ]; then
     alias start_front='cd $WorkDir/front && npm run dev-server'
-    alias start_agent='cd $WorkDir/agent/docker-rest-agent && source venv/bin/activate && gunicorn server:app -c ./gunicorn.conf.py:config_lab_server'
-    alias start_trans='cd $WorkDir/py_translator && source venv/bin/activate && uvicorn server:app --reload -c ./config.py:config_lab_server'
+    alias start_agent='cd $WorkDir/agent/docker-rest-agent && source venv/bin/activate && gunicorn server:app -c ./gunicorn.conf.py'
+    alias start_trans='cd $WorkDir/py_translator && source venv/bin/activate && uvicorn server:app --reload -c ./config.py'
 fi
 
 # COMMON PART
