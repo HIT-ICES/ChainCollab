@@ -855,6 +855,9 @@ class GoChaincodeTranslator:
 
         if not return_message_flow:
             params = self._get_message_params(init_message_flow.message)
+            params = [
+                {"name": param[0], "schema": {"type": param[1]}} for param in params
+            ]
             # find parameters
             items.append(
                 self._generate_ffi_item(
@@ -877,6 +880,7 @@ class GoChaincodeTranslator:
             return items
 
         params = self._get_message_params(init_message_flow.message)
+        params = [{"name": param[0], "schema": {"type": param[1]}} for param in params]
         items.append(
             self._generate_ffi_item(
                 name=init_message_flow.message.id + "_Send",
@@ -897,6 +901,7 @@ class GoChaincodeTranslator:
         )
 
         params = self._get_message_params(return_message_flow.message)
+        params = [{"name": param[0], "schema": {"type": param[1]}} for param in params]
         items.append(
             self._generate_ffi_item(
                 name=return_message_flow.message.id + "_Send",
@@ -958,8 +963,8 @@ class GoChaincodeTranslator:
         # Init
         ffi_items.append(
             self._generate_ffi_item(
-                name="Init",
-                pathname="Init",
+                name="InitLedger",
+                pathname="",
                 description="Init the chaincode",
                 params=[],
             )
@@ -968,7 +973,7 @@ class GoChaincodeTranslator:
         ffi_items.append(
             self._generate_ffi_item(
                 name="CreateInstance",
-                pathname="CreateInstance",
+                pathname="",
                 description="Create a new instance",
                 params=[{"name": "initParametersBytes", "schema": {"type": "string"}}],
             )
@@ -977,7 +982,7 @@ class GoChaincodeTranslator:
         ffi_items.append(
             self._generate_ffi_item(
                 name="GetMethod",
-                pathname="GetMethod",
+                pathname="",
                 description="Get all methods",
                 params=[
                     self._instance_id_param(),
@@ -987,7 +992,7 @@ class GoChaincodeTranslator:
         ffi_items.append(
             self._generate_ffi_item(
                 name="GetAllMessages",
-                pathname="GetAllMessages",
+                pathname="",
                 description="Get all messages",
                 params=[
                     self._instance_id_param(),
@@ -997,7 +1002,7 @@ class GoChaincodeTranslator:
         ffi_items.append(
             self._generate_ffi_item(
                 name="GetAllGateways",
-                pathname="GetAllGateways",
+                pathname="",
                 description="Get all gateways",
                 params=[
                     self._instance_id_param(),
@@ -1054,7 +1059,8 @@ class GoChaincodeTranslator:
 
 if __name__ == "__main__":
     go_chaincode_translator = GoChaincodeTranslator(
-        None, bpmn_file="resource/bpmn/Coffee_machine.bpmn"
+        None,
+        bpmn_file="resource/bpmn/service provider running time example-with business rule.bpmn",
     )
     go_chaincode_translator.generate_chaincode()
     go_chaincode_translator.generate_ffi()

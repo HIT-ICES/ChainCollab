@@ -6,9 +6,10 @@ import json
 from concurrent.futures import ThreadPoolExecutor
 
 core_url = "http://127.0.0.1:5000/"
-chaincode_url = f"""{core_url}api/v1/namespaces/default/apis/event4-test/"""
+chaincode_url = f"""{core_url}api/v1/namespaces/default/apis/Test2/"""
 ipfs_url = "http://127.0.0.1:10207/ipfs/"
-
+uri = "ws://localhost:5000/ws"  # 替换为你的 WebSocket 服务器地址
+listen_subscription_name = "dmn_created"
 
 async def listen(executor, uri, listen_subscription_name, listen_action):
     async with websockets.connect(uri) as websocket:
@@ -103,8 +104,6 @@ def update_chaincode_cid(id, cid):
 
 # 创建线程池执行器
 executor = ThreadPoolExecutor()
-uri = "ws://localhost:5000/ws"  # 替换为你的 WebSocket 服务器地址
-listen_subscription_name = "dmn_create4"
 # 运行 WebSocket 监听器
 asyncio.get_event_loop().run_until_complete(
     listen(

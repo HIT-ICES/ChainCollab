@@ -227,7 +227,8 @@ const ChorJs = () => {
 
     // open file dialog
     console.log('js_open_file add event listener');
-    document.getElementById('js-open-file').addEventListener('click', js_open_file_listener);
+    const openFileElement = document.getElementById('js-open-file');
+    openFileElement.addEventListener('click', js_open_file_listener);
 
 
     // load diagram from disk
@@ -249,8 +250,9 @@ const ChorJs = () => {
     const validateButton = document.getElementById('js-validate');
     validateButton.addEventListener('click', js_validate_listener);
 
+    const upload_file = document.getElementById('js-upload');
     //upload bpmn file
-    document.getElementById('js-upload').addEventListener('click', js_upload_listener);
+    upload_file.addEventListener('click', js_upload_listener);
 
     window.addEventListener('beforeunload', function (e) {
       if (isDirty) {
@@ -277,17 +279,17 @@ const ChorJs = () => {
     });
 
     return () => {
-      document.getElementById('js-download-diagram').removeEventListener('click', js_download_listener);
-      document.getElementById('js-download-svg').removeEventListener('click', js_download_svg_listerner);
-      document.getElementById('js-open-file').removeEventListener('click', js_open_file_listener);
-      document.getElementById('file-input').removeEventListener('change', js_file_input_listener);
-      document.getElementById('js-new-diagram').removeEventListener('click', js_create_new_diagram_listener);
-      document.getElementById('js-validate').removeEventListener('click', js_validate_listener);
-      document.getElementById('js-upload').removeEventListener('click', js_upload_listener);
+      downloadLink.removeEventListener('click', js_download_listener);
+      downloadSvgLink.removeEventListener('click', js_download_svg_listerner);
+      openFileElement.removeEventListener('click', js_open_file_listener);
+      loadDiagram.removeEventListener('change', js_file_input_listener);
+      newDiagram.removeEventListener('click', js_create_new_diagram_listener);
+      validateButton.removeEventListener('click', js_validate_listener);
+      upload_file.removeEventListener('click', js_upload_listener);
       dropZone.removeEventListener('dragover', drag_over_listener);
       dropZone.removeEventListener('dragleave', drag_leave_listener);
       dropZone.removeEventListener('drop', is_drag_over_listener);
-      modeler.current.off('commandStack.changed', on_change);
+      // modeler.current.off('commandStack.changed', on_change);
       console.log('event listeners[js-download-diagram, js-download-svg, js-open-file, file-input, js-new-diagram, js-validate, js-upload] removed');
     };
   }, []);

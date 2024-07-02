@@ -64,7 +64,17 @@
 This project is based on Docker containers, which requires a Linux system/WSL2 environment, as well as Docker and Docker Compose.
 
 ### Requirements
+#### docker pull images
+  pull docker images : 
+  1. `docker pull yeasy/hyperledger-fabric-peer:2.2.0` 
+  2. `docker pull hyperledger/fabric-ca:latest`
+  
+#### create docker net work
+      `docker network create cello-net`
 
+#### give the permission to the /etc/hosts
+      `sudo chmod 777 /etc/hosts`
+      
 #### GCC and Make
 
  `sudo apt-get install build-essential`

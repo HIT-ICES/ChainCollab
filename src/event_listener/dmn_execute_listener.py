@@ -7,9 +7,9 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 
 core_url = "http://127.0.0.1:5000/"
-chaincode_url = f"""{core_url}api/v1/namespaces/default/apis/event4-test/"""
+chaincode_url = f"""{core_url}api/v1/namespaces/default/apis/Test2/"""
 ipfs_url = "http://127.0.0.1:10207/ipfs/"
-
+listen_subscription_name = "dmn_required1"
 
 async def listen(executor, uri, listen_subscription_name, listen_action):
     async with websockets.connect(uri) as websocket:
@@ -73,7 +73,7 @@ asyncio.get_event_loop().run_until_complete(
     listen(
         executor=executor,
         uri=ws_uri,
-        listen_subscription_name="dmn_read4",
+        listen_subscription_name=listen_subscription_name,
         listen_action=handle_read_dmn,
     )
 )
