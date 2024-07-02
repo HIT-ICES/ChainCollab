@@ -4,6 +4,8 @@
 
 import os
 
+mode = os.environ.get("MODE", "local")
+
 PWD = os.path.dirname(os.path.abspath(__file__))
 print(PWD)
 BASE_PATH = os.path.dirname(PWD)
@@ -21,12 +23,14 @@ FABRIC_CA_CFG = os.path.join(BASE_PATH, "opt", "node", "ca.yaml.bak")
 
 FABRIC_CHAINCODE_STORE = os.path.join(BASE_PATH, "opt", "chaincode")
 BPMN_CHAINCODE_STORE = os.path.join(BASE_PATH, "opt", "chaincode-go-bpmn")
+CURRENT_IP = "192.168.1.177" if mode == "server" else "0.0.0.0"
+AGENT_PORT = 7001
 DEFAULT_AGENT = default_agent = {
     "name": "default_agent",
-    "urls": "http://192.168.1.177:7001",
+    "urls": f"http://{CURRENT_IP}:{AGENT_PORT}",
     "type": "docker",
     "status": "active",
 }
 
 DEFAULT_CHANNEL_NAME = "default"
-CURRENT_IP = "192.168.1.177"
+

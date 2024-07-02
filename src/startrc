@@ -1,14 +1,14 @@
 export WorkDir=$(pwd)
 alias clean='cd $WorkDir &&sudo ./clean.sh'
-export MODE="server"  # 或者设置为 'server'
+export MODE="local"  # 或者设置为 'server'
 
-if [  "$MODE" == "local" ]; then
-    alias start_front='cd $WorkDir/front && npm run dev-local'
+if [  "$MODE" = "local" ]; then
+    alias start_front='cd $WorkDir/front && npm run dev'
     alias start_agent='cd $WorkDir/agent/docker-rest-agent && source venv/bin/activate && gunicorn server:app -c ./gunicorn.conf.py'
     alias start_trans='cd $WorkDir/py_translator && source venv/bin/activate && uvicorn server:app --reload -c ./config.py'
 fi
 
-if [ "$MODE" == "server" ]; then
+if [ "$MODE" = "server" ]; then
     alias start_front='cd $WorkDir/front && npm run dev-server'
     alias start_agent='cd $WorkDir/agent/docker-rest-agent && source venv/bin/activate && gunicorn server:app -c ./gunicorn.conf.py'
     alias start_trans='cd $WorkDir/py_translator && source venv/bin/activate && uvicorn server:app --reload -c ./config.py'
