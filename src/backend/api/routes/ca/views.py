@@ -33,6 +33,7 @@ import traceback
 from api.models import Node, Port, FabricCAServerType, Environment, ResourceSet
 from api.common import ok, err
 from api.utils.host import add_host
+from api.config import CURRENT_IP
 
 LOG = logging.getLogger(__name__)
 
@@ -51,9 +52,7 @@ class FabricCAViewSet(viewsets.ViewSet):
                 "ca_name": ca_name,
                 "port_map": port_map,
             }
-            response = post(
-                "{}/api/v1/ca".format("http://192.168.1.177:7001"), data=data
-            )
+            response = post(f"""http://{CURRENT_IP}:7001/api/v1/ca""", data=data)
             if response.status_code == 200:
                 txt = json.loads(response.text)
                 return txt["res"]
@@ -70,9 +69,7 @@ class FabricCAViewSet(viewsets.ViewSet):
                 "action": "start",
             }
             response = post(
-                "{}/api/v1/ca/{}/operation".format(
-                    "http://192.168.1.177:7001", ca_name
-                ),
+                f"""http://{CURRENT_IP}:7001/api/v1/ca/{ca_name}/operation""",
                 data=data,
             )
 
