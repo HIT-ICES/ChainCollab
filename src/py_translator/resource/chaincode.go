@@ -24,11 +24,12 @@ type StateMemory struct {
 }
 
 type InitParameters struct {
-	Participant_1080bkg      Participant  `json:"Participant_1080bkg"`
-	Participant_0sktaei      Participant  `json:"Participant_0sktaei"`
-	Participant_1gcdqza      Participant  `json:"Participant_1gcdqza"`
-	Activity_1q19lty         BusinessRule `json:"Activity_1q19lty"`
-	Activity_1q19lty_Content string       `json:"Activity_1q19lty_Content"`
+	Participant_1080bkg           Participant       `json:"Participant_1080bkg"`
+	Participant_0sktaei           Participant       `json:"Participant_0sktaei"`
+	Participant_1gcdqza           Participant       `json:"Participant_1gcdqza"`
+	Activity_1q19lty_DecisionID   string            `json:"Activity_1q19lty_DecisionID"`
+	Activity_1q19lty_ParamMapping map[string]string `json:"Activity_1q19lty_ParamMapping"`
+	Activity_1q19lty_Content      string            `json:"Activity_1q19lty_Content"`
 }
 
 type ContractInstance struct {
@@ -91,27 +92,11 @@ type BusinessRule struct {
 	CID          string            `json:"cid"`
 	Hash         string            `json:"hash"`
 	DecisionID   string            `json:"decisionId"`
-	ParamMapping map[string]string `json:"mapping"`
+	ParamMapping map[string]string `json:"paramMapping"`
 	State        ElementState      `json:"state"`
 }
 
-func (cc *SmartContract) CreateBusinessRule(ctx contractapi.TransactionContextInterface, InstanceID string, BusinessRuleID string, CID string, DMNContent string, DecisionId string, ParamMapping map[string]string) (*BusinessRule, error) {
-	stub := ctx.GetStub()
-
-	existingData, err := stub.GetState(InstanceID)
-	if err != nil {
-		return nil, fmt.Errorf("获取状态数据时出错: %v", err)
-	}
-	if existingData == nil {
-		return nil, fmt.Errorf("实例 %s 不存在", InstanceID)
-	}
-
-	// 从现有实例中读取
-	var instance ContractInstance
-	err = json.Unmarshal(existingData, &instance)
-	if err != nil {
-		return nil, fmt.Errorf("反序列化实例数据时出错: %v", err)
-	}
+func (cc *SmartContract) CreateBusinessRule(ctx contractapi.TransactionContextInterface, instance *ContractInstance, BusinessRuleID string, DMNContent string, DecisionID string, ParamMapping map[string]string) (*BusinessRule, error) {
 
 	Hash, err := cc.hashXML(ctx, DMNContent)
 	if err != nil {
@@ -121,25 +106,15 @@ func (cc *SmartContract) CreateBusinessRule(ctx contractapi.TransactionContextIn
 
 	// 创建业务规则对象
 	instance.InstanceElements[BusinessRuleID] = &BusinessRule{
-		CID:          CID,
+		CID:          "",
 		Hash:         Hash,
-		DecisionID:   "",
+		DecisionID:   DecisionID,
 		ParamMapping: ParamMapping,
 		State:        DISABLED,
 	}
 
-	instanceJson, err := json.Marshal(instance)
-	if err != nil {
-		return nil, fmt.Errorf("序列化实例数据时出错: %v", err)
-	}
-	// 将业务规则对象序列化为JSON字符串并保存在状态数据库中
-	err = stub.PutState(InstanceID, instanceJson)
-	if err != nil {
-		return nil, fmt.Errorf("保存实例数据时出错: %v", err)
-	}
-
 	eventPayload := map[string]string{
-		"InstanceID": InstanceID,
+		"InstanceID": instance.InstanceID,
 		"ID":         BusinessRuleID,
 		"DMNContent": DMNContent,
 	}
@@ -162,23 +137,7 @@ func (cc *SmartContract) CreateBusinessRule(ctx contractapi.TransactionContextIn
 	return returnBusinessRule, nil
 }
 
-func (cc *SmartContract) CreateParticipant(ctx contractapi.TransactionContextInterface, instanceID string, participantID string, msp string, attributes map[string]string, IsMulti bool, MultiMaximum int, MultiMinimum int) (*Participant, error) {
-	stub := ctx.GetStub()
-
-	existingData, err := stub.GetState(instanceID)
-	if err != nil {
-		return nil, fmt.Errorf("获取状态数据时出错: %v", err)
-	}
-	if existingData == nil {
-		return nil, fmt.Errorf("实例 %s 不存在", instanceID)
-	}
-
-	// 从现有实例中读取
-	var instance ContractInstance
-	err = json.Unmarshal(existingData, &instance)
-	if err != nil {
-		return nil, fmt.Errorf("反序列化实例数据时出错: %v", err)
-	}
+func (cc *SmartContract) CreateParticipant(ctx contractapi.TransactionContextInterface, instance *ContractInstance, participantID string, msp string, attributes map[string]string, IsMulti bool, MultiMaximum int, MultiMinimum int) (*Participant, error) {
 
 	// 创建参与者对象
 	instance.InstanceElements[participantID] = &Participant{
@@ -187,16 +146,6 @@ func (cc *SmartContract) CreateParticipant(ctx contractapi.TransactionContextInt
 		IsMulti:      IsMulti,
 		MultiMaximum: MultiMaximum,
 		MultiMinimum: MultiMinimum,
-	}
-
-	instanceJson, err := json.Marshal(instance)
-	if err != nil {
-		return nil, fmt.Errorf("序列化实例数据时出错: %v", err)
-	}
-	// 将参与者对象序列化为JSON字符串并保存在状态数据库中
-	err = stub.PutState(instanceID, instanceJson)
-	if err != nil {
-		return nil, fmt.Errorf("保存实例数据时出错: %v", err)
 	}
 
 	returnParticipant, ok := instance.InstanceElements[participantID].(*Participant)
@@ -208,23 +157,7 @@ func (cc *SmartContract) CreateParticipant(ctx contractapi.TransactionContextInt
 
 }
 
-func (cc *SmartContract) CreateMessage(ctx contractapi.TransactionContextInterface, instanceID string, messageID string, sendParticipantID string, receiveParticipantID string, fireflyTranID string, msgState ElementState, format string) (*Message, error) {
-	stub := ctx.GetStub()
-
-	existingData, err := stub.GetState(instanceID)
-	if err != nil {
-		return nil, fmt.Errorf("获取状态数据时出错: %v", err)
-	}
-	if existingData == nil {
-		return nil, fmt.Errorf("实例 %s 不存在", instanceID)
-	}
-
-	// read from the existing instance
-	var instance ContractInstance
-	err = json.Unmarshal(existingData, &instance)
-	if err != nil {
-		return nil, fmt.Errorf("反序列化实例数据时出错: %v", err)
-	}
+func (cc *SmartContract) CreateMessage(ctx contractapi.TransactionContextInterface, instance *ContractInstance, messageID string, sendParticipantID string, receiveParticipantID string, fireflyTranID string, msgState ElementState, format string) (*Message, error) {
 
 	// 创建消息对象
 	instance.InstanceElements[messageID] = &Message{
@@ -235,15 +168,6 @@ func (cc *SmartContract) CreateMessage(ctx contractapi.TransactionContextInterfa
 		MsgState:             msgState,
 		Format:               format,
 	}
-	instanceJson, err := json.Marshal(instance)
-	if err != nil {
-		return nil, fmt.Errorf("序列化实例数据时出错: %v", err)
-	}
-	// 将消息对象序列化为JSON字符串并保存在状态数据库中
-	err = stub.PutState(instanceID, instanceJson)
-	if err != nil {
-		return nil, fmt.Errorf("保存实例数据时出错: %v", err)
-	}
 
 	returnMessage, ok := instance.InstanceElements[messageID].(*Message)
 	if !ok {
@@ -253,39 +177,12 @@ func (cc *SmartContract) CreateMessage(ctx contractapi.TransactionContextInterfa
 	return returnMessage, nil
 }
 
-func (cc *SmartContract) CreateGateway(ctx contractapi.TransactionContextInterface, instanceID string, gatewayID string, gatewayState ElementState) (*Gateway, error) {
-	stub := ctx.GetStub()
-
-	// 检查是否存在具有相同ID的记录
-	existingData, err := stub.GetState(instanceID)
-	if err != nil {
-		return nil, fmt.Errorf("获取状态数据时出错: %v", err)
-	}
-	if existingData == nil {
-		return nil, fmt.Errorf("实例 %s 不存在", instanceID)
-	}
-
-	// 从现有实例中读取
-	var instance ContractInstance
-	err = json.Unmarshal(existingData, &instance)
-	if err != nil {
-		return nil, fmt.Errorf("反序列化实例数据时出错: %v", err)
-	}
+func (cc *SmartContract) CreateGateway(ctx contractapi.TransactionContextInterface, instance *ContractInstance, gatewayID string, gatewayState ElementState) (*Gateway, error) {
 
 	// 创建网关对象
 	instance.InstanceElements[gatewayID] = &Gateway{
 		GatewayID:    gatewayID,
 		GatewayState: gatewayState,
-	}
-
-	instanceJson, err := json.Marshal(instance)
-	if err != nil {
-		return nil, fmt.Errorf("序列化实例数据时出错: %v", err)
-	}
-	// 将网关对象序列化为JSON字符串并保存在状态数据库中
-	err = stub.PutState(instanceID, instanceJson)
-	if err != nil {
-		return nil, fmt.Errorf("保存实例数据时出错: %v", err)
 	}
 
 	returnGateway, ok := instance.InstanceElements[gatewayID].(*Gateway)
@@ -296,25 +193,7 @@ func (cc *SmartContract) CreateGateway(ctx contractapi.TransactionContextInterfa
 	return returnGateway, nil
 }
 
-func (cc *SmartContract) CreateActionEvent(ctx contractapi.TransactionContextInterface, instanceID string, eventID string, eventState ElementState) (*ActionEvent, error) {
-	stub := ctx.GetStub()
-
-	// 检查是否存在具有相同ID的记录
-	existingData, err := stub.GetState(instanceID)
-	if err != nil {
-		return nil, fmt.Errorf("获取状态数据时出错: %v", err)
-	}
-	if existingData == nil {
-		return nil, fmt.Errorf("实例 %s 不存在", instanceID)
-	}
-
-	// 从现有实例中读取
-	var instance ContractInstance
-	err = json.Unmarshal(existingData, &instance)
-	if err != nil {
-		return nil, fmt.Errorf("反序列化实例数据时出错: %v", err)
-	}
-
+func (cc *SmartContract) CreateActionEvent(ctx contractapi.TransactionContextInterface, instance *ContractInstance, eventID string, eventState ElementState) (*ActionEvent, error) {
 	// 创建事件对象
 	instance.InstanceElements[eventID] = &ActionEvent{
 		EventID:    eventID,
@@ -960,7 +839,7 @@ func (cc *SmartContract) check_participant(ctx contractapi.TransactionContextInt
 
 func (cc *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
 	stub := ctx.GetStub()
-	fmt.Println("begin InitLedger")
+
 	// isInited in state
 	isInitedBytes, err := stub.GetState("isInited")
 	if err != nil {
@@ -977,7 +856,6 @@ func (cc *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface)
 	stub.PutState("isInited", []byte("true"))
 
 	stub.SetEvent("initContractEvent", []byte("Contract has been initialized successfully"))
-	fmt.Println("Contract has been initialized successfully")
 	return nil
 }
 
@@ -1010,50 +888,35 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 
 	isInitedBytes, err := stub.GetState("isInited")
 	if err != nil {
-		errorMsg := "Failed to read from world state."
-		fmt.Println(errorMsg, err.Error())
-		return "", errors.New(errorMsg)
+		return "", fmt.Errorf("failed to read from world state. %s", err.Error())
 	}
 
-	if isInitedBytes == nil {
-		fmt.Println("The instance has not been initialized.")
-		return "", fmt.Errorf("The instance has not been initialized.")
+	if isInitedBytes != nil {
+		return "", fmt.Errorf("The instance has been initialized.")
 	}
 
-	var isInited bool
-	err = json.Unmarshal(isInitedBytes, &isInited)
-	fmt.Println("isInited: ", isInited)
+	isInited, err := strconv.ParseBool(string(isInitedBytes))
+
 	if err != nil {
-		fmt.Println("Failed to unmarshal.")
-		return "", fmt.Errorf("Failed to unmarshal. %s", err.Error())
+		return "", fmt.Errorf("fail To Resolve isInited")
 	}
-
 	if !isInited {
-		fmt.Println("The instance has not been initialized.")
 		return "", fmt.Errorf("The instance has not been initialized.")
 	}
 
 	// get the instanceID
-
-	var instanceID string
-	instanceIDByte, err := stub.GetState("currentInstanceID")
+	instanceIDBytes, err := stub.GetState("currentInstanceID")
 	if err != nil {
-		fmt.Println("Failed to read from world state.")
-		return "", fmt.Errorf("Failed to read from world state. %s", err.Error())
+		return "", fmt.Errorf("failed to read from world state. %s", err.Error())
 	}
 
-	fmt.Print("instanceIDString: ", instanceIDByte)
-	instanceID, err = strconv.Unquote(string(instanceIDByte))
-
-	fmt.Print("instanceID: ", instanceID)
+	instanceID := string(instanceIDBytes)
 
 	// Create the instance with the data from the InitParameters
 	var initParameters InitParameters
-	fmt.Println("initParametersBytes: ", initParametersBytes)
 	err = json.Unmarshal([]byte(initParametersBytes), &initParameters)
 	if err != nil {
-		fmt.Println("Failed to unmarshal.")
-		return "", fmt.Errorf("Failed to unmarshal. %s", err.Error())
+		return "", fmt.Errorf("failed to unmarshal. %s", err.Error())
 	}
 
 	instance := ContractInstance{
@@ -1065,78 +928,71 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 	// Save the instance
 	instanceBytes, err := json.Marshal(instance)
 	if err != nil {
-		fmt.Println("Failed to marshal.")
-		return "", fmt.Errorf("Failed to marshal. %s", err.Error())
+		return "", fmt.Errorf("failed to marshal. %s", err.Error())
 	}
 
 	err = stub.PutState(instanceID, instanceBytes)
 	if err != nil {
-		fmt.Println("Failed to put state.")
-		return "", fmt.Errorf("Failed to put state. %s", err.Error())
+		return "", fmt.Errorf("failed to put state. %s", err.Error())
 	}
 
 	// Update the currentInstanceID
 
-	cc.CreateParticipant(ctx, instanceID, "Participant_1080bkg", initParameters.Participant_1080bkg.MSP, initParameters.Participant_1080bkg.Attributes, false, 0, 0)
-	cc.CreateParticipant(ctx, instanceID, "Participant_0sktaei", initParameters.Participant_0sktaei.MSP, initParameters.Participant_0sktaei.Attributes, false, 0, 0)
-	cc.CreateParticipant(ctx, instanceID, "Participant_1gcdqza", initParameters.Participant_1gcdqza.MSP, initParameters.Participant_1gcdqza.Attributes, false, 0, 0)
-	cc.CreateActionEvent(ctx, instanceID, "Event_1jtgn3j", ENABLED)
+	cc.CreateParticipant(ctx, &instance, "Participant_1080bkg", initParameters.Participant_1080bkg.MSP, initParameters.Participant_1080bkg.Attributes, false, 0, 0)
+	cc.CreateParticipant(ctx, &instance, "Participant_0sktaei", initParameters.Participant_0sktaei.MSP, initParameters.Participant_0sktaei.Attributes, false, 0, 0)
+	cc.CreateParticipant(ctx, &instance, "Participant_1gcdqza", initParameters.Participant_1gcdqza.MSP, initParameters.Participant_1gcdqza.Attributes, false, 0, 0)
+	cc.CreateActionEvent(ctx, &instance, "Event_1jtgn3j", ENABLED)
 
-	cc.CreateActionEvent(ctx, instanceID, "Event_0366pfz", DISABLED)
+	cc.CreateActionEvent(ctx, &instance, "Event_0366pfz", DISABLED)
 
-	cc.CreateActionEvent(ctx, instanceID, "Event_08edp7f", DISABLED)
+	cc.CreateActionEvent(ctx, &instance, "Event_08edp7f", DISABLED)
 
-	cc.CreateActionEvent(ctx, instanceID, "Event_146eii4", DISABLED)
+	cc.CreateActionEvent(ctx, &instance, "Event_146eii4", DISABLED)
 
-	cc.CreateMessage(ctx, instanceID, "Message_1qbk325", "Participant_1gcdqza", "Participant_0sktaei", "", DISABLED, `{"properties":{"product Id":{"type":"string","description":"Delivered product id"}},"required":["product Id"],"files":{},"file required":[]}`)
-	cc.CreateMessage(ctx, instanceID, "Message_1q05nnw", "Participant_0sktaei", "Participant_1gcdqza", "", DISABLED, `{"properties":{"payment amount":{"type":"number","description":"payment amount"}},"required":["payment amount"],"files":{},"file required":[]}`)
-	cc.CreateMessage(ctx, instanceID, "Message_1i8rlqn", "Participant_0sktaei", "Participant_1gcdqza", "", DISABLED, `{"properties":{"external service Id":{"type":"string","description":"The requested external service information"}},"required":["external service Id"],"files":{},"file required":[]}`)
-	cc.CreateMessage(ctx, instanceID, "Message_0m9p3da", "Participant_1080bkg", "Participant_0sktaei", "", DISABLED, `{"properties":{"invoice":{"type":"boolean","description":"Do you need an invoice?"}},"required":["invoice"],"files":{},"file required":[]}`)
-	cc.CreateMessage(ctx, instanceID, "Message_1etcmvl", "Participant_0sktaei", "Participant_1080bkg", "", DISABLED, `{"properties":{"invoice_id":{"type":"string","description":"Invoice Id"},"invoice_data":{"type":"number","description":"Date of invoice issuance"}},"required":["invoice_id"],"files":{"invoice":{"type":"file","description":"Invoice documents"}},"file required":["invoice"]}`)
-	cc.CreateMessage(ctx, instanceID, "Message_1joj7ca", "Participant_1080bkg", "Participant_0sktaei", "", DISABLED, `{"properties":{"invoice information":{"type":"string","description":"Invoice related information"}},"required":["invoice information"],"files":{},"file required":[]}`)
-	cc.CreateMessage(ctx, instanceID, "Message_1ljlm4g", "Participant_0sktaei", "Participant_1080bkg", "", DISABLED, `{"properties":{"delivered_product_id":{"type":"string","description":"delivered_product_id"}},"required":["delivered_product_id"],"files":{},"file required":[]}`)
-	cc.CreateMessage(ctx, instanceID, "Message_1xm9dxy", "Participant_1080bkg", "Participant_0sktaei", "", DISABLED, `{"properties":{"motivation":{"type":"string","description":"Motivation for Canceling orders"}},"required":["motivation"],"files":{},"file required":[]}`)
-	cc.CreateMessage(ctx, instanceID, "Message_0o8eyir", "Participant_1080bkg", "Participant_0sktaei", "", DISABLED, `{"properties":{"payment amount":{"type":"number","description":"payment amount"},"orderID":{"type":"number","description":"The order id of payment"},"temperature":{"type":"number","description":"The decision of temperature"},"dataType":{"type":"string","description":"The decision of datatype(eh: Wednesday..)"}},"required":["payment amount","orderID","temperature","dataType"],"files":{},"file required":[]}`)
-	cc.CreateMessage(ctx, instanceID, "Message_1nlagx2", "Participant_1080bkg", "Participant_0sktaei", "", DISABLED, `{"properties":{"confirmation":{"type":"boolean","description":"Whether to accept the service plan"}},"required":["confirmation"],"files":{},"file required":[]}`)
-	cc.CreateMessage(ctx, instanceID, "Message_1em0ee4", "Participant_0sktaei", "Participant_1080bkg", "", DISABLED, `{"properties":{"service plan":{"type":"string","description":"service plan"},"price_quotation":{"type":"number","description":"Price quotation"},"need_external_provider":{"type":"boolean","description":"Whether external service providers are required"}},"required":["service plan","price_quotation","need_external_provider"],"files":{},"file required":[]}`)
-	cc.CreateMessage(ctx, instanceID, "Message_0r9lypd", "Participant_0sktaei", "Participant_1080bkg", "", DISABLED, `{"properties":{"is_available":{"type":"boolean","description":"Is the service available?"}},"required":["is_available"],"files":{},"file required":[]}`)
-	cc.CreateMessage(ctx, instanceID, "Message_045i10y", "Participant_1080bkg", "Participant_0sktaei", "", DISABLED, `{"properties":{"serviceId":{"type":"string","description":"The required service id"}},"required":["serviceId"],"files":{},"file required":[]}`)
-	cc.CreateGateway(ctx, instanceID, "ExclusiveGateway_106je4z", DISABLED)
+	cc.CreateMessage(ctx, &instance, "Message_1qbk325", "Participant_1gcdqza", "Participant_0sktaei", "", DISABLED, `{"properties":{"product Id":{"type":"string","description":"Delivered product id"}},"required":["product Id"],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, &instance, "Message_1q05nnw", "Participant_0sktaei", "Participant_1gcdqza", "", DISABLED, `{"properties":{"payment amount":{"type":"number","description":"payment amount"}},"required":["payment amount"],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, &instance, "Message_1i8rlqn", "Participant_0sktaei", "Participant_1gcdqza", "", DISABLED, `{"properties":{"external service Id":{"type":"string","description":"The requested external service information"}},"required":["external service Id"],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, &instance, "Message_0m9p3da", "Participant_1080bkg", "Participant_0sktaei", "", DISABLED, `{"properties":{"invoice":{"type":"boolean","description":"Do you need an invoice?"}},"required":["invoice"],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, &instance, "Message_1etcmvl", "Participant_0sktaei", "Participant_1080bkg", "", DISABLED, `{"properties":{"invoice_id":{"type":"string","description":"Invoice Id"},"invoice_data":{"type":"number","description":"Date of invoice issuance"}},"required":["invoice_id"],"files":{"invoice":{"type":"file","description":"Invoice documents"}},"file required":["invoice"]}`)
+	cc.CreateMessage(ctx, &instance, "Message_1joj7ca", "Participant_1080bkg", "Participant_0sktaei", "", DISABLED, `{"properties":{"invoice information":{"type":"string","description":"Invoice related information"}},"required":["invoice information"],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, &instance, "Message_1ljlm4g", "Participant_0sktaei", "Participant_1080bkg", "", DISABLED, `{"properties":{"delivered_product_id":{"type":"string","description":"delivered_product_id"}},"required":["delivered_product_id"],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, &instance, "Message_1xm9dxy", "Participant_1080bkg", "Participant_0sktaei", "", DISABLED, `{"properties":{"motivation":{"type":"string","description":"Motivation for Canceling orders"}},"required":["motivation"],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, &instance, "Message_0o8eyir", "Participant_1080bkg", "Participant_0sktaei", "", DISABLED, `{"properties":{"payment amount":{"type":"number","description":"payment amount"},"orderID":{"type":"number","description":"The order id of payment"},"temperature":{"type":"number","description":"The decision of temperature"},"dataType":{"type":"string","description":"The decision of datatype(eh: Wednesday..)"}},"required":["payment amount","orderID","temperature","dataType"],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, &instance, "Message_1nlagx2", "Participant_1080bkg", "Participant_0sktaei", "", DISABLED, `{"properties":{"confirmation":{"type":"boolean","description":"Whether to accept the service plan"}},"required":["confirmation"],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, &instance, "Message_1em0ee4", "Participant_0sktaei", "Participant_1080bkg", "", DISABLED, `{"properties":{"service plan":{"type":"string","description":"service plan"},"price_quotation":{"type":"number","description":"Price quotation"},"need_external_provider":{"type":"boolean","description":"Whether external service providers are required"}},"required":["service plan","price_quotation","need_external_provider"],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, &instance, "Message_0r9lypd", "Participant_0sktaei", "Participant_1080bkg", "", DISABLED, `{"properties":{"is_available":{"type":"boolean","description":"Is the service available?"}},"required":["is_available"],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, &instance, "Message_045i10y", "Participant_1080bkg", "Participant_0sktaei", "", DISABLED, `{"properties":{"serviceId":{"type":"string","description":"The required service id"}},"required":["serviceId"],"files":{},"file required":[]}`)
+	cc.CreateGateway(ctx, &instance, "ExclusiveGateway_106je4z", DISABLED)
 
-	cc.CreateGateway(ctx, instanceID, "ExclusiveGateway_0hs3ztq", DISABLED)
+	cc.CreateGateway(ctx, &instance, "ExclusiveGateway_0hs3ztq", DISABLED)
 
-	cc.CreateGateway(ctx, instanceID, "ExclusiveGateway_0nzwv7v", DISABLED)
+	cc.CreateGateway(ctx, &instance, "ExclusiveGateway_0nzwv7v", DISABLED)
 
-	cc.CreateGateway(ctx, instanceID, "Gateway_1bhtapl", DISABLED)
+	cc.CreateGateway(ctx, &instance, "Gateway_1bhtapl", DISABLED)
 
-	cc.CreateGateway(ctx, instanceID, "Gateway_04h9e6e", DISABLED)
+	cc.CreateGateway(ctx, &instance, "Gateway_04h9e6e", DISABLED)
 
-	cc.CreateGateway(ctx, instanceID, "EventBasedGateway_1fxpmyn", DISABLED)
+	cc.CreateGateway(ctx, &instance, "EventBasedGateway_1fxpmyn", DISABLED)
 
-	cc.CreateBusinessRule(ctx, instanceID, "Activity_1q19lty", initParameters.Activity_1q19lty.CID, initParameters.Activity_1q19lty_Content, initParameters.Activity_1q19lty.DecisionID, initParameters.Activity_1q19lty.ParamMapping)
+	cc.CreateBusinessRule(ctx, &instance, "Activity_1q19lty", initParameters.Activity_1q19lty_Content, initParameters.Activity_1q19lty_DecisionID, initParameters.Activity_1q19lty_ParamMapping)
 
 	instanceIDInt, err := strconv.Atoi(instanceID)
 	if err != nil {
-		fmt.Println("Failed to convert instanceID to int.")
-		return "", fmt.Errorf("Failed to convert instanceID to int. %s", err.Error())
+		return "", fmt.Errorf("failed to convert instanceID to int. %s", err.Error())
 	}
 
 	instanceIDInt++
 	instanceID = strconv.Itoa(instanceIDInt)
 
-	instanceIDBytes, err := json.Marshal(instanceID)
+	instanceIDBytes = []byte(instanceID)
 	if err != nil {
-		fmt.Println("Failed to marshal instanceID.")
-		return "", fmt.Errorf("Failed to marshal instanceID. %s", err.Error())
+		return "", fmt.Errorf("failed to marshal instanceID. %s", err.Error())
 	}
 
 	err = stub.PutState("currentInstanceID", instanceIDBytes)
 	if err != nil {
-		fmt.Println("Failed to put state.")
-		return "", fmt.Errorf("Failed to put state. %s", err.Error())
+		return "", fmt.Errorf("failed to put state. %s", err.Error())
 	}
-
-	fmt.Print("Success to create instance, Next is ", instanceID)
 
 	return instanceID, nil
 
