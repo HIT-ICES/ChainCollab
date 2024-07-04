@@ -64,7 +64,7 @@ def CreateInstance_code(
             multi_maximum=multi_maximum,
             multi_minimum=multi_minimum,
         )
-    
+
     def InitBusinessRule(business_rule: str) -> str:
         return content["InitBusinessRuleFrame"].format(business_rule=business_rule)
 
@@ -90,8 +90,18 @@ def CreateInstance_code(
                 )
                 for message in messages
             ]
-            + [InitGateway(gateway) for gateway in gateways]+
-            [InitBusinessRule(business_rule) for business_rule in business_rules]
+            + [InitGateway(gateway) for gateway in gateways]
+            + [InitBusinessRule(business_rule) for business_rule in business_rules]
+        ),
+        event_content="\n".join(
+            [
+                '"'
+                + business_rule
+                + '"'
+                + " : "
+                + f"initParameters.{business_rule}_Content,"
+                for business_rule in business_rules
+            ]
         ),
     )
 
@@ -342,6 +352,7 @@ def BusinessRuleFuncFrame_code(
         change_next_state_code=change_next_state_code,
     )
 
+
 def BusinessRuleContinueFuncFrame_code(
     business_rule: str,
     pre_activate_next_hook: str = "",
@@ -354,6 +365,7 @@ def BusinessRuleContinueFuncFrame_code(
         after_all_hook=after_all_hook,
         change_next_state_code=change_next_state_code,
     )
+
 
 def InvokeChaincodeFunc_code():
     return content["InvokeChaincodeFunc"]
