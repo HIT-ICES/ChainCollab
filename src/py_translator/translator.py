@@ -247,12 +247,23 @@ class GoChaincodeTranslator:
             )
         # DMN ELEMENTS: TODO
         for name, prop in instance_initparameters["BusinessRuleTask"].items():
+            # temp_list.append(
+            #     snippet.StructParameterDefinition_code(
+            #         public_the_name(name), "BusinessRule"
+            #     )
+            # )
+            # only Content、DecisionID、ParamMapping
+            # content field of DMN
             temp_list.append(
                 snippet.StructParameterDefinition_code(
-                    public_the_name(name), "BusinessRule"
+                    public_the_name(name)+"_DecisionID", "string"
                 )
             )
-            # content field of DMN
+            temp_list.append(
+                snippet.StructParameterDefinition_code(
+                    public_the_name(name)+"_ParamMapping", "map[string]string"
+                )
+            )
             temp_list.append(
                 snippet.StructParameterDefinition_code(
                     public_the_name(name) + "_Content", "string"

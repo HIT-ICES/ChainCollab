@@ -38,7 +38,11 @@ type ContractInstance struct {
 	// global Memory
 	InstanceStateMemory StateMemory `json:"stateMemory"`
 	// map type from string to Message、Gateway、ActionEvent
-	InstanceElements map[string]interface{} `json:"InstanceElements"`
+	InstanceMessages      map[string]*Message      `json:"InstanceMessages"`
+	InstanceGateways      map[string]*Gateway      `json:"InstanceGateways"`
+	InstanceActionEvents  map[string]*ActionEvent  `json:"InstanceActionEvents"`
+	InstanceBusinessRules map[string]*BusinessRule `json:"InstanceBusinessRule"`
+	InstanceParticipants  map[string]*Participant  `json:"InstanceParticipants"`
 	// state of the instance
 	InstanceState InstanceState `json:"InstanceState"`
 }
@@ -60,40 +64,40 @@ type InstanceState int
 // )
 
 type Participant struct {
-	MSP          string            `json:"msp"`
-	Attributes   map[string]string `json:"attributes"`
-	IsMulti      bool              `json:"isMulti"`
-	MultiMaximum int               `json:"multiMaximum"`
-	MultiMinimum int               `json:"multiMinimum"`
+	MSP          string            `json:"MSP"`
+	Attributes   map[string]string `json:"Attributes"`
+	IsMulti      bool              `json:"IsMulti"`
+	MultiMaximum int               `json:"MultiMaximum"`
+	MultiMinimum int               `json:"MultiMinimum"`
 
-	X509 string `json:"x509"`
+	X509 string `json:"X509"`
 }
 
 type Message struct {
-	MessageID            string       `json:"messageID"`
-	SendParticipantID    string       `json:"sendMspID"`
-	ReceiveParticipantID string       `json:"receiveMspID"`
-	FireflyTranID        string       `json:"fireflyTranID"`
-	MsgState             ElementState `json:"msgState"`
-	Format               string       `json:"format"`
+	MessageID            string       `json:"MessageID"`
+	SendParticipantID    string       `json:"SendMspID"`
+	ReceiveParticipantID string       `json:"ReceiveMspID"`
+	FireflyTranID        string       `json:"FireflyTranID"`
+	MsgState             ElementState `json:"MsgState"`
+	Format               string       `json:"Format"`
 }
 
 type Gateway struct {
-	GatewayID    string       `json:"gatewayID"`
-	GatewayState ElementState `json:"gatewayState"`
+	GatewayID    string       `json:"GatewayID"`
+	GatewayState ElementState `json:"GatewayState"`
 }
 
 type ActionEvent struct {
-	EventID    string       `json:"eventID"`
-	EventState ElementState `json:"eventState"`
+	EventID    string       `json:"EventID"`
+	EventState ElementState `json:"EventState"`
 }
 
 type BusinessRule struct {
-	CID          string            `json:"cid"`
-	Hash         string            `json:"hash"`
-	DecisionID   string            `json:"decisionId"`
-	ParamMapping map[string]string `json:"paramMapping"`
-	State        ElementState      `json:"state"`
+	CID          string            `json:"Cid"`
+	Hash         string            `json:"Hash"`
+	DecisionID   string            `json:"DecisionID"`
+	ParamMapping map[string]string `json:"ParamMapping"`
+	State        ElementState      `json:"State"`
 }
 
 func (cc *SmartContract) CreateBusinessRule(ctx contractapi.TransactionContextInterface, instance *ContractInstance, BusinessRuleID string, DMNContent string, DecisionID string, ParamMapping map[string]string) (*BusinessRule, error) {
@@ -105,7 +109,7 @@ func (cc *SmartContract) CreateBusinessRule(ctx contractapi.TransactionContextIn
 	}
 
 	// 创建业务规则对象
-	instance.InstanceElements[BusinessRuleID] = &BusinessRule{
+	instance.InstanceBusinessRules[BusinessRuleID] = &BusinessRule{
 		CID:          "",
 		Hash:         Hash,
 		DecisionID:   DecisionID,
@@ -129,7 +133,7 @@ func (cc *SmartContract) CreateBusinessRule(ctx contractapi.TransactionContextIn
 		return nil, fmt.Errorf("failed to set event: %v", err)
 	}
 
-	returnBusinessRule, ok := instance.InstanceElements[BusinessRuleID].(*BusinessRule)
+	returnBusinessRule, ok := instance.InstanceBusinessRules[BusinessRuleID]
 	if !ok {
 		return nil, fmt.Errorf("无法将实例元素转换为BusinessRule")
 	}
@@ -140,7 +144,7 @@ func (cc *SmartContract) CreateBusinessRule(ctx contractapi.TransactionContextIn
 func (cc *SmartContract) CreateParticipant(ctx contractapi.TransactionContextInterface, instance *ContractInstance, participantID string, msp string, attributes map[string]string, IsMulti bool, MultiMaximum int, MultiMinimum int) (*Participant, error) {
 
 	// 创建参与者对象
-	instance.InstanceElements[participantID] = &Participant{
+	instance.InstanceParticipants[participantID] = &Participant{
 		MSP:          msp,
 		Attributes:   attributes,
 		IsMulti:      IsMulti,
@@ -148,7 +152,7 @@ func (cc *SmartContract) CreateParticipant(ctx contractapi.TransactionContextInt
 		MultiMinimum: MultiMinimum,
 	}
 
-	returnParticipant, ok := instance.InstanceElements[participantID].(*Participant)
+	returnParticipant, ok := instance.InstanceParticipants[participantID]
 	if !ok {
 		return nil, fmt.Errorf("无法将实例元素转换为Participant")
 	}
@@ -160,7 +164,7 @@ func (cc *SmartContract) CreateParticipant(ctx contractapi.TransactionContextInt
 func (cc *SmartContract) CreateMessage(ctx contractapi.TransactionContextInterface, instance *ContractInstance, messageID string, sendParticipantID string, receiveParticipantID string, fireflyTranID string, msgState ElementState, format string) (*Message, error) {
 
 	// 创建消息对象
-	instance.InstanceElements[messageID] = &Message{
+	instance.InstanceMessages[messageID] = &Message{
 		MessageID:            messageID,
 		SendParticipantID:    sendParticipantID,
 		ReceiveParticipantID: receiveParticipantID,
@@ -169,7 +173,7 @@ func (cc *SmartContract) CreateMessage(ctx contractapi.TransactionContextInterfa
 		Format:               format,
 	}
 
-	returnMessage, ok := instance.InstanceElements[messageID].(*Message)
+	returnMessage, ok := instance.InstanceMessages[messageID]
 	if !ok {
 		return nil, fmt.Errorf("无法将实例元素转换为Message")
 	}
@@ -180,12 +184,12 @@ func (cc *SmartContract) CreateMessage(ctx contractapi.TransactionContextInterfa
 func (cc *SmartContract) CreateGateway(ctx contractapi.TransactionContextInterface, instance *ContractInstance, gatewayID string, gatewayState ElementState) (*Gateway, error) {
 
 	// 创建网关对象
-	instance.InstanceElements[gatewayID] = &Gateway{
+	instance.InstanceGateways[gatewayID] = &Gateway{
 		GatewayID:    gatewayID,
 		GatewayState: gatewayState,
 	}
 
-	returnGateway, ok := instance.InstanceElements[gatewayID].(*Gateway)
+	returnGateway, ok := instance.InstanceGateways[gatewayID]
 	if !ok {
 		return nil, fmt.Errorf("无法将实例元素转换为Gateway")
 	}
@@ -195,12 +199,12 @@ func (cc *SmartContract) CreateGateway(ctx contractapi.TransactionContextInterfa
 
 func (cc *SmartContract) CreateActionEvent(ctx contractapi.TransactionContextInterface, instance *ContractInstance, eventID string, eventState ElementState) (*ActionEvent, error) {
 	// 创建事件对象
-	instance.InstanceElements[eventID] = &ActionEvent{
+	instance.InstanceActionEvents[eventID] = &ActionEvent{
 		EventID:    eventID,
 		EventState: eventState,
 	}
 
-	returnEvent, ok := instance.InstanceElements[eventID].(*ActionEvent)
+	returnEvent, ok := instance.InstanceActionEvents[eventID]
 	if !ok {
 		return nil, fmt.Errorf("无法将实例元素转换为ActionEvent")
 	}
@@ -228,7 +232,7 @@ func (c *SmartContract) ReadMsg(ctx contractapi.TransactionContextInterface, ins
 		return nil, err
 	}
 
-	msg, ok := instance.InstanceElements[messageID].(*Message)
+	msg, ok := instance.InstanceMessages[messageID]
 	if !ok {
 		errorMessage := fmt.Sprintf("Message %s does not exist", messageID)
 		fmt.Println(errorMessage)
@@ -257,7 +261,7 @@ func (c *SmartContract) ReadGtw(ctx contractapi.TransactionContextInterface, ins
 		return nil, err
 	}
 
-	gtw, ok := instance.InstanceElements[gatewayID].(*Gateway)
+	gtw, ok := instance.InstanceGateways[gatewayID]
 	if !ok {
 		errorMessage := fmt.Sprintf("Gateway %s does not exist", gatewayID)
 		fmt.Println(errorMessage)
@@ -287,7 +291,7 @@ func (c *SmartContract) ReadEvent(ctx contractapi.TransactionContextInterface, i
 		return nil, err
 	}
 
-	actionEvent, ok := instance.InstanceElements[eventID].(*ActionEvent)
+	actionEvent, ok := instance.InstanceActionEvents[eventID]
 	if !ok {
 		errorMessage := fmt.Sprintf("Event %s does not exist", eventID)
 		fmt.Println(errorMessage)
@@ -320,7 +324,7 @@ func (c *SmartContract) ChangeMsgState(ctx contractapi.TransactionContextInterfa
 		return err
 	}
 
-	msg, ok := instance.InstanceElements[messageID].(*Message)
+	msg, ok := instance.InstanceMessages[messageID]
 	if !ok {
 		errorMessage := fmt.Sprintf("Message %s does not exist", messageID)
 		fmt.Println(errorMessage)
@@ -366,7 +370,7 @@ func (c *SmartContract) ChangeMsgFireflyTranID(ctx contractapi.TransactionContex
 		return err
 	}
 
-	msg, ok := instance.InstanceElements[messageID].(*Message)
+	msg, ok := instance.InstanceMessages[messageID]
 	if !ok {
 		errorMessage := fmt.Sprintf("Message %s does not exist", messageID)
 		fmt.Println(errorMessage)
@@ -412,7 +416,7 @@ func (c *SmartContract) ChangeGtwState(ctx contractapi.TransactionContextInterfa
 		return err
 	}
 
-	gtw, ok := instance.InstanceElements[gatewayID].(*Gateway)
+	gtw, ok := instance.InstanceGateways[gatewayID]
 	if !ok {
 		errorMessage := fmt.Sprintf("Gateway %s does not exist", gatewayID)
 		fmt.Println(errorMessage)
@@ -458,7 +462,7 @@ func (c *SmartContract) ChangeEventState(ctx contractapi.TransactionContextInter
 		return err
 	}
 
-	actionEvent, ok := instance.InstanceElements[eventID].(*ActionEvent)
+	actionEvent, ok := instance.InstanceActionEvents[eventID]
 	if !ok {
 		errorMessage := fmt.Sprintf("Event %s does not exist", eventID)
 		fmt.Println(errorMessage)
@@ -504,7 +508,7 @@ func (cc *SmartContract) ChangeBusinessRuleState(ctx contractapi.TransactionCont
 		return err
 	}
 
-	businessRule, ok := instance.InstanceElements[BusinessRuleID].(*BusinessRule)
+	businessRule, ok := instance.InstanceBusinessRules[BusinessRuleID]
 	if !ok {
 		errorMessage := fmt.Sprintf("BusinessRule %s does not exist", BusinessRuleID)
 		fmt.Println(errorMessage)
@@ -550,11 +554,8 @@ func (cc *SmartContract) GetAllMessages(ctx contractapi.TransactionContextInterf
 	}
 
 	var messages []*Message
-	for _, element := range instance.InstanceElements {
-		msg, ok := element.(*Message)
-		if ok {
-			messages = append(messages, msg)
-		}
+	for _, msg := range instance.InstanceMessages {
+		messages = append(messages, msg)
 	}
 
 	return messages, nil
@@ -580,11 +581,8 @@ func (cc *SmartContract) GetAllGateways(ctx contractapi.TransactionContextInterf
 	}
 
 	var gateways []*Gateway
-	for _, element := range instance.InstanceElements {
-		gtw, ok := element.(*Gateway)
-		if ok {
-			gateways = append(gateways, gtw)
-		}
+	for _, gtw := range instance.InstanceGateways {
+		gateways = append(gateways, gtw)
 	}
 
 	return gateways, nil
@@ -610,11 +608,8 @@ func (cc *SmartContract) GetAllActionEvents(ctx contractapi.TransactionContextIn
 	}
 
 	var actionEvents []*ActionEvent
-	for _, element := range instance.InstanceElements {
-		event, ok := element.(*ActionEvent)
-		if ok {
-			actionEvents = append(actionEvents, event)
-		}
+	for _, event := range instance.InstanceActionEvents {
+		actionEvents = append(actionEvents, event)
 	}
 
 	return actionEvents, nil
@@ -701,7 +696,7 @@ func (cc *SmartContract) ReadBusinessRule(ctx contractapi.TransactionContextInte
 		return nil, err
 	}
 
-	businessRule, ok := instance.InstanceElements[BusinessRuleID].(*BusinessRule)
+	businessRule, ok := instance.InstanceBusinessRules[BusinessRuleID]
 	if !ok {
 		errorMessage := fmt.Sprintf("BusinessRule %s does not exist", BusinessRuleID)
 		fmt.Println(errorMessage)
@@ -730,7 +725,7 @@ func (cc *SmartContract) ReadParticipant(ctx contractapi.TransactionContextInter
 		return nil, err
 	}
 
-	participant, ok := instance.InstanceElements[participantID].(*Participant)
+	participant, ok := instance.InstanceParticipants[participantID]
 	if !ok {
 		errorMessage := fmt.Sprintf("Participant %s does not exist", participantID)
 		fmt.Println(errorMessage)
@@ -761,7 +756,7 @@ func (cc *SmartContract) WriteParticipant(ctx contractapi.TransactionContextInte
 		return err
 	}
 
-	instance.InstanceElements[participantID] = participant
+	instance.InstanceParticipants[participantID] = participant
 
 	instanceJson, err = json.Marshal(instance)
 	if err != nil {
@@ -891,8 +886,8 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 		return "", fmt.Errorf("failed to read from world state. %s", err.Error())
 	}
 
-	if isInitedBytes != nil {
-		return "", fmt.Errorf("The instance has been initialized.")
+	if isInitedBytes == nil {
+		return "", fmt.Errorf("The instance has not been initialized.")
 	}
 
 	isInited, err := strconv.ParseBool(string(isInitedBytes))
@@ -920,20 +915,13 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 	}
 
 	instance := ContractInstance{
-		InstanceID:          instanceID,
-		InstanceStateMemory: StateMemory{},
-		InstanceElements:    make(map[string]interface{}),
-	}
-
-	// Save the instance
-	instanceBytes, err := json.Marshal(instance)
-	if err != nil {
-		return "", fmt.Errorf("failed to marshal. %s", err.Error())
-	}
-
-	err = stub.PutState(instanceID, instanceBytes)
-	if err != nil {
-		return "", fmt.Errorf("failed to put state. %s", err.Error())
+		InstanceID:            instanceID,
+		InstanceStateMemory:   StateMemory{},
+		InstanceMessages:      make(map[string]*Message),
+		InstanceActionEvents:  make(map[string]*ActionEvent),
+		InstanceGateways:      make(map[string]*Gateway),
+		InstanceParticipants:  make(map[string]*Participant),
+		InstanceBusinessRules: make(map[string]*BusinessRule),
 	}
 
 	// Update the currentInstanceID
@@ -975,6 +963,17 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 	cc.CreateGateway(ctx, &instance, "EventBasedGateway_1fxpmyn", DISABLED)
 
 	cc.CreateBusinessRule(ctx, &instance, "Activity_1q19lty", initParameters.Activity_1q19lty_Content, initParameters.Activity_1q19lty_DecisionID, initParameters.Activity_1q19lty_ParamMapping)
+
+	// Save the instance
+	instanceBytes, err := json.Marshal(instance)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal. %s", err.Error())
+	}
+
+	err = stub.PutState(instanceID, instanceBytes)
+	if err != nil {
+		return "", fmt.Errorf("failed to put state. %s", err.Error())
+	}
 
 	instanceIDInt, err := strconv.Atoi(instanceID)
 	if err != nil {
