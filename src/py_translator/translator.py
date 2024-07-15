@@ -247,12 +247,23 @@ class GoChaincodeTranslator:
             )
         # DMN ELEMENTS: TODO
         for name, prop in instance_initparameters["BusinessRuleTask"].items():
+            # temp_list.append(
+            #     snippet.StructParameterDefinition_code(
+            #         public_the_name(name), "BusinessRule"
+            #     )
+            # )
+            # only Content、DecisionID、ParamMapping
+            # content field of DMN
             temp_list.append(
                 snippet.StructParameterDefinition_code(
-                    public_the_name(name), "BusinessRule"
+                    public_the_name(name) + "_DecisionID", "string"
                 )
             )
-            # content field of DMN
+            temp_list.append(
+                snippet.StructParameterDefinition_code(
+                    public_the_name(name) + "_ParamMapping", "map[string]string"
+                )
+            )
             temp_list.append(
                 snippet.StructParameterDefinition_code(
                     public_the_name(name) + "_Content", "string"
@@ -919,8 +930,8 @@ class GoChaincodeTranslator:
     def _generate_ffi_items_for_business_rule_task(
         self, business_rule_task: NodeType.BUSINESS_RULE_TASK
     ) -> list:
-        first_name = "Activity_" + business_rule_task.id
-        continue_method = "Activity_" + business_rule_task.id + "_Continue"
+        first_name = business_rule_task.id
+        continue_method = business_rule_task.id + "_Continue"
         return [
             self._generate_ffi_item(
                 name=first_name,
@@ -930,11 +941,7 @@ class GoChaincodeTranslator:
                     {
                         "name": "InstanceID",
                         "schema": {"type": "string"},
-                    },
-                    {
-                        "name": "DmnID",
-                        "schema": {"type": "string"},
-                    },
+                    }
                 ],
             ),
             self._generate_ffi_item(
@@ -955,7 +962,7 @@ class GoChaincodeTranslator:
         ]
 
     def _generate_ffi_events(self) -> list:
-        return [{"name": "DMNContentCreated"}, {"name": "DMNContentRequired"}]
+        return [{"name": "DMNContentRequired"}, {"name": "InstanceCreated"}]
 
     def generate_ffi(self) -> str:
         ffi_items = []
@@ -1006,6 +1013,38 @@ class GoChaincodeTranslator:
                 description="Get all gateways",
                 params=[
                     self._instance_id_param(),
+                ],
+            )
+        )
+        ffi_items.append(
+            self._generate_ffi_item(
+                name="GetAllParticipants",
+                pathname="",
+                description="Get all participants",
+                params=[
+                    self._instance_id_param(),
+                ],
+            )
+        )
+        ffi_items.append(
+            self._generate_ffi_item(
+                name="GetAllBusinessRules",
+                pathname="",
+                description="Get all business rules",
+                params=[
+                    self._instance_id_param(),
+                ],
+            )
+        )
+        ffi_items.append(
+            self._generate_ffi_item(
+                name="UpdateCID",
+                pathname="",
+                description="Update the businessRule CID",
+                params=[
+                    self._instance_id_param(),
+                    {"name": "BusinessRuleID", "schema": {"type": "string"}},
+                    {"name": "cid", "schema": {"type": "string"}},
                 ],
             )
         )

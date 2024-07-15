@@ -7,9 +7,10 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 
 core_url = "http://127.0.0.1:5000/"
-chaincode_url = f"""{core_url}api/v1/namespaces/default/apis/Test2/"""
+chaincode_url = f"""{core_url}api/v1/namespaces/default/apis/Test12/"""
 ipfs_url = "http://127.0.0.1:10207/ipfs/"
-listen_subscription_name = "dmn_required1"
+listen_subscription_name = "dmn_required_12"
+
 
 async def listen(executor, uri, listen_subscription_name, listen_action):
     async with websockets.connect(uri) as websocket:
@@ -45,10 +46,13 @@ def handle_read_dmn(message):
     # 将字符串转换为字典
     data = json.loads(message)
     eventContent = data.get("blockchainEvent").get("output")
-    Id = eventContent.get("ID")
+    instance_ID = eventContent.get("InstanceID")
     Cid = eventContent.get("CID")
+    func_name = eventContent.get("Func")
     dmn_content = read_from_ipfs(ipfs_url, Cid)
-    invoke_dmn_contract(dmn_content, Id)
+    invoke_dmn_contract(
+        dmn_content=dmn_content, instance_id=instance_ID, func_name=func_name
+    )
 
 
 def read_from_ipfs(url, cid):
@@ -57,13 +61,13 @@ def read_from_ipfs(url, cid):
     return dmn_content
 
 
-def invoke_dmn_contract(dmn_content, Id):
+def invoke_dmn_contract(dmn_content, instance_id, func_name):
     # 目标URL
-    url = f"""{chaincode_url}invoke/InvokeDmnContract"""
+    url = f"""{chaincode_url}invoke/{func_name}"""
     # 构造请求
     response = requests.post(
         url,
-        data=json.dumps({"input": {"dmnContent": dmn_content, "dmnId": Id}}),
+        data=json.dumps({"input": {"ContentOfDmn": dmn_content, "InstanceID": instance_id}}),
         headers={"Content-Type": "application/json"},
     )
     print(response.text)

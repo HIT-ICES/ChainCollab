@@ -233,7 +233,7 @@ def encode_decode_xml_string(xml_string):
 
 def invoke_chaincode():
     # 目标URL
-    url = "http://127.0.0.1:5000/api/v1/namespaces/default/apis/Test5/invoke/CreateInstance"
+    url = "http://127.0.0.1:5000/api/v1/namespaces/default/apis/Test12/invoke/CreateInstance"
 
     parameters = {
         "Participant_1080bkg": {
@@ -267,8 +267,8 @@ def invoke_chaincode():
             "mapping": {"temperature": "temperature", "dayType": "dataType"},
             "state": 0,
         },
-        "Activity_0ysk2q6_Content": "",
-        # "Activity_0ysk2q6_Content": xml_string,
+        # "Activity_0ysk2q6_Content": "",
+        "Activity_1q19lty_Content": xml_string,
     }
 
     # JSON请求体

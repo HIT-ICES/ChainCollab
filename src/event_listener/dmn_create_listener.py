@@ -6,10 +6,11 @@ import json
 from concurrent.futures import ThreadPoolExecutor
 
 core_url = "http://127.0.0.1:5000/"
-chaincode_url = f"""{core_url}api/v1/namespaces/default/apis/Test2/"""
+chaincode_url = f"""{core_url}api/v1/namespaces/default/apis/Test12/"""
 ipfs_url = "http://127.0.0.1:10207/ipfs/"
 uri = "ws://localhost:5000/ws"  # 替换为你的 WebSocket 服务器地址
-listen_subscription_name = "dmn_created"
+listen_subscription_name = "instance_created_12"
+
 
 async def listen(executor, uri, listen_subscription_name, listen_action):
     async with websockets.connect(uri) as websocket:
@@ -42,15 +43,22 @@ def handle_upload_dmn(message):
     data = json.loads(message)
     eventContent = data.get("blockchainEvent").get("output")
     print("------------\n", eventContent)
-    dmn_content = eventContent.get("DMNContent")
-    Id = eventContent.get("ID")
-    data_id = invoke_upload_data(dmn_content, Id)
-    invoke_broadcast_data(data_id)
-    # 如果不休眠2秒，broadcast未完成，query_data会返回None（还未传到IPFS）
-    sleep(2)
-    IPFS_cid = query_data(data_id)
-    print(f"IPFS_cid: {IPFS_cid}")
-    update_chaincode_cid(Id, IPFS_cid)
+    instance_id = eventContent.get("InstanceID")
+
+    for key, value in eventContent.items():
+        if key == "InstanceID":
+            continue
+        dmn_content = value
+        dmn_Id = key
+        data_id = invoke_upload_data(dmn_content, instance_id + "@" + dmn_Id)
+        invoke_broadcast_data(data_id)
+        # 如果不休眠2秒，broadcast未完成，query_data会返回None（还未传到IPFS）
+        sleep(2)
+        IPFS_cid = query_data(data_id)
+        print(f"IPFS_cid: {IPFS_cid}")
+        update_chaincode_cid(
+            cid=IPFS_cid, instanceId=instance_id, business_rule_id=dmn_Id
+        )
 
 
 def invoke_upload_data(data_content, Id):
@@ -90,10 +98,16 @@ def query_data(Id):
     return res_json.get("blob").get("public")
 
 
-def update_chaincode_cid(id, cid):
-    print(f"Updating chaincode with id: {id} and cid: {cid}")
-    url = f"""{chaincode_url}invoke/UpdateCid"""
-    request_body = {"input": {"id": id, "cid": cid}}
+def update_chaincode_cid(cid, instanceId, business_rule_id):
+    print(f"Updating chaincode with instanceId: {instanceId} and cid: {cid}")
+    url = f"""{chaincode_url}invoke/UpdateCID"""
+    request_body = {
+        "input": {
+            "InstanceID": instanceId,
+            "BusinessRuleID": business_rule_id,
+            "cid": cid,
+        }
+    }
     json_data = json.dumps(request_body)
     headers = {
         "Content-Type": "application/json",
