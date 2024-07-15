@@ -2,16 +2,17 @@ import { useEffect, useState } from "react"
 import { Card, Row, Col, Button, Typography, Steps, Modal, TableProps, Table, Select, Input, Tag } from "antd"
 import { useLocation, useNavigate } from "react-router-dom";
 import { BindingModal } from "./bindingModel"
-import { getMapInfoofBPMNInstance, generateChaincode, retrieveBPMN, packageBPMN, updateBPMNInstanceStatus, updateBPMNInstanceFireflyUrl } from "@/api/externalResource"
+import { getMapInfoofBPMNInstance, retrieveBPMN, packageBPMN, updateBPMNInstanceStatus, updateBPMNInstanceFireflyUrl } from "@/api/externalResource"
+import { generateChaincode } from "@/api/translator"
 import { useAvailableMembers } from "./hooks"
 import axios from "axios"
 const steps = [
     {
         title: "Initiated",
     },
-    {
-        title: 'Fullfilled',
-    },
+    // {
+    //     title: 'Fullfilled',
+    // },
     {
         title: 'Generated',
     },
@@ -335,12 +336,13 @@ const BPMNInstanceOverview = () => {
                         flex="auto"
                         style={{ textAlign: "right", marginRight: "0px" }}
                     >
-                        <Button type="primary"
+                        {/* <Button type="primary"
                             style={{ marginRight: "10px", display: status == "Initiated" ? "" : "none" }}
                             onClick={() => {
                                 setIsBindingModelOpen(true);
-                            }} >BINDING</Button>
-                        <Button type="primary" disabled={status == 'Initiated'}
+                            }} >BINDING</Button> */}
+                        <Button type="primary"
+                            // disabled={status == 'Initiated'}
                             loading={buttonLoading}
                             onClick={() => {
                                 if (status == 'Generated') {

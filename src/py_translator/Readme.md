@@ -3,7 +3,7 @@
 
 ~~2. invoke other chaincode 的name，目前写死，assert:v1   要么指定为固定的，要不通过参数传进来~~
 
-[x] ffi  多出这个格式
+3. [x] ffi  多出这个格式
                 [
                     "error",
                     "boolean"
