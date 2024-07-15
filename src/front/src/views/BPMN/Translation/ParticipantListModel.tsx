@@ -3,13 +3,9 @@ import React, { useState } from 'react';
 import { Card, Row, Col, Button, Typography, Steps, Modal, TableProps, Table, Select, Input, Tag } from "antd"
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAppSelector } from "@/redux/hooks";
-import { useParticipantsData, useAvailableMembers, useBPMNBindingData } from "./hooks"
+import { useParticipantsData, useAvailableMembers, useBPMNBindingData } from "./Detail/hooks"
 
-const ParticipantList = () => {
- 
-  const location = useLocation();
-  const bpmnInstanceId = location.pathname.split("/").pop();
-
+const ParticipantList = (bpmnInstanceId) => {
   const [modalActive, setModalActive] = useState(false);
   const [validationType, setValidationType] = useState('equal');
   const [showUserSection, setShowUserSection] = useState(true);
@@ -80,6 +76,9 @@ const ParticipantList = () => {
               <Select
                 style={{ width: "100%" }}
                 defaultValue=""
+                onChange={(value) => {
+                  // 处理选择MSP的事件
+                }}
                 >
                           {
                               members.filter((item) => {
@@ -113,12 +112,13 @@ const ParticipantList = () => {
                   ))}
                 </tbody>
               </table>
-              <button className="add-row-btn" onClick={handleAddRow}>添加一行</button>
+              <Button className="add-row-btn" onClick={handleAddRow}>添加一行</Button>
             </div>
           )}
         </div>
         <div className="modal-footer">
-          <button onClick={handleModalClose}>关闭</button>
+          <Button onClick={handleModalClose}>关闭</Button>
+          <Button onClick={handleModalSubmit}>确定</Button>
         </div>
       </div>
     )}

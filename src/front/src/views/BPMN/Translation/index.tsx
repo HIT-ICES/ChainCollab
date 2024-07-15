@@ -3,9 +3,10 @@
 //     ：3. 部署成功后，更新BPMN编排图状态
 
 import React, { useState } from "react";
-import { Button, Input, Table, TableProps, } from "antd";
+import { Button, Input, Table, TableProps, Modal} from "antd";
 import { useAppSelector } from "@/redux/hooks.ts";
 import { useNavigate } from "react-router-dom";
+import ParticipantListModel from "./ParticipantListModel.tsx"
 
 interface DataType {
   id: string;
@@ -160,6 +161,15 @@ const Translation: React.FC = () => {
       syncLeaf();
   }
 
+  const [ParticipantListmodalVisible, setParticipantListModalVisible] = useState(false);
+
+  const handleButtonClick = () => {
+    setParticipantListModalVisible(true);
+  };
+  const handleModalClose = () => {
+    setParticipantListModalVisible(false);
+  };
+
 
   const columns: TableProps<DataType>["columns"] = [
     {
@@ -195,11 +205,20 @@ const Translation: React.FC = () => {
                   ...newOne,
                   bpmn_id: record.id
                 })
+                handleButtonClick()
                 // expand the row
               }}
             >
               Add New Instance
             </Button>
+            <Modal
+              title="参与方列表"
+              open={ParticipantListmodalVisible}
+              onCancel={handleModalClose}
+              footer={null}
+            >
+              <ParticipantListModel bpmnInstanceId={record.id}/>
+            </Modal>
             <Button
               type="primary"
               style={{ marginLeft: 10, background: "red" }}
