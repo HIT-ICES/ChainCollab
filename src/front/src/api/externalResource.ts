@@ -1,5 +1,5 @@
 import api from "./apiConfig";
-import {translatorAPI} from "./apiConfig";
+import { translatorAPI } from "./apiConfig";
 
 export const getBPMNList = async (consortiumId: string) => {
     try {
@@ -22,6 +22,22 @@ export const retrieveBPMN = async (bpmnId: string, consortiumId: string = "1") =
 
 }
 
+export const addBPMN = async (consortiumId: string, name: string, orgId: string, bpmnContent: string, svgContent: string, participants: string) => {
+    try {
+        const response = await api.post(`/consortiums/${consortiumId}/bpmns/_upload`, {
+            bpmnContent: bpmnContent,
+            consortiumid: consortiumId,
+            orgid: orgId,
+            name: name,
+            svgContent: svgContent,
+            participants: participants
+        })
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
 
 export const getBPMNInstanceList = async (BPMNId: string) => {
     try {
@@ -47,22 +63,6 @@ export const addBPMNInstance = async (bpmnId: string, name: string, currentEnvId
     } catch (error) {
         console.log(error);
         return null;
-    }
-}
-
-export const generateChaincode = async (bpmnContent: string, mapInfo: string) => {
-    try {
-        const res = await translatorAPI.post(`/chaincode/generate`, {
-            bpmnContent: bpmnContent,
-            participantMspMap: mapInfo
-        })
-        return {
-            bpmnContent: res.data.bpmnContent,
-            ffiContent: res.data.ffiContent,
-            timeCost: res.data.timeCost
-        }
-    } catch (error) {
-        console.log(error);
     }
 }
 
@@ -105,20 +105,6 @@ export const updateBPMNInstanceFireflyUrl = async (bpmnInstanceId: string, bpmnI
     } catch (error) {
         console.log(error);
         return null;
-    }
-}
-
-
-
-export const getParticipantsByContent = async (bpmnContent: string) => {
-    try {
-        const response = await translatorAPI.post(`/chaincode/getPartByBpmnC`, {
-            bpmnContent: bpmnContent
-        })
-        return response.data;
-    } catch (error) {
-        console.log(error);
-        return [];
     }
 }
 

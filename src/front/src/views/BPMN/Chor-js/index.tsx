@@ -9,6 +9,9 @@ import Reporter from './lib-provider/validator/Validator.js';
 import axios from 'axios';
 import MainPage from './pop-up/MainPage.js'
 import TestPaletteProvider from './lib-provider/external-elements'
+import { getParticipantsByContent } from '@/api/translator.ts'
+import { addBPMN } from '@/api/externalResource.js'
+import { useAppSelector } from "@/redux/hooks.ts";
 
 const ChorJs = () => {
 
@@ -31,6 +34,9 @@ const ChorJs = () => {
       return newMap;
     });
   };
+  const consortiumid = useAppSelector((state) => state.consortium).currentConsortiumId;
+  const orgid = useAppSelector((state) => state.org).currentOrgId;
+
 
   useEffect(() => {
     console.log('dmnIdXmlMap:', dmnIdXmlMap);
@@ -180,37 +186,16 @@ const ChorJs = () => {
 
         console.log("consortiumid = " + params["consortiumid"]);
         // console.log("userid = " + params["userid"])
-        upload_bpmn_post(result, params, bpmnName, resultOfSvg);
+        await upload_bpmn_post(result, params, bpmnName, resultOfSvg);
       } else {
       }
     }
   };
 
-
-  function upload_bpmn_post(result, params, bpmnName, resultOfSvg) {
-    return axios.post('http://192.168.1.177:9999/chaincode/getPartByBpmnC', {
-      bpmnContent: result.xml
-    })
-      .then((response) => {
-        console.log('Post getParticipant request success:', response.data);
-        axios.post(`http://192.168.1.177:8000/api/v1/consortiums/${params["consortiumid"]}/bpmns/_upload`, {
-          bpmnContent: result.xml,
-          consortiumid: params["consortiumid"],
-          orgid: params["orgid"],
-          name: bpmnName + '.bpmn', //之后加一个输入名字？
-          svgContent: resultOfSvg.svg,
-          participants: response.data
-        })
-          .then(function (response) {
-            console.log(response);
-          })
-          .catch(function (error) {
-            console.error(error);
-          });
-      })
-      .catch((error) => {
-        console.error('Post request error:', error);
-      });
+  async function upload_bpmn_post(result, params, bpmnName, resultOfSvg) {
+    const participants = await getParticipantsByContent(result.xml)
+    console.log('Post getParticipant request success:', participants);
+    await addBPMN(consortiumid, bpmnName + '.bpmn', orgid, result.xml, resultOfSvg.svg, participants)
   }
 
 

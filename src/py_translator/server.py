@@ -20,7 +20,6 @@ app.add_middleware(
 
 class ChaincodeGenerateParams(BaseModel):
     bpmnContent: str
-    participantMspMap: str
 
 
 class ChaincodeGenerateResponse(BaseModel):
@@ -29,10 +28,10 @@ class ChaincodeGenerateResponse(BaseModel):
     timecost: str = None
 
 
-@app.post("/chaincode/generate")
+@app.post("/api/v1/chaincode/generate")
 async def generate_chaincode(params: ChaincodeGenerateParams):
     translator: GoChaincodeTranslator = GoChaincodeTranslator(params.bpmnContent)
-    chaincode = translator.generate_chaincode(bindings=json.loads(params.participantMspMap))
+    chaincode = translator.generate_chaincode()
     ffi = translator.generate_ffi()
     return ChaincodeGenerateResponse(bpmnContent=chaincode, ffiContent=ffi)
 
@@ -40,17 +39,19 @@ async def generate_chaincode(params: ChaincodeGenerateParams):
 class ChaincodePartParams(BaseModel):
     bpmnContent: str
 
+
 class ChaincodePartResponse(BaseModel):
     data: Dict[str, Any]
 
 
-@app.api_route("/chaincode/getPartByBpmnC", methods=["POST"])
+@app.api_route("/api/v1/chaincode/getPartByBpmnC", methods=["POST"])
 async def get_participant_by_bpmn_content(bpmn: ChaincodePartParams):
     translator: GoChaincodeTranslator = GoChaincodeTranslator(bpmn.bpmnContent)
+    print(translator.get_participants())
     return JSONResponse(content=translator.get_participants())
 
 
-@app.get("/ffi/generate")
+@app.get("/api/v1/ffi/generate")
 async def generate_ffi():
     translator = GoChaincodeTranslator()
     return JSONResponse(content={"message": "Hello, world! (async)"})

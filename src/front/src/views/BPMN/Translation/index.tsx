@@ -187,7 +187,15 @@ const Translation: React.FC = () => {
       align: "center",
       render: (_, record: DataType) => {
         return (
-          <div style={{ display: "flex" }} >
+          <div style={{ marginLeft: 10, display: "flex" }} >
+            <Button
+              type="primary"
+              onClick={() => {
+                // expand the row
+              }}
+            >
+              Detail
+            </Button>
             <Button
               type="primary"
               onClick={() => {
