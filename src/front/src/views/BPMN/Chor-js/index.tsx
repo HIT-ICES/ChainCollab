@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import ChoreoModeler from './chor-js/Modeler'; // Adjust the import based on your package structure
+import ChoreoModeler from './chor-js/Modeler.js'; // Adjust the import based on your package structure
 // import ChoreoModeler from 'chor-js/lib/Modeler'; // Adjust the import based on your package structure
 import PropertiesPanelModule from 'bpmn-js-properties-panel';
 import PropertiesProviderModule from './lib-provider/properties-provider'; // Adjust the import based on your package structure
@@ -8,10 +8,12 @@ import blankXml from '../../../../src/assets/bpmns/newDiagram.bpmn'; // Adjust t
 import Reporter from './lib-provider/validator/Validator.js';
 import axios from 'axios';
 import MainPage from './pop-up/MainPage.js'
+import UploadDmnModal from './pop-up/UploadDmnModal';
 import TestPaletteProvider from './lib-provider/external-elements'
 import { getParticipantsByContent } from '@/api/translator.ts'
 import { addBPMN } from '@/api/externalResource.js'
 import { useAppSelector } from "@/redux/hooks.ts";
+import { set } from 'lodash';
 
 const ChorJs = () => {
 
@@ -22,6 +24,8 @@ const ChorJs = () => {
   let isDirty = false;
   let lastFile = null;
   let isValidating = false;
+
+  const [dmnUploadModalOpen, setdmnUploadModalOpen] = React.useState(false);
 
   // map store dmn-elementID and xml content
   const [dmnIdXmlMap, setDmnIdXmlMap] = useState(new Map());
@@ -198,6 +202,10 @@ const ChorJs = () => {
     await addBPMN(consortiumid, bpmnName + '.bpmn', orgid, result.xml, resultOfSvg.svg, participants)
   }
 
+  const js_upload_dmn_listener = async (e: MouseEvent): Promise<void> => {
+    console.log('upload dmn clicked');
+    setdmnUploadModalOpen(true);
+  };
 
   useEffect(() => {
     //download diagram as BPMN 
@@ -239,6 +247,11 @@ const ChorJs = () => {
     //upload bpmn file
     upload_file.addEventListener('click', js_upload_listener);
 
+    //upload dmn file
+    console.log('upload dmn add event listener');
+    const upload_dmn = document.getElementById('js-upload-dmn');
+    upload_dmn.addEventListener('click', js_upload_dmn_listener);
+
     window.addEventListener('beforeunload', function (e) {
       if (isDirty) {
         // see https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload
@@ -274,8 +287,9 @@ const ChorJs = () => {
       dropZone.removeEventListener('dragover', drag_over_listener);
       dropZone.removeEventListener('dragleave', drag_leave_listener);
       dropZone.removeEventListener('drop', is_drag_over_listener);
+      upload_dmn.removeEventListener('click', js_upload_dmn_listener);
       // modeler.current.off('commandStack.changed', on_change);
-      console.log('event listeners[js-download-diagram, js-download-svg, js-open-file, file-input, js-new-diagram, js-validate, js-upload] removed');
+      console.log('event listeners[js-download-diagram, js-download-svg, js-open-file, file-input, js-new-diagram, js-validate, js-upload, js-upload-dmn] removed');
     };
   }, []);
 
@@ -375,12 +389,19 @@ const ChorJs = () => {
           <button id="js-validate" className="icon-bug" title="Check diagram for problems"></button>
           <div className="divider"></div>
           <button id="js-upload" className="icon-file-upload" title="Upload BPMN file"></button>
+          <button id="js-upload-dmn" className="icon-file-upload" title="Upload Dmn file"></button>
           <input id="file-input" name="name" type="file" accept=".bpmn, .xml" style={{ display: "none" }} />
         </div>
       </div>
       <MainPage
         xmlDataMap={dmnIdXmlMap}
         onSave={addToDmnMap} />
+      <UploadDmnModal
+        dmnData={dmnIdXmlMap}
+        open={dmnUploadModalOpen}
+        setOpen={setdmnUploadModalOpen}
+        consortiumId={consortiumid}
+        orgId={orgid} />
     </div >
   );
 };

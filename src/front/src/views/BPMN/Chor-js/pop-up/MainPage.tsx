@@ -11,7 +11,7 @@ export default function MainPage({ xmlDataMap, onSave }) {
   const [dataElementId, setDataElementId] = React.useState(null);
   const [dataElementType, setDataElementType] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
-  
+
   React.useEffect(() => {
     const handleDoubleClick = (e) => {
       e.stopPropagation();
@@ -46,7 +46,7 @@ export default function MainPage({ xmlDataMap, onSave }) {
       {dataElementType === 'Activity' && dataElementId ? (
         <DmnModal
           dataElementId={dataElementId}
-          xmlData={xmlDataMap.get(dataElementId)}
+          xmlData={xmlDataMap.get(dataElementId) ? xmlDataMap.get(dataElementId).dmnContent : null}
           open={modalOpen && 'Activity' === dataElementType}
           onClose={() => setModalOpen(false)}
           onSave={onSave}

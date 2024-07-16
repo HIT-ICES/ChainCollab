@@ -39,6 +39,32 @@ export const addBPMN = async (consortiumId: string, name: string, orgId: string,
     }
 }
 
+export const addDmn = async (consortiumId: string, name: string, orgId: string, dmnContent: string, svgContent: string) => {
+    try {
+        const response = await api.post(`/consortiums/${consortiumId}/dmns`, {
+            dmnContent: dmnContent,
+            consortiumid: consortiumId,
+            orgid: orgId,
+            name: name,
+            svgContent: svgContent
+        })
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
+export const getDmnList = async (consortiumId: string) => {
+    try {
+        const response = await api.get(`/consortiums/${consortiumId}/dmns`)
+        return response.data.data;
+    } catch (error) {
+        console.log(error);
+        return [];
+    }
+}
+
 export const getBPMNInstanceList = async (BPMNId: string) => {
     try {
         const response = await api.get(`/bpmns/${BPMNId}/bpmn-instances`)

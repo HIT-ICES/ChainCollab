@@ -16,12 +16,14 @@ from api.routes.bpmn.serializers import (
     BpmnInstanceChaincodeSerializer,
     BpmnSerializer,
     BpmnInstanceSerializer,
+    DmnSerializer,
 )
 import yaml
 from api.config import BASE_PATH, BPMN_CHAINCODE_STORE, CURRENT_IP
 from api.common import ok, err
 from api.models import (
     BPMN,
+    DMN,
     BPMNInstance,
     BpmnParticipantBindingRecord,
     ChainCode,
@@ -372,3 +374,74 @@ class BPMNBindingRecordViewSet(viewsets.ModelViewSet):
 
         serializer = BpmnBindingRecordSerializer(bpmn_binding_records, many=True)
         return Response(ok(serializer.data), status=status.HTTP_200_OK)
+
+
+class DmnViewSet(viewsets.ModelViewSet):
+    def create(self, request, *args, **kwargs):
+        """
+        创建Dmn实例
+        """
+        try:
+            consortiumid = request.data.get("consortiumid")
+            orgid = request.data.get("orgid")
+            consortium = Consortium.objects.get(id=consortiumid)
+            organization = LoleidoOrganization.objects.get(id=orgid)
+            dmn = DMN.objects.create(
+                consortium=consortium,
+                organization=organization,
+                name=request.data.get("name"),
+                dmnContent=request.data.get("dmnContent"),
+                svgContent=request.data.get("svgContent"),
+            )
+            dmn.save()
+            serializer = DmnSerializer(dmn)
+            return Response(data=ok(serializer.data), status=status.HTTP_201_CREATED)
+        except Exception as e:
+            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+
+    def retrieve(self, request, pk=None, *args, **kwargs):
+        """
+        获取Dmn详情
+        """
+        try:
+            dmn = DMN.objects.get(pk=pk)
+        except DMN.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = DmnSerializer(dmn)
+        return Response(serializer.data)
+
+    def list(self, request, *args, **kwargs):
+        """
+        获取Dmn列表
+        """
+        try:
+            dmns = DMN.objects.all()
+            serializer = DmnSerializer(dmns, many=True)
+            return Response(ok(serializer.data), status=status.HTTP_200_OK)
+        except Exception as e:
+            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, pk=None, *args, **kwargs):
+        """
+        更新Dmn实例
+        """
+        try:
+            dmn = DMN.objects.get(pk=pk)
+            if "dmn_id" in request.data:
+                dmn.dmn_id = request.data.get("dmn_id")
+            if "name" in request.data:
+                dmn.name = request.data.get("name")
+            if "dmnContent" in request.data:
+                dmn.dmnContent = request.data.get("dmnContent")
+            if "dmnSvgContent" in request.data:
+                dmn.dmnSvgContent = request.data.get("dmnSvgContent")
+            if "consortiumid" in request.data:
+                dmn.consortiumid = request.data.get("consortiumid")
+            if "orgid" in request.data:
+                dmn.orgid = request.data.get("orgid")
+
+            dmn.save()
+            serializer = DmnSerializer(dmn)
+            return Response(data=ok(serializer.data), status=status.HTTP_202_ACCEPTED)
+        except Exception as e:
+            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)

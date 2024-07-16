@@ -1,4 +1,4 @@
-from api.models import BPMN, BPMNInstance, BpmnParticipantBindingRecord
+from api.models import BPMN, DMN, BPMNInstance, BpmnParticipantBindingRecord
 from rest_framework import serializers
 
 
@@ -19,6 +19,12 @@ class BpmnPageQuerySerializer(serializers.Serializer):
 class BpmnSerializer(serializers.ModelSerializer):
     class Meta:
         model = BPMN
+        fields = "__all__"
+
+
+class DmnSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMN
         fields = "__all__"
 
 

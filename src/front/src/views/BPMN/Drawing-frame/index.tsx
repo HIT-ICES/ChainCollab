@@ -1,7 +1,6 @@
 import { useDispatch } from "react-redux";
 import React, { useState } from "react";
 import { FloatButton } from "antd";
-import UploadBPMN from "./Upload";
 import { set } from "lodash";
 import { useAppSelector } from "@/redux/hooks.ts";
 import { current_ip } from "@/api/apiConfig";
@@ -32,7 +31,6 @@ const Darwing = () => {
           title="Modeler"
         />
       </div>
-      <UploadBPMN UploadBPMN={uploadOpen} setUploadOpen={setUploadOpen} />
     </div>
   );
 };

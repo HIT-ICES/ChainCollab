@@ -212,9 +212,10 @@ const DmnModal = ({ dataElementId, xmlData, open: isModalOpen, onClose, onSave }
     }
 
     const handleOk = async () => {
-        const xml = await viewer.current.saveXML({ format: true });
+        const xml_result = await viewer.current.saveXML({ format: true });
+        const svg_result = await viewer.current.getActiveViewer().saveSVG();
         // console.log('xml', xml);
-        onSave(dataElementId, xml.xml);
+        onSave(dataElementId, { "dmnContent": xml_result.xml, "name": name, "svgContent": svg_result.svg });
         updateBpmnName();
         onClose && onClose(true);
     };

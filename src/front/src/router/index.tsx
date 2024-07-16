@@ -35,6 +35,7 @@ const MembershipDetailInEnv = lazy(() => import("@/views/Environment/Dashboard/O
 // const Register = lazy(() => import("@/views/BPMN/Register"));
 // const BPMNInstanceOverview = lazy(() => import("@/views/BPMN/Translation/BpmnInstanceDetail"));
 const BPMNOverview = lazy(() => import("@/views/BPMN/Translation/BpmnDetail"));
+const DmnOverview = lazy(() => import("@/views/BPMN/Dmn"));
 
 const withLoadingComponent = (Comp: JSX.Element) => (
   <React.Suspense fallback={<SkeletonLoading />}>{Comp}</React.Suspense>
@@ -255,6 +256,13 @@ const routes: routesType[] = [
             meta: {
               title: "Translation",
             },
+          },
+          {
+            path: "/bpmn/dmn",
+            element: withLoadingComponent(<DmnOverview />),
+            meta: {
+              title: "Dmn",
+            }
           },
           {
             path: "/bpmn/translation/:id",

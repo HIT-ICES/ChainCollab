@@ -1239,7 +1239,7 @@ class BPMNInstance(models.Model):
         null=True,
         blank=True,
     )
-    instance_id= models.IntegerField(
+    instance_id = models.IntegerField(
         help_text="instance_id of BPMNInstance",
         null=True,
         blank=True,
@@ -1297,6 +1297,7 @@ class BpmnParticipantBindingRecord(models.Model):
         on_delete=models.CASCADE,
     )
 
+
 class BpmnDmnBindingRecord(models.Model):
     id = models.UUIDField(
         primary_key=True,
@@ -1311,7 +1312,7 @@ class BpmnDmnBindingRecord(models.Model):
         null=False,
         on_delete=models.CASCADE,
     )
-    business_rule_id= models.CharField(
+    business_rule_id = models.CharField(
         help_text="ID of business rule",
         max_length=255,
         null=True,
@@ -1323,6 +1324,38 @@ class BpmnDmnBindingRecord(models.Model):
         null=True,
         blank=True,
     )
+
+
+class DMN(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        help_text="ID of Dmn",
+        default=make_uuid,
+        editable=False,
+        unique=True,
+    )
+    name = models.CharField(
+        help_text="Name of Dmn",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+    consortium = models.ForeignKey(
+        Consortium,
+        help_text="related consortium_id",
+        null=True,
+        on_delete=models.CASCADE,
+    )
+
+    organization = models.ForeignKey(
+        LoleidoOrganization,
+        help_text="related organization_id",
+        null=False,
+        on_delete=models.CASCADE,
+    )
+    dmnContent = models.TextField(help_text="content of dmn file")
+    svgContent = models.TextField(help_text="content of dmn`s svg file")
+
 
 class APISecretKey(models.Model):
     id = models.UUIDField(

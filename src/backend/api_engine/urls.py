@@ -56,6 +56,7 @@ from api.routes.bpmn.views import (
     BPMNViewsSet,
     BPMNInstanceViewSet,
     BPMNBindingRecordViewSet,
+    DmnViewSet,
 )
 from api.routes.fabric_identity.views import FabricIdentityViewSet
 from api.routes.api_secret_key.views import APISecretKeyViewSet
@@ -143,6 +144,9 @@ router.register(
     "bpmn-instances/(?P<bpmn_instance_id>[^/.]+)/binding-records",
     BPMNBindingRecordViewSet,
     basename="bpmn-binding-record",
+)
+router.register(
+    "consortiums/(?P<consortium_id>[^/.]+)/dmns", DmnViewSet, basename="dmn"
 )
 
 router.register("organizations", LoleidoOrganizationViewSet, basename="organization")

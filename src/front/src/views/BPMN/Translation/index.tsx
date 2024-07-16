@@ -1,7 +1,3 @@
-// TODO：1. 部署BPMN编排图 根据上传的OrgId和BPMN文件部署BPMN编排图 （根据OrgID获取编排图列表）
-//     ：2. 选择对应的participant(只有自己(uploader)上传的才有deploy功能)
-//     ：3. 部署成功后，更新BPMN编排图状态
-
 import React, { useState } from "react";
 import { Button, Input, Table, TableProps, } from "antd";
 import { useAppSelector } from "@/redux/hooks.ts";
