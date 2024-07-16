@@ -17,7 +17,9 @@
 	instanceID = string(instanceIDByte)
 	fmt.Print("instanceID: ", instanceID)
 8. 把createMessage，CreateParticipant等改成不断往json续拼凑字段 doing~!
-
+9. [x] service.py,能够根据BPMN content返回有几个Activity的id及name
+10. [x] 根据DMN content获取decisionID，目前Java链码有写，是不是再用python写个方法，放在server.py里？
+11. [x] 目前无法通过getAllMessage获取所有的message,因为需要实例ID查询消息。此处应该通过BPMN内容提取出所有消息的properties字段
 
 TODO：
 1. CreateInstance 阶段setEvent  instanceID

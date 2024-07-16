@@ -2,7 +2,7 @@ import api from './apiConfig.ts';
 import axios from 'axios';
 import { translatorAPI } from './apiConfig.ts';
 
-export const generateChaincode = async (bpmnContent: string, mapInfo: string) => {
+export const generateChaincode = async (bpmnContent: string) => {
     try {
         const res = await translatorAPI.post(`/chaincode/generate`, {
             bpmnContent: bpmnContent,

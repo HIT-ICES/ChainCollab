@@ -266,13 +266,6 @@ class ChainCodeViewSet(viewsets.ViewSet):
                 return Response(
                     err("install chaincode failed."), status=status.HTTP_400_BAD_REQUEST
                 )
-            try:
-                bpmn_object = BPMNInstance.objects.get(chaincode_id=chaincode_id)
-                if bpmn_object:
-                    bpmn_object.status = "Installed"
-                    bpmn_object.save()
-            except Exception as e:
-                pass
         except Exception as e:
             traceback.print_exc()
             return Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
@@ -712,7 +705,16 @@ class ChainCodeViewSet(viewsets.ViewSet):
                     return Response(
                         err("commit failed."), status=status.HTTP_400_BAD_REQUEST
                     )
-
+                try:
+                    chaincode = ChainCode.objects.get(
+                        name=chaincode_name, version=chaincode_version
+                    )
+                    bpmn_object = BPMN.objects.get(chaincode_id=chaincode.id)
+                    if bpmn_object:
+                        bpmn_object.status = "Installed"
+                        bpmn_object.save()
+                except Exception as e:
+                    pass
             except Exception as e:
                 traceback.print_exc()
                 return Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)

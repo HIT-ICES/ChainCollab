@@ -1166,17 +1166,18 @@ class BPMN(models.Model):
         null=False,
         on_delete=models.CASCADE,
     )
-    # status = models.CharField(
-    #     help_text="status of BpmnStoragedFile",
-    #     default="pending",
-    #     max_length=32,
-    #     choices=(
-    #         ("drawn", "drawn"),
-    #         ("chaincode", "chaincode"),
-    #         ("installed", "installed"),
-    #         ("executing", "executing"),
-    #     ),
-    # )
+    status = models.CharField(
+        help_text="status of BPMN",
+        default="pending",
+        max_length=32,
+        choices=(
+            ("Initiated", "Initiated"),
+            ("DeployEnved", "DeployEnved"),
+            ("Generated", "Generated"),
+            ("Installed", "Installed"),
+            ("Registered", "Registered"),
+        ),
+    )
     name = models.CharField(
         help_text="Name of Bpmn",
         max_length=255,
@@ -1196,52 +1197,6 @@ class BPMN(models.Model):
     # chaincode_content = models.TextField(
     #     help_text="content of chaincode file", null=True, blank=True, default=None
     # )
-
-
-class BPMNInstance(models.Model):
-    id = models.UUIDField(
-        primary_key=True,
-        help_text="ID of BPMNInstance",
-        default=make_uuid,
-        editable=False,
-        unique=True,
-    )
-    name = models.CharField(
-        help_text="Name of BPMNInstance",
-        max_length=255,
-        null=True,
-        blank=True,
-    )
-    bpmn = models.ForeignKey(
-        BPMN,
-        help_text="related bpmn_id",
-        null=False,
-        on_delete=models.CASCADE,
-    )
-    status = models.CharField(
-        help_text="status of BPMNInstance",
-        default="pending",
-        max_length=32,
-        choices=(
-            ("Initiated", "Initiated"),
-            ("Fullfilled", "Fullfilled"),
-            ("Generated", "Generated"),
-            ("Installed", "Installed"),
-            ("Registered", "Registered"),
-        ),
-    )
-    create_at = models.DateTimeField(
-        help_text="Create time of BPMNInstance", auto_now_add=True
-    )
-    update_at = models.DateTimeField(
-        help_text="Update time of BPMNInstance", auto_now=True
-    )
-    environment = models.ForeignKey(
-        Environment,
-        help_text="related environment_id",
-        null=True,
-        on_delete=models.CASCADE,
-    )
     chaincode = models.ForeignKey(
         ChainCode,
         help_text="related chaincode_id",
@@ -1262,9 +1217,60 @@ class BPMNInstance(models.Model):
     ffiContent = models.TextField(
         help_text="content of ffi file", null=True, blank=True, default=None
     )
+    environment = models.ForeignKey(
+        Environment,
+        help_text="related environment_id",
+        null=True,
+        on_delete=models.CASCADE,
+    )
 
 
-class BPMNBindingRecord(models.Model):
+class BPMNInstance(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        help_text="ID of BPMNInstance",
+        default=make_uuid,
+        editable=False,
+        unique=True,
+    )
+    name = models.CharField(
+        help_text="Name of BPMNInstance",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+    instance_id= models.IntegerField(
+        help_text="instance_id of BPMNInstance",
+        null=True,
+        blank=True,
+    )
+    bpmn = models.ForeignKey(
+        BPMN,
+        help_text="related bpmn_id",
+        null=False,
+        on_delete=models.CASCADE,
+    )
+    # status = models.CharField(
+    #     help_text="status of BPMNInstance",
+    #     default="pending",
+    #     max_length=32,
+    #     choices=(
+    #         ("Initiated", "Initiated"),
+    #         ("Fullfilled", "Fullfilled"),
+    #         ("Generated", "Generated"),
+    #         ("Installed", "Installed"),
+    #         ("Registered", "Registered"),
+    #     ),
+    # )
+    create_at = models.DateTimeField(
+        help_text="Create time of BPMNInstance", auto_now_add=True
+    )
+    update_at = models.DateTimeField(
+        help_text="Update time of BPMNInstance", auto_now=True
+    )
+
+
+class BpmnParticipantBindingRecord(models.Model):
     id = models.UUIDField(
         primary_key=True,
         help_text="ID of BPMNBindingRecord",
@@ -1291,6 +1297,32 @@ class BPMNBindingRecord(models.Model):
         on_delete=models.CASCADE,
     )
 
+class BpmnDmnBindingRecord(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        help_text="ID of BPMNBindingRecord",
+        default=make_uuid,
+        editable=False,
+        unique=True,
+    )
+    bpmn_instance = models.ForeignKey(
+        BPMNInstance,
+        help_text="related bpmn_instance_id",
+        null=False,
+        on_delete=models.CASCADE,
+    )
+    business_rule_id= models.CharField(
+        help_text="ID of business rule",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+    dmn_instance_id = models.CharField(
+        help_text="ID of dmn",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
 
 class APISecretKey(models.Model):
     id = models.UUIDField(
@@ -1337,6 +1369,7 @@ class APISecretKey(models.Model):
 
     def save(self, *args, **kwargs):
         import hashlib
+
         print("START")
         print(self.key_secret)
         print(hashlib.md5(self.key_secret.encode("utf-8")).hexdigest())
@@ -1346,6 +1379,7 @@ class APISecretKey(models.Model):
 
     def verifyKeySecret(self, key_secret):
         import hashlib
+
         print(key_secret)
         print(hashlib.md5(key_secret.encode("utf-8")).hexdigest())
         return self.key_secret == hashlib.md5(key_secret.encode("utf-8")).hexdigest()

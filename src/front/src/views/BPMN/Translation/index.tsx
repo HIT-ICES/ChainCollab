@@ -133,6 +133,7 @@ const Translation: React.FC = () => {
 
   const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
   const currenEnvName = useAppSelector((state) => state.env.currentEnvName);
+  const navigate = useNavigate();
 
   const [newOne, setNewOne] = useState({
     id: "new",
@@ -187,17 +188,19 @@ const Translation: React.FC = () => {
       align: "center",
       render: (_, record: DataType) => {
         return (
-          <div style={{ marginLeft: 10, display: "flex" }} >
+          <div style={{ display: "flex" }} >
             <Button
               type="primary"
               onClick={() => {
-                // expand the row
+                console.log("click bpmn detail", record);
+                navigate(`/bpmn/translation/${record.id}`);
               }}
             >
               Detail
             </Button>
             <Button
               type="primary"
+              style={{ marginLeft: 10 }}
               onClick={() => {
                 setNewOne({
                   ...newOne,

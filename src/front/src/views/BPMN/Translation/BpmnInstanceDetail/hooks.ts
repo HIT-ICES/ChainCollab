@@ -1,7 +1,7 @@
 import api from '@/api/apiConfig';
 import { useState, useEffect } from 'react';
 
-import { retrieveBPMNInstance, getParticipantsByContent } from '@/api/externalResource';
+import { retrieveBPMNInstance } from '@/api/externalResource';
 import { getResourceSets } from '@/api/resourceAPI';
 import { useAppSelector } from '@/redux/hooks';
 

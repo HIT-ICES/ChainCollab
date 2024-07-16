@@ -88,9 +88,39 @@ export const deleteBPMNInstance = async (bpmnInstanceId: string, bpmnId: string)
     }
 }
 
+export const updateBPMNStatus = async (bpmnId: string, newStatus: string, consortiumId: string = '1') => {
+    try {
+        const response = await api.put(`/consortiums/${consortiumId}/bpmns/${bpmnId}`, { status: newStatus })
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
+export const updateBpmnEnv = async (bpmnId: string, envId: string, consortiumId: string = '1') => {
+    try {
+        const response = await api.put(`/consortiums/${consortiumId}/bpmns/${bpmnId}`, { envId: envId })
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
 export const updateBPMNInstanceStatus = async (bpmnInstanceId: string, bpmnId: string, newStatus: string) => {
     try {
         const response = await api.put(`/bpmns/${bpmnId}/bpmn-instances/${bpmnInstanceId}`, { status: newStatus })
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
+export const updateBPMNFireflyUrl = async (bpmnId: string, fireflyUrl: string, consortiumId: string = '1') => {
+    try {
+        const response = await api.put(`/consortiums/${consortiumId}/bpmns/${bpmnId}`, { firefly_url: fireflyUrl })
         return response.data;
     } catch (error) {
         console.log(error);
@@ -149,7 +179,21 @@ export const getMapInfoofBPMNInstance = async (bpmnInstanceId: string, bpmnId: s
     }
 }
 
-export const packageBPMN = async (chaincodeContent: string, ffiContent: string, bpmnInstanceId, orgId: string, bpmnId: string = '1') => {
+export const packageBpmn = async (chaincodeContent: string, ffiContent: string, orgId: string, bpmnId: string, consortiumId: string = '1') => {
+    try {
+        const response = await api.post(`/consortiums/${consortiumId}/bpmns/${bpmnId}/package`, {
+            chaincodeContent: chaincodeContent,
+            ffiContent: ffiContent,
+            orgId: orgId
+        })
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
+export const packageBpmnToInstance = async (chaincodeContent: string, ffiContent: string, bpmnInstanceId, orgId: string, bpmnId: string = '1') => {
     try {
         const response = await api.post(`bpmns/${bpmnId}/bpmn-instances/${bpmnInstanceId}/package`, {
             chaincodeContent: chaincodeContent,

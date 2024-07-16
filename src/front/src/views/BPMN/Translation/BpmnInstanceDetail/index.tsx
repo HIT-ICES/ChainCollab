@@ -235,7 +235,7 @@ const BPMNInstanceOverview = () => {
             const parsedFFIContent = JSON.parse(ffiContent);
             const chaincodeIdPrefix = instance.chaincode_name + instance.chaincode_id.substring(0, 6);
             parsedFFIContent.name = chaincodeIdPrefix
-            const response = await axios.post(`http://${current_ip}:5000/api/v1/namespaces/default/contracts/interfaces`,
+            const response = await axios.post(`${current_ip}:5000/api/v1/namespaces/default/contracts/interfaces`,
                 parsedFFIContent)
             const interfaceid = response.data.id;
             const location = {
@@ -250,11 +250,11 @@ const BPMNInstanceOverview = () => {
                 location: location
             };
             await new Promise(resolve => setTimeout(resolve, 4000));
-            const response2 = await axios.post(`http://${current_ip}:5000/api/v1/namespaces/default/apis`,
+            const response2 = await axios.post(`${current_ip}:5000/api/v1/namespaces/default/apis`,
                 jsonData)
             const fireflyUrl = response2.data.urls.ui
             await new Promise(resolve => setTimeout(resolve, 4000));
-            const fireflyUrlForRegister = `http://${current_ip}:5000`
+            const fireflyUrlForRegister = `${current_ip}:5000`
             await initLedger(fireflyUrlForRegister, chaincodeIdPrefix);
             await new Promise(resolve => setTimeout(resolve, 4000));
             const messages = await getAllMessages(fireflyUrlForRegister, chaincodeIdPrefix);

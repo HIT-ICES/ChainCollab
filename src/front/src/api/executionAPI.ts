@@ -64,7 +64,9 @@ export const initLedger = async (coreUrl: string, contractName: string) => {
     // coreUrl + `/api/v1/namespaces/default/apis/${name}/invoke/InitLedger
     // mediaType: "application/json"
     try {
-        const res = await axios.post(`${coreUrl}/api/v1/namespaces/default/apis/${contractName}/invoke/InitLedger`, {}
+        const res = await axios.post(`${coreUrl}/api/v1/namespaces/default/apis/${contractName}/invoke/InitLedger`, {
+            "input": {}
+        }
         );
         return res.data;
     } catch (error) {

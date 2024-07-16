@@ -138,7 +138,7 @@ const Execution: React.FC = () => {
 
     const fetchFireflyData = async () => {
         try {
-            const res = await fetch(`http://${current_ip}:8000/api/v1/fireflys/1/start`);
+            const res = await fetch(`${current_ip}:8000/api/v1/fireflys/1/start`);
             const data = await res.json();
             setFireflyData(data); // 保存从API返回的数据到状态中
         } catch (error) {

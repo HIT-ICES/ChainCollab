@@ -13,7 +13,7 @@ const Darwing = () => {
 
   const consortiumid = useAppSelector((state) => state.consortium).currentConsortiumId;
   const orgid = useAppSelector((state) => state.org).currentOrgId;
-  const iframeSrc = `http://${current_ip}:4913?consortiumid=` + consortiumid + "&orgid=" + orgid;
+  const iframeSrc = `${current_ip}:4913?consortiumid=` + consortiumid + "&orgid=" + orgid;
   return (
     <div>
       <div

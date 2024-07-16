@@ -1,4 +1,4 @@
-from api.models import BPMN, BPMNInstance, BPMNBindingRecord
+from api.models import BPMN, BPMNInstance, BpmnParticipantBindingRecord
 from rest_framework import serializers
 
 
@@ -38,7 +38,7 @@ class BpmnInstanceSerializer(serializers.ModelSerializer):
     def get_environment_id(self, obj):
         return obj.environment.id
 
-    
+
 class BpmnInstanceChaincodeSerializer(serializers.ModelSerializer):
     environment_name = serializers.SerializerMethodField()
     environment_id = serializers.SerializerMethodField()
@@ -56,12 +56,12 @@ class BpmnInstanceChaincodeSerializer(serializers.ModelSerializer):
 
     def get_environment_id(self, obj):
         return obj.environment.id
-    
+
     def get_chaincode_id(self, obj):
         if obj.chaincode:
             return obj.chaincode.id
         return None
-    
+
     def get_chaincode_name(self, obj):
         if obj.chaincode:
             return obj.chaincode.name
@@ -72,5 +72,5 @@ class BpmnBindingRecordSerializer(serializers.ModelSerializer):
     membership_name = serializers.CharField(source="membership.name")
 
     class Meta:
-        model = BPMNBindingRecord
+        model = BpmnParticipantBindingRecord
         fields = "__all__"

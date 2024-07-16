@@ -33,7 +33,9 @@ const ResourceSet = lazy(() => import("@/views/Environment/ResourceSet"));
 const EnvDashboard = lazy(() => import("@/views/Environment/Dashboard"));
 const MembershipDetailInEnv = lazy(() => import("@/views/Environment/Dashboard/Overview/MembershipDetail"));
 // const Register = lazy(() => import("@/views/BPMN/Register"));
-const BPMNInstanceOverview = lazy(() => import("@/views/BPMN/Translation/Detail"));
+// const BPMNInstanceOverview = lazy(() => import("@/views/BPMN/Translation/BpmnInstanceDetail"));
+const BPMNOverview = lazy(() => import("@/views/BPMN/Translation/BpmnDetail"));
+
 const withLoadingComponent = (Comp: JSX.Element) => (
   <React.Suspense fallback={<SkeletonLoading />}>{Comp}</React.Suspense>
 );
@@ -256,7 +258,7 @@ const routes: routesType[] = [
           },
           {
             path: "/bpmn/translation/:id",
-            element: withLoadingComponent(<BPMNInstanceOverview />),
+            element: withLoadingComponent(<BPMNOverview />),
             meta: {
               title: "Translation Detail",
             },
@@ -280,11 +282,11 @@ const routes: routesType[] = [
     ],
   },
   {
-       //TODO:这里参数传入我还没搞懂
+    //TODO:这里参数传入我还没搞懂
     path: "/aaa/:BPMNinstanceId",
-    element: <ParticipantList/>,
+    element: <ParticipantList />,
   },
- 
+
 
 ];
 

@@ -18,12 +18,12 @@ from api.routes.bpmn.serializers import (
     BpmnInstanceSerializer,
 )
 import yaml
-from api.config import BASE_PATH, BPMN_CHAINCODE_STORE,CURRENT_IP
+from api.config import BASE_PATH, BPMN_CHAINCODE_STORE, CURRENT_IP
 from api.common import ok, err
 from api.models import (
     BPMN,
     BPMNInstance,
-    BPMNBindingRecord,
+    BpmnParticipantBindingRecord,
     ChainCode,
     Environment,
     LoleidoOrganization,
@@ -66,6 +66,7 @@ class BPMNViewsSet(viewsets.ModelViewSet):
                 svgContent=svgContent,
                 bpmnContent=bpmnContent,
                 participants=json.dumps(participants),
+                status="Initiated",
             )
 
             bpmn.save()
@@ -87,31 +88,31 @@ class BPMNViewsSet(viewsets.ModelViewSet):
         except Exception as e:
             raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
 
-    def update(self, request, pk=None):
+    def update(self, request, pk=None, *args, **kwargs):
         """
-        更新bpmn
+        更新Bpmn实例
         """
         try:
             bpmn = BPMN.objects.get(pk=pk)
-            # bpmn.bpmnContent = request.data.get("bpmnContent")
-            # bpmn.save()
-        except BPMN.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            if "bpmn_id" in request.data:
+                bpmn.bpmn_id = request.data.get("bpmn_id")
+            if "name" in request.data:
+                bpmn.name = request.data.get("name")
+            if "status" in request.data:
+                bpmn.status = request.data.get("status")
+            if "user_id" in request.data:
+                bpmn.user_id = request.data.get("user_id")
+            if "firefly_url" in request.data:
+                bpmn.firefly_url = request.data.get("firefly_url")
+            if "envId" in request.data:
+                envId = request.data.get("envId")
+                bpmn.environment = Environment.objects.get(pk=envId)
 
-        consortiumid = request.data.get("consortiumid")
-        orgid = request.data.get("orgid")
-        name = request.data.get("name")
-        bpmnContent = request.data.get("bpmnContent")
-
-        bpmn.organization_id = orgid
-        bpmn.organization_id = orgid
-        bpmn.consortium_id = consortiumid
-        bpmn.name = name
-        bpmn.bpmn_content = bpmnContent
-        bpmn.save()
-
-        serializer = BpmnSerializer(bpmn)
-        return Response(data=ok(serializer.data), status=status.HTTP_202_ACCEPTED)
+            bpmn.save()
+            serializer = BpmnSerializer(bpmn)
+            return Response(data=ok(serializer.data), status=status.HTTP_202_ACCEPTED)
+        except Exception as e:
+            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, pk=None, *args, **kwargs):
         """
@@ -132,6 +133,66 @@ class BPMNViewsSet(viewsets.ModelViewSet):
             bpmns = BPMN.objects.all()
             serializer = BpmnSerializer(bpmns, many=True)
             return Response(ok(serializer.data), status=status.HTTP_200_OK)
+        except Exception as e:
+            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+
+    def _zip_folder(self, folder_path, output_path):
+        with ZipFile(output_path, "w") as zipf:
+            for root, _, files in os.walk(folder_path):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    zipf.write(file_path, os.path.relpath(file_path, folder_path))
+
+    @action(methods=["post"], detail=True, url_path="package")
+    def package(self, request, pk, *args, **kwargs):
+        try:
+            bpmn_id = pk
+            orgid = request.data.get("orgId")
+            chaincodeContent = request.data.get("chaincodeContent")
+            ffiContent = request.data.get("ffiContent")
+            bpmn = BPMN.objects.get(pk=bpmn_id)
+            env_id = bpmn.environment.id
+
+            with open(
+                BPMN_CHAINCODE_STORE + "/chaincode-go-bpmn/chaincode/smartcontract.go",
+                "w",
+                encoding="utf-8",
+            ) as file:
+                file.write(chaincodeContent)
+
+            self._zip_folder(
+                BPMN_CHAINCODE_STORE, BASE_PATH + "/opt/bpmn_chaincode.zip"
+            )
+
+            headers = request.headers
+            files = {
+                "file": open(file=BASE_PATH + "/opt//bpmn_chaincode.zip", mode="rb")
+            }
+            response = post(
+                f"http://{CURRENT_IP}:8000/api/v1/environments/{env_id}/chaincodes/package",
+                data={
+                    "name": bpmn.name.replace(".bpmn", ""),
+                    "version": 1,
+                    "language": "golang",
+                    "org_id": orgid,
+                },
+                files=files,
+                headers={"Authorization": headers["Authorization"]},
+            )
+            chaincode_id = response.json()["data"]["id"]
+            chaincode = ChainCode.objects.get(id=chaincode_id)
+
+            bpmn.ffiContent = ffiContent
+            bpmn.chaincode_content = chaincodeContent
+            bpmn.chaincode = chaincode
+            bpmn.status = "Generated"
+            # consortium = consortium,
+            bpmn.save()
+
+            return Response(
+                data=ok("bpmn file storaged success"), status=status.HTTP_202_ACCEPTED
+            )
+
         except Exception as e:
             raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
 
@@ -163,28 +224,6 @@ class BPMNInstanceViewSet(viewsets.ModelViewSet):
             BPMNBindingRecordViewSet()._check(bpmn_instance.id)
             serializer = BpmnInstanceSerializer(bpmn_instance)
             return Response(data=ok(serializer.data), status=status.HTTP_201_CREATED)
-        except Exception as e:
-            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
-
-    def update(self, request, pk=None, *args, **kwargs):
-        """
-        更新Bpmn实例
-        """
-        try:
-            bpmn_instance = BPMNInstance.objects.get(pk=pk)
-            if "bpmn_id" in request.data:
-                bpmn_instance.bpmn_id = request.data.get("bpmn_id")
-            if "name" in request.data:
-                bpmn_instance.name = request.data.get("name")
-            if "status" in request.data:
-                bpmn_instance.status = request.data.get("status")
-            if "user_id" in request.data:
-                bpmn_instance.user_id = request.data.get("user_id")
-            if "firefly_url" in request.data:
-                bpmn_instance.firefly_url = request.data.get("firefly_url")
-            bpmn_instance.save()
-            serializer = BpmnInstanceSerializer(bpmn_instance)
-            return Response(data=ok(serializer.data), status=status.HTTP_202_ACCEPTED)
         except Exception as e:
             raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
 
@@ -245,20 +284,15 @@ class BPMNInstanceViewSet(viewsets.ModelViewSet):
             )
             return resource_set.sub_resource_set.get().msp
 
-        bindings = BPMNBindingRecord.objects.filter(bpmn_instance=bpmn_instance)
+        bindings = BpmnParticipantBindingRecord.objects.filter(
+            bpmn_instance=bpmn_instance
+        )
         mapInfos = {
             f"{binding.participant_id}": getMSPByMembershipId(binding.membership.id)
             for binding in bindings
         }
 
         return Response(ok(mapInfos), status=status.HTTP_200_OK)
-
-    def _zip_folder(self, folder_path, output_path):
-        with ZipFile(output_path, "w") as zipf:
-            for root, _, files in os.walk(folder_path):
-                for file in files:
-                    file_path = os.path.join(root, file)
-                    zipf.write(file_path, os.path.relpath(file_path, folder_path))
 
     def _ends_with_time_format(self, input_string):
         pattern = r"^test-\d{4}-\d{2}-\d{2}-\d{2}\.\d{2}\.\d{2}\.bpmn$"
@@ -273,68 +307,6 @@ class BPMNInstanceViewSet(viewsets.ModelViewSet):
             return True
         return False
 
-    @action(methods=["post"], detail=True, url_path="package")
-    def translate(self, request, pk, *args, **kwargs):
-        try:
-            bpmn_instance_id = pk
-
-            orgid = request.data.get("orgId")
-            chaincodeContent = request.data.get("chaincodeContent")
-            ffiContent = request.data.get("ffiContent")
-            bpmn_instance = BPMNInstance.objects.get(id=bpmn_instance_id)
-            env_id = bpmn_instance.environment.id
-
-            # # 增加测试的逻辑
-            bpmn = bpmn_instance.bpmn
-            # if self._ends_with_time_format(bpmn.name) or self._ends_with_Test(bpmn.name):
-            #     chaincodeContent = chaincodeContent.replace( # Only deal with task, not with event and gateway
-            #         # "msg.MsgState = WAITFORCONFIRM", "//msg.MsgState = WAITFORCONFIRM"
-            #         "gtw.GatewayState = gtwState", "//gtw.GatewayState = gtwState"
-            #     )
-
-            with open(
-                BPMN_CHAINCODE_STORE + "/chaincode-go-bpmn/chaincode/smartcontract.go",
-                "w",
-                encoding="utf-8",
-            ) as file:
-                file.write(chaincodeContent)
-
-            self._zip_folder(
-                BPMN_CHAINCODE_STORE, BASE_PATH + "/opt/bpmn_chaincode.zip"
-            )
-
-            headers = request.headers
-            files = {
-                "file": open(file=BASE_PATH + "/opt//bpmn_chaincode.zip", mode="rb")
-            }
-            response = post(
-                f"http://{CURRENT_IP}:8000/api/v1/environments/{env_id}/chaincodes/package",
-                data={
-                    "name": bpmn.name.replace(".bpmn", "") + "-" + bpmn_instance.name,
-                    "version": 1,
-                    "language": "golang",
-                    "org_id": orgid,
-                },
-                files=files,
-                headers={"Authorization": headers["Authorization"]},
-            )
-            chaincode_id = response.json()["data"]["id"]
-            chaincode = ChainCode.objects.get(id=chaincode_id)
-
-            bpmn_instance.ffiContent = ffiContent
-            bpmn_instance.chaincode_content = chaincodeContent
-            bpmn_instance.chaincode = chaincode
-            bpmn_instance.status = "Generated"
-            # consortium = consortium,
-            bpmn_instance.save()
-
-            return Response(
-                data=ok("bpmn file storaged success"), status=status.HTTP_202_ACCEPTED
-            )
-
-        except Exception as e:
-            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
-
 
 class BPMNBindingRecordViewSet(viewsets.ModelViewSet):
     def _check(self, bpmn_instance_id):
@@ -345,7 +317,9 @@ class BPMNBindingRecordViewSet(viewsets.ModelViewSet):
         participant_json = bpmn_instance.bpmn.participants
         participants = json.loads(participant_json)
 
-        bindings = BPMNBindingRecord.objects.filter(bpmn_instance=bpmn_instance)
+        bindings = BpmnParticipantBindingRecord.objects.filter(
+            bpmn_instance=bpmn_instance
+        )
 
         fullfilled = len(participants) <= len(bindings)
         if fullfilled:
@@ -373,7 +347,7 @@ class BPMNBindingRecordViewSet(viewsets.ModelViewSet):
 
         participant_id = request.data.get("participant_id", None)
 
-        bpmn_binding_record = BPMNBindingRecord.objects.create(
+        bpmn_binding_record = BpmnParticipantBindingRecord.objects.create(
             bpmn_instance=bpmn_instance,
             membership=membership,
             participant_id=participant_id,
@@ -392,7 +366,7 @@ class BPMNBindingRecordViewSet(viewsets.ModelViewSet):
         except BPMNInstance.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        bpmn_binding_records = BPMNBindingRecord.objects.filter(
+        bpmn_binding_records = BpmnParticipantBindingRecord.objects.filter(
             bpmn_instance=bpmn_instance
         )
 

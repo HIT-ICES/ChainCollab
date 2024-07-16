@@ -1,0 +1,187 @@
+import api from '@/api/apiConfig';
+import { useState, useEffect } from 'react';
+import { useQuery } from 'react-query';
+
+import { retrieveBPMN, retrieveBPMNInstance } from '@/api/externalResource';
+import { getResourceSets } from '@/api/resourceAPI';
+import { useAppSelector } from '@/redux/hooks';
+import { getEnvironmentList } from '@/api/platformAPI';
+
+export const useBPMNIntanceDetailData = (BPMNInstanceId: string) => {
+    const [BPMNInstanceData, setBPMNInstanceData] = useState<any>({})
+    const [syncFlag, setSyncFlag] = useState(false)
+    useEffect(() => {
+        let ignore = false
+        const fetchData = async () => {
+            const response = await retrieveBPMNInstance(BPMNInstanceId)
+            if (ignore) return [[], () => { }]
+            setBPMNInstanceData(response)
+        }
+        fetchData()
+        return () => {
+            ignore = true
+        }
+    }, [BPMNInstanceId, syncFlag])
+    return [BPMNInstanceData, () => setSyncFlag(!syncFlag)]
+
+}
+
+export const useBpmnDetailData = (bpmnId: string) => {
+    const { data: bpmnDetail = {}, isLoading, isError, isSuccess, refetch } = useQuery(['bpmnDetail', bpmnId], async () => {
+        return await retrieveBPMN(bpmnId);
+    });
+    return [bpmnDetail, {
+        isLoading, isError, isSuccess
+    }, refetch];
+}
+
+export const useAvaliableEnvs = (consortiumId: string) => {
+    const {data: envs = [], isLoading, isError, isSuccess, refetch} = useQuery(['envs', consortiumId], async () => {
+        return await getEnvironmentList(consortiumId);
+    });
+    return [envs, {
+        isLoading, isError, isSuccess
+    }, refetch];
+}
+
+export const useAvailableMembers = (envId: string): [
+    any[],
+    () => void
+] => {
+    const currenOrgId = useAppSelector((state) => state.org.currentOrgId)
+    const [members, setMembers] = useState<any[]>([])
+    const [syncFlag, setSyncFlag] = useState(false)
+    useEffect(() => {
+        let ignore = false
+        if (!envId) return;
+        const fetchData = async () => {
+            const response = await getResourceSets(envId, currenOrgId)
+            if (ignore) return
+            const data = response.map((item: any) => {
+                return {
+                    "membershipName": item.membershipName,
+                    "membershipId": item.membership,
+                    "resourceSetId": item.id,
+                    "msp": item.msp,
+                }
+            })
+            setMembers(data)
+        }
+        fetchData()
+        return () => {
+            ignore = true
+        }
+    }, [envId, syncFlag])
+    return [members, () => setSyncFlag(!syncFlag)]
+}
+
+import { retrieveBPMN } from '@/api/externalResource'
+
+export const useParticipantsData = (bpmnId: string): [
+    any[], () => void
+] => {
+    const [participants, setParticipants] = useState<any[]>([])
+    const [syncFlag, setSyncFlag] = useState(false)
+    useEffect(() => {
+        let ignore = false
+        const fetchData = async () => {
+            // const response = await getParticipantsByContent(bpmnContent)
+            const response = await retrieveBPMN(bpmnId)
+            if (ignore) return [[], () => { }]
+            setParticipants(JSON.parse(response.participants))
+        }
+        fetchData()
+        return () => {
+            ignore = true
+        }
+    }, [bpmnId, syncFlag])
+    return [participants, () => setSyncFlag(!syncFlag)]
+}
+
+import { getBindingByBPMNInstance } from '@/api/externalResource'
+
+export const useBPMNBindingData = (bpmnInstanceId: string): [
+    {}, () => void
+] => {
+    const [bindings, setBindings] = useState<{}>({})
+    const [syncFlag, setSyncFlag] = useState(false)
+    useEffect(() => {
+        let ignore = false
+        const fetchData = async () => {
+            const response = await getBindingByBPMNInstance(bpmnInstanceId)
+            if (ignore) return [{}, () => { }]
+            let data = {}
+            response.forEach((item: any) => {
+                data[item.participant] = item.membershipName
+            })
+            setBindings(data)
+        }
+        fetchData()
+        return () => {
+            ignore = true
+        }
+    }, [bpmnInstanceId, syncFlag])
+    return [bindings, () => setSyncFlag(!syncFlag)]
+}
+
+export const useBPMNBindingDataReverse = (bpmnInstanceId: string): [
+    {}, () => void
+] => {
+    const [bindings, setBindings] = useState<{}>({})
+    const [syncFlag, setSyncFlag] = useState(false)
+    useEffect(() => {
+        let ignore = false
+        const fetchData = async () => {
+            const response = await getBindingByBPMNInstance(bpmnInstanceId)
+            if (ignore) return [{}, () => { }]
+            let data = {}
+            response.forEach((item: any) => {
+                data[item.membershipName] = item.participant
+            })
+            setBindings(data)
+        }
+        fetchData()
+        return () => {
+            ignore = true
+        }
+    }, [bpmnInstanceId, syncFlag])
+    return [bindings, () => setSyncFlag(!syncFlag)]
+}
+
+
+import { getFireflyList } from '@/api/resourceAPI.ts';
+export const useFireflyData = (
+    envId: string,
+    orgId: string,
+    membershipId: string
+): [
+        {
+            "coreURL": string,
+            "orgName": string,
+        },
+        () => void
+    ] => {
+
+    const [firefly, setFirefly] = useState({
+        coreURL: "",
+        orgName: "",
+    });
+    const [syncFlag, setSyncFlag] = useState(false);
+
+    useEffect(() => {
+        let ignore = false;
+        const fetchData = async () => {
+            try {
+                const data = await getFireflyList(envId, orgId);
+                const finalData = data.find((item: any) => item.membershipId === membershipId);
+                if (ignore) return
+                setFirefly(finalData);
+            } catch (e) {
+                console.log(e);
+            }
+        }
+        fetchData();
+        return () => { ignore = true; }
+    }, [syncFlag, envId, orgId, membershipId]);
+    return [firefly, () => { setSyncFlag(!syncFlag) }];
+}
