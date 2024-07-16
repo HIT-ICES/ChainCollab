@@ -140,7 +140,7 @@ router.register(
 )
 
 router.register(
-    "bpmn-instances/(?P<bpmn_instance_id>[^/.]+)/binding-records",
+    "bpmn-instances/(?P<A>[^/.]+)/binding-records",
     BPMNBindingRecordViewSet,
     basename="bpmn-binding-record",
 )

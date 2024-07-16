@@ -39,7 +39,6 @@ const withLoadingComponent = (Comp: JSX.Element) => (
 );
 const MembershipCardInEnv = lazy(() => import("@/views/Environment/Dashboard/Overview/MembershipDetail/Detail"));
 
-const ParticipantList = lazy(() => import("@/views/Aaa"));
 const routes: routesType[] = [
   {
     path: "/",
@@ -279,13 +278,6 @@ const routes: routesType[] = [
       },
     ],
   },
-  {
-       //TODO:这里参数传入我还没搞懂
-    path: "/aaa/:BPMNinstanceId",
-    element: <ParticipantList/>,
-  },
- 
-
 ];
 
 export default routes;

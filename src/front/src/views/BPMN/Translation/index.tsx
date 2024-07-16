@@ -3,10 +3,10 @@
 //     ：3. 部署成功后，更新BPMN编排图状态
 
 import React, { useState } from "react";
-import { Button, Input, Table, TableProps, Modal} from "antd";
+import { Button, Input, Table, TableProps, Modal } from "antd";
 import { useAppSelector } from "@/redux/hooks.ts";
 import { useNavigate } from "react-router-dom";
-import ParticipantListModel from "./ParticipantListModel.tsx"
+import ParticipantListModel from "./participantBinding/ParticipantListModel.tsx"
 
 interface DataType {
   id: string;
@@ -225,7 +225,7 @@ const Translation: React.FC = () => {
               onCancel={handleModalClose}
               footer={null}
             >
-              <ParticipantListModel bpmnInstanceId={record.id}/>
+              <ParticipantListModel bpmnId={record.id} />
             </Modal>
             <Button
               type="primary"
