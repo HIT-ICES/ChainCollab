@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { Button, Input, Table, TableProps, } from "antd";
 import { useAppSelector } from "@/redux/hooks.ts";
 import { useNavigate } from "react-router-dom";
+import ParticipantDmnBindingModal from "./BpmnInstanceDetail/bingingModal-ParticiapantDmn";
 
 interface DataType {
   id: string;
   consortium_id: string;
   organization_id: string;
+  status: string;
   name: string;
   bpmnContent: string;
 }
@@ -130,6 +132,7 @@ const Translation: React.FC = () => {
   const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
   const currenEnvName = useAppSelector((state) => state.env.currentEnvName);
   const navigate = useNavigate();
+  const [isBindingOpen, setIsBindingOpen] = useState(false);
 
   const [newOne, setNewOne] = useState({
     id: "new",
@@ -140,7 +143,7 @@ const Translation: React.FC = () => {
     environment_name: currenEnvName
   });
 
-
+  
 
   const submitNewOne = async (syncLeaf) => {
     const res = await addBPMNInstance(newOne.bpmn_id, newOne.name, currentEnvId);
@@ -197,11 +200,13 @@ const Translation: React.FC = () => {
             <Button
               type="primary"
               style={{ marginLeft: 10 }}
+              disabled={record.status !== "Registered"}
               onClick={() => {
-                setNewOne({
-                  ...newOne,
-                  bpmn_id: record.id
-                })
+                // setNewOne({
+                //   ...newOne,
+                //   bpmn_id: record.id
+                // })
+                setIsBindingOpen(true);
                 // expand the row
               }}
             >
@@ -252,6 +257,7 @@ const Translation: React.FC = () => {
           }
         }}
       />
+      <ParticipantDmnBindingModal open={isBindingOpen} setOpen={setIsBindingOpen} />
     </div>
   );
 };

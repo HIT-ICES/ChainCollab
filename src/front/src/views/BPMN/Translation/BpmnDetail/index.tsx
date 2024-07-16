@@ -261,14 +261,16 @@ const BPMNOverview = () => {
     const buttonText = (() => {
         if (status == 'Installed') {
             return 'Register';
-        } else if (status == 'Registered') {
-            return 'Execute';
         }
+        // else if (status == 'Registered') {
+        //     return 'Execute';
+        // }
         else if (status == 'Initiated') {
             return 'Deploy to Env';
-        }
-        else {
-            return status == 'Generated' ? 'Install' : 'Generate';
+        } else if (status == 'Generated') {
+            return 'Install'
+        } else if (status == 'DeployEnved') {
+            return 'Generate';
         }
     })()
 
@@ -289,20 +291,23 @@ const BPMNOverview = () => {
                             onClick={() => {
                                 setIsBindingModelOpen(true);
                             }} >BINDING</Button> */}
-                            <Button type="primary"
-                                // disabled={status == 'Initiated'}
-                                loading={buttonLoading}
-                                onClick={() => {
-                                    if (status == 'Generated') {
-                                        navigate(`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/fabric/chaincode`)
-                                    } else if (status == 'Installed') {
-                                        onRegister();
-                                    } else if (status == 'Initiated') {
-                                        onDeployEnv();
-                                    } else if (status == 'DeployEnved') {
-                                        onGenerate();
-                                    }
-                                }} >{buttonText}</Button>
+                            {
+                                status !== 'Registered' ?
+                                    <Button type="primary"
+                                        // disabled={status == 'Initiated'}
+                                        loading={buttonLoading}
+                                        onClick={() => {
+                                            if (status == 'Generated') {
+                                                navigate(`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/fabric/chaincode`)
+                                            } else if (status == 'Installed') {
+                                                onRegister();
+                                            } else if (status == 'Initiated') {
+                                                onDeployEnv();
+                                            } else if (status == 'DeployEnved') {
+                                                onGenerate();
+                                            }
+                                        }} >{buttonText}</Button> : null
+                            }
                         </Col>
                     </Row>
                     <Row>
