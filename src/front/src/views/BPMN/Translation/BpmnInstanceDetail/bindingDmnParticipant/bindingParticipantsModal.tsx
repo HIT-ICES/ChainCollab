@@ -5,32 +5,29 @@ import { useAppSelector } from "@/redux/hooks";
 import { useParticipantsData, useAvailableMembers } from "../hooks"
 import { title } from 'process';
 import { v4 as uuidv4 } from 'uuid';
+import { useFabricIdentities } from '@/views/Consortium/FabricUsers/hooks';
 
 export const BindingParticipant = ({ bpmnId }) => {
 
 
   const [bindings, setBindings] = useState<{}>({})
-  const [usedMember, setUsedMember] = useState<string[]>([])
   const [participants, syncParticipants] = useParticipantsData(bpmnId)
 
   const [modalActive, setModalActive] = useState(false);
   const [validationType, setValidationType] = useState('equal');
   const [showUserSection, setShowUserSection] = useState(true);
-  const [showMspSection, setShowMspSection] = useState(false);
   const [showAttributeSection, setShowAttributeSection] = useState(false);
   const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
-  const [attrRows, setAttrRows] = useState([{ attrName: '', equalValue: '' }]);
+  const [currentSelectedMembershipId, setCurrentSelectedMembershipId] = useState("");
+  const [fabricIdentities, { isLoading, isError, isSuccess }, refetch] = useFabricIdentities(currentEnvId, currentSelectedMembershipId);
 
-  const handleModalClose = () => { setModalActive(false); };
   const handleValidationTypeChange = (value, evt) => {
     setValidationType(value);
     if (evt.children == "一类") {
       setShowUserSection(false);
-      setShowMspSection(true);
       setShowAttributeSection(true);
     } else {
       setShowUserSection(true);
-      setShowMspSection(false);
       setShowAttributeSection(false);
     }
   };
@@ -184,6 +181,37 @@ export const BindingParticipant = ({ bpmnId }) => {
               alignItems: 'center',   // 垂直居中对齐子元素
               width: '100%',          // 容器宽度为100%
               marginBottom: '10px'    // 可选，为行添加底部间距
+            }}>
+              <label htmlFor="mspSelect">选择MSP (可选):</label>
+              <Select
+                style={{ width: 'auto', flexGrow: 1, paddingLeft: "10px" }}
+                defaultValue=""
+                value={currentSelectedMembershipId}
+                onChange={(value) => {
+                  // 处理选择MSP的事件
+                  setCurrentSelectedMembershipId(value);
+                }}
+              >
+                <Select.Option value="" key="default">
+                  请选择一个选项
+                </Select.Option>
+                {
+                  members.map((member) => {
+                    return (
+                      <Select.Option value={member.membershipId} key={member.membershipId}>
+                        {member.membershipName}
+                      </Select.Option>
+                    )
+                  }) // 为Select添加一个空选项
+                }
+              </Select>
+            </div>
+            <div style={{
+              display: 'flex',        // 使用Flexbox布局
+              justifyContent: 'space-between', // 子元素间隔均匀分布
+              alignItems: 'center',   // 垂直居中对齐子元素
+              width: '100%',          // 容器宽度为100%
+              marginBottom: '10px'    // 可选，为行添加底部间距
             }}>{
                 showUserSection && (
                   <div style={{
@@ -195,39 +223,19 @@ export const BindingParticipant = ({ bpmnId }) => {
                   }}>
                     <label htmlFor="userSelect">选择用户:</label>
                     <Select id="userSelect" style={{ width: 'auto', flexGrow: 1, paddingLeft: "10px" }}>
-                      <Select.Option value="user1">用户 1</Select.Option>
-                      <Select.Option value="user2">用户 2</Select.Option>
-                      <Select.Option value="user3">用户 3</Select.Option>
+                      {
+                        fabricIdentities.map((user) => {
+                          return (
+                            <Select.Option value={user.id} key={user.id}>
+                              {user.name}
+                            </Select.Option>
+                          )
+                        })
+                      }
                     </Select>
                   </div>
                 )
               }
-            </div>
-            <div style={{
-              display: 'flex',        // 使用Flexbox布局
-              justifyContent: 'space-between', // 子元素间隔均匀分布
-              alignItems: 'center',   // 垂直居中对齐子元素
-              width: '100%',          // 容器宽度为100%
-              marginBottom: '10px'    // 可选，为行添加底部间距
-            }}>
-              <label htmlFor="mspSelect">选择MSP (可选):</label>
-              <Select
-                style={{ width: 'auto', flexGrow: 1, paddingLeft: "10px" }}
-                defaultValue=""
-                onChange={(value) => {
-                  // 处理选择MSP的事件
-                }}
-              >
-                {
-                  members.map((member) => {
-                    return (
-                      <Select.Option value={member.membershipId} key={member.membershipId}>
-                        {member.membershipName}
-                      </Select.Option>
-                    )
-                  })
-                }
-              </Select>
             </div>
             <div style={{
               display: 'flex',        // 使用Flexbox布局

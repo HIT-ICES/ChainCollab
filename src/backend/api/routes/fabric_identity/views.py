@@ -3,7 +3,11 @@ from requests import get, post
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from .serializers import FabricIdentitySerializer, GatewayRegisterSerializer, FabricIdentityCreateSerializer
+from .serializers import (
+    FabricIdentitySerializer,
+    GatewayRegisterSerializer,
+    FabricIdentityCreateSerializer,
+)
 from api.models import FabricIdentity, Firefly, APISecretKey, ResourceSet
 from api.config import DEFAULT_AGENT, DEFAULT_CHANNEL_NAME, FABRIC_CONFIG
 from api.utils.test_time import timeitwithname
@@ -14,18 +18,20 @@ class FabricIdentityViewSet(viewsets.ViewSet):
 
     # platform method
     def list(self, request):
-        queryset = FabricIdentity.objects.all()
+        resource_set_id = request.query_params.get("resource_set_id")
+        resource_set = ResourceSet.objects.get(id=resource_set_id)
+        queryset = FabricIdentity.objects.filter(membership=resource_set.membership)
         serializer = FabricIdentitySerializer(queryset, many=True)
         return Response(serializer.data)
 
     # platform method
     def create(self, request):
-        
+
         serializer = FabricIdentityCreateSerializer(data=request.data)
         if serializer.is_valid():
             resource_set_id = serializer.data["resource_set_id"]
             resource_set = ResourceSet.objects.get(id=resource_set_id)
-            
+
             # register
             target_firefly = resource_set.firefly.get()
             if target_firefly is None:
@@ -36,12 +42,14 @@ class FabricIdentityViewSet(viewsets.ViewSet):
                 name=serializer.data["name_of_identity"],
                 attributes=serializer.data["attributes"],
             )
-            success = target_firefly.enroll_certificate(name, secret, serializer.data["attributes"])
+            success = target_firefly.enroll_certificate(
+                name, secret, serializer.data["attributes"]
+            )
             if not success:
                 return Response(
                     {"error": "enroll failed"}, status=status.HTTP_400_BAD_REQUEST
                 )
-            
+
             # register to firefly
             success = target_firefly.register_to_firefly(name)
             if not success:
@@ -106,7 +114,8 @@ class FabricIdentityViewSet(viewsets.ViewSet):
             # create fabric identity
 
             resource_set = ResourceSet.objects.filter(
-                membership=api_secret_key.membership, environment=api_secret_key.environment
+                membership=api_secret_key.membership,
+                environment=api_secret_key.environment,
             ).first()
             if resource_set is None:
                 return Response(
@@ -122,7 +131,9 @@ class FabricIdentityViewSet(viewsets.ViewSet):
                 name=serializer.data["name_of_identity"],
                 attributes=serializer.data["attributes"],
             )
-            success = target_firefly.enroll_certificate(name, secret, serializer.data["attributes"])
+            success = target_firefly.enroll_certificate(
+                name, secret, serializer.data["attributes"]
+            )
             if not success:
                 return Response(
                     {"error": "enroll failed"}, status=status.HTTP_400_BAD_REQUEST
@@ -138,10 +149,11 @@ class FabricIdentityViewSet(viewsets.ViewSet):
                 name=serializer.data["name_of_fabric_identity"],
                 signer=serializer.data["name_of_identity"],
                 secret=serializer.data["secret_of_identity"],
-                environment = api_secret_key.environment,
-                membership = api_secret_key.membership,
+                environment=api_secret_key.environment,
+                membership=api_secret_key.membership,
             )
             fabric_identity.save()
             return Response(
-                {"id": fabric_identity.id, "secret": secret}, status=status.HTTP_201_CREATED
+                {"id": fabric_identity.id, "secret": secret},
+                status=status.HTTP_201_CREATED,
             )

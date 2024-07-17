@@ -318,7 +318,7 @@ export const deleteEnvironment = async (environmentId: string) => { };
 
 export const getFabricIdentityList = async (resourceSetId) => {
   try {
-    const res = await api.get(`/fabric_identities`);
+    const res = await api.get(`/fabric_identities/?resource_set_id=${resourceSetId}`);
     return res.data;
   } catch (err) {
     console.error("获取fabricIdentityList失败", err);

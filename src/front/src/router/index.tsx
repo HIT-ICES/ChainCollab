@@ -17,13 +17,13 @@ const UsersManage = lazy(() => import("@/views/Organization/UsersManage"));
 const OrgSettings = lazy(() => import("@/views/Organization/Settings"));
 const OrgDashboard = lazy(() => import("@/views/Organization/Dashboard"));
 const Home = lazy(() => import("@/views/Home"));
-const NetworkDashboard = lazy(() => import("@/views/Network/Dashboard"));
-const Memberships = lazy(() => import("@/views/Network/Memberships"));
-const FabricUsers = lazy(() => import("@/views/Network/FabricUsers"));
+const NetworkDashboard = lazy(() => import("@/views/Consortium/Dashboard"));
+const Memberships = lazy(() => import("@/views/Consortium/Memberships"));
+const FabricUsers = lazy(() => import("@/views/Consortium/FabricUsers"));
 const MembershipDetail = lazy(
-  () => import("@/views/Network/Memberships/Detail")
+  () => import("@/views/Consortium/Memberships/Detail")
 );
-const NetworkSettings = lazy(() => import("@/views/Network/Settings"));
+const NetworkSettings = lazy(() => import("@/views/Consortium/Settings"));
 // const Drawing = lazy(() => import("@/views/BPMN/Drawing"));
 const Execution = lazy(() => import("@/views/BPMN/Execution"));
 const Translation = lazy(() => import("@/views/BPMN/Translation"));

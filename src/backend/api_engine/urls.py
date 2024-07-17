@@ -91,7 +91,7 @@ router.register("register", RegisterViewSet, basename="register")
 router.register("agents", AgentViewSet, basename="agent")  # No Change
 
 router.register("api_secret_keys", APISecretKeyViewSet, basename="api_secret_key")
-router.register("fabric_identities", FabricIdentityViewSet, basename="fabric_identity")
+router.register("fabric_identities/", FabricIdentityViewSet, basename="fabric_identity")
 
 router.register(
     "fabric_resource_sets", FabricResourceSetViewSet, basename="fabric_resource_set"
