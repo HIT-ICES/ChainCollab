@@ -273,11 +273,12 @@ class EventBasedGateway(Element):
 
 class BusinessRuleTask(Element):
     _type: NodeType = NodeType.BUSINESS_RULE_TASK
-    _properties: List[str] = ["id", "name", "type", "incoming", "outgoing"]
+    _properties: List[str] = ["id", "name", "type", "incoming", "outgoing", "documentation"]
     _object_properties: List[str] = ["incoming", "outgoing"]
 
-    def __init__(self, graph, id: str, name: str = "", incoming: str = "", outgoing: str = ""):
+    def __init__(self, graph, id: str, name: str = "", incoming: str = "", outgoing: str = "", documentation:str = ""):
         super().__init__(graph, id, name)
+        self._documentation = documentation
         self._incoming: dict = initObjectProperties(incoming)
         self._outgoing: dict = initObjectProperties(outgoing)
 

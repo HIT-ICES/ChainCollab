@@ -8,6 +8,9 @@ from pydantic import BaseModel
 from typing import Dict, Any
 import json
 from fastapi.middleware.cors import CORSMiddleware
+from dmn_parser.parser import DMNParser
+from choreography_parser.parser import Choreography
+from choreography_parser.elements import NodeType
 
 app = FastAPI()
 app.add_middleware(
@@ -62,6 +65,61 @@ async def generate_ffi():
     translator = GoChaincodeTranslator()
     return JSONResponse(content={"message": "Hello, world! (async)"})
 
+
+class GetDecisionsParams(BaseModel):
+    dmnContent: str
+
+
+# 1. return all decisionID， and mark the main one
+@app.post("/api/v1/chaincode/getDecisions")
+async def get_decisions(params: GetDecisionsParams):
+    parser: DMNParser = DMNParser(params.dmnContent)
+    returns = [
+        {
+            "id": decision._id,
+            "name": decision._name,
+            "is_main": decision.is_main,
+
+            "inputs":[
+                {
+                    "id": input.id,
+                    "label": input.label,
+                    "expression_id": input.expression_id,
+                    "typeRef": input.typeRef,
+                    "text": input.text
+                }
+                for input in decision.inputs
+            ],
+            "outputs": [
+                {
+                    "id": output.id,
+                    "name": output.name,
+                    "label": output.label,
+                    "type": output.type
+                }
+                for output in decision.outputs
+            ]
+        }
+        for decision in parser.get_all_decisions()
+    ]
+    return JSONResponse(content=returns)
+
+
+class GetBusinessRulesParams(BaseModel):
+    bpmnContent: str
+
+# 2. return all BPMN BusinessRule Input and Output
+@app.post("/api/v1/chaincode/getBusinessRules")
+async def get_businessrules(params: GetDecisionsParams):
+    parser : Choreography = Choreography(params.dmnContent)
+    returns = [
+        {
+            "id": businessrule.id,
+            "documenation": businessrule.documentation,
+        }
+        for businessrule in parser.query_element_with_type(NodeType.BUSINESSRULE)
+    ]
+    return JSONResponse(content=returns)
 
 # 启动服务器
 if __name__ == "__main__":

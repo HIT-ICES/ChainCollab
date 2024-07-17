@@ -83,6 +83,20 @@ class Choreography:
                     element.attrib.get("name", ""),
                     documentation=documentation if documentation is not None else "{}",
                 )
+            case NodeType.BUSINESS_RULE_TASK.value:
+                # Parser Input & Output
+                documentation_list = element.findall(f"./{bpmn2prefix}documentation")
+                documentation = (
+                    documentation_list[0].text if documentation_list else None
+                )
+                return BusinessRuleTask(
+                    self,
+                    element.attrib["id"],
+                    element.attrib.get("name", ""),
+                    incoming=element.findall(f"./{bpmn2prefix}incoming")[0].text,
+                    outgoing=element.findall(f"./{bpmn2prefix}outgoing")[0].text,
+                    documentation=documentation if documentation is not None else "{}",
+                )
             case NodeType.START_EVENT.value:
                 return StartEvent(
                     self,
@@ -156,14 +170,7 @@ class Choreography:
                         for element in element.findall(f"./{bpmn2prefix}outgoing")
                     ],
                 )
-            case NodeType.BUSINESS_RULE_TASK.value:
-                return BusinessRuleTask(
-                    self,
-                    element.attrib["id"],
-                    element.attrib.get("name", ""),
-                    incoming=element.findall(f"./{bpmn2prefix}incoming")[0].text,
-                    outgoing=element.findall(f"./{bpmn2prefix}outgoing")[0].text,
-                )
+
 
     def _parse_edge(self, element):
         bpmn2prefix = "{http://www.omg.org/spec/BPMN/20100524/MODEL}"
@@ -213,6 +220,7 @@ class Choreography:
             self._id2nodes[message_node.id] = message_node
 
     def _init_graph(self):
+        # TODO : USE GRAPH TO EXECUTE SOME ALGORITHMS
         for node in self.nodes:
             self.graph.add_node(node.id, node=node)
         for edge in self.edges:
@@ -235,7 +243,7 @@ class Choreography:
             and (target == "" or element.attrib.get("id", "") == target)
         ]
         if len(target_elements) != 1:
-            # parse error, end
+            # Parse Error! TODO
             print("Error: target not found or multiple targets found")
             return
         target_element = target_elements[0]
