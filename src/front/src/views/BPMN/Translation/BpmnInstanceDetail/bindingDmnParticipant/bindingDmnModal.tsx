@@ -1,8 +1,8 @@
 import { Modal, Table, Select, Button } from "antd"
 import { useState, useEffect } from "react"
 import { Binding, retrieveBPMN } from "@/api/externalResource"
-import { useParticipantsData, useAvailableMembers, useBPMNBindingData, useBusinessRulesDataByBpmn } from "./hooks"
-import { useDmnListData } from "../../Dmn/hooks"
+import { useBusinessRulesDataByBpmn } from "./hooks"
+import { useDmnListData } from "../../../Dmn/hooks"
 import { useAppSelector } from "@/redux/hooks"
 
 export const BindingDmnModal = ({
@@ -82,8 +82,6 @@ export const BindingDmnModal = ({
             columns={colums}
             dataSource={data}
             pagination={false}
-            title={() => 'Binding BPMN businessRuleTasks and DMN'} // 添加标题
-            style={{ minWidth: '400px' }} // 设置最小宽度为600px
         />
     )
 }

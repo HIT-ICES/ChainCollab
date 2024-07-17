@@ -79,19 +79,6 @@ export const useParticipantsData = (bpmnId: string): [
     return [participants, () => setSyncFlag(!syncFlag)]
 }
 
-export const useBusinessRulesDataByBpmn = (bpmnId: string) => {
-    const { data: dmns = [], isLoading, isError, isSuccess, refetch } = useQuery(['dmns', bpmnId], async () => {
-        const response = await retrieveBPMN(bpmnId)
-        const bpmnContent = response.bpmnContent
-        return await getBusinessRulesByContent(
-            bpmnContent
-        );
-    });
-    return [dmns, { isLoading, isError, isSuccess }, refetch]
-}
-
-
-
 import { getBindingByBPMNInstance } from '@/api/externalResource'
 
 export const useBPMNBindingData = (bpmnInstanceId: string): [
@@ -144,8 +131,7 @@ export const useBPMNBindingDataReverse = (bpmnInstanceId: string): [
 
 
 import { getFireflyList } from '@/api/resourceAPI.ts';
-import { useDmnListData } from '../../Dmn/hooks';
-import { getBusinessRulesByContent } from '@/api/translator';
+
 export const useFireflyData = (
     envId: string,
     orgId: string,
