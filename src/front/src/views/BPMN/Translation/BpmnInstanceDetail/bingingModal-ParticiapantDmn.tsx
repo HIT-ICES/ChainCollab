@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Modal, Button } from 'antd';
+import { BindingDmnModal } from './bindingDmnModal';
 
-const ParticipantDmnBindingModal = ({ open, setOpen }) => {
+const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 
   const handleOk = () => {
     setOpen(false);
@@ -13,10 +14,10 @@ const ParticipantDmnBindingModal = ({ open, setOpen }) => {
 
   return (
     <div>
-      <Modal title="Custom Modal" open={open} onOk={handleOk} onCancel={handleCancel}>
+      <Modal title="Binding Dmns and Participants" open={open} onOk={handleOk} onCancel={handleCancel}>
         <div style={{ display: 'flex', marginBottom: '20px' }}>
           <div style={{ flex: 1, borderRight: '1px solid #ccc', paddingRight: '10px' }}>
-            <MyLeftComponent />
+            <MyLeftComponent bpmnId={bpmnId} />
           </div>
           <div style={{ flex: 1, paddingLeft: '10px' }}>
             <MyRightComponent />
@@ -30,10 +31,11 @@ const ParticipantDmnBindingModal = ({ open, setOpen }) => {
   );
 };
 
-const MyLeftComponent = () => (
+const MyLeftComponent = ({ bpmnId }) => (
   <div>
-    <h3>Left Component</h3>
-    {/* 这里放置左边组件的内容 */}
+    <BindingDmnModal
+      bpmnId={bpmnId}
+    ></BindingDmnModal>
   </div>
 );
 

@@ -143,7 +143,7 @@ const Translation: React.FC = () => {
     environment_name: currenEnvName
   });
 
-  
+
 
   const submitNewOne = async (syncLeaf) => {
     const res = await addBPMNInstance(newOne.bpmn_id, newOne.name, currentEnvId);
@@ -159,6 +159,8 @@ const Translation: React.FC = () => {
     if (syncLeaf)
       syncLeaf();
   }
+
+  const [currentBpmnId, setCurrentBpmnId] = useState("");
 
 
   const columns: TableProps<DataType>["columns"] = [
@@ -206,6 +208,7 @@ const Translation: React.FC = () => {
                 //   ...newOne,
                 //   bpmn_id: record.id
                 // })
+                setCurrentBpmnId(record.id);
                 setIsBindingOpen(true);
                 // expand the row
               }}
@@ -257,7 +260,7 @@ const Translation: React.FC = () => {
           }
         }}
       />
-      <ParticipantDmnBindingModal open={isBindingOpen} setOpen={setIsBindingOpen} />
+      <ParticipantDmnBindingModal open={isBindingOpen} setOpen={setIsBindingOpen} bpmnId={currentBpmnId} />
     </div>
   );
 };

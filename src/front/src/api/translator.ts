@@ -29,3 +29,16 @@ export const getParticipantsByContent = async (bpmnContent: string) => {
         return [];
     }
 }
+
+export const getBusinessRulesByContent = async (bpmnContent: string) => {
+    try {
+        const response = await translatorAPI.post('/chaincode/getBusinessRulesByBpmnC', {
+            bpmnContent: bpmnContent
+        })
+        return response.data;
+    }
+    catch (error) {
+        console.log(error);
+        return [];
+    }
+}
