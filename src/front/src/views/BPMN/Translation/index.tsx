@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button, Input, Table, TableProps, Modal } from "antd";
 import { useAppSelector } from "@/redux/hooks.ts";
 import { useNavigate } from "react-router-dom";
-import ParticipantDmnBindingModal from "./BpmnInstanceDetail/bingingModal-ParticiapantDmn";
+import ParticipantDmnBindingModal from "./BpmnInstanceDetail/bindingDmnParticipant/bingingModal-ParticiapantDmn.tsx";
 
 interface DataType {
   id: string;
@@ -215,14 +215,6 @@ const Translation: React.FC = () => {
             >
               Add New Instance
             </Button>
-            <Modal
-              title="参与方列表"
-              open={ParticipantListmodalVisible}
-              onCancel={handleModalClose}
-              footer={null}
-            >
-              <ParticipantListModel bpmnId={record.id} />
-            </Modal>
             <Button
               type="primary"
               style={{ marginLeft: 10, background: "red" }}
