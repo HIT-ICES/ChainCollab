@@ -243,7 +243,7 @@ class Choreography:
             and (target == "" or element.attrib.get("id", "") == target)
         ]
         if len(target_elements) != 1:
-            # parse error, end
+            # Parse Error! TODO
             print("Error: target not found or multiple targets found")
             return
         target_element = target_elements[0]

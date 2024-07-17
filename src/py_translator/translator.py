@@ -861,6 +861,10 @@ class GoChaincodeTranslator:
             f.write("\n\n".join(chaincode_list))
         return "\n\n".join(chaincode_list)
 
+
+
+
+
     def _fireflytran_ffi_param(self):
         return {
             "name": "FireFlyTran",
