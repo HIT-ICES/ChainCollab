@@ -1095,6 +1095,13 @@ class GoChaincodeTranslator:
             )
         }
 
+    def get_businessrules(self):
+        return {
+            business_rule.id: business_rule.name
+            for business_rule in self._choreography.query_element_with_type(
+                NodeType.BUSINESS_RULE_TASK
+            )
+        }
 
 if __name__ == "__main__":
     go_chaincode_translator = GoChaincodeTranslator(
