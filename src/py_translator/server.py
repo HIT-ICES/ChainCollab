@@ -63,6 +63,10 @@ async def generate_ffi():
     return JSONResponse(content={"message": "Hello, world! (async)"})
 
 
+# 1. return all decisionID， and mark the main one
+
+# 2. return all BPMN BusinessRule Input and Output
+
 # 启动服务器
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=9999)

@@ -62,12 +62,18 @@ class GoChaincodeTranslator:
         self._instance_initparameters = self._extract_instance_initparameters()
 
     def _extract_global_parameters(self) -> dict:
+        # We can split the element related with global param into two type: producer and consumer
+        # Message with properties is producer
+        # BusinessRule and SequenceFlow with condition is consumer
+
+        # so, extract all parameters from properties, and check if it is in consumer's param, to decide whether it is global param or not
+        # and there is a consequence problem, now let it go TODO
+
         choreography = self._choreography
-        global_parameters = {}
-        judge_parameters = (
-            {}
-        )  # {sequence_flow_id: {name: value, type: type, relation: relation}}
-        message_properties = {}
+        global_parameters = {} # {'is_available': {'definition': {'message_id': ['Message_0r9lypd'], 'type': 'boolean', 'description': 'Is the service available?'}}
+        judge_parameters = {} # {sequence_flow_id: {name: value, type: type, relation: relation}}
+        message_properties = {} # {'product Id': {'message_id': ['Message_1qbk325'], 'type': 'string', 'description': 'Delivered product id'}, 'payment amount': {'message_id': ['Message_0o8eyir', 'Message_1q05nnw'], 'type': 'number', 'description': 'payment amount'}
+        business_rule_outputs = {} # {"name":{type:"","business_rule_id":[]}}
         # Step 1: extract parameters from properties
         for message in choreography.query_element_with_type(NodeType.MESSAGE):
             if message.documentation == "{}":
@@ -91,15 +97,41 @@ class GoChaincodeTranslator:
                     },
                     **attri,
                 }
+        # Step 2: extract parameters from sequence flow and business rule
+        # Step 3: match parameters from properties to that from sequence flow and business rule
 
-        # Step 2: extract parameters from sequence flow
-        # Step 3: match parameters from properties and sequence flow
+        for business_rule in choreography.query_element_with_type(
+            NodeType.BUSINESS_RULE_TASK
+        ):
+            input_and_output_def_of_business_rule = json.loads(business_rule.documentation)
+            # {"input":[{{"name":"","type":""}}],"output":{"name":"","type":""}}
+            for input_def in input_and_output_def_of_business_rule.get("input",[]):
+                prop_defination = message_properties.get(input_def["name"])
+                if prop_defination is None:
+                    # Parse Error!
+                    continue
+                global_parameters[input_def["name"]] = {
+                    "definition": prop_defination,
+                }
+            for output_def in input_and_output_def_of_business_rule.get("output",[]):
+                business_rule_outputs[output_def["name"]] = {
+                    "type": output_def["type"],
+                    "business_rule_id": [business_rule.id],
+                    "description": output_def["description"],
+                }
+
+        message_properties_plus_business_rule_outputs = {
+            **message_properties,
+            **business_rule_outputs,
+        }
+
         for sequence_flow in choreography.query_element_with_type(
             EdgeType.SEQUENCE_FLOW
         ):
             name = sequence_flow.name
             if name == "":
                 continue
+            {
             # name possible value
             #   [A]==[B]
             #   [A]!=[B]
@@ -109,11 +141,13 @@ class GoChaincodeTranslator:
             #   [A]<=[B]
             #   [A] means the property of the message
             #   [B] means the value of the property
+            }
             match name:
                 case x if "==" in x:
                     prop, value = x.split("==")
-                    prop_defination = message_properties.get(prop)
+                    prop_defination = message_properties_plus_business_rule_outputs.get(prop)
                     if prop_defination is None:
+                        # Parse Error!
                         continue
                     global_parameters[prop] = {
                         "definition": prop_defination,
@@ -126,8 +160,9 @@ class GoChaincodeTranslator:
                     }
                 case x if "!=" in x:
                     prop, value = x.split("!=")
-                    prop_defination = message_properties.get(prop)
+                    prop_defination = message_properties_plus_business_rule_outputs.get(prop)
                     if prop_defination is None:
+                        # Parse Error!
                         continue
                     global_parameters[prop] = {
                         "definition": prop_defination,
@@ -140,8 +175,9 @@ class GoChaincodeTranslator:
                     }
                 case x if ">" in x:
                     prop, value = x.split(">")
-                    prop_defination = message_properties.get(prop)
+                    prop_defination = message_properties_plus_business_rule_outputs.get(prop)
                     if prop_defination is None:
+                        # Parse Error!
                         continue
                     global_parameters[prop] = {
                         "definition": prop_defination,
@@ -154,8 +190,9 @@ class GoChaincodeTranslator:
                     }
                 case x if "<" in x:
                     prop, value = x.split("<")
-                    prop_defination = message_properties.get(prop)
+                    prop_defination = message_properties_plus_business_rule_outputs.get(prop)
                     if prop_defination is None:
+                        # Parse Error!
                         continue
                     global_parameters[prop] = {
                         "definition": prop_defination,
@@ -168,8 +205,9 @@ class GoChaincodeTranslator:
                     }
                 case x if ">=" in x:
                     prop, value = x.split(">=")
-                    prop_defination = message_properties.get(prop)
+                    prop_defination = message_properties_plus_business_rule_outputs.get(prop)
                     if prop_defination is None:
+                        # Parse Error!
                         continue
                     global_parameters[prop] = {
                         "definition": prop_defination,
@@ -182,8 +220,9 @@ class GoChaincodeTranslator:
                     }
                 case x if "<=" in x:
                     prop, value = x.split("<=")
-                    prop_defination = message_properties.get(prop)
+                    prop_defination = message_properties_plus_business_rule_outputs.get(prop)
                     if prop_defination is None:
+                        # Parse Error!
                         continue
                     global_parameters[prop] = {
                         "definition": prop_defination,
@@ -1096,8 +1135,12 @@ class GoChaincodeTranslator:
         }
 
     def get_businessrules(self):
+        # return the businessrules and its related properties
         return {
-            business_rule.id: business_rule.name
+            business_rule.id: {
+                "name": business_rule.name,
+                "documentation": business_rule.documentation,
+            }
             for business_rule in self._choreography.query_element_with_type(
                 NodeType.BUSINESS_RULE_TASK
             )
