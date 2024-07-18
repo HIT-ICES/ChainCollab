@@ -6,23 +6,108 @@ import { useParticipantsData, useAvailableMembers } from "../hooks"
 import { title } from 'process';
 import { v4 as uuidv4 } from 'uuid';
 import { useFabricIdentities } from '@/views/Consortium/FabricUsers/hooks';
+import { ClickAwayListener } from '@mui/material';
 
-export const BindingParticipant = ({ bpmnId, showBindingParticipantMap, setShowBindingParticipantMap, showBindingParticipantValueMap, setShowBindingParticipantValueMap
-}) => {
+const AttrTable = ({ dataSource, _setShowBingParticipantValue, clickedActionIndex }) => {
+
+  // const [dataSource, setDataSource] = useState([]);
+  const handleAddRow = () => {
+    const newData = {
+      key: uuidv4(),
+      attr: '',
+      value: '',
+    };
+    _setShowBingParticipantValue(clickedActionIndex, { "Attr": [...dataSource, newData] })
+  };
+
+  const handleDeleteRow = (key) => {
+    const newData = dataSource.filter(item => item.key !== key);
+    _setShowBingParticipantValue(clickedActionIndex, { "Attr": newData })
+  };
+
+  const handleInputChange = (key, field, value) => {
+    console.log('input change', key, field, value);
+    const newData = dataSource.map(item => {
+      if (item.key === key) {
+        return { ...item, [field]: value };
+      }
+      return item;
+    });
+    _setShowBingParticipantValue(clickedActionIndex, { "Attr": newData })
+  };
+
+  const columns = [
+    {
+      title: 'Attr',
+      dataIndex: 'attr',
+      key: 'attr',
+      render: (text, record) => (
+        <Input
+          value={text}
+          onChange={(e) => handleInputChange(record.key, 'attr', e.target.value)}
+        />
+      )
+    },
+    {
+      title: 'Equal Value',
+      dataIndex: 'value',
+      key: 'value',
+      render: (text, record) => (
+        <Input
+          value={text}
+          onChange={(e) => handleInputChange(record.key, 'value', e.target.value)}
+        />
+      )
+    },
+    {
+      title: 'Operation',
+      dataIndex: 'operation',
+      key: 'operation',
+      render: (_, record) =>
+        dataSource.length >= 1 ? (
+          <Button
+            type="danger"
+            onClick={() => handleDeleteRow(record.key)}
+          >
+            Delete
+          </Button>
+        ) : null,
+    },
+  ];
+
+  return (
+    <div
+      style={{
+        display: 'flex',        // 使用Flexbox布局
+        flexDirection: 'column', // 子元素垂直排列
+        width: '100%'
+      }}>
+      <Table
+        columns={columns}
+        dataSource={dataSource}
+        scroll={{ y: 200 }} // 以像素为单位，设置合适的值以显示大约5行
+      />
+      <Button
+        onClick={handleAddRow}
+        type="primary"
+        style={{
+          width: "30%", marginBottom: 16, marginTop: '10px', alignSelf: 'flex-end' // 设置按钮靠右侧显示
+          // 与上方组件（表格）间距10px
+        }}
+      >
+        Add a row
+      </Button>
+    </div>
+  );
+}
+
+const BindingParticipantComponent = ({ clickedActionIndex, showBindingParticipantMap, setShowBindingParticipantMap, showBindingParticipantValueMap, setShowBindingParticipantValueMap }) => {
 
   const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
-  const [bindings, setBindings] = useState<{}>({})
-
-  // const [showBindingParticipantMap, setShowBindingParticipantMap] = useState(new Map());
-  // const [showBindingParticipantValueMap, setShowBindingParticipantValueMap] = useState(new Map());
-
-  const [clickedActionIndex, setClickedActionIndex] = useState("");
-
 
   // fetch datas
   const [fabricIdentities, { isLoading, isError, isSuccess }, refetch] = useFabricIdentities(currentEnvId,
     showBindingParticipantValueMap.get(clickedActionIndex)?.selectedMembershipId);
-  const [participants, syncParticipants] = useParticipantsData(bpmnId)
   const [members, syncMembers] = useAvailableMembers(currentEnvId)
 
   const _setShowBingParticipant = (id, updates) => {
@@ -52,219 +137,127 @@ export const BindingParticipant = ({ bpmnId, showBindingParticipantMap, setShowB
     }
   };
 
-  const AttrTable = ({ dataSource }) => {
-
-    // const [dataSource, setDataSource] = useState([]);
-    const handleAddRow = () => {
-      const newData = {
-        key: uuidv4(),
-        attr: '',
-        value: '',
-      };
-      _setShowBingParticipantValue(clickedActionIndex, { "Attr": [...dataSource, newData] })
-    };
-
-    const handleDeleteRow = (key) => {
-      const newData = dataSource.filter(item => item.key !== key);
-      _setShowBingParticipantValue(clickedActionIndex, { "Attr": newData })
-    };
-
-    const handleInputChange = (key, field, value) => {
-      console.log('input change', key, field, value);
-      const newData = dataSource.map(item => {
-        if (item.key === key) {
-          return { ...item, [field]: value };
-        }
-        return item;
-      });
-      _setShowBingParticipantValue(clickedActionIndex, { "Attr": newData })
-    };
-
-    const columns = [
-      {
-        title: 'Attr',
-        dataIndex: 'attr',
-        key: 'attr',
-        render: (text, record) => (
-          <Input
-            value={text}
-            onChange={(e) => handleInputChange(record.key, 'attr', e.target.value)}
-          />
-        )
-      },
-      {
-        title: 'Equal Value',
-        dataIndex: 'value',
-        key: 'value',
-        render: (text, record) => (
-          <Input
-            value={text}
-            onChange={(e) => handleInputChange(record.key, 'value', e.target.value)}
-          />
-        )
-      },
-      {
-        title: 'Operation',
-        dataIndex: 'operation',
-        key: 'operation',
-        render: (_, record) =>
-          dataSource.length >= 1 ? (
-            <Button
-              type="danger"
-              onClick={() => handleDeleteRow(record.key)}
-            >
-              Delete
-            </Button>
-          ) : null,
-      },
-    ];
-
-    return (
-      <div
-        style={{
-          display: 'flex',        // 使用Flexbox布局
-          flexDirection: 'column', // 子元素垂直排列
-          width: '100%'
-        }}>
-        <Table
-          columns={columns}
-          dataSource={dataSource}
-          scroll={{ y: 200 }} // 以像素为单位，设置合适的值以显示大约5行
-        />
-        <Button
-          onClick={handleAddRow}
-          type="primary"
-          style={{
-            width: "30%", marginBottom: 16, marginTop: '10px', alignSelf: 'flex-end' // 设置按钮靠右侧显示
-            // 与上方组件（表格）间距10px
-          }}
-        >
-          Add a row
-        </Button>
-      </div>
-    );
-  }
-
-  const BindingParticipantComponent = () => {
-    return (
-      <div>{
-        clickedActionIndex && (
-          <Card>
-            <div style={{
-              display: 'flex',        // 使用Flexbox布局
-              justifyContent: 'space-between', // 子元素间隔均匀分布
-              alignItems: 'center',   // 垂直居中对齐子元素
-              width: '100%',          // 容器宽度为100%
-              marginBottom: '10px'    // 可选，为行添加底部间距
-            }}>
-              <label htmlFor="validationSelect">选择校验方式 :</label>
-              <Select id="validationSelect" value={showBindingParticipantValueMap.get(clickedActionIndex)?.selectedValidationType} onChange={handleValidationTypeChange} style={{ width: 'auto', flexGrow: 1, paddingLeft: "10px" }}>
-                <Select.Option value="equal">相等</Select.Option>
-                <Select.Option value="group">一类</Select.Option>
-              </Select>
-            </div>
-            <div style={{
-              display: 'flex',        // 使用Flexbox布局
-              justifyContent: 'space-between', // 子元素间隔均匀分布
-              alignItems: 'center',   // 垂直居中对齐子元素
-              width: '100%',          // 容器宽度为100%
-              marginBottom: '10px'    // 可选，为行添加底部间距
-            }}>
-              {showBindingParticipantMap.get(clickedActionIndex)?.showMspSection && (
-                <div>
-                  <label htmlFor="mspSelect">
-                    {showBindingParticipantValueMap.get(clickedActionIndex)?.selectedValidationType === 'equal' ? '选择MSP :' : '选择MSP(可选) :'}
-                  </label>
+  return (
+    <div>{
+      clickedActionIndex && (
+        <Card>
+          <div style={{
+            display: 'flex',        // 使用Flexbox布局
+            justifyContent: 'space-between', // 子元素间隔均匀分布
+            alignItems: 'center',   // 垂直居中对齐子元素
+            width: '100%',          // 容器宽度为100%
+            marginBottom: '10px'    // 可选，为行添加底部间距
+          }}>
+            <label htmlFor="validationSelect">选择校验方式 :</label>
+            <Select id="validationSelect" value={showBindingParticipantValueMap.get(clickedActionIndex)?.selectedValidationType} onChange={handleValidationTypeChange} style={{ width: 'auto', flexGrow: 1, paddingLeft: "10px" }}>
+              <Select.Option value="equal">相等</Select.Option>
+              <Select.Option value="group">一类</Select.Option>
+            </Select>
+          </div>
+          <div style={{
+            display: 'flex',        // 使用Flexbox布局
+            justifyContent: 'space-between', // 子元素间隔均匀分布
+            alignItems: 'center',   // 垂直居中对齐子元素
+            width: '100%',          // 容器宽度为100%
+            marginBottom: '10px'    // 可选，为行添加底部间距
+          }}>
+            {showBindingParticipantMap.get(clickedActionIndex)?.showMspSection && (
+              <div>
+                <label htmlFor="mspSelect">
+                  {showBindingParticipantValueMap.get(clickedActionIndex)?.selectedValidationType === 'equal' ? '选择MSP :' : '选择MSP(可选) :'}
+                </label>
+                <Select
+                  style={{ width: 'auto', flexGrow: 1, paddingLeft: "10px" }}
+                  defaultValue=""
+                  value={showBindingParticipantValueMap.get(clickedActionIndex)?.selectedMembershipId}
+                  onChange={(value) => {
+                    // 处理选择MSP的事件
+                    _setShowBingParticipantValue(clickedActionIndex, { 'selectedMembershipId': value })
+                  }}
+                >
+                  <Select.Option value="" key="default">
+                    请选择一个选项
+                  </Select.Option>
+                  {
+                    members.map((member) => {
+                      return (
+                        <Select.Option value={member.membershipId} key={member.membershipId}>
+                          {member.membershipName}
+                        </Select.Option>
+                      )
+                    }) // 为Select添加一个空选项
+                  }
+                </Select>
+              </div>
+            )}
+          </div>
+          <div style={{
+            display: 'flex',        // 使用Flexbox布局
+            justifyContent: 'space-between', // 子元素间隔均匀分布
+            alignItems: 'center',   // 垂直居中对齐子元素
+            width: '100%',          // 容器宽度为100%
+            marginBottom: '10px'    // 可选，为行添加底部间距
+          }}>{
+              showBindingParticipantMap.get(clickedActionIndex)?.showUserSection && showBindingParticipantValueMap.get(clickedActionIndex)?.selectedMembershipId && (
+                <div style={{
+                  display: 'flex',        // 使用Flexbox布局
+                  justifyContent: 'space-between', // 子元素间隔均匀分布
+                  alignItems: 'center',   // 垂直居中对齐子元素
+                  width: '100%',          // 容器宽度为100%
+                  marginBottom: '10px'    // 可选，为行添加底部间距
+                }}>
+                  <label htmlFor="userSelect">选择用户:</label>
                   <Select
-                    style={{ width: 'auto', flexGrow: 1, paddingLeft: "10px" }}
-                    defaultValue=""
-                    value={showBindingParticipantValueMap.get(clickedActionIndex)?.selectedMembershipId}
+                    id="userSelect"
+                    value={showBindingParticipantValueMap.get(clickedActionIndex)?.selectedUser}
                     onChange={(value) => {
                       // 处理选择MSP的事件
-                      _setShowBingParticipantValue(clickedActionIndex, { 'selectedMembershipId': value })
+                      _setShowBingParticipantValue(clickedActionIndex, { 'selectedUser': value })
                     }}
-                  >
-                    <Select.Option value="" key="default">
-                      请选择一个选项
-                    </Select.Option>
+                    style={{ width: 'auto', flexGrow: 1, paddingLeft: "10px" }}>
                     {
-                      members.map((member) => {
+                      fabricIdentities.map((user) => {
                         return (
-                          <Select.Option value={member.membershipId} key={member.membershipId}>
-                            {member.membershipName}
+                          <Select.Option value={user.id} key={user.id}>
+                            {user.name}
                           </Select.Option>
                         )
-                      }) // 为Select添加一个空选项
+                      })
                     }
                   </Select>
                 </div>
-              )}
-            </div>
-            <div style={{
-              display: 'flex',        // 使用Flexbox布局
-              justifyContent: 'space-between', // 子元素间隔均匀分布
-              alignItems: 'center',   // 垂直居中对齐子元素
-              width: '100%',          // 容器宽度为100%
-              marginBottom: '10px'    // 可选，为行添加底部间距
-            }}>{
-                showBindingParticipantMap.get(clickedActionIndex)?.showUserSection && showBindingParticipantValueMap.get(clickedActionIndex)?.selectedMembershipId && (
-                  <div style={{
-                    display: 'flex',        // 使用Flexbox布局
-                    justifyContent: 'space-between', // 子元素间隔均匀分布
-                    alignItems: 'center',   // 垂直居中对齐子元素
-                    width: '100%',          // 容器宽度为100%
-                    marginBottom: '10px'    // 可选，为行添加底部间距
-                  }}>
-                    <label htmlFor="userSelect">选择用户:</label>
-                    <Select
-                      id="userSelect"
-                      value={showBindingParticipantValueMap.get(clickedActionIndex)?.selectedUser}
-                      onChange={(value) => {
-                        // 处理选择MSP的事件
-                        _setShowBingParticipantValue(clickedActionIndex, { 'selectedUser': value })
-                      }}
-                      style={{ width: 'auto', flexGrow: 1, paddingLeft: "10px" }}>
-                      {
-                        fabricIdentities.map((user) => {
-                          return (
-                            <Select.Option value={user.id} key={user.id}>
-                              {user.name}
-                            </Select.Option>
-                          )
-                        })
-                      }
-                    </Select>
-                  </div>
-                )
-              }
-            </div>
-            <div style={{
-              display: 'flex',        // 使用Flexbox布局
-              justifyContent: 'space-between', // 子元素间隔均匀分布
-              alignItems: 'center',   // 垂直居中对齐子元素
-              width: '100%',          // 容器宽度为100%
-              marginBottom: '5px',    // 可选，为行添加底部间距
-            }}>
-              {
-                showBindingParticipantMap.get(clickedActionIndex)?.showAttributeSection && (
-                  <AttrTable
-                    dataSource={showBindingParticipantValueMap.get(clickedActionIndex)?.Attr || []}
-                  ></AttrTable>
-                )
-              }
-            </div>
-            {/* <div style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                width: '100%',
-              }}>
-                <Button onClick={handleModalClose}>关闭</Button>
-              </div> */}
-          </Card >
-        )
-      }
-      </div >)
-  };
+              )
+            }
+          </div>
+          <div style={{
+            display: 'flex',        // 使用Flexbox布局
+            justifyContent: 'space-between', // 子元素间隔均匀分布
+            alignItems: 'center',   // 垂直居中对齐子元素
+            width: '100%',          // 容器宽度为100%
+            marginBottom: '5px',    // 可选，为行添加底部间距
+          }}>
+            {
+              showBindingParticipantMap.get(clickedActionIndex)?.showAttributeSection && (
+                <AttrTable
+                  dataSource={showBindingParticipantValueMap.get(clickedActionIndex)?.Attr || []}
+                  _setShowBingParticipantValue={_setShowBingParticipantValue}
+                  clickedActionIndex={clickedActionIndex}>
+                </AttrTable>
+              )
+            }
+          </div>
+        </Card >
+      )
+    }
+    </div >)
+};
+
+
+export const BindingParticipant = ({ bpmnId, showBindingParticipantMap, setShowBindingParticipantMap, showBindingParticipantValueMap, setShowBindingParticipantValueMap
+}) => {
+
+  const [participants, syncParticipants] = useParticipantsData(bpmnId)
+  const [clickedActionIndex, setClickedActionIndex] = useState("");
 
   const columns = [
     {
@@ -292,7 +285,6 @@ export const BindingParticipant = ({ bpmnId, showBindingParticipantMap, setShowB
     return {
       participantName: participant.name,
       participantId: participant.id,
-      dmn: bindings[participant.id] ? bindings[participant.id] : ""
     }
   })
 
@@ -306,7 +298,13 @@ export const BindingParticipant = ({ bpmnId, showBindingParticipantMap, setShowB
         />
       </div>
       <div style={{ flex: 1 }}> {/* 让BindingParticipantComponent占用剩余空间 */}
-        <BindingParticipantComponent />
+        <BindingParticipantComponent
+          clickedActionIndex={clickedActionIndex}
+          showBindingParticipantMap={showBindingParticipantMap}
+          setShowBindingParticipantMap={setShowBindingParticipantMap}
+          showBindingParticipantValueMap={showBindingParticipantValueMap}
+          setShowBindingParticipantValueMap={setShowBindingParticipantValueMap}
+        />
       </div>
     </div>
 
