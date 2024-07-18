@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, Row, Col, Button, Typography, Steps, Modal, TableProps, Table, Select, Input, Tag, List } from "antd"
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAppSelector } from "@/redux/hooks";
@@ -9,87 +9,75 @@ import { useFabricIdentities } from '@/views/Consortium/FabricUsers/hooks';
 
 export const BindingParticipant = ({ bpmnId }) => {
 
-
-  const [bindings, setBindings] = useState<{}>({})
-  const [participants, syncParticipants] = useParticipantsData(bpmnId)
-
-  const [modalActive, setModalActive] = useState(false);
-  const [validationType, setValidationType] = useState('equal');
-  const [showUserSection, setShowUserSection] = useState(true);
-  const [showAttributeSection, setShowAttributeSection] = useState(false);
   const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
-  const [currentSelectedMembershipId, setCurrentSelectedMembershipId] = useState("");
-  const [fabricIdentities, { isLoading, isError, isSuccess }, refetch] = useFabricIdentities(currentEnvId, currentSelectedMembershipId);
+  const [bindings, setBindings] = useState<{}>({})
 
-  const handleValidationTypeChange = (value, evt) => {
-    setValidationType(value);
-    if (evt.children == "一类") {
-      setShowUserSection(false);
-      setShowAttributeSection(true);
-    } else {
-      setShowUserSection(true);
-      setShowAttributeSection(false);
-    }
-  };
+  const [showBingParticipantMap, setShowBingParticipantMap] = useState(new Map());
+  const [showBingParticipantValueMap, setShowBingParticipantValueMap] = useState(new Map());
+
+  const [clickedActionIndex, setClickedActionIndex] = useState("");
+
+
+  // fetch datas
+  const [fabricIdentities, { isLoading, isError, isSuccess }, refetch] = useFabricIdentities(currentEnvId,
+    showBingParticipantValueMap.get(clickedActionIndex)?.selectedMembershipId);
+  const [participants, syncParticipants] = useParticipantsData(bpmnId)
   const [members, syncMembers] = useAvailableMembers(currentEnvId)
 
+  const _setShowBingParticipant = (id, updates) => {
+    setShowBingParticipantMap(prev => {
+      const currentObj = prev.get(id) || {};
+      const updatedObj = { ...currentObj, ...updates };
+      return new Map(prev).set(id, updatedObj);
+    });
+  }
 
-  const columns = [
-    {
-      title: "Participant",
-      dataIndex: "participantName",
-      key: "participant",
-    },
-    {
-      title: "Action",
-      dataIndex: "action",
-      key: "action",
-      render: (text, record) => {
-        return (
-          <Button
-            onClick={() => {
-              console.log(record.id)
-              setModalActive(true)
-            }}>
-            绑定
-          </Button>
-        )
-      }
+  const _setShowBingParticipantValue = (id, updates) => {
+    setShowBingParticipantValueMap(prev => {
+      const currentObj = prev.get(id) || {};
+      const updatedObj = { ...currentObj, ...updates };
+      return new Map(prev).set(id, updatedObj);
+    });
+  }
+
+  const handleValidationTypeChange = (value) => {
+    _setShowBingParticipantValue(clickedActionIndex, { 'selectedValidationType': value })
+    if (value === "group") {
+      _setShowBingParticipant(clickedActionIndex, { "showUserSection": false, "showAttributeSection": true, 'showMspSection': true })
+    } else if (value === 'equal') {
+      _setShowBingParticipant(clickedActionIndex, { "showUserSection": true, "showAttributeSection": false, 'showMspSection': true })
+    } else {
+      _setShowBingParticipant(clickedActionIndex, { "showUserSection": true, "showAttributeSection": false, 'showMspSection': true })
     }
-  ]
-  const data = participants.map(participant => {
-    return {
-      participantName: participant.name,
-      participantId: participant.id,
-      dmn: bindings[participant.id] ? bindings[participant.id] : ""
-    }
-  })
+  };
 
-  const DynamicTable = () => {
-    const [dataSource, setDataSource] = useState([]);
+  const AttrTable = ({ dataSource }) => {
 
+    // const [dataSource, setDataSource] = useState([]);
+    console.log('dataSource', dataSource)
     const handleAddRow = () => {
       const newData = {
         key: uuidv4(),
         attr: '',
         value: '',
       };
-      setDataSource([...dataSource, newData]);
+      _setShowBingParticipantValue(clickedActionIndex, { "Attr": [...dataSource, newData] })
     };
 
     const handleDeleteRow = (key) => {
       const newData = dataSource.filter(item => item.key !== key);
-      setDataSource(newData);
+      _setShowBingParticipantValue(clickedActionIndex, { "Attr": newData })
     };
 
     const handleInputChange = (key, field, value) => {
+      console.log('input change', key, field, value);
       const newData = dataSource.map(item => {
         if (item.key === key) {
           return { ...item, [field]: value };
         }
         return item;
       });
-      setDataSource(newData);
+      _setShowBingParticipantValue(clickedActionIndex, { "Attr": newData })
     };
 
     const columns = [
@@ -160,7 +148,7 @@ export const BindingParticipant = ({ bpmnId }) => {
   const BindingParticipantComponent = () => {
     return (
       <div>{
-        modalActive && (
+        clickedActionIndex && (
           <Card>
             <div style={{
               display: 'flex',        // 使用Flexbox布局
@@ -170,9 +158,9 @@ export const BindingParticipant = ({ bpmnId }) => {
               marginBottom: '10px'    // 可选，为行添加底部间距
             }}>
               <label htmlFor="validationSelect">选择校验方式 :</label>
-              <Select id="validationSelect" value={validationType} onChange={handleValidationTypeChange} style={{ width: 'auto', flexGrow: 1, paddingLeft: "10px" }}>
+              <Select id="validationSelect" value={showBingParticipantValueMap.get(clickedActionIndex)?.selectedValidationType} onChange={handleValidationTypeChange} style={{ width: 'auto', flexGrow: 1, paddingLeft: "10px" }}>
                 <Select.Option value="equal">相等</Select.Option>
-                <Select.Option value="type">一类</Select.Option>
+                <Select.Option value="group">一类</Select.Option>
               </Select>
             </div>
             <div style={{
@@ -182,29 +170,35 @@ export const BindingParticipant = ({ bpmnId }) => {
               width: '100%',          // 容器宽度为100%
               marginBottom: '10px'    // 可选，为行添加底部间距
             }}>
-              <label htmlFor="mspSelect">选择MSP (可选):</label>
-              <Select
-                style={{ width: 'auto', flexGrow: 1, paddingLeft: "10px" }}
-                defaultValue=""
-                value={currentSelectedMembershipId}
-                onChange={(value) => {
-                  // 处理选择MSP的事件
-                  setCurrentSelectedMembershipId(value);
-                }}
-              >
-                <Select.Option value="" key="default">
-                  请选择一个选项
-                </Select.Option>
-                {
-                  members.map((member) => {
-                    return (
-                      <Select.Option value={member.membershipId} key={member.membershipId}>
-                        {member.membershipName}
-                      </Select.Option>
-                    )
-                  }) // 为Select添加一个空选项
-                }
-              </Select>
+              {showBingParticipantMap.get(clickedActionIndex)?.showMspSection && (
+                <div>
+                  <label htmlFor="mspSelect">
+                    {showBingParticipantValueMap.get(clickedActionIndex)?.selectedValidationType === 'equal' ? '选择MSP :' : '选择MSP(可选) :'}
+                  </label>
+                  <Select
+                    style={{ width: 'auto', flexGrow: 1, paddingLeft: "10px" }}
+                    defaultValue=""
+                    value={showBingParticipantValueMap.get(clickedActionIndex)?.selectedMembershipId}
+                    onChange={(value) => {
+                      // 处理选择MSP的事件
+                      _setShowBingParticipantValue(clickedActionIndex, { 'selectedMembershipId': value })
+                    }}
+                  >
+                    <Select.Option value="" key="default">
+                      请选择一个选项
+                    </Select.Option>
+                    {
+                      members.map((member) => {
+                        return (
+                          <Select.Option value={member.membershipId} key={member.membershipId}>
+                            {member.membershipName}
+                          </Select.Option>
+                        )
+                      }) // 为Select添加一个空选项
+                    }
+                  </Select>
+                </div>
+              )}
             </div>
             <div style={{
               display: 'flex',        // 使用Flexbox布局
@@ -213,7 +207,7 @@ export const BindingParticipant = ({ bpmnId }) => {
               width: '100%',          // 容器宽度为100%
               marginBottom: '10px'    // 可选，为行添加底部间距
             }}>{
-                showUserSection && (
+                showBingParticipantMap.get(clickedActionIndex)?.showUserSection && showBingParticipantValueMap.get(clickedActionIndex)?.selectedMembershipId && (
                   <div style={{
                     display: 'flex',        // 使用Flexbox布局
                     justifyContent: 'space-between', // 子元素间隔均匀分布
@@ -222,7 +216,14 @@ export const BindingParticipant = ({ bpmnId }) => {
                     marginBottom: '10px'    // 可选，为行添加底部间距
                   }}>
                     <label htmlFor="userSelect">选择用户:</label>
-                    <Select id="userSelect" style={{ width: 'auto', flexGrow: 1, paddingLeft: "10px" }}>
+                    <Select
+                      id="userSelect"
+                      value={showBingParticipantValueMap.get(clickedActionIndex)?.selectedUser}
+                      onChange={(value) => {
+                        // 处理选择MSP的事件
+                        _setShowBingParticipantValue(clickedActionIndex, { 'selectedUser': value })
+                      }}
+                      style={{ width: 'auto', flexGrow: 1, paddingLeft: "10px" }}>
                       {
                         fabricIdentities.map((user) => {
                           return (
@@ -245,8 +246,10 @@ export const BindingParticipant = ({ bpmnId }) => {
               marginBottom: '5px',    // 可选，为行添加底部间距
             }}>
               {
-                showAttributeSection && (
-                  <DynamicTable></DynamicTable>
+                showBingParticipantMap.get(clickedActionIndex)?.showAttributeSection && (
+                  <AttrTable
+                    dataSource={showBingParticipantValueMap.get(clickedActionIndex)?.Attr || []}
+                  ></AttrTable>
                 )
               }
             </div>
@@ -262,6 +265,36 @@ export const BindingParticipant = ({ bpmnId }) => {
       }
       </div >)
   };
+
+  const columns = [
+    {
+      title: "Participant",
+      dataIndex: "participantName",
+      key: "participant",
+    },
+    {
+      title: "Action",
+      dataIndex: "action",
+      key: "action",
+      render: (text, record) => {
+        return (
+          <Button
+            onClick={() => {
+              setClickedActionIndex(record.participantId)
+            }}>
+            绑定
+          </Button>
+        )
+      }
+    }
+  ]
+  const data = participants.map(participant => {
+    return {
+      participantName: participant.name,
+      participantId: participant.id,
+      dmn: bindings[participant.id] ? bindings[participant.id] : ""
+    }
+  })
 
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'stretch' }}>

@@ -68,10 +68,11 @@ export const BindingDmnModal = ({
         }
     ]
 
-    const data = Object.entries(businessRules).map(([businessRuleId, businessRuleName]) => {
+    const data = Object.entries(businessRules).map(([businessRuleId, value]) => {
         return {
-            businessRuleName: businessRuleName,
+            businessRuleName: value.name,
             businessRuleId: businessRuleId,
+            documentation: value.documentation,
             dmn: bindings[businessRuleId] ? bindings[businessRuleId] : ""
         }
     })

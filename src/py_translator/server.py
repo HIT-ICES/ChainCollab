@@ -79,14 +79,13 @@ async def get_decisions(params: GetDecisionsParams):
             "id": decision._id,
             "name": decision._name,
             "is_main": decision.is_main,
-
-            "inputs":[
+            "inputs": [
                 {
                     "id": input.id,
                     "label": input.label,
                     "expression_id": input.expression_id,
                     "typeRef": input.typeRef,
-                    "text": input.text
+                    "text": input.text,
                 }
                 for input in decision.inputs
             ],
@@ -95,10 +94,10 @@ async def get_decisions(params: GetDecisionsParams):
                     "id": output.id,
                     "name": output.name,
                     "label": output.label,
-                    "type": output.type
+                    "type": output.type,
                 }
                 for output in decision.outputs
-            ]
+            ],
         }
         for decision in parser.get_all_decisions()
     ]
@@ -108,18 +107,20 @@ async def get_decisions(params: GetDecisionsParams):
 class GetBusinessRulesParams(BaseModel):
     bpmnContent: str
 
+
 # 2. return all BPMN BusinessRule Input and Output
-@app.post("/api/v1/chaincode/getBusinessRules")
-async def get_businessrules(params: GetDecisionsParams):
-    parser : Choreography = Choreography(params.dmnContent)
+@app.post("/api/v1/chaincode/getBusinessRulesByBpmnC")
+async def get_businessrules(params: ChaincodePartParams):
+    parser: Choreography = Choreography(params.bpmnContent)
     returns = [
         {
             "id": businessrule.id,
-            "documenation": businessrule.documentation,
+            "documentation": businessrule.documentation,
         }
         for businessrule in parser.query_element_with_type(NodeType.BUSINESSRULE)
     ]
     return JSONResponse(content=returns)
+
 
 # 启动服务器
 if __name__ == "__main__":
