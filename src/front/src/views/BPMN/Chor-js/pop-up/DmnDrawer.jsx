@@ -138,7 +138,7 @@ const DmnDrawer = forwardRef(({
     }
 
 
-    const js_download_listener = async (e)=> {
+    const js_download_listener = async (e) => {
         console.log('downloadLink clicked');
         const downloadLink = document.getElementById('js-download-diagram-dmn');
         const result = await viewer.current.saveXML({ format: true });
@@ -173,7 +173,7 @@ const DmnDrawer = forwardRef(({
         lastFile = false;
     };
 
-    const js_download_svg_listerner = async (e)=> {
+    const js_download_svg_listerner = async (e) => {
         console.log('downloadSvgLink clicked');
         const downloadSvgLink = document.getElementById('js-download-svg-dmn');
         const result = await viewer.current.getActiveViewer().saveSVG();
@@ -223,8 +223,7 @@ const DmnDrawer = forwardRef(({
                 id='container'
                 ref={containerRef}
                 style={{
-                    width: "100%",
-                    height: "95%",
+                    width: 1700, height: 'calc(100vh - 400px)',
                     background: "white",
                 }}>
             </div>
