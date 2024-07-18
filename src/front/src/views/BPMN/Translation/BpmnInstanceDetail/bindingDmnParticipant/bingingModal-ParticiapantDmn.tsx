@@ -6,6 +6,9 @@ import { useBpmnSvg } from './hooks';
 
 const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 
+  const [showBindingParticipantMap, setShowBindingParticipantMap] = useState(new Map());
+  const [showBindingParticipantValueMap, setShowBindingParticipantValueMap] = useState(new Map());
+
   const handleOk = () => {
     setOpen(false);
   };
@@ -29,6 +32,10 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
             <h2>Binding Participants</h2>
             <BindingParticipant
               bpmnId={bpmnId}
+              showBindingParticipantMap={showBindingParticipantMap}
+              setShowBindingParticipantMap={setShowBindingParticipantMap}
+              showBindingParticipantValueMap={showBindingParticipantValueMap}
+              setShowBindingParticipantValueMap={setShowBindingParticipantValueMap}
             ></BindingParticipant>
           </div>
         </div>

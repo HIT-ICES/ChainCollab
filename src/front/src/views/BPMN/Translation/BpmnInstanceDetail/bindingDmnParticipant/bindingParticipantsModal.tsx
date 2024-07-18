@@ -7,25 +7,26 @@ import { title } from 'process';
 import { v4 as uuidv4 } from 'uuid';
 import { useFabricIdentities } from '@/views/Consortium/FabricUsers/hooks';
 
-export const BindingParticipant = ({ bpmnId }) => {
+export const BindingParticipant = ({ bpmnId, showBindingParticipantMap, setShowBindingParticipantMap, showBindingParticipantValueMap, setShowBindingParticipantValueMap
+}) => {
 
   const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
   const [bindings, setBindings] = useState<{}>({})
 
-  const [showBingParticipantMap, setShowBingParticipantMap] = useState(new Map());
-  const [showBingParticipantValueMap, setShowBingParticipantValueMap] = useState(new Map());
+  // const [showBindingParticipantMap, setShowBindingParticipantMap] = useState(new Map());
+  // const [showBindingParticipantValueMap, setShowBindingParticipantValueMap] = useState(new Map());
 
   const [clickedActionIndex, setClickedActionIndex] = useState("");
 
 
   // fetch datas
   const [fabricIdentities, { isLoading, isError, isSuccess }, refetch] = useFabricIdentities(currentEnvId,
-    showBingParticipantValueMap.get(clickedActionIndex)?.selectedMembershipId);
+    showBindingParticipantValueMap.get(clickedActionIndex)?.selectedMembershipId);
   const [participants, syncParticipants] = useParticipantsData(bpmnId)
   const [members, syncMembers] = useAvailableMembers(currentEnvId)
 
   const _setShowBingParticipant = (id, updates) => {
-    setShowBingParticipantMap(prev => {
+    setShowBindingParticipantMap(prev => {
       const currentObj = prev.get(id) || {};
       const updatedObj = { ...currentObj, ...updates };
       return new Map(prev).set(id, updatedObj);
@@ -33,7 +34,7 @@ export const BindingParticipant = ({ bpmnId }) => {
   }
 
   const _setShowBingParticipantValue = (id, updates) => {
-    setShowBingParticipantValueMap(prev => {
+    setShowBindingParticipantValueMap(prev => {
       const currentObj = prev.get(id) || {};
       const updatedObj = { ...currentObj, ...updates };
       return new Map(prev).set(id, updatedObj);
@@ -54,7 +55,6 @@ export const BindingParticipant = ({ bpmnId }) => {
   const AttrTable = ({ dataSource }) => {
 
     // const [dataSource, setDataSource] = useState([]);
-    console.log('dataSource', dataSource)
     const handleAddRow = () => {
       const newData = {
         key: uuidv4(),
@@ -158,7 +158,7 @@ export const BindingParticipant = ({ bpmnId }) => {
               marginBottom: '10px'    // 可选，为行添加底部间距
             }}>
               <label htmlFor="validationSelect">选择校验方式 :</label>
-              <Select id="validationSelect" value={showBingParticipantValueMap.get(clickedActionIndex)?.selectedValidationType} onChange={handleValidationTypeChange} style={{ width: 'auto', flexGrow: 1, paddingLeft: "10px" }}>
+              <Select id="validationSelect" value={showBindingParticipantValueMap.get(clickedActionIndex)?.selectedValidationType} onChange={handleValidationTypeChange} style={{ width: 'auto', flexGrow: 1, paddingLeft: "10px" }}>
                 <Select.Option value="equal">相等</Select.Option>
                 <Select.Option value="group">一类</Select.Option>
               </Select>
@@ -170,15 +170,15 @@ export const BindingParticipant = ({ bpmnId }) => {
               width: '100%',          // 容器宽度为100%
               marginBottom: '10px'    // 可选，为行添加底部间距
             }}>
-              {showBingParticipantMap.get(clickedActionIndex)?.showMspSection && (
+              {showBindingParticipantMap.get(clickedActionIndex)?.showMspSection && (
                 <div>
                   <label htmlFor="mspSelect">
-                    {showBingParticipantValueMap.get(clickedActionIndex)?.selectedValidationType === 'equal' ? '选择MSP :' : '选择MSP(可选) :'}
+                    {showBindingParticipantValueMap.get(clickedActionIndex)?.selectedValidationType === 'equal' ? '选择MSP :' : '选择MSP(可选) :'}
                   </label>
                   <Select
                     style={{ width: 'auto', flexGrow: 1, paddingLeft: "10px" }}
                     defaultValue=""
-                    value={showBingParticipantValueMap.get(clickedActionIndex)?.selectedMembershipId}
+                    value={showBindingParticipantValueMap.get(clickedActionIndex)?.selectedMembershipId}
                     onChange={(value) => {
                       // 处理选择MSP的事件
                       _setShowBingParticipantValue(clickedActionIndex, { 'selectedMembershipId': value })
@@ -207,7 +207,7 @@ export const BindingParticipant = ({ bpmnId }) => {
               width: '100%',          // 容器宽度为100%
               marginBottom: '10px'    // 可选，为行添加底部间距
             }}>{
-                showBingParticipantMap.get(clickedActionIndex)?.showUserSection && showBingParticipantValueMap.get(clickedActionIndex)?.selectedMembershipId && (
+                showBindingParticipantMap.get(clickedActionIndex)?.showUserSection && showBindingParticipantValueMap.get(clickedActionIndex)?.selectedMembershipId && (
                   <div style={{
                     display: 'flex',        // 使用Flexbox布局
                     justifyContent: 'space-between', // 子元素间隔均匀分布
@@ -218,7 +218,7 @@ export const BindingParticipant = ({ bpmnId }) => {
                     <label htmlFor="userSelect">选择用户:</label>
                     <Select
                       id="userSelect"
-                      value={showBingParticipantValueMap.get(clickedActionIndex)?.selectedUser}
+                      value={showBindingParticipantValueMap.get(clickedActionIndex)?.selectedUser}
                       onChange={(value) => {
                         // 处理选择MSP的事件
                         _setShowBingParticipantValue(clickedActionIndex, { 'selectedUser': value })
@@ -246,9 +246,9 @@ export const BindingParticipant = ({ bpmnId }) => {
               marginBottom: '5px',    // 可选，为行添加底部间距
             }}>
               {
-                showBingParticipantMap.get(clickedActionIndex)?.showAttributeSection && (
+                showBindingParticipantMap.get(clickedActionIndex)?.showAttributeSection && (
                   <AttrTable
-                    dataSource={showBingParticipantValueMap.get(clickedActionIndex)?.Attr || []}
+                    dataSource={showBindingParticipantValueMap.get(clickedActionIndex)?.Attr || []}
                   ></AttrTable>
                 )
               }
