@@ -6,14 +6,12 @@ import PropertiesProviderModule from './lib-provider/properties-provider'; // Ad
 import '../../../../src/assets/styles/app.less';  // 确保您已经配置了less-loader来处理less文件
 import blankXml from '../../../../src/assets/bpmns/newDiagram.bpmn'; // Adjust the import based on your package structure
 import Reporter from './lib-provider/validator/Validator.js';
-import axios from 'axios';
 import MainPage from './pop-up/MainPage.js'
 import UploadDmnModal from './pop-up/UploadDmnModal';
 import TestPaletteProvider from './lib-provider/external-elements'
 import { getParticipantsByContent } from '@/api/translator.ts'
 import { addBPMN } from '@/api/externalResource.js'
 import { useAppSelector } from "@/redux/hooks.ts";
-import { set } from 'lodash';
 
 const ChorJs = () => {
 
@@ -295,7 +293,6 @@ const ChorJs = () => {
 
   useEffect(() => {
 
-    // let modeler = null;
     const [panels, panelListeners] = generatePanelListener();
 
     const InitModeler = async () => {

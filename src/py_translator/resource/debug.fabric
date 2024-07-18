@@ -1,8 +1,10 @@
-[      
-    { 
+[
+    {
         "invoke": "Message_1qbk325_Send",
-        "args": ["asset1"],
-        "identity": "User1"  
+        "args": [
+            "asset1"
+        ],
+        "identity": "User1"
     },
     {
         "invoke": "InitLedger",
@@ -10,6 +12,22 @@
     },
     {
         "invoke": "Invoke_Other_chaincode",
-        "args": ["createRecord", "{\"temperature\":20,\"dayType\":\"WeekDay\"}",  "dish-decision"]
+        "args": [
+            "createRecord",
+            "{\"temperature\":20,\"dayType\":\"WeekDay\"}",
+            "dish-decision"
+        ]
+    },
+    {
+        "invoke": "CreateInstance",
+        "args": [
+            "{\"Participant_1080bkg\":{\"msp\":\"Mem.org.comMSP\",\"attributes\":{},\"isMulti\":false,\"multiMaximum\":0,\"multiMinimum\":0,\"x509\":\"\"},\"Participant_0sktaei\":{\"msp\":\"Org1-con.org.comMSP\",\"attributes\":{},\"isMulti\":false,\"multiMaximum\":0,\"multiMinimum\":0,\"x509\":\"\"},\"Participant_1gcdqza\":{\"msp\":\"Org1-con.org.comMSP\",\"attributes\":{},\"isMulti\":false,\"multiMaximum\":0,\"multiMinimum\":0,\"x509\":\"\"},\"Activity_1q19lty_DecisionID\":\"dish-decision\",\"Activity_1q19lty_ParamMapping\":{\"temperature\":\"temperature\",\"dayType\":\"datatype\"},\"Activity_1q19lty_Content\":\"Hello\"}"
+        ]
+    },
+    {
+        "query": "GetAllBusinessRules",
+        "args": [
+            "0"
+        ]
     }
 ]
