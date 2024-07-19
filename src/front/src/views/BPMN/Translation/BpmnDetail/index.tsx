@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import { Card, Row, Col, Button, Steps, Modal, Table, Select, Input } from "antd"
 import { useLocation, useNavigate } from "react-router-dom";
-import { retrieveBPMN, packageBpmn, updateBPMNStatus, updateBpmnEnv, updateBPMNFireflyUrl } from "@/api/externalResource"
-import { generateChaincode } from "@/api/translator"
+import { retrieveBPMN, packageBpmn, updateBPMNStatus, updateBpmnEnv, updateBPMNFireflyUrl, updateBpmnEvents } from "@/api/externalResource"
+import { generateChaincode, getMessagesByBpmnContent } from "@/api/translator"
 import { useAvaliableEnvs, useBpmnDetailData } from "./hooks"
 import axios from "axios"
 const steps = [
@@ -24,8 +24,9 @@ const steps = [
 ];
 
 import { useAppSelector } from "@/redux/hooks";
-import { getAllMessages, registerDataType, initLedger } from "@/api/executionAPI"
+import { getAllMessages, registerDataType, initLedger, invokeFireflyListeners, invokeFireflySubscriptions } from "@/api/executionAPI"
 import { current_ip } from "@/api/apiConfig";
+import { eventNames } from "process";
 
 const BPMNOverview = () => {
 
@@ -185,9 +186,12 @@ const BPMNOverview = () => {
             const parsedFFIContent = JSON.parse(ffiContent);
             const chaincodeIdPrefix = chaincodeName + "-" + bpmn.chaincode.substring(0, 6);
             parsedFFIContent.name = chaincodeIdPrefix;
+            const fireflyUrlForRegister = `${current_ip}:5000`
+            // register interface
             const response = await axios.post(`${current_ip}:5000/api/v1/namespaces/default/contracts/interfaces`,
                 parsedFFIContent)
             const interfaceid = response.data.id;
+            // register api
             const location = {
                 channel: "default",        //写死在后端
                 chaincode: chaincodeName
@@ -203,55 +207,79 @@ const BPMNOverview = () => {
             const response2 = await axios.post(`${current_ip}:5000/api/v1/namespaces/default/apis`,
                 jsonData)
             const fireflyUrl = response2.data.urls.ui
+            // sleep 4s 否则没法调用Init ledger
             await new Promise(resolve => setTimeout(resolve, 4000));
-            const fireflyUrlForRegister = `${current_ip}:5000`
+            // Init ledger
             await initLedger(fireflyUrlForRegister, chaincodeIdPrefix);
-            await new Promise(resolve => setTimeout(resolve, 4000));
-            // 目前无法通过getAllMessage获取所有的message,因为需要实例ID查询消息。此处应该通过BPMN内容提取出所有消息的properties字段
-            // const messages = await getAllMessages(fireflyUrlForRegister, chaincodeIdPrefix);
+            // Register datatypes
+            await _registerDatatypes(bpmn, chaincodeName, fireflyUrlForRegister);
 
-            // const all_requests = messages ? messages.map(
-            //     (msg) => {
-            //         console.log()
-            //         const data1 = {
-            //             "$id": "https://example.com/widget.schema.json",
-            //             "$schema": "https://json-schema.org/draft/2020-12/schema",
-            //             "title": "Widget",
-            //             "type": "object"
-            //         }
-            //         let data2 = {}
-            //         try {
-            //             data2 = JSON.parse(msg.format)
-            //             data2 = {
-            //                 "properties": data2["properties"],
-            //                 "required": data2["required"],
-            //             }
-            //         } catch (e) {
-            //             console.log(e)
-            //             return;
-            //         }
-
-            //         const mergeData = {
-            //             "name": chaincodeName + "_" + msg.messageID,
-            //             "version": "1",
-            //             "value": {
-            //                 ...data1,
-            //                 ...data2
-            //             }
-            //         }
-            //         return registerDataType(
-            //             fireflyUrlForRegister,
-            //             mergeData
-            //         )
-            //     }
-            // ) : [];
-            // const res2 = await Promise.all(all_requests)
             await updateBPMNFireflyUrl(bpmnId, fireflyUrl);
+
+            // 获取 events 字段
+            _register_listeners(parsedFFIContent, fireflyUrlForRegister, chaincodeName, interfaceid);
+
+
             const res = await updateBPMNStatus(bpmnId, "Registered");
             refetchBpmn()
             setButtonLoading(false);
         } catch (error) {
             console.error("Error occurred while making post request:", error);
+        }
+
+        async function _register_listeners(parsedFFIContent: any, fireflyUrlForRegister: string, chaincodeName: any, interfaceid: string) {
+            const events = parsedFFIContent.events;
+
+            // 输出 events 字段
+            console.log(events);
+
+            // 访问每个 event 的 name
+            events.forEach(async (event) => {
+                const res = await invokeFireflyListeners(fireflyUrlForRegister, chaincodeName, event.name, interfaceid);
+                const listener_id = res.id;
+                await invokeFireflySubscriptions(fireflyUrlForRegister, event.name + "-" + chaincodeName, listener_id);
+            });
+            await updateBpmnEvents(bpmnId, events.map((event) => event.name).join(","));
+        }
+
+        async function _registerDatatypes(bpmn: any, chaincodeName: any, fireflyUrlForRegister: string) {
+            const messages = await getMessagesByBpmnContent(bpmn.bpmnContent);
+            // 目前无法通过getAllMessage获取所有的message,因为需要实例ID查询消息。此处应该通过BPMN内容提取出所有消息的properties字段
+            const all_requests = messages ? Object.entries(messages).map(
+                ([key, msg]) => {
+                    const data1 = {
+                        "$id": "https://example.com/widget.schema.json",
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "title": "Widget",
+                        "type": "object"
+                    };
+                    let data2 = {};
+                    try {
+                        data2 = JSON.parse(msg.documentation);
+                        data2 = {
+                            "properties": data2["properties"],
+                            "required": data2["required"],
+                        };
+                    } catch (e) {
+                        console.log(e);
+                        return;
+                    }
+
+                    const mergeData = {
+                        "name": chaincodeName + "_" + key,
+                        "version": "1",
+                        "value": {
+                            ...data1,
+                            ...data2
+                        }
+                    };
+                    return registerDataType(
+                        fireflyUrlForRegister,
+                        mergeData
+                    );
+                }
+            ) : [];
+            await Promise.all(all_requests)
         }
     }
 

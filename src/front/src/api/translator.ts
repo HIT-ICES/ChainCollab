@@ -43,6 +43,19 @@ export const getBusinessRulesByContent = async (bpmnContent: string) => {
     }
 }
 
+export const getMessagesByBpmnContent = async (bpmnContent: string) => {
+    try {
+        const response = await translatorAPI.post('/chaincode/getMessagesByBpmnC', {
+            bpmnContent: bpmnContent
+        })
+        return response.data;
+    }
+    catch (error) {
+        console.log(error);
+        return [];
+    }
+}
+
 export const getDecisions = async (dmnContent: string) => {
     try {
         const response = await translatorAPI.post(`/chaincode/getDecisions`,{

@@ -67,7 +67,9 @@ def invoke_dmn_contract(dmn_content, instance_id, func_name):
     # 构造请求
     response = requests.post(
         url,
-        data=json.dumps({"input": {"ContentOfDmn": dmn_content, "InstanceID": instance_id}}),
+        data=json.dumps(
+            {"input": {"ContentOfDmn": dmn_content, "InstanceID": instance_id}}
+        ),
         headers={"Content-Type": "application/json"},
     )
     print(response.text)

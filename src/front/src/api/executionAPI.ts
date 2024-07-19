@@ -6,7 +6,7 @@ import axios from 'axios';
 // DataType Annotation
 export const registerDataType = async (coreUrl: string, mergedData: any) => {
     try {
-        const res = await fireflyAPI.post(`http://${coreUrl}/api/v1/namespaces/default/datatypes`, mergedData);
+        const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/datatypes`, mergedData);
         return res.data;
     } catch (error) {
         console.error("Error occurred while making post request:", error);
@@ -22,7 +22,7 @@ export const fireflyFileTransfer = async (coreUrl: string, uploadedFile: any) =>
         const formData = new FormData();
         formData.append('autometa', 'true');
         formData.append('file', uploadedFile);
-        const res = await fireflyAPI.post(`http://${coreUrl}/api/v1/namespaces/default/data`, formData, {
+        const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/data`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
@@ -36,7 +36,7 @@ export const fireflyFileTransfer = async (coreUrl: string, uploadedFile: any) =>
 
 export const getFireflyData = async (coreUrl: string, dataId: string) => {
     try {
-        const res = await fireflyAPI.get(`http://${coreUrl}/api/v1/namespaces/default/data/${dataId}`);
+        const res = await fireflyAPI.get(`${coreUrl}/api/v1/namespaces/default/data/${dataId}`);
         return res.data;
     } catch (error) {
         console.error("Error occurred while making post request:", error);
@@ -46,7 +46,7 @@ export const getFireflyData = async (coreUrl: string, dataId: string) => {
 
 export const fireflyDataTransfer = async (coreUrl: string, data: any) => {
     try {
-        const res = await fireflyAPI.post(`http://${coreUrl}/api/v1/namespaces/default/messages/private`, data);
+        const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/messages/private`, data);
         return res.data;
     } catch (error) {
         console.error("Error occurred while making post request:", error);
@@ -64,7 +64,7 @@ export const initLedger = async (coreUrl: string, contractName: string) => {
     // coreUrl + `/api/v1/namespaces/default/apis/${name}/invoke/InitLedger
     // mediaType: "application/json"
     try {
-        const res = await axios.post(`http://${coreUrl}/api/v1/namespaces/default/apis/${contractName}/invoke/InitLedger`, {
+        const res = await axios.post(`${coreUrl}/api/v1/namespaces/default/apis/${contractName}/invoke/InitLedger`, {
             "input": {}
         }
         );
@@ -80,7 +80,7 @@ export const initLedger = async (coreUrl: string, contractName: string) => {
 export const getAllEvents = async (coreUrl: string, contractName: string) => {
     // coreUrl + "/api/v1/namespaces/default/apis/" + name + "/query/GetAllActionEvents"
     try {
-        const res = await fireflyAPI.post(`http://${coreUrl}/api/v1/namespaces/default/apis/${contractName}/query/GetAllActionEvents`, {});
+        const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/apis/${contractName}/query/GetAllActionEvents`, {});
         return res.data;
     } catch (error) {
         console.error("Error occurred while making post request:", error);
@@ -90,7 +90,7 @@ export const getAllEvents = async (coreUrl: string, contractName: string) => {
 
 export const getAllGateways = async (coreUrl: string, contractName: string) => {
     try {
-        const res = await fireflyAPI.post(`http://${coreUrl}/api/v1/namespaces/default/apis/${contractName}/query/GetAllGateways`, {});
+        const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/apis/${contractName}/query/GetAllGateways`, {});
         return res.data;
     } catch (error) {
         console.error("Error occurred while making post request:", error);
@@ -100,7 +100,7 @@ export const getAllGateways = async (coreUrl: string, contractName: string) => {
 
 export const getAllMessages = async (coreUrl: string, contractName: string) => {
     try {
-        const res = await fireflyAPI.post(`http://${coreUrl}/api/v1/namespaces/default/apis/${contractName}/query/GetAllMessages`, {});
+        const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/apis/${contractName}/query/GetAllMessages`, {});
         return res.data;
     } catch (error) {
         console.error("Error occurred while making post request:", error);
@@ -112,7 +112,7 @@ export const getAllMessages = async (coreUrl: string, contractName: string) => {
 
 export const invokeEventAction = async (coreUrl: string, contractName: string, eventId: any) => {
     try {
-        const res = await fireflyAPI.post(`http://${coreUrl}/api/v1/namespaces/default/apis/${contractName}/invoke/${eventId}`, {});
+        const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/apis/${contractName}/invoke/${eventId}`, {});
         return res.data;
     } catch (error) {
         console.error("Error occurred while making post request:", error);
@@ -122,7 +122,7 @@ export const invokeEventAction = async (coreUrl: string, contractName: string, e
 
 export const invokeGatewayAction = async (coreUrl: string, contractName: string, gtwId: any) => {
     try {
-        const res = await fireflyAPI.post(`http://${coreUrl}/api/v1/namespaces/default/apis/${contractName}/invoke/${gtwId}`, {});
+        const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/apis/${contractName}/invoke/${gtwId}`, {});
         return res.data;
     } catch (error) {
         console.error("Error occurred while making post request:", error);
@@ -159,6 +159,53 @@ export const invokeCreateInstance = async (chaincodeUrl: string, data: any) => {
             }
         });
         return res.data
+    } catch (error) {
+        console.error("Error occurred while making post request:", error);
+        return [];
+    }
+}
+export const invokeFireflyListeners = async (coreUrl: string, contractName: string, eventName: string, interfaceId: string) => {
+    try {
+        const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/contracts/listeners`, {
+            "interface": {
+                "id": interfaceId
+            },
+            "location": {
+                "channel": "default",
+                "chaincode": contractName
+            },
+            "event": {
+                "name": eventName
+            },
+            "options": {
+                "firstEvent": "oldest"
+            },
+            "topic": eventName
+        });
+        return res.data;
+    } catch (error) {
+        console.error("Error occurred while making post request:", error);
+        return [];
+    }
+}
+
+export const invokeFireflySubscriptions = async (coreUrl: string, eventName: string, listenerId: string) => {
+    try {
+        const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/subscriptions`, {
+            "namespace": "default",
+            "name": eventName,
+            "transport": "websockets",
+            "filter": {
+                "events": "blockchain_event_received",
+                "blockchainevent": {
+                    "listener": listenerId
+                }
+            },
+            "options": {
+                "firstEvent": "oldest"
+            }
+        });
+        return res.data;
     } catch (error) {
         console.error("Error occurred while making post request:", error);
         return [];

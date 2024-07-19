@@ -1189,14 +1189,14 @@ class BPMN(models.Model):
         null=True,
         blank=True,
     )
+    events = models.TextField(
+        help_text="events of BpmnStoragedFile",
+        null=True,
+        blank=True,
+    )
+
     bpmnContent = models.TextField(help_text="content of bpmn file")
     svgContent = models.TextField(help_text="content of svg file")
-    # create_at = models.DateTimeField(
-    #     help_text="Create time of BpmnStoragedFile", auto_now_add=True
-    # )
-    # chaincode_content = models.TextField(
-    #     help_text="content of chaincode file", null=True, blank=True, default=None
-    # )
     chaincode = models.ForeignKey(
         ChainCode,
         help_text="related chaincode_id",

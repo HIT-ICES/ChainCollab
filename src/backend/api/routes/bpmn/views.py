@@ -109,6 +109,8 @@ class BPMNViewsSet(viewsets.ModelViewSet):
             if "envId" in request.data:
                 envId = request.data.get("envId")
                 bpmn.environment = Environment.objects.get(pk=envId)
+            if "events" in request.data:
+                bpmn.events = request.data.get("events")
 
             bpmn.save()
             serializer = BpmnSerializer(bpmn)
