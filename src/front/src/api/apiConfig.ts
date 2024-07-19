@@ -10,7 +10,7 @@ export const translatorAPI = axios.create({
   },
 });
 export const fireflyAPI = axios.create({
-  baseURL: `http://`,
+  baseURL: ``,
   headers: {
     "Content-Type": "application/json",
   },

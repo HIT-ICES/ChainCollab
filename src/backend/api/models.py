@@ -1189,6 +1189,12 @@ class BPMN(models.Model):
         null=True,
         blank=True,
     )
+    events = models.TextField(
+        help_text="events of BpmnStoragedFile",
+        null=True,
+        blank=True,
+    )
+
     bpmnContent = models.TextField(help_text="content of bpmn file")
     svgContent = models.TextField(help_text="content of svg file")
     # create_at = models.DateTimeField(

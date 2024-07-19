@@ -154,6 +154,16 @@ export const updateBPMNFireflyUrl = async (bpmnId: string, fireflyUrl: string, c
     }
 }
 
+export const updateBpmnEvents = async (bpmnId: string, events: string, consortiumId: string = '1') => {
+    try {
+        const response = await api.put(`/consortiums/${consortiumId}/bpmns/${bpmnId}`, { events: events })
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
 export const updateBPMNInstanceFireflyUrl = async (bpmnInstanceId: string, bpmnId: string, fireflyUrl: string) => {
     try {
         const response = await api.put(`/bpmns/${bpmnId}/bpmn-instances/${bpmnInstanceId}`, { firefly_url: fireflyUrl })

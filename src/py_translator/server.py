@@ -54,6 +54,14 @@ async def get_participant_by_bpmn_content(bpmn: ChaincodePartParams):
     return JSONResponse(content=translator.get_participants())
 
 
+@app.api_route("/api/v1/chaincode/getMessagesByBpmnC", methods=["POST"])
+async def get_participant_by_bpmn_content(bpmn: ChaincodePartParams):
+    translator: GoChaincodeTranslator = GoChaincodeTranslator(bpmn.bpmnContent)
+    messages = translator.get_messages()
+    # print(messages)
+    return JSONResponse(content=translator.get_messages())
+
+
 @app.api_route("/api/v1/chaincode/getBusinessRulesByBpmnC", methods=["POST"])
 async def get_businessRules_by_bpmn_content(bpmn: ChaincodePartParams):
     translator: GoChaincodeTranslator = GoChaincodeTranslator(bpmn.bpmnContent)
