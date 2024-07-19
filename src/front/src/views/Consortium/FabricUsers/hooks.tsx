@@ -1,5 +1,5 @@
 import { getResourceSets } from '@/api/resourceAPI';
-import { getFabricIdentityList, createFabricIdentity, getAPIKeyList, registerAPIKey } from '@/api/platformAPI';
+import { getFabricIdentityList, createFabricIdentity, getAPIKeyList, registerAPIKey, retrieveFabricIdentity } from '@/api/platformAPI';
 import { useQuery, useMutation } from 'react-query';
 import { getEnvironmentList } from '@/api/platformAPI';
 
@@ -15,12 +15,10 @@ export const useFabricIdentities = (envId, membershipId) => {
         return await getFabricIdentityList(resourceSet.id);
     }
     );
-
     return [fabricIdentities, {
         isLoading, isError, isSuccess
     }, refetch];
 }
-
 
 export const useCreateFabricIdentity = () => {
     const { mutate, isLoading, isError, isSuccess } = useMutation(

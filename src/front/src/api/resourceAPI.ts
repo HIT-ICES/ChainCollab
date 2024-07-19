@@ -306,7 +306,7 @@ export const commitChaincode = async (chaincodeName: string, chaincodeVersion: s
     }
 }
 
-export const getFireflyList = async (envId: string, orgId: string) => {
+export const getFireflyList = async (envId: string, orgId: string, membershipId: string = null) => {
     if (envId === "") {
         return [];
     }
@@ -314,7 +314,8 @@ export const getFireflyList = async (envId: string, orgId: string) => {
 
         const response = await api.get(`/environments/${envId}/fireflys`, {
             params: {
-                org_id: orgId ? orgId : null
+                org_id: orgId ? orgId : null,
+                membership_id: membershipId ? membershipId : null
             }
         })
         return response.data.data.map((item: any) => {

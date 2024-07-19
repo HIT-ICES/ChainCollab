@@ -3,10 +3,8 @@ import { Card, Row, Col, Button, Typography, Steps, Modal, TableProps, Table, Se
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAppSelector } from "@/redux/hooks";
 import { useParticipantsData, useAvailableMembers } from "../hooks"
-import { title } from 'process';
 import { v4 as uuidv4 } from 'uuid';
 import { useFabricIdentities } from '@/views/Consortium/FabricUsers/hooks';
-import { ClickAwayListener } from '@mui/material';
 
 const AttrTable = ({ dataSource, _setShowBingParticipantValue, clickedActionIndex }) => {
 
@@ -26,7 +24,6 @@ const AttrTable = ({ dataSource, _setShowBingParticipantValue, clickedActionInde
   };
 
   const handleInputChange = (key, field, value) => {
-    console.log('input change', key, field, value);
     const newData = dataSource.map(item => {
       if (item.key === key) {
         return { ...item, [field]: value };
@@ -164,7 +161,7 @@ const BindingParticipantComponent = ({ clickedActionIndex, showBindingParticipan
             {showBindingParticipantMap.get(clickedActionIndex)?.showMspSection && (
               <div>
                 <label htmlFor="mspSelect">
-                  {showBindingParticipantValueMap.get(clickedActionIndex)?.selectedValidationType === 'equal' ? '选择MSP :' : '选择MSP(可选) :'}
+                  {showBindingParticipantValueMap.get(clickedActionIndex)?.selectedValidationType === 'equal' ? '选择Membership :' : '选择Membership(可选) :'}
                 </label>
                 <Select
                   style={{ width: 'auto', flexGrow: 1, paddingLeft: "10px" }}
@@ -253,10 +250,9 @@ const BindingParticipantComponent = ({ clickedActionIndex, showBindingParticipan
 };
 
 
-export const BindingParticipant = ({ bpmnId, showBindingParticipantMap, setShowBindingParticipantMap, showBindingParticipantValueMap, setShowBindingParticipantValueMap
+export const BindingParticipant = ({ participants, showBindingParticipantMap, setShowBindingParticipantMap, showBindingParticipantValueMap, setShowBindingParticipantValueMap
 }) => {
 
-  const [participants, syncParticipants] = useParticipantsData(bpmnId)
   const [clickedActionIndex, setClickedActionIndex] = useState("");
 
   const columns = [

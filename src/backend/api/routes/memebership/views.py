@@ -70,14 +70,8 @@ class MemebershipViewSet(viewsets.ViewSet):
         """
         获取Membership详情
         """
-        consortium_id = kwargs.get("consortium_id")
         try:
-            consortium = Consortium.objects.get(pk=consortium_id)
-        except Consortium.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        try:
-            membership = Membership.objects.get(consortium=consortium, pk=pk)
+            membership = Membership.objects.get(pk=pk)
         except Membership.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = MembershipSerializer(membership)

@@ -1,15 +1,20 @@
 import axios from "axios";
 
 const backendUrl = import.meta.env.MODE === "local_mode" ? "http://localhost:8000" : "http://192.168.1.177:8000";
-const translatorUrl = import.meta.env.MODE === "local_mode"  ? "http://localhost:9999" : "http://192.168.1.177:9999";
-export const current_ip = import.meta.env.MODE === "local_mode"  ? "http://localhost" :"http://192.168.1.177"
+const translatorUrl = import.meta.env.MODE === "local_mode" ? "http://localhost:9999" : "http://192.168.1.177:9999";
+export const current_ip = import.meta.env.MODE === "local_mode" ? "http://localhost" : "http://192.168.1.177"
 export const translatorAPI = axios.create({
   baseURL: `${translatorUrl}/api/v1`,
   headers: {
     "Content-Type": "application/json",
   },
 });
-
+export const fireflyAPI = axios.create({
+  baseURL: `http://`,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 const api = axios.create({
   // baseURL: "https://ae702a09-b9ea-40d0-858c-2f6bb82702d8.mock.pstmn.io/api/v1",
