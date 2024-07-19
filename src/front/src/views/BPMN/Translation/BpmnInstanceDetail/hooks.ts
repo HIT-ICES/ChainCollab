@@ -66,6 +66,9 @@ export const useParticipantsData = (bpmnId: string): [
     useEffect(() => {
         let ignore = false
         const fetchData = async () => {
+            if (!bpmnId) {
+                return [[], () => { }]
+            }
             // const response = await getParticipantsByContent(bpmnContent)
             const response = await retrieveBPMN(bpmnId)
             if (ignore) return [[], () => { }]
@@ -154,7 +157,7 @@ export const useFireflyData = (
         let ignore = false;
         const fetchData = async () => {
             try {
-                const data = await getFireflyList(envId, orgId);
+                const data = await getFireflyList(envId, orgId, membershipId);
                 const finalData = data.find((item: any) => item.membershipId === membershipId);
                 if (ignore) return
                 setFirefly(finalData);

@@ -47,6 +47,7 @@ class FireflyViewSet(viewsets.ModelViewSet):
         try:
             org_id = request.query_params.get("org_id", None)
             env_id = request.parser_context["kwargs"].get("environment_id")
+            membership_id = request.query_params.get("membership_id", None)
             env = Environment.objects.get(id=env_id)
             if org_id:
                 organization = LoleidoOrganization.objects.get(id=org_id)
@@ -55,6 +56,11 @@ class FireflyViewSet(viewsets.ModelViewSet):
                 )
                 resource_sets = ResourceSet.objects.filter(
                     environment=env, membership__in=memberships
+                )
+            elif membership_id:
+                membership = Membership.objects.get(id=membership_id)
+                resource_sets = ResourceSet.objects.filter(
+                    environment=env, membership=membership
                 )
             else:
                 resource_sets = ResourceSet.objects.filter(environment=env)

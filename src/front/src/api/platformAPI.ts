@@ -237,8 +237,8 @@ export const getMembershipList = async (consortiumId: string) => {
 };
 
 export const getMembership = async (
-  consortiumId: string,
-  membershipId: string
+  membershipId: string,
+  consortiumId: string = '1',
 ) => {
   const res = await api.get(
     `/consortium/${consortiumId}/memberships/${membershipId}`
@@ -318,10 +318,19 @@ export const deleteEnvironment = async (environmentId: string) => { };
 
 export const getFabricIdentityList = async (resourceSetId) => {
   try {
-    const res = await api.get(`/fabric_identities/?resource_set_id=${resourceSetId}`);
+    const res = await api.get(`/fabric_identities?resource_set_id=${resourceSetId}`);
     return res.data;
   } catch (err) {
     console.error("获取fabricIdentityList失败", err);
+  }
+}
+
+export const retrieveFabricIdentity = async (fabricIdentityId) => {
+  try {
+    const res = await api.get(`/fabric_identities/${fabricIdentityId}`);
+    return res.data;
+  } catch (err) {
+    console.error("获取fabricIdentity失败", err);
   }
 }
 

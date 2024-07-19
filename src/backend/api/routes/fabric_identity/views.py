@@ -51,8 +51,8 @@ class FabricIdentityViewSet(viewsets.ViewSet):
                 )
 
             # register to firefly
-            success = target_firefly.register_to_firefly(name)
-            if not success:
+            firefly_identity_id = target_firefly.register_to_firefly(name)
+            if not firefly_identity_id:
                 return Response(
                     {"error": "register to firefly failed"},
                     status=status.HTTP_400_BAD_REQUEST,
@@ -62,6 +62,7 @@ class FabricIdentityViewSet(viewsets.ViewSet):
                 name=serializer.data["name_of_fabric_identity"],
                 signer=serializer.data["name_of_identity"],
                 secret=serializer.data["secret_of_identity"],
+                firefly_identity_id=firefly_identity_id,
                 environment=resource_set.environment,
                 membership=resource_set.membership,
             )
@@ -69,8 +70,7 @@ class FabricIdentityViewSet(viewsets.ViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def retrieve(self, request, pk=None):
-        queryset = FabricIdentity.objects.all()
-        fabric_identity = get_object_or_404(queryset, pk=pk)
+        fabric_identity = FabricIdentity.objects.get(pk=pk)
         serializer = FabricIdentitySerializer(fabric_identity)
         return Response(serializer.data)
 

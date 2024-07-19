@@ -1000,10 +1000,10 @@ class Firefly(models.Model):
         print(org_name, key)
         response = post(
             address,
-            data=json.dumps({"parent": org_name, "key": key, "name": key + "FF"}),
+            data=json.dumps({"parent": org_name, "key": key, "name": key}),
             headers={"Content-Type": "application/json"},
         )
-        print({"parent": org_name, "key": key, "name": key + "FF"})
+        print({"parent": org_name, "key": key, "name": key})
         print(response.json())
         return response.json().get("id", False)
 
@@ -1434,6 +1434,11 @@ class FabricIdentity(models.Model):
     )
     secret = models.TextField(
         help_text="secret of FabricIdentity",
+        null=True,
+        blank=True,
+    )
+    firefly_identity_id = models.TextField(
+        help_text="firefly_identity_id of FabricIdentity",
         null=True,
         blank=True,
     )
