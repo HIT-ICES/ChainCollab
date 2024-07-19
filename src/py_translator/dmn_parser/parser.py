@@ -52,6 +52,21 @@ class Decision(Element):
             "inputs": self.inputs,
             "outputs": self.outputs
         }
+    
+    def deep_inputs(self, dmn):
+        the_deep_inputs = []
+        for input in self.inputs:
+            # find information_requirements matched
+            find_flag = False
+            for requirement in self.information_requirements:
+                if requirement.type == "requiredDecision" and requirement.ref == input.text:
+                    decision = dmn.get_decision_by_id(requirement.ref)
+                    the_deep_inputs.extend(decision.deep_inputs(dmn))
+                    find_flag = True
+                    break
+            if not find_flag:
+                the_deep_inputs.append(input)
+        return the_deep_inputs
 
 
 class InputData(Element):

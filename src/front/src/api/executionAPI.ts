@@ -150,3 +150,17 @@ export const getFireflyVerify = async (coreUrl: string, fireflyIdentityId: strin
         return [];
     }
 }
+
+export const invokeCreateInstance = async (chaincodeUrl: string, data: any) => {
+    try {
+        const res = await fireflyAPI.post(`${chaincodeUrl.slice(0,-4)}/invoke/CreateInstance`, {
+            "input":{
+                "initParametersBytes": JSON.stringify(data)
+            }
+        });
+        return res.data
+    } catch (error) {
+        console.error("Error occurred while making post request:", error);
+        return [];
+    }
+}

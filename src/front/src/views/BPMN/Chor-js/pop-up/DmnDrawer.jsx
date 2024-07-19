@@ -45,6 +45,7 @@ const DmnDrawer = forwardRef(({
             async getXmlAndSvg() {
                 const xml_result = await viewer.current.saveXML({ format: true });
                 const svg_result = await viewer.current.getActiveViewer().saveSVG(); // 显示没有saveSVG函数
+                console.log(xml_result)
                 return { xml: xml_result.xml, svg: svg_result.svg };
             }
         })

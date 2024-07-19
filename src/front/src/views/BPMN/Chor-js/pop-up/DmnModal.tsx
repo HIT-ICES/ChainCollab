@@ -10,7 +10,6 @@ import "dmn-js/dist/assets/dmn-js-decision-table.css";
 import "dmn-js/dist/assets/dmn-js-drd.css";
 import "dmn-js/dist/assets/dmn-js-literal-expression.css";
 import "dmn-js/dist/assets/dmn-js-shared.css";
-import { migrateDiagram } from '@bpmn-io/dmn-migrate';
 import DmnDrawer from "./DmnDrawer"
 
 
@@ -41,7 +40,7 @@ const IOBlock = ({
                     onChange={(value) => handleChange(index, 'type', value, type)}
                     disabled={type === 'input'}
                 >
-                    <Option value="text">Text</Option>
+                    <Option value="string">String</Option>
                     <Option value="number">Number</Option>
                     <Option value="boolean">Boolean</Option>
                 </Select>
@@ -123,27 +122,39 @@ const AddInputBlock = ({ messageList, addItem }) => {
 
 const DmnModal = ({ dataElementId, xmlData, open: isModalOpen, onClose, onSave }) => {
 
+    const clean = () => {
+        setInputs([]);
+        setOutputs([]);
+    }
 
-    const DmnDrawerRef = useRef()
+    const DmnDrawerRef = useRef(null)
     const [name, setName] = useState("")
 
 
     const [activeTabKey, setActiveTabKey] = useState('businessRuleTask');
 
     const handleOk = async () => {
-        if (DmnDrawerRef.current === undefined) {
-            return;
+        // depend on activeTabKey
+
+        if (activeTabKey === 'businessRuleTask') {
+            defineIOofActivity(shape);
+            onClose && onClose(true);
+            clean()
+            // Clear the inputs and outputs
+            
+        } else {
+            const {xml,svg} = await DmnDrawerRef.current?.getXmlAndSvg();
+            // console.log('xml', xml);
+            onSave(dataElementId, { "dmnContent": xml, "name": name, "svgContent": svg });
+            // updateBpmnName();
+            onClose && onClose(true);
         }
-        const { xml, svg } = DmnDrawerRef.current?.getXmlAndSvg() || {};
-        // console.log('xml', xml);
-        onSave(dataElementId, { "dmnContent": xml, "name": name, "svgContent": svg });
-        // updateBpmnName();
-        onClose && onClose(true);
     };
 
 
     const handleCancel = () => {
         onClose && onClose(false);
+        clean()
     };
 
 
@@ -175,9 +186,25 @@ const DmnModal = ({ dataElementId, xmlData, open: isModalOpen, onClose, onSave }
         }
     })
 
+    // Read origin inputs and outputs
 
     const [inputs, setInputs] = useState([]);
     const [outputs, setOutputs] = useState([]);
+
+
+    useEffect(() => {
+        if (isModalOpen===false) return
+        const doc = shape.businessObject.documentation[0];
+        if (doc) {
+            const content = JSON.parse(doc.text);            
+            if (content.inputs) {
+                setInputs(content.inputs);
+            }
+            if (content.outputs) {
+                setOutputs(content.outputs);
+            }
+        }
+    }, [isModalOpen]);
 
     const defineIOofActivity = (shape) => {
         commandStack.execute('element.updateProperties', {

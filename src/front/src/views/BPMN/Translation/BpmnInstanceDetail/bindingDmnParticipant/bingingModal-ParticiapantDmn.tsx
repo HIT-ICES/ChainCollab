@@ -7,12 +7,15 @@ import { getMembership, retrieveFabricIdentity } from '@/api/platformAPI';
 import { getFireflyList, getResourceSets } from '@/api/resourceAPI';
 import { useAppSelector } from '@/redux/hooks';
 import { useFireflyData, useParticipantsData } from '../hooks';
-import { getFireflyVerify } from '@/api/executionAPI';
+import { getFireflyVerify, invokeCreateInstance } from '@/api/executionAPI';
+import { retrieveBPMN } from '@/api/externalResource';
 
 const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 
   const [showBindingParticipantMap, setShowBindingParticipantMap] = useState(new Map());
   const [showBindingParticipantValueMap, setShowBindingParticipantValueMap] = useState(new Map());
+
+  const [DmnBindingInfo, setDmnBindingInfo] = useState({});
   const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
   const [errorMessage, setErrorMessage] = useState('');
   const [participants, syncParticipants] = useParticipantsData(bpmnId);
@@ -24,14 +27,23 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 
     // 遍历数组中的每个元素，并将其合并到singleObject中
     createInstanceParam.forEach((item) => {
+      console.log("SDASDSA")
+      console.log(item)
       Object.assign(singleObject, item);
     });
     console.log('createInstanceParam', createInstanceParam);
     console.log('result', singleObject);
 
+
+    const bpmn = await retrieveBPMN(bpmnId)
+    const chaincode_url = bpmn.firefly_url
+    await invokeCreateInstance(chaincode_url, singleObject);
+
+    setOpen(false);
+
     async function constructParam() {
-      const createInstanceParam = []
-      showBindingParticipantValueMap.forEach(async (value, key) => {
+
+      const createPromise = async (value, key) => {
         const selectedValidationType = value.selectedValidationType;
         if (selectedValidationType === 'group') {
           let msp = '';
@@ -78,15 +90,42 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
               "isMulti": false,
               "multiMaximum": 0,
               "multiMinimum": 0,
-              "x509": x509,
+              "x509": btoa(x509),
             }
           }
           );
         }
-      });
+      };
+
+      const createInstanceParam = []
+
+      const promises = []
+      showBindingParticipantValueMap.forEach((value, key) => {
+        promises.push(createPromise(value, key))
+      })
+      await Promise.all(promises)
+
+
+      Object.entries(DmnBindingInfo).forEach(([key, value]) => {
+        createInstanceParam.push(
+          {
+            [key + "_DecisionID"]: value[key + "_DecisionID"],
+          }
+        )
+        createInstanceParam.push(
+          {
+            [key + "_ParamMapping"]: value[key + "_ParamMapping"],
+          }
+        )
+        createInstanceParam.push(
+          {
+            [key + "_Content"]: value[key + "_Content"],
+          }
+        )
+      })
+
       return createInstanceParam
     }
-    // setOpen(false);
   };
 
   const handleCancel = () => {
@@ -102,6 +141,8 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
             <h2>Binding BPMN businessRuleTasks and DMN</h2>
             <BindingDmnModal
               bpmnId={bpmnId}
+              DmnBindingInfo={DmnBindingInfo}
+              setDmnBindingInfo={setDmnBindingInfo}
             ></BindingDmnModal>
           </div>
           <div style={{ flex: '0 1 65%', paddingLeft: '10px', height: '600px' }}>
@@ -146,4 +187,4 @@ const SVGDisplayComponent = ({ bpmnId }) => {
   );
 }
 
-export default ParticipantDmnBindingModal;
+export default ParticipantDmnBindingModal

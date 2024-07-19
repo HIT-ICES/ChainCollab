@@ -1,4 +1,4 @@
-import { getBusinessRulesByContent } from '@/api/translator';
+import { getBusinessRulesByContent,getDecisions } from '@/api/translator';
 import { retrieveBPMN } from '@/api/externalResource'
 import { useQuery } from 'react-query';
 
@@ -19,4 +19,12 @@ export const useBpmnSvg = (bpmnId: string) => {
         return response.svgContent
     });
     return [bpmnSvg, { isLoading, isError, isSuccess }, refetch]
+}
+
+export const useDecisions = (dmnContent: string) => {
+    const { data: decisions = [], isLoading, isError, isSuccess, refetch } = useQuery(['dmnList', dmnContent], async () => {
+        if (dmnContent === "") return []
+        return await getDecisions(dmnContent)
+    });
+    return [decisions, { isLoading, isError, isSuccess }, refetch]
 }

@@ -87,7 +87,7 @@ async def get_decisions(params: GetDecisionsParams):
                     "typeRef": input.typeRef,
                     "text": input.text,
                 }
-                for input in decision.inputs
+                for input in decision.deep_inputs(parser)
             ],
             "outputs": [
                 {
