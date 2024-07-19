@@ -217,7 +217,7 @@ const BPMNOverview = () => {
             await updateBPMNFireflyUrl(bpmnId, fireflyUrl);
 
             // 获取 events 字段
-            _register_listeners(parsedFFIContent, fireflyUrlForRegister, chaincodeName, interfaceid);
+            await _register_listeners(parsedFFIContent, fireflyUrlForRegister, chaincodeName, interfaceid);
 
 
             const res = await updateBPMNStatus(bpmnId, "Registered");

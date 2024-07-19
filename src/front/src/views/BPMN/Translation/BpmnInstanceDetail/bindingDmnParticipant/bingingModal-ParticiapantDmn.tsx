@@ -51,11 +51,13 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
             let memberships = await getResourceSets(currentEnvId, null, value.selectedMembershipId);
             msp = memberships[0].msp;
           }
-          let attr = value.Attr;
+          let attr = value.Attr
           if (attr) {
             attr = attr.map(({ attr, value }) => ({ [attr]: value })).reduce((acc, obj) => {
               return { ...acc, ...obj };
             }, {});
+          }else{
+            attr = {}
           }
           createInstanceParam.push({
             [key]: {
@@ -86,7 +88,7 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
           createInstanceParam.push({
             [key]: {
               "msp": msp,
-              "attributes": '',
+              "attributes": {},
               "isMulti": false,
               "multiMaximum": 0,
               "multiMinimum": 0,

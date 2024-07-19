@@ -156,7 +156,7 @@ class FireflyViewSet(viewsets.ModelViewSet):
                     org_name=account_names[index],
                     core_url=f"{CURRENT_IP}:{core_port}",
                     sandbox_url=f"{CURRENT_IP}:{sandbox_port}",
-                    fab_connect_port=f"{CURRENT_IP}:{fab_connect_port}",
+                    fab_connect_url=f"{CURRENT_IP}:{fab_connect_port}",
                 )
                 firefly.save()
             return Response(status=status.HTTP_202_ACCEPTED)

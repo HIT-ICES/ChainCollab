@@ -306,9 +306,11 @@ def PutState_code(name: str, value: str):
     return content["PutStateFuncFrame"].format(name=name, value=value)
 
 
-def SetGlobalVariable_code(name: str, value: str):
-    return content["SetGlobalVariableFuncFrame"].format(name=name, value=value)
+def SetGlobalVariable_code(items:str=""):
+    return content["SetGlobalVariableFuncFrame"].format(items=items)
 
+def SetGlobalVaribaleItem_code(name: str, value: str):
+    return content["SetGlobalVaribaleFuncItemFrame"].format(name=name, value=value)
 
 def ReadState_code(name: str):
     return content["ReadStateFuncFrame"].format(stateName=name)

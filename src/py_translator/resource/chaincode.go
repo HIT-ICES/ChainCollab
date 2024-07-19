@@ -20,7 +20,9 @@ type SmartContract struct {
 
 
 type StateMemory struct {
-    Is_available bool `json:"Is_available"`
+    Datatype string `json:"Datatype"`
+	Temperature int `json:"Temperature"`
+	Is_available bool `json:"Is_available"`
 	Invoice bool `json:"Invoice"`
 	Need_external_provider bool `json:"Need_external_provider"`
 }
@@ -1023,7 +1025,7 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 	cc.CreateMessage(ctx, &instance, "Message_1joj7ca", "Participant_1080bkg", "Participant_0sktaei", "", DISABLED, `{"properties":{"invoice information":{"type":"string","description":"Invoice related information"}},"required":["invoice information"],"files":{},"file required":[]}`)
 	cc.CreateMessage(ctx, &instance, "Message_1ljlm4g", "Participant_0sktaei", "Participant_1080bkg", "", DISABLED, `{"properties":{"delivered_product_id":{"type":"string","description":"delivered_product_id"}},"required":["delivered_product_id"],"files":{},"file required":[]}`)
 	cc.CreateMessage(ctx, &instance, "Message_1xm9dxy", "Participant_1080bkg", "Participant_0sktaei", "", DISABLED, `{"properties":{"motivation":{"type":"string","description":"Motivation for Canceling orders"}},"required":["motivation"],"files":{},"file required":[]}`)
-	cc.CreateMessage(ctx, &instance, "Message_0o8eyir", "Participant_1080bkg", "Participant_0sktaei", "", DISABLED, `{"properties":{"payment amount":{"type":"number","description":"payment amount"},"orderID":{"type":"number","description":"The order id of payment"},"temperature":{"type":"number","description":"2321"},"dataType":{"type":"string","description":"The decision of datatype(eh: Wednesday..)"},"guestCount":{"type":"number","description":"321312"}},"required":["payment amount","orderID","temperature","dataType"],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, &instance, "Message_0o8eyir", "Participant_1080bkg", "Participant_0sktaei", "", DISABLED, `{"properties":{"payment amount":{"type":"number","description":"payment amount"},"orderID":{"type":"number","description":"The order id of payment"},"temperature":{"type":"number","description":"The decision of temperature"},"dataType":{"type":"string","description":"The decision of datatype(eh: Wednesday..)"}},"required":["payment amount","orderID","temperature","dataType"],"files":{},"file required":[]}`)
 	cc.CreateMessage(ctx, &instance, "Message_1nlagx2", "Participant_1080bkg", "Participant_0sktaei", "", DISABLED, `{"properties":{"confirmation":{"type":"boolean","description":"Whether to accept the service plan"}},"required":["confirmation"],"files":{},"file required":[]}`)
 	cc.CreateMessage(ctx, &instance, "Message_1em0ee4", "Participant_0sktaei", "Participant_1080bkg", "", DISABLED, `{"properties":{"service plan":{"type":"string","description":"service plan"},"price_quotation":{"type":"number","description":"Price quotation"},"need_external_provider":{"type":"boolean","description":"Whether external service providers are required"}},"required":["service plan","price_quotation","need_external_provider"],"files":{},"file required":[]}`)
 	cc.CreateMessage(ctx, &instance, "Message_0r9lypd", "Participant_0sktaei", "Participant_1080bkg", "", DISABLED, `{"properties":{"is_available":{"type":"boolean","description":"Is the service available?"}},"required":["is_available"],"files":{},"file required":[]}`)
@@ -1137,7 +1139,17 @@ func (cc *SmartContract) Message_045i10y_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instanceID, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instanceID, msg.MessageID, WAITINGFORCONFIRMATION)
+		globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
+	if readGloabolError != nil {
+		fmt.Println(readGloabolError.Error())
+		return readGloabolError
+	}
 	
+	setGloabolErrror :=cc.SetGlobalVariable(ctx, instanceID, globalMemory)
+	if setGloabolErrror != nil {
+		fmt.Println(setGloabolErrror.Error())
+		return setGloabolErrror
+	}
 	stub.SetEvent("Message_045i10y", []byte("Message is waiting for confirmation"))
 
 	
@@ -1200,7 +1212,7 @@ func (cc *SmartContract) Message_0r9lypd_Send(ctx contractapi.TransactionContext
 		fmt.Println(readGloabolError.Error())
 		return readGloabolError
 	}
-	globalMemory.Is_available = Is_available
+		globalMemory.Is_available = Is_available
 	setGloabolErrror :=cc.SetGlobalVariable(ctx, instanceID, globalMemory)
 	if setGloabolErrror != nil {
 		fmt.Println(setGloabolErrror.Error())
@@ -1303,7 +1315,7 @@ func (cc *SmartContract) Message_1em0ee4_Send(ctx contractapi.TransactionContext
 		fmt.Println(readGloabolError.Error())
 		return readGloabolError
 	}
-	globalMemory.Need_external_provider = Need_external_provider
+		globalMemory.Need_external_provider = Need_external_provider
 	setGloabolErrror :=cc.SetGlobalVariable(ctx, instanceID, globalMemory)
 	if setGloabolErrror != nil {
 		fmt.Println(setGloabolErrror.Error())
@@ -1366,7 +1378,17 @@ func (cc *SmartContract) Message_1nlagx2_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instanceID, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instanceID, msg.MessageID, WAITINGFORCONFIRMATION)
+		globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
+	if readGloabolError != nil {
+		fmt.Println(readGloabolError.Error())
+		return readGloabolError
+	}
 	
+	setGloabolErrror :=cc.SetGlobalVariable(ctx, instanceID, globalMemory)
+	if setGloabolErrror != nil {
+		fmt.Println(setGloabolErrror.Error())
+		return setGloabolErrror
+	}
 	stub.SetEvent("Message_1nlagx2", []byte("Message is waiting for confirmation"))
 
 	
@@ -1449,7 +1471,7 @@ func (cc *SmartContract) EventBasedGateway_1fxpmyn(ctx contractapi.TransactionCo
     return nil
 }
 
-func (cc *SmartContract) Message_0o8eyir_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string ) error {
+func (cc *SmartContract) Message_0o8eyir_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string , Datatype string, Temperature int) error {
 	stub := ctx.GetStub()
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_0o8eyir")
 	if err != nil {
@@ -1471,7 +1493,18 @@ func (cc *SmartContract) Message_0o8eyir_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instanceID, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instanceID, msg.MessageID, WAITINGFORCONFIRMATION)
-	
+		globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
+	if readGloabolError != nil {
+		fmt.Println(readGloabolError.Error())
+		return readGloabolError
+	}
+		globalMemory.Datatype = Datatype
+	globalMemory.Temperature = Temperature
+	setGloabolErrror :=cc.SetGlobalVariable(ctx, instanceID, globalMemory)
+	if setGloabolErrror != nil {
+		fmt.Println(setGloabolErrror.Error())
+		return setGloabolErrror
+	}
 	stub.SetEvent("Message_0o8eyir", []byte("Message is waiting for confirmation"))
 
 	    cc.ChangeMsgState(ctx, instanceID, "Message_1xm9dxy", DISABLED)
@@ -1529,7 +1562,17 @@ func (cc *SmartContract) Message_1xm9dxy_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instanceID, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instanceID, msg.MessageID, WAITINGFORCONFIRMATION)
+		globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
+	if readGloabolError != nil {
+		fmt.Println(readGloabolError.Error())
+		return readGloabolError
+	}
 	
+	setGloabolErrror :=cc.SetGlobalVariable(ctx, instanceID, globalMemory)
+	if setGloabolErrror != nil {
+		fmt.Println(setGloabolErrror.Error())
+		return setGloabolErrror
+	}
 	stub.SetEvent("Message_1xm9dxy", []byte("Message is waiting for confirmation"))
 
 	    cc.ChangeMsgState(ctx, instanceID, "Message_0o8eyir", DISABLED)
@@ -1606,7 +1649,17 @@ func (cc *SmartContract) Message_1ljlm4g_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instanceID, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instanceID, msg.MessageID, WAITINGFORCONFIRMATION)
+		globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
+	if readGloabolError != nil {
+		fmt.Println(readGloabolError.Error())
+		return readGloabolError
+	}
 	
+	setGloabolErrror :=cc.SetGlobalVariable(ctx, instanceID, globalMemory)
+	if setGloabolErrror != nil {
+		fmt.Println(setGloabolErrror.Error())
+		return setGloabolErrror
+	}
 	stub.SetEvent("Message_1ljlm4g", []byte("Message is waiting for confirmation"))
 
 	
@@ -1669,7 +1722,7 @@ func (cc *SmartContract) Message_0m9p3da_Send(ctx contractapi.TransactionContext
 		fmt.Println(readGloabolError.Error())
 		return readGloabolError
 	}
-	globalMemory.Invoice = Invoice
+		globalMemory.Invoice = Invoice
 	setGloabolErrror :=cc.SetGlobalVariable(ctx, instanceID, globalMemory)
 	if setGloabolErrror != nil {
 		fmt.Println(setGloabolErrror.Error())
@@ -1786,7 +1839,17 @@ func (cc *SmartContract) Message_1joj7ca_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instanceID, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instanceID, msg.MessageID, WAITINGFORCONFIRMATION)
+		globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
+	if readGloabolError != nil {
+		fmt.Println(readGloabolError.Error())
+		return readGloabolError
+	}
 	
+	setGloabolErrror :=cc.SetGlobalVariable(ctx, instanceID, globalMemory)
+	if setGloabolErrror != nil {
+		fmt.Println(setGloabolErrror.Error())
+		return setGloabolErrror
+	}
 	stub.SetEvent("Message_1joj7ca", []byte("Message is waiting for confirmation"))
 
 	
@@ -1844,7 +1907,17 @@ func (cc *SmartContract) Message_1etcmvl_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instanceID, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instanceID, msg.MessageID, WAITINGFORCONFIRMATION)
+		globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
+	if readGloabolError != nil {
+		fmt.Println(readGloabolError.Error())
+		return readGloabolError
+	}
 	
+	setGloabolErrror :=cc.SetGlobalVariable(ctx, instanceID, globalMemory)
+	if setGloabolErrror != nil {
+		fmt.Println(setGloabolErrror.Error())
+		return setGloabolErrror
+	}
 	stub.SetEvent("Message_1etcmvl", []byte("Message is waiting for confirmation"))
 
 	
@@ -1921,7 +1994,17 @@ func (cc *SmartContract) Message_1i8rlqn_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instanceID, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instanceID, msg.MessageID, WAITINGFORCONFIRMATION)
+		globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
+	if readGloabolError != nil {
+		fmt.Println(readGloabolError.Error())
+		return readGloabolError
+	}
 	
+	setGloabolErrror :=cc.SetGlobalVariable(ctx, instanceID, globalMemory)
+	if setGloabolErrror != nil {
+		fmt.Println(setGloabolErrror.Error())
+		return setGloabolErrror
+	}
 	stub.SetEvent("Message_1i8rlqn", []byte("Message is waiting for confirmation"))
 
 	
@@ -2037,7 +2120,17 @@ func (cc *SmartContract) Message_1q05nnw_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instanceID, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instanceID, msg.MessageID, WAITINGFORCONFIRMATION)
+		globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
+	if readGloabolError != nil {
+		fmt.Println(readGloabolError.Error())
+		return readGloabolError
+	}
 	
+	setGloabolErrror :=cc.SetGlobalVariable(ctx, instanceID, globalMemory)
+	if setGloabolErrror != nil {
+		fmt.Println(setGloabolErrror.Error())
+		return setGloabolErrror
+	}
 	stub.SetEvent("Message_1q05nnw", []byte("Message is waiting for confirmation"))
 
 	
@@ -2095,7 +2188,17 @@ func (cc *SmartContract) Message_1qbk325_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instanceID, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instanceID, msg.MessageID, WAITINGFORCONFIRMATION)
+		globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
+	if readGloabolError != nil {
+		fmt.Println(readGloabolError.Error())
+		return readGloabolError
+	}
 	
+	setGloabolErrror :=cc.SetGlobalVariable(ctx, instanceID, globalMemory)
+	if setGloabolErrror != nil {
+		fmt.Println(setGloabolErrror.Error())
+		return setGloabolErrror
+	}
 	stub.SetEvent("Message_1qbk325", []byte("Message is waiting for confirmation"))
 
 	

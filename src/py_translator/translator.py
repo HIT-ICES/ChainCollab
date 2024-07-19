@@ -23,6 +23,8 @@ import json
 def type_change_from_bpmn_to_go(type: str) -> str:
     if type == "string":
         return "string"
+    if type == "number":
+        return "int"
     if type == "integer":
         return "int"
     if type == "boolean":
@@ -113,7 +115,7 @@ class GoChaincodeTranslator:
                 business_rule.documentation
             )
             # {"input":[{{"name":"","type":""}}],"output":{"name":"","type":""}}
-            for input_def in input_and_output_def_of_business_rule.get("input", []):
+            for input_def in input_and_output_def_of_business_rule.get("inputs", []):
                 prop_defination = message_properties.get(input_def["name"])
                 if prop_defination is None:
                     # Parse Error!
@@ -121,7 +123,7 @@ class GoChaincodeTranslator:
                 global_parameters[input_def["name"]] = {
                     "definition": prop_defination,
                 }
-            for output_def in input_and_output_def_of_business_rule.get("output", []):
+            for output_def in input_and_output_def_of_business_rule.get("outputs", []):
                 business_rule_outputs[output_def["name"]] = {
                     "type": output_def["type"],
                     "business_rule_id": [business_rule.id],
@@ -264,6 +266,7 @@ class GoChaincodeTranslator:
             # type may need to be converted to golang type
             # boolean -> bool
             # integer -> int
+            # number -> int
             # string -> string
             # float -> float64
             temp_list.append(
@@ -461,9 +464,16 @@ class GoChaincodeTranslator:
         put_more_params_code = "\n".join(
             [
                 snippet.SetGlobalVariable_code(
-                    name=public_the_name(param[0]), value=public_the_name(param[0])
+                    "\n".join(
+                        [
+                            snippet.SetGlobalVaribaleItem_code(
+                                name=public_the_name(param[0]),
+                                value=public_the_name(param[0]),
+                            )
+                            for param in params_to_add
+                        ]
+                    )
                 )
-                for param in params_to_add
             ]
         )
         return more_params_code, put_more_params_code
@@ -1179,7 +1189,7 @@ class GoChaincodeTranslator:
 if __name__ == "__main__":
     go_chaincode_translator = GoChaincodeTranslator(
         None,
-        bpmn_file="resource/bpmn/service provider running time example-with business rule.bpmn",
+        bpmn_file="/home/logres/system/src/py_translator/resource/bpmn/bpmn.bpmn",
     )
     go_chaincode_translator.generate_chaincode()
     go_chaincode_translator.generate_ffi()

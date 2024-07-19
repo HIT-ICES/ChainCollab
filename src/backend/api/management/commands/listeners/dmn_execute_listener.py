@@ -37,6 +37,7 @@ class DMNContentRequiredAction:
     def __init__(self, core_url, chaincode_url):
         self.core_url = core_url
         self.chaincode_url = chaincode_url
+        self.ipfs_url = "http://127.0.0.1:10207/ipfs/"
 
     def handle_read_dmn(self, message):
         # 将字符串转换为字典
@@ -57,7 +58,7 @@ class DMNContentRequiredAction:
 
     def invoke_dmn_contract(self, dmn_content, instance_id, func_name):
         # 目标URL
-        url = f"""{self.chaincode_url}invoke/{func_name}"""
+        url = f"""{self.chaincode_url}/invoke/{func_name}"""
         # 构造请求
         response = requests.post(
             url,

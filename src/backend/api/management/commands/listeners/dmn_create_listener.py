@@ -62,7 +62,7 @@ class InstanceCreatedAction:
                 cid=IPFS_cid, instanceId=instance_id, business_rule_id=dmn_Id
             )
 
-    def invoke_upload_data(data_content, Id, core_url):
+    def invoke_upload_data(self, data_content, Id, core_url):
         # 目标URL
         url = f"""{core_url}api/v1/namespaces/default/data"""
         # 构造请求
@@ -98,7 +98,7 @@ class InstanceCreatedAction:
 
     def update_chaincode_cid(self, cid, instanceId, business_rule_id):
         print(f"Updating chaincode with instanceId: {instanceId} and cid: {cid}")
-        url = f"""{self.chaincode_url}invoke/UpdateCID"""
+        url = f"""{self.chaincode_url}/invoke/UpdateCID"""
         request_body = {
             "input": {
                 "InstanceID": instanceId,
