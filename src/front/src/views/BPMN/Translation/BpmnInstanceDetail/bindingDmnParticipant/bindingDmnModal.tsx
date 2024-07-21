@@ -84,7 +84,7 @@ const DmnBindingBlock = (
             businessRuleToFullfill.businessRuleId,
             dmnId,
             mainDecision.id,
-            currentParamMapping,
+            swapMappingKeyValue(currentParamMapping),
             dmnToUse[0].dmnContent
         )
         close()
@@ -266,6 +266,16 @@ const DmnBindingBlock = (
 
         </div>
     )
+
+    function swapMappingKeyValue(originMapping) {
+        const swappedParamMapping = {}
+
+        for (const key in originMapping) {
+            const value = originMapping[key]
+            swappedParamMapping[value] = key
+        }
+        return swappedParamMapping
+    }
 }
 
 

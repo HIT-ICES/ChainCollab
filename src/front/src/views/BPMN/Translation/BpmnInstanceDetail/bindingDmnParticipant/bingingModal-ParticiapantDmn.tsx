@@ -92,7 +92,7 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
               "isMulti": false,
               "multiMaximum": 0,
               "multiMinimum": 0,
-              "x509": btoa(x509),
+              "x509": btoa(x509) + "@" + msp,
             }
           }
           );

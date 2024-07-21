@@ -60,7 +60,7 @@ def CreateInstance_code(
 
         return content["InitParticipantFrame"].format(
             participant_id=participant,
-            is_multi=is_multi,
+            # is_multi=is_multi,
             multi_maximum=multi_maximum,
             multi_minimum=multi_minimum,
         )

@@ -35,7 +35,8 @@ def type_change_from_bpmn_to_go(type: str) -> str:
 
 
 def public_the_name(name: str) -> str:
-    return name.capitalize()
+    return "".join(name[:1].upper() + name[1:])
+    # return name.capitalize()
 
 
 def bool_handle(origin: bool) -> str:
@@ -104,6 +105,7 @@ class GoChaincodeTranslator:
                         )
                     },
                     **attri,
+                    "source_type": "message",
                 }
         # Step 2: extract parameters from sequence flow and business rule
         # Step 3: match parameters from properties to that from sequence flow and business rule
@@ -128,7 +130,14 @@ class GoChaincodeTranslator:
                     "type": output_def["type"],
                     "business_rule_id": [business_rule.id],
                     "description": output_def["description"],
+                    "source_type":"business_rule"
                 }
+
+        # Logic Change, output always show in Global Variables, for Testing
+        for output_name, output_def in business_rule_outputs.items():
+            global_parameters[output_name] = {
+                "definition": output_def,
+            }
 
         message_properties_plus_business_rule_outputs = {
             **message_properties,
@@ -434,11 +443,14 @@ class GoChaincodeTranslator:
 
     def _get_message_params(self, message: Message):
         global_parameters = self._global_parameters
+        message_global_parameters = {
+            param: global_parameters[param] for param in global_parameters if global_parameters[param]["definition"]["source_type"] == "message"
+        }
         params_to_add = []
-        for parameter in global_parameters:
-            if message.id in global_parameters[parameter]["definition"]["message_id"]:
+        for parameter in message_global_parameters:
+            if message.id in message_global_parameters[parameter]["definition"]["message_id"]:
                 params_to_add.append(
-                    (parameter, global_parameters[parameter]["definition"]["type"])
+                    (parameter, message_global_parameters[parameter]["definition"]["type"])
                 )
         return params_to_add
 
@@ -806,6 +818,7 @@ class GoChaincodeTranslator:
         chaincode_list.append(
             snippet.StateMemoryDefinition_code(self._generate_parameters_code())
         )
+        # initParams definition
         chaincode_list.append(
             snippet.InitParametersTypeDefFrame_code(
                 self._generate_instance_initparameters_code()
@@ -985,13 +998,13 @@ class GoChaincodeTranslator:
         items.append(
             self._generate_ffi_item(
                 name=return_message_flow.message.id + "_Send",
-                params=[self._fireflytran_ffi_param(), *params],
+                params=[self._instance_id_param(),self._fireflytran_ffi_param(), *params],
             )
         )
         items.append(
             self._generate_ffi_item(
                 name=return_message_flow.message.id + "_Complete",
-                params=[],
+                params=[self._instance_id_param()],
             )
         )
         return items
