@@ -1258,32 +1258,32 @@ class BPMNInstance(models.Model):
     )
 
 
-class BpmnParticipantBindingRecord(models.Model):
-    id = models.UUIDField(
-        primary_key=True,
-        help_text="ID of BPMNBindingRecord",
-        default=make_uuid,
-        editable=False,
-        unique=True,
-    )
-    bpmn_instance = models.ForeignKey(
-        BPMNInstance,
-        help_text="related bpmn_instance_id",
-        null=False,
-        on_delete=models.CASCADE,
-    )
-    participant_id = models.CharField(
-        help_text="ID of participant",
-        max_length=255,
-        null=True,
-        blank=True,
-    )
-    membership = models.ForeignKey(
-        Membership,
-        help_text="related membership_id",
-        null=False,
-        on_delete=models.CASCADE,
-    )
+# class BpmnParticipantBindingRecord(models.Model):
+#     id = models.UUIDField(
+#         primary_key=True,
+#         help_text="ID of BPMNBindingRecord",
+#         default=make_uuid,
+#         editable=False,
+#         unique=True,
+#     )
+#     bpmn_instance = models.ForeignKey(
+#         BPMNInstance,
+#         help_text="related bpmn_instance_id",
+#         null=False,
+#         on_delete=models.CASCADE,
+#     )
+#     participant_id = models.CharField(
+#         help_text="ID of participant",
+#         max_length=255,
+#         null=True,
+#         blank=True,
+#     )
+#     membership = models.ForeignKey(
+#         Membership,
+#         help_text="related membership_id",
+#         null=False,
+#         on_delete=models.CASCADE,
+#     )
 
 
 class BpmnDmnBindingRecord(models.Model):

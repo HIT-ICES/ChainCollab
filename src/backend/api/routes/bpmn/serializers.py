@@ -2,7 +2,6 @@ from api.models import (
     BPMN,
     DMN,
     BPMNInstance,
-    BpmnParticipantBindingRecord,
     ChainCode,
     Consortium,
     Environment,
@@ -116,11 +115,3 @@ class BpmnInstanceChaincodeSerializer(serializers.ModelSerializer):
         if obj.chaincode:
             return obj.chaincode.name
         return None
-
-
-class BpmnBindingRecordSerializer(serializers.ModelSerializer):
-    membership_name = serializers.CharField(source="membership.name")
-
-    class Meta:
-        model = BpmnParticipantBindingRecord
-        fields = "__all__"
