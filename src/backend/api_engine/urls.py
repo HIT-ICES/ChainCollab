@@ -169,6 +169,11 @@ router.register(
     ResourceSetViewSet,
     basename="environment-resource_set",
 )
+
+from api.routes.search.views import SearchView
+# Speed Search Route
+router.register("search", SearchView, basename="search")
+
 urlpatterns = router.urls
 
 urlpatterns += [

@@ -198,6 +198,24 @@ class BPMNViewsSet(viewsets.ModelViewSet):
 
 class BPMNInstanceViewSet(viewsets.ModelViewSet):
 
+    def create( self, request, *args, **kwargs):
+        """
+        创建Bpmn实例
+        """
+        try:
+            bpmn_id = request.parser_context["kwargs"].get("bpmn_id")
+            bpmn = BPMN.objects.get(pk=bpmn_id)
+            instance_chaincode_id = request.data.get("instance_chaincode_id")
+            bpmn_instance = BPMNInstance.objects.create(
+                bpmn=bpmn,
+                instance_chaincode_id=instance_chaincode_id
+            )
+            bpmn_instance.save()
+            serializer = BpmnInstanceSerializer(bpmn_instance)
+            return Response(data=ok(serializer.data), status=status.HTTP_201_CREATED)
+        except Exception as e:
+            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+
     def retrieve(self, request, pk=None, *args, **kwargs):
         """
         获取Bpmn实例详情

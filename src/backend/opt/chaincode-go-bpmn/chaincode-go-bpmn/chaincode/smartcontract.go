@@ -671,9 +671,6 @@ func (cc *SmartContract) check_attribute(ctx contractapi.TransactionContextInter
 	if err != nil {
 		return false
 	}
-	fmt.Println("targetParticipant.Attributes[attributeName]: ", targetParticipant.Attributes[attributeName])
-	attr, _, _ := ctx.GetClientIdentity().GetAttributeValue(attributeName)
-	fmt.Println("attr: ", attr)
 	if ctx.GetClientIdentity().AssertAttributeValue(attributeName, targetParticipant.Attributes[attributeName]) != nil {
 		return false
 	}

@@ -23,8 +23,19 @@ class BpmnPageQuerySerializer(serializers.Serializer):
         default=10, help_text="Per Page of filter", min_value=1, max_value=100
     )
 
+class ChaincodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChainCode
+        fields = "__all__"
 
 class BpmnSerializer(serializers.ModelSerializer):
+
+    chaincode = ChaincodeSerializer()
+    mark = serializers.SerializerMethodField()
+
+    def get_mark(self,obj):
+        return "Logres"
+
     class Meta:
         model = BPMN
         fields = "__all__"
