@@ -1250,18 +1250,6 @@ class BPMNInstance(models.Model):
         null=False,
         on_delete=models.CASCADE,
     )
-    # status = models.CharField(
-    #     help_text="status of BPMNInstance",
-    #     default="pending",
-    #     max_length=32,
-    #     choices=(
-    #         ("Initiated", "Initiated"),
-    #         ("Fullfilled", "Fullfilled"),
-    #         ("Generated", "Generated"),
-    #         ("Installed", "Installed"),
-    #         ("Registered", "Registered"),
-    #     ),
-    # )
     create_at = models.DateTimeField(
         help_text="Create time of BPMNInstance", auto_now_add=True
     )
