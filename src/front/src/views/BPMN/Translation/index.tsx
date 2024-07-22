@@ -23,14 +23,12 @@ interface expendDataType {
 }
 
 import { useBPMNInstanceListData } from './hooks.ts';
-import { addBPMNInstance, deleteBPMNInstance } from "@/api/externalResource.ts";
 
-const ExpandedRowRender = ({ record, appendedOne, setAppendedOne, submitNewOne }) => {
+const ExpandedRowRender = ({ record }) => {
 
-  const isAppend = record.id === appendedOne.bpmn_id;
-  const navigate = useNavigate();
-  const onClickViewDetail = (record: expendDataType) => {
-    navigate(`/bpmn/translation/${record.id}`);
+  const onClickExecute = (record: expendDataType) => {
+    // navigate(`/bpmn/translation/${record.id}`);
+    console.log("click execute", record);
   }
 
   const [data, syncData] = useBPMNInstanceListData(record.id);
@@ -41,26 +39,6 @@ const ExpandedRowRender = ({ record, appendedOne, setAppendedOne, submitNewOne }
       dataIndex: "name",
       key: "BPMN Instance",
       align: "center",
-      render: (text, record) => {
-        return record.id === "new" ? (
-          <Input
-            value={appendedOne.name}
-            onChange={(e) => {
-              setAppendedOne({
-                ...appendedOne,
-                name: e.target.value
-              })
-            }}
-          />
-        ) : (
-          <span>{text}</span>
-        );
-      }
-    },
-    {
-      title: "Environment",
-      dataIndex: "environment_name",
-      key: "Environment",
     },
     {
       title: "Status",
@@ -73,27 +51,17 @@ const ExpandedRowRender = ({ record, appendedOne, setAppendedOne, submitNewOne }
       key: "action",
       align: "center",
       render: (_, record: expendDataType) => {
-        return record.id === "new" ? (
-          <Button
-            type="primary"
-            onClick={() => {
-              submitNewOne(syncData)
-            }}
-          >
-            Submit
-          </Button>
-        ) :
-          (
-            <>
-              <Button
-                type="primary"
-                onClick={() => {
-                  onClickViewDetail(record);
-                }}
-              >
-                Detail
-              </Button>
-              <Button
+        return (
+          <>
+            <Button
+              type="primary"
+              onClick={() => {
+                onClickExecute(record);
+              }}
+            >
+              Execute
+            </Button>
+            {/* <Button
                 type="primary"
                 style={{ marginLeft: 10, background: "red" }}
                 onClick={() => {
@@ -104,10 +72,8 @@ const ExpandedRowRender = ({ record, appendedOne, setAppendedOne, submitNewOne }
                 }}
               >
                 Delete
-              </Button>
-            </>
-
-          );
+              </Button> */}
+          </>)
       },
     }
   ]
@@ -116,9 +82,7 @@ const ExpandedRowRender = ({ record, appendedOne, setAppendedOne, submitNewOne }
   return (
     <Table
       columns={expendColumns}
-      dataSource={isAppend ? [...data,
-        appendedOne
-      ] : data}
+      dataSource={data}
       pagination={false}
     />
   )
@@ -134,31 +98,6 @@ const Translation: React.FC = () => {
   const navigate = useNavigate();
   const [isBindingOpen, setIsBindingOpen] = useState(false);
 
-  const [newOne, setNewOne] = useState({
-    id: "new",
-    name: "name",
-    bpmn_id: "",
-    status: "",
-    environment_id: currentEnvId,
-    environment_name: currenEnvName
-  });
-
-
-
-  const submitNewOne = async (syncLeaf) => {
-    const res = await addBPMNInstance(newOne.bpmn_id, newOne.name, currentEnvId);
-    setNewOne({
-      id: "new",
-      bpmn_id: '',
-      name: '',
-      status: '',
-      environment_id: currentEnvId,
-      environment_name: currenEnvName
-    })
-    syncBpmnData();
-    if (syncLeaf)
-      syncLeaf();
-  }
 
   const [currentBpmnId, setCurrentBpmnId] = useState("");
 
@@ -178,9 +117,15 @@ const Translation: React.FC = () => {
       hidden: true
     },
     {
-      title: "OrgId",
-      dataIndex: "organization_id",
-      key: "OrgId",
+      title: "OrgName",
+      dataIndex: "organization_name",
+      key: "OrgName",
+      align: "center",
+    },
+    {
+      title: "EnvName",
+      dataIndex: "environment_name",
+      key: "EnvName",
       align: "center",
     },
     {
@@ -247,9 +192,6 @@ const Translation: React.FC = () => {
           expandedRowRender: (record: DataType) => {
             return (
               <ExpandedRowRender record={record}
-                appendedOne={newOne}
-                setAppendedOne={setNewOne}
-                submitNewOne={submitNewOne}
               />
             )
           },

@@ -1,4 +1,13 @@
-from api.models import BPMN, DMN, BPMNInstance, BpmnParticipantBindingRecord
+from api.models import (
+    BPMN,
+    DMN,
+    BPMNInstance,
+    BpmnParticipantBindingRecord,
+    ChainCode,
+    Consortium,
+    Environment,
+    LoleidoOrganization,
+)
 from rest_framework import serializers
 
 
@@ -22,6 +31,50 @@ class BpmnSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class BpmnListSerializer(serializers.ModelSerializer):
+    consortium_id = serializers.PrimaryKeyRelatedField(
+        source="consortium", queryset=Consortium.objects.all(), allow_null=True
+    )
+    organization_id = serializers.PrimaryKeyRelatedField(
+        source="organization", queryset=LoleidoOrganization.objects.all()
+    )
+    chaincode_id = serializers.PrimaryKeyRelatedField(
+        source="chaincode", queryset=ChainCode.objects.all(), allow_null=True
+    )
+    environment_id = serializers.PrimaryKeyRelatedField(
+        source="environment", queryset=Environment.objects.all(), allow_null=True
+    )
+    environment_name = serializers.SerializerMethodField()
+    organization_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BPMN
+        fields = [
+            "id",
+            "consortium_id",
+            "organization_id",
+            "organization_name",
+            "status",
+            "name",
+            "participants",
+            "events",
+            "bpmnContent",
+            "svgContent",
+            "chaincode_id",
+            "chaincode_content",
+            "firefly_url",
+            "ffiContent",
+            "environment_id",
+            "environment_name",
+        ]
+
+    def get_environment_name(self, obj):
+        return obj.environment.name if obj.environment else None
+
+    def get_organization_name(self, obj):
+        return obj.organization.name
+
+
 class DmnSerializer(serializers.ModelSerializer):
     class Meta:
         model = DMN
@@ -29,20 +82,11 @@ class DmnSerializer(serializers.ModelSerializer):
 
 
 class BpmnInstanceSerializer(serializers.ModelSerializer):
-    environment_name = serializers.SerializerMethodField()
-    environment_id = serializers.SerializerMethodField()
-
     class Meta:
         model = BPMNInstance
         # exclude = ("environment",)
         fields = "__all__"
         # depth = 1
-
-    def get_environment_name(self, obj):
-        return obj.environment.name
-
-    def get_environment_id(self, obj):
-        return obj.environment.id
 
 
 class BpmnInstanceChaincodeSerializer(serializers.ModelSerializer):

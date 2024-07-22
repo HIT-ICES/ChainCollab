@@ -1,9 +1,9 @@
 import api from "./apiConfig";
 import { translatorAPI } from "./apiConfig";
 
-export const getBPMNList = async (consortiumId: string) => {
+export const getBPMNList = async (consortiumId: string = '1') => {
     try {
-        const response = await api.get(`/consortiums/${consortiumId}/bpmns`)
+        const response = await api.get(`/consortiums/${consortiumId}/bpmns/_list`)
         return response.data.data;
     } catch (error) {
         console.log(error);

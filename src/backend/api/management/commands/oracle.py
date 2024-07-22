@@ -16,7 +16,7 @@ executor = ThreadPoolExecutor()
 ws_uri = "ws://localhost:5000/ws"  # 替换为你的 WebSocket 服务器地址
 
 
-async def listener_task(chaincode_url, event_type, subscription_name):
+async def listener_task(chaincode_url, event_type, subscription_name, bpmn_id):
     async with websockets.connect(ws_uri) as websocket:
         # 连接后发送一条消息
         message_to_send = {
@@ -48,6 +48,7 @@ async def listener_task(chaincode_url, event_type, subscription_name):
                             InstanceCreatedAction(
                                 core_url="http://127.0.0.1:5000/",
                                 chaincode_url=chaincode_url,
+                                bpmn_id=bpmn_id,
                             ).handle_upload_dmn(message)
                         except Exception as e:
                             print(e)
@@ -59,7 +60,7 @@ async def listener_task(chaincode_url, event_type, subscription_name):
 # namedTuple
 from collections import namedtuple
 
-TaskItem = namedtuple("TaskItem", ["task_id", "chaincode_url", "event_type"])
+TaskItem = namedtuple("TaskItem", ["task_id", "chaincode_url", "event_type", "bpmn_id"])
 taskId2ref = dict()
 
 taskList: list[TaskItem] = []
@@ -72,6 +73,7 @@ def get_all_bpmns():
             "events": bpmn.events,
             "chaincode_name": bpmn.chaincode.name,
             "firefly_url": bpmn.firefly_url[:-4],
+            "bpmn_id": bpmn.id,
         }
         for bpmn in BPMN.objects.all()
         if bpmn.events is not None
@@ -94,6 +96,7 @@ async def db_scanner():
                         task_id=event_listener_name,
                         chaincode_url=chaincode_url,
                         event_type=event,
+                        bpmn_id=bpmn["bpmn_id"],
                     )
                     if newTask not in taskList:
                         taskList.append(newTask)
@@ -112,6 +115,7 @@ async def task_manager():
                         chaincode_url=task.chaincode_url,
                         event_type=task.event_type,
                         subscription_name=task.task_id,
+                        bpmn_id=task.bpmn_id,
                     )
                 )
         await asyncio.sleep(5)

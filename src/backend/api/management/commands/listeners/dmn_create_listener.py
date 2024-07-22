@@ -4,38 +4,15 @@ import requests
 import json
 from concurrent.futures import ThreadPoolExecutor
 
+from api.config import CURRENT_IP
 from api.management.commands.listeners.dmn_execute_listener import listen
 
 
-# async def listen(executor, uri, listen_subscription_name, listen_action):
-#     async with websockets.connect(uri) as websocket:
-#         # 连接后发送一条消息
-#         message_to_send = {
-#             "type": "start",
-#             "name": listen_subscription_name,
-#             "namespace": "default",
-#             "autoack": True,
-#         }
-#         await websocket.send(json.dumps(message_to_send))
-#         print(f"Sent message: {message_to_send}")
-
-#         # 开始监听来自服务器的消息
-#         while True:
-#             try:
-#                 message = await websocket.recv()
-#                 print(f"Received message: {message}")
-#                 # 在接收到消息后启动一个线程执行send_post_request
-#                 loop = asyncio.get_event_loop()
-#                 await loop.run_in_executor(executor, listen_action, message)
-#             except websockets.ConnectionClosed:
-#                 print("Connection closed")
-#                 break
-
-
 class InstanceCreatedAction:
-    def __init__(self, core_url, chaincode_url):
+    def __init__(self, core_url, chaincode_url, bpmn_id):
         self.core_url = core_url
         self.chaincode_url = chaincode_url
+        self.bpmn_id = bpmn_id
 
     def handle_upload_dmn(self, message):
         print(f"Received message: {message}")
@@ -44,6 +21,7 @@ class InstanceCreatedAction:
         eventContent = data.get("blockchainEvent").get("output")
         print("------------\n", eventContent)
         instance_id = eventContent.get("InstanceID")
+        self.create_db_instance(instance_id=instance_id)
 
         for key, value in eventContent.items():
             if key == "InstanceID":
@@ -105,6 +83,19 @@ class InstanceCreatedAction:
                 "BusinessRuleID": business_rule_id,
                 "cid": cid,
             }
+        }
+        json_data = json.dumps(request_body)
+        headers = {
+            "Content-Type": "application/json",
+        }
+        response = requests.post(url, data=json_data, headers=headers)
+        print(response.text)
+
+    def create_db_instance(self, instance_id):
+        print(f"Creating DB instance with instance_id: {instance_id}")
+        url = f"http://{CURRENT_IP}:8000/api/v1/bpmns/{self.bpmn_id}/bpmn-instances"
+        request_body = {
+            "instance_chaincode_id": instance_id,
         }
         json_data = json.dumps(request_body)
         headers = {

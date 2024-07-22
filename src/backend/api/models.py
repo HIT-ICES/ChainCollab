@@ -1239,8 +1239,8 @@ class BPMNInstance(models.Model):
         null=True,
         blank=True,
     )
-    instance_id = models.IntegerField(
-        help_text="instance_id of BPMNInstance",
+    instance_chaincode_id = models.IntegerField(
+        help_text="instance_id of BPMNInstance in chaincode",
         null=True,
         blank=True,
     )

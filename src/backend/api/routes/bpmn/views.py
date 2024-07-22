@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.permissions import IsAuthenticated
 from api.routes.bpmn.serializers import (
+    BpmnListSerializer,
     BpmnBindingRecordSerializer,
     BpmnInstanceChaincodeSerializer,
     BpmnSerializer,
@@ -80,12 +81,12 @@ class BPMNViewsSet(viewsets.ModelViewSet):
         except Exception as e:
             raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
 
-    @action(methods=["get"], detail=True, url_path="_list")
-    def list_all(self, request, pk=None):
+    @action(methods=["get"], detail=False, url_path="_list")
+    def list_all(self, request, pk=None, *args, **kwargs):
         try:
             bpmns = BPMN.objects.all()
-            bpmn_data = list(bpmns.values())
-            return Response(bpmn_data, status=status.HTTP_200_OK)
+            serializer = BpmnListSerializer(bpmns, many=True)
+            return Response(data=ok(serializer.data), status=status.HTTP_200_OK)
 
         except Exception as e:
             raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
@@ -208,22 +209,21 @@ class BPMNInstanceViewSet(viewsets.ModelViewSet):
         """
         try:
             bpmn_id = request.parser_context["kwargs"].get("bpmn_id")
-
+            instance_chaincode_id = request.data.get("instance_chaincode_id")
             try:
                 bpmn = BPMN.objects.get(pk=bpmn_id)
             except BPMN.DoesNotExist:
                 return Response(status=status.HTTP_404_NOT_FOUND)
 
-            try:
-                env = Environment.objects.get(pk=request.data.get("env_id"))
-            except Environment.DoesNotExist:
-                return Response(status=status.HTTP_404_NOT_FOUND)
+            # try:
+            #     env = Environment.objects.get(pk=request.data.get("env_id"))
+            # except Environment.DoesNotExist:
+            #     return Response(status=status.HTTP_404_NOT_FOUND)
 
             bpmn_instance = BPMNInstance.objects.create(
                 bpmn=bpmn,
-                name=request.data.get("name"),
-                environment=env,
-                status="Initiated",
+                name=instance_chaincode_id,
+                instance_chaincode_id=instance_chaincode_id,
             )
             BPMNBindingRecordViewSet()._check(bpmn_instance.id)
             serializer = BpmnInstanceSerializer(bpmn_instance)
@@ -237,7 +237,7 @@ class BPMNInstanceViewSet(viewsets.ModelViewSet):
         """
         try:
             bpmn_instance = BPMNInstance.objects.get(pk=pk)
-            serializer = BpmnInstanceChaincodeSerializer(bpmn_instance)
+            serializer = BpmnInstanceSerializer(bpmn_instance)
             return Response(serializer.data)
         except BPMNInstance.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
