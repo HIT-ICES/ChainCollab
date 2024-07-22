@@ -13,8 +13,6 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.permissions import IsAuthenticated
 from api.routes.bpmn.serializers import (
     BpmnListSerializer,
-    BpmnBindingRecordSerializer,
-    BpmnInstanceChaincodeSerializer,
     BpmnSerializer,
     BpmnInstanceSerializer,
     DmnSerializer,
@@ -26,14 +24,10 @@ from api.models import (
     BPMN,
     DMN,
     BPMNInstance,
-    BpmnParticipantBindingRecord,
     ChainCode,
     Environment,
     LoleidoOrganization,
-    ResourceSet,
-    UserProfile,
     Consortium,
-    Membership,
 )
 from zipfile import ZipFile
 import json
@@ -203,33 +197,6 @@ class BPMNViewsSet(viewsets.ModelViewSet):
 
 
 class BPMNInstanceViewSet(viewsets.ModelViewSet):
-    def create(self, request, *args, **kwargs):
-        """
-        创建Bpmn实例
-        """
-        try:
-            bpmn_id = request.parser_context["kwargs"].get("bpmn_id")
-            instance_chaincode_id = request.data.get("instance_chaincode_id")
-            try:
-                bpmn = BPMN.objects.get(pk=bpmn_id)
-            except BPMN.DoesNotExist:
-                return Response(status=status.HTTP_404_NOT_FOUND)
-
-            # try:
-            #     env = Environment.objects.get(pk=request.data.get("env_id"))
-            # except Environment.DoesNotExist:
-            #     return Response(status=status.HTTP_404_NOT_FOUND)
-
-            bpmn_instance = BPMNInstance.objects.create(
-                bpmn=bpmn,
-                name=instance_chaincode_id,
-                instance_chaincode_id=instance_chaincode_id,
-            )
-            BPMNBindingRecordViewSet()._check(bpmn_instance.id)
-            serializer = BpmnInstanceSerializer(bpmn_instance)
-            return Response(data=ok(serializer.data), status=status.HTTP_201_CREATED)
-        except Exception as e:
-            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, pk=None, *args, **kwargs):
         """
@@ -259,45 +226,6 @@ class BPMNInstanceViewSet(viewsets.ModelViewSet):
         except Exception as e:
             raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
 
-    def destroy(self, request, *args, **kwargs):
-        bpmn_instance_id = request.parser_context["kwargs"].get("pk")
-
-        try:
-            bpmn_instance = BPMNInstance.objects.get(pk=bpmn_instance_id)
-        except BPMNInstance.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        bpmn_instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(methods=["get"], detail=True, url_path="bindInfo")
-    def bind_info(self, request, pk, *args, **kwargs):
-        try:
-            bpmn_instance = BPMNInstance.objects.get(pk=pk)
-        except BPMNInstance.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        env = bpmn_instance.environment
-
-        def getMSPByMembershipId(membership_id):
-            try:
-                membership = Membership.objects.get(pk=membership_id)
-            except Membership.DoesNotExist:
-                return Response(status=status.HTTP_404_NOT_FOUND)
-            resource_set = ResourceSet.objects.get(
-                environment=env, membership=membership
-            )
-            return resource_set.sub_resource_set.get().msp
-
-        bindings = BpmnParticipantBindingRecord.objects.filter(
-            bpmn_instance=bpmn_instance
-        )
-        mapInfos = {
-            f"{binding.participant_id}": getMSPByMembershipId(binding.membership.id)
-            for binding in bindings
-        }
-
-        return Response(ok(mapInfos), status=status.HTTP_200_OK)
-
     def _ends_with_time_format(self, input_string):
         pattern = r"^test-\d{4}-\d{2}-\d{2}-\d{2}\.\d{2}\.\d{2}\.bpmn$"
         if re.match(pattern, input_string):
@@ -310,72 +238,6 @@ class BPMNInstanceViewSet(viewsets.ModelViewSet):
         if re.match(pattern, input_string):
             return True
         return False
-
-
-class BPMNBindingRecordViewSet(viewsets.ModelViewSet):
-    def _check(self, bpmn_instance_id):
-        try:
-            bpmn_instance = BPMNInstance.objects.get(pk=bpmn_instance_id)
-        except BPMNInstance.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        participant_json = bpmn_instance.bpmn.participants
-        participants = json.loads(participant_json)
-
-        bindings = BpmnParticipantBindingRecord.objects.filter(
-            bpmn_instance=bpmn_instance
-        )
-
-        fullfilled = len(participants) <= len(bindings)
-        if fullfilled:
-            bpmn_instance.status = "Fullfilled"
-            bpmn_instance.save()
-        return fullfilled
-
-    def create(self, request, *args, **kwargs):
-        """
-        创建Bpmn绑定实例
-        """
-        bpmn_instance_id = request.parser_context["kwargs"].get(
-            "bpmn_instance_id", None
-        )
-        try:
-            bpmn_instance = BPMNInstance.objects.get(pk=bpmn_instance_id)
-        except BPMNInstance.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        membership_id = request.data.get("membership_id", None)
-        try:
-            membership = Membership.objects.get(pk=membership_id)
-        except Membership.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        participant_id = request.data.get("participant_id", None)
-
-        bpmn_binding_record = BpmnParticipantBindingRecord.objects.create(
-            bpmn_instance=bpmn_instance,
-            membership=membership,
-            participant_id=participant_id,
-        )
-        serializer = BpmnBindingRecordSerializer(bpmn_binding_record)
-        self._check(bpmn_instance_id)
-        return Response(data=ok(serializer.data), status=status.HTTP_201_CREATED)
-
-    def list(self, request, *args, **kwargs):
-
-        bpmn_instance_id = request.parser_context["kwargs"].get(
-            "bpmn_instance_id", None
-        )
-        try:
-            bpmn_instance = BPMNInstance.objects.get(pk=bpmn_instance_id)
-        except BPMNInstance.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        bpmn_binding_records = BpmnParticipantBindingRecord.objects.filter(
-            bpmn_instance=bpmn_instance
-        )
-
-        serializer = BpmnBindingRecordSerializer(bpmn_binding_records, many=True)
-        return Response(ok(serializer.data), status=status.HTTP_200_OK)
 
 
 class DmnViewSet(viewsets.ModelViewSet):

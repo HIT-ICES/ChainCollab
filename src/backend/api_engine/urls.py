@@ -55,7 +55,6 @@ from api.routes.resource_set.views import ResourceSetViewSet
 from api.routes.bpmn.views import (
     BPMNViewsSet,
     BPMNInstanceViewSet,
-    BPMNBindingRecordViewSet,
     DmnViewSet,
 )
 from api.routes.fabric_identity.views import FabricIdentityViewSet
@@ -140,11 +139,6 @@ router.register(
     basename="bpmn-instance",
 )
 
-router.register(
-    "bpmn-instances/(?P<bpmn_instance_id>[^/.]+)/binding-records",
-    BPMNBindingRecordViewSet,
-    basename="bpmn-binding-record",
-)
 router.register(
     "consortiums/(?P<consortium_id>[^/.]+)/dmns", DmnViewSet, basename="dmn"
 )
