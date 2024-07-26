@@ -21,9 +21,9 @@ type SmartContract struct {
 
 
 type StateMemory struct {
-    DataType string `json:"DataType"`
-	Temperature int `json:"Temperature"`
-	Test string `json:"Test"`
+    Temperature int `json:"Temperature"`
+	DataType string `json:"DataType"`
+	TestOutput string `json:"TestOutput"`
 	Is_available bool `json:"Is_available"`
 	Invoice bool `json:"Invoice"`
 	Need_external_provider bool `json:"Need_external_provider"`
@@ -1326,7 +1326,7 @@ func (cc *SmartContract) EventBasedGateway_1fxpmyn(ctx contractapi.TransactionCo
     return nil
 }
 
-func (cc *SmartContract) Message_0o8eyir_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string , DataType string, Temperature int) error {
+func (cc *SmartContract) Message_0o8eyir_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string , Temperature int, DataType string) error {
 	stub := ctx.GetStub()
 	instance,err := cc.GetInstance(ctx, instanceID)
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_0o8eyir")
@@ -1354,8 +1354,8 @@ func (cc *SmartContract) Message_0o8eyir_Send(ctx contractapi.TransactionContext
 		fmt.Println(readGloabolError.Error())
 		return readGloabolError
 	}
-		globalMemory.DataType = DataType
-	globalMemory.Temperature = Temperature
+		globalMemory.Temperature = Temperature
+	globalMemory.DataType = DataType
 	setGloabolErrror :=cc.SetGlobalVariable(ctx, instance, globalMemory)
 	if setGloabolErrror != nil {
 		fmt.Println(setGloabolErrror.Error())
