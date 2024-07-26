@@ -256,3 +256,10 @@ export const getFireflyWithMSP = async (msp) => {
         return null;
     }
 }
+
+import axios from 'axios'
+
+export const getFireflyIdentity = async (coreUrl:string, idInFirefly:string) =>{
+    const res = await axios.get(`${coreUrl}/api/v1/identities/${idInFirefly}/verifiers`)
+    return res
+}

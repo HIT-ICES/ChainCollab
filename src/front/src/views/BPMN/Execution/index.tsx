@@ -7,23 +7,7 @@ import { getBPMNInstanceList, getBPMNList } from "@/api/externalResource";
 import { current_ip } from "@/api/apiConfig";
 const { Link } = Typography;
 
-// interface DataType {
-//   id: string;
-//   BPMN: string;
-//   Uploader: string;
-//   status: string;
-// }
-
 interface DataType {
-    // id: string;
-    // consortium_id: string;
-    // organization_id: string;
-    // status: string;
-    // name: string;
-    // bpmnContent: string;
-    // svgContent: string;
-    // chaincodeContent: string;
-    // ffiContent: string
     id: string;
     consortium: string;
     organization: string;

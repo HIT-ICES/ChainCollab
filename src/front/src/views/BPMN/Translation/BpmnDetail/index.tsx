@@ -184,7 +184,7 @@ const BPMNOverview = () => {
             const chaincodeName = bpmn.name.replace(".bpmn", "")
             const ffiContent = bpmn.ffiContent
             const parsedFFIContent = JSON.parse(ffiContent);
-            const chaincodeIdPrefix = chaincodeName + "-" + bpmn.chaincode.substring(0, 6);
+            const chaincodeIdPrefix = chaincodeName + "-" + bpmn.chaincode.id.substring(0, 6);
             parsedFFIContent.name = chaincodeIdPrefix;
             const fireflyUrlForRegister = `${current_ip}:5000`
             // register interface

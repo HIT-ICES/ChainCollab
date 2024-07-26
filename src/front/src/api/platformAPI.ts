@@ -381,3 +381,20 @@ export const getAPIKeyList = async (membershipId, envId) => {
     console.error("获取API Key失败", err);
   }
 }
+
+export const getFireflyIdentity = async (envId, orgId) => {
+  if (envId === '' || orgId === '') {
+    return {};
+  }
+  try {
+    const res = await api.get(`/search/search-identity-by-org-and-env`, {
+      params: {
+        env_id: envId,
+        org_id: orgId
+      }
+    });
+    return res.data;
+  } catch (err) {
+    console.error("获取fireflyIdentity失败", err);
+  }
+}
