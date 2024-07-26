@@ -44,6 +44,13 @@ do
     docker stop "$container_name" && docker rm "$container_name"
 done
 
+# 移除 dev开头的image
+docker images --format "{{.Repository}}" | grep '^dev' | while read -r image_name
+do
+    echo "Removing image: $image_name"
+    docker rmi "$image_name"
+done
+
 
 echo "Remove DB"
 docker stop cello-postgres
@@ -56,4 +63,5 @@ docker volume prune -f
 # Remove Firefly
 
 echo "Remove Firefly"
+ff remove cello_env
 rm -rf /home/logres/.firefly/stacks/cello_*
