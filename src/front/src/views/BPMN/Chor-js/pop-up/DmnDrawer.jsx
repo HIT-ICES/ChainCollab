@@ -67,7 +67,6 @@ const DmnDrawer = forwardRef(({
             while (isModelerHandling.current) {
                 await new Promise(resolve => setTimeout(resolve, 10));
             }
-            // console.log('container ref', containerRef.current)
             while (containerRef.current === null) {
                 await new Promise(resolve => setTimeout(resolve, 10));
             }
@@ -82,11 +81,9 @@ const DmnDrawer = forwardRef(({
                 }
 
             });
-            console.log("dmn created", viewer.current)
 
             // Function to attach viewer to container
             const attachViewer = () => {
-                console.log("attach viewer")
                 viewer.current.attachTo(containerRef.current);
             };
             attachViewer();
@@ -113,9 +110,7 @@ const DmnDrawer = forwardRef(({
     }, []);
 
     useEffect(() => {
-        // console.log("xmlData", xmlData)
         const loadDiagram = async () => {
-            // Import XML and render the DMN diagram
             if (xmlData !== null && xmlData !== undefined) {
                 await renderModel(xmlData);
             } else {
@@ -154,7 +149,6 @@ const DmnDrawer = forwardRef(({
     };
 
     const js_file_input_listener = (e) => {
-        console.log('file-input changed');
         const loadDiagram = document.getElementById('file-input-dmn');
         const file = loadDiagram.files[0];
         if (file) {

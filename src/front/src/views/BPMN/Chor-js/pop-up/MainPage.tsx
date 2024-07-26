@@ -16,10 +16,7 @@ export default function MainPage({ xmlDataMap, onSave }) {
     const handleDoubleClick = (e) => {
       e.stopPropagation();
       const data_element_id = $(e.target).closest('.djs-element.djs-shape').attr('data-element-id');
-      // console.log('click task done', this, e, data_element_id)
-      // debugger
       const ids = data_element_id.split('_');
-      // console.log(ids)
       const type = ids[0];
       setDataElementId(data_element_id);
       setDataElementType(type);

@@ -20,21 +20,22 @@ fi
 alias start_database='cd $WorkDir/backend && docker-compose up -d'
 alias prepare_api='cd $WorkDir/backend && source venv/bin/activate && python manage.py makemigrations && python manage.py migrate'
 alias start_api='cd $WorkDir/backend && source venv/bin/activate && python manage.py runserver 0.0.0.0:8000'
+alias start_backend='alias python=python3.10 && start_database &&sleep 2&& prepare_api && start_api'
 
-alias start_oldtrans='cd ~/translator-springboot && mvn spring-boot:run'
 
-alias start_chor='cd $WorkDir/chor_js_modify && npm run dev'
+
 
 
 alias export_ER='cd $WorkDir/backend && source venv/bin/activate && python3.10 manage.py graph_models -a -g -o er.png'
 alias export_ER_Dot='cd $WorkDir/backend && source venv/bin/activate && python3.10 manage.py graph_models -a -o er.dot'
-alias start_backend='alias python=python3.10 && start_database &&sleep 2&& prepare_api && start_api'
-alias start_translator='cd $WorkDir/py_translator && source venv/bin/activate && python3.10 server.py'
 
+alias start_translator='cd $WorkDir/py_translator && source venv/bin/activate && python3.12 server.py'
 
+# deprecated 
 
-# start_database then wait for 3 seconds
+# alias start_oldtrans='cd ~/translator-springboot && mvn spring-boot:run'
 
+# alias start_chor='cd $WorkDir/chor_js_modify && npm run dev'
 
 add_host_mapping() {
     if [ $# -eq 0 ]; then
@@ -47,3 +48,6 @@ add_host_mapping() {
         echo "已将 $plugin 添加到hosts文件"
     done
 }
+
+
+alias python=python3.10

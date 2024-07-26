@@ -117,6 +117,8 @@ def ChangeMsgState_code(msg, state: str):
 def ChangeGtwState_code(gtw, state: str):
     return content["ChangeGtwStateFrame"].format(gateway=gtw, state=state)
 
+def ChangeBusinessRuleState_code(business_rule, state: str):
+    return content["ChangeBusinessRuleStateFrame"].format(business_rule=business_rule, state=state)
 
 def StartEvent_code(
     event,

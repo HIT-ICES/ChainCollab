@@ -40,10 +40,6 @@ const ChorJs = () => {
   const orgid = useAppSelector((state) => state.org).currentOrgId;
 
 
-  useEffect(() => {
-    console.log('dmnIdXmlMap:', dmnIdXmlMap);
-  }, [dmnIdXmlMap]);
-
   async function renderModel(newXml) {
     await modeler.current.importXML(newXml);
     isDirty = false;
@@ -79,7 +75,6 @@ const ChorJs = () => {
 
 
   const js_download_listener = async (e: MouseEvent): Promise<void> => {
-    console.log('downloadLink clicked');
     const downloadLink = document.getElementById('js-download-diagram');
     const result = await modeler.current.saveXML({ format: true });
     downloadLink['href'] = 'data:application/bpmn20-xml;charset=UTF-8,' + encodeURIComponent(result.xml);
@@ -88,7 +83,6 @@ const ChorJs = () => {
   };
 
   const js_download_svg_listerner = async (e: MouseEvent): Promise<void> => {
-    console.log('downloadSvgLink clicked');
     const downloadSvgLink = document.getElementById('js-download-svg');
     const result = await modeler.current.saveSVG();
     downloadSvgLink['href'] = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(result.svg);
@@ -96,12 +90,10 @@ const ChorJs = () => {
   };
 
   const js_open_file_listener = (e: MouseEvent): void => {
-    console.log('js-open-file clicked');
     document.getElementById('file-input').click();
   };
 
   const js_file_input_listener = (e: Event): void => {
-    console.log('file-input changed');
     const loadDiagram = document.getElementById('file-input');
     const file = loadDiagram.files[0];
     if (file) {
@@ -151,7 +143,6 @@ const ChorJs = () => {
 
 
   const js_validate_listener = (e: MouseEvent): void => {
-    console.log('validateButton clicked');
     const validateButton = document.getElementById('js-validate');
     isValidating = !isValidating;
     if (isValidating) {
@@ -173,10 +164,7 @@ const ChorJs = () => {
       const confirmUpload = confirm("是否上传该bpmn文件？");
       if (confirmUpload) {
         const result = await modeler.current.saveXML({ format: true });
-        console.log(result);
-
         const resultOfSvg = await modeler.current.saveSVG();
-        console.log(resultOfSvg);
 
         var params = {};
         var queryString = window.location.search.substring(1);
@@ -185,9 +173,6 @@ const ChorJs = () => {
           var pair = pairs[i].split("=");
           params[pair[0]] = decodeURIComponent(pair[1]);
         }
-
-        console.log("consortiumid = " + params["consortiumid"]);
-        // console.log("userid = " + params["userid"])
         await upload_bpmn_post(result, params, bpmnName, resultOfSvg);
       } else {
       }
@@ -196,7 +181,6 @@ const ChorJs = () => {
 
   async function upload_bpmn_post(result, params, bpmnName, resultOfSvg) {
     const participants = await getParticipantsByContent(result.xml)
-    console.log('Post getParticipant request success:', participants);
     await addBPMN(consortiumid, bpmnName + '.bpmn', orgid, result.xml, resultOfSvg.svg, participants)
   }
 
@@ -208,7 +192,6 @@ const ChorJs = () => {
   useEffect(() => {
     //download diagram as BPMN 
     const downloadLink = document.getElementById('js-download-diagram');
-    console.log('downloadLink listener added');
     downloadLink.addEventListener('click', js_download_listener);
 
 
@@ -217,13 +200,11 @@ const ChorJs = () => {
     downloadSvgLink.addEventListener('click', js_download_svg_listerner);
 
     // open file dialog
-    console.log('js_open_file add event listener');
     const openFileElement = document.getElementById('js-open-file');
     openFileElement.addEventListener('click', js_open_file_listener);
 
 
     // load diagram from disk
-    console.log('js_file_input add event listener');
     const loadDiagram = document.getElementById('file-input');
     loadDiagram.addEventListener('change', js_file_input_listener);
 
@@ -246,7 +227,6 @@ const ChorJs = () => {
     upload_file.addEventListener('click', js_upload_listener);
 
     //upload dmn file
-    console.log('upload dmn add event listener');
     const upload_dmn = document.getElementById('js-upload-dmn');
     upload_dmn.addEventListener('click', js_upload_dmn_listener);
 

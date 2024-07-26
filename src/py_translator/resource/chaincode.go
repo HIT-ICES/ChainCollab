@@ -64,17 +64,13 @@ const (
 
 type InstanceState int
 
-// const (
-// 	TOBEREGISTERED = iota
-// 	READY
-// )
-
 type Participant struct {
-	MSP          string            `json:"MSP"`
-	Attributes   map[string]string `json:"Attributes"`
-	IsMulti      bool              `json:"IsMulti"`
-	MultiMaximum int               `json:"MultiMaximum"`
-	MultiMinimum int               `json:"MultiMinimum"`
+	ParticipantID string            `json:"ParticipantID"`
+	MSP           string            `json:"MSP"`
+	Attributes    map[string]string `json:"Attributes"`
+	IsMulti       bool              `json:"IsMulti"`
+	MultiMaximum  int               `json:"MultiMaximum"`
+	MultiMinimum  int               `json:"MultiMinimum"`
 
 	X509 string `json:"X509"`
 }
@@ -99,11 +95,12 @@ type ActionEvent struct {
 }
 
 type BusinessRule struct {
-	CID          string            `json:"Cid"`
-	Hash         string            `json:"Hash"`
-	DecisionID   string            `json:"DecisionID"`
-	ParamMapping map[string]string `json:"ParamMapping"`
-	State        ElementState      `json:"State"`
+	BusinessRuleID string            `json:"BusinessRuleID"`
+	CID            string            `json:"Cid"`
+	Hash           string            `json:"Hash"`
+	DecisionID     string            `json:"DecisionID"`
+	ParamMapping   map[string]string `json:"ParamMapping"`
+	State          ElementState      `json:"State"`
 }
 
 func (cc *SmartContract) CreateBusinessRule(ctx contractapi.TransactionContextInterface, instance *ContractInstance, BusinessRuleID string, DMNContent string, DecisionID string, ParamMapping map[string]string) (*BusinessRule, error) {
@@ -116,11 +113,12 @@ func (cc *SmartContract) CreateBusinessRule(ctx contractapi.TransactionContextIn
 
 	// 创建业务规则对象
 	instance.InstanceBusinessRules[BusinessRuleID] = &BusinessRule{
-		CID:          "",
-		Hash:         Hash,
-		DecisionID:   DecisionID,
-		ParamMapping: ParamMapping,
-		State:        DISABLED,
+		BusinessRuleID: BusinessRuleID,
+		CID:            "",
+		Hash:           Hash,
+		DecisionID:     DecisionID,
+		ParamMapping:   ParamMapping,
+		State:          DISABLED,
 	}
 
 	returnBusinessRule, ok := instance.InstanceBusinessRules[BusinessRuleID]
@@ -135,12 +133,13 @@ func (cc *SmartContract) CreateParticipant(ctx contractapi.TransactionContextInt
 
 	// 创建参与者对象
 	instance.InstanceParticipants[participantID] = &Participant{
-		MSP:          msp,
-		Attributes:   attributes,
-		IsMulti:      IsMulti,
-		MultiMaximum: MultiMaximum,
-		MultiMinimum: MultiMinimum,
-		X509:         x509,
+		ParticipantID: participantID,
+		MSP:           msp,
+		Attributes:    attributes,
+		IsMulti:       IsMulti,
+		MultiMaximum:  MultiMaximum,
+		MultiMinimum:  MultiMinimum,
+		X509:          x509,
 	}
 
 	returnParticipant, ok := instance.InstanceParticipants[participantID]
@@ -1393,7 +1392,7 @@ func (cc *SmartContract) Message_0o8eyir_Complete(ctx contractapi.TransactionCon
 	stub.SetEvent("Message_0o8eyir", []byte("Message has been done"))
 
 	
-	    cc.ChangeMsgState(ctx, instance, "Activity_1q19lty", ENABLED)
+	cc.ChangeBusinessRuleState(ctx, instance, "Activity_1q19lty", ENABLED)
 
 	
 	cc.SetInstance(ctx, instance)

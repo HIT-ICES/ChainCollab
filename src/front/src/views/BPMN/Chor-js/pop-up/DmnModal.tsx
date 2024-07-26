@@ -144,9 +144,7 @@ const DmnModal = ({ dataElementId, xmlData, open: isModalOpen, onClose, onSave }
             
         } else {
             const {xml,svg} = await DmnDrawerRef.current?.getXmlAndSvg();
-            // console.log('xml', xml);
             onSave(dataElementId, { "dmnContent": xml, "name": name, "svgContent": svg });
-            // updateBpmnName();
             onClose && onClose(true);
         }
     };

@@ -114,12 +114,13 @@ export const useFireflyData = (
 // Firefly Hook
 
 import {
-    getAllEvents, getAllGateways, getAllMessages
+    getAllEvents, getAllGateways, getAllMessages, getAllBusinessRules,
 } from '@/api/executionAPI'
 
 export const useAllFireflyData = (
     coreUrl: string, contractName: string, bpmnInstanceId: string
 ): [
+        any[],
         any[],
         any[],
         any[],
@@ -129,6 +130,7 @@ export const useAllFireflyData = (
     const [events, setEvents] = useState<any[]>([]);
     const [gateways, setGateways] = useState<any[]>([]);
     const [messages, setMessages] = useState<any[]>([]);
+    const [businessRules, setBusinessRules] = useState<any[]>([]);
     const [syncFlag, setSyncFlag] = useState(false);
     const [ready, setReady] = useState(false);
 
@@ -136,10 +138,11 @@ export const useAllFireflyData = (
         let ignore = false;
         const fetchData = async () => {
             setReady(false);
-            if (!coreUrl || !contractName) return;
+            if (!coreUrl || !contractName || coreUrl === "http://") return;
             const events = await getAllEvents(coreUrl, contractName, bpmnInstanceId);
             const gateways = await getAllGateways(coreUrl, contractName, bpmnInstanceId);
             const messages = await getAllMessages(coreUrl, contractName, bpmnInstanceId);
+            const businessRules = await getAllBusinessRules(coreUrl, contractName, bpmnInstanceId);
             if (ignore) return
             if (events) {
                 setEvents(events.map((item: any) => {
@@ -173,12 +176,23 @@ export const useAllFireflyData = (
 
                 ));
             }
+            if (businessRules) {
+                setBusinessRules(businessRules.map(
+                    (item: any) => {
+                        return {
+                            ...item,
+                            type: "businessRule",
+                            state: item.State
+                        }
+                    }
+                ));
+            }
             setReady(true);
         }
         fetchData();
         return () => { ignore = true; }
     }, [syncFlag, coreUrl, contractName]);
-    return [events, gateways, messages, ready, () => { setSyncFlag(syncFlag => !syncFlag) }];
+    return [events, gateways, messages, businessRules, ready, () => { setSyncFlag(syncFlag => !syncFlag) }];
 }
 
 import { useQuery } from 'react-query'
@@ -195,8 +209,8 @@ export const useAvailableIdentity = () => {
     return [data, isLoading, refetch]
 }
 
-export const useFireflyIdentity = (coreUrl:string, idInFirefly:string) =>{
-    const {data, isLoading} = useQuery([' fireflyIdentity', idInFirefly], async () => {
+export const useFireflyIdentity = (coreUrl: string, idInFirefly: string) => {
+    const { data, isLoading } = useQuery([' fireflyIdentity', idInFirefly], async () => {
         const res = await axios.get(`${coreUrl}/api/v1/identities/${idInFirefly}/verifiers`)
         return res.data
     })

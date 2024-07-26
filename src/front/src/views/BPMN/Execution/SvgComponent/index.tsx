@@ -22,7 +22,7 @@ const sleep = async (ms) => {
 }
 
 import {
-    invokeEventAction, invokeGatewayAction,
+    invokeEventAction, invokeGatewayAction, invokeBusinessRuleAction,
     fireflyFileTransfer, fireflyDataTransfer, invokeMessageAction
 } from '@/api/executionAPI.ts'
 
@@ -150,7 +150,7 @@ const InputComponentForMessage = (
                     style={{ backgroundColor: 'mediumspringgreen', marginTop: "10px" }}
                     onClick={() => { confirmMessage() }}
                 >Confirm</Button>
-                <TestComponent
+                {TestMode ? <TestComponent
                     bpmn={bpmn}
                     bpmnInstance={bpmnInstance}
                     testFunction={async () => {
@@ -172,7 +172,7 @@ const InputComponentForMessage = (
                         return { ...theRes }
                     }}
                     columns={TestConfirmResultColumns}
-                />
+                /> : null}
             </div>
         );
     }
@@ -252,7 +252,6 @@ const InputComponentForMessage = (
         const Identity = "did:firefly:" + the_identity?.name
 
         // 1. check type
-        // debugger;
         // 2. upload file if exists
         let file_ids = [];
         for (let key in format.files) {
@@ -434,6 +433,7 @@ const ControlPanel = ({
             // currentElement?.sendMspID === msp ||
             currentElement?.MsgState === 2
         // currentElement?.receiveMspID === msp;
+        if (type === "businessRule") return currentElement?.State === 1;
     })()
     // debugger
     const showTransactionId = (() => {
@@ -442,7 +442,6 @@ const ControlPanel = ({
     })()
 
     if (!isYourTurn) return null;
-
     const TestResultColumns = [
         {
             title: 'Index',
@@ -463,7 +462,6 @@ const ControlPanel = ({
             contractName
             , currentElement.EventID, instanceId);
     }
-    // debugger
 
     if (type === "event")
         return (
@@ -557,6 +555,55 @@ const ControlPanel = ({
                     : null}
             </div>
         );
+
+    const onHandleBusinessRule = () => {
+        invokeBusinessRuleAction(coreURL,
+            contractName
+            , currentElement.BusinessRuleID,
+            instanceId
+        );
+    }
+
+    if (type === "businessRule")
+        return (
+            <div style={{
+                display: "flex",
+                flexDirection: "column",
+
+            }} >
+                <Button
+                    style={{ backgroundColor: 'mediumspringgreen' }}
+                    onClick={() => {
+                        onHandleBusinessRule()
+                    }}
+                >Next</Button>
+                {TestMode ? <TestComponent
+                    bpmn={bpmn}
+                    bpmnInstance={bpmnInstance}
+                    testFunction={async () => {
+                        const theRes = {}
+                        // const observer = new PerformanceObserver(list => {
+                        //     list.getEntries().forEach(
+                        //         (entry) => {
+                        //             if (entry.name.includes("invoke/Gateway")) {
+                        //                 theRes["timeCost"] = entry.responseStart - entry.requestStart;
+                        //             }
+                        //         }
+                        //     );
+                        // });
+                        // observer.observe({ entryTypes: ["resource"] });
+                        await invokeGatewayAction(coreURL,
+                            contractName
+                            , currentElement.GatewayID,
+                            instanceId);
+                        await sleep(300);
+                        // observer.disconnect();
+                        return { ...theRes }
+                    }}
+                    columns={TestResultColumns} />
+                    : null}
+            </div>
+        )
 
 
 
@@ -685,6 +732,7 @@ const IdentitySelector = ({
 import { useAllFireflyData } from './hook'
 import axios from "axios";
 import { identity } from "lodash";
+import { debug } from "console";
 
 const ExecutionPage = (props) => {
     const bpmnInstanceId = window.location.pathname.split("/").pop();
@@ -702,17 +750,8 @@ const ExecutionPage = (props) => {
             identity: ""
         }
     )
-
-    console.log(bpmnInstanceId)
     const [bpmnInstance, bpmnInstanceReady, syncBpmnInstance] = useBPMNIntanceDetailData(bpmnInstanceId);
-
-    console.log(bpmnInstance)
-    console.log(bpmnInstanceReady)
-
     const [bpmnData, bpmnReady, syncBpmn] = useBPMNDetailData(bpmnInstance.bpmn);
-
-    console.log(bpmnData)
-    console.log(bpmnReady)
 
     // const getParticipantName = (participant) => {
     //     if (!bpmnReady) return "";
@@ -741,14 +780,13 @@ const ExecutionPage = (props) => {
 
     const contractName = bpmnReady ? bpmnData.chaincode.name + "-" + bpmnData.chaincode.id.substring(0, 6) : "";
     const full_core_url = "http://" + identity.core_url
-    const [allEvents, allGateways, allMessages, fireflyDataReady, syncFireflyData] = useAllFireflyData(full_core_url, contractName, bpmnInstance.instance_chaincode_id);
-
-    const currentElements = [...allMessages, ...allEvents, ...allGateways].filter((msg) => {
+    const [allEvents, allGateways, allMessages, allBusinessRules, fireflyDataReady, syncFireflyData] = useAllFireflyData(full_core_url, contractName, bpmnInstance.instance_chaincode_id);
+    const currentElements = [...allMessages, ...allEvents, ...allGateways, ...allBusinessRules].filter((msg) => {
         return msg.state === 1 || msg.state === 2;
     })
 
     const renderSvg = () => {
-        const updatedMsgList = [...allMessages, ...allEvents, ...allGateways].map((msg) => {
+        const updatedMsgList = [...allMessages, ...allEvents, ...allGateways, ...allBusinessRules].map((msg) => {
             let color = "";
             // msgState, gatewayState, eventState;
             // State: 0: disabled, 1: enabled, 2: wait for confirm, 3: completed
@@ -778,9 +816,13 @@ const ExecutionPage = (props) => {
                 if (msg.color === "unColored" && msg.color === "") return;
 
                 const selector = (() => {
+                    console.log(msg)
                     if (msg.type === "event") return `& g[data-element-id="${msg.EventID}"]`
                     if (msg.type === "gateway") return `& g[data-element-id="${msg.GatewayID}"]`
                     if (msg.type === "message") return `& g[data-element-id="${msg.MessageID}"]`
+                    if (msg.type === "businessRule") {
+                        return `& g[data-element-id="${msg.BusinessRuleID}"]`
+                    }
                 })()
                 styles["& svg"][selector] = {
                     "& path": {
@@ -792,6 +834,9 @@ const ExecutionPage = (props) => {
                     "& circle": {
                         fill: `${msg.color} !important`,
                     },
+                    // "& rect": {
+                    //     fill: `${msg.color} !important`,
+                    // }
                 };
             });
             return styles;
@@ -818,9 +863,6 @@ const ExecutionPage = (props) => {
     //     }
     // }
     //     , []);
-    console.log("SADSD")
-    console.log(currentElements)
-
 
 
     return (
@@ -858,6 +900,7 @@ const ExecutionPage = (props) => {
             < Button
                 onClick={() => {
                     syncFireflyData();
+                    renderSvg();
                 }}
             >Refresh</Button>
         </div>
