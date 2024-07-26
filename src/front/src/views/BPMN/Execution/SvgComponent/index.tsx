@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { css } from "@emotion/css";
-import { Button, Input, Form, Upload, Tag, Typography, Table } from "antd";
+import { Button, Input, Form, Upload, Tag, Typography, Table, Select } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { useLocation } from "react-router-dom";
-import { useBPMNIntanceDetailData, useBPMNDetailData } from "./hook";
-import { getFireflyWithMSP } from '@/api/externalResource.ts'
-import JSZip from "jszip";
-const TestMode = true;
+import { useBPMNIntanceDetailData, useBPMNDetailData, useFireflyIdentity } from "./hook";
+import { getFireflyIdentity, getFireflyWithMSP } from '@/api/externalResource.ts'
+import { useSelector } from "react-redux";
+const TestMode = false;
 
 // 定义Flex容器样式
 const flexContainerStyle = css`
@@ -37,28 +37,30 @@ const InputComponentForMessage = (
         Identity,
         contractMethodDes,
         bpmn,
-        bpmnInstance
+        bpmnInstance,
+        instanceId,
+        the_identity,
     }
 ) => {
-    // debugger;
-    const format = JSON.parse(currentElement.format);
+    const format = JSON.parse(currentElement.Format);
 
     const transValue = (key, value) => {
-        if (format.properties[key].type === "string") return value;
-        if (format.properties[key].type === "number") return parseInt(value);
-        if (format.properties[key].type === "boolean") return value === "true";
+        if (format.properties[key]?.type === "string") return value;
+        if (format.properties[key]?.type === "number") return parseInt(value);
+        if (format.properties[key]?.type === "boolean") return value === "true";
+        return value
     }
 
     const formRef = useRef(null);
     const isSender = currentElement.state === 1;
-    const methodName = currentElement.messageID + (isSender ? "_Send" : "_Complete");
+    const methodName = currentElement.MessageID + (isSender ? "_Send" : "_Complete");
 
 
 
     const confirmMessage = async () => {
         const res = await invokeMessageAction(coreURL,
             contractName
-            , methodName, {});
+            , methodName, {}, instanceId, the_identity.identity.data[0].value);
     }
     const [messageToConfirm, setMessageToConfirm] = useState([]);
 
@@ -116,7 +118,7 @@ const InputComponentForMessage = (
         const fetchData = async () => {
             //http://127.0.0.1:5000/api/v1/namespaces/default/messages/{currentElement.fireflyTranID}/data
 
-            const res = await axios.get(`${coreURL}/api/v1/namespaces/default/messages/${currentElement.fireflyTranID}/data`);
+            const res = await axios.get(`${coreURL}/api/v1/namespaces/default/messages/${currentElement.FireflyTranID}/data`);
             const messageToShow = res.data.map(
                 (item) => {
                     return Object.keys(item.value).map(key => ({ name: key, value: item.value[key] }));
@@ -186,20 +188,20 @@ const InputComponentForMessage = (
 
     function generateRandomFile(sizeInMB) {
         function generateRandomString(length) {
-          let result = '';
-          const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-          for (let i = 0; i < length; i++) {
-            result += characters.charAt(Math.floor(Math.random() * characters.length));
-          }
-          return result;
+            let result = '';
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            for (let i = 0; i < length; i++) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return result;
         }
-    
+
         const sizeInBytes = sizeInMB * 1024 * 1024;
         const randomString = generateRandomString(sizeInBytes);
         const blob = new Blob([randomString], { type: 'text/plain' });
         const file = new File([blob], `randomFile_${sizeInMB}MB.txt`, { type: 'text/plain' });
         return file;
-      }
+    }
 
     const handleTest = async () => {
         const values = {};
@@ -228,11 +230,11 @@ const InputComponentForMessage = (
         for (let key in format.properties) {
             values[key] = generateRandomString(10);
         }
-        
+
         for (let key in format.files) {
             // generate file
             // 1, 5 , 10, 50, 100
-            values[key] ={file:generateRandomFile(100)} 
+            values[key] = { file: generateRandomFile(100) }
         }
         await onHandleMessage(values);
         await sleep(500);
@@ -244,9 +246,10 @@ const InputComponentForMessage = (
     const onHandleMessage = async (values) => {
         // 0. get Identity to send message
 
-        const msp = currentElement.receiveMspID
-        const mspData = await getFireflyWithMSP(msp)
-        const Identity = "did:firefly:org/" + mspData.data.org_name;
+        // const msp = currentElement.ReceiveMspID
+        // const mspData = await getFireflyWithMSP(msp)
+
+        const Identity = "did:firefly:" + the_identity?.name
 
         // 1. check type
         // debugger;
@@ -266,14 +269,13 @@ const InputComponentForMessage = (
         // // 3. send firefly message if exists
 
         const datatype = {
-            name: bpmnName + "_" + currentElement.messageID,
+            name: bpmnName.split(".")[0] + "_" + currentElement.MessageID,
             version: '1'
         };
         let value = {}
         for (let key in format.properties) {
             value[key] = transValue(key, values[key])
         }
-        // debugger;
         const dataItem1 = {
             datatype: datatype,
             value: value,
@@ -298,7 +300,7 @@ const InputComponentForMessage = (
             header: {
                 tag: "private",
                 topics: [
-                    bpmnName + "_" + currentElement.messageID
+                    bpmnName + "_" + currentElement.MessageID
                 ]
             }
         };
@@ -323,10 +325,10 @@ const InputComponentForMessage = (
             contractName
             , methodName, {
             "input": {
-                "fireflyTranID": fireflyMessageID,
-                ...otherKeyValuePair
-            }
-        });
+                ...otherKeyValuePair,
+                "FireFlyTran": fireflyMessageID,
+            },
+        }, instanceId, the_identity.identity.data[0].value);
     }
 
     return (
@@ -415,19 +417,25 @@ const ControlPanel = ({
     bpmnName,
     contractMethodDes,
     bpmnInstance,
-    bpmn
+    bpmn,
+    instanceId,
+    identity
 }) => {
+
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const msp = queryParams.get("msp");
     const type = currentElement?.type;
     const Identity = queryParams.get("identity");
     const isYourTurn = (() => {
-        if (type === "event") return currentElement?.eventState === 1;
-        if (type === "gateway") return currentElement?.gatewayState === 1;
-        if (type === "message") return currentElement?.msgState === 1 && currentElement?.sendMspID === msp ||
-            currentElement?.msgState === 2 && currentElement?.receiveMspID === msp;
+        if (type === "event") return currentElement?.EventState === 1;
+        if (type === "gateway") return currentElement?.GatewayState === 1;
+        if (type === "message") return currentElement?.MsgState === 1 ||
+            // currentElement?.sendMspID === msp ||
+            currentElement?.MsgState === 2
+        // currentElement?.receiveMspID === msp;
     })()
+    // debugger
     const showTransactionId = (() => {
         if (type === "message") return currentElement?.msgState === 2 && currentElement?.receiveMspID === msp;
         return false;
@@ -453,8 +461,9 @@ const ControlPanel = ({
     const onHandleEvent = () => {
         invokeEventAction(coreURL,
             contractName
-            , currentElement.eventID);
+            , currentElement.EventID, instanceId);
     }
+    // debugger
 
     if (type === "event")
         return (
@@ -485,7 +494,9 @@ const ControlPanel = ({
                             // observer.observe({ entryTypes: ["resource"] });
                             await invokeEventAction(coreURL,
                                 contractName
-                                , currentElement.eventID);
+                                , currentElement.EventID,
+                                instanceId
+                            );
                             await sleep(300);
                             // observer.disconnect();
                             return { ...theRes }
@@ -499,7 +510,9 @@ const ControlPanel = ({
     const onHandleGateway = () => {
         invokeGatewayAction(coreURL,
             contractName
-            , currentElement.gatewayID);
+            , currentElement.GatewayID,
+            instanceId
+        );
     }
 
 
@@ -534,7 +547,8 @@ const ControlPanel = ({
                         // observer.observe({ entryTypes: ["resource"] });
                         await invokeGatewayAction(coreURL,
                             contractName
-                            , currentElement.gatewayID);
+                            , currentElement.GatewayID,
+                            instanceId);
                         await sleep(300);
                         // observer.disconnect();
                         return { ...theRes }
@@ -549,7 +563,7 @@ const ControlPanel = ({
     if (type === "message")
         return (
             <div>
-                {showTransactionId ? <div>Transaction ID: {currentElement.fireflyTranID}</div> : null}
+                {showTransactionId ? <div>Transaction ID: {currentElement.FireflyTranID}</div> : null}
                 <InputComponentForMessage
                     currentElement={currentElement}
                     contractName={contractName}
@@ -559,37 +573,157 @@ const ControlPanel = ({
                     contractMethodDes={contractMethodDes}
                     bpmn={bpmn}
                     bpmnInstance={bpmnInstance}
+                    instanceId={instanceId}
+                    the_identity={identity}
                 />
             </div>
 
         );
 }
 
+import { RootStateType } from '@/redux/store.ts'
+import { useAvailableIdentity } from "./hook.ts"
+
+const IdentitySelector = ({
+    identity,
+    setIdentity
+}) => {
+
+    // 1. get all membership and participant based on user identity
+    const [currentMembership, setCurrentMembership] = useState("");
+    const [availableIdentities, isLoading, refetch] = useAvailableIdentity();
+    const identities_example = [
+        {
+            memebership_id: "123",
+            "membership_name": "123",
+            "identities": [
+                {
+                    core_url: "127.0.0.1:5001",
+                    firefly_identity_id: "dfc4",
+                    identity_id: "6e",
+                    "name": "name"
+                }
+            ]
+        }
+    ]
+    // console.log(availableIdentities)
+    // console.log(currentMembership)
+
+    if (isLoading || !availableIdentities) {
+        return <div>Loading</div>
+    }
+
+    // console.log(availableIdentities.find((item) => item.membership_id === currentMembership))
+
+
+    return (
+        <div>
+            <div>Select Your Identity</div>
+            <Button onClick={() => refetch()}>DDD</Button>
+            <Select
+                key="membership"
+                onChange={
+                    (value) => {
+                        setCurrentMembership(value);
+                    }
+                }
+                value={
+                    currentMembership
+                }
+                style={{ width: 200 }}
+            >
+                {
+                    availableIdentities.map(
+                        (item) => {
+                            return <Select.Option
+                                key={item.membership_id}
+                                value={item.memebership_id}>{item.membership_name}</Select.Option>
+                        }
+                    )
+                }
+            </Select>
+            <Select
+                key="identity"
+                style={{ width: 200 }}
+                value={identity.idInFirefly}
+                onChange={
+                    async (value) => {
+                        const the_one = availableIdentities.find((item) => item.membership_id === currentMembership)?.identities.find((item) => item.firefly_identity_id === value)
+                        const identity = await getFireflyIdentity("http://" + the_one.core_url, value)
+
+                        setIdentity(
+                            {
+                                name: the_one.name,
+                                membership: currentMembership,
+                                idInFirefly: value,
+                                core_url: the_one.core_url,
+                                identity: identity,
+                                msp: the_one.firefly_msp
+                            }
+                        )
+                    }
+                }
+            >
+                {
+                    availableIdentities.find((item) => item.membership_id === currentMembership)?.identities.map(
+                        (item) => {
+                            return <Select.Option
+                                key={
+                                    item.firefly_identity_id
+                                }
+                                value={item.firefly_identity_id}>{item.name}</Select.Option>
+                        }
+                    )
+                }
+            </Select>
+        </div>
+    )
+
+}
+
+
 import { useAllFireflyData } from './hook'
 import axios from "axios";
-import { includes } from "lodash";
+import { identity } from "lodash";
 
 const ExecutionPage = (props) => {
     const bpmnInstanceId = window.location.pathname.split("/").pop();
-    const location = useLocation();
-    const queryParams = new URLSearchParams(location.search);
-    const coreUrl = 'http://' + queryParams.get("coreUrl");
-    const participant = queryParams.get("participant");
 
+    // 1. get BPMN Content by bpmnInstanceId
+    // 2. get BPMN Detail by bpmnId
+    // 3. get all available Membership and it's identity to choose
+
+    const [identity, setIdentity] = useState(
+        {
+            name: "",
+            membership: "",
+            idInFirefly: "",
+            core_url: "",
+            identity: ""
+        }
+    )
+
+    console.log(bpmnInstanceId)
     const [bpmnInstance, bpmnInstanceReady, syncBpmnInstance] = useBPMNIntanceDetailData(bpmnInstanceId);
+
+    console.log(bpmnInstance)
+    console.log(bpmnInstanceReady)
 
     const [bpmnData, bpmnReady, syncBpmn] = useBPMNDetailData(bpmnInstance.bpmn);
 
-    const getParticipantName = (participant) => {
-        if (!bpmnReady) return "";
-        const mapping = JSON.parse(bpmnReady ? bpmnData.participants : "[]");
-        return mapping.find((item) => {
-            return item.id === participant
-        }
-        ).name;
-    }
+    console.log(bpmnData)
+    console.log(bpmnReady)
 
-    const contractMethodDes = JSON.parse(bpmnInstanceReady ? bpmnInstance.ffiContent : "{ }");
+    // const getParticipantName = (participant) => {
+    //     if (!bpmnReady) return "";
+    //     const mapping = JSON.parse(bpmnReady ? bpmnData.participants : "[]");
+    //     return mapping.find((item) => {
+    //         return item.id === participant
+    //     }
+    //     ).name;
+    // }
+
+    const contractMethodDes = JSON.parse(bpmnReady ? bpmnData.ffiContent : "{ }");
 
     const svgRef = useRef(null);
     const [svgContent, setSvgContent] = useState(null);
@@ -605,9 +739,9 @@ const ExecutionPage = (props) => {
         }
     }, [bpmnInstanceId, svgRef.current, bpmnReady])
 
-    const [instance, instanceReady, syncInstance] = useBPMNIntanceDetailData(bpmnInstanceId);
-    const contractName = instanceReady ? instance.chaincode_name + instance.chaincode_id.substring(0, 6) : "";
-    const [allEvents, allGateways, allMessages, fireflyDataReady, syncFireflyData] = useAllFireflyData(coreUrl, contractName);
+    const contractName = bpmnReady ? bpmnData.chaincode.name + "-" + bpmnData.chaincode.id.substring(0, 6) : "";
+    const full_core_url = "http://" + identity.core_url
+    const [allEvents, allGateways, allMessages, fireflyDataReady, syncFireflyData] = useAllFireflyData(full_core_url, contractName, bpmnInstance.instance_chaincode_id);
 
     const currentElements = [...allMessages, ...allEvents, ...allGateways].filter((msg) => {
         return msg.state === 1 || msg.state === 2;
@@ -644,9 +778,9 @@ const ExecutionPage = (props) => {
                 if (msg.color === "unColored" && msg.color === "") return;
 
                 const selector = (() => {
-                    if (msg.type === "event") return `& g[data-element-id="${msg.eventID}"]`
-                    if (msg.type === "gateway") return `& g[data-element-id="${msg.gatewayID}"]`
-                    if (msg.type === "message") return `& g[data-element-id="${msg.messageID}"]`
+                    if (msg.type === "event") return `& g[data-element-id="${msg.EventID}"]`
+                    if (msg.type === "gateway") return `& g[data-element-id="${msg.GatewayID}"]`
+                    if (msg.type === "message") return `& g[data-element-id="${msg.MessageID}"]`
                 })()
                 styles["& svg"][selector] = {
                     "& path": {
@@ -684,27 +818,38 @@ const ExecutionPage = (props) => {
     //     }
     // }
     //     , []);
+    console.log("SADSD")
+    console.log(currentElements)
+
+
 
     return (
         <div className="Execution">
+            <IdentitySelector
+                identity={identity}
+                setIdentity={setIdentity}
+            />
 
             <div
                 dangerouslySetInnerHTML={{ __html: svgContent }}
                 ref={svgRef}
                 className={css(svgStyle)}
             />
-            <Tag color="blue">Participant: {" " + getParticipantName(participant)}</Tag>
+
+            {/* <Tag color="blue">Participant: {" " + getParticipantName(participant)}</Tag> */}
 
             <div style={{ display: "flex", marginTop: "20px" }}>
                 {
                     currentElements.map((currentElement) => {
                         return <ControlPanel currentElement={currentElement}
                             contractName={contractName}
-                            coreURL={coreUrl}
+                            coreURL={full_core_url}
                             bpmnName={bpmnData.name}
                             contractMethodDes={contractMethodDes}
                             bpmn={bpmnData}
                             bpmnInstance={bpmnInstance}
+                            instanceId={bpmnInstance.instance_chaincode_id}
+                            identity={identity}
                         />
                     }
                     )

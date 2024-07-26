@@ -1120,6 +1120,17 @@ class GoChaincodeTranslator:
         )
         ffi_items.append(
             self._generate_ffi_item(
+                name="GetAllActionEvents",
+                pathname="",
+                description="Get all action events",
+                params=[
+                    self._instance_id_param(),
+                ]
+            )
+        )
+
+        ffi_items.append(
+            self._generate_ffi_item(
                 name="UpdateCID",
                 pathname="",
                 description="Update the businessRule CID",

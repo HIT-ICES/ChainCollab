@@ -118,7 +118,7 @@ import {
 } from '@/api/executionAPI'
 
 export const useAllFireflyData = (
-    coreUrl: string, contractName: string,
+    coreUrl: string, contractName: string, bpmnInstanceId: string
 ): [
         any[],
         any[],
@@ -137,16 +137,16 @@ export const useAllFireflyData = (
         const fetchData = async () => {
             setReady(false);
             if (!coreUrl || !contractName) return;
-            const events = await getAllEvents(coreUrl, contractName);
-            const gateways = await getAllGateways(coreUrl, contractName);
-            const messages = await getAllMessages(coreUrl, contractName);
+            const events = await getAllEvents(coreUrl, contractName, bpmnInstanceId);
+            const gateways = await getAllGateways(coreUrl, contractName, bpmnInstanceId);
+            const messages = await getAllMessages(coreUrl, contractName, bpmnInstanceId);
             if (ignore) return
             if (events) {
                 setEvents(events.map((item: any) => {
                     return {
                         ...item,
                         type: "event",
-                        state: item.eventState
+                        state: item.EventState
                     }
                 }));
             }
@@ -156,7 +156,7 @@ export const useAllFireflyData = (
                         return {
                             ...item,
                             type: "gateway",
-                            state: item.gatewayState
+                            state: item.GatewayState
                         }
                     }
                 ));
@@ -167,7 +167,7 @@ export const useAllFireflyData = (
                         return {
                             ...item,
                             type: "message",
-                            state: item.msgState
+                            state: item.MsgState
                         }
                     }
 
@@ -178,5 +178,27 @@ export const useAllFireflyData = (
         fetchData();
         return () => { ignore = true; }
     }, [syncFlag, coreUrl, contractName]);
-    return [events, gateways, messages, ready, () => { setSyncFlag(syncFlag=>!syncFlag)}];
+    return [events, gateways, messages, ready, () => { setSyncFlag(syncFlag => !syncFlag) }];
+}
+
+import { useQuery } from 'react-query'
+import { getFireflyIdentity } from "@/api/platformAPI"
+import axios from 'axios';
+
+export const useAvailableIdentity = () => {
+    const currenOrgId = useAppSelector((state) => state.org.currentOrgId)
+    const currenEnvId = useAppSelector((state) => state.env.currentEnvId)
+    const { data, isLoading, isError, isSuccess, refetch } = useQuery(['availableIdentity', currenOrgId, currenEnvId], async () => {
+        const res = await getFireflyIdentity(currenEnvId, currenOrgId)
+        return res.data
+    })
+    return [data, isLoading, refetch]
+}
+
+export const useFireflyIdentity = (coreUrl:string, idInFirefly:string) =>{
+    const {data, isLoading} = useQuery([' fireflyIdentity', idInFirefly], async () => {
+        const res = await axios.get(`${coreUrl}/api/v1/identities/${idInFirefly}/verifiers`)
+        return res.data
+    })
+    return [data, isLoading]
 }

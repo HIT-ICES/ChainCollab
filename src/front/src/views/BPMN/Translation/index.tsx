@@ -26,9 +26,11 @@ import { useBPMNInstanceListData } from './hooks.ts';
 
 const ExpandedRowRender = ({ record }) => {
 
+  const navigate = useNavigate()
+
   const onClickExecute = (record: expendDataType) => {
-    // navigate(`/bpmn/translation/${record.id}`);
-    console.log("click execute", record);
+    navigate(`/bpmn/execution/${record.id}`);
+    // console.log("click execute", record);
   }
 
   const [data, syncData] = useBPMNInstanceListData(record.id);
@@ -56,6 +58,7 @@ const ExpandedRowRender = ({ record }) => {
             <Button
               type="primary"
               onClick={() => {
+                // Jump To Execution Page with param in url
                 onClickExecute(record);
               }}
             >
