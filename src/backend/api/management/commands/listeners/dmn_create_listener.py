@@ -94,9 +94,7 @@ class InstanceCreatedAction:
     def create_db_instance(self, instance_id):
         print(f"Creating DB instance with instance_id: {instance_id}")
         url = f"http://{CURRENT_IP}:8000/api/v1/bpmns/{self.bpmn_id}/bpmn-instances"
-        request_body = {
-            "instance_chaincode_id": instance_id,
-        }
+        request_body = {"instance_chaincode_id": instance_id, "name": instance_id}
         json_data = json.dumps(request_body)
         headers = {
             "Content-Type": "application/json",
