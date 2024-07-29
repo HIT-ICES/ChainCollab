@@ -141,9 +141,9 @@ const DmnModal = ({ dataElementId, xmlData, open: isModalOpen, onClose, onSave }
             onClose && onClose(true);
             clean()
             // Clear the inputs and outputs
-            
+
         } else {
-            const {xml,svg} = await DmnDrawerRef.current?.getXmlAndSvg();
+            const { xml, svg } = await DmnDrawerRef.current?.getXmlAndSvg();
             onSave(dataElementId, { "dmnContent": xml, "name": name, "svgContent": svg });
             onClose && onClose(true);
         }
@@ -165,9 +165,11 @@ const DmnModal = ({ dataElementId, xmlData, open: isModalOpen, onClose, onSave }
     const messageList = Object.keys(elementRegistry._elements).map(
         (key) => elementRegistry._elements[key]
     ).filter((element) => element.element.type === 'bpmn:Message').map((element) => {
-        const doc = element.element.businessObject.documentation[0]
+        debugger;
+        const documentation = element.element.businessObject.documentation;
         let fields = []
-        if (doc) {
+        if (documentation) {
+            const doc = element.element.businessObject.documentation[0]
             const content = JSON.parse(doc.text).properties
             // {\"input1\":{\"type\":\"string\",\"description\":\"123\"}
             fields = Object.keys(content).map((key) => {
@@ -191,10 +193,10 @@ const DmnModal = ({ dataElementId, xmlData, open: isModalOpen, onClose, onSave }
 
 
     useEffect(() => {
-        if (isModalOpen===false) return
+        if (isModalOpen === false) return
         const doc = shape.businessObject.documentation[0];
         if (doc) {
-            const content = JSON.parse(doc.text);            
+            const content = JSON.parse(doc.text);
             if (content.inputs) {
                 setInputs(content.inputs);
             }
