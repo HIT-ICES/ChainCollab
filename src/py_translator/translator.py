@@ -43,8 +43,18 @@ def bool_handle(origin: bool) -> str:
     return "true" if origin else "false"
 
 
+default_config = {
+    "NeedConfirm": False,
+    "NeedIdentityAuth": True,
+    "NeedStateCheck": True,
+}
+
+
 class GoChaincodeTranslator:
-    def __init__(self, bpmnContent: str, bpmn_file: str = None):
+    def __init__(
+        self, bpmnContent: str, bpmn_file: str = None, config: dict = default_config
+    ):
+        self._config = config
         self._choreography: Optional[Choreography] = None
         self._global_variabels: Optional[dict] = None
         self._judge_parameters: Optional[dict] = None
@@ -481,20 +491,24 @@ class GoChaincodeTranslator:
             else ""
         )
         # generate put state code
-        put_more_params_code = "\n".join(
-            [
-                snippet.SetGlobalVariable_code(
-                    "\n".join(
-                        [
-                            snippet.SetGlobalVaribaleItem_code(
-                                name=public_the_name(param[0]),
-                                value=public_the_name(param[0]),
-                            )
-                            for param in params_to_add
-                        ]
+        put_more_params_code = (
+            "\n".join(
+                [
+                    snippet.SetGlobalVariable_code(
+                        "\n".join(
+                            [
+                                snippet.SetGlobalVaribaleItem_code(
+                                    name=public_the_name(param[0]),
+                                    value=public_the_name(param[0]),
+                                )
+                                for param in params_to_add
+                            ]
+                        )
                     )
-                )
-            ]
+                ]
+            )
+            if params_to_add
+            else ""
         )
         return more_params_code, put_more_params_code
 
@@ -532,6 +546,57 @@ class GoChaincodeTranslator:
         self,
         choreography_task: ChoreographyTask,
     ):
+
+        def generate_chaincode_for_choreography_message(
+            message_id,
+            more_params_code,
+            put_more_params_code,
+            next_element,
+            pre_activate_next_hook,
+            when_triggered_code,
+            need_confirm=True,
+        ):
+            temp_list = []
+            if need_confirm == False:
+                temp_list.append(
+                    snippet.MessageSend_code(
+                        message=message_id,
+                        after_all_hook="\n\t".join(when_triggered_code)
+                        + "\n\t"
+                        + "\n\t".join(pre_activate_next_hook)
+                        + "\n\t"
+                        + self._generate_change_state_code(next_element),
+                        more_parameters=more_params_code,
+                        put_more_parameters=put_more_params_code,
+                        change_self_state=self._generate_change_state_code(
+                            self._choreography.get_element_with_id(message_id),
+                            "COMPLETED",
+                        ),
+                    )
+                )
+                return temp_list
+            temp_list.append(
+                snippet.MessageSend_code(
+                    message=message_id,
+                    after_all_hook="\n\t".join(when_triggered_code),
+                    more_parameters=more_params_code,
+                    put_more_parameters=put_more_params_code,
+                    change_self_state=self._generate_change_state_code(
+                        self._choreography.get_element_with_id(message_id), "WAITINGFORCONFIRMATION"
+                    ),
+                )
+            )
+            temp_list.append(
+                snippet.MessageComplete_code(
+                    message=message_id,
+                    change_next_state_code=self._generate_change_state_code(
+                        next_element
+                    ),
+                    pre_activate_next_hook="\n\t".join(pre_activate_next_hook),
+                )
+            )
+            return temp_list
+
         temp_list = []
         next_element = choreography_task.outgoing.target
         init_message_flow = choreography_task.init_message_flow
@@ -545,69 +610,52 @@ class GoChaincodeTranslator:
         if not init_message_flow:
             return temp_list
 
+        more_parameters, put_more_parameters = (
+            self._generate_message_record_parameters_code(init_message_flow.message)
+        )
+
         if not return_message_flow:
-            more_parameters, put_more_parameters = (
-                self._generate_message_record_parameters_code(init_message_flow.message)
-            )
-            # find parameters
-            temp_list.append(
-                # To Modify, may be need more parameters than default
-                snippet.MessageSend_code(
-                    message=init_message_flow.message.id,
-                    after_all_hook="\n".join(when_triggered_code),
-                    more_parameters=more_parameters,
-                    put_more_parameters=put_more_parameters,
-                )
-            )
-            temp_list.append(
-                snippet.MessageComplete_code(
-                    message=init_message_flow.message.id,
-                    change_next_state_code=self._generate_change_state_code(
-                        return_message_flow.message
-                        if return_message_flow
-                        else next_element
-                    ),
-                    pre_activate_next_hook="\n\t".join(pre_activate_next_hook),
+            temp_list.extend(
+                generate_chaincode_for_choreography_message(
+                    message_id=init_message_flow.message.id,
+                    more_params_code=more_parameters,
+                    put_more_params_code=put_more_parameters,
+                    next_element=next_element,
+                    pre_activate_next_hook=pre_activate_next_hook,
+                    when_triggered_code=when_triggered_code,
+                    need_confirm=self._config["NeedConfirm"],
                 )
             )
             return temp_list
 
-        more_parameters, put_more_parameters = (
-            self._generate_message_record_parameters_code(init_message_flow.message)
-        )
-        temp_list.append(
-            snippet.MessageSend_code(
-                message=init_message_flow.message.id,
-                after_all_hook="\n\t".join(when_triggered_code),
-                more_parameters=more_parameters,
-                put_more_parameters=put_more_parameters,
+        temp_list.extend(
+            generate_chaincode_for_choreography_message(
+                message_id=init_message_flow.message.id,
+                more_params_code=more_parameters,
+                put_more_params_code=put_more_parameters,
+                next_element=return_message_flow.message,
+                pre_activate_next_hook="",
+                when_triggered_code=when_triggered_code,
+                need_confirm=self._config["NeedConfirm"],
             )
         )
-        temp_list.append(
-            snippet.MessageComplete_code(
-                message=init_message_flow.message.id,
-                change_next_state_code=self._generate_change_state_code(
-                    return_message_flow.message if return_message_flow else next_element
-                ),
-            )
-        )
+
         more_parameters, put_more_parameters = (
             self._generate_message_record_parameters_code(return_message_flow.message)
         )
-        temp_list.append(
-            snippet.MessageSend_code(
-                message=return_message_flow.message.id,
-                more_parameters=more_parameters,
-                put_more_parameters=put_more_parameters,
+
+        temp_list.extend(
+            generate_chaincode_for_choreography_message(
+                message_id=return_message_flow.message.id,
+                more_params_code=more_parameters,
+                put_more_params_code=put_more_parameters,
+                next_element=next_element,
+                pre_activate_next_hook=pre_activate_next_hook,
+                when_triggered_code=when_triggered_code,
+                need_confirm=self._config["NeedConfirm"],
             )
         )
-        temp_list.append(
-            snippet.MessageComplete_code(
-                message=return_message_flow.message.id,
-                change_next_state_code=self._generate_change_state_code(next_element),
-                pre_activate_next_hook="\n\t".join(pre_activate_next_hook),
-            )
-        )
+
         return temp_list
 
     def _generate_fullfill_condition_code(self, sequence_flow: SequenceFlow):
