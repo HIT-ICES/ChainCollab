@@ -146,12 +146,14 @@ def MessageSend_code(
     after_all_hook: str = "",
     more_parameters: str = "",
     put_more_parameters: str = "",
+    change_self_state: str = ""
 ):
     return content["MessageSendFuncFrame"].format(
         message=message,
         after_all_hook=after_all_hook,
         more_parameters=more_parameters,
         put_more_parameters=put_more_parameters,
+        change_self_state=change_self_state
     )
 
 
