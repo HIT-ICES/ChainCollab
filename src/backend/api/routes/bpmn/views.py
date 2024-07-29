@@ -198,7 +198,7 @@ class BPMNViewsSet(viewsets.ModelViewSet):
 
 class BPMNInstanceViewSet(viewsets.ModelViewSet):
 
-    def create( self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):
         """
         创建Bpmn实例
         """
@@ -206,9 +206,9 @@ class BPMNInstanceViewSet(viewsets.ModelViewSet):
             bpmn_id = request.parser_context["kwargs"].get("bpmn_id")
             bpmn = BPMN.objects.get(pk=bpmn_id)
             instance_chaincode_id = request.data.get("instance_chaincode_id")
+            name = request.data.get("name")
             bpmn_instance = BPMNInstance.objects.create(
-                bpmn=bpmn,
-                instance_chaincode_id=instance_chaincode_id
+                bpmn=bpmn, instance_chaincode_id=instance_chaincode_id, name=name
             )
             bpmn_instance.save()
             serializer = BpmnInstanceSerializer(bpmn_instance)
