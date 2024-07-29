@@ -165,7 +165,6 @@ const DmnModal = ({ dataElementId, xmlData, open: isModalOpen, onClose, onSave }
     const messageList = Object.keys(elementRegistry._elements).map(
         (key) => elementRegistry._elements[key]
     ).filter((element) => element.element.type === 'bpmn:Message').map((element) => {
-        debugger;
         const documentation = element.element.businessObject.documentation;
         let fields = []
         if (documentation) {
