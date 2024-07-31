@@ -22,13 +22,14 @@ export default function MainPage({ xmlDataMap, onSave }) {
       setDataElementType(type);
       setModalOpen(true);
     }
+    $(document).on('dblclick', '.djs-element.djs-shape', handleDoubleClick);
 
-    if (!modalOpen) {
-      $(document).on('dblclick', '.djs-element.djs-shape', handleDoubleClick);
-    } else {
-      $(document).off('dblclick', '.djs-element.djs-shape', handleDoubleClick);
-
-    } return () => $(document).off('dblclick', '.djs-element.djs-shape', handleDoubleClick);
+    // if (!modalOpen) {
+    //   $(document).on('dblclick', '.djs-element.djs-shape', handleDoubleClick);
+    // } else {
+    //   $(document).off('dblclick', '.djs-element.djs-shape', handleDoubleClick);
+    // }
+    return () => $(document).off('dblclick', '.djs-element.djs-shape', handleDoubleClick);
   }, [modalOpen]);
 
   return (
