@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" id="definitions_1olsuce" name="definitions" namespace="http://camunda.org/schema/1.0/dmn" exporter="dmn-js (https://demo.bpmn.io/dmn)" exporterVersion="16.4.0">
+  <decision id="decision_0tybghz" name="">
+    <decisionTable id="decisionTable_1v3tii8">
+      <input id="input1" label="CancelAmount">
+        <inputExpression id="inputExpression1" typeRef="number">
+          <text>CancelAmount</text>
+        </inputExpression>
+      </input>
+      <output id="output1" label="CancelFee" name="CancelFee" typeRef="boolean" />
+      <rule id="DecisionRule_1cnxcyn">
+        <inputEntry id="UnaryTests_111j4z2">
+          <text>&lt;3</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_02lpi7u">
+          <text>true</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0ekg6tt">
+        <inputEntry id="UnaryTests_00r0voj">
+          <text>&gt;=3</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_13dssz2">
+          <text>false</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

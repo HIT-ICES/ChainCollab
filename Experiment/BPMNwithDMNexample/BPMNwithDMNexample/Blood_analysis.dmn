@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/2.0" id="definitions_1olsuce" name="definitions" namespace="http://camunda.org/schema/1.0/dmn" exporter="dmn-js (https://demo.bpmn.io/dmn)" exporterVersion="16.4.0">
+  <decision id="decision_0tybghz" name="">
+    <decisionTable id="decisionTable_1v3tii8">
+      <input id="input1" label="result">
+        <inputExpression id="inputExpression1" typeRef="string">
+          <text>result</text>
+        </inputExpression>
+      </input>
+      <output id="output1" label="FurtherCheck" name="FurtherCheck" typeRef="boolean" biodi:width="192" />
+      <rule id="DecisionRule_12ud8g3">
+        <inputEntry id="UnaryTests_1m2j1vk">
+          <text>"healthy"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1kynia0">
+          <text>false</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1crblss">
+        <inputEntry id="UnaryTests_0fq1t5q">
+          <text>"ill"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0o6wt1c">
+          <text>true</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0xxkxsz">
+        <inputEntry id="UnaryTests_1lbv57k">
+          <text>"uncertain"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1az0uw1">
+          <text>true</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>
