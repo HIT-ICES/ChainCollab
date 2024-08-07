@@ -1,6 +1,6 @@
 export WorkDir=$(pwd)
 alias clean='cd $WorkDir &&sudo ./clean.sh'
-export MODE="server"  # 或者设置为 'server'
+export MODE="local"  # 或者设置为 'server'
 
 if [  "$MODE" = "local" ]; then
     alias start_front='cd $WorkDir/front && npm run dev'
