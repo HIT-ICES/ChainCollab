@@ -63,5 +63,4 @@ docker volume prune -f
 # Remove Firefly
 
 echo "Remove Firefly"
-ff remove cello_env
-rm -rf /home/logres/.firefly/stacks/cello_*
+sudo -u $SUDO_USER ff list | grep 'cello_' | xargs -I{} sh -c "echo 'y' | ff remove {}"

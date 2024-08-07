@@ -582,7 +582,8 @@ class GoChaincodeTranslator:
                     more_parameters=more_params_code,
                     put_more_parameters=put_more_params_code,
                     change_self_state=self._generate_change_state_code(
-                        self._choreography.get_element_with_id(message_id), "WAITINGFORCONFIRMATION"
+                        self._choreography.get_element_with_id(message_id),
+                        "WAITINGFORCONFIRMATION",
                     ),
                 )
             )
@@ -852,8 +853,7 @@ class GoChaincodeTranslator:
         return temp_list
 
     def generate_chaincode(
-        self,
-        output_path: str = "resource/chaincode.go",
+        self, output_path: str = "resource/chaincode.go", is_output: bool = False
     ):
         ############
         # Init: Set general state
@@ -956,9 +956,9 @@ class GoChaincodeTranslator:
                 )
 
         # OutPut the chaincode
-
-        with open(output_path, "w") as f:
-            f.write("\n\n".join(chaincode_list))
+        if is_output:
+            with open(output_path, "w") as f:
+                f.write("\n\n".join(chaincode_list))
         return "\n\n".join(chaincode_list)
 
     def _fireflytran_ffi_param(self):
@@ -1107,7 +1107,9 @@ class GoChaincodeTranslator:
     def _generate_ffi_events(self) -> list:
         return [{"name": "DMNContentRequired"}, {"name": "InstanceCreated"}]
 
-    def generate_ffi(self) -> str:
+    def generate_ffi(
+        self, is_output: bool = False, output_path: str = "resource/ffi.json"
+    ) -> str:
         ffi_items = []
 
         # Init
@@ -1237,8 +1239,9 @@ class GoChaincodeTranslator:
             frame = json.load(f)
         frame["methods"].extend(ffi_items)
         frame["events"].extend(ffi_events)
-        with open("resource/ffi.json", "w") as f:
-            json.dump(frame, f)
+        if is_output:
+            with open(output_path, "w") as f:
+                json.dump(frame, f)
         return json.dumps(frame)
 
     def get_participants(self):
@@ -1276,5 +1279,5 @@ if __name__ == "__main__":
         None,
         bpmn_file="/home/logres/system/src/py_translator/resource/bpmn/bpmn.bpmn",
     )
-    go_chaincode_translator.generate_chaincode()
-    go_chaincode_translator.generate_ffi()
+    go_chaincode_translator.generate_chaincode(is_output=True)
+    go_chaincode_translator.generate_ffi(is_output=True)

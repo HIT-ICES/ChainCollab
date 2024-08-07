@@ -100,9 +100,9 @@ class InstanceCreatedAction:
             "Content-Type": "application/json",
         }
         response = requests.post(url, data=json_data, headers=headers)
-        # print(response.text)
-        with open("instance_create_response.json", "w") as f:
-            f.write(response.text)
+        print(response.text)
+        # with open("instance_create_response.json", "w") as f:
+        #     f.write(response.text)
 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ from api.models import (
     FabricResourceSet,
     LoleidoOrganization,
 )
-from api.config import DEFAULT_AGENT, DEFAULT_CHANNEL_NAME, FABRIC_CONFIG,CURRENT_IP
+from api.config import DEFAULT_AGENT, DEFAULT_CHANNEL_NAME, FABRIC_CONFIG, CURRENT_IP
 from api.utils.test_time import timeitwithname
 
 
@@ -525,10 +525,10 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
             headers={"Authorization": headers["Authorization"]},
         )
 
-        # post(
-        #     f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/fireflys/start",
-        #     headers={"Authorization": headers["Authorization"]},
-        # )
+        post(
+            f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/fireflys/start",
+            headers={"Authorization": headers["Authorization"]},
+        )
 
         env.status = "FIREFLY"
         env.save()

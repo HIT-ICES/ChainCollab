@@ -112,111 +112,112 @@ class ChainCodeViewSet(viewsets.ViewSet):
     @action(detail=False, methods=["post"])
     def package(self, request, *args, **kwargs):
         serializer = ChainCodePackageBody(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            name = serializer.validated_data.get("name")
-            version = serializer.validated_data.get("version")
-            language = serializer.validated_data.get("language")
-            file = serializer.validated_data.get("file")
-            env_id = request.parser_context["kwargs"].get("environment_id")
-            env = Environment.objects.get(id=env_id)
-            env_resource_set = (
-                env.resource_sets.all().filter(sub_resource_set__org_type=0).first()
+        if not serializer.is_valid(raise_exception=True):
+            return Response(err(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
+        name = serializer.validated_data.get("name")
+        version = serializer.validated_data.get("version")
+        language = serializer.validated_data.get("language")
+        file = serializer.validated_data.get("file")
+        env_id = request.parser_context["kwargs"].get("environment_id")
+        env = Environment.objects.get(id=env_id)
+        env_resource_set = (
+            env.resource_sets.all().filter(sub_resource_set__org_type=0).first()
+        )
+        org_id = serializer.validated_data.get("org_id")
+
+        id = make_uuid()
+
+        try:
+            file_path = os.path.join(FABRIC_CHAINCODE_STORE, id)
+            if not os.path.exists(file_path):
+                os.makedirs(file_path)
+            fileziped = os.path.join(file_path, file.name)
+            with open(fileziped, "wb") as f:
+                for chunk in file.chunks():
+                    f.write(chunk)
+                f.close()
+            zipped_file = zipfile.ZipFile(fileziped)
+            for filename in zipped_file.namelist():
+                zipped_file.extract(filename, file_path)
+
+            match language:
+                case "golang":
+                    # When there is go.mod in the chain code, execute the go mod vendor command to obtain dependencies.
+                    chaincode_path = file_path
+                    found = False
+                    for _, dirs, _ in os.walk(file_path):
+                        if found:
+                            break
+                        elif dirs:
+                            for each in dirs:
+                                chaincode_path += "/" + each
+                                if os.path.exists(chaincode_path + "/go.mod"):
+                                    cwd = os.getcwd()
+                                    print("cwd:", cwd)
+                                    os.chdir(chaincode_path)
+                                    os.system("go mod vendor")
+                                    found = True
+                                    os.chdir(cwd)
+                                    break
+                    # if can not find go.mod, use the dir after extract zipped_file
+                    if not found:
+                        for _, dirs, _ in os.walk(file_path):
+                            chaincode_path = file_path + "/" + dirs[0]
+                            break
+                case "java":
+                    chaincode_path = file_path
+                    found = False
+                    for _, dirs, _ in os.walk(file_path):
+                        if found:
+                            break
+                        elif dirs:
+                            for each in dirs:
+                                chaincode_path += "/" + each
+                                if os.path.exists(chaincode_path + "/build.gradle"):
+                                    cwd = os.getcwd()
+                                    print("cwd:", cwd)
+                                    os.chdir(chaincode_path)
+                                    # os.system("gradle build")
+                                    found = True
+                                    os.chdir(cwd)
+                                    break
+
+            # find a resource_set.sub_resource_set in env
+            # fabric_resource_set = request.user.organization
+            fabric_resource_set = env_resource_set.sub_resource_set.get()
+            qs = Node.objects.filter(
+                type="peer", fabric_resource_set=fabric_resource_set
             )
-            org_id = serializer.validated_data.get("org_id")
-
-            id = make_uuid()
-
-            try:
-                file_path = os.path.join(FABRIC_CHAINCODE_STORE, id)
-                if not os.path.exists(file_path):
-                    os.makedirs(file_path)
-                fileziped = os.path.join(file_path, file.name)
-                with open(fileziped, "wb") as f:
-                    for chunk in file.chunks():
-                        f.write(chunk)
-                    f.close()
-                zipped_file = zipfile.ZipFile(fileziped)
-                for filename in zipped_file.namelist():
-                    zipped_file.extract(filename, file_path)
-
-                match language:
-                    case "golang":
-                        # When there is go.mod in the chain code, execute the go mod vendor command to obtain dependencies.
-                        chaincode_path = file_path
-                        found = False
-                        for _, dirs, _ in os.walk(file_path):
-                            if found:
-                                break
-                            elif dirs:
-                                for each in dirs:
-                                    chaincode_path += "/" + each
-                                    if os.path.exists(chaincode_path + "/go.mod"):
-                                        cwd = os.getcwd()
-                                        print("cwd:", cwd)
-                                        os.chdir(chaincode_path)
-                                        os.system("go mod vendor")
-                                        found = True
-                                        os.chdir(cwd)
-                                        break
-                        # if can not find go.mod, use the dir after extract zipped_file
-                        if not found:
-                            for _, dirs, _ in os.walk(file_path):
-                                chaincode_path = file_path + "/" + dirs[0]
-                                break
-                    case "java":
-                        chaincode_path = file_path
-                        found = False
-                        for _, dirs, _ in os.walk(file_path):
-                            if found:
-                                break
-                            elif dirs:
-                                for each in dirs:
-                                    chaincode_path += "/" + each
-                                    if os.path.exists(chaincode_path + "/build.gradle"):
-                                        cwd = os.getcwd()
-                                        print("cwd:", cwd)
-                                        os.chdir(chaincode_path)
-                                        # os.system("gradle build")
-                                        found = True
-                                        os.chdir(cwd)
-                                        break
-
-                # find a resource_set.sub_resource_set in env
-                # fabric_resource_set = request.user.organization
-                fabric_resource_set = env_resource_set.sub_resource_set.get()
-                qs = Node.objects.filter(
-                    type="peer", fabric_resource_set=fabric_resource_set
+            if not qs.exists():
+                raise ResourceNotFound
+            peer_node = qs.first()
+            envs = init_env_vars(peer_node, fabric_resource_set)
+            peer_channel_cli = PeerChainCode("v2.2.0", **envs)
+            res = peer_channel_cli.lifecycle_package(
+                name, version, chaincode_path, language
+            )
+            os.system("rm -rf {}/*".format(file_path))
+            os.system("mv {}.tar.gz {}".format(name, file_path))
+            if res != 0:
+                return Response(
+                    err("package chaincode failed."),
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
-                if not qs.exists():
-                    raise ResourceNotFound
-                peer_node = qs.first()
-                envs = init_env_vars(peer_node, fabric_resource_set)
-                peer_channel_cli = PeerChainCode("v2.2.0", **envs)
-                res = peer_channel_cli.lifecycle_package(
-                    name, version, chaincode_path, language
-                )
-                os.system("rm -rf {}/*".format(file_path))
-                os.system("mv {}.tar.gz {}".format(name, file_path))
-                if res != 0:
-                    return Response(
-                        err("package chaincode failed."),
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-                org = LoleidoOrganization.objects.get(id=org_id)
-                chaincode = ChainCode(
-                    id=id,
-                    name=name,
-                    version=version,
-                    language=language,
-                    creator=org,
-                    environment=env,
-                    # md5=md5
-                )
-                chaincode.save()
-            except Exception as e:
-                traceback.print_exc()
-                return Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
-            return Response(ok({"id": id}), status=status.HTTP_200_OK)
+            org = LoleidoOrganization.objects.get(id=org_id)
+            chaincode = ChainCode(
+                id=id,
+                name=name,
+                version=version,
+                language=language,
+                creator=org,
+                environment=env,
+                # md5=md5
+            )
+            chaincode.save()
+        except Exception as e:
+            traceback.print_exc()
+            return Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+        return Response(ok({"id": id}), status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         method="post",

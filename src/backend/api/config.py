@@ -7,7 +7,6 @@ import os
 mode = os.environ.get("MODE", "local")
 
 PWD = os.path.dirname(os.path.abspath(__file__))
-print(PWD)
 BASE_PATH = os.path.dirname(PWD)
 
 CELLO_HOME = os.path.join(BASE_PATH, "opt", "cello")
