@@ -63,4 +63,4 @@ docker volume prune -f
 # Remove Firefly
 
 echo "Remove Firefly"
-sudo -u $SUDO_USER ff list | grep 'cello_' | xargs -I{} sh -c "echo 'y' | ff remove {}"
+sudo -u $SUDO_USER ff list | grep 'cello_' | xargs -I{} sh -c "echo 'y' | sudo -u $SUDO_USER ff remove {}"
