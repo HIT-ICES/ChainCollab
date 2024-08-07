@@ -21,17 +21,12 @@ alias start_database='cd $WorkDir/backend && docker-compose up -d'
 alias prepare_api='cd $WorkDir/backend && source venv/bin/activate && python manage.py makemigrations && python manage.py migrate'
 alias start_api='cd $WorkDir/backend && source venv/bin/activate && python manage.py runserver 0.0.0.0:8000'
 alias start_backend='alias python=python3.10 && start_database &&sleep 2&& prepare_api && start_api'
-
-
-
-
+alias start_translator='cd $WorkDir/py_translator && source venv/bin/activate && python3.10 server.py'
+alias start_oracle='cd $WorkDir/backend && source venv/bin/activate && python3.10 manage.py oracle'
+alias start_debug='cd $WorkDir/backend && source venv/bin/activate && python3.10 manage.py debug 3'
 
 alias export_ER='cd $WorkDir/backend && source venv/bin/activate && python3.10 manage.py graph_models -a -g -o er.png'
 alias export_ER_Dot='cd $WorkDir/backend && source venv/bin/activate && python3.10 manage.py graph_models -a -o er.dot'
-
-alias start_backend='alias python=python3.10 && start_database &&sleep 2&& prepare_api && start_api'
-alias start_translator='cd $WorkDir/py_translator && source venv/bin/activate && python3.10 server.py'
-alias start_oracle='cd $WorkDir/backend && source venv/bin/activate && python3.10 manage.py oracle'
 
 # deprecated 
 

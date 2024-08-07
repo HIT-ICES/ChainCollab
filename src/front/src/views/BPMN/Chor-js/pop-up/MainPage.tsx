@@ -20,15 +20,15 @@ export default function MainPage({ xmlDataMap, onSave }) {
       const type = ids[0];
       setDataElementId(data_element_id);
       setDataElementType(type);
-      setModalOpen(true);
+      if (type === 'Activity' || type === 'Message') {
+        setModalOpen(true);
+      }
     }
-    $(document).on('dblclick', '.djs-element.djs-shape', handleDoubleClick);
-
-    // if (!modalOpen) {
-    //   $(document).on('dblclick', '.djs-element.djs-shape', handleDoubleClick);
-    // } else {
-    //   $(document).off('dblclick', '.djs-element.djs-shape', handleDoubleClick);
-    // }
+    if (!modalOpen) {
+      $(document).on('dblclick', '.djs-element.djs-shape', handleDoubleClick);
+    } else {
+      $(document).off('dblclick', '.djs-element.djs-shape', handleDoubleClick);
+    }
     return () => $(document).off('dblclick', '.djs-element.djs-shape', handleDoubleClick);
   }, [modalOpen]);
 

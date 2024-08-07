@@ -79,49 +79,6 @@ class RegisterViewSet(viewsets.ViewSet):
                 user.set_password(password)
                 user.save()
 
-                from api.utils.test_time import REPORT_COUNT,TEST_MODE_ON
-                if TEST_MODE_ON:
-                # Create Org
-                    new_org = LoleidoOrganization.objects.create(
-                        name="NewOrganization",
-                    )
-                    new_org.members.add(user)
-                    new_org.save()
-                    # create Consortium
-                    new_consortium = Consortium.objects.create(
-                        name="NewConsortium",
-                    )
-                    # new_consortium.orgs.add(new_org)
-                    new_consortium.save()
-                    # Create Two Membership
-                    
-                    # new_membership = Membership.objects.create(
-                    #     name="member1",
-                    #     loleido_organization=new_org,
-                    #     consortium=new_consortium,
-                    # )
-                    # new_membership.save()
-                    # new_membership2 = Membership.objects.create(
-                    #     name="member2",
-                    #     loleido_organization=new_org,
-                    #     consortium=new_consortium,
-                    # )
-                    # new_membership2.save()
-                    
-                    for i in range(REPORT_COUNT):
-                        new_membership = Membership.objects.create(
-                            name="member{}".format(i),
-                            loleido_organization=new_org,
-                            consortium=new_consortium,
-                        )
-                        new_membership.save()
-
-                    new_env = Environment.objects.create(
-                        name="NewEnvironment",
-                        consortium=new_consortium,
-                    )
-                    new_env.save()
-
                 response = RegisterResponse(
                     data={
                         "status": "Success",

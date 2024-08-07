@@ -138,6 +138,7 @@ const DmnModal = ({ dataElementId, xmlData, open: isModalOpen, onClose, onSave }
 
         if (activeTabKey === 'businessRuleTask') {
             defineIOofActivity(shape);
+
             onClose && onClose(true);
             clean()
             // Clear the inputs and outputs
@@ -161,6 +162,7 @@ const DmnModal = ({ dataElementId, xmlData, open: isModalOpen, onClose, onSave }
     const elementRegistry = modeler.get('elementRegistry');
     const commandStack = modeler.get('commandStack');
     const shape = elementRegistry.get(dataElementId);
+    const eventBus = modeler.get('eventBus');
 
     const messageList = Object.keys(elementRegistry._elements).map(
         (key) => elementRegistry._elements[key]
@@ -203,6 +205,10 @@ const DmnModal = ({ dataElementId, xmlData, open: isModalOpen, onClose, onSave }
                 setOutputs(content.outputs);
             }
         }
+        const businessRuleTaskName = shape.businessObject.name;
+        if (businessRuleTaskName) {
+            setName(businessRuleTaskName);
+        }
     }, [isModalOpen]);
 
     const defineIOofActivity = (shape) => {
@@ -219,6 +225,11 @@ const DmnModal = ({ dataElementId, xmlData, open: isModalOpen, onClose, onSave }
                 ]
             }
         });
+        commandStack.execute('element.updateLabel', {
+            element: shape,
+            newLabel: name,
+        });
+        eventBus.fire('element.changed', { element: shape });
     }
 
     const handleInputChange = (index, key, value, type) => {
