@@ -7,10 +7,18 @@
           <text>invoiceType</text>
         </inputExpression>
       </input>
+      <input id="InputClause_02k362l" label="invoice">
+        <inputExpression id="LiteralExpression_1uexm9z" typeRef="boolean">
+          <text>invoice</text>
+        </inputExpression>
+      </input>
       <output id="output1" label="invoiceTypeAvailable" name="invoiceTypeAvailable" typeRef="boolean" biodi:width="192" />
       <rule id="DecisionRule_1oyddrr">
         <inputEntry id="UnaryTests_1wvkvfa">
-          <text>"A"</text>
+          <text>"HIT"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0xgibym">
+          <text>true</text>
         </inputEntry>
         <outputEntry id="LiteralExpression_1esf1bm">
           <text>true</text>
@@ -18,7 +26,10 @@
       </rule>
       <rule id="DecisionRule_0f5g2m7">
         <inputEntry id="UnaryTests_069nkt8">
-          <text>"B"</text>
+          <text>"HITwh"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0m8uhu2">
+          <text>true</text>
         </inputEntry>
         <outputEntry id="LiteralExpression_0cm8blh">
           <text>true</text>
@@ -26,9 +37,23 @@
       </rule>
       <rule id="DecisionRule_0bo63a3">
         <inputEntry id="UnaryTests_1dkdmmv">
-          <text>"other"</text>
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_086c8ll">
+          <text>true</text>
         </inputEntry>
         <outputEntry id="LiteralExpression_0rhhni5">
+          <text>false</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1wdnie7">
+        <inputEntry id="UnaryTests_0t432ic">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0yb6s1z">
+          <text>false</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_14n15xx">
           <text>false</text>
         </outputEntry>
       </rule>

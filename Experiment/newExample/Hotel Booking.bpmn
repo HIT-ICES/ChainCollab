@@ -2,8 +2,8 @@
 <bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xs="http://www.w3.org/2001/XMLSchema" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://www.signavio.com">
   <bpmn2:message id="Message_04ikf2n" />
   <bpmn2:message id="Message_0vlxzcv" />
-  <bpmn2:message id="Message_104h2tt" name="haveMembershipCard">
-    <bpmn2:documentation>{"properties":{"cardId":{"type":"number","description":""}},"required":["cardId"],"files":{},"file required":[]}</bpmn2:documentation>
+  <bpmn2:message id="Message_104h2tt" name="haveVIPCard">
+    <bpmn2:documentation>{"properties":{"VIPpoints":{"type":"number","description":""},"VIPcardId":{"type":"string","description":""}},"required":["VIPpoints","VIPcardId"],"files":{},"file required":[]}</bpmn2:documentation>
   </bpmn2:message>
   <bpmn2:message id="Message_0m9p3da" name="cancel_order(bool cancel)" />
   <bpmn2:message id="Message_1etcmvl" name="payment1(address payable to)" />
@@ -134,8 +134,8 @@
       <bpmn2:messageFlowRef>MessageFlow_1tuimjy</bpmn2:messageFlowRef>
     </bpmn2:choreographyTask>
     <bpmn2:sequenceFlow id="Flow_00urpax" sourceRef="EventBasedGateway_1fxpmyn" targetRef="ChoreographyTask_0yime3t" />
-    <bpmn2:businessRuleTask id="Activity_0b1f7uv">
-      <bpmn2:documentation>{"inputs":[{"name":"cardId","type":"number","description":""}],"outputs":[{"name":"membershipLevel","type":"number","description":""}]}</bpmn2:documentation>
+    <bpmn2:businessRuleTask id="Activity_0b1f7uv" name="">
+      <bpmn2:documentation>{"inputs":[{"name":"VIPpoints","type":"number","description":""}],"outputs":[{"name":"VIPLevel","type":"number","description":""}]}</bpmn2:documentation>
       <bpmn2:incoming>Flow_1byvr2b</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0webz0z</bpmn2:outgoing>
     </bpmn2:businessRuleTask>
@@ -153,7 +153,7 @@
       <bpmn2:participantRef>Participant_1080bkg</bpmn2:participantRef>
       <bpmn2:messageFlowRef>MessageFlow_1lnn8yt</bpmn2:messageFlowRef>
     </bpmn2:choreographyTask>
-    <bpmn2:sequenceFlow id="Flow_0y0y9gl" name="membershipLevel&#60;3" sourceRef="Gateway_1jhfnrm" targetRef="ChoreographyTask_1jk0ir4" />
+    <bpmn2:sequenceFlow id="Flow_0y0y9gl" name="VIPLevel&#60;3" sourceRef="Gateway_1jhfnrm" targetRef="ChoreographyTask_1jk0ir4" />
     <bpmn2:choreographyTask id="ChoreographyTask_0oyz7te" name="New Activity" initiatingParticipantRef="Participant_0sktaei">
       <bpmn2:incoming>Flow_0rr6350</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0df2kqk</bpmn2:outgoing>
@@ -161,7 +161,7 @@
       <bpmn2:participantRef>Participant_1080bkg</bpmn2:participantRef>
       <bpmn2:messageFlowRef>MessageFlow_1sdd689</bpmn2:messageFlowRef>
     </bpmn2:choreographyTask>
-    <bpmn2:sequenceFlow id="Flow_0rr6350" name="membershipLevel==3" sourceRef="Gateway_1jhfnrm" targetRef="ChoreographyTask_0oyz7te" />
+    <bpmn2:sequenceFlow id="Flow_0rr6350" name="VIPLevel==3" sourceRef="Gateway_1jhfnrm" targetRef="ChoreographyTask_0oyz7te" />
     <bpmn2:sequenceFlow id="Flow_1xhwvnb" sourceRef="ChoreographyTask_1jk0ir4" targetRef="ChoreographyTask_177ikw5" />
     <bpmn2:sequenceFlow id="Flow_0df2kqk" sourceRef="ChoreographyTask_0oyz7te" targetRef="ChoreographyTask_177ikw5" />
   </bpmn2:choreography>
@@ -367,7 +367,7 @@
         <di:waypoint x="1350" y="65" />
         <di:waypoint x="1350" y="109" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1258" y="58" width="85" height="27" />
+          <dc:Bounds x="1273" y="58" width="56" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="ChoreographyTask_0oyz7te_di" bpmnElement="ChoreographyTask_0oyz7te">
@@ -384,7 +384,7 @@
         <di:waypoint x="1240" y="250" />
         <di:waypoint x="1399" y="250" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1209" y="226" width="85" height="27" />
+          <dc:Bounds x="1220" y="226" width="63" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1xhwvnb_di" bpmnElement="Flow_1xhwvnb">
