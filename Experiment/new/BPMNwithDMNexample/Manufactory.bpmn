@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xs="http://www.w3.org/2001/XMLSchema" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://bpmn.io/schema/bpmn">
-  <bpmn2:message id="Message_16wcucn" />
+  <bpmn2:message id="Message_18gj1ql" name="pay">
+    <bpmn2:documentation>{"properties":{"payMethod":{"type":"string","description":""}},"required":["payMethod"],"files":{},"file required":[]}</bpmn2:documentation>
+  </bpmn2:message>
+  <bpmn2:message id="Message_16wcucn" name="Payment">
+    <bpmn2:documentation>{"properties":{"Fee":{"type":"number","description":""}},"required":["Fee"],"files":{},"file required":[]}</bpmn2:documentation>
+  </bpmn2:message>
   <bpmn2:message id="Message_0k9tnvh" />
   <bpmn2:message id="Message_1rymt7w" />
   <bpmn2:message id="Message_0473mtp" />
@@ -137,6 +142,7 @@
   <bpmn2:choreography id="Choreography_0tp6sk6" name="Manufactor">
     <bpmn2:participant id="Participant_0ykkst0" name="Customer" />
     <bpmn2:participant id="Participant_1be5jmm" name="Manufacturer" />
+    <bpmn2:messageFlow id="MessageFlow_1ez9i6y" sourceRef="Participant_0ykkst0" targetRef="Participant_1be5jmm" messageRef="Message_18gj1ql" />
     <bpmn2:messageFlow id="MessageFlow_098yc0j" sourceRef="Participant_1be5jmm" targetRef="Participant_0ykkst0" messageRef="Message_16wcucn" />
     <bpmn2:messageFlow id="MessageFlow_0n499gy" sourceRef="Participant_1be5jmm" targetRef="Participant_0ykkst0" messageRef="Message_1b9cl8r" />
     <bpmn2:messageFlow id="MessageFlow_0p1h4ea" sourceRef="Participant_1be5jmm" targetRef="Participant_0ykkst0" messageRef="Message_1br1kb3" />
@@ -221,6 +227,7 @@
       <bpmn2:outgoing>Flow_0vl461z</bpmn2:outgoing>
       <bpmn2:participantRef>Participant_1be5jmm</bpmn2:participantRef>
       <bpmn2:participantRef>Participant_0ykkst0</bpmn2:participantRef>
+      <bpmn2:messageFlowRef>MessageFlow_1ez9i6y</bpmn2:messageFlowRef>
       <bpmn2:messageFlowRef>MessageFlow_098yc0j</bpmn2:messageFlowRef>
     </bpmn2:choreographyTask>
     <bpmn2:sequenceFlow id="Flow_0o2vkp8" name="CancelFee==true" sourceRef="Gateway_1o6d4zo" targetRef="ChoreographyTask_0zblxcf" />
@@ -336,10 +343,10 @@
       <bpmndi:BPMNShape id="ChoreographyTask_0zblxcf_di" bpmnElement="ChoreographyTask_0zblxcf">
         <dc:Bounds x="1580" y="70" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_0f4kk0y" bpmnElement="Participant_1be5jmm" isMessageVisible="false" participantBandKind="top_initiating" choreographyActivityShape="ChoreographyTask_0zblxcf_di">
+      <bpmndi:BPMNShape id="BPMNShape_0f4kk0y" bpmnElement="Participant_1be5jmm" isMessageVisible="true" participantBandKind="top_initiating" choreographyActivityShape="ChoreographyTask_0zblxcf_di">
         <dc:Bounds x="1580" y="70" width="100" height="20" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_0epgeyo" bpmnElement="Participant_0ykkst0" isMessageVisible="false" participantBandKind="bottom_non_initiating" choreographyActivityShape="ChoreographyTask_0zblxcf_di">
+      <bpmndi:BPMNShape id="BPMNShape_0epgeyo" bpmnElement="Participant_0ykkst0" isMessageVisible="true" participantBandKind="bottom_non_initiating" choreographyActivityShape="ChoreographyTask_0zblxcf_di">
         <dc:Bounds x="1580" y="130" width="100" height="20" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0o2vkp8_di" bpmnElement="Flow_0o2vkp8">

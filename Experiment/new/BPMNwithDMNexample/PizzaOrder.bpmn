@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xs="http://www.w3.org/2001/XMLSchema" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://bpmn.io/schema/bpmn">
-  <bpmn2:message id="Message_0tnxd43" />
-  <bpmn2:message id="Message_0qi0am0" />
+  <bpmn2:message id="Message_0tnxd43" name="bikePrepare">
+    <bpmn2:documentation>{"properties":{"bikePrepare":{"type":"boolean","description":""}},"required":["bikePrepare"],"files":{},"file required":[]}</bpmn2:documentation>
+  </bpmn2:message>
+  <bpmn2:message id="Message_0qi0am0" name="carPrepare">
+    <bpmn2:documentation>{"properties":{"carPrepare":{"type":"boolean","description":""}},"required":["carPrepare"],"files":{},"file required":[]}</bpmn2:documentation>
+  </bpmn2:message>
   <bpmn2:message id="Message_07ijcd8" name="Receipt">
     <bpmn2:documentation>{"properties":{"Signature":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
   </bpmn2:message>
@@ -395,7 +399,7 @@
       <bpmndi:BPMNShape id="ChoreographyTask_18k0igt_di" bpmnElement="ChoreographyTask_18k0igt">
         <dc:Bounds x="890" y="200" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_0h01mo9" bpmnElement="Participant_0sap3uu" isMessageVisible="false" participantBandKind="top_initiating" choreographyActivityShape="ChoreographyTask_18k0igt_di">
+      <bpmndi:BPMNShape id="BPMNShape_0h01mo9" bpmnElement="Participant_0sap3uu" isMessageVisible="true" participantBandKind="top_initiating" choreographyActivityShape="ChoreographyTask_18k0igt_di">
         <dc:Bounds x="890" y="200" width="100" height="20" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0bu5bt0" bpmnElement="Participant_1ho1h5w" isMessageVisible="false" participantBandKind="bottom_non_initiating" choreographyActivityShape="ChoreographyTask_18k0igt_di">
@@ -412,7 +416,7 @@
       <bpmndi:BPMNShape id="ChoreographyTask_11iw02d_di" bpmnElement="ChoreographyTask_11iw02d">
         <dc:Bounds x="890" y="10" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_1fycemd" bpmnElement="Participant_0sap3uu" isMessageVisible="false" participantBandKind="top_initiating" choreographyActivityShape="ChoreographyTask_11iw02d_di">
+      <bpmndi:BPMNShape id="BPMNShape_1fycemd" bpmnElement="Participant_0sap3uu" isMessageVisible="true" participantBandKind="top_initiating" choreographyActivityShape="ChoreographyTask_11iw02d_di">
         <dc:Bounds x="890" y="10" width="100" height="20" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_18a6yt5" bpmnElement="Participant_1ho1h5w" isMessageVisible="false" participantBandKind="bottom_non_initiating" choreographyActivityShape="ChoreographyTask_11iw02d_di">
