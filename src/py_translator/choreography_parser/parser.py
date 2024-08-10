@@ -290,8 +290,8 @@ class Choreography:
         simple_paths = list(
             nx.all_simple_paths(self.topology_graph_without_message, start_id, end_id)
         )
-
         cycles = list(nx.simple_cycles(self.topology_graph_without_message))
+        
         paths_with_cycle = []
         for simple_path in simple_paths:
             for cycle in cycles:
@@ -306,7 +306,7 @@ class Choreography:
 
         all_paths = simple_paths + paths_with_cycle
 
-        def handle_parallel_gateway(choreography, path):
+        def handle_parallel_gateway(choreography, path)->tuple:
             fix_part = []
             sign = 0
             for index, step in enumerate(path):
@@ -373,9 +373,10 @@ class Choreography:
                     if next_part
                     else path[fix_part[index]["end"]:]
                 )
-            return new_path
+            return tuple(new_path)
 
-        all_paths = [handle_parallel_gateway(self, path) for path in all_paths]
+        # since parallel make redundant path, we need to remove the redundant path
+        all_paths = list(set([handle_parallel_gateway(self, path) for path in all_paths]))
 
         ### Expand Exclusive Gateway Into Condition
         def handle_exclusive_gateway(choreography, path):
@@ -441,19 +442,23 @@ class Choreography:
 
 
 if __name__ == "__main__":
-    choreography = Choreography()
-    choreography.load_diagram_from_xml_file(
-        "C:/Users/logre/Desktop/py_translator/resource/bpmn/BikeRental.bpmn"
-    )
 
-    ### find all simple path
-    all_paths = []
-    start_event = choreography.query_element_with_type(NodeType.START_EVENT)[0]
-    end_events = choreography.query_element_with_type(NodeType.END_EVENT)
-    for end_event in end_events:
-        paths = choreography.generate_invoke_path(start_event.id, end_event.id)
-        all_paths.extend(paths)
+    file_name_list = ["Blood_analysis.bpmn", "customer_new.bpmn", "Hotel Booking.bpmn", "Manufactory.bpmn","PizzaOrder.bpmn"]
+    for file_name in file_name_list:
+        choreography = Choreography()
+        choreography.load_diagram_from_xml_file(
+            f"/home/logres/system/src/py_translator/resource/bpmn/{file_name}"
+        )
 
-    with open("./path.txt", "w") as f:
-        for path in all_paths:
-            f.write(str(path) + "\n")
+        ### find all simple path
+        all_paths = []
+        start_event = choreography.query_element_with_type(NodeType.START_EVENT)[0]
+        end_events = choreography.query_element_with_type(NodeType.END_EVENT)
+        for end_event in end_events:
+            paths = choreography.generate_invoke_path(start_event.id, end_event.id)
+            all_paths.extend(paths)
+
+        with open(f"./{file_name.split(".")[0]}-path.txt", "w") as f:
+            for path in all_paths:
+                f.write(str(path) + "\n")
+        print(f"File {file_name} is done")
