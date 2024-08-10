@@ -42,6 +42,13 @@ class Choreography:
             element for element in self.edges if element.type == element_type
         ]
 
+    def query_edge_with_source_and_target(self, source_id, target_id):
+        return [
+            element
+            for element in self.edges
+            if element.source.id == source_id and element.target.id == target_id
+        ]
+
     def _parse_node(self, element: ET.Element):
         bpmn2prefix = "{http://www.omg.org/spec/BPMN/20100524/MODEL}"
         split_tag = element.tag.split("}")[1]
@@ -171,7 +178,6 @@ class Choreography:
                     ],
                 )
 
-
     def _parse_edge(self, element):
         bpmn2prefix = "{http://www.omg.org/spec/BPMN/20100524/MODEL}"
         match element.tag.split("}")[1]:
@@ -210,21 +216,40 @@ class Choreography:
         # recursively parse the children of the element
         for child in element:
             self._parse_element(child)
-    
+
     def _parse_messages(self, root):
         # Add Message to Graph base on demand of MessageFlow
-        message_to_add = [element for element in root if element.tag.split("}")[1] == NodeType.MESSAGE.value and element.attrib.get("id", "") in self.message_to_add]
+        message_to_add = [
+            element
+            for element in root
+            if element.tag.split("}")[1] == NodeType.MESSAGE.value
+            and element.attrib.get("id", "") in self.message_to_add
+        ]
         for message in message_to_add:
             message_node = self._parse_node(message)
             self.nodes.append(message_node)
             self._id2nodes[message_node.id] = message_node
 
-    def _init_graph(self):
+    @property
+    def simple_graph(self):
         # TODO : USE GRAPH TO EXECUTE SOME ALGORITHMS
         for node in self.nodes:
             self.graph.add_node(node.id, node=node)
         for edge in self.edges:
-            self.graph.add_edge(edge.sourceRef, edge.targetRef, edge=edge)
+            self.graph.add_edge(edge.source.id, edge.target.id, edge=edge)
+
+    @property
+    def topology_graph_without_message(self):
+        graph = nx.DiGraph()
+        for node in self.nodes:
+            if node.type == NodeType.MESSAGE or node.type == NodeType.PARTICIPANT:
+                continue
+            graph.add_node(node.id)
+        for edge in self.edges:
+            if edge.type == EdgeType.MESSAGE_FLOW:
+                continue
+            graph.add_edge(edge.source.id, edge.target.id, edge=edge)
+        return graph
 
     def _init_element_properties(self):
         for node in self.nodes:
@@ -253,7 +278,7 @@ class Choreography:
         self._init_element_properties()
 
     def load_diagram_from_xml_file(self, file_path, target=""):
-        document = ET.parse(file_path)
+        document = ET.parse(file_path, ET.XMLParser(encoding="utf-8"))
         root = document.getroot()
         self.load_from_root(root, target)
 
@@ -261,10 +286,174 @@ class Choreography:
         root = ET.fromstring(xml_string)
         self.load_from_root(root, target)
 
+    def generate_invoke_path(self, start_id, end_id):
+        simple_paths = list(
+            nx.all_simple_paths(self.topology_graph_without_message, start_id, end_id)
+        )
+
+        cycles = list(nx.simple_cycles(self.topology_graph_without_message))
+        paths_with_cycle = []
+        for simple_path in simple_paths:
+            for cycle in cycles:
+                for index, step in enumerate(simple_path):
+                    if cycle[0] == step:
+                        path_with_cycle = (
+                            simple_path.copy()[:index]
+                            + cycle
+                            + simple_path.copy()[index:]
+                        )
+                        paths_with_cycle.append(path_with_cycle)
+
+        all_paths = simple_paths + paths_with_cycle
+
+        def handle_parallel_gateway(choreography, path):
+            fix_part = []
+            sign = 0
+            for index, step in enumerate(path):
+                if index < sign:
+                    continue
+                if (
+                    gateway := choreography.get_element_with_id(step)
+                ).type == NodeType.PARALLEL_GATEWAY:
+                    if len(gateway.outgoings) == 1:
+                        continue
+                    # find the close gateway for it
+                    count = 0
+                    close_gateway = None
+                    for index_, step_ in enumerate(path[index + 1 :]):
+                        if "Gateway" in step_:
+                            gateway2 = choreography.get_element_with_id(step_)
+                            if (
+                                gateway2.type == NodeType.PARALLEL_GATEWAY
+                                and len(gateway2.outgoings) > 1
+                            ):
+                                count += 1
+
+                            if (
+                                gateway2.type == NodeType.PARALLEL_GATEWAY
+                                and len(gateway2.incomings) > 1
+                            ):
+                                if count == 0:
+                                    close_gateway = gateway2
+                                    break
+                                count -= 1
+                    # Replace the path between with the combination of the paths available
+                    all_available_paths = nx.all_simple_paths(
+                        choreography.topology_graph_without_message,
+                        gateway.id,
+                        close_gateway.id,
+                    )
+                    all_available_paths = list(all_available_paths)
+                    from itertools import chain
+
+                    combined_paths = list(chain(
+                        *[
+                            handle_parallel_gateway(choreography, _path[1:-1])
+                            for _path in all_available_paths
+                        ]
+                    ))
+                    close_gateway_index_in_path = path.index(close_gateway.id)
+                    fix_part.append(
+                        {
+                            "start": index,
+                            "end": close_gateway_index_in_path,
+                            "combined_paths": combined_paths,
+                        }
+                    )
+                    sign = close_gateway_index_in_path
+
+            # combine together
+            new_path = []
+            new_path += path[: fix_part[0]["start"]+1] if fix_part else path
+            for index in range(len(fix_part)):
+                next_part = fix_part[index + 1] if index + 1 < len(fix_part) else None
+                new_path += fix_part[index]["combined_paths"]
+                new_path += (
+                    path[fix_part[index]["end"]: next_part["start"]+1]
+                    if next_part
+                    else path[fix_part[index]["end"]:]
+                )
+            return new_path
+
+        all_paths = [handle_parallel_gateway(self, path) for path in all_paths]
+
+        ### Expand Exclusive Gateway Into Condition
+        def handle_exclusive_gateway(choreography, path):
+            new_path = []
+            sign = 0
+            for index, step in enumerate(path):
+                if index < sign:
+                    continue
+                if (
+                    gateway := choreography.get_element_with_id(step)
+                ).type == NodeType.EXCLUSIVE_GATEWAY:
+                    if len(gateway.outgoings) == 1:
+                        continue
+                    next_node = path[index + 1]
+                    next_node = choreography.get_element_with_id(next_node)
+                    edge = choreography.query_edge_with_source_and_target(
+                        gateway.id, next_node.id
+                    )[0]
+                    condition = edge.name
+                    new_path.append(step)
+                    new_path.insert(index + 1, f"Condition: {condition}")
+                    sign = index + 1
+                else:
+                    new_path.append(step)
+            return new_path
+
+        all_paths = [handle_exclusive_gateway(self, path) for path in all_paths]
+
+        ### Expand Choreography Task Into Task
+
+        def handle_choreography_task(choreography, path):
+            new_path = []
+            for index, step in enumerate(path):
+                if step.startswith("Condition"):
+                    new_path.append(step)
+                    continue
+                if (
+                    choreography_task := choreography.get_element_with_id(step)
+                ).type == NodeType.CHOREOGRAPHY_TASK:
+                    message_flows = choreography_task.message_flows
+                    init_participant = choreography_task.init_participant
+                    init_message_flow = list(
+                        filter(lambda x: x.source == init_participant, message_flows)
+                    )[0]
+                    return_message_flow_ = list(
+                        filter(lambda x: x.target == init_participant, message_flows)
+                    )
+                    if return_message_flow_:
+                        return_message_flow = return_message_flow_[0]
+                    else:
+                        return_message_flow = None
+
+                    new_path.append(init_message_flow.message.id)
+                    if return_message_flow:
+                        new_path.append(return_message_flow.message.id)
+                else:
+                    new_path.append(step)
+            return new_path
+
+        all_paths = [handle_choreography_task(self, path) for path in all_paths]
+
+        return all_paths
+
 
 if __name__ == "__main__":
     choreography = Choreography()
-    choreography.load_diagram_from_xml_file("Coffee_machine.bpmn")
+    choreography.load_diagram_from_xml_file(
+        "C:/Users/logre/Desktop/py_translator/resource/bpmn/BikeRental.bpmn"
+    )
 
-    start = choreography.query_element_with_type(NodeType.START_EVENT)[0]
-    print(start.outgoing.target.id)
+    ### find all simple path
+    all_paths = []
+    start_event = choreography.query_element_with_type(NodeType.START_EVENT)[0]
+    end_events = choreography.query_element_with_type(NodeType.END_EVENT)
+    for end_event in end_events:
+        paths = choreography.generate_invoke_path(start_event.id, end_event.id)
+        all_paths.extend(paths)
+
+    with open("./path.txt", "w") as f:
+        for path in all_paths:
+            f.write(str(path) + "\n")
