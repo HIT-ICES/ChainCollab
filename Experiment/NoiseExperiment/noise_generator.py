@@ -1,5 +1,6 @@
 import random
 import argparse
+import os
 
 parser = argparse.ArgumentParser()
 # subparsers = parser.add_subparsers()
@@ -10,83 +11,77 @@ my_description = (
     "at random."
 )
 
+def generate_random_seed():  
+    random_bytes = os.urandom(4)  
+    return int.from_bytes(random_bytes, byteorder='big')  
 
-def init_parser(parser):
-    parser.add_argument(
-        "-n", type=int, help="Amount of noise logs to generate.", default=1
-    )
-    parser.add_argument("-f", help="input file name", required=True)
-    parser.add_argument(
-        "-a",
-        help="add-list file name, containing all possible lines to add",
-        required=True,
-    )
-    parser.add_argument("-o", help="output directory name", required=True)
-    parser.add_argument("-i", help="input directory name", required=True)
-    parser.set_defaults()
+def reset_random_seed():  
+    random.seed(generate_random_seed()) 
 
+def random_int(min, max):
+    reset_random_seed() 
+    return random.randint(min, max)
 
-# def subcommand(args):
+class RandomMode:
+    ADD = "add"
+    REMOVE = "remove"
+    SWITCH = "switch"
+    ALL = "all"
 
+    def __init__(self, mode: str):
+        self.mode = mode
 
-def rnd_noise_gen_func(args):
-
-    #    import time
-    #    import sys
-    # import math
-
-    # read file
-    filename = args.f
-    fo = open(args.i + filename, "r")
-    lines = fo.readlines()
-    fo.close()
-
-    fo2 = open(args.a, "r")
-    addListLines = fo2.readlines()
-    fo2.close()
-
-    filenamename = filename
-    filenameext = ""
-    if filename.endswith(".log") or filename.endswith(".txt"):
-        filenamename = filename[:-4]
-        filenameext = filename[-4:]
-
-    n = abs(args.n)
-    for i in range(n):
-        newFilename = filenamename + "-noise-" + str(i).zfill(2) + filenameext
-        print("New file: " + newFilename)
-        newFile = open(args.o + newFilename, "w")
-        # clone the original lines
-        linesClone = list(lines)
-        noLines = len(linesClone)
-        # iterate through the three options: add, del, switch
-        if i % 3 == 0:
-            lineToDel = int(random.random() * noLines)
-            print("Deleting line " + str(lineToDel))
-            linesClone.pop(lineToDel)
-        elif i % 3 == 1:
-            idxLineToAdd = int(random.random() * len(addListLines))
-            addedLine = addListLines[idxLineToAdd]
-            idxToAddLine = int(random.random() * noLines)
-            print(
-                "Adding line at " + str(idxToAddLine) + " ; line to add: " + addedLine
-            )
-            linesClone.insert(idxToAddLine, addedLine)
-        else:
-            lineToSwitch = int(random.random() * (noLines - 1))
-            print(
-                "Switching lines " + str(lineToSwitch) + " and " + str(lineToSwitch + 1)
-            )
-            line = linesClone.pop(lineToSwitch)
-            linesClone.insert(lineToSwitch + 1, line)
-        for line in linesClone:
-            newFile.write(line)
-        newFile.close()
+    def if_add(self) -> bool:
+        return self.ADD in self.mode
+    
+    def if_remove(self) -> bool:
+        return self.REMOVE in self.mode
+    
+    def if_switch(self) -> bool:
+        return self.SWITCH in self.mode
 
 
-if __name__ == "__main__":
-    #    my_parser = parser.add_parser("random_noise_gnerator", description=my_description)
-    init_parser(parser)
-    args = parser.parse_args()
-    #    args.subcommand(args)
-    rnd_noise_gen_func(args)
+def generate_random_path(origin_path, random_mode: RandomMode, random_num: int) -> list[tuple]:
+    # read origin path
+    # generate output accorrding to random_mode and random_num
+    change_method = []
+
+    if random_mode.if_add():
+        change_method.append(RandomMode.ADD)
+    if random_mode.if_remove():
+        change_method.append(RandomMode.REMOVE)
+    if random_mode.if_switch():
+        change_method.append(RandomMode.SWITCH)
+
+    def random_method(input_path:tuple, method:str)->tuple:
+        input_path = list(input_path)
+        match method:
+            case RandomMode.ADD:
+                idxToAdd = random_int(0, len(input_path)-1)
+                content_to_input = input_path[idxToAdd]
+                idxToInsert = random_int(0, len(input_path)-1)
+                input_path.insert(idxToInsert, content_to_input)
+                return tuple(input_path)
+            case RandomMode.REMOVE:
+                idxToRemove = random_int(0, len(input_path)-1)
+                input_path.pop(idxToRemove)
+                return tuple(input_path)
+            case RandomMode.SWITCH:
+                idxToSwitch = random_int(0, len(input_path)-1)
+                content_to_input = input_path[idxToSwitch]
+                idxToSwitchWith = random_int(0, len(input_path)-1)
+                input_path[idxToSwitch] = input_path[idxToSwitchWith]
+                input_path[idxToSwitchWith] = content_to_input
+                return tuple(input_path)
+            case _:
+                return tuple(input_path)
+
+        
+
+    for i in range(random_num):
+        # choose beteen add, remove, switch according to random_mode
+        random_methods = random.choice(change_method)
+        new_path = random_method(tuple(origin_path), random_methods)
+    
+    return new_path
+
