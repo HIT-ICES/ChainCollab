@@ -447,7 +447,7 @@ if __name__ == "__main__":
     for file_name in file_name_list:
         choreography = Choreography()
         choreography.load_diagram_from_xml_file(
-            f"/home/logres/system/src/py_translator/resource/bpmn/{file_name}"
+            f"./resource/bpmn/{file_name}"
         )
 
         ### find all simple path
@@ -458,7 +458,7 @@ if __name__ == "__main__":
             paths = choreography.generate_invoke_path(start_event.id, end_event.id)
             all_paths.extend(paths)
 
-        with open(f"./{file_name.split(".")[0]}-path.txt", "w") as f:
+        with open(f"./resource/bpmn/{file_name.split(".")[0]}-path.txt", "w") as f:
             for path in all_paths:
                 f.write(str(path) + "\n")
         print(f"File {file_name} is done")
