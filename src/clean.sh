@@ -1,6 +1,4 @@
-#!/bin/sh
-
-# Should run with sudo
+#!/bin/bash
 
 # Remove Storage
 
@@ -26,7 +24,7 @@ rm -rf ./backend/opt/chaincode/*
 
 
 echo "Remove pgdata"
-chmod -R 777 ./backend/pgdata
+sudo chmod -R 777 ./backend/pgdata
 rm -rf ./backend/pgdata/*
 
 # rm -rf /home/logres/LoLeido/cello/src/backend/opt/chaincode/*
@@ -63,4 +61,5 @@ docker volume prune -f
 # Remove Firefly
 
 echo "Remove Firefly"
-sudo -u $SUDO_USER ff list | grep 'cello_' | xargs -I{} sh -c "echo 'y' | sudo -u $SUDO_USER ff remove {}"
+ff list | grep 'cello_' | xargs -I{} sh -c "echo 'y' | ff remove {}"
+
