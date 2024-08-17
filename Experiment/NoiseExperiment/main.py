@@ -56,13 +56,13 @@ def run_experiment(
             execute_paths.append(random_path)
 
     # execute and output
-    results = [{"path":task.invoke_path, "results":"", "original":True}]
+    results = [{"path":task.invoke_path, "results":[], "original":True}]
 
     with open(output, "w") as f:
         for path in execute_paths:
             single_result = {"path": path, "results": ""}
             res = invoke_task(path, task.steps)
-            single_result["results"] = res
+            single_result["results"] = str(res)
             results.append(single_result)
         json.dump(results, f, indent=4)
 
