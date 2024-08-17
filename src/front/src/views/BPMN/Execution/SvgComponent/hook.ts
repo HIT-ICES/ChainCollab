@@ -204,7 +204,7 @@ export const useAvailableIdentity = () => {
     const currenEnvId = useAppSelector((state) => state.env.currentEnvId)
     const { data, isLoading, isError, isSuccess, refetch } = useQuery(['availableIdentity', currenOrgId, currenEnvId], async () => {
         const res = await getFireflyIdentity(currenEnvId, currenOrgId)
-        return res.data
+        return res
     })
     return [data, isLoading, refetch]
 }
