@@ -437,8 +437,17 @@ class Choreography:
             return new_path
 
         all_paths = [handle_choreography_task(self, path) for path in all_paths]
+        new_all_paths = []
+        for path in all_paths:
+            new_path = []
+            for step in path:
+                if step.startswith("Condition"):
+                    path.pop()
+                    new_path[-1]["condition"] = step.split(":")[1].strip()
+                new_path.append({"element":step})
+            new_all_paths.append(new_path)
 
-        return all_paths
+        return new_all_paths
 
 
 if __name__ == "__main__":
