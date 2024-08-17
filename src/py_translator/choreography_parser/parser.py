@@ -442,8 +442,8 @@ class Choreography:
             new_path = []
             for step in path:
                 if step.startswith("Condition"):
-                    path.pop()
                     new_path[-1]["condition"] = step.split(":")[1].strip()
+                    continue
                 new_path.append({"element":step})
             new_all_paths.append(new_path)
 
