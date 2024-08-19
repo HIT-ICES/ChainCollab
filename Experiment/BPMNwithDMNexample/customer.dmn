@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/2.0" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/" id="definitions_1olsuce" name="definitions" namespace="http://camunda.org/schema/1.0/dmn" exporter="dmn-js (https://demo.bpmn.io/dmn)" exporterVersion="16.4.0">
-  <decision id="decision_0tybghz" name="">
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/2.0" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/" id="definitions_1olsuce" name="definitions" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="5.22.0">
+  <decision id="decision_0tybghz" name="customer1">
     <informationRequirement id="InformationRequirement_1hoht1b">
       <requiredInput href="#InputData_1g61x6h" />
     </informationRequirement>
     <informationRequirement id="InformationRequirement_0h8ttmr">
       <requiredInput href="#InputData_04naupt" />
     </informationRequirement>
-    <decisionTable id="decisionTable_1v3tii8">
+    <decisionTable id="decisionTable_1v3tii8" hitPolicy="FIRST">
       <input id="input1" label="VIPpoints" biodi:width="192">
         <inputExpression id="inputExpression1" typeRef="number">
           <text>VIPpoints</text>
@@ -54,8 +54,8 @@
       </rule>
     </decisionTable>
   </decision>
-  <inputData id="InputData_1g61x6h" />
-  <inputData id="InputData_04naupt" />
+  <inputData id="InputData_1g61x6h" name="VIPpoints" />
+  <inputData id="InputData_04naupt" name="need_external_provider" />
   <dmndi:DMNDI>
     <dmndi:DMNDiagram id="DMNDiagram_1flr508">
       <dmndi:DMNShape id="DMNShape_0fg1a7g" dmnElementRef="decision_0tybghz">
