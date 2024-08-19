@@ -247,15 +247,15 @@ def EventBasedGateway_code(
 
 
 def CheckMessageState_code(message, state: str):
-    return content["CheckMessageState"].format(state=state, message=message)
+    return content["CheckMessageStateFrame"].format(state=state, message=message)
 
 
 def CheckGatewayState_code(gateway, state: str):
-    return content["CheckGtwState"].format(state=state, gateway=gateway)
+    return content["CheckGtwStateFrame"].format(state=state, gateway=gateway)
 
 
 def CheckEventState_code(event, state: str):
-    return content["CheckEventState"].format(state=state, event=event)
+    return content["CheckEventStateFrame"].format(state=state, event=event)
 
 
 ##----------------
