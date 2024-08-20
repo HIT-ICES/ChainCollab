@@ -107,7 +107,7 @@ const DmnDrawer = forwardRef(({
             };
             detachViewer();
         };
-    }, []);
+    }, [xmlData]);
 
     useEffect(() => {
         const loadDiagram = async () => {
