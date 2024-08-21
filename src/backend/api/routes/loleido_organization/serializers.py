@@ -9,11 +9,19 @@ class ConsortiumSerializer(serializers.ModelSerializer):
 
 
 class LoleidoOrganizationSerializer(serializers.ModelSerializer):
-    consortiums = ConsortiumSerializer(many=True, read_only=True)
+    # consortiums = ConsortiumSerializer(many=True, read_only=True)
+    consortiums = serializers.SerializerMethodField()
 
     class Meta:
         model = LoleidoOrganization
         fields = "__all__"
+
+    def get_consortiums(self, obj):
+        # 获取与该组织关联的所有独特的 Consortium 对象
+        consortiums = Consortium.objects.filter(
+            membership__loleido_organization=obj
+        ).distinct()
+        return ConsortiumSerializer(consortiums, many=True).data
 
 
 class UserJoinOrgInvitionSerializer(serializers.ModelSerializer):

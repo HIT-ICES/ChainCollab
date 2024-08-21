@@ -22,21 +22,21 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 
   const handleOk = async () => {
     const createInstanceParam = await constructParam();
+    console.log('createInstanceParam', createInstanceParam );
+
     // 创建一个空对象
     let singleObject = {};
 
     // 遍历数组中的每个元素，并将其合并到singleObject中
     createInstanceParam.forEach((item) => {
-      console.log("SDASDSA")
-      console.log(item)
       Object.assign(singleObject, item);
     });
     console.log('createInstanceParam', createInstanceParam);
     console.log('result', singleObject);
 
-
     const bpmn = await retrieveBPMN(bpmnId)
     const chaincode_url = bpmn.firefly_url
+
     await invokeCreateInstance(chaincode_url, singleObject);
 
     setOpen(false);

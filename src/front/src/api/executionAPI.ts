@@ -209,6 +209,11 @@ export const getFireflyVerify = async (coreUrl: string, fireflyIdentityId: strin
 }
 
 export const invokeCreateInstance = async (chaincodeUrl: string, data: any) => {
+    console.log("chaincodeUrl", chaincodeUrl);
+    console.log(data)
+
+    // return
+
     try {
         const res = await fireflyAPI.post(`${chaincodeUrl.slice(0, -4)}/invoke/CreateInstance`, {
             "input": {

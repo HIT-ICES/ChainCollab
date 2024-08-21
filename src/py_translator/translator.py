@@ -439,7 +439,7 @@ class GoChaincodeTranslator:
     def _generate_check_state_code(self, element: Element, state: str = "ENABLED"):
         match element.type:
             case NodeType.CHOREOGRAPHY_TASK:
-                return snippet.CheckMsgState_code(
+                return snippet.CheckMessageState_code(
                     element.init_message_flow.message.id, state
                 )
             case (
@@ -910,13 +910,12 @@ class GoChaincodeTranslator:
                     )
 
         # find all parallel to parrallel gateways, and set pre_activate_next hook to check if other branch finished
-
         for parallel_gateway in self._choreography.query_element_with_type(
             NodeType.PARALLEL_GATEWAY
         ):
             if len(parallel_gateway.incomings) > 1:
                 for incoming in parallel_gateway.incomings:
-                    self._hook_codes[incoming.id].setdefault(
+                    self._hook_codes[incoming.source.id].setdefault(
                         "pre_activate_next", []
                     ).append(
                         # generate some code to check if other branch finished
@@ -1277,7 +1276,7 @@ class GoChaincodeTranslator:
 if __name__ == "__main__":
     go_chaincode_translator = GoChaincodeTranslator(
         None,
-        bpmn_file="/home/logres/system/src/py_translator/resource/bpmn/bpmn.bpmn",
+        bpmn_file="/home/logres/system/src/py_translator/resource/bpmn/Blood_analysis.bpmn",
     )
     go_chaincode_translator.generate_chaincode(is_output=True)
     go_chaincode_translator.generate_ffi(is_output=True)

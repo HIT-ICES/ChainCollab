@@ -122,6 +122,12 @@ const AddInputBlock = ({ messageList, addItem }) => {
 
 const DmnModal = ({ dataElementId, xmlData, open: isModalOpen, onClose, onSave }) => {
 
+    useEffect(()=>{
+        console.log("DmnModal")
+        console.log(dataElementId)
+        console.log(xmlData)
+    },dataElementId)
+
     const clean = () => {
         setInputs([]);
         setOutputs([]);
