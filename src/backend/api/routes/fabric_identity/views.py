@@ -67,7 +67,10 @@ class FabricIdentityViewSet(viewsets.ViewSet):
                 membership=resource_set.membership,
             )
             fabric_identity.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(
+                {"id": fabric_identity.id},
+                status=status.HTTP_201_CREATED,
+            )
 
     def retrieve(self, request, pk=None):
         fabric_identity = FabricIdentity.objects.get(pk=pk)
