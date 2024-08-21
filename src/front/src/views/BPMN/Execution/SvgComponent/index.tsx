@@ -753,15 +753,6 @@ const ExecutionPage = (props) => {
     const [bpmnInstance, bpmnInstanceReady, syncBpmnInstance] = useBPMNIntanceDetailData(bpmnInstanceId);
     const [bpmnData, bpmnReady, syncBpmn] = useBPMNDetailData(bpmnInstance.bpmn);
 
-    // const getParticipantName = (participant) => {
-    //     if (!bpmnReady) return "";
-    //     const mapping = JSON.parse(bpmnReady ? bpmnData.participants : "[]");
-    //     return mapping.find((item) => {
-    //         return item.id === participant
-    //     }
-    //     ).name;
-    // }
-
     const contractMethodDes = JSON.parse(bpmnReady ? bpmnData.ffiContent : "{ }");
 
     const svgRef = useRef(null);
