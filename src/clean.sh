@@ -4,10 +4,12 @@
 
 echo "Remove Storage"
 
+sudo chmod -R 777 ./agent/docker-rest-agent/storage
 rm -rf ./agent/docker-rest-agent/storage/*
 
 echo "Remove Fabric CA storage"
 
+sudo chmod -R 777 ./agent/docker-rest-agent/CA_related/storage/fabric-ca-servers
 rm -rf ./agent/docker-rest-agent/CA_related/storage/fabric-ca-servers/*
 
 # Remove opt/cello
