@@ -35,7 +35,11 @@ rm -rf ./backend/pgdata/*
 echo "Remove py migrations"
 find ./backend/api/migrations -type f -name '*_auto_*.py' -exec rm -f {} \;
 
-# Remove Container
+# Remove Firefly
+echo "Remove Firefly"
+ff list | grep 'cello_' | xargs -I{} sh -c "echo 'y' | ff remove {}"
+
+# Remove Docker Container
 #!/bin/bash
 
 # 停止和删除以cello.com、edu.cn或tech.cn结尾的Docker容器
@@ -51,18 +55,10 @@ do
     echo "Removing image: $image_name"
     docker rmi "$image_name"
 done
-
-
-echo "Remove DB"
-docker stop cello-postgres
-docker rm cello-postgres
-
-# input y
 docker container prune -f
 docker volume prune -f
 
-# Remove Firefly
-
-echo "Remove Firefly"
-ff list | grep 'cello_' | xargs -I{} sh -c "echo 'y' | ff remove {}"
-
+# Remove DB
+echo "Remove DB"
+docker stop cello-postgres
+docker rm cello-postgres
