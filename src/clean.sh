@@ -4,10 +4,7 @@
 
 echo "Remove Storage"
 
-<<<<<<< HEAD
 sudo chmod -R 777 ./agent/docker-rest-agent/CA_related/storage/fabric-ca-servers
-=======
->>>>>>> b22b3e7cc4e7f92e8dcc0ca3febdd2751f41b429
 sudo chmod -R 777 ./agent/docker-rest-agent/storage
 rm -rf ./agent/docker-rest-agent/storage/*
 
