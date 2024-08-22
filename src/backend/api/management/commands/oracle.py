@@ -92,7 +92,7 @@ async def db_scanner():
                 for event in events:
                     chaincode_name = bpmn["chaincode_name"]
                     event_listener_name = event + "-" + chaincode_name
-                    print(event_listener_name)
+                    # print(event_listener_name)
                     newTask = TaskItem(
                         task_id=event_listener_name,
                         chaincode_url=chaincode_url,

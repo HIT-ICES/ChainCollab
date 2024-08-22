@@ -54,7 +54,7 @@ const InputComponentForMessage = (
     const formRef = useRef(null);
     const isSender = currentElement.state === 1;
     const methodName = currentElement.MessageID + (isSender ? "_Send" : "_Complete");
-
+    debugger;
 
 
     const confirmMessage = async () => {
@@ -345,6 +345,7 @@ const InputComponentForMessage = (
             >
                 {
                     Object.keys(format.properties).map((key) => {
+                        console.log('format.properties', format.properties)
                         return (
                             <Form.Item
                                 label={key}
@@ -359,7 +360,10 @@ const InputComponentForMessage = (
                                     ]
                                 }
                             >
-                                <Input placeholder={format.properties[key].description} />
+                                <div>
+                                    <Tag>{format.properties[key].type}</Tag>
+                                    <Input placeholder={format.properties[key].description} />
+                                </div>
                             </Form.Item>
                         )
                     })
@@ -611,18 +615,19 @@ const ControlPanel = ({
         return (
             <div>
                 {showTransactionId ? <div>Transaction ID: {currentElement.FireflyTranID}</div> : null}
-                <InputComponentForMessage
-                    currentElement={currentElement}
-                    contractName={contractName}
-                    coreURL={coreURL}
-                    bpmnName={bpmnName}
-                    Identity={Identity}
-                    contractMethodDes={contractMethodDes}
-                    bpmn={bpmn}
-                    bpmnInstance={bpmnInstance}
-                    instanceId={instanceId}
-                    the_identity={identity}
-                />
+                {currentElement.Format && currentElement.Format !== '{}' ?
+                    <InputComponentForMessage
+                        currentElement={currentElement}
+                        contractName={contractName}
+                        coreURL={coreURL}
+                        bpmnName={bpmnName}
+                        Identity={Identity}
+                        contractMethodDes={contractMethodDes}
+                        bpmn={bpmn}
+                        bpmnInstance={bpmnInstance}
+                        instanceId={instanceId}
+                        the_identity={identity}
+                    /> : null}
             </div>
 
         );
@@ -733,6 +738,7 @@ import { useAllFireflyData } from './hook'
 import axios from "axios";
 import { identity } from "lodash";
 import { debug } from "console";
+import { Label } from "@mui/icons-material";
 
 const ExecutionPage = (props) => {
     const bpmnInstanceId = window.location.pathname.split("/").pop();
