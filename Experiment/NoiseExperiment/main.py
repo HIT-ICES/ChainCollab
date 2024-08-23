@@ -153,24 +153,24 @@ def run_experiment(
     }
 
     create_instance_params = {"input": {"initParametersBytes": json.dumps(param)}}
-    url = "http://127.0.0.1:5001/api/v1/namespaces/default/apis/Customer-52a150"
+    url = "http://127.0.0.1:5001/api/v1/namespaces/default/apis/customer2-031b75"
 
     participant_map = {
         "Participant_1080bkg": {
             "key": "Testmembership-2.org.comMSP::x509::CN=user1,OU=client::CN=ca.testMembership-2.org.com,OU=Fabric,O=testMembership-2.org.com,ST=North Carolina,C=US",
-            "fireflyUrl": "http://localhost:5001/api/v1/namespaces/default/apis/Customer-52a150",
+            "fireflyUrl": "http://localhost:5001/api/v1/namespaces/default/apis/customer2-031b75",
         },
         "Participant_0sktaei": {
             "key": "Testmembership-1.org.comMSP::x509::CN=user2,OU=client::CN=ca.testMembership-1.org.com,OU=Fabric,O=testMembership-1.org.com,ST=North Carolina,C=US",
-            "fireflyUrl": "http://localhost:5002/api/v1/namespaces/default/apis/Customer-52a150",
+            "fireflyUrl": "http://localhost:5002/api/v1/namespaces/default/apis/customer2-031b75",
         },
         "Participant_1gcdqza": {
             "key": "Testorg-testconsortium.org.comMSP::x509::CN=user3,OU=client::CN=ca.testOrg-testConsortium.org.com,OU=Fabric,O=testOrg-testConsortium.org.com,ST=North Carolina,C=US",
-            "fireflyUrl": "http://localhost:5003/api/v1/namespaces/default/apis/Customer-52a150",
+            "fireflyUrl": "http://localhost:5003/api/v1/namespaces/default/apis/customer2-031b75",
         },
     }
-    contract_name = "Customer"
-    contract_interface_id = "afad0217-5db5-45ff-875a-da4b5748a4c6"
+    contract_name = "customer2"
+    contract_interface_id = "7c366188-80c2-41d0-9dfe-d5634d46f14a"
 
     with open(output, "w") as f:
         if create_listener:
@@ -217,14 +217,28 @@ if __name__ == "__main__":
                     random_mode += RandomMode.REMOVE
                 elif "s" in c:
                     random_mode += RandomMode.SWITCH
-            run_experiment(
-                file=args.input,
-                random_mode=RandomMode(random_mode),
-                random_num=args.n,
-                experiment_num=args.N,
-                output=args.output,
-                create_listener=args.listen,
-            )
+            # if file is dictionary or a file
+            if os.path.isfile(args.input):
+                run_experiment(
+                    file=args.input,
+                    random_mode=RandomMode(random_mode),
+                    random_num=args.n,
+                    experiment_num=args.N,
+                    output=args.output,
+                    create_listener=args.listen,
+                )
+            else:
+                if not os.path.isdir(args.output):
+                    raise Exception("Output directory is not a directory")
+                for file in os.listdir(args.input):
+                    run_experiment(
+                        file=args.input + "/" + file,
+                        random_mode=RandomMode(random_mode),
+                        random_num=args.n,
+                        experiment_num=args.N,
+                        output=args.output + "/" + file,
+                        create_listener=args.listen,
+                    )
 
         case _:
             default_response()
