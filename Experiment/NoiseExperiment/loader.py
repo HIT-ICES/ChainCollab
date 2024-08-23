@@ -3,21 +3,23 @@ from enum import Enum
 from collections import namedtuple
 from typing import NamedTuple
 
+
 class BoolWithMessage(NamedTuple):
     value: bool
     message: str
 
     def __bool__(self):
         return self.value
-    
+
     def __str__(self):
         return self.message
-    
+
 
 class ElementTypes(Enum):
     MESSAGE = "Message"
     GATEWAY = "Gateway"
     EVENT = "Event"
+    ACTIVITY = "Activity"
 
 
 class FormatType(Enum):
@@ -76,13 +78,15 @@ class Task(NamedTuple):
 """
 
 
-def type_checker(name: str) -> ElementTypes:
-    if "Message" in name:
+def type_checker(type_name: str) -> ElementTypes:
+    if "Message" == type_name:
         return ElementTypes.MESSAGE
-    elif "Gateway" in name:
+    elif "Gateway" == type_name:
         return ElementTypes.GATEWAY
-    elif "Event" in name:
+    elif "Event" == type_name:
         return ElementTypes.EVENT
+    elif "Activity" == type_name:
+        return ElementTypes.ACTIVITY
 
 
 import json

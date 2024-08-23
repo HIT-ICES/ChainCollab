@@ -54,8 +54,6 @@ const InputComponentForMessage = (
     const formRef = useRef(null);
     const isSender = currentElement.state === 1;
     const methodName = currentElement.MessageID + (isSender ? "_Send" : "_Complete");
-    debugger;
-
 
     const confirmMessage = async () => {
         const res = await invokeMessageAction(coreURL,
