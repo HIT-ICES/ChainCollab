@@ -106,7 +106,7 @@ def get_all_state_of_instance(url: str, instance_id: str) -> dict:
     return state
 
 
-def pre_check(url: str, instance_id, conditions: list[CHECK_CONDITION]) -> bool:
+def pre_check(url: str, instance_id, conditions: list[CHECK_CONDITION]) -> BoolWithMessage:
     print("PRE CHECK")
     state = get_all_state_of_instance(url, instance_id)
     for condition in conditions:
@@ -133,7 +133,7 @@ def pre_check(url: str, instance_id, conditions: list[CHECK_CONDITION]) -> bool:
     return True, ""
 
 
-def post_check(url: str, instance_id, conditions: list[CHECK_CONDITION]) -> bool:
+def post_check(url: str, instance_id, conditions: list[CHECK_CONDITION]) -> BoolWithMessage:
     print("POST CHECK")
     state = get_all_state_of_instance(url, instance_id)
     for condition in conditions:
@@ -249,8 +249,8 @@ def invoke_step(
     if not is_success:
         return BoolWithMessage(False, f"Pre-check failed, reason:[{msg}]")
 
-    if not invoke_api(url, instance_id, step, invoker_map):
-        return BoolWithMessage(False, "Invoke failed")
+    if not (res:=invoke_api(url, instance_id, step, invoker_map)):
+        return BoolWithMessage(False, f"Invoke failed:{res.message}")
 
     is_success, msg = post_check(url, instance_id, step.check_conditions)
     if not is_success:
