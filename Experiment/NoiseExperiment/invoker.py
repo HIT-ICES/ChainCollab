@@ -4,10 +4,24 @@ import json
 import websocket
 import time
 import re
+import select
 
 
-def subsribe_and_get_result(subscription_name: str):
-    ws_uri = "ws://localhost:5000/ws"
+def extract_url_port(chaincode_url):
+    pattern = r"(http:\/\/[\w\.]+):(\d+)"
+    match = re.search(pattern, chaincode_url)
+
+    if match:
+        invoker_firefly_url = match.group(1)
+        invoker_firefly_port = match.group(2)
+        # print(f"invoker_firefly_url: {invoker_firefly_url}:{invoker_firefly_port}")
+    else:
+        print("No match found.")
+    return invoker_firefly_url, invoker_firefly_port
+
+
+def websocket_listen_get_result(subscription_name: str, timeout: int = 20):
+    ws_uri = "ws://localhost:5001/ws"
     ws = websocket.WebSocket()
     ws.connect(ws_uri)
     message_to_send = {
@@ -17,10 +31,31 @@ def subsribe_and_get_result(subscription_name: str):
         "autoack": True,
     }
     ws.send(json.dumps(message_to_send))
+    print(f"Sent: {message_to_send}")
+    ws_fd = ws.sock.fileno()  # Get the file descriptor of the WebSocket socket
+    poll = select.poll()
+    poll.register(ws_fd, select.POLLIN)  # Register to poll for incoming data
 
-    message = ws.recv()
-    ws.close()
-    return json.loads(message)
+    start_time = time.time()
+
+    while True:
+        elapsed_time = time.time() - start_time
+        if elapsed_time >= timeout:
+            print("Timeout reached. Closing connection.")
+            ws.close()
+            return False, {"error": "Timeout after {} seconds".format(timeout)}
+
+        events = poll.poll(
+            (timeout - elapsed_time) * 1000
+        )  # Poll remaining time in milliseconds
+
+        if events:
+            message = ws.recv()
+            print(f"Received: {message}")
+            ws.close()
+            return True, json.loads(message)
+
+        time.sleep(1)  # Optional: to avoid busy waiting
 
 
 def from_num_to_state(num: int) -> str:
@@ -130,9 +165,12 @@ def get_real_invoker(invoker: str) -> str:
     return invoker
 
 
-def invoke_api(chaincode_url: str, instance_id: str, step: STEP, invoker_map) -> bool:
+def invoke_api(
+    chaincode_url: str, instance_id: str, step: STEP, invoker_map, contract_name
+) -> bool:
     # Execute
     is_message = True if step.type == ElementTypes.MESSAGE else False
+    is_activity = True if step.type == ElementTypes.ACTIVITY else False
 
     method_name = step.element if not is_message else f"{step.element}_Send"
 
@@ -164,38 +202,39 @@ def invoke_api(chaincode_url: str, instance_id: str, step: STEP, invoker_map) ->
         f"{chaincode_url}/invoke/{method_name}",
         json=full_param,
     )
-    # time.sleep(5)
-    print(res.text)
+    print(f"invoke method {method_name}", res.text)
 
-    operation_id = res.json()["id"]
-    # Wait Return Value and Event
-    pattern = r"(http:\/\/[\w\.]+):(\d+)"
-    match = re.search(pattern, chaincode_url)
-
-    if match:
-        invoker_firefly_url = match.group(1)
-        invoker_firefly_port = match.group(2)
-        print(f"invoker_firefly_url: {invoker_firefly_url}:{invoker_firefly_port}")
-    else:
-        print("No match found.")
-
-    # Wait for the operation to complete
-    while True:
-        time.sleep(1)
-        res = requests.get(
-            f"{invoker_firefly_url}:{invoker_firefly_port}/api/v1/namespaces/default/operations/{operation_id}?fetchstatus=true"
+    if is_activity:
+        is_success, msg = websocket_listen_get_result(
+            "Avtivity_continueDone-" + contract_name
         )
-        invoke_status = res.json()["status"]
-        print(f"Invoke Status: {invoke_status}")
-        if invoke_status == "Pending":
-            continue
-        else:
-            break
-    # Check if invoke is Success
-    if invoke_status == "Succeeded":
-        return True, res.json()["output"]
-    elif invoke_status == "Failed":
-        return False, res.json()["output"]["errorMessage"]
+        if not is_success:
+            return False, f"{step.element} failed,Reason:[{msg}]"
+        blockchain_instance_id = msg["blockchainEvent"]["output"]["InstanceID"]
+        if blockchain_instance_id == instance_id:
+            return True, "Activity passed"
+    else:
+        operation_id = res.json()["id"]
+        # Wait Return Value and Event
+        invoker_firefly_url, invoker_firefly_port = extract_url_port(chaincode_url)
+
+        # Wait for the operation to complete
+        while True:
+            time.sleep(1)
+            res = requests.get(
+                f"{invoker_firefly_url}:{invoker_firefly_port}/api/v1/namespaces/default/operations/{operation_id}?fetchstatus=true"
+            )
+            invoke_status = res.json()["status"]
+            print(f"Invoke Status: {invoke_status}")
+            if invoke_status == "Pending":
+                continue
+            else:
+                break
+        # Check if invoke is Success
+        if invoke_status == "Succeeded":
+            return True, res.json()["output"]
+        elif invoke_status == "Failed":
+            return False, res.json()["output"]["errorMessage"]
 
 
 def invoke_step(
@@ -220,16 +259,21 @@ def invoke_step(
 
 
 def invoke_choreograph_path_step(
-    url, instance_id: str, step: STEP | None, invoker_map
+    url, instance_id: str, step: STEP | None, invoker_map, contract_name
 ) -> BoolWithMessage:
-    is_success, msg = invoke_api(url, instance_id, step, invoker_map)
+    is_success, msg = invoke_api(url, instance_id, step, invoker_map, contract_name)
     if not is_success:
         return BoolWithMessage(False, f"Invoke failed,Reason:[{msg}]")
     return BoolWithMessage(True, "Step passed")
 
 
 def invoke_task(
-    path, steps: list[STEP], url, create_instance_param, invoker_map
+    path,
+    steps: list[STEP],
+    url,
+    create_instance_param,
+    invoker_map,
+    contract_name,
 ) -> BoolWithMessage:
 
     # Create A New Instance of Task
@@ -238,9 +282,12 @@ def invoke_task(
         f"{url}/invoke/CreateInstance",
         json=create_instance_param,
     )
-    subscription_name = "InstanceCreated-Customer"
+    print("create instance response:", res.text)
+    # create contract listener and subscribe to the event
+    subscription_name = "InstanceCreated-" + contract_name
 
-    message = subsribe_and_get_result(subscription_name)
+    message = websocket_listen_get_result(subscription_name)
+
     blockchain_instance_id = message["blockchainEvent"]["output"]["InstanceID"]
     print(f"blockchain_instance_id: {blockchain_instance_id}")
 
@@ -256,7 +303,11 @@ def invoke_task(
     for index, step in enumerate(path):
         if not (
             res := invoke_choreograph_path_step(
-                url, blockchain_instance_id, get_step_with_name(step), invoker_map
+                url,
+                blockchain_instance_id,
+                get_step_with_name(step),
+                invoker_map,
+                contract_name,
             )
         ):
             return BoolWithMessage(False, f"Step {index} failed for reason:{res}")

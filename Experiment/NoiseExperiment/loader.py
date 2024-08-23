@@ -103,7 +103,7 @@ def state_checker(state: str) -> str:
 
 
 def step_loader(file_name: str) -> list:
-    content = json.load(open(file_name, "r"))[0]
+    content = json.load(open(file_name, "r"))
     # name, steps, invoke_path
     task = Task(
         name=content["name"],

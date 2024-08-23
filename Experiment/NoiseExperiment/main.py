@@ -3,7 +3,9 @@ import sys
 import json
 import argparse
 
-from invoker import invoke_task
+import requests
+
+from invoker import extract_url_port, invoke_task
 from noise_generator import generate_random_path, RandomMode
 from loader import step_loader, Task
 
@@ -37,6 +39,11 @@ def get_parser():
         help="Mode of noise generation, like ars ar as etc. add|remove|switch including add, remove, and switch, default is all, -t ars",
         default="ars",
     )
+    parser_run.add_argument(
+        "-listen",
+        help="Create listener and subscribe to the contract event",
+        action="store_true",
+    )
     return parser
 
 
@@ -45,8 +52,51 @@ def default_response():
 
 
 def run_experiment(
-    file, random_mode, random_num=1, experiment_num=1, output="result.json"
+    file,
+    random_mode,
+    random_num=1,
+    experiment_num=1,
+    output="result.json",
+    create_listener=False,
 ):
+
+    def create_listener_and_subscribe(
+        event_name: str, contract_name, url: str, contract_interface_id: str
+    ):
+        firefly_url, firefly_port = extract_url_port(url)
+        res = requests.post(
+            f"{firefly_url}:{firefly_port}/api/v1/namespaces/default/contracts/listeners",
+            json={
+                "interface": {"id": contract_interface_id},
+                "location": {"channel": "default", "chaincode": contract_name},
+                "event": {"name": event_name},
+                "options": {"firstEvent": "oldest"},
+                "topic": event_name + "-" + contract_name,
+            },
+            # headers={
+            #     "Content-Type": "application/json",
+            # },
+        )
+        print("Create listener ", res.json())
+        listener_id = res.json()["id"]
+        res = requests.post(
+            f"{firefly_url}:{firefly_port}/api/v1/namespaces/default/subscriptions",
+            json={
+                "namespace": "default",
+                "name": event_name + "-" + contract_name,
+                "transport": "websockets",
+                "filter": {
+                    "events": "blockchain_event_received",
+                    "blockchainevent": {"listener": listener_id},
+                },
+                "options": {"firstEvent": "oldest"},
+            },
+            headers={
+                "Content-Type": "application/json",
+            },
+        )
+        print("Subscribe ", res.json())
+
     task: Task = step_loader(file)
 
     # generate
@@ -119,12 +169,32 @@ def run_experiment(
             "fireflyUrl": "http://localhost:5003/api/v1/namespaces/default/apis/Customer-52a150",
         },
     }
+    contract_name = "Customer"
+    contract_interface_id = "afad0217-5db5-45ff-875a-da4b5748a4c6"
 
     with open(output, "w") as f:
+        if create_listener:
+            create_listener_and_subscribe(
+                "InstanceCreated",
+                contract_name,
+                url,
+                contract_interface_id,
+            )
+            create_listener_and_subscribe(
+                "Avtivity_continueDone",
+                contract_name,
+                url,
+                contract_interface_id,
+            )
         for path in execute_paths:
             single_result = {"path": path, "results": ""}
             res = invoke_task(
-                path, task.steps, url, create_instance_params, participant_map
+                path,
+                task.steps,
+                url,
+                create_instance_params,
+                participant_map,
+                contract_name,
             )
             single_result["results"] = str(res)
             results.append(single_result)
@@ -153,6 +223,7 @@ if __name__ == "__main__":
                 random_num=args.n,
                 experiment_num=args.N,
                 output=args.output,
+                create_listener=args.listen,
             )
 
         case _:

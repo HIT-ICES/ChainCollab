@@ -1,0 +1,277 @@
+{
+    "name": "task1",
+    "steps": [
+        {
+            "element_name": "Event_1jtgn3j",
+            "element_type": "Event",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Event_1jtgn3j",
+                    "element_type": "Event",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "ExclusiveGateway_0hs3ztq",
+                    "element_type": "Gateway",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "ExclusiveGateway_0hs3ztq",
+            "element_type": "Gateway",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "ExclusiveGateway_0hs3ztq",
+                    "element_type": "Gateway",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Message_045i10y",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_045i10y",
+            "element_type": "Message",
+            "metaInfo": {
+                "serviceId": {
+                    "type": "string",
+                    "description": "The required service id"
+                },
+                "VIPpoints": {
+                    "type": "number",
+                    "description": "points"
+                }
+            },
+            "parameters": [
+                "123123",
+                0
+            ],
+            "invoker": "Participant_1080bkg",
+            "state_change": [
+                {
+                    "element_name": "Message_045i10y",
+                    "element_type": "Message",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Message_0r9lypd",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_0r9lypd",
+            "element_type": "Message",
+            "metaInfo": {
+                "is_available": {
+                    "type": "boolean",
+                    "description": "Is the service available?"
+                }
+            },
+            "parameters": [
+                true
+            ],
+            "invoker": "Participant_0sktaei",
+            "state_change": [
+                {
+                    "element_name": "Message_0r9lypd",
+                    "element_type": "Message",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "ExclusiveGateway_106je4z",
+                    "element_type": "Gateway",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "ExclusiveGateway_106je4z",
+            "element_type": "Gateway",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "ExclusiveGateway_106je4z",
+                    "element_type": "Gateway",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Message_1em0ee4",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_1em0ee4",
+            "element_type": "Message",
+            "metaInfo": {
+                "service plan": {
+                    "type": "string",
+                    "description": "service plan"
+                },
+                "price_quotation": {
+                    "type": "number",
+                    "description": "Price quotation"
+                },
+                "need_external_provider": {
+                    "type": "boolean",
+                    "description": "Whether external service providers are required"
+                }
+            },
+            "parameters": [
+                "fix A",
+                100,
+                true
+            ],
+            "invoker": "Participant_0sktaei",
+            "state_change": [
+                {
+                    "element_name": "Message_1em0ee4",
+                    "element_type": "Message",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Message_1nlagx2",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_1nlagx2",
+            "element_type": "Message",
+            "metaInfo": {
+                "confirmation": {
+                    "type": "boolean",
+                    "description": "Whether to accept the service plan"
+                }
+            },
+            "parameters": [
+                true
+            ],
+            "invoker": "Participant_1080bkg",
+            "state_change": [
+                {
+                    "element_name": "Message_1nlagx2",
+                    "element_type": "Message",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "EventBasedGateway_1fxpmyn",
+                    "element_type": "Gateway",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "EventBasedGateway_1fxpmyn",
+            "element_type": "Gateway",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "EventBasedGateway_1fxpmyn",
+                    "element_type": "Gateway",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Message_1xm9dxy",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Message_0o8eyir",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_1xm9dxy",
+            "element_type": "Message",
+            "metaInfo": {
+                "motivation": {
+                    "type": "string",
+                    "description": "Motivation for Canceling orders"
+                }
+            },
+            "parameters": [
+                "price too high"
+            ],
+            "invoker": "Participant_1080bkg",
+            "state_change": [
+                {
+                    "element_name": "Message_1xm9dxy",
+                    "element_type": "Message",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Event_0366pfz",
+                    "element_type": "Event",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Event_0366pfz",
+            "element_type": "Event",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Event_0366pfz",
+                    "element_type": "Event",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                }
+            ]
+        }
+    ],
+    "invoke_path": [
+        "Event_1jtgn3j",
+        "ExclusiveGateway_0hs3ztq",
+        "Message_045i10y",
+        "Message_0r9lypd",
+        "ExclusiveGateway_106je4z",
+        "Message_1em0ee4",
+        "Message_1nlagx2",
+        "EventBasedGateway_1fxpmyn",
+        "Message_1xm9dxy",
+        "Event_0366pfz"
+    ]
+}
