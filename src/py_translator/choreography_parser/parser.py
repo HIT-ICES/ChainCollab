@@ -2,6 +2,7 @@
 
 import networkx as nx
 import xml.etree.ElementTree as ET
+import json
 
 from .elements import (
     NodeType,
@@ -444,10 +445,20 @@ class Choreography:
                 if step.startswith("Condition"):
                     new_path[-1]["condition"] = step.split(":")[1].strip()
                     continue
-                new_path.append({"element":step})
+                item_to_append = {"element":step}
+                if (self.get_element_with_id(step)).type == NodeType.MESSAGE:
+                    item_to_append["invoker"] = self.get_message_flow_with_message(step)[0].source.id
+                new_path.append(item_to_append)
             new_all_paths.append(new_path)
 
         return new_all_paths
+    
+    def get_message_flow_with_message(self, message_id):
+        return [
+            edge
+            for edge in self.edges
+            if edge.type == EdgeType.MESSAGE_FLOW and edge.message.id == message_id
+        ]
 
 
 if __name__ == "__main__":
@@ -467,7 +478,6 @@ if __name__ == "__main__":
             paths = choreography.generate_invoke_path(start_event.id, end_event.id)
             all_paths.extend(paths)
 
-        with open(f"./resource/bpmn/{file_name.split(".")[0]}-path.txt", "w") as f:
-            for path in all_paths:
-                f.write(str(path) + "\n")
+        with open(f"./resource/bpmn/{file_name.split(".")[0]}-path.json", "w") as f:
+            json.dump(all_paths, f)
         print(f"File {file_name} is done")
