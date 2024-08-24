@@ -255,22 +255,22 @@ if __name__ == "__main__":
                 sys.stdout = f  # 将标准输出重定向到文件
                 print("output print to file")
                 for task in all_tasks:
-                    # try:
-                    res = run_experiment(
-                        task=task,
-                        random_mode=RandomMode(random_mode),
-                        random_num=random_num,
-                        experiment_num=experiment_num,
-                        create_listener=args.listen,
-                    )
-                    for r in res:
-                        r["index_path"] = r.pop("path")
-                        r["path"] = [
-                            task.steps[index].element for index in r["index_path"]
-                        ]
-                    # except Exception as e:
-                    #     print(e)
-                    #     continue
+                    try:
+                        res = run_experiment(
+                            task=task,
+                            random_mode=RandomMode(random_mode),
+                            random_num=random_num,
+                            experiment_num=experiment_num,
+                            create_listener=args.listen,
+                        )
+                        for r in res:
+                            r["index_path"] = r.pop("path")
+                            r["path"] = [
+                                task.steps[index].element for index in r["index_path"]
+                            ]
+                    except Exception as e:
+                        print(e)
+                        continue
                     results.append({"task_name": task.name, "results": res})
                 with open(args.output, "r") as f:
                     origin_result = json.load(f)

@@ -299,7 +299,7 @@ def invoke_choreograph_path_step(
 
 
 def invoke_task(
-    path,
+    path_indexes,
     steps: list[STEP],
     url,
     create_instance_param,
@@ -324,12 +324,12 @@ def invoke_task(
 
     # return BoolWithMessage(True, "Instance created")
 
-    for index in path:
+    for index, path_index in enumerate(path_indexes):
         if not (
             res := invoke_choreograph_path_step(
                 url,
                 blockchain_instance_id,
-                steps[index],
+                steps[path_index],
                 invoker_map,
                 contract_name,
             )
