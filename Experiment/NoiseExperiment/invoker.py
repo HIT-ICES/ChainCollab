@@ -169,6 +169,20 @@ def get_real_invoker(invoker: str) -> str:
     return invoker
 
 
+def parse_meta(step_meta):
+    if isinstance(step_meta, str):
+        # 如果是字符串格式，先尝试将其转换为字典
+        try:
+            step_meta = json.loads(step_meta)
+        except json.JSONDecodeError:
+            raise ValueError("The string could not be parsed as JSON.")
+    elif not isinstance(step_meta, dict):
+        raise TypeError("The input should be either a string or a dictionary.")
+
+    # 如果已经是字典格式，直接返回
+    return step_meta
+
+
 def invoke_api(
     chaincode_url: str, instance_id: str, step: STEP, invoker_map, contract_name
 ) -> bool:
@@ -179,7 +193,7 @@ def invoke_api(
 
     if is_message:
         method_name = f"{step.element}_Send"
-        meta = json.loads(step.meta)
+        meta = parse_meta(step.meta)
         params = {}
         idx = 0
         for key in meta["properties"].keys():

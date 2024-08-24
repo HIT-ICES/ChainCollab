@@ -173,32 +173,37 @@ def run_experiment(
     contract_interface_id = "7c366188-80c2-41d0-9dfe-d5634d46f14a"
 
     with open(output, "w") as f:
-        if create_listener:
-            create_listener_and_subscribe(
-                "InstanceCreated",
-                contract_name,
-                url,
-                contract_interface_id,
-            )
-            create_listener_and_subscribe(
-                "Avtivity_continueDone",
-                contract_name,
-                url,
-                contract_interface_id,
-            )
-        for path in execute_paths:
-            single_result = {"path": path, "results": ""}
-            res = invoke_task(
-                path,
-                task.steps,
-                url,
-                create_instance_params,
-                participant_map,
-                contract_name,
-            )
-            single_result["results"] = str(res)
-            results.append(single_result)
-        json.dump(results, f, indent=4)
+        try:
+            if create_listener:
+                create_listener_and_subscribe(
+                    "InstanceCreated",
+                    contract_name,
+                    url,
+                    contract_interface_id,
+                )
+                create_listener_and_subscribe(
+                    "Avtivity_continueDone",
+                    contract_name,
+                    url,
+                    contract_interface_id,
+                )
+            for path in execute_paths:
+                single_result = {"path": path, "results": ""}
+                res = invoke_task(
+                    path,
+                    task.steps,
+                    url,
+                    create_instance_params,
+                    participant_map,
+                    contract_name,
+                )
+                single_result["results"] = str(res)
+                results.append(single_result)
+            json.dump(results, f, indent=4)
+        except Exception as e:
+            print("Error: ", e)
+            f.close()  # 确保文件已经关闭
+            os.remove(output)
 
 
 if __name__ == "__main__":
@@ -219,6 +224,7 @@ if __name__ == "__main__":
                     random_mode += RandomMode.SWITCH
             # if file is dictionary or a file
             if os.path.isfile(args.input):
+                print("Begin to run experiment,file is ", args.input)
                 run_experiment(
                     file=args.input,
                     random_mode=RandomMode(random_mode),
@@ -230,15 +236,31 @@ if __name__ == "__main__":
             else:
                 if not os.path.isdir(args.output):
                     raise Exception("Output directory is not a directory")
-                for file in os.listdir(args.input):
-                    run_experiment(
-                        file=args.input + "/" + file,
-                        random_mode=RandomMode(random_mode),
-                        random_num=args.n,
-                        experiment_num=args.N,
-                        output=args.output + "/" + file,
-                        create_listener=args.listen,
-                    )
+                with open(args.output + "/" + "output.txt", "a") as f:
+                    sys.stdout = f  # 将标准输出重定向到文件
+                    print("output print to file")
+                    # 遍历input文件夹中除了output文件夹的内容
+                    output_files = os.listdir(args.output)
+                    input_files = os.listdir(args.input)
+                    input_files = [
+                        file for file in input_files if file not in output_files
+                    ]
+                    for file in input_files:
+                        print(
+                            "Begin to run experiment,file is ", args.input + "/" + file
+                        )
+                        # 打开文件并重定向控制台输出
+                        run_experiment(
+                            file=args.input + "/" + file,
+                            random_mode=RandomMode(random_mode),
+                            random_num=args.n,
+                            experiment_num=args.N,
+                            output=args.output + "/" + file,
+                            create_listener=args.listen,
+                        )
+                    # 恢复标准输出到控制台
+                sys.stdout = sys.__stdout__
+                print("这是恢复后，打印到控制台的内容")
 
         case _:
             default_response()
