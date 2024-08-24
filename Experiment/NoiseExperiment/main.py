@@ -25,9 +25,7 @@ def get_parser():
         "run", aliases=["-r", "--run"], help="Run an experiment"
     )
     parser_run.add_argument("-input", help="Input file name", required=True)
-    parser_run.add_argument(
-        "-output", help="Output file name", default="output.json"
-    )
+    parser_run.add_argument("-output", help="Output file name", default="output.json")
     parser_run.add_argument(
         "-n", type=int, help="Number of noise to generate", default=1
     )
@@ -201,7 +199,6 @@ if __name__ == "__main__":
     parser = get_parser()
     args = parser.parse_args()
 
-
     # Read All Task From All input File, then output it to One File
 
     match args.command:
@@ -216,7 +213,7 @@ if __name__ == "__main__":
                     random_mode += RandomMode.REMOVE
                 elif "s" in c:
                     random_mode += RandomMode.SWITCH
-            
+
             # 标记已完成
             finished_tasks = []
             if os.path.exists(args.output):
@@ -225,40 +222,53 @@ if __name__ == "__main__":
                     finished_tasks = [task["task_name"] for task in finished_works]
 
             # 收集所有task
-            all_files = [args.input] if os.path.isfile(args.input) else os.listdir(args.input)
+            all_files = (
+                [args.input]
+                if os.path.isfile(args.input)
+                else [args.input + "/" + file for file in os.listdir(args.input)]
+            )
             all_content = []
             for file in all_files:
                 with open(file, "r") as f:
                     content = json.load(f)
                     for item in content:
-                        item["name"] = file+"_"+item["name"]
+                        item["name"] = file + "_" + item["name"]
                     all_content.extend(content)
 
-            all_tasks = [step_loader(content) for content in all_content if content["name"] not in finished_tasks]
+            all_tasks = [
+                step_loader(content)
+                for content in all_content
+                if content["name"] not in finished_tasks
+            ]
 
             # 执行
             results = []
-            for task in all_tasks:
-                try:
-                    res = run_experiment(
-                        task=task,
-                        random_mode=RandomMode(random_mode),\
-                        random_num=args.n,
-                        experiment_num=args.N,
-                        create_listener=args.listen,
-                    )
-                    for r in res:
-                        r["index_path"] = r.pop("path")
-                        r["path"] = [task.steps[index].element for index in r["index_path"]]
-                except Exception as e:
-                    print(e)
-                    continue
-                results.append({
-                    "task_name": task.name,
-                    "results": res
-                })
-            with open(args.output, "w") as f:
-                json.dump(results, f, indent=4)
+            with open(args.output + "_output.txt", "a") as f:
+                sys.stdout = f  # 将标准输出重定向到文件
+                print("output print to file")
+                for task in all_tasks:
+                    try:
+                        res = run_experiment(
+                            task=task,
+                            random_mode=RandomMode(random_mode),
+                            random_num=args.n,
+                            experiment_num=args.N,
+                            create_listener=args.listen,
+                        )
+                        for r in res:
+                            r["index_path"] = r.pop("path")
+                            r["path"] = [
+                                task.steps[index].element for index in r["index_path"]
+                            ]
+                    except Exception as e:
+                        print(e)
+                        continue
+                    results.append({"task_name": task.name, "results": res})
+                with open(args.output, "a") as f:
+                    json.dump(results, f, indent=4)
+                # 恢复标准输出到控制台
+                sys.stdout = sys.__stdout__
+                print("这是恢复后，打印到控制台的内容")
 
         case _:
             default_response()
