@@ -248,6 +248,7 @@ if __name__ == "__main__":
                 print("output print to file")
                 for task in all_tasks:
                     try:
+                        print("begin to run task:", task.name)
                         res = run_experiment(
                             task=task,
                             random_mode=RandomMode(random_mode),
