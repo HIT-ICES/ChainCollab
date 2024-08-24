@@ -26,7 +26,7 @@ def get_parser():
     )
     parser_run.add_argument("-input", help="Input file name", required=True)
     parser_run.add_argument(
-        "-output", help="Output directory name", default="output.json"
+        "-output", help="Output file name", default="output.json"
     )
     parser_run.add_argument(
         "-n", type=int, help="Number of noise to generate", default=1
@@ -52,11 +52,10 @@ def default_response():
 
 
 def run_experiment(
-    file,
+    task,
     random_mode,
     random_num=1,
     experiment_num=1,
-    output="result.json",
     create_listener=False,
 ):
 
@@ -97,10 +96,8 @@ def run_experiment(
         )
         print("Subscribe ", res.json())
 
-    task: Task = step_loader(file)
-
     # generate
-    execute_paths = [task.invoke_path]
+    execute_paths = [list(range(len(task.invoke_path)))]
     while len(execute_paths) <= experiment_num:
         random_path = generate_random_path(task.invoke_path, random_mode, random_num)
         if random_path not in execute_paths:
@@ -172,43 +169,40 @@ def run_experiment(
     contract_name = "customer2"
     contract_interface_id = "7c366188-80c2-41d0-9dfe-d5634d46f14a"
 
-    with open(output, "w") as f:
-        try:
-            if create_listener:
-                create_listener_and_subscribe(
-                    "InstanceCreated",
-                    contract_name,
-                    url,
-                    contract_interface_id,
-                )
-                create_listener_and_subscribe(
-                    "Avtivity_continueDone",
-                    contract_name,
-                    url,
-                    contract_interface_id,
-                )
-            for path in execute_paths:
-                single_result = {"path": path, "results": ""}
-                res = invoke_task(
-                    path,
-                    task.steps,
-                    url,
-                    create_instance_params,
-                    participant_map,
-                    contract_name,
-                )
-                single_result["results"] = str(res)
-                results.append(single_result)
-            json.dump(results, f, indent=4)
-        except Exception as e:
-            print("Error: ", e)
-            f.close()  # 确保文件已经关闭
-            os.remove(output)
+    if create_listener:
+        create_listener_and_subscribe(
+            "InstanceCreated",
+            contract_name,
+            url,
+            contract_interface_id,
+        )
+        create_listener_and_subscribe(
+            "Avtivity_continueDone",
+            contract_name,
+            url,
+            contract_interface_id,
+        )
+    for path in execute_paths:
+        single_result = {"path": path, "results": ""}
+        res = invoke_task(
+            path,
+            task.steps,
+            url,
+            create_instance_params,
+            participant_map,
+            contract_name,
+        )
+        single_result["results"] = str(res)
+        results.append(single_result)
+    return results
 
 
 if __name__ == "__main__":
     parser = get_parser()
     args = parser.parse_args()
+
+
+    # Read All Task From All input File, then output it to One File
 
     match args.command:
         case "help":
@@ -222,45 +216,49 @@ if __name__ == "__main__":
                     random_mode += RandomMode.REMOVE
                 elif "s" in c:
                     random_mode += RandomMode.SWITCH
-            # if file is dictionary or a file
-            if os.path.isfile(args.input):
-                print("Begin to run experiment,file is ", args.input)
-                run_experiment(
-                    file=args.input,
-                    random_mode=RandomMode(random_mode),
-                    random_num=args.n,
-                    experiment_num=args.N,
-                    output=args.output,
-                    create_listener=args.listen,
-                )
-            else:
-                if not os.path.isdir(args.output):
-                    raise Exception("Output directory is not a directory")
-                with open(args.output + "/" + "output.txt", "a") as f:
-                    sys.stdout = f  # 将标准输出重定向到文件
-                    print("output print to file")
-                    # 遍历input文件夹中除了output文件夹的内容
-                    output_files = os.listdir(args.output)
-                    input_files = os.listdir(args.input)
-                    input_files = [
-                        file for file in input_files if file not in output_files
-                    ]
-                    for file in input_files:
-                        print(
-                            "Begin to run experiment,file is ", args.input + "/" + file
-                        )
-                        # 打开文件并重定向控制台输出
-                        run_experiment(
-                            file=args.input + "/" + file,
-                            random_mode=RandomMode(random_mode),
-                            random_num=args.n,
-                            experiment_num=args.N,
-                            output=args.output + "/" + file,
-                            create_listener=args.listen,
-                        )
-                    # 恢复标准输出到控制台
-                sys.stdout = sys.__stdout__
-                print("这是恢复后，打印到控制台的内容")
+            
+            # 标记已完成
+            finished_tasks = []
+            if os.path.exists(args.output):
+                with open(args.output, "r") as f:
+                    finished_works = json.load(f)
+                    finished_tasks = [task["task_name"] for task in finished_works]
+
+            # 收集所有task
+            all_files = [args.input] if os.path.isfile(args.input) else os.listdir(args.input)
+            all_content = []
+            for file in all_files:
+                with open(file, "r") as f:
+                    content = json.load(f)
+                    for item in content:
+                        item["name"] = file+"_"+item["name"]
+                    all_content.extend(content)
+
+            all_tasks = [step_loader(content) for content in all_content if content["name"] not in finished_tasks]
+
+            # 执行
+            results = []
+            for task in all_tasks:
+                try:
+                    res = run_experiment(
+                        task=task,
+                        random_mode=RandomMode(random_mode),\
+                        random_num=args.n,
+                        experiment_num=args.N,
+                        create_listener=args.listen,
+                    )
+                    for r in res:
+                        r["index_path"] = r.pop("path")
+                        r["path"] = [task.steps[index].element for index in r["index_path"]]
+                except Exception as e:
+                    print(e)
+                    continue
+                results.append({
+                    "task_name": task.name,
+                    "results": res
+                })
+            with open(args.output, "w") as f:
+                json.dump(results, f, indent=4)
 
         case _:
             default_response()

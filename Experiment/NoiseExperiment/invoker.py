@@ -186,6 +186,7 @@ def parse_meta(step_meta):
 def invoke_api(
     chaincode_url: str, instance_id: str, step: STEP, invoker_map, contract_name
 ) -> bool:
+
     # Execute
     is_message = True if step.type == ElementTypes.MESSAGE else False
     is_activity = True if step.type == ElementTypes.ACTIVITY else False
@@ -305,7 +306,6 @@ def invoke_task(
     invoker_map,
     contract_name,
 ) -> BoolWithMessage:
-
     # Create A New Instance of Task
 
     res = requests.post(
@@ -324,19 +324,12 @@ def invoke_task(
 
     # return BoolWithMessage(True, "Instance created")
 
-    # TODO : maintain a map of step name to step object
-    def get_step_with_name(name: str) -> STEP:
-        for step in steps:
-            if step.element == name:
-                return step
-        return None
-
-    for index, step in enumerate(path):
+    for index in path:
         if not (
             res := invoke_choreograph_path_step(
                 url,
                 blockchain_instance_id,
-                get_step_with_name(step),
+                steps[index],
                 invoker_map,
                 contract_name,
             )

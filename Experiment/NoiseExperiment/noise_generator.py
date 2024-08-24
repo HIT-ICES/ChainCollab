@@ -44,6 +44,7 @@ class RandomMode:
 def generate_random_path(origin_path, random_mode: RandomMode, random_num: int) -> list[tuple]:
     # read origin path
     # generate output accorrding to random_mode and random_num
+    origin_path = list(range(len(origin_path)))
     change_method = []
 
     if random_mode.if_add():

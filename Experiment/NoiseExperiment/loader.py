@@ -102,8 +102,7 @@ def state_checker(state: str) -> str:
             return "COMPLETED"
 
 
-def step_loader(file_name: str) -> list:
-    content = json.load(open(file_name, "r"))
+def step_loader(content) -> list:
     # name, steps, invoke_path
     task = Task(
         name=content["name"],
