@@ -26,7 +26,9 @@ def get_parser():
     )
     parser_run.add_argument("-input", help="Input file name", required=True)
     parser_run.add_argument("-output", help="Output file name", default="output.json")
-    parser_run.add_argument("-e", help="append path only mode", action="store_true", default=False)
+    parser_run.add_argument(
+        "-e", help="append path only mode", action="store_true", default=False
+    )
     parser_run.add_argument(
         "-n", type=int, help="Number of noise to generate", default=1
     )
@@ -214,8 +216,8 @@ if __name__ == "__main__":
                 elif "s" in c:
                     random_mode += RandomMode.SWITCH
 
-            random_num=args.n
-            experiment_num=args.N
+            random_num = args.n
+            experiment_num = args.N
 
             append_only_mode = args.e
             if append_only_mode:
@@ -225,7 +227,7 @@ if __name__ == "__main__":
 
             # 标记已完成
             finished_tasks = []
-            if os.path.exists(args.output) and not append_only_mode :
+            if os.path.exists(args.output) and not append_only_mode:
                 with open(args.output, "r") as f:
                     finished_works = json.load(f)
                     finished_tasks = [task["task_name"] for task in finished_works]
@@ -272,8 +274,11 @@ if __name__ == "__main__":
                         print(e)
                         continue
                     results.append({"task_name": task.name, "results": res})
-                with open(args.output, "r") as f:
-                    origin_result = json.load(f)
+                if os.path.exists(args.output):
+                    with open(args.output, "r") as f:
+                        origin_result = json.load(f)
+                else:
+                    origin_result = []
                 with open(args.output, "w") as f:
                     if not append_only_mode:
                         results.extend(origin_result)

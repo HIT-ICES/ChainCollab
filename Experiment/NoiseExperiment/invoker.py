@@ -247,11 +247,18 @@ def invoke_api(
             "Avtivity_continueDone-" + contract_name
         )
         if not is_success:
+            print(f"Activity {step.element} failed,Reason:[{msg}]")
             return False, f"{step.element} failed,Reason:[{msg}]"
         blockchain_instance_id = msg["blockchainEvent"]["output"]["InstanceID"]
         if blockchain_instance_id == instance_id:
             return True, "Activity passed"
         else:
+            print(
+                "Activity intanceID not equal, received InstanceId:"
+                + blockchain_instance_id
+                + "expected InstanceId:"
+                + instance_id
+            )
             return (
                 False,
                 "Activity intanceID not equal, received InstanceId:"
@@ -322,6 +329,7 @@ def invoke_task(
     blockchain_instance_id = message["blockchainEvent"]["output"]["InstanceID"]
     print(f"blockchain_instance_id: {blockchain_instance_id}")
 
+    print(get_all_state_of_instance(url, blockchain_instance_id))
     # return BoolWithMessage(True, "Instance created")
 
     for index, path_index in enumerate(path_indexes):
