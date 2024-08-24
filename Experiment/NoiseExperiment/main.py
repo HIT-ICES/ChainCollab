@@ -26,6 +26,7 @@ def get_parser():
     )
     parser_run.add_argument("-input", help="Input file name", required=True)
     parser_run.add_argument("-output", help="Output file name", default="output.json")
+    parser_run.add_argument("-e", help="append path only mode", action="store_true", default=False)
     parser_run.add_argument(
         "-n", type=int, help="Number of noise to generate", default=1
     )
@@ -56,7 +57,6 @@ def run_experiment(
     experiment_num=1,
     create_listener=False,
 ):
-
     def create_listener_and_subscribe(
         event_name: str, contract_name, url: str, contract_interface_id: str
     ):
@@ -100,7 +100,7 @@ def run_experiment(
         random_path = generate_random_path(task.invoke_path, random_mode, random_num)
         if random_path not in execute_paths:
             execute_paths.append(random_path)
-
+    execute_paths.extend(task.appended_index_paths)
     # execute and output
     results = []
 
@@ -214,9 +214,18 @@ if __name__ == "__main__":
                 elif "s" in c:
                     random_mode += RandomMode.SWITCH
 
+            random_num=args.n
+            experiment_num=args.N
+
+            append_only_mode = args.e
+            if append_only_mode:
+                random_mode = ""
+                random_num = 0
+                experiment_num = 0
+
             # 标记已完成
             finished_tasks = []
-            if os.path.exists(args.output):
+            if os.path.exists(args.output) and not append_only_mode :
                 with open(args.output, "r") as f:
                     finished_works = json.load(f)
                     finished_tasks = [task["task_name"] for task in finished_works]
@@ -240,32 +249,45 @@ if __name__ == "__main__":
                 for content in all_content
                 if content["name"] not in finished_tasks
             ]
-
             # 执行
             results = []
             with open(args.output + "_output.txt", "a") as f:
                 sys.stdout = f  # 将标准输出重定向到文件
                 print("output print to file")
                 for task in all_tasks:
-                    try:
-                        res = run_experiment(
-                            task=task,
-                            random_mode=RandomMode(random_mode),
-                            random_num=args.n,
-                            experiment_num=args.N,
-                            create_listener=args.listen,
-                        )
-                        for r in res:
-                            r["index_path"] = r.pop("path")
-                            r["path"] = [
-                                task.steps[index].element for index in r["index_path"]
-                            ]
-                    except Exception as e:
-                        print(e)
-                        continue
+                    # try:
+                    res = run_experiment(
+                        task=task,
+                        random_mode=RandomMode(random_mode),
+                        random_num=random_num,
+                        experiment_num=experiment_num,
+                        create_listener=args.listen,
+                    )
+                    for r in res:
+                        r["index_path"] = r.pop("path")
+                        r["path"] = [
+                            task.steps[index].element for index in r["index_path"]
+                        ]
+                    # except Exception as e:
+                    #     print(e)
+                    #     continue
                     results.append({"task_name": task.name, "results": res})
-                with open(args.output, "a") as f:
-                    json.dump(results, f, indent=4)
+                with open(args.output, "r") as f:
+                    origin_result = json.load(f)
+                with open(args.output, "w") as f:
+                    if not append_only_mode:
+                        results.extend(origin_result)
+                        json.dump(results, f, indent=4)
+                    else:
+                        # combine the results with same task name
+                        for result in results:
+                            print(result)
+                            result["results"] = result["results"][1:]
+                            for origin in origin_result:
+                                if result["task_name"] == origin["task_name"]:
+                                    origin["results"].extend(result["results"])
+                                    break
+                        json.dump(origin_result, f, indent=4)
                 # 恢复标准输出到控制台
                 sys.stdout = sys.__stdout__
                 print("这是恢复后，打印到控制台的内容")

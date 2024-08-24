@@ -48,6 +48,7 @@ class Task(NamedTuple):
     name: str
     steps: list[STEP]
     invoke_path: list
+    appended_index_paths: list = []
 
 
 """
@@ -126,5 +127,6 @@ def step_loader(content) -> list:
             for element in content["steps"]
         ],
         invoke_path=content["invoke_path"],
+        appended_index_paths=content.get("appended_index_paths", [])
     )
     return task
