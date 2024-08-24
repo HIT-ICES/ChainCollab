@@ -279,14 +279,18 @@ if __name__ == "__main__":
                         results.extend(origin_result)
                         json.dump(results, f, indent=4)
                     else:
-                        # combine the results with same task name
-                        for result in results:
-                            print(result)
-                            result["results"] = result["results"][1:]
-                            for origin in origin_result:
+                        # Only append to exists one, never create new task
+                        for origin in origin_result:
+                            for result in results:
                                 if result["task_name"] == origin["task_name"]:
-                                    origin["results"].extend(result["results"])
-                                    break
+                                    # add all res with different index_path
+                                    extra_path = []
+                                    for res in result["results"]:
+                                        if res["index_path"] not in [
+                                            o["index_path"] for o in origin["results"]
+                                        ]:
+                                            extra_path.append(res)
+                                    origin["results"].extend(extra_path)
                         json.dump(origin_result, f, indent=4)
                 # 恢复标准输出到控制台
                 sys.stdout = sys.__stdout__
