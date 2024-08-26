@@ -289,8 +289,8 @@ class Choreography:
 
     def generate_invoke_path(self, start_id, end_id):
         simple_paths = list(
-            nx.all_simple_paths(self.topology_graph_without_message, start_id, end_id)
-        )
+            nx.all_simple_paths(self.topology_graph_without_message, start_id, end_id))
+
         cycles = list(nx.simple_cycles(self.topology_graph_without_message))
         
         paths_with_cycle = []
@@ -378,28 +378,22 @@ class Choreography:
 
         # since parallel make redundant path, we need to remove the redundant path
         all_paths = list(set([handle_parallel_gateway(self, path) for path in all_paths]))
+        all_paths = [[{"element": step} for step in path] for path in all_paths]
 
         ### Expand Exclusive Gateway Into Condition
         def handle_exclusive_gateway(choreography, path):
             new_path = []
-            sign = 0
             for index, step in enumerate(path):
-                if index < sign:
-                    continue
                 if (
-                    gateway := choreography.get_element_with_id(step)
-                ).type == NodeType.EXCLUSIVE_GATEWAY:
-                    if len(gateway.outgoings) == 1:
-                        continue
+                    gateway := choreography.get_element_with_id(step["element"])
+                ).type == NodeType.EXCLUSIVE_GATEWAY and len(gateway.outgoings) > 1:
                     next_node = path[index + 1]
-                    next_node = choreography.get_element_with_id(next_node)
+                    next_node = choreography.get_element_with_id(next_node["element"])
                     edge = choreography.query_edge_with_source_and_target(
                         gateway.id, next_node.id
                     )[0]
                     condition = edge.name
-                    new_path.append(step)
-                    new_path.insert(index + 1, f"Condition: {condition}")
-                    sign = index + 1
+                    new_path.append({"element": step["element"], "condition": condition})
                 else:
                     new_path.append(step)
             return new_path
@@ -411,11 +405,8 @@ class Choreography:
         def handle_choreography_task(choreography, path):
             new_path = []
             for index, step in enumerate(path):
-                if step.startswith("Condition"):
-                    new_path.append(step)
-                    continue
                 if (
-                    choreography_task := choreography.get_element_with_id(step)
+                    choreography_task := choreography.get_element_with_id(step["element"])
                 ).type == NodeType.CHOREOGRAPHY_TASK:
                     message_flows = choreography_task.message_flows
                     init_participant = choreography_task.init_participant
@@ -429,10 +420,9 @@ class Choreography:
                         return_message_flow = return_message_flow_[0]
                     else:
                         return_message_flow = None
-
-                    new_path.append(init_message_flow.message.id)
+                    new_path.append({"element": init_message_flow.message.id})
                     if return_message_flow:
-                        new_path.append(return_message_flow.message.id)
+                        new_path.append({"element": return_message_flow.message.id})
                 else:
                     new_path.append(step)
             return new_path
@@ -442,12 +432,9 @@ class Choreography:
         for path in all_paths:
             new_path = []
             for step in path:
-                if step.startswith("Condition"):
-                    new_path[-1]["condition"] = step.split(":")[1].strip()
-                    continue
-                item_to_append = {"element":step}
-                if (self.get_element_with_id(step)).type == NodeType.MESSAGE:
-                    item_to_append["invoker"] = self.get_message_flow_with_message(step)[0].source.id
+                item_to_append = step.copy()
+                if (self.get_element_with_id(step["element"])).type == NodeType.MESSAGE:
+                    item_to_append["invoker"] = self.get_message_flow_with_message(step["element"])[0].source.id
                 new_path.append(item_to_append)
             new_all_paths.append(new_path)
 
@@ -464,6 +451,7 @@ class Choreography:
 if __name__ == "__main__":
 
     file_name_list = ["Blood_analysis.bpmn", "customer_new.bpmn", "Hotel Booking.bpmn", "Manufactory.bpmn","Pizza_Order.bpmn"]
+    # file_name_list = ["Hotel Booking.bpmn"]
     for file_name in file_name_list:
         choreography = Choreography()
         choreography.load_diagram_from_xml_file(
