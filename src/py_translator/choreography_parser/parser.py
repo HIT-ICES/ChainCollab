@@ -463,7 +463,7 @@ class Choreography:
 
 if __name__ == "__main__":
 
-    file_name_list = ["Blood_analysis.bpmn", "customer_new.bpmn", "Hotel Booking.bpmn", "Manufactory.bpmn","PizzaOrder.bpmn"]
+    file_name_list = ["Blood_analysis.bpmn", "customer_new.bpmn", "Hotel Booking.bpmn", "Manufactory.bpmn","Pizza_Order.bpmn"]
     for file_name in file_name_list:
         choreography = Choreography()
         choreography.load_diagram_from_xml_file(
