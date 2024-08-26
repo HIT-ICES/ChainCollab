@@ -530,10 +530,7 @@ class GoChaincodeTranslator:
         self, parallel_gateway: ParallelGateway, currentElement: Element
     ):
         # find all other branches
-        other_elements = []
-        for incoming in parallel_gateway.incomings:
-            if incoming.source != currentElement:
-                other_elements.append(incoming.source)
+        other_elements = [ incoming.source for incoming in parallel_gateway.incomings if incoming.source != currentElement]
         # check if other branches are "COMPLETED"
         conditions = [
             self._generate_check_state_code(element, "COMPLETED")
