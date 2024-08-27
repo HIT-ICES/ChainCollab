@@ -139,11 +139,11 @@ def run_experiment(
 
     participant_map = {
         "Participant_0sktaei": {
-            "key": "Testmembership-1.org.comMSP::x509::CN=org_337c98,OU=client::CN=ca.testMembership-1.org.com,OU=Fabric,O=testMembership-1.org.com,ST=North Carolina,C=US",
+            "key": "Testmembership-1.org.comMSP::x509::CN=user2,OU=client::CN=ca.testMembership-1.org.com,OU=Fabric,O=testMembership-1.org.com,ST=North Carolina,C=US",
             "fireflyUrl": "http://localhost:5002/api/v1/namespaces/default/apis/hotel-2435c9",
         },
         "Participant_1080bkg": {
-            "key": "Testmembership-2.org.comMSP::x509::CN=org_fcc285,OU=client::CN=ca.testMembership-2.org.com,OU=Fabric,O=testMembership-2.org.com,ST=North Carolina,C=US",
+            "key": "Testmembership-2.org.comMSP::x509::CN=user1,OU=client::CN=ca.testMembership-2.org.com,OU=Fabric,O=testMembership-2.org.com,ST=North Carolina,C=US",
             "fireflyUrl": "http://localhost:5001/api/v1/namespaces/default/apis/hotel-2435c9",
         }
     }
