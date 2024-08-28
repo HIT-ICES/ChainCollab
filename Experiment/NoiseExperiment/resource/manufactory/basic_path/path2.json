@@ -1,0 +1,244 @@
+[{
+    "name": "task2",
+    "steps": [
+        {
+            "element_name": "Event_1kw6wq7",
+            "element_type": "Event",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Event_1kw6wq7",
+                    "element_type": "Event",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Message_1nq7msq",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_1nq7msq",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"QuoteRequest\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"QuoteRequest\"],\"files\":{},\"file required\":[]}",
+            "parameters": ["QuoteRequest_value"],  // This is a placeholder for the actual string value you would use
+            "invoker": "Participant_0ykkst0",
+            "state_change": [
+                {
+                    "element_name": "Message_1nq7msq",
+                    "element_type": "Message",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Message_1br1kb3",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_1br1kb3",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"QuoteContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"QuoteContent\"],\"files\":{},\"file required\":[]}",
+            "parameters": ["QuoteContent_value"],  // This is a placeholder for the actual string value you would use
+            "invoker": "Participant_1be5jmm",
+            "state_change": [
+                {
+                    "element_name": "Message_1br1kb3",
+                    "element_type": "Message",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Message_0vzhrso",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_0vzhrso",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"OrderContent\":{\"type\":\"string\",\"description\":\"\"},\"OrderAmount\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"OrderContent\",\"OrderAmount\"],\"files\":{},\"file required\":[]}",
+            "parameters": ["OrderContent_value", 100],  // This is a placeholder for the actual string and number values you would use
+            "invoker": "Participant_0ykkst0",
+            "state_change": [
+                {
+                    "element_name": "Message_0vzhrso",
+                    "element_type": "Message",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Message_08gg8ej",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_08gg8ej",
+            "element_type": "Message",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": "Participant_1be5jmm",
+            "state_change": [
+                {
+                    "element_name": "Message_08gg8ej",
+                    "element_type": "Message",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Gateway_0fkskz5",
+                    "element_type": "Gateway",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Gateway_0fkskz5",
+            "element_type": "Gateway",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Gateway_0fkskz5",
+                    "element_type": "Gateway",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Message_03avvjh",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_03avvjh",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"cancelation\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"cancelation\"],\"files\":{},\"file required\":[]}",
+            "parameters": ["cancelation_value"],  // This is a placeholder for the actual string value you would use
+            "invoker": "Participant_0ykkst0",
+            "state_change": [
+                {
+                    "element_name": "Message_03avvjh",
+                    "element_type": "Message",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Message_1b9cl8r",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_1b9cl8r",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"ConcelAck\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"ConcelAck\"],\"files\":{},\"file required\":[]}",
+            "parameters": ["ConcelAck_value"],  // This is a placeholder for the actual string value you would use
+            "invoker": "Participant_1be5jmm",
+            "state_change": [
+                {
+                    "element_name": "Message_1b9cl8r",
+                    "element_type": "Message",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Activity_1wl7u85",
+                    "element_type": "Activity",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Activity_1wl7u85",
+            "element_type": "Activity",
+            "metaInfo": "{\"inputs\":[{\"name\":\"OrderAmount\",\"type\":\"number\",\"description\":\"\"}],\"outputs\":[{\"name\":\"CancelFee\",\"type\":\"number\",\"description\":\"\"}]}",
+            "parameters": [100, 0],  // This is a placeholder for the actual number values you would use
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Activity_1wl7u85",
+                    "element_type": "Activity",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Gateway_1o6d4zo",
+                    "element_type": "Gateway",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Gateway_1o6d4zo",
+            "element_type": "Gateway",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Gateway_1o6d4zo",
+                    "element_type": "Gateway",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Event_0whqcyb",
+                    "element_type": "Event",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Event_0whqcyb",
+            "element_type": "Event",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Event_0whqcyb",
+                    "element_type": "Event",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                }
+            ]
+        }
+    ],
+    "invoke_path": [
+        "Event_1kw6wq7",
+        "Message_1nq7msq",
+        "Message_1br1kb3",
+        "Message_0vzhrso",
+        "Message_08gg8ej",
+        "Gateway_0fkskz5",
+        "Message_03avvjh",
+        "Message_1b9cl8r",
+        "Activity_1wl7u85",
+        "Gateway_1o6d4zo",
+        "Event_0whqcyb"
+    ]
+}
+]

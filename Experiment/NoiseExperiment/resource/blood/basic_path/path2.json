@@ -1,0 +1,244 @@
+[{
+    "name": "task2",
+    "steps": [
+      {
+        "element_name": "StartEvent_0m7hz56",
+        "element_type": "Event",
+        "metaInfo": "",
+        "parameters": [],
+        "invoker": null,
+        "state_change": [
+          {
+            "element_name": "StartEvent_0m7hz56",
+            "element_type": "Event",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "ParallelGateway_1pgjqtw",
+            "element_type": "Gateway",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "ParallelGateway_1pgjqtw",
+        "element_type": "Gateway",
+        "metaInfo": "",
+        "parameters": [],
+        "invoker": null,
+        "state_change": [
+          {
+            "element_name": "ParallelGateway_1pgjqtw",
+            "element_type": "Gateway",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Message_0gswvmq",
+            "element_type": "Message",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Message_0gswvmq",
+        "element_type": "Message",
+        "metaInfo": "{\"properties\":{\"sample\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"sample\"],\"files\":{},\"file required\":[]}",
+        "parameters": ["sample_value_1"],
+        "invoker": "Participant_0ggs0ck",
+        "state_change": [
+          {
+            "element_name": "Message_0gswvmq",
+            "element_type": "Message",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Message_1vzqd37",
+            "element_type": "Message",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Message_1vzqd37",
+        "element_type": "Message",
+        "metaInfo": "{\"properties\":{\"result\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"result\"],\"files\":{},\"file required\":[]}",
+        "parameters": ["result_value_1"],
+        "invoker": "Participant_1v6wnpq",
+        "state_change": [
+          {
+            "element_name": "Message_1vzqd37",
+            "element_type": "Message",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Message_0wq8mc6",
+            "element_type": "Message",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Message_0wq8mc6",
+        "element_type": "Message",
+        "metaInfo": "{\"properties\":{\"patientData\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"patientData\"],\"files\":{},\"file required\":[]}",
+        "parameters": ["patient_data_1"],
+        "invoker": "Participant_0ggs0ck",
+        "state_change": [
+          {
+            "element_name": "Message_0wq8mc6",
+            "element_type": "Message",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Gateway_1m6dgym",
+            "element_type": "Gateway",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Gateway_1m6dgym",
+        "element_type": "Gateway",
+        "metaInfo": "",
+        "parameters": [],
+        "invoker": null,
+        "state_change": [
+          {
+            "element_name": "Gateway_1m6dgym",
+            "element_type": "Gateway",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Message_1rqbibd",
+            "element_type": "Message",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Message_1rqbibd",
+        "element_type": "Message",
+        "metaInfo": "{\"properties\":{\"result\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"result\"],\"files\":{},\"file required\":[]}",
+        "parameters": ["result_value_2"],
+        "invoker": "Participant_0ggs0ck",
+        "state_change": [
+          {
+            "element_name": "Message_1rqbibd",
+            "element_type": "Message",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Activity_1mj4mr7",
+            "element_type": "BusinessRuleTask",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Activity_1mj4mr7",
+        "element_type": "BusinessRuleTask",
+        "metaInfo": "{\"inputs\":[{\"name\":\"result\",\"type\":\"string\",\"description\":\"\"}],\"outputs\":[{\"name\":\"FurtherCheck\",\"type\":\"boolean\",\"description\":\"\"}]}",
+        "parameters": ["result_value_2"],
+        "invoker": null,
+        "state_change": [
+          {
+            "element_name": "Activity_1mj4mr7",
+            "element_type": "BusinessRuleTask",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Gateway_0o8snyv",
+            "element_type": "Gateway",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Gateway_0o8snyv",
+        "element_type": "Gateway",
+        "metaInfo": "",
+        "parameters": [],
+        "invoker": null,
+        "state_change": [
+          {
+            "element_name": "Gateway_0o8snyv",
+            "element_type": "Gateway",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Message_0gd0z61",
+            "element_type": "Message",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Message_0gd0z61",
+        "element_type": "Message",
+        "metaInfo": "{\"properties\":{\"furtherCheckPlace\":{\"type\":\"string\",\"description\":\"\"},\"furtherCheckDate\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"furtherCheckPlace\",\"furtherCheckDate\"],\"files\":{},\"file required\":[]}",
+        "parameters": ["further_check_place_1", "further_check_date_1"],
+        "invoker": "Participant_0tkhpj2",
+        "state_change": [
+          {
+            "element_name": "Message_0gd0z61",
+            "element_type": "Message",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "EndEvent_110myff",
+            "element_type": "Event",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "EndEvent_110myff",
+        "element_type": "Event",
+        "metaInfo": "",
+        "parameters": [],
+        "invoker": null,
+        "state_change": [
+          {
+            "element_name": "EndEvent_110myff",
+            "element_type": "Event",
+            "pre_state": "enable",
+            "post_state": "done"
+          }
+        ]
+      }
+    ],
+    "invoke_path": [
+      "StartEvent_0m7hz56",
+      "ParallelGateway_1pgjqtw",
+      "Message_0gswvmq",
+      "Message_1vzqd37",
+      "Message_0wq8mc6",
+      "Gateway_1m6dgym",
+      "Message_1rqbibd",
+      "Activity_1mj4mr7",
+      "Gateway_0o8snyv",
+      "Message_0gd0z61",
+      "EndEvent_110myff"
+    ]
+  }
+  ]

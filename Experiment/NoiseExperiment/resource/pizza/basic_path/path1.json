@@ -1,0 +1,156 @@
+[{
+    "name": "task1",
+    "steps": [
+        {
+            "element_name": "Event_17c6iyi",
+            "element_type": "Event",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": null,
+            "state_change": [
+                {
+                    "element_name": "Event_17c6iyi",
+                    "element_type": "Event",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Message_1wwub0e",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_1wwub0e",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"OrderContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"OrderContent\"],\"files\":{},\"file required\":[]}",
+            "parameters": ["OrderContent_Value"],
+            "invoker": "Participant_1ssz56y",
+            "state_change": [
+                {
+                    "element_name": "Message_1wwub0e",
+                    "element_type": "Message",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Gateway_1k9qf30",
+                    "element_type": "Gateway",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Gateway_1k9qf30",
+            "element_type": "Gateway",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": null,
+            "state_change": [
+                {
+                    "element_name": "Gateway_1k9qf30",
+                    "element_type": "Gateway",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Message_0gm7yco",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_0gm7yco",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"PickUpTime\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"PickUpTime\"],\"files\":{},\"file required\":[]}",
+            "parameters": ["PickUpTime_Value"],
+            "invoker": "Participant_1f296fx",
+            "state_change": [
+                {
+                    "element_name": "Message_0gm7yco",
+                    "element_type": "Message",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Message_1l76ppu",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_1l76ppu",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"Signature\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+            "parameters": ["Signature_Value"],
+            "invoker": "Participant_1f296fx",
+            "state_change": [
+                {
+                    "element_name": "Message_1l76ppu",
+                    "element_type": "Message",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Gateway_1rwnujh",
+                    "element_type": "Gateway",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Gateway_1rwnujh",
+            "element_type": "Gateway",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": null,
+            "state_change": [
+                {
+                    "element_name": "Gateway_1rwnujh",
+                    "element_type": "Gateway",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Event_1bxai2s",
+                    "element_type": "Event",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Event_1bxai2s",
+            "element_type": "Event",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": null,
+            "state_change": [
+                {
+                    "element_name": "Event_1bxai2s",
+                    "element_type": "Event",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                }
+            ]
+        }
+    ],
+    "invoke_path": [
+        "Event_17c6iyi",
+        "Message_1wwub0e",
+        "Gateway_1k9qf30",
+        "Message_0gm7yco",
+        "Message_1l76ppu",
+        "Gateway_1rwnujh",
+        "Event_1bxai2s"
+    ]
+}
+]
