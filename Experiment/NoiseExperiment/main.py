@@ -135,20 +135,20 @@ def run_experiment(
 }
 
     create_instance_params = {"input": {"initParametersBytes": json.dumps(param)}}
-    url = "http://127.0.0.1:5001/api/v1/namespaces/default/apis/hotel-2435c9"
+    url = "http://127.0.0.1:5001/api/v1/namespaces/default/apis/hotel2-d50f2f"
 
     participant_map = {
         "Participant_0sktaei": {
             "key": "Testmembership-1.org.comMSP::x509::CN=user2,OU=client::CN=ca.testMembership-1.org.com,OU=Fabric,O=testMembership-1.org.com,ST=North Carolina,C=US",
-            "fireflyUrl": "http://localhost:5002/api/v1/namespaces/default/apis/hotel-2435c9",
+            "fireflyUrl": "http://localhost:5002/api/v1/namespaces/default/apis/hotel2-d50f2f",
         },
         "Participant_1080bkg": {
             "key": "Testmembership-2.org.comMSP::x509::CN=user1,OU=client::CN=ca.testMembership-2.org.com,OU=Fabric,O=testMembership-2.org.com,ST=North Carolina,C=US",
-            "fireflyUrl": "http://localhost:5001/api/v1/namespaces/default/apis/hotel-2435c9",
+            "fireflyUrl": "http://localhost:5001/api/v1/namespaces/default/apis/hotel2-d50f2f",
         }
     }
-    contract_name = "hotel"
-    contract_interface_id = "4cd18eaf-dfc7-45a2-82ab-b3719026f5fb"
+    contract_name = "hotel2"
+    contract_interface_id = "ec2a087d-49f1-4edc-9e81-f51eac9a8564"
 
     if create_listener:
         create_listener_and_subscribe(

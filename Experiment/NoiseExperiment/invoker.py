@@ -346,5 +346,9 @@ def invoke_task(
                 contract_name,
             )
         ):
+            print(
+                "Failed All elements state:",
+                get_all_state_of_instance(url, blockchain_instance_id),
+            )
             return BoolWithMessage(False, f"Step {index} failed for reason:{res}")
     return BoolWithMessage(True, "All steps passed")
