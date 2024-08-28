@@ -301,6 +301,9 @@ def invoke_choreograph_path_step(
 ) -> BoolWithMessage:
     is_success, msg = invoke_api(url, instance_id, step, invoker_map, contract_name)
     if not is_success:
+        print(
+            f"Invoke instanceId [{instance_id}],element [{step.element}] failed,Reason:[{msg}]"
+        )
         return BoolWithMessage(False, f"Invoke failed,Reason:[{msg}]")
     return BoolWithMessage(True, "Step passed")
 
