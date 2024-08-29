@@ -450,7 +450,7 @@ class Choreography:
 
 if __name__ == "__main__":
 
-    file_name_list = ["Blood_analysis.bpmn", "customer_new.bpmn", "Hotel Booking.bpmn", "Manufactory.bpmn","Pizza_Order.bpmn"]
+    file_name_list = ["manu2.bpmn"]
     # file_name_list = ["Hotel Booking.bpmn"]
     for file_name in file_name_list:
         choreography = Choreography()
