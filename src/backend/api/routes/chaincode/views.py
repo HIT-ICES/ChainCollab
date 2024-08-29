@@ -305,10 +305,15 @@ class ChainCodeViewSet(viewsets.ViewSet):
             return_installed_chaincodes = []
             for chaincode in installed_chaincodes:
                 # if chaincode["label"].split("_").__len__() != 3:
-                chaincode_id = ChainCode.objects.get(
-                    name=chaincode["label"].split("_", 1)[0],
-                    version=chaincode["label"].split("_", 1)[1],
-                ).id
+                # print("chaincode:", chaincode)
+                try:
+                    chaincode_id = ChainCode.objects.get(
+                        name=chaincode["label"].split("_", 1)[0],
+                        version=chaincode["label"].split("_", 1)[1],
+                    ).id
+                except Exception as e:
+                    print("chaincode name error,can`t have _:", chaincode)
+                    traceback.print_exc
                 # else:
                 #     print("chaincode", chaincode["label"])
                 #     chaincode_id = ChainCode.objects.filter(
