@@ -1,3 +1,4 @@
+import itertools
 import os
 import sys
 import json
@@ -56,7 +57,10 @@ def default_response():
 def run_experiment(
     task,
     random_mode,
-    random_num=1,
+    used_path_add: list[tuple[int]],
+    used_path_remove: list[int],
+    used_path_switch: list[tuple[int]],
+    random_method_num=1,  # 一条路径中随机中add swap remove的次数
     experiment_num=1,
     create_listener=False,
 ):
@@ -99,8 +103,17 @@ def run_experiment(
 
     # generate
     execute_paths = [list(range(len(task.invoke_path)))]
-    while len(execute_paths) <= experiment_num:
-        random_path = generate_random_path(task.invoke_path, random_mode, random_num)
+    while len(execute_paths) < experiment_num:
+        print("execute_paths num:", len(execute_paths))
+        print("experiment_num", experiment_num)
+        random_path = generate_random_path(
+            task.invoke_path,
+            random_mode,
+            random_method_num,
+            used_path_add,
+            used_path_remove,
+            used_path_switch,
+        )
         if random_path not in execute_paths:
             execute_paths.append(random_path)
     execute_paths.extend(task.appended_index_paths)
@@ -109,47 +122,47 @@ def run_experiment(
 
     # copy params here!!!!
     # param = """{"Participant_1080bkg":{"msp":"Testmembership-2.org.comMSP","attributes":{},"isMulti":false,"multiMaximum":0,"multiMinimum":0,"x509":"eDUwOTo6Q049bWVtYmVyMSxPVT1jbGllbnQ6OkNOPWNhLnRlc3RNZW1iZXJzaGlwLTIub3JnLmNvbSxPVT1GYWJyaWMsTz10ZXN0TWVtYmVyc2hpcC0yLm9yZy5jb20sU1Q9Tm9ydGggQ2Fyb2xpbmEsQz1VUw==@Testmembership-2.org.comMSP"},"Participant_1gcdqza":{"msp":"Testorg-testconsortium.org.comMSP","attributes":{},"isMulti":false,"multiMaximum":0,"multiMinimum":0,"x509":"eDUwOTo6Q049dGVzdE1lbWJlcixPVT1jbGllbnQ6OkNOPWNhLnRlc3RPcmctdGVzdENvbnNvcnRpdW0ub3JnLmNvbSxPVT1GYWJyaWMsTz10ZXN0T3JnLXRlc3RDb25zb3J0aXVtLm9yZy5jb20sU1Q9Tm9ydGggQ2Fyb2xpbmEsQz1VUw==@Testorg-testconsortium.org.comMSP"},"Participant_0sktaei":{"msp":"Testmembership-1.org.comMSP","attributes":{},"isMulti":false,"multiMaximum":0,"multiMinimum":0,"x509":"eDUwOTo6Q049bWVtYmVyMixPVT1jbGllbnQ6OkNOPWNhLnRlc3RNZW1iZXJzaGlwLTEub3JnLmNvbSxPVT1GYWJyaWMsTz10ZXN0TWVtYmVyc2hpcC0xLm9yZy5jb20sU1Q9Tm9ydGggQ2Fyb2xpbmEsQz1VUw==@Testmembership-1.org.comMSP"},"Activity_1yl9tfp_DecisionID":"decision_0tybghz","Activity_1yl9tfp_ParamMapping":{"VIPpoints":"VIPpoints","need_external_provider":"need_external_provider","externalAvailable":"externalAvailable"},"Activity_1yl9tfp_Content":"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<definitions xmlns=\"https://www.omg.org/spec/DMN/20191111/MODEL/\" xmlns:biodi=\"http://bpmn.io/schema/dmn/biodi/2.0\" xmlns:dmndi=\"https://www.omg.org/spec/DMN/20191111/DMNDI/\" xmlns:dc=\"http://www.omg.org/spec/DMN/20180521/DC/\" xmlns:di=\"http://www.omg.org/spec/DMN/20180521/DI/\" id=\"definitions_1olsuce\" name=\"definitions\" namespace=\"http://camunda.org/schema/1.0/dmn\" exporter=\"Camunda Modeler\" exporterVersion=\"5.22.0\">\n  <decision id=\"decision_0tybghz\" name=\"customer1\">\n    <informationRequirement id=\"InformationRequirement_1hoht1b\">\n      <requiredInput href=\"#InputData_1g61x6h\" />\n    </informationRequirement>\n    <informationRequirement id=\"InformationRequirement_0h8ttmr\">\n      <requiredInput href=\"#InputData_04naupt\" />\n    </informationRequirement>\n    <decisionTable id=\"decisionTable_1v3tii8\" hitPolicy=\"FIRST\">\n      <input id=\"input1\" label=\"VIPpoints\" biodi:width=\"192\">\n        <inputExpression id=\"inputExpression1\" typeRef=\"number\">\n          <text>VIPpoints</text>\n        </inputExpression>\n      </input>\n      <input id=\"InputClause_1i7xu16\" label=\"need_external_provider\" biodi:width=\"192\">\n        <inputExpression id=\"LiteralExpression_1hd5g8t\" typeRef=\"boolean\">\n          <text>need_external_provider</text>\n        </inputExpression>\n      </input>\n      <output id=\"output1\" label=\"externalAvailable\" name=\"externalAvailable\" typeRef=\"boolean\" />\n      <rule id=\"DecisionRule_0cs4468\">\n        <inputEntry id=\"UnaryTests_1aut0oo\">\n          <text>&lt;=9999</text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_0lq0fko\">\n          <text></text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_11etaq9\">\n          <text>false</text>\n        </outputEntry>\n      </rule>\n      <rule id=\"DecisionRule_1vbhylp\">\n        <inputEntry id=\"UnaryTests_17t02el\">\n          <text></text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_1ik5kui\">\n          <text>false</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_1amyrv5\">\n          <text>false</text>\n        </outputEntry>\n      </rule>\n      <rule id=\"DecisionRule_1l5kdzl\">\n        <inputEntry id=\"UnaryTests_0d8927n\">\n          <text>&gt;=10000</text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_0bqww61\">\n          <text>true</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_0z0fcvd\">\n          <text>true</text>\n        </outputEntry>\n      </rule>\n    </decisionTable>\n  </decision>\n  <inputData id=\"InputData_1g61x6h\" name=\"VIPpoints\" />\n  <inputData id=\"InputData_04naupt\" name=\"need_external_provider\" />\n  <dmndi:DMNDI>\n    <dmndi:DMNDiagram id=\"DMNDiagram_1flr508\">\n      <dmndi:DMNShape id=\"DMNShape_0fg1a7g\" dmnElementRef=\"decision_0tybghz\">\n        <dc:Bounds height=\"80\" width=\"180\" x=\"460\" y=\"70\" />\n      </dmndi:DMNShape>\n      <dmndi:DMNShape id=\"DMNShape_0g5yhqk\" dmnElementRef=\"InputData_1g61x6h\">\n        <dc:Bounds height=\"45\" width=\"125\" x=\"258\" y=\"238\" />\n      </dmndi:DMNShape>\n      <dmndi:DMNShape id=\"DMNShape_1inp6do\" dmnElementRef=\"InputData_04naupt\">\n        <dc:Bounds height=\"45\" width=\"125\" x=\"678\" y=\"258\" />\n      </dmndi:DMNShape>\n      <dmndi:DMNEdge id=\"DMNEdge_06eiibn\" dmnElementRef=\"InformationRequirement_1hoht1b\">\n        <di:waypoint x=\"321\" y=\"238\" />\n        <di:waypoint x=\"520\" y=\"170\" />\n        <di:waypoint x=\"520\" y=\"150\" />\n      </dmndi:DMNEdge>\n      <dmndi:DMNEdge id=\"DMNEdge_1qs00fv\" dmnElementRef=\"InformationRequirement_0h8ttmr\">\n        <di:waypoint x=\"741\" y=\"258\" />\n        <di:waypoint x=\"580\" y=\"170\" />\n        <di:waypoint x=\"580\" y=\"150\" />\n      </dmndi:DMNEdge>\n    </dmndi:DMNDiagram>\n  </dmndi:DMNDI>\n</definitions>\n","Activity_0ibsbry_DecisionID":"decision_0tybghz","Activity_0ibsbry_ParamMapping":{"invoiceType":"invoiceType","invoice":"invoice","invoiceTypeAvailable":"invoiceAvailable"},"Activity_0ibsbry_Content":"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<definitions xmlns=\"https://www.omg.org/spec/DMN/20191111/MODEL/\" xmlns:biodi=\"http://bpmn.io/schema/dmn/biodi/2.0\" xmlns:dmndi=\"https://www.omg.org/spec/DMN/20191111/DMNDI/\" xmlns:dc=\"http://www.omg.org/spec/DMN/20180521/DC/\" id=\"definitions_1olsuce\" name=\"definitions\" namespace=\"http://camunda.org/schema/1.0/dmn\" exporter=\"Camunda Modeler\" exporterVersion=\"5.22.0\">\n  <decision id=\"decision_0tybghz\" name=\"customer2\">\n    <decisionTable id=\"decisionTable_1v3tii8\" hitPolicy=\"FIRST\">\n      <input id=\"input1\" label=\"invoiceType\" biodi:width=\"192\">\n        <inputExpression id=\"inputExpression1\" typeRef=\"string\">\n          <text>invoiceType</text>\n        </inputExpression>\n      </input>\n      <input id=\"InputClause_02k362l\" label=\"invoice\">\n        <inputExpression id=\"LiteralExpression_1uexm9z\" typeRef=\"boolean\">\n          <text>invoice</text>\n        </inputExpression>\n      </input>\n      <output id=\"output1\" label=\"invoiceTypeAvailable\" name=\"invoiceTypeAvailable\" typeRef=\"boolean\" biodi:width=\"192\" />\n      <rule id=\"DecisionRule_1oyddrr\">\n        <inputEntry id=\"UnaryTests_1wvkvfa\">\n          <text>\"HIT\"</text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_0xgibym\">\n          <text>true</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_1esf1bm\">\n          <text>true</text>\n        </outputEntry>\n      </rule>\n      <rule id=\"DecisionRule_0f5g2m7\">\n        <inputEntry id=\"UnaryTests_069nkt8\">\n          <text>\"HITwh\"</text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_0m8uhu2\">\n          <text>true</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_0cm8blh\">\n          <text>true</text>\n        </outputEntry>\n      </rule>\n      <rule id=\"DecisionRule_0bo63a3\">\n        <inputEntry id=\"UnaryTests_1dkdmmv\">\n          <text></text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_086c8ll\">\n          <text>true</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_0rhhni5\">\n          <text>false</text>\n        </outputEntry>\n      </rule>\n      <rule id=\"DecisionRule_1wdnie7\">\n        <inputEntry id=\"UnaryTests_0t432ic\">\n          <text></text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_0yb6s1z\">\n          <text>false</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_14n15xx\">\n          <text>false</text>\n        </outputEntry>\n      </rule>\n    </decisionTable>\n  </decision>\n  <dmndi:DMNDI>\n    <dmndi:DMNDiagram id=\"DMNDiagram_19nwh5y\">\n      <dmndi:DMNShape id=\"DMNShape_03xv25j\" dmnElementRef=\"decision_0tybghz\">\n        <dc:Bounds height=\"80\" width=\"180\" x=\"150\" y=\"80\" />\n      </dmndi:DMNShape>\n    </dmndi:DMNDiagram>\n  </dmndi:DMNDI>\n</definitions>\n"}"""
-    param ={
-    "Participant_05g5xih": {
-        "msp": "Testmembership-1.org.comMSP",
-        "attributes": {},
-        "isMulti": False,
-        "multiMaximum": 0,
-        "multiMinimum": 0,
-        "x509": "eDUwOTo6Q049dXNlcjIsT1U9Y2xpZW50OjpDTj1jYS50ZXN0TWVtYmVyc2hpcC0xLm9yZy5jb20sT1U9RmFicmljLE89dGVzdE1lbWJlcnNoaXAtMS5vcmcuY29tLFNUPU5vcnRoIENhcm9saW5hLEM9VVM=@Testmembership-1.org.comMSP"
-    },
-    "Participant_1xq1vsc": {
-        "msp": "Testmembership-2.org.comMSP",
-        "attributes": {},
-        "isMulti": False,
-        "multiMaximum": 0,
-        "multiMinimum": 0,
-        "x509": "eDUwOTo6Q049dXNlcjEsT1U9Y2xpZW50OjpDTj1jYS50ZXN0TWVtYmVyc2hpcC0yLm9yZy5jb20sT1U9RmFicmljLE89dGVzdE1lbWJlcnNoaXAtMi5vcmcuY29tLFNUPU5vcnRoIENhcm9saW5hLEM9VVM=@Testmembership-2.org.comMSP"
-    },
-    "Activity_1uktp5z_DecisionID": "decision_0tybghz",
-    "Activity_1uktp5z_ParamMapping": {
-        "CancelAmount": "OrderAmount",
-        "CancelFee": "CancelFee"
-    },
-    "Activity_1uktp5z_Content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<definitions xmlns=\"https://www.omg.org/spec/DMN/20191111/MODEL/\" xmlns:dmndi=\"https://www.omg.org/spec/DMN/20191111/DMNDI/\" xmlns:dc=\"http://www.omg.org/spec/DMN/20180521/DC/\" id=\"definitions_1olsuce\" name=\"definitions\" namespace=\"http://camunda.org/schema/1.0/dmn\" exporter=\"Camunda Modeler\" exporterVersion=\"5.22.0\">\n  <decision id=\"decision_0tybghz\" name=\"manufactory\">\n    <decisionTable id=\"decisionTable_1v3tii8\" hitPolicy=\"FIRST\">\n      <input id=\"input1\" label=\"CancelAmount\">\n        <inputExpression id=\"inputExpression1\" typeRef=\"number\">\n          <text>CancelAmount</text>\n        </inputExpression>\n      </input>\n      <output id=\"output1\" label=\"CancelFee\" name=\"CancelFee\" typeRef=\"boolean\" />\n      <rule id=\"DecisionRule_1cnxcyn\">\n        <inputEntry id=\"UnaryTests_111j4z2\">\n          <text>&lt;3</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_02lpi7u\">\n          <text>true</text>\n        </outputEntry>\n      </rule>\n      <rule id=\"DecisionRule_0ekg6tt\">\n        <inputEntry id=\"UnaryTests_00r0voj\">\n          <text>&gt;=3</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_13dssz2\">\n          <text>false</text>\n        </outputEntry>\n      </rule>\n    </decisionTable>\n  </decision>\n  <dmndi:DMNDI>\n    <dmndi:DMNDiagram id=\"DMNDiagram_0efnji1\">\n      <dmndi:DMNShape id=\"DMNShape_1sgy5sm\" dmnElementRef=\"decision_0tybghz\">\n        <dc:Bounds height=\"80\" width=\"180\" x=\"150\" y=\"150\" />\n      </dmndi:DMNShape>\n    </dmndi:DMNDiagram>\n  </dmndi:DMNDI>\n</definitions>\n"
-}
+    param = {
+        "Participant_1xq1vsc": {
+            "msp": "Testmembership-2.org.comMSP",
+            "attributes": {},
+            "isMulti": False,
+            "multiMaximum": 0,
+            "multiMinimum": 0,
+            "x509": "eDUwOTo6Q049dXNlcjEsT1U9Y2xpZW50OjpDTj1jYS50ZXN0TWVtYmVyc2hpcC0yLm9yZy5jb20sT1U9RmFicmljLE89dGVzdE1lbWJlcnNoaXAtMi5vcmcuY29tLFNUPU5vcnRoIENhcm9saW5hLEM9VVM=@Testmembership-2.org.comMSP",
+        },
+        "Participant_05g5xih": {
+            "msp": "Testmembership-1.org.comMSP",
+            "attributes": {},
+            "isMulti": False,
+            "multiMaximum": 0,
+            "multiMinimum": 0,
+            "x509": "eDUwOTo6Q049dXNlcjIsT1U9Y2xpZW50OjpDTj1jYS50ZXN0TWVtYmVyc2hpcC0xLm9yZy5jb20sT1U9RmFicmljLE89dGVzdE1lbWJlcnNoaXAtMS5vcmcuY29tLFNUPU5vcnRoIENhcm9saW5hLEM9VVM=@Testmembership-1.org.comMSP",
+        },
+        "Activity_1uktp5z_DecisionID": "decision_0tybghz",
+        "Activity_1uktp5z_ParamMapping": {
+            "CancelAmount": "OrderAmount",
+            "CancelFee": "CancelFee",
+        },
+        "Activity_1uktp5z_Content": '<?xml version="1.0" encoding="UTF-8"?>\n<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" id="definitions_1olsuce" name="definitions" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="5.22.0">\n  <decision id="decision_0tybghz" name="manufactory">\n    <decisionTable id="decisionTable_1v3tii8" hitPolicy="FIRST">\n      <input id="input1" label="CancelAmount">\n        <inputExpression id="inputExpression1" typeRef="number">\n          <text>CancelAmount</text>\n        </inputExpression>\n      </input>\n      <output id="output1" label="CancelFee" name="CancelFee" typeRef="boolean" />\n      <rule id="DecisionRule_1cnxcyn">\n        <inputEntry id="UnaryTests_111j4z2">\n          <text>&lt;3</text>\n        </inputEntry>\n        <outputEntry id="LiteralExpression_02lpi7u">\n          <text>true</text>\n        </outputEntry>\n      </rule>\n      <rule id="DecisionRule_0ekg6tt">\n        <inputEntry id="UnaryTests_00r0voj">\n          <text>&gt;=3</text>\n        </inputEntry>\n        <outputEntry id="LiteralExpression_13dssz2">\n          <text>false</text>\n        </outputEntry>\n      </rule>\n    </decisionTable>\n  </decision>\n  <dmndi:DMNDI>\n    <dmndi:DMNDiagram id="DMNDiagram_0efnji1">\n      <dmndi:DMNShape id="DMNShape_1sgy5sm" dmnElementRef="decision_0tybghz">\n        <dc:Bounds height="80" width="180" x="150" y="150" />\n      </dmndi:DMNShape>\n    </dmndi:DMNDiagram>\n  </dmndi:DMNDI>\n</definitions>\n',
+    }
 
     create_instance_params = {"input": {"initParametersBytes": json.dumps(param)}}
-    url = "http://127.0.0.1:5001/api/v1/namespaces/default/apis/manu3333-4ff118"
+    url = "http://127.0.0.1:5001/api/v1/namespaces/default/apis/manu1-895f32"
 
     participant_map = {
         "Participant_05g5xih": {
             "key": "Testmembership-1.org.comMSP::x509::CN=user2,OU=client::CN=ca.testMembership-1.org.com,OU=Fabric,O=testMembership-1.org.com,ST=North Carolina,C=US",
-            "fireflyUrl": "http://localhost:5002/api/v1/namespaces/default/apis/manu3333-4ff118",
+            "fireflyUrl": "http://localhost:5002/api/v1/namespaces/default/apis/manu1-895f32",
         },
         "Participant_1xq1vsc": {
             "key": "Testmembership-2.org.comMSP::x509::CN=user1,OU=client::CN=ca.testMembership-2.org.com,OU=Fabric,O=testMembership-2.org.com,ST=North Carolina,C=US",
-            "fireflyUrl": "http://localhost:5001/api/v1/namespaces/default/apis/manu3333-4ff118",
-        }
+            "fireflyUrl": "http://localhost:5001/api/v1/namespaces/default/apis/manu1-895f32",
+        },
     }
-    
-    contract_name = "manu3333"
-    contract_interface_id = "5a38664b-ef69-4c08-a2a0-9552a28d7bd8"
+
+    contract_name = "manu1"
+    contract_interface_id = "9232f4bf-6ed5-4e1b-b760-65604cde52f5"
 
     if create_listener:
         create_listener_and_subscribe(
@@ -198,14 +211,10 @@ if __name__ == "__main__":
                 elif "s" in c:
                     random_mode += RandomMode.SWITCH
 
-            random_num = args.n
-            experiment_num = args.N
-
             append_only_mode = args.e
             if append_only_mode:
                 random_mode = ""
                 random_num = 0
-                experiment_num = 0
 
             # 标记已完成
             finished_tasks = []
@@ -233,18 +242,44 @@ if __name__ == "__main__":
                 for content in all_content
                 if content["name"] not in finished_tasks
             ]
+
+            random_num = args.n
+            rate = args.N * 0.01
+            experiment_num = [
+                int(
+                    (
+                        len(task.steps) * (len(task.steps)-1)
+                        + len(task.steps)
+                        + 0.5 * len(task.steps) * (len(task.steps) - 1)
+                    )
+                    * rate
+                )
+                for task in all_tasks
+            ]
+
             # 执行
             results = []
+            origin_path = list(range(0, len(all_tasks[0].steps)))
+
+            used_path_remove = list(range(0, len(all_tasks[0].steps)))
+            used_path_add = list(itertools.permutations(origin_path, 2))
+            used_path_switch = list(itertools.combinations(origin_path, 2))
+
             with open(args.output + "_output.txt", "a") as f:
-                sys.stdout = f  # 将标准输出重定向到文件
+                # sys.stdout = f  # 将标准输出重定向到文件
                 print("output print to file")
-                for task in all_tasks:
+                for idx, task in enumerate(all_tasks):
                     try:
                         res = run_experiment(
                             task=task,
                             random_mode=RandomMode(random_mode),
-                            random_num=random_num,
-                            experiment_num=experiment_num,
+                            used_path_add=used_path_add,
+                            used_path_remove=used_path_remove,
+                            used_path_switch=used_path_switch,
+                            random_method_num=random_num,
+                            experiment_num=experiment_num[
+                                idx
+                            ],  # Use the calculated value
                             create_listener=args.listen,
                         )
                         for r in res:
@@ -267,11 +302,11 @@ if __name__ == "__main__":
                         results.extend(origin_result)
                         json.dump(results, f, indent=4)
                     else:
-                        # Only append to exists one, never create new task
+                        # Only append to existing one, never create a new task
                         for origin in origin_result:
                             for result in results:
                                 if result["task_name"] == origin["task_name"]:
-                                    # add all res with different index_path
+                                    # Add all res with different index_path
                                     extra_path = []
                                     for res in result["results"]:
                                         if res["index_path"] not in [

@@ -140,7 +140,7 @@ git switch NewCodeGenerate
 
 
 
-### Backend配置
+### Backend + oracle 配置
 
 创建：`python -m venv venv_name`
 
@@ -169,6 +169,11 @@ npm install
 `pip install -r requirements.txt`
 
 
+### translator配置
+
+到pytranslator文件夹同上步骤安装即可
+
+
 
 ### 运行
 
@@ -176,13 +181,22 @@ npm install
 
 source startrc
 
-分三个终端运行
+分5个终端运行
 
 （1）start_front
 
 （2）start_agent
 
 （3）start_backend
+
+（4）start_translator
+
+ (5)start_oracle
+ 
+
+ 还有一个debug功能，自动创建平台测试环境。
+
+（6）start_debug
 
 2.前端操作
 

@@ -335,7 +335,7 @@ def invoke_task(
     print(get_all_state_of_instance(url, blockchain_instance_id))
     # return BoolWithMessage(True, "Instance created")
 
-    time.sleep(2)
+    time.sleep(4)
     for index, path_index in enumerate(path_indexes):
         if not (
             res := invoke_choreograph_path_step(
