@@ -57,9 +57,6 @@ def default_response():
 def run_experiment(
     task,
     random_mode,
-    used_path_add: list[tuple[int]],
-    used_path_remove: list[int],
-    used_path_switch: list[tuple[int]],
     random_method_num=1,  # 一条路径中随机中add swap remove的次数
     experiment_num=1,
     create_listener=False,
@@ -104,8 +101,10 @@ def run_experiment(
     # generate
     execute_paths = [list(range(len(task.invoke_path)))]
     while len(execute_paths) < experiment_num:
-        print("execute_paths num:", len(execute_paths))
-        print("experiment_num", experiment_num)
+        origin_path = list(range(0, len(task.steps)))
+        used_path_remove = list(range(0, len(task.steps)))
+        used_path_add = list(itertools.permutations(origin_path, 2))
+        used_path_switch = list(itertools.combinations(origin_path, 2))
         random_path = generate_random_path(
             task.invoke_path,
             random_mode,
@@ -259,23 +258,16 @@ if __name__ == "__main__":
 
             # 执行
             results = []
-            origin_path = list(range(0, len(all_tasks[0].steps)))
-
-            used_path_remove = list(range(0, len(all_tasks[0].steps)))
-            used_path_add = list(itertools.permutations(origin_path, 2))
-            used_path_switch = list(itertools.combinations(origin_path, 2))
+            
 
             with open(args.output + "_output.txt", "a") as f:
-                # sys.stdout = f  # 将标准输出重定向到文件
+                sys.stdout = f  # 将标准输出重定向到文件
                 print("output print to file")
                 for idx, task in enumerate(all_tasks):
                     try:
                         res = run_experiment(
                             task=task,
                             random_mode=RandomMode(random_mode),
-                            used_path_add=used_path_add,
-                            used_path_remove=used_path_remove,
-                            used_path_switch=used_path_switch,
                             random_method_num=random_num,
                             experiment_num=experiment_num[
                                 idx
