@@ -6,6 +6,8 @@ import { useParticipantsData, useAvailableMembers } from "../hooks"
 import { v4 as uuidv4 } from 'uuid';
 import { useFabricIdentities } from '@/views/Consortium/FabricUsers/hooks';
 
+import {getMembershipList} from "@/api/platformAPI";
+
 const AttrTable = ({ dataSource, _setShowBingParticipantValue, clickedActionIndex }) => {
 
   // const [dataSource, setDataSource] = useState([]);
@@ -98,6 +100,13 @@ const AttrTable = ({ dataSource, _setShowBingParticipantValue, clickedActionInde
   );
 }
 
+interface membershipItemType {
+  id: string;
+  name: string;
+  orgId: string;
+  consortiumId: string;
+}
+
 const BindingParticipantComponent = ({ clickedActionIndex, showBindingParticipantMap, setShowBindingParticipantMap, showBindingParticipantValueMap, setShowBindingParticipantValueMap }) => {
 
   const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
@@ -106,6 +115,28 @@ const BindingParticipantComponent = ({ clickedActionIndex, showBindingParticipan
   const [fabricIdentities, { isLoading, isError, isSuccess }, refetch] = useFabricIdentities(currentEnvId,
     showBindingParticipantValueMap.get(clickedActionIndex)?.selectedMembershipId);
   const [members, syncMembers] = useAvailableMembers(currentEnvId)
+
+  const [membershipList, setMembershipList] = useState<membershipItemType[]>([]);
+
+  const renameMembership = ({ loleido_organization, consortium, ...rest }) => ({
+    ...rest,
+    orgId: loleido_organization,
+    consortiumId: consortium,
+  });
+
+  const consortiumId = useAppSelector(
+    (state) => state.consortium
+  ).currentConsortiumId;
+
+  useEffect(() => {
+    const fetchAndSetData = async (consortiumId: string) => {
+      const data = await getMembershipList(consortiumId);
+      const newMembershipList = data.map(renameMembership);
+      setMembershipList(newMembershipList);
+    };
+
+    fetchAndSetData(consortiumId);
+  }, [consortiumId]);
 
   const _setShowBingParticipant = (id, updates) => {
     setShowBindingParticipantMap(prev => {
@@ -176,10 +207,10 @@ const BindingParticipantComponent = ({ clickedActionIndex, showBindingParticipan
                     请选择一个选项
                   </Select.Option>
                   {
-                    members.map((member) => {
+                    membershipList.map((member) => {
                       return (
-                        <Select.Option value={member.membershipId} key={member.membershipId}>
-                          {member.membershipName}
+                        <Select.Option value={member.id} key={member.id}>
+                          {member.name}
                         </Select.Option>
                       )
                     }) // 为Select添加一个空选项
