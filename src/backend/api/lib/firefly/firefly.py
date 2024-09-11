@@ -30,10 +30,10 @@ class Firefly_cli:
             command.append(f"""--channel {channel_name}""")
             command.append(f"""--chaincode {firefly_chaincode_name}""")
             command = " ".join(command)
-            # print(command)
+            print(command)
             # output = call(proxy_command + ";" + command, shell=True)
             output = call(command, shell=True)
-            # print("Command Output:")
+            print("Command Output:")
             # print(output)
             if output != 0:
                 raise Exception("ff iniy command execute fail")
