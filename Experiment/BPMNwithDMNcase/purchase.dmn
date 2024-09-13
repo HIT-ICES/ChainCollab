@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/2.0" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" id="definitions_1olsuce" name="definitions" namespace="http://camunda.org/schema/1.0/dmn" exporter="dmn-js (https://demo.bpmn.io/dmn)" exporterVersion="16.4.0">
+  <decision id="decision_0tybghz" name="">
+    <decisionTable id="decisionTable_1v3tii8">
+      <input id="input1" label="price">
+        <inputExpression id="inputExpression1" typeRef="number">
+          <text>price</text>
+        </inputExpression>
+      </input>
+      <output id="output1" label="discount" name="discount" typeRef="boolean" biodi:width="192" />
+      <rule id="DecisionRule_1s51owg">
+        <inputEntry id="UnaryTests_05mwgq3">
+          <text>&gt;=1000</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_19i7d5n">
+          <text>true</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1fvljw2">
+        <inputEntry id="UnaryTests_0w4gn9v">
+          <text>&lt;1000</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1mm1wl8">
+          <text>false</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram id="DMNDiagram_1xxktam">
+      <dmndi:DMNShape id="DMNShape_00d928b" dmnElementRef="decision_0tybghz">
+        <dc:Bounds height="80" width="180" x="150" y="150" />
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>

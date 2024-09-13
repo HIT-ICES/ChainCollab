@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" id="definitions_1olsuce" name="definitions" namespace="http://camunda.org/schema/1.0/dmn" exporter="dmn-js (https://demo.bpmn.io/dmn)" exporterVersion="16.4.0">
+  <decision id="decision_0tybghz" name="">
+    <decisionTable id="decisionTable_1v3tii8">
+      <input id="input1" label="damageNumber">
+        <inputExpression id="inputExpression1" typeRef="number">
+          <text>damageNumber</text>
+        </inputExpression>
+      </input>
+      <output id="output1" label="refund" name="refund" typeRef="boolean" />
+      <rule id="DecisionRule_1u3nx99">
+        <inputEntry id="UnaryTests_1wiuhxd">
+          <text>&gt;=10</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1truver">
+          <text>false</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0yj7v2q">
+        <inputEntry id="UnaryTests_1hfiee1">
+          <text>&lt;10</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1og4jjn">
+          <text>true</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>
