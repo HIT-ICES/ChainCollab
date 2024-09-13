@@ -1188,18 +1188,18 @@ class GoChaincodeTranslator:
             )
         )
 
-        ffi_items.append(
-            self._generate_ffi_item(
-                name="UpdateCID",
-                pathname="",
-                description="Update the businessRule CID",
-                params=[
-                    self._instance_id_param(),
-                    {"name": "BusinessRuleID", "schema": {"type": "string"}},
-                    {"name": "cid", "schema": {"type": "string"}},
-                ],
-            )
-        )
+        # ffi_items.append(
+        #     self._generate_ffi_item(
+        #         name="UpdateCID",
+        #         pathname="",
+        #         description="Update the businessRule CID",
+        #         params=[
+        #             self._instance_id_param(),
+        #             {"name": "BusinessRuleID", "schema": {"type": "string"}},
+        #             {"name": "cid", "schema": {"type": "string"}},
+        #         ],
+        #     )
+        # )
 
         for element in self._choreography.nodes:
             match element.type:

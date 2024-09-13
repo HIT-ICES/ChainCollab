@@ -1,3 +1,0 @@
-type InitParameters struct {
-    #fields#
-}
