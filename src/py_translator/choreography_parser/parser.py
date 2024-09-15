@@ -184,6 +184,7 @@ class Choreography:
         match element.tag.split("}")[1]:
             case EdgeType.MESSAGE_FLOW.value:
                 self.message_to_add.append(element.attrib.get("messageRef"))
+                # print(element.attrib["messageRef"])
                 return MessageFlow(
                     self,
                     element.attrib["id"],
@@ -277,6 +278,7 @@ class Choreography:
         self._parse_element(target_element)
         self._parse_messages(root)
         self._init_element_properties()
+
 
     def load_diagram_from_xml_file(self, file_path, target=""):
         document = ET.parse(file_path, ET.XMLParser(encoding="utf-8"))
@@ -450,7 +452,7 @@ class Choreography:
 
 if __name__ == "__main__":
 
-    file_name_list = ["manu2.bpmn"]
+    file_name_list = ["Purchase.bpmn"]
     # file_name_list = ["Hotel Booking.bpmn"]
     for file_name in file_name_list:
         choreography = Choreography()

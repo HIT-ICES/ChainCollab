@@ -6,9 +6,11 @@ from enum import Enum
 from typing import List, Optional, Tuple, Any, Protocol
 from .protocals import ElementProtocol, GraphProtocol
 
+
 class RootType(Enum):
     CHOREOGRAPHY = "choreography"
     BPMNDIAGRAM = "BPMNDiagram"
+
 
 class NodeType(Enum):
     PARTICIPANT = "participant"
@@ -20,6 +22,7 @@ class NodeType(Enum):
     PARALLEL_GATEWAY = "parallelGateway"
     EVENT_BASED_GATEWAY = "eventBasedGateway"
     BUSINESS_RULE_TASK = "businessRuleTask"
+
 
 class EdgeType(Enum):
     MESSAGE_FLOW = "messageFlow"
@@ -52,6 +55,7 @@ class PropertyMeta(type):
             attrs[attr_name] = property(getter)
         return super().__new__(cls, name, bases, attrs)
 
+
 class Element(metaclass=PropertyMeta):
     _properties: List[str] = ["id", "name", "type"]
     _object_properties: List[str] = []
@@ -71,11 +75,10 @@ class Element(metaclass=PropertyMeta):
                     [
                         {
                             "id": inner_attr["id"],
-                            "element": self._graph.get_element_with_id(
-                                inner_attr["id"]
-                            ),
+                            "element": element
                         }
                         for inner_attr in getattr(self, "_" + attr)
+                        if (element := self._graph.get_element_with_id(inner_attr["id"])) is not None 
                     ],
                 )
                 continue
@@ -110,7 +113,15 @@ class Participant(Element):
     ]
     _object_properties: List[str] = []
 
-    def __init__(self, graph, id: str, name: str = "", is_multi: bool = False,  multi_minimum: int = 0, multi_maximum: int = 0):
+    def __init__(
+        self,
+        graph,
+        id: str,
+        name: str = "",
+        is_multi: bool = False,
+        multi_minimum: int = 0,
+        multi_maximum: int = 0,
+    ):
         super().__init__(graph, id, name)
         self._is_multi: bool = is_multi
         self._multi_minimum: int = multi_minimum
@@ -273,10 +284,25 @@ class EventBasedGateway(Element):
 
 class BusinessRuleTask(Element):
     _type: NodeType = NodeType.BUSINESS_RULE_TASK
-    _properties: List[str] = ["id", "name", "type", "incoming", "outgoing", "documentation"]
+    _properties: List[str] = [
+        "id",
+        "name",
+        "type",
+        "incoming",
+        "outgoing",
+        "documentation",
+    ]
     _object_properties: List[str] = ["incoming", "outgoing"]
 
-    def __init__(self, graph, id: str, name: str = "", incoming: str = "", outgoing: str = "", documentation:str = ""):
+    def __init__(
+        self,
+        graph,
+        id: str,
+        name: str = "",
+        incoming: str = "",
+        outgoing: str = "",
+        documentation: str = "",
+    ):
         super().__init__(graph, id, name)
         self._documentation = documentation
         self._incoming: dict = initObjectProperties(incoming)

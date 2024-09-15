@@ -180,6 +180,7 @@ const BPMNOverview = () => {
     const onRegister = async () => {
         try {
             setButtonLoading(true);
+            debugger
             const bpmn = await retrieveBPMN(bpmnId)
             const chaincodeName = bpmn.name.replace(".bpmn", "")
             const ffiContent = bpmn.ffiContent

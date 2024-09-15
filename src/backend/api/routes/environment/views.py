@@ -16,7 +16,7 @@ from api.models import (
     FabricResourceSet,
     LoleidoOrganization,
 )
-from api.config import DEFAULT_AGENT, DEFAULT_CHANNEL_NAME, FABRIC_CONFIG, CURRENT_IP
+from api.config import DEFAULT_AGENT, DEFAULT_CHANNEL_NAME, FABRIC_CONFIG, CURRENT_IP, ORACLE_CONTRACT_PATH
 from api.utils.test_time import timeitwithname
 
 
@@ -440,7 +440,7 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         env.status = "ACTIVATED"
         env.save()
 
-        # package Firefly Chaincode Here
+        # package Firefly、Oracle Chaincode Here
         # formdata
         # read chaincode from file system
 
@@ -449,64 +449,150 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         if TEST_MODE_ON:
             return Response(status=status.HTTP_201_CREATED)
         org_id = request.data.get("org_id")
-        with open(FABRIC_CONFIG + "/firefly-go.zip", "rb") as f:
-            chaincode = f.read()
-        data = {
-            "name": "Firefly",
-            "version": "1.0",
-            "language": "golang",
-            "org_id": org_id,
-        }
-        files = {"file": ("firefly.tar.gz", chaincode, "application/octet-stream")}
 
-        res = post(
-            f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/chaincodes/package",
-            data=data,
-            files=files,
-            headers={"Authorization": headers["Authorization"]},
+        def packageChaincode(
+            file_path: str, chaincode_name: str, version: str, org_id: str
+        ) -> str:
+            with open(file_path, "rb") as f:
+                chaincode = f.read()
+            data = {
+                "name": chaincode_name,
+                "version": version,
+                "language": "golang",
+                "org_id": org_id,
+            }
+            files = {
+                "file": (
+                    chaincode_name + ".tar.gz",
+                    chaincode,
+                    "application/octet-stream",
+                )
+            }
+            res = post(
+                f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/chaincodes/package",
+                data=data,
+                files=files,
+                headers={"Authorization": headers["Authorization"]},
+            )
+            return res.json()["data"]["id"]
+
+        def installChaincodeForSystemOrgPeers(
+            file_path: str,
+            chaincode_name: str,
+            version: str,
+            org_id: str,
+            channel_name: str,
+            orderer_resource_set: ResourceSet,
+        ):
+            # install、approve chaincode for system org peers
+            chaincode_id = packageChaincode(file_path, chaincode_name, version, org_id)
+            # install chaincode for system org peers
+            data = {
+                "id": chaincode_id,
+                "peer_node_list": [
+                    str(node.id)
+                    for node in orderer_resource_set.sub_resource_set.get()
+                    .node.all()
+                    .filter(type="peer")
+                ],
+            }
+            res = post(
+                f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/chaincodes/install",
+                data=data,
+                headers={"Authorization": headers["Authorization"]},
+            )
+            # approve chaincode for system org peers
+            data = {
+                "channel_name": channel_name,
+                "chaincode_name": chaincode_name,
+                "chaincode_version": "1.0",
+                "sequence": 1,
+                "resource_set_id": orderer_resource_set.id,
+            }
+            res = post(
+                f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/chaincodes/approve_for_my_org",
+                data=data,
+                headers={"Authorization": headers["Authorization"]},
+            )
+
+        org_id = request.data.get("org_id")
+        installChaincodeForSystemOrgPeers(
+            FABRIC_CONFIG + "/firefly-go.zip",
+            "Firefly",
+            "1.0",
+            org_id,
+            channel_name,
+            orderer_resource_sets[0],
         )
 
-        # install chaincode for system org peers
-        print("install chaincode for system org peers")
-        data = {
-            "id": res.json()["data"]["id"],
-            "peer_node_list": [
-                str(node.id)
-                for node in orderer_resource_sets[0]
-                .sub_resource_set.get()
-                .node.all()
-                .filter(type="peer")
-            ],
-        }
-        res = post(
-            f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/chaincodes/install",
-            data=data,
-            headers={"Authorization": headers["Authorization"]},
+        installChaincodeForSystemOrgPeers(
+            ORACLE_CONTRACT_PATH + "/oracle-go.zip",
+            "Oracle",
+            "1.0",
+            org_id,
+            channel_name,
+            orderer_resource_sets[0],
         )
-        print(res.json())
+            
+        # with open(FABRIC_CONFIG + "/firefly-go.zip", "rb") as f:
+        #     chaincode = f.read()
+        # data = {
+        #     "name": "Firefly",
+        #     "version": "1.0",
+        #     "language": "golang",
+        #     "org_id": org_id,
+        # }
+        # files = {"file": ("firefly.tar.gz", chaincode, "application/octet-stream")}
 
-        # approve chaincode for system org peers
-        print("approve chaincode for system org peers")
-        data = {
-            "channel_name": channel_name,
-            "chaincode_name": "Firefly",
-            "chaincode_version": "1.0",
-            "sequence": 1,
-            "resource_set_id": orderer_resource_sets[0].id,
-        }
-        res = post(
-            f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/chaincodes/approve_for_my_org",
-            data=data,
-            headers={"Authorization": headers["Authorization"]},
-        )
-        print(res.json())
+        # res = post(
+        #     f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/chaincodes/package",
+        #     data=data,
+        #     files=files,
+        #     headers={"Authorization": headers["Authorization"]},
+        # )
+
+        # # install chaincode for system org peers
+        # print("install chaincode for system org peers")
+        # data = {
+        #     "id": res.json()["data"]["id"],
+        #     "peer_node_list": [
+        #         str(node.id)
+        #         for node in orderer_resource_sets[0]
+        #         .sub_resource_set.get()
+        #         .node.all()
+        #         .filter(type="peer")
+        #     ],
+        # }
+        # res = post(
+        #     f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/chaincodes/install",
+        #     data=data,
+        #     headers={"Authorization": headers["Authorization"]},
+        # )
+        # print(res.json())
+
+        # # approve chaincode for system org peers
+        # print("approve chaincode for system org peers")
+        # data = {
+        #     "channel_name": channel_name,
+        #     "chaincode_name": "Firefly",
+        #     "chaincode_version": "1.0",
+        #     "sequence": 1,
+        #     "resource_set_id": orderer_resource_sets[0].id,
+        # }
+        # res = post(
+        #     f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/chaincodes/approve_for_my_org",
+        #     data=data,
+        #     headers={"Authorization": headers["Authorization"]},
+        # )
+        # print(res.json())
+
         return Response(status=status.HTTP_201_CREATED)
 
     @action(methods=["post"], detail=True, url_path="start_firefly")
     @timeitwithname("Firefly")
     def start_firefly(self, request, pk=None, *args, **kwargs):
         """
-        启动Firefly
+        启动Firefly 以及 其他组件
         """
         try:
             env = Environment.objects.get(pk=pk)

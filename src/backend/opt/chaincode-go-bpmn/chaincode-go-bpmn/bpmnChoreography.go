@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"chaincode-go-bpmn/chaincode"
+
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
