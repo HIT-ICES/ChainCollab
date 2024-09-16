@@ -1,0 +1,353 @@
+[{
+    "name": "Order Processing Flow - Path 2",
+    "steps": [
+      {
+        "element_name": "Event_06sexe6",
+        "element_type": "Event",
+        "metaInfo": "Start Event",
+        "parameters": [],
+        "invoker": "",
+        "state_change": [
+          {
+            "element_name": "Event_06sexe6",
+            "element_type": "Event",
+            "pre_state": "enable",
+            "post_state": "done"
+          }
+        ]
+      },
+      {
+        "element_name": "Message_1wswgqu",
+        "element_type": "Message",
+        "metaInfo": "{\"properties\":{\"order\":{\"type\":\"string\",\"description\":\"\"},\"amount\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"order\",\"amount\"],\"files\":{},\"file required\":[]}",
+        "parameters": ["order", 10],
+        "invoker": "Participant_0w6qkdf",
+        "state_change": [
+          {
+            "element_name": "Event_06sexe6",
+            "element_type": "Event",
+            "pre_state": "done",
+            "post_state": "enable"
+          },
+          {
+            "element_name": "Message_1wswgqu",
+            "element_type": "Message",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Message_1ajdm9l",
+        "element_type": "Message",
+        "metaInfo": "{\"properties\":{\"placed_order\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+        "parameters": ["placed_order_details"],
+        "invoker": "Participant_19mgbdn",
+        "state_change": [
+          {
+            "element_name": "Message_1wswgqu",
+            "element_type": "Message",
+            "pre_state": "done",
+            "post_state": "enable"
+          },
+          {
+            "element_name": "Message_1ajdm9l",
+            "element_type": "Message",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Gateway_0onpe6x",
+        "element_type": "Gateway",
+        "metaInfo": "",
+        "parameters": [],
+        "invoker": "",
+        "state_change": [
+          {
+            "element_name": "Message_1ajdm9l",
+            "element_type": "Message",
+            "pre_state": "done",
+            "post_state": "enable"
+          },
+          {
+            "element_name": "Gateway_0onpe6x",
+            "element_type": "Gateway",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Message_0cba4t6",
+        "element_type": "Message",
+        "metaInfo": "{\"properties\":{\"fwd_order\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+        "parameters": ["fwd_order_details"],
+        "invoker": "Participant_0w6qkdf",
+        "state_change": [
+          {
+            "element_name": "Gateway_0onpe6x",
+            "element_type": "Gateway",
+            "pre_state": "done",
+            "post_state": "enable"
+          },
+          {
+            "element_name": "Message_0cba4t6",
+            "element_type": "Message",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Message_0pm90nx",
+        "element_type": "Message",
+        "metaInfo": "{\"properties\":{\"transport_order\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+        "parameters": ["transport_order_details"],
+        "invoker": "Participant_0w6qkdf",
+        "state_change": [
+          {
+            "element_name": "Message_0cba4t6",
+            "element_type": "Message",
+            "pre_state": "done",
+            "post_state": "enable"
+          },
+          {
+            "element_name": "Message_0pm90nx",
+            "element_type": "Message",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Gateway_1fbifca",
+        "element_type": "Gateway",
+        "metaInfo": "",
+        "parameters": [],
+        "invoker": "",
+        "state_change": [
+          {
+            "element_name": "Message_0pm90nx",
+            "element_type": "Message",
+            "pre_state": "done",
+            "post_state": "enable"
+          },
+          {
+            "element_name": "Gateway_1fbifca",
+            "element_type": "Gateway",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Message_0rwz1km",
+        "element_type": "Message",
+        "metaInfo": "{\"properties\":{\"req_details\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+        "parameters": ["req_details"],
+        "invoker": "Participant_19j1e3o",
+        "state_change": [
+          {
+            "element_name": "Gateway_1fbifca",
+            "element_type": "Gateway",
+            "pre_state": "done",
+            "post_state": "enable"
+          },
+          {
+            "element_name": "Message_0rwz1km",
+            "element_type": "Message",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Message_0hpha6h",
+        "element_type": "Message",
+        "metaInfo": "{\"properties\":{\"pre_details\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+        "parameters": ["pre_details"],
+        "invoker": "Participant_0sa2v7d",
+        "state_change": [
+          {
+            "element_name": "Message_0rwz1km",
+            "element_type": "Message",
+            "pre_state": "done",
+            "post_state": "enable"
+          },
+          {
+            "element_name": "Message_0hpha6h",
+            "element_type": "Message",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Message_1io2g9u",
+        "element_type": "Message",
+        "metaInfo": "{\"properties\":{\"waybill\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+        "parameters": ["waybill_info"],
+        "invoker": "Participant_0sa2v7d",
+        "state_change": [
+          {
+            "element_name": "Message_0hpha6h",
+            "element_type": "Message",
+            "pre_state": "done",
+            "post_state": "enable"
+          },
+          {
+            "element_name": "Message_1io2g9u",
+            "element_type": "Message",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Message_0d2xte5",
+        "element_type": "Message",
+        "metaInfo": "{\"properties\":{\"del_order\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+        "parameters": ["delivered_order_details"],
+        "invoker": "Participant_19j1e3o",
+        "state_change": [
+          {
+            "element_name": "Message_1io2g9u",
+            "element_type": "Message",
+            "pre_state": "done",
+            "post_state": "enable"
+          },
+          {
+            "element_name": "Message_0d2xte5",
+            "element_type": "Message",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Message_04wmlqe",
+        "element_type": "Message",
+        "metaInfo": "{\"properties\":{\"report\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+        "parameters": ["report_details"],
+        "invoker": "Participant_19mgbdn",
+        "state_change": [
+          {
+            "element_name": "Message_0d2xte5",
+            "element_type": "Message",
+            "pre_state": "done",
+            "post_state": "enable"
+          },
+          {
+            "element_name": "Message_04wmlqe",
+            "element_type": "Message",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Message_0ps2yzo",
+        "element_type": "Message",
+        "metaInfo": "{\"properties\":{\"Self_pickup\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"Self_pickup\"],\"files\":{},\"file required\":[]}",
+        "parameters": [false],
+        "invoker": "Participant_0w6qkdf",
+        "state_change": [
+          {
+            "element_name": "Message_04wmlqe",
+            "element_type": "Message",
+            "pre_state": "done",
+            "post_state": "enable"
+          },
+          {
+            "element_name": "Message_0ps2yzo",
+            "element_type": "Message",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Activity_0fbi09z",
+        "element_type": "Activity",
+        "metaInfo": "{\"inputs\":[{\"name\":\"amount\",\"type\":\"number\",\"description\":\"\"},{\"name\":\"Self_pickup\",\"type\":\"boolean\",\"description\":\"\"}],\"outputs\":[{\"name\":\"deliver\",\"type\":\"boolean\",\"description\":\"\"}]}",
+        "parameters": [10, false],
+        "invoker": "",
+        "state_change": [
+          {
+            "element_name": "Message_0ps2yzo",
+            "element_type": "Message",
+            "pre_state": "done",
+            "post_state": "enable"
+          },
+          {
+            "element_name": "Activity_0fbi09z",
+            "element_type": "Activity",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Gateway_11hmo2k",
+        "element_type": "Gateway",
+        "metaInfo": "",
+        "parameters": [],
+        "invoker": "",
+        "state_change": [
+          {
+            "element_name": "Activity_0fbi09z",
+            "element_type": "Activity",
+            "pre_state": "done",
+            "post_state": "enable"
+          },
+          {
+            "element_name": "Gateway_11hmo2k",
+            "element_type": "Gateway",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Event_0eoqvir",
+        "element_type": "Event",
+        "metaInfo": "End Event",
+        "parameters": [],
+        "invoker": "",
+        "state_change": [
+          {
+            "element_name": "Gateway_11hmo2k",
+            "element_type": "Gateway",
+            "pre_state": "done",
+            "post_state": "enable"
+          },
+          {
+            "element_name": "Event_0eoqvir",
+            "element_type": "Event",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      }
+    ],
+    "invoke_path": [
+      "Event_06sexe6",
+      "Message_1wswgqu",
+      "Message_1ajdm9l",
+      "Gateway_0onpe6x",
+      "Message_0cba4t6",
+      "Message_0pm90nx",
+      "Gateway_1fbifca",
+      "Message_0rwz1km",
+      "Message_0hpha6h",
+      "Message_1io2g9u",
+      "Message_0d2xte5",
+      "Message_04wmlqe",
+      "Message_0ps2yzo",
+      "Activity_0fbi09z",
+      "Gateway_11hmo2k",
+      "Event_0eoqvir"
+    ]
+  }]
