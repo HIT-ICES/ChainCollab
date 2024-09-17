@@ -533,58 +533,9 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
             channel_name,
             orderer_resource_sets[0],
         )
-            
-        # with open(FABRIC_CONFIG + "/firefly-go.zip", "rb") as f:
-        #     chaincode = f.read()
-        # data = {
-        #     "name": "Firefly",
-        #     "version": "1.0",
-        #     "language": "golang",
-        #     "org_id": org_id,
-        # }
-        # files = {"file": ("firefly.tar.gz", chaincode, "application/octet-stream")}
 
-        # res = post(
-        #     f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/chaincodes/package",
-        #     data=data,
-        #     files=files,
-        #     headers={"Authorization": headers["Authorization"]},
-        # )
+        # installChaincodeForSystemOrgPeers()
 
-        # # install chaincode for system org peers
-        # print("install chaincode for system org peers")
-        # data = {
-        #     "id": res.json()["data"]["id"],
-        #     "peer_node_list": [
-        #         str(node.id)
-        #         for node in orderer_resource_sets[0]
-        #         .sub_resource_set.get()
-        #         .node.all()
-        #         .filter(type="peer")
-        #     ],
-        # }
-        # res = post(
-        #     f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/chaincodes/install",
-        #     data=data,
-        #     headers={"Authorization": headers["Authorization"]},
-        # )
-        # print(res.json())
-
-        # # approve chaincode for system org peers
-        # print("approve chaincode for system org peers")
-        # data = {
-        #     "channel_name": channel_name,
-        #     "chaincode_name": "Firefly",
-        #     "chaincode_version": "1.0",
-        #     "sequence": 1,
-        #     "resource_set_id": orderer_resource_sets[0].id,
-        # }
-        # res = post(
-        #     f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/chaincodes/approve_for_my_org",
-        #     data=data,
-        #     headers={"Authorization": headers["Authorization"]},
-        # )
-        # print(res.json())
 
         return Response(status=status.HTTP_201_CREATED)
 

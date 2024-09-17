@@ -22,7 +22,7 @@ import Button, { ButtonProps } from "@mui/material/Button";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import { purple } from "@mui/material/colors";
 import { useNavigate } from "react-router-dom";
-const { Text } = Typography;
+const { Text, Title } = Typography;
 import {
   InitEnv,
   JoinEnv,
@@ -125,11 +125,62 @@ const items: Array<{
     },
     {
       title: "Active",
-    },
-    {
-      title: "Firefly",
     }
   ];
+
+
+const FireflyComponentCard = () => {
+  // With A Logo and some text
+  return (
+    <Card style={{ width: 200, height: 200, borderRadius: 10, display: "flex", justifyContent: "center", alignContent: "center" }}>
+      {/* center a logo 100*100 */}
+      <Row justify="center" align="middle" style={{ height: 120 }}>
+        <img src="https://www.lfdecentralizedtrust.org/hubfs/LF%20Decentralized%20Trust/Hyperledger_Firefly_Stroke.svg" alt="firefly" style={{ width: 100, height: 100 }} />
+      </Row>
+      <Title>
+        Firefly
+      </Title>
+      <Text>
+        ChainCode Installed
+      </Text>
+    </Card>
+  )
+}
+
+const OracleComponentCard = () => {
+  // With A Logo and some text
+  return (
+    <Card style={{ width: 200, height: 200, borderRadius: 10, display: "flex", justifyContent: "center", alignContent: "center" }}>
+      {/* center a logo 100*100 */}
+      <Row justify="center" align="middle" style={{ height: 120 }}>
+        <img src="https://www.lfdecentralizedtrust.org/hubfs/LF%20Decentralized%20Trust/Hyperledger_Firefly_Stroke.svg" alt="firefly" style={{ width: 100, height: 100 }} />
+      </Row>
+      <Title>
+        Firefly
+      </Title>
+      <Text>
+        ChainCode Installed
+      </Text>
+    </Card>
+  )
+}
+
+const DMNComponentCard = () => {
+  return (
+    <Card style={{ width: 200, height: 200, borderRadius: 10, display: "flex", justifyContent: "center", alignContent: "center" }}>
+      {/* center a logo 100*100 */}
+      <Row justify="center" align="middle" style={{ height: 120 }}>
+        <img src="https://www.lfdecentralizedtrust.org/hubfs/LF%20Decentralized%20Trust/Hyperledger_Firefly_Stroke.svg" alt="firefly" style={{ width: 100, height: 100 }} />
+      </Row>
+      <Title>
+        Firefly
+      </Title>
+      <Text>
+        ChainCode Installed
+      </Text>
+    </Card>
+  )
+}
 
 
 const Overview: React.FC = () => {
@@ -155,9 +206,8 @@ const Overview: React.FC = () => {
       return 2
     } else if (envInfo.status === "ACTIVATED") {
       return 3
-    } else if (envInfo.status === "FIREFLY") {
-      return 4
     }
+    return 3
   })()
 
 
@@ -254,18 +304,6 @@ const Overview: React.FC = () => {
     >{buttonName}</Button>)
   }
 
-  const allInOneFunction = async () => {
-    // Init, join all membership, start, activate
-    await InitEnv(envInfo.id)
-    // get all memberships
-
-    for (let i = 0; i < membershipList.length; i++) {
-      await JoinEnv(envInfo.id, membershipList[i].id)
-    }
-    await StartEnv(envInfo.id)
-    await ActivateEnv(envInfo.id, currentOrgId)
-    setSync()
-  }
 
   return (
     <>
@@ -279,30 +317,16 @@ const Overview: React.FC = () => {
               <Col span={2} style={customColStyle}>
                 <ClearAllIcon style={{ fontSize: 24 }} />
               </Col>
-              <Col span={2} style={customColStyle}>
+              <Col span={8} style={customColStyle}>
                 <Text strong style={customTextStyle}>
-                  Status
+                  Naive Network
                 </Text>
               </Col>
               <Col
                 flex="auto"
                 style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}
               >
-                {(status !== 1 && status !== 3) ? null : (
-                  subButton()
-                )}
-                <div style={{ width: '10px' }} />
-                {status === 4 ? null : (
-                  mainButton()
-                )}
-                <div style={{ width: '10px' }} />
-                <Button
-                  variant="outlined"
-                  onClick={allInOneFunction}
-                >
-                  All In One
-                </Button>
-
+                Button Line
               </Col>
             </Row>
             <Row>
@@ -322,8 +346,22 @@ const Overview: React.FC = () => {
             </Row>
           </Card.Grid>
 
+          <Card.Grid style={{ width: "100%", height: "100%" }}>
+            <Row
+              justify="space-between"
+              style={{ width: "100%", height: "100%" }}
+            >
+              <Col span={8} style={customColStyle}>
+                <Text strong style={customTextStyle}>
+                  Function Component
+                </Text>
+              </Col>
+            </Row>
+            <Row>
+              <FireflyComponentCard />
+            </Row>
+          </Card.Grid>
 
-          {/* Membership */}
           <Card.Grid style={{ width: "100%", height: "100%" }}>
             <Row style={{ width: "100%", height: "100%" }}>
               <Col span={2} style={customColStyle}>
@@ -341,6 +379,7 @@ const Overview: React.FC = () => {
               </Col>
             </Row>
           </Card.Grid>
+          {/* Membership */}
           <Card.Grid
             style={{ width: "100%", height: "100%", cursor: "pointer" }}
           >

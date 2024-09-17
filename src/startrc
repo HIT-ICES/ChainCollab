@@ -50,25 +50,40 @@ add_host_mapping() {
 alias python=python3.10
 
 # back up /etc/hosts
-export is_backup_hosts=0
+# read from $WorkDir/hosts.bak
+
+
+
+# write it to $WorkDir/startrc.config]
+
+is_backup_hosts() {
+    # check if hosts file is backed up
+    if [ -f $WorkDir/hosts.bak ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+
 backup_hosts() {
-    if [ $is_backup_hosts -eq 1 ]; then
+    is_backup_hosts
+    if [ $? -eq 0 ]; then
         echo "已经备份过hosts文件"
         return 1
     fi
     cp /etc/hosts $WorkDir/hosts.bak
-    export is_backup_hosts=1
     echo "已备份hosts文件"
 }
 
 restore_hosts() {
-    if [ $is_backup_hosts -eq 0 ]; then
+    is_backup_hosts
+    if [ $? -eq 1 ]; then
         echo "没有备份hosts文件"
         return 1
     fi
     sudo cp $WorkDir/hosts.bak /etc/hosts
     rm $WorkDir/hosts.bak
-    export is_backup_hosts=0
     echo "已恢复hosts文件"
 }
 

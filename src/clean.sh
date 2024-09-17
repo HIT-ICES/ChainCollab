@@ -62,3 +62,5 @@ docker volume prune -f
 echo "Remove DB"
 docker stop cello-postgres
 docker rm cello-postgres
+
+echo "Finished cleaning"
