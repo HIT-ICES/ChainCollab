@@ -794,9 +794,24 @@ class Environment(models.Model):
     )
     network = models.ForeignKey(Network, null=True, on_delete=models.DO_NOTHING)
     status = models.CharField(
-        help_text="status of environment,can be CREATED|INITIALIZED|STARTED|ACTIVATED|FIREFLY",
+        help_text="status of environment,can be CREATED|INITIALIZED|STARTED|ACTIVATED",
         max_length=32,
         default="CREATED",
+    )
+    firefly_status = models.CharField(
+        help_text="status of firefly,can be NO|CHAINCODEINSTALLED|STARTED",
+        max_length=32,
+        default="NO",
+    )
+    Oracle_status = models.CharField(
+        help_text="status of Oracle,can be NO|CHAINCODEINSTALLED",
+        max_length=32,
+        default="NO",
+    )
+    DMN_status = models.CharField(
+        help_text="status of DMN,can be NO|CHAINCODEINSTALLED",
+        max_length=32,
+        default="NO",
     )
     create_at = models.DateTimeField(
         help_text="create time of environment", auto_now_add=True
@@ -1456,3 +1471,55 @@ class FabricIdentity(models.Model):
         import hashlib
 
         return self.secret == hashlib.md5(secret.encode("utf-8")).hexdigest()
+
+
+class Oracle(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        help_text="ID of Oracle",
+        default=make_uuid,
+        editable=False,
+        unique=True,
+    )
+    name = models.TextField(help_text="name of Oracle")
+    environment = models.ForeignKey(
+        Environment,
+        help_text="related environment_id",
+        null=True,
+        on_delete=models.CASCADE,
+    )
+    membership = models.ForeignKey(
+        Membership,
+        help_text="related membership_id",
+        null=True,
+        on_delete=models.CASCADE,
+    )
+    create_at = models.DateTimeField(
+        help_text="Create time of Oracle", auto_now_add=True
+    )
+
+
+class DmnEngine(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        help_text="ID of DmnEngine",
+        default=make_uuid,
+        editable=False,
+        unique=True,
+    )
+    name = models.TextField(help_text="name of DmnEngine")
+    environment = models.ForeignKey(
+        Environment,
+        help_text="related environment_id",
+        null=True,
+        on_delete=models.CASCADE,
+    )
+    membership = models.ForeignKey(
+        Membership,
+        help_text="related membership_id",
+        null=True,
+        on_delete=models.CASCADE,
+    )
+    create_at = models.DateTimeField(
+        help_text="Create time of DmnEngine", auto_now_add=True
+    )

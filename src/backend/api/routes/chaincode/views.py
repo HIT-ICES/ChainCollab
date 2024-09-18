@@ -228,7 +228,7 @@ class ChainCodeViewSet(viewsets.ViewSet):
     @action(detail=False, methods=["post"])
     def install(self, request, *args, **kwargs):
         chaincode_id = request.data.get("id")
-        peer_node_list = request.data.get("peer_node_list")
+        peer_node_list = request.data.getlist("peer_node_list")
         try:
             if isinstance(peer_node_list, str):
                 peer_node_list = [peer_node_list]
@@ -250,17 +250,18 @@ class ChainCodeViewSet(viewsets.ViewSet):
                 envs = init_env_vars(peer_node, peer_node.fabric_resource_set)
 
                 peer_channel_cli = PeerChainCode("v2.2.0", **envs)
-                import time
+                # import time
 
-                start_time = time.time()
+                # start_time = time.time()
+                print(peer_node.id)
                 res = peer_channel_cli.lifecycle_install(cc_targz)
-                print("install time:", time.time() - start_time)
-                with open("install.log", "a") as f:
-                    f.write(
-                        "install chaincode {} time: {}\n".format(
-                            chaincode_id, time.time() - start_time
-                        )
-                    )
+                # print("install time:", time.time() - start_time)
+                # with open("install.log", "a") as f:
+                #     f.write(
+                #         "install chaincode {} time: {}\n".format(
+                #             chaincode_id, time.time() - start_time
+                #         )
+                #     )
                 if res != 0:
                     flag = True
             if flag == True:
@@ -450,6 +451,7 @@ class ChainCodeViewSet(viewsets.ViewSet):
                         status=status.HTTP_400_BAD_REQUEST,
                     )
             except Exception as e:
+                print(e)
                 traceback.print_exc()
                 return Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
             return Response(ok("success"), status=status.HTTP_200_OK)

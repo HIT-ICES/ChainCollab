@@ -1,4 +1,4 @@
-from requests import get, post
+from requests import post
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 
@@ -16,8 +16,20 @@ from api.models import (
     FabricResourceSet,
     LoleidoOrganization,
 )
-from api.config import DEFAULT_AGENT, DEFAULT_CHANNEL_NAME, FABRIC_CONFIG, CURRENT_IP, ORACLE_CONTRACT_PATH
+from api.config import (
+    DEFAULT_AGENT,
+    DEFAULT_CHANNEL_NAME,
+    FABRIC_CONFIG,
+    CURRENT_IP,
+    ORACLE_CONTRACT_PATH,
+    DMN_CONTRACT_PATH
+)
 from api.utils.test_time import timeitwithname
+from .utils import (
+    packageChaincodeForEnv,
+    installChaincodeForEnv,
+    approveChaincodeForEnv,
+)
 
 
 class EnvironmentViewSet(viewsets.ViewSet):
@@ -440,107 +452,103 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         env.status = "ACTIVATED"
         env.save()
 
-        # package Firefly、Oracle Chaincode Here
-        # formdata
-        # read chaincode from file system
+        # # package Firefly、Oracle Chaincode Here
+        # # formdata
+        # # read chaincode from file system
 
-        from api.utils.test_time import TEST_MODE_ON
+        # from api.utils.test_time import TEST_MODE_ON
 
-        if TEST_MODE_ON:
-            return Response(status=status.HTTP_201_CREATED)
-        org_id = request.data.get("org_id")
+        # if TEST_MODE_ON:
+        #     return Response(status=status.HTTP_201_CREATED)
+        # org_id = request.data.get("org_id")
 
-        def packageChaincode(
-            file_path: str, chaincode_name: str, version: str, org_id: str
-        ) -> str:
-            with open(file_path, "rb") as f:
-                chaincode = f.read()
-            data = {
-                "name": chaincode_name,
-                "version": version,
-                "language": "golang",
-                "org_id": org_id,
-            }
-            files = {
-                "file": (
-                    chaincode_name + ".tar.gz",
-                    chaincode,
-                    "application/octet-stream",
-                )
-            }
-            res = post(
-                f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/chaincodes/package",
-                data=data,
-                files=files,
-                headers={"Authorization": headers["Authorization"]},
-            )
-            return res.json()["data"]["id"]
+        # def packageChaincode(
+        #     file_path: str, chaincode_name: str, version: str, org_id: str
+        # ) -> str:
+        #     with open(file_path, "rb") as f:
+        #         chaincode = f.read()
+        #     data = {
+        #         "name": chaincode_name,
+        #         "version": version,
+        #         "language": "golang",
+        #         "org_id": org_id,
+        #     }
+        #     files = {
+        #         "file": (
+        #             chaincode_name + ".tar.gz",
+        #             chaincode,
+        #             "application/octet-stream",
+        #         )
+        #     }
+        #     res = post(
+        #         f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/chaincodes/package",
+        #         data=data,
+        #         files=files,
+        #         headers={"Authorization": headers["Authorization"]},
+        #     )
+        #     return res.json()["data"]["id"]
 
-        def installChaincodeForSystemOrgPeers(
-            file_path: str,
-            chaincode_name: str,
-            version: str,
-            org_id: str,
-            channel_name: str,
-            orderer_resource_set: ResourceSet,
-        ):
-            # install、approve chaincode for system org peers
-            chaincode_id = packageChaincode(file_path, chaincode_name, version, org_id)
-            # install chaincode for system org peers
-            data = {
-                "id": chaincode_id,
-                "peer_node_list": [
-                    str(node.id)
-                    for node in orderer_resource_set.sub_resource_set.get()
-                    .node.all()
-                    .filter(type="peer")
-                ],
-            }
-            res = post(
-                f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/chaincodes/install",
-                data=data,
-                headers={"Authorization": headers["Authorization"]},
-            )
-            # approve chaincode for system org peers
-            data = {
-                "channel_name": channel_name,
-                "chaincode_name": chaincode_name,
-                "chaincode_version": "1.0",
-                "sequence": 1,
-                "resource_set_id": orderer_resource_set.id,
-            }
-            res = post(
-                f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/chaincodes/approve_for_my_org",
-                data=data,
-                headers={"Authorization": headers["Authorization"]},
-            )
+        # def installChaincodeForSystemOrgPeers(
+        #     file_path: str,
+        #     chaincode_name: str,
+        #     version: str,
+        #     org_id: str,
+        #     channel_name: str,
+        #     orderer_resource_set: ResourceSet,
+        # ):
+        #     # install、approve chaincode for system org peers
+        #     chaincode_id = packageChaincode(file_path, chaincode_name, version, org_id)
+        #     # install chaincode for system org peers
+        #     data = {
+        #         "id": chaincode_id,
+        #         "peer_node_list": [
+        #             str(node.id)
+        #             for node in orderer_resource_set.sub_resource_set.get()
+        #             .node.all()
+        #             .filter(type="peer")
+        #         ],
+        #     }
+        #     res = post(
+        #         f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/chaincodes/install",
+        #         data=data,
+        #         headers={"Authorization": headers["Authorization"]},
+        #     )
+        #     # approve chaincode for system org peers
+        #     data = {
+        #         "channel_name": channel_name,
+        #         "chaincode_name": chaincode_name,
+        #         "chaincode_version": "1.0",
+        #         "sequence": 1,
+        #         "resource_set_id": orderer_resource_set.id,
+        #     }
+        #     res = post(
+        #         f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/chaincodes/approve_for_my_org",
+        #         data=data,
+        #         headers={"Authorization": headers["Authorization"]},
+        #     )
 
-        org_id = request.data.get("org_id")
-        installChaincodeForSystemOrgPeers(
-            FABRIC_CONFIG + "/firefly-go.zip",
-            "Firefly",
-            "1.0",
-            org_id,
-            channel_name,
-            orderer_resource_sets[0],
-        )
+        # org_id = request.data.get("org_id")
+        # installChaincodeForSystemOrgPeers(
+        #     FABRIC_CONFIG + "/firefly-go.zip",
+        #     "Firefly",
+        #     "1.0",
+        #     org_id,
+        #     channel_name,
+        #     orderer_resource_sets[0],
+        # )
 
-        installChaincodeForSystemOrgPeers(
-            ORACLE_CONTRACT_PATH + "/oracle-go.zip",
-            "Oracle",
-            "1.0",
-            org_id,
-            channel_name,
-            orderer_resource_sets[0],
-        )
-
-        # installChaincodeForSystemOrgPeers()
-
+        # installChaincodeForSystemOrgPeers(
+        #     ORACLE_CONTRACT_PATH + "/oracle-go.zip",
+        #     "Oracle",
+        #     "1.0",
+        #     org_id,
+        #     channel_name,
+        #     orderer_resource_sets[0],
+        # )
 
         return Response(status=status.HTTP_201_CREATED)
 
     @action(methods=["post"], detail=True, url_path="start_firefly")
-    @timeitwithname("Firefly")
     def start_firefly(self, request, pk=None, *args, **kwargs):
         """
         启动Firefly 以及 其他组件
@@ -557,6 +565,7 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
             )
 
         headers = request.headers
+
         post(
             f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/fireflys/init",
             headers={"Authorization": headers["Authorization"]},
@@ -567,7 +576,138 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
             headers={"Authorization": headers["Authorization"]},
         )
 
-        env.status = "FIREFLY"
+        return Response(status=status.HTTP_201_CREATED)
+
+    @action(methods=["post"], detail=True, url_path="install_firefly")
+    def install_firefly(self, request, pk=None, *args, **kwargs):
+        """
+        安装Firefly
+        """
+        try:
+            env = Environment.objects.get(pk=pk)
+        except Environment.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if env.status != "ACTIVATED":
+            return Response(
+                {"message": "Environment has not been activated or has started"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        headers = request.headers
+        org_id = request.data.get("org_id")
+        chaincode_id = packageChaincodeForEnv(
+            env_id=env.id,
+            file_path=FABRIC_CONFIG + "/firefly-go.zip",
+            chaincode_name="Firefly",
+            version="1.0",
+            org_id=org_id,
+            auth=headers["Authorization"],
+        )
+
+        installChaincodeForEnv(
+            env_id=env.id,
+            chaincode_id=chaincode_id,
+            auth=headers["Authorization"],
+        )
+
+        approveChaincodeForEnv(
+            env_id=env.id,
+            channel_name=DEFAULT_CHANNEL_NAME,
+            chaincode_name="Firefly",
+            auth=headers["Authorization"],
+        )
+
+        env.firefly_status = "CHAINCODEINSTALLED"
+        env.save()
+        return Response(status=status.HTTP_200_OK)
+
+    @action(methods=["post"], detail=True, url_path="install_oracle")
+    def install_oracle(self, request, pk=None, *args, **kwargs):
+        """ """
+        try:
+            env = Environment.objects.get(pk=pk)
+        except Environment.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if env.status != "ACTIVATED":
+            return Response(
+                {"message": "Environment has not been activated or has started"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        headers = request.headers
+        org_id = request.data.get("org_id")
+        chaincode_id = packageChaincodeForEnv(
+            env_id=env.id,
+            file_path=ORACLE_CONTRACT_PATH + "/oracle-go.zip",
+            chaincode_name="Oracle",
+            version="1.0",
+            org_id=org_id,
+            auth=headers["Authorization"],
+        )
+
+        installChaincodeForEnv(
+            env_id=env.id,
+            chaincode_id=chaincode_id,
+            auth=headers["Authorization"],
+        )
+
+        approveChaincodeForEnv(
+            env_id=env.id,
+            channel_name=DEFAULT_CHANNEL_NAME,
+            chaincode_name="Oracle",
+            auth=headers["Authorization"],
+        )
+
+        env.Oracle_status = "CHAINCODEINSTALLED"
         env.save()
 
-        return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_200_OK)
+
+    @action(methods=["post"], detail=True, url_path="install_dmn_engine")
+    def install_dmn_engine(self, request, pk=None, *args, **kwargs):
+        """
+        启动DMN Engine: 部署合约
+        """
+        try:
+            env = Environment.objects.get(pk=pk)
+        except Environment.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if env.status != "ACTIVATED":
+            return Response(
+                {"message": "Environment has not been activated or has started"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        headers = request.headers
+        org_id = request.data.get("org_id")
+
+        chaincode_id = packageChaincodeForEnv(
+            env_id=env.id,
+            file_path=DMN_CONTRACT_PATH + "/dmn-engine.zip",
+            chaincode_name="DMNEngine",
+            version="1.0",
+            org_id=org_id,
+            auth=headers["Authorization"],
+            language="java",
+        )
+
+        installChaincodeForEnv(
+            env_id=env.id,
+            chaincode_id=chaincode_id,
+            auth=headers["Authorization"],
+        )
+
+        approveChaincodeForEnv(
+            env_id=env.id,
+            channel_name=DEFAULT_CHANNEL_NAME,
+            chaincode_name="DMNEngine",
+            auth=headers["Authorization"],
+        )
+
+        env.DMN_status = "CHAINCODEINSTALLED"
+        env.save()
+
+        return Response(status=status.HTTP_200_OK)

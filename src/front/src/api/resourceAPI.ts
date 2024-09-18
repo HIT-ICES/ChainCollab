@@ -107,6 +107,39 @@ export const ActivateEnv = async (envId: string, orgId: string) => {
     }
 }
 
+export const InstallFirefly = async (orgId: string, envId: string) => {
+    try {
+        const response = await api.post(`/environments/${envId}/install_firefly`, {
+            org_id: orgId
+        })
+        return response.data;
+    } catch (error) {
+        return error;
+    }
+}
+
+export const InstallOracle = async (orgId: string, envId: string) => {
+    try {
+        const response = await api.post(`/environments/${envId}/install_oracle`, {
+            org_id: orgId
+        })
+        return response.data;
+    } catch (error) {
+        return error;
+    }
+}
+
+export const InstallDmnEngine = async (orgId: string, envId: string) => {
+    try {
+        const response = await api.post(`/environments/${envId}/install_dmn_engine`, {
+            org_id: orgId
+        })
+        return response.data;
+    } catch (error) {
+        return error;
+    }
+}
+
 export const StartFireflyForEnv = async (envId: string) => {
     try {
         const response = await api.post(`/environments/${envId}/start_firefly`)

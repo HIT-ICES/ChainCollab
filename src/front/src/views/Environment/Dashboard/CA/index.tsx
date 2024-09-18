@@ -55,7 +55,7 @@ const CA = () => {
   });
 
   return (
-    <Col span={12}>
+    <Col span={8}>
       <Card
         title="Certificate Authorities"
         style={{ width: "100%", height: "100%" }}
