@@ -140,6 +140,15 @@ export const InstallDmnEngine = async (orgId: string, envId: string) => {
     }
 }
 
+export const requestOracleFFI = async () => {
+    try {
+        const response = await api.get(`/environments/requestOracleFFI`)
+        return response.data;
+    } catch (error) {
+        return error;
+    }
+}
+
 export const StartFireflyForEnv = async (envId: string) => {
     try {
         const response = await api.post(`/environments/${envId}/start_firefly`)

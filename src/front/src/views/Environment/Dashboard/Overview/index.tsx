@@ -30,8 +30,16 @@ import {
   InstallOracle,
   InstallDmnEngine,
   StartFireflyForEnv,
-
+  requestOracleFFI
 } from "@/api/resourceAPI";
+
+import {
+    registerInterface,
+    registerAPI
+} from "@/api/executionAPI"
+
+const systemFireflyURL = "http://127.0.0.1:5000"
+
 
 import { useEnvInfo, useMembershipListData } from './hooks'
 import { useAppSelector } from '@/redux/hooks'
@@ -92,17 +100,23 @@ const Overview: React.FC = () => {
   }
 
   const handleSetUpComponent = async () => {
-    // await InstallFirefly(currentOrgId, currentEnvId)
-    // setSync()
-    // await StartFireflyForEnv(currentEnvId)
-    // setSync()
-    // await InstallOracle(currentOrgId, currentEnvId)
-    // setSync()
+    await InstallFirefly(currentOrgId, currentEnvId)
+    setSync()
+    await StartFireflyForEnv(currentEnvId)
+    setSync()
+    await InstallOracle(currentOrgId, currentEnvId)
+    // register interface
+    const oracleFFI = await requestOracleFFI()
+    const res = await registerInterface(systemFireflyURL,oracleFFI.ffiContent, "Oracle5")
+    await new Promise((resolve, reject) => {
+      // sleep 1s
+      setTimeout(resolve, 3000)
+    })
+    await registerAPI(systemFireflyURL, "Oracle", "default", "Oracle", res.id)
+    setSync()
     await InstallDmnEngine(currentOrgId, currentEnvId)
     setSync()
   }
-
-  console.log(envInfo)
 
   return (
     <>
@@ -177,7 +191,7 @@ const Overview: React.FC = () => {
               </Col>
             </Row>
             <Row style={{ display: "flex", justifyContent: "space-evenly" }}>
-              <FireflyComponentCard ChaincodeStatus={envInfo.fireflyStatus!=="NO"} ClusterStatus={envInfo.fireflyStatus==="ACTIVATED"}  />
+              <FireflyComponentCard ChaincodeStatus={envInfo.fireflyStatus!=="NO"} ClusterStatus={envInfo.fireflyStatus==="STARTED"}  />
               <OracleComponentCard ChaincodeStatus ={envInfo.oracleStatus==="CHAINCODEINSTALLED"}/>
               <DMNComponentCard  ChaincodeStatus ={envInfo.dmnStatus==="CHAINCODEINSTALLED"} />
             </Row>

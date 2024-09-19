@@ -22,13 +22,14 @@ from api.config import (
     FABRIC_CONFIG,
     CURRENT_IP,
     ORACLE_CONTRACT_PATH,
-    DMN_CONTRACT_PATH
+    DMN_CONTRACT_PATH,
 )
 from api.utils.test_time import timeitwithname
 from .utils import (
     packageChaincodeForEnv,
     installChaincodeForEnv,
     approveChaincodeForEnv,
+    commmitChaincodeForEnv,
 )
 
 
@@ -452,100 +453,6 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         env.status = "ACTIVATED"
         env.save()
 
-        # # package Firefly、Oracle Chaincode Here
-        # # formdata
-        # # read chaincode from file system
-
-        # from api.utils.test_time import TEST_MODE_ON
-
-        # if TEST_MODE_ON:
-        #     return Response(status=status.HTTP_201_CREATED)
-        # org_id = request.data.get("org_id")
-
-        # def packageChaincode(
-        #     file_path: str, chaincode_name: str, version: str, org_id: str
-        # ) -> str:
-        #     with open(file_path, "rb") as f:
-        #         chaincode = f.read()
-        #     data = {
-        #         "name": chaincode_name,
-        #         "version": version,
-        #         "language": "golang",
-        #         "org_id": org_id,
-        #     }
-        #     files = {
-        #         "file": (
-        #             chaincode_name + ".tar.gz",
-        #             chaincode,
-        #             "application/octet-stream",
-        #         )
-        #     }
-        #     res = post(
-        #         f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/chaincodes/package",
-        #         data=data,
-        #         files=files,
-        #         headers={"Authorization": headers["Authorization"]},
-        #     )
-        #     return res.json()["data"]["id"]
-
-        # def installChaincodeForSystemOrgPeers(
-        #     file_path: str,
-        #     chaincode_name: str,
-        #     version: str,
-        #     org_id: str,
-        #     channel_name: str,
-        #     orderer_resource_set: ResourceSet,
-        # ):
-        #     # install、approve chaincode for system org peers
-        #     chaincode_id = packageChaincode(file_path, chaincode_name, version, org_id)
-        #     # install chaincode for system org peers
-        #     data = {
-        #         "id": chaincode_id,
-        #         "peer_node_list": [
-        #             str(node.id)
-        #             for node in orderer_resource_set.sub_resource_set.get()
-        #             .node.all()
-        #             .filter(type="peer")
-        #         ],
-        #     }
-        #     res = post(
-        #         f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/chaincodes/install",
-        #         data=data,
-        #         headers={"Authorization": headers["Authorization"]},
-        #     )
-        #     # approve chaincode for system org peers
-        #     data = {
-        #         "channel_name": channel_name,
-        #         "chaincode_name": chaincode_name,
-        #         "chaincode_version": "1.0",
-        #         "sequence": 1,
-        #         "resource_set_id": orderer_resource_set.id,
-        #     }
-        #     res = post(
-        #         f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/chaincodes/approve_for_my_org",
-        #         data=data,
-        #         headers={"Authorization": headers["Authorization"]},
-        #     )
-
-        # org_id = request.data.get("org_id")
-        # installChaincodeForSystemOrgPeers(
-        #     FABRIC_CONFIG + "/firefly-go.zip",
-        #     "Firefly",
-        #     "1.0",
-        #     org_id,
-        #     channel_name,
-        #     orderer_resource_sets[0],
-        # )
-
-        # installChaincodeForSystemOrgPeers(
-        #     ORACLE_CONTRACT_PATH + "/oracle-go.zip",
-        #     "Oracle",
-        #     "1.0",
-        #     org_id,
-        #     channel_name,
-        #     orderer_resource_sets[0],
-        # )
-
         return Response(status=status.HTTP_201_CREATED)
 
     @action(methods=["post"], detail=True, url_path="start_firefly")
@@ -575,6 +482,8 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
             f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/fireflys/start",
             headers={"Authorization": headers["Authorization"]},
         )
+        env.firefly_status = "STARTED"
+        env.save()
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -618,6 +527,13 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
             auth=headers["Authorization"],
         )
 
+        commmitChaincodeForEnv(
+            env_id=env.id,
+            channel_name=DEFAULT_CHANNEL_NAME,
+            chaincode_name="Firefly",
+            auth=headers["Authorization"],
+        )
+
         env.firefly_status = "CHAINCODEINSTALLED"
         env.save()
         return Response(status=status.HTTP_200_OK)
@@ -654,6 +570,13 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         )
 
         approveChaincodeForEnv(
+            env_id=env.id,
+            channel_name=DEFAULT_CHANNEL_NAME,
+            chaincode_name="Oracle",
+            auth=headers["Authorization"],
+        )
+
+        commmitChaincodeForEnv(
             env_id=env.id,
             channel_name=DEFAULT_CHANNEL_NAME,
             chaincode_name="Oracle",
@@ -707,7 +630,26 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
             auth=headers["Authorization"],
         )
 
+        commmitChaincodeForEnv(
+            env_id=env.id,
+            channel_name=DEFAULT_CHANNEL_NAME,
+            chaincode_name="DMNEngine",
+            auth=headers["Authorization"],
+        )
+
         env.DMN_status = "CHAINCODEINSTALLED"
         env.save()
 
         return Response(status=status.HTTP_200_OK)
+
+    @action(methods=["get"], detail=False, url_path="requestOracleFFI")
+    def requestOracleFFI(self, request, pk=None, *args, **kwargs):
+        """
+        请求Oracle FFI
+        """
+        with open(ORACLE_CONTRACT_PATH + "/oracleFFI.json", "r") as f:
+            ffiContent = f.read()
+
+        response = {"ffiContent": ffiContent}
+
+        return Response(response, status=status.HTTP_200_OK)

@@ -1,1 +1,441 @@
-{"namespace": "default", "name": "example", "description": "Spec interface for the message-transfer-basic golang chaincode", "version": "1.0", "methods": [{"name": "InitLedger", "pathname": "", "description": "Init the chaincode", "params": [], "returns": []}, {"name": "CreateInstance", "pathname": "", "description": "Create a new instance", "params": [{"name": "initParametersBytes", "schema": {"type": "string"}}], "returns": []}, {"name": "GetMethod", "pathname": "", "description": "Get all methods", "params": [{"name": "InstanceID", "schema": {"type": "string"}}], "returns": []}, {"name": "GetAllMessages", "pathname": "", "description": "Get all messages", "params": [{"name": "InstanceID", "schema": {"type": "string"}}], "returns": []}, {"name": "GetAllGateways", "pathname": "", "description": "Get all gateways", "params": [{"name": "InstanceID", "schema": {"type": "string"}}], "returns": []}, {"name": "GetAllParticipants", "pathname": "", "description": "Get all participants", "params": [{"name": "InstanceID", "schema": {"type": "string"}}], "returns": []}, {"name": "GetAllBusinessRules", "pathname": "", "description": "Get all business rules", "params": [{"name": "InstanceID", "schema": {"type": "string"}}], "returns": []}, {"name": "GetAllActionEvents", "pathname": "", "description": "Get all action events", "params": [{"name": "InstanceID", "schema": {"type": "string"}}], "returns": []}, {"name": "StartEvent_0m7hz56", "pathname": "", "description": "", "params": [{"name": "InstanceID", "schema": {"type": "string"}}], "returns": []}, {"name": "ParallelGateway_1pgjqtw", "pathname": "", "description": "", "params": [{"name": "InstanceID", "schema": {"type": "string"}}], "returns": []}, {"name": "Message_0gswvmq_Send", "pathname": "", "description": "", "params": [{"name": "InstanceID", "schema": {"type": "string"}}, {"name": "FireFlyTran", "schema": {"type": "string"}}], "returns": []}, {"name": "Message_0gswvmq_Complete", "pathname": "", "description": "", "params": [{"name": "InstanceID", "schema": {"type": "string"}}], "returns": []}, {"name": "Message_0wq8mc6_Send", "pathname": "", "description": "", "params": [{"name": "InstanceID", "schema": {"type": "string"}}, {"name": "FireFlyTran", "schema": {"type": "string"}}], "returns": []}, {"name": "Message_0wq8mc6_Complete", "pathname": "", "description": "", "params": [{"name": "InstanceID", "schema": {"type": "string"}}], "returns": []}, {"name": "Message_1vzqd37_Send", "pathname": "", "description": "", "params": [{"name": "InstanceID", "schema": {"type": "string"}}, {"name": "FireFlyTran", "schema": {"type": "string"}}, {"name": "result", "schema": {"type": "string"}}], "returns": []}, {"name": "Message_1vzqd37_Complete", "pathname": "", "description": "", "params": [{"name": "InstanceID", "schema": {"type": "string"}}], "returns": []}, {"name": "Message_1rqbibd_Send", "pathname": "", "description": "", "params": [{"name": "InstanceID", "schema": {"type": "string"}}, {"name": "FireFlyTran", "schema": {"type": "string"}}, {"name": "result", "schema": {"type": "string"}}], "returns": []}, {"name": "Message_1rqbibd_Complete", "pathname": "", "description": "", "params": [{"name": "InstanceID", "schema": {"type": "string"}}], "returns": []}, {"name": "EndEvent_110myff", "pathname": "", "description": "", "params": [{"name": "InstanceID", "schema": {"type": "string"}}], "returns": []}, {"name": "Activity_1mj4mr7", "pathname": "Activity_1mj4mr7", "description": "", "params": [{"name": "InstanceID", "schema": {"type": "string"}}], "returns": []}, {"name": "Activity_1mj4mr7_Continue", "pathname": "Activity_1mj4mr7_Continue", "description": "", "params": [{"name": "InstanceID", "schema": {"type": "string"}}, {"name": "ContentOfDmn", "schema": {"type": "string"}}], "returns": []}, {"name": "Gateway_0o8snyv", "pathname": "", "description": "", "params": [{"name": "InstanceID", "schema": {"type": "string"}}], "returns": []}, {"name": "Message_0gd0z61_Send", "pathname": "", "description": "", "params": [{"name": "InstanceID", "schema": {"type": "string"}}, {"name": "FireFlyTran", "schema": {"type": "string"}}], "returns": []}, {"name": "Message_0gd0z61_Complete", "pathname": "", "description": "", "params": [{"name": "InstanceID", "schema": {"type": "string"}}], "returns": []}, {"name": "Gateway_1m6dgym", "pathname": "", "description": "", "params": [{"name": "InstanceID", "schema": {"type": "string"}}], "returns": []}, {"name": "Message_13mh6mk_Send", "pathname": "", "description": "", "params": [{"name": "InstanceID", "schema": {"type": "string"}}, {"name": "FireFlyTran", "schema": {"type": "string"}}], "returns": []}, {"name": "Message_13mh6mk_Complete", "pathname": "", "description": "", "params": [{"name": "InstanceID", "schema": {"type": "string"}}], "returns": []}], "events": [{"name": "DMNContentRequired"}, {"name": "InstanceCreated"}]}
+{
+    "namespace": "default",
+    "name": "example",
+    "description": "Spec interface for the message-transfer-basic golang chaincode",
+    "version": "1.0",
+    "methods": [
+        {
+            "name": "InitLedger",
+            "pathname": "",
+            "description": "Init the chaincode",
+            "params": [],
+            "returns": []
+        },
+        {
+            "name": "CreateInstance",
+            "pathname": "",
+            "description": "Create a new instance",
+            "params": [
+                {
+                    "name": "initParametersBytes",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "GetMethod",
+            "pathname": "",
+            "description": "Get all methods",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "GetAllMessages",
+            "pathname": "",
+            "description": "Get all messages",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "GetAllGateways",
+            "pathname": "",
+            "description": "Get all gateways",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "GetAllParticipants",
+            "pathname": "",
+            "description": "Get all participants",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "GetAllBusinessRules",
+            "pathname": "",
+            "description": "Get all business rules",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "GetAllActionEvents",
+            "pathname": "",
+            "description": "Get all action events",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "StartEvent_0m7hz56",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "ParallelGateway_1pgjqtw",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Message_0gswvmq_Send",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "FireFlyTran",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Message_0gswvmq_Complete",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Message_0wq8mc6_Send",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "FireFlyTran",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Message_0wq8mc6_Complete",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Message_1vzqd37_Send",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "FireFlyTran",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "result",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Message_1vzqd37_Complete",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Message_1rqbibd_Send",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "FireFlyTran",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "result",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Message_1rqbibd_Complete",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "EndEvent_110myff",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Activity_1mj4mr7",
+            "pathname": "Activity_1mj4mr7",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Activity_1mj4mr7_Continue",
+            "pathname": "Activity_1mj4mr7_Continue",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "ContentOfDmn",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Gateway_0o8snyv",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Message_0gd0z61_Send",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "FireFlyTran",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Message_0gd0z61_Complete",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Gateway_1m6dgym",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Message_13mh6mk_Send",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "FireFlyTran",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Message_13mh6mk_Complete",
+            "pathname": "",
+            "description": "",
+            "params": [
+                {
+                    "name": "InstanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        }
+    ],
+    "events": [
+        {
+            "name": "DMNContentRequired"
+        },
+        {
+            "name": "InstanceCreated"
+        }
+    ]
+}

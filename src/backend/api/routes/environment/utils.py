@@ -116,3 +116,28 @@ def approveChaincodeForEnv(env_id: str, channel_name, chaincode_name: str, auth:
         )
         all_res.append(res)
     return all_res
+
+
+def commmitChaincodeForEnv(
+        env_id: str,
+        channel_name: str,
+        chaincode_name: str,
+        auth: str
+):
+    resourceSets = get_all_resource_set_of_env(env_id, including_system=True)
+    if not resourceSets:
+        return None
+    chosen_resource_set = resourceSets[0]
+    data = {
+        "chaincode_name": chaincode_name,
+        "chaincode_version": "1.0",
+        "channel_name": channel_name,
+        "resource_set_id": chosen_resource_set.id,
+        "sequence": 1
+    }
+    res = post(
+        f"http://{CURRENT_IP}:8000/api/v1/environments/{env_id}/chaincodes/commit",
+        data=data,
+        headers={"Authorization": auth},
+    )
+    return res

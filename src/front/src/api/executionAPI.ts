@@ -273,3 +273,39 @@ export const invokeFireflySubscriptions = async (coreUrl: string, eventName: str
         return [];
     }
 }
+
+// Register Interface
+
+export const registerInterface = async (coreUrl: string, ffiConetnt: string, interfaceName: string) => {
+    try {
+        let parsedData = JSON.parse(ffiConetnt);
+        parsedData.name = interfaceName;
+        const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/contracts/interfaces`, 
+            parsedData
+        );
+        return res.data;
+    } catch (error) {
+        console.error("Error occurred while making post request:", error);
+        return [];
+    }
+}
+
+
+export const registerAPI = async (coreUrl: string, chaincodeName:string, channel:string, apiName: string, interfaceId: string) => {
+    try {
+        const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/apis`, {
+            "name": apiName,
+            "interface": {
+                "id": interfaceId
+            },
+            "location": {
+                "channel": channel,
+                "chaincode": chaincodeName
+            }
+        });
+        return res.data;
+    } catch (error) {
+        console.error("Error occurred while making post request:", error);
+        return [];
+    }
+}
