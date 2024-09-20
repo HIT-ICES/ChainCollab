@@ -76,12 +76,14 @@ class InstanceCreatedAction:
 
     def update_chaincode_cid(self, cid, instanceId, business_rule_id):
         print(f"Updating chaincode with instanceId: {instanceId} and cid: {cid}")
-        url = f"""{self.chaincode_url}/invoke/UpdateCID"""
+        oracle_url = "http://127.0.0.1:5000/api/v1/namespaces/default/apis/Oracle"
+        url = f"""{oracle_url}/invoke/SetDataItem"""
         request_body = {
             "input": {
-                "InstanceID": instanceId,
-                "BusinessRuleID": business_rule_id,
-                "cid": cid,
+                "accessKey": instanceId,
+                "dataType": "STRING",
+                "key": business_rule_id,
+                "value": cid,
             }
         }
         json_data = json.dumps(request_body)

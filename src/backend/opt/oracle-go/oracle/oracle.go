@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
@@ -26,10 +25,10 @@ const (
 )
 
 type DataItem struct {
-	Key       string              `json:"key"`
-	Value     string              `json:"value"`
-	Type      DataType            `json:"type"`
-	TimeStamp timestamp.Timestamp `json:"timeStamp"`
+	Key   string   `json:"key"`
+	Value string   `json:"value"`
+	Type  DataType `json:"type"`
+	// TimeStamp timestamp.Timestamp `json:"timeStamp"`
 }
 
 // Register and return the access key for the data space
@@ -57,19 +56,19 @@ func getDataTypeFromString(s string) DataType {
 // for 1, use GetDataItem; for 2, use MakeRequest
 
 func (oracle *Oracle) SetDataItem(ctx contractapi.TransactionContextInterface, accessKey string, key string, value string, dataType string) error {
-	txTime, err := ctx.GetStub().GetTxTimestamp()
-	if err != nil {
-		return err
-	}
+	// txTime, err := ctx.GetStub().GetTxTimestamp()
+	// if err != nil {
+	// 	return err
+	// }
 
 	dataItem := DataItem{
 		Key:   key,
 		Value: value,
 		Type:  getDataTypeFromString(dataType),
-		TimeStamp: timestamp.Timestamp{
-			Seconds: txTime.Seconds,
-			Nanos:   txTime.Nanos,
-		},
+		// TimeStamp: timestamp.Timestamp{
+		// 	Seconds: txTime.Seconds,
+		// 	Nanos:   txTime.Nanos,
+		// },
 	}
 	// if equal [], set as {}
 	dataSpaceJson, err := ctx.GetStub().GetState(accessKey)
@@ -117,7 +116,7 @@ func (oracle *Oracle) GetDataItem(ctx contractapi.TransactionContextInterface, a
 	dataItem, ok := dataSpace[key]
 
 	if !ok {
-		return nil, nil
+		return nil, err
 	}
 
 	return &dataItem, nil

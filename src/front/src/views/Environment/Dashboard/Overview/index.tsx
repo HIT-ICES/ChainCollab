@@ -79,6 +79,8 @@ const Overview: React.FC = () => {
 
   const [setupFabricNetWorkLoading, setSetupFabricNetWorkLoading] = useState(false)
 
+  const [setupComponentLoading, setSetupComponentLoading] = useState(false)
+
   const handleSetUpFabricNetwork = async () => {
     // Init
     setSetupFabricNetWorkLoading(true)
@@ -100,6 +102,7 @@ const Overview: React.FC = () => {
   }
 
   const handleSetUpComponent = async () => {
+    setSetupComponentLoading(true)
     await InstallFirefly(currentOrgId, currentEnvId)
     setSync()
     await StartFireflyForEnv(currentEnvId)
@@ -109,13 +112,13 @@ const Overview: React.FC = () => {
     const oracleFFI = await requestOracleFFI()
     const res = await registerInterface(systemFireflyURL,oracleFFI.ffiContent, "Oracle5")
     await new Promise((resolve, reject) => {
-      // sleep 1s
       setTimeout(resolve, 3000)
     })
-    await registerAPI(systemFireflyURL, "Oracle", "default", "Oracle", res.id)
+    const res2 = await registerAPI(systemFireflyURL, "Oracle", "default", "Oracle", res.id)
     setSync()
     await InstallDmnEngine(currentOrgId, currentEnvId)
     setSync()
+    setSetupComponentLoading(false)
   }
 
   return (
@@ -183,11 +186,12 @@ const Overview: React.FC = () => {
                 flex="auto"
                 style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}
               >
-                <Button
+                <LoadingButton
                   variant="outlined"
+                  loading={setupComponentLoading}
                   onClick={() => {handleSetUpComponent()}}>
                   SetUp Core Component
-                </Button>
+                </LoadingButton>
               </Col>
             </Row>
             <Row style={{ display: "flex", justifyContent: "space-evenly" }}>

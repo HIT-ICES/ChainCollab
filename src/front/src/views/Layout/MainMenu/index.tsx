@@ -63,6 +63,7 @@ const AddConsortiumModal: React.FC<{
         onFinish={onFinish}
         autoComplete="off"
         preserve={false} // 在Modal关闭后，销毁Field
+        initialValues={{ consortiumName: 'Consortium' }}
       >
         <Form.Item<FieldType>
           label="Consortium Name"
@@ -118,6 +119,7 @@ const AddOrgModal: React.FC<{
         onFinish={onFinish}
         autoComplete="off"
         preserve={false} // 在Modal关闭后，销毁Field
+        initialValues={{ orgName: 'Organization' }}
       >
         <Form.Item<FieldType>
           label="Organization Name"
@@ -174,6 +176,7 @@ const AddEnvModal: React.FC<{
         onFinish={onFinish}
         autoComplete="off"
         preserve={false}
+        initialValues={{ envName: 'Environment' }}
       >
         <Form.Item<FieldType>
           label="Environment Name"

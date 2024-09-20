@@ -90,8 +90,8 @@ def installChaincodeForEnv(env_id: str, chaincode_id: str, auth: str):
     data = {"id": chaincode_id, "peer_node_list": [str(peer.id) for peer in peers]}
     res = post(
         f"http://{CURRENT_IP}:8000/api/v1/environments/{env_id}/chaincodes/install",
-        data=data,
-        headers={"Authorization": auth},
+        json=data,
+        headers={"Authorization": auth, "Content-Type": "application/json"},
     )
 
     return res
@@ -119,10 +119,7 @@ def approveChaincodeForEnv(env_id: str, channel_name, chaincode_name: str, auth:
 
 
 def commmitChaincodeForEnv(
-        env_id: str,
-        channel_name: str,
-        chaincode_name: str,
-        auth: str
+    env_id: str, channel_name: str, chaincode_name: str, auth: str
 ):
     resourceSets = get_all_resource_set_of_env(env_id, including_system=True)
     if not resourceSets:
@@ -133,7 +130,7 @@ def commmitChaincodeForEnv(
         "chaincode_version": "1.0",
         "channel_name": channel_name,
         "resource_set_id": chosen_resource_set.id,
-        "sequence": 1
+        "sequence": 1,
     }
     res = post(
         f"http://{CURRENT_IP}:8000/api/v1/environments/{env_id}/chaincodes/commit",

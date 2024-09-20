@@ -227,9 +227,9 @@ class ChainCodeViewSet(viewsets.ViewSet):
     )
     @action(detail=False, methods=["post"])
     def install(self, request, *args, **kwargs):
-        chaincode_id = request.data.get("id")
-        peer_node_list = request.data.getlist("peer_node_list")
         try:
+            chaincode_id = request.data.get("id")
+            peer_node_list = request.data.get("peer_node_list")
             if isinstance(peer_node_list, str):
                 peer_node_list = [peer_node_list]
             cc_targz = ""
