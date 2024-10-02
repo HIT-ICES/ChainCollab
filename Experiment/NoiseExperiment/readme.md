@@ -1,6 +1,13 @@
-1.  创建venv, pip install
+# 实验手册
 
-   ​
+
+## 概要
+
+
+
+## 主要流程
+
+1.  创建venv, pip install
 
 2.  main.py的参数
 
@@ -15,7 +22,6 @@
    （5）contract_name：就是创建bpmn时你填的名字
 
 ​      
-
 3. 执行：python3.12 main.py run -input {.../.../path1.json} -output {.../.../path1.json} -N 100 -listen
 
    * 第一次要加-listen     -N为生成路径的百分比
