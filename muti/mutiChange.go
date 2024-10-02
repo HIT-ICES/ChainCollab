@@ -47,7 +47,7 @@ type StateMemory struct {
 
 type Membership struct {
 	MSP           string
-	Attributes    map[string]string
+	X509          string            `json:"X509"`
 	enable        bool
 }
 
@@ -58,7 +58,7 @@ type Participant struct {
 	MultiMaximum  int               `json:"MultiMaximum"`
 	MultiMinimum  int               `json:"MultiMinimum"`
 	locked        bool
-	X509          string            `json:"X509"`
+	Attributes    map[string]string
 }
 
 
@@ -67,18 +67,18 @@ type MutiMessage struct {
 	MutiMessageID        string       `json:"MessageID"`
 	MutiMsgState         ElementState `json:"MsgState"`  //enable/completed
 	MutiType             int          //1-->loop 2-->sequence 3-->parallel
-	MsgList              *string      //存MessageID，loop需要动态添加
-	loopCardinality      int          //顺序/并行-->个数，loop-->次数
+	MsgList              *Message      //存MessageID，loop需要动态添加
+	loopCardinalityOrMax      int          //顺序/并行-->个数，loop-->次数
 
     isBefore             bool         //loop专属属性，发消息前/后检测条件
-	loopConditionName    bool         //loop专属属性,循环跳出条件，对应相应全局变量
+	loopConditionName    string        //loop专属属性,循环跳出条件，对应相应全局变量
 
 }
 
 type Message struct {
 	MessageID            string       `json:"MessageID"`
 	MsgState             ElementState `json:"MsgState"`  //disable/enable/completed
-	MiniMsgList          *string      //存minimsgInstanceID
+	MiniMsgList          *MiniMessage      //存minimsgInstanceID
 	SendParticipantID    string
 	ReceiveParticipantID string   
 }
@@ -575,7 +575,7 @@ func (cc *SmartContract) Message_aaaaa_Confirm(ctx contractapi.TransactionContex
 }
 
 //第一次涉及到某Participant时调用
-func (cc *SmartContract) Message_aaaaa_Advance(ctx contractapi.TransactionContextInterface, instanceID string) error {
+func (cc *SmartContract) Message_aaaaa_LockParticipant(ctx contractapi.TransactionContextInterface, instanceID string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_aaaaa")
@@ -583,7 +583,7 @@ func (cc *SmartContract) Message_aaaaa_Advance(ctx contractapi.TransactionContex
 		return err
 	}
 
-	//这里设想默认接收方和发送方都有权利推进
+	//这里设想默认接收方和发送方都有权利推进，也可以根据一对多 多对一 和多对多分别设计
 	if cc.check_participant(ctx, instanceID, {msg.ReceiveParticipantID, msg.sendParticipantID}) == false {
 		errorMessage := fmt.Sprintf("Participant %s is not allowed to Advance", msg.SendParticipantID)
 		fmt.Println(errorMessage)
