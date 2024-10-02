@@ -1655,8 +1655,6 @@ func (cc *SmartContract) Message_1qbk325_Send(ctx contractapi.TransactionContext
 func (cc *SmartContract) Activity_1yl9tfp(ctx contractapi.TransactionContextInterface, instanceID string) error {
 
 
-
-	fmt.Println("Activity_1yl9tfp")
 	instance, err := cc.GetInstance(ctx, instanceID)
 	// Read Business Info
 	businessRule, err := cc.ReadBusinessRule(ctx, instanceID, "Activity_1yl9tfp")
@@ -1670,8 +1668,6 @@ func (cc *SmartContract) Activity_1yl9tfp(ctx contractapi.TransactionContextInte
 	}
 
 	// Get the CID
-
-	fmt.Println("Activity_1yl9tfp")
 
 	res,err := cc.Invoke_Other_chaincode(ctx, "Oracle:v1", "default", oracle.EncodeGetDataItemArgs(
 		instanceID, "Activity_1yl9tfp",
@@ -1842,7 +1838,6 @@ func (cc *SmartContract) Activity_1yl9tfp_Continue(ctx contractapi.TransactionCo
 func (cc *SmartContract) Activity_0ibsbry(ctx contractapi.TransactionContextInterface, instanceID string) error {
 
 
-	fmt.Println("Activity_0ibsbry")
 	instance, err := cc.GetInstance(ctx, instanceID)
 	// Read Business Info
 	businessRule, err := cc.ReadBusinessRule(ctx, instanceID, "Activity_0ibsbry")
@@ -1864,18 +1859,11 @@ func (cc *SmartContract) Activity_0ibsbry(ctx contractapi.TransactionContextInte
 		return  err
 	}
 
-	fmt.Println("res: ", res)
-
 	var dataItem *oracle.DataItem
 	dataItem, err = oracle.DecodeGetDataItemResult(res)
-	
-	fmt.Println("dataItem: ", dataItem)
-	
 	if err != nil {
 		return  err
 	}
-
-
 
 	eventPayload := map[string]string{
 		"ID":        "Activity_0ibsbry",
@@ -1883,7 +1871,6 @@ func (cc *SmartContract) Activity_0ibsbry(ctx contractapi.TransactionContextInte
 		"Func":	   "Activity_0ibsbry_Continue",
 		"CID": dataItem.Value, 
 	}
-
 
 	eventPayloadAsBytes, err := json.Marshal(eventPayload)
 	if err != nil {
@@ -1953,7 +1940,7 @@ func (cc *SmartContract) Activity_0ibsbry_Continue(ctx contractapi.TransactionCo
 
 	// Invoke DMN Engine Chaincode
 	var resJson []byte
-	resJson, err=cc.Invoke_Other_chaincode(ctx, "asset:v1","default", _args)
+	resJson, err=cc.Invoke_Other_chaincode(ctx, "DMNEngine:v1","default", _args)
 
 	// Set the Result
 	var res map[string]interface{}

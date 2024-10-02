@@ -1,192 +1,234 @@
-import React, { useEffect, useState } from 'react';
-import { Modal, Button, Alert } from 'antd';
-import { BindingDmnModal } from './bindingDmnModal';
-import { BindingParticipant } from './bindingParticipantsModal';
-import { useBpmnSvg } from './hooks';
-import { getMembership, retrieveFabricIdentity } from '@/api/platformAPI';
-import { getFireflyList, getResourceSets } from '@/api/resourceAPI';
-import { useAppSelector } from '@/redux/hooks';
-import { useFireflyData, useParticipantsData } from '../hooks';
-import { getFireflyVerify, invokeCreateInstance } from '@/api/executionAPI';
-import { retrieveBPMN } from '@/api/externalResource';
+import React, { useEffect, useState } from "react";
+import { Modal, Button, Alert } from "antd";
+import { BindingDmnModal } from "./bindingDmnModal";
+import { BindingParticipant } from "./bindingParticipantsModal";
+import { useBpmnSvg } from "./hooks";
+import { getMembership, retrieveFabricIdentity } from "@/api/platformAPI";
+import { getFireflyList, getResourceSets } from "@/api/resourceAPI";
+import { useAppSelector } from "@/redux/hooks";
+import { useFireflyData, useParticipantsData } from "../hooks";
+import { getFireflyVerify, invokeCreateInstance } from "@/api/executionAPI";
+import { retrieveBPMN } from "@/api/externalResource";
 
 const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
+	const [showBindingParticipantMap, setShowBindingParticipantMap] = useState(
+		new Map(),
+	);
+	const [showBindingParticipantValueMap, setShowBindingParticipantValueMap] =
+		useState(new Map());
 
-  const [showBindingParticipantMap, setShowBindingParticipantMap] = useState(new Map());
-  const [showBindingParticipantValueMap, setShowBindingParticipantValueMap] = useState(new Map());
+	const [DmnBindingInfo, setDmnBindingInfo] = useState({});
+	const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
+	const [errorMessage, setErrorMessage] = useState("");
+	const [participants, syncParticipants] = useParticipantsData(bpmnId);
 
-  const [DmnBindingInfo, setDmnBindingInfo] = useState({});
-  const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [participants, syncParticipants] = useParticipantsData(bpmnId);
+	const CreateInstance = async (onlyReturnParam = false) => {
+		const createInstanceParam = await constructParam();
 
-  const handleOk = async () => {
-    const createInstanceParam = await constructParam();
-    console.log('createInstanceParam', createInstanceParam );
+		// 创建一个空对象
+		const singleObject = {};
 
-    // 创建一个空对象
-    let singleObject = {};
+		// 遍历数组中的每个元素，并将其合并到singleObject中
+		for (const item of createInstanceParam) {
+			Object.assign(singleObject, item);
+		}
 
-    // 遍历数组中的每个元素，并将其合并到singleObject中
-    createInstanceParam.forEach((item) => {
-      Object.assign(singleObject, item);
-    });
-    console.log('createInstanceParam', createInstanceParam);
-    console.log('result', singleObject);
+		const bpmn = await retrieveBPMN(bpmnId);
+		const chaincode_url = bpmn.firefly_url;
 
-    const bpmn = await retrieveBPMN(bpmnId)
-    const chaincode_url = bpmn.firefly_url
+		if (onlyReturnParam) {
+			return { param: singleObject, url: chaincode_url.slice(0,-4), contract_name:bpmn.name.split(".")[0], };
+		}
 
-    await invokeCreateInstance(chaincode_url, singleObject);
+		await invokeCreateInstance(chaincode_url, singleObject);
 
-    setOpen(false);
+		async function constructParam() {
+			const createPromise = async (value, key) => {
+				const selectedValidationType = value.selectedValidationType;
+				if (selectedValidationType === "group") {
+					let msp = "";
+					if (value.selectedMembershipId) {
+						let memberships = await getResourceSets(
+							currentEnvId,
+							null,
+							value.selectedMembershipId,
+						);
+						msp = memberships[0].msp;
+					}
+					let attr = value.Attr;
+					if (attr) {
+						attr = attr
+							.map(({ attr, value }) => ({ [attr]: value }))
+							.reduce((acc, obj) => {
+								return { ...acc, ...obj };
+							}, {});
+					} else {
+						attr = {};
+					}
+					createInstanceParam.push({
+						[key]: {
+							msp: msp,
+							attributes: attr,
+							isMulti: true,
+							multiMaximum: 0,
+							multiMinimum: 0,
+							x509: "",
+						},
+					});
+				} else if (selectedValidationType === "equal") {
+					let msp = "";
+					if (!value.selectedMembershipId) {
+						setErrorMessage(
+							`Participant ${participants.find(key)} membership is null`,
+						);
+					}
+					let memberships = await getResourceSets(
+						currentEnvId,
+						null,
+						value.selectedMembershipId,
+					);
+					msp = memberships[0].msp;
+					if (!value.selectedUser) {
+						setErrorMessage(
+							`Participant ${participants.find(key)} user is null`,
+						);
+					}
+					const fabricIdentity = await retrieveFabricIdentity(
+						value.selectedUser,
+					);
+					const fireflyData = await getFireflyList(
+						currentEnvId,
+						null,
+						fabricIdentity.membership,
+					);
+					const fireflyCoreUrl = fireflyData[0].coreURL;
+					const verify = await getFireflyVerify(
+						fireflyCoreUrl,
+						fabricIdentity.firefly_identity_id,
+					);
+					const x509 = verify[0].value.split("::").slice(1).join("::");
+					createInstanceParam.push({
+						[key]: {
+							msp: msp,
+							attributes: {},
+							isMulti: false,
+							multiMaximum: 0,
+							multiMinimum: 0,
+							x509: `${btoa(x509)}@${msp}`,
+						},
+					});
+				}
+			};
 
-    async function constructParam() {
+			const createInstanceParam = [];
 
-      const createPromise = async (value, key) => {
-        const selectedValidationType = value.selectedValidationType;
-        if (selectedValidationType === 'group') {
-          let msp = '';
-          if (value.selectedMembershipId) {
-            let memberships = await getResourceSets(currentEnvId, null, value.selectedMembershipId);
-            msp = memberships[0].msp;
-          }
-          let attr = value.Attr
-          if (attr) {
-            attr = attr.map(({ attr, value }) => ({ [attr]: value })).reduce((acc, obj) => {
-              return { ...acc, ...obj };
-            }, {});
-          }else{
-            attr = {}
-          }
-          createInstanceParam.push({
-            [key]: {
-              "msp": msp,
-              "attributes": attr,
-              "isMulti": true,
-              "multiMaximum": 0,
-              "multiMinimum": 0,
-              "x509": "",
-            }
-          }
-          );
-        } else if (selectedValidationType === 'equal') {
-          let msp = '';
-          if (!value.selectedMembershipId) {
-            setErrorMessage(`Participant ${participants.find(key)} membership is null`);
-          }
-          let memberships = await getResourceSets(currentEnvId, null, value.selectedMembershipId);
-          msp = memberships[0].msp;
-          if (!value.selectedUser) {
-            setErrorMessage(`Participant ${participants.find(key)} user is null`);
-          }
-          const fabricIdentity = await retrieveFabricIdentity(value.selectedUser);
-          const fireflyData = await getFireflyList(currentEnvId, null, fabricIdentity.membership);
-          const fireflyCoreUrl = fireflyData[0].coreURL;
-          const verify = await getFireflyVerify(fireflyCoreUrl, fabricIdentity.firefly_identity_id);
-          const x509 = verify[0].value.split('::').slice(1).join('::');
-          createInstanceParam.push({
-            [key]: {
-              "msp": msp,
-              "attributes": {},
-              "isMulti": false,
-              "multiMaximum": 0,
-              "multiMinimum": 0,
-              "x509": btoa(x509) + "@" + msp,
-            }
-          }
-          );
-        }
-      };
+			const promises = [];
+			showBindingParticipantValueMap.forEach((value, key) => {
+				promises.push(createPromise(value, key));
+			});
+			await Promise.all(promises);
 
-      const createInstanceParam = []
+			for (const [key, value] of Object.entries(DmnBindingInfo)) {
+				const newObj = {};
+				newObj[`${key}_DecisionID`] = value[`${key}_DecisionID`];
+				createInstanceParam.push(newObj);
 
-      const promises = []
-      showBindingParticipantValueMap.forEach((value, key) => {
-        promises.push(createPromise(value, key))
-      })
-      await Promise.all(promises)
+				newObj[`${key}_ParamMapping`] = value[`${key}_ParamMapping`];
+				createInstanceParam.push({ ...newObj });
 
+				newObj[`${key}_Content`] = value[`${key}_Content`];
+				createInstanceParam.push({ ...newObj });
+			}
 
-      Object.entries(DmnBindingInfo).forEach(([key, value]) => {
-        createInstanceParam.push(
-          {
-            [key + "_DecisionID"]: value[key + "_DecisionID"],
-          }
-        )
-        createInstanceParam.push(
-          {
-            [key + "_ParamMapping"]: value[key + "_ParamMapping"],
-          }
-        )
-        createInstanceParam.push(
-          {
-            [key + "_Content"]: value[key + "_Content"],
-          }
-        )
-      })
+			return createInstanceParam;
+		}
+	};
 
-      return createInstanceParam
-    }
-  };
+	const handleOK = async () => {
+		await CreateInstance();
+		setOpen(false);
+	};
 
-  const handleCancel = () => {
-    setOpen(false);
-  };
+	const handleCancel = () => {
+		setOpen(false);
+	};
 
-  return (
-    <Modal title="Binding Dmns and Participants" open={open} onOk={handleOk} onCancel={handleCancel}
-      style={{ minWidth: "1600px", textAlign: 'center' }}>
-      <div>
-        <div style={{ display: 'flex', marginBottom: '20px', height: '600px' }}>
-          <div style={{ flex: '0 1 35%', paddingRight: '10px' }}>
-            <h2>Binding BPMN businessRuleTasks and DMN</h2>
-            <BindingDmnModal
-              bpmnId={bpmnId}
-              DmnBindingInfo={DmnBindingInfo}
-              setDmnBindingInfo={setDmnBindingInfo}
-            ></BindingDmnModal>
-          </div>
-          <div style={{ flex: '0 1 65%', paddingLeft: '10px', height: '600px' }}>
-            <h2>Binding Participants</h2>
-            <BindingParticipant
-              participants={participants}
-              showBindingParticipantMap={showBindingParticipantMap}
-              setShowBindingParticipantMap={setShowBindingParticipantMap}
-              showBindingParticipantValueMap={showBindingParticipantValueMap}
-              setShowBindingParticipantValueMap={setShowBindingParticipantValueMap}
-            ></BindingParticipant>
-          </div>
-        </div>
-        <div style={{ textAlign: 'center', height: '400px' }}>
-          <SVGDisplayComponent bpmnId={bpmnId} />
-        </div>
-        {errorMessage && (
-          <Alert
-            message={errorMessage}
-            description="Error Description Error Description Error Description Error Description Error Description Error Description"
-            type="error"
-            closable
-            onClose={() => setErrorMessage('')}
-          />)}
-      </div>
-    </Modal>
-  );
+	return (
+		<Modal
+			title="Binding Dmns and Participants"
+			open={open}
+			onOk={handleOK}
+			onCancel={handleCancel}
+			style={{ minWidth: "1600px", textAlign: "center" }}
+		>
+			<div>
+				<div style={{ display: "flex", marginBottom: "20px", height: "600px" }}>
+					<div style={{ flex: "0 1 35%", paddingRight: "10px" }}>
+						<h2>Binding BPMN businessRuleTasks and DMN</h2>
+						<BindingDmnModal
+							bpmnId={bpmnId}
+							DmnBindingInfo={DmnBindingInfo}
+							setDmnBindingInfo={setDmnBindingInfo}
+						/>
+					</div>
+					<div
+						style={{ flex: "0 1 65%", paddingLeft: "10px", height: "600px" }}
+					>
+						<h2>Binding Participants</h2>
+						<BindingParticipant
+							participants={participants}
+							showBindingParticipantMap={showBindingParticipantMap}
+							setShowBindingParticipantMap={setShowBindingParticipantMap}
+							showBindingParticipantValueMap={showBindingParticipantValueMap}
+							setShowBindingParticipantValueMap={
+								setShowBindingParticipantValueMap
+							}
+						/>
+					</div>
+				</div>
+				<Button
+					type="primary"
+					onClick={async () => {
+						const { param, url, contract_name } = await CreateInstance(true);
+						navigator.clipboard.writeText(
+							`param=${JSON.stringify(param, null, 2).replaceAll("false", "False")}\n    url="${url}"\n    contract_name="${contract_name}"`,
+						);
+						alert("The parameter has been copied to the clipboard");
+					}}
+				>
+					Get CreateInstance Param
+				</Button>
+
+				<div style={{ textAlign: "center", height: "400px" }}>
+					<SVGDisplayComponent bpmnId={bpmnId} />
+				</div>
+				{errorMessage && (
+					<Alert
+						message={errorMessage}
+						description="Error Description Error Description Error Description Error Description Error Description Error Description"
+						type="error"
+						closable
+						onClose={() => setErrorMessage("")}
+					/>
+				)}
+			</div>
+		</Modal>
+	);
 };
 
 // TODO 调整SVG大小到固定尺寸
 const SVGDisplayComponent = ({ bpmnId }) => {
-  const [svgContent, { }, refreshSvg] = useBpmnSvg(bpmnId);
+	const [svgContent, {}, refreshSvg] = useBpmnSvg(bpmnId);
 
-  return (
-    <div
-      style={{
-        width: '100 %',/* 或者具体的px值 */
-        height: 'auto' /* 保持SVG的宽高比 */
-      }}
-      dangerouslySetInnerHTML={{ __html: svgContent }}
-    />
-  );
-}
+	return (
+		<div
+			style={{
+				width: "100 %" /* 或者具体的px值 */,
+				height: "auto" /* 保持SVG的宽高比 */,
+			}}
+			dangerouslySetInnerHTML={{ __html: svgContent }}
+		/>
+	);
+};
 
-export default ParticipantDmnBindingModal
+export default ParticipantDmnBindingModal;
