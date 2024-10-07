@@ -163,13 +163,17 @@ func (cc *SmartContract) Create_message_ByMuti(ctx contractapi.TransactionContex
 	//loop
 	case 1:
 		cc.CreateMessage("message_cccc_0")//只创建一个
+		//TODO: testBefore 逻辑写在这 return
+
+		cc.createmini()
 		cc.SetInstance(ctx, instance)
 	
 	case 2:
 		cc.CreateMessage("message_cccc_{0}", ENABLED) //仅对第一个进行ENABLED
-
+		cc.createmini()
 		for i := 1; i < MutiMsg.loopCardinality; i++ {
 			cc.CreateMessage("message_cccc_{i}", DISABLED)
+			cc.createmini()
 		}
 		
 		cc.SetInstance(ctx, instance)
@@ -179,7 +183,7 @@ func (cc *SmartContract) Create_message_ByMuti(ctx contractapi.TransactionContex
 		for i := 0; i < MutiMsg.loopCardinality; i++ {
 			cc.CreateMessage("message_cccc_{i}", ENABLED)
 		}
-		
+		cc.createmini()
 		cc.SetInstance(ctx, instance)
 	default:
 		// 执行默认语句块
@@ -441,7 +445,7 @@ func (cc *SmartContract) Message_aaaaa_Send(ctx contractapi.TransactionContextIn
 	}
 
 	
-	//检查大消息状态
+	//检查中消息状态
 	if msg.MsgState != ENABLED {
 		errorMessage := fmt.Sprintf("Message state %s is not allowed", msg.MessageID)
 		fmt.Println(errorMessage)
@@ -506,7 +510,7 @@ func (cc *SmartContract) Message_aaaaa_Confirm(ctx contractapi.TransactionContex
 		return fmt.Errorf(errorMessage)
 	}
 
-	//先检查大消息
+	//先检查中消息
 	if msg.MsgState != ENABLED{
 		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
 		fmt.Println(errorMessage)
