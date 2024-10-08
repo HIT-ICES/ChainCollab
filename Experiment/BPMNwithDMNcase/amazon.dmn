@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/2.0" id="definitions_1olsuce" name="definitions" namespace="http://camunda.org/schema/1.0/dmn" exporter="dmn-js (https://demo.bpmn.io/dmn)" exporterVersion="16.4.0">
+  <decision id="decision_0tybghz" name="">
+    <decisionTable id="decisionTable_1v3tii8">
+      <input id="input1" label="type">
+        <inputExpression id="inputExpression1" typeRef="string">
+          <text>type</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_13zdqxt" label="time1">
+        <inputExpression id="LiteralExpression_0rrdy7t" typeRef="number">
+          <text>time1</text>
+        </inputExpression>
+      </input>
+      <output id="output1" label="result" name="result" typeRef="boolean" biodi:width="192" />
+      <rule id="DecisionRule_1r65y9z">
+        <inputEntry id="UnaryTests_1rwno5x">
+          <text>"regional"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_003p3ha">
+          <text>&lt;=14</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0gp3uiy">
+          <text>true</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1fln0yt">
+        <inputEntry id="UnaryTests_13vbd5q">
+          <text>"instance"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1mgjp5n">
+          <text>&lt;=14</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1d9kue8">
+          <text>true</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1j0q6wd">
+        <inputEntry id="UnaryTests_0zqtejc">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0wfawmf">
+          <text>&gt;14</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1be20tj">
+          <text>false</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

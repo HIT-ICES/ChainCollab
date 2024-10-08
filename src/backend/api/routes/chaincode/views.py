@@ -345,7 +345,7 @@ class ChainCodeViewSet(viewsets.ViewSet):
         # get back the package from peer
         try:
             # fabric_resource_set = request.user.organization
-            resource_set_id = request.data.get("resource_set_id", None)
+            resource_set_id = request.query_params.get("resource_set_id", None)
             resource_set = ResourceSet.objects.get(pk=resource_set_id)
             fabric_resource_set = resource_set.sub_resource_set.get()
 
@@ -365,10 +365,9 @@ class ChainCodeViewSet(viewsets.ViewSet):
                     err("get installed package failed."),
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-
         except Exception as e:
             return Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
-        return Response(ok("success"), status=status.HTTP_200_OK)
+        return Response(ok(res), status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         method="post",
@@ -530,7 +529,10 @@ class ChainCodeViewSet(viewsets.ViewSet):
                 )  # 0: UserOrg 1: SystemOrg
 
                 orderer_node = (
-                    orderer_resource_set.sub_resource_set.get().node.all().first()
+                    orderer_resource_set.sub_resource_set.get()
+                    .node.all()
+                    .filter(type="orderer")
+                    .first()
                 )
                 # qs = Node.objects.filter(type="orderer", organization=org)
                 if not orderer_node:
@@ -558,7 +560,7 @@ class ChainCodeViewSet(viewsets.ViewSet):
                 )  # 0: UserOrg 1: SystemOrg
                 peer_fabric_resource_set = peer_resource_set.sub_resource_set.get()
                 qs = Node.objects.filter(
-                    type="peer", organization=peer_fabric_resource_set
+                    type="peer", fabric_resource_set=peer_fabric_resource_set
                 )
                 if not qs.exists():
                     raise ResourceNotFound
@@ -577,7 +579,7 @@ class ChainCodeViewSet(viewsets.ViewSet):
                 )
                 if code != 0:
                     return Response(
-                        err("check_commit_readiness failed."),
+                        err("check_commit_readiness failed.:" + content),
                         status=status.HTTP_400_BAD_REQUEST,
                     )
 
