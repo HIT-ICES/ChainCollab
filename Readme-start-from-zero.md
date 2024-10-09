@@ -82,6 +82,11 @@ export PATH=$PATH:$GOROOT/bin
 
 ###### 3.go依赖
 
+将go的代理设置为https://goproxy.cn
+
+go env -w GOPROXY=https://goproxy.cn,direct
+
+废弃用代理的方式
 （先打开代理，配置文件中加入两行，下完之后注释掉，一定打开新终端才生效）
 
  export http_proxy=172.26.224.1:7890
@@ -90,7 +95,8 @@ export PATH=$PATH:$GOROOT/bin
 
 cd /IBC/src/backend/opt/chaincode-go-bpmn
 
-go build
+删除go.sum
+go mod tidy
 
 ###### 4.go下载firefly
 
@@ -151,7 +157,7 @@ git switch NewCodeGenerate
 
 
 ### front配置
-
+(node版本20以上，npm install不成功，删掉node-modules重来/按照yarn，yarn install) 单独给npm和yarn配置代理会快
 sudo apt install npm
 
 sudo apt install nodejs
