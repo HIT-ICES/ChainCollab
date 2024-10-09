@@ -44,7 +44,7 @@ def bool_handle(origin: bool) -> str:
 
 
 default_config = {
-    "NeedConfirm": True,
+    "NeedConfirm": False,
     "NeedIdentityAuth": True,
     "NeedStateCheck": True,
 }

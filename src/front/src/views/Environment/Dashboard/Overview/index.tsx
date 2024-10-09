@@ -110,9 +110,9 @@ const Overview: React.FC = () => {
     await InstallOracle(currentOrgId, currentEnvId)
     // register interface
     const oracleFFI = await requestOracleFFI()
-    const res = await registerInterface(systemFireflyURL,oracleFFI.ffiContent, "Oracle5")
+    const res = await registerInterface(systemFireflyURL,oracleFFI.ffiContent, "Oracle")
     await new Promise((resolve, reject) => {
-      setTimeout(resolve, 3000)
+      setTimeout(resolve, 5000)
     })
     const res2 = await registerAPI(systemFireflyURL, "Oracle", "default", "Oracle", res.id)
     setSync()
