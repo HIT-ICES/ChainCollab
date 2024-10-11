@@ -1809,13 +1809,13 @@ func (cc *SmartContract) Gateway_0ep8cuh(ctx contractapi.TransactionContextInter
 if true {
 	    cc.ChangeMsgState(ctx, instance, "Message_0d2xte5", ENABLED)
 }
-if FinalPriority==“Low” {
+if FinalPriority=="Low" {
 	    cc.ChangeMsgState(ctx, instance, "Message_1oxmq1k", ENABLED)
 }
-if FinalPriority==“High” {
+if FinalPriority=="High" {
 	    cc.ChangeMsgState(ctx, instance, "Message_1dmeexg", ENABLED)
 }
-if FinalPriority==“Medium” {
+if FinalPriority=="Medium" {
 	    cc.ChangeMsgState(ctx, instance, "Message_1dzkcn0", ENABLED)
 }
     
