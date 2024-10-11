@@ -3,15 +3,12 @@
   <bpmn2:message id="Message_1dmeexg" name="Supplies Delivery Confirmation" />
   <bpmn2:message id="Message_1dzkcn0" name="Supplies Delivery Confirmation" />
   <bpmn2:message id="Message_1oxmq1k" name="Supplies Delivery Confirmation" />
-  <bpmn2:message id="Message_1amf6l2" />
   <bpmn2:message id="Message_196q1fj" name="Goods Delivery Confirmatio">
     <bpmn2:documentation>{"properties":{},"required":[],"files":{"deliveryNote":{"type":"file","description":"A document confirming the delivery of goods"}},"file required":["deliveryNote"]}</bpmn2:documentation>
   </bpmn2:message>
   <bpmn2:message id="Message_04wmlqe" name="Supplies Delivery Confirmation">
     <bpmn2:documentation>{"properties":{"productionStart":{"type":"string","description":"Notification of the commencement of production, including the date and time"}},"required":["productionStart"],"files":{},"file required":[]}</bpmn2:documentation>
   </bpmn2:message>
-  <bpmn2:message id="Message_1slt8tv" />
-  <bpmn2:message id="Message_1yv2h4e" />
   <bpmn2:message id="Message_0d2xte5" name="Supplies Delivery Confirmation">
     <bpmn2:documentation>{"properties":{"deliveryConfirmation":{"type":"boolean","description":"Confirmation of whether the supplies have been successfully delivered"}},"required":["deliveryConfirmation"],"files":{},"file required":[]}</bpmn2:documentation>
   </bpmn2:message>
@@ -45,11 +42,8 @@
     <bpmn2:messageFlow id="MessageFlow_16tyv4a" sourceRef="Participant_19j1e3o" targetRef="Participant_19mgbdn" messageRef="Message_1dmeexg" />
     <bpmn2:messageFlow id="MessageFlow_0j9vpbt" sourceRef="Participant_19j1e3o" targetRef="Participant_19mgbdn" messageRef="Message_1dzkcn0" />
     <bpmn2:messageFlow id="MessageFlow_1wcvu98" sourceRef="Participant_19j1e3o" targetRef="Participant_19mgbdn" messageRef="Message_1oxmq1k" />
-    <bpmn2:messageFlow id="MessageFlow_169gaoz" sourceRef="Participant_0sa2v7d" targetRef="Participant_19j1e3o" messageRef="Message_1amf6l2" />
     <bpmn2:messageFlow id="MessageFlow_1wmjt89" sourceRef="Participant_19mgbdn" targetRef="Participant_0w6qkdf" messageRef="Message_196q1fj" />
     <bpmn2:messageFlow id="MessageFlow_0g6c3ic" sourceRef="Participant_19mgbdn" targetRef="Participant_0w6qkdf" messageRef="Message_04wmlqe" />
-    <bpmn2:messageFlow id="MessageFlow_0jltnr0" sourceRef="Participant_0w6qkdf" targetRef="Participant_19mgbdn" messageRef="Message_1slt8tv" />
-    <bpmn2:messageFlow id="MessageFlow_0x78vz8" sourceRef="Participant_0w6qkdf" targetRef="Participant_19mgbdn" messageRef="Message_1yv2h4e" />
     <bpmn2:messageFlow id="MessageFlow_1wk4rp7" sourceRef="Participant_19j1e3o" targetRef="Participant_19mgbdn" messageRef="Message_0d2xte5" />
     <bpmn2:messageFlow id="MessageFlow_12csdsd" sourceRef="Participant_0sa2v7d" targetRef="Participant_19j1e3o" messageRef="Message_1io2g9u" />
     <bpmn2:messageFlow id="MessageFlow_0tx6stl" sourceRef="Participant_0sa2v7d" targetRef="Participant_19j1e3o" messageRef="Message_0hpha6h" />
@@ -111,7 +105,6 @@
       <bpmn2:outgoing>Flow_0imjwmb</bpmn2:outgoing>
       <bpmn2:participantRef>Participant_19j1e3o</bpmn2:participantRef>
       <bpmn2:participantRef>Participant_0sa2v7d</bpmn2:participantRef>
-      <bpmn2:messageFlowRef>MessageFlow_169gaoz</bpmn2:messageFlowRef>
       <bpmn2:messageFlowRef>MessageFlow_087ue4t</bpmn2:messageFlowRef>
     </bpmn2:choreographyTask>
     <bpmn2:sequenceFlow id="Flow_0gtd6v3" sourceRef="Gateway_1fbifca" targetRef="ChoreographyTask_1cceq4q" />
@@ -142,7 +135,6 @@
       <bpmn2:participantRef>Participant_19mgbdn</bpmn2:participantRef>
       <bpmn2:participantRef>Participant_0w6qkdf</bpmn2:participantRef>
       <bpmn2:messageFlowRef>MessageFlow_0g6c3ic</bpmn2:messageFlowRef>
-      <bpmn2:messageFlowRef>MessageFlow_0x78vz8</bpmn2:messageFlowRef>
     </bpmn2:choreographyTask>
     <bpmn2:choreographyTask id="ChoreographyTask_1q3p8t2" name="Deliver goods" initiatingParticipantRef="Participant_19mgbdn">
       <bpmn2:incoming>Flow_1tf8ufi</bpmn2:incoming>
@@ -150,7 +142,6 @@
       <bpmn2:participantRef>Participant_19mgbdn</bpmn2:participantRef>
       <bpmn2:participantRef>Participant_0w6qkdf</bpmn2:participantRef>
       <bpmn2:messageFlowRef>MessageFlow_1wmjt89</bpmn2:messageFlowRef>
-      <bpmn2:messageFlowRef>MessageFlow_0jltnr0</bpmn2:messageFlowRef>
     </bpmn2:choreographyTask>
     <bpmn2:endEvent id="Event_13pbqdz">
       <bpmn2:incoming>Flow_17gtrvu</bpmn2:incoming>
