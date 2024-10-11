@@ -39,15 +39,11 @@ type ContractInstance struct {
 	InstanceState InstanceState `json:"InstanceState"`
 }
 
-type StateMemory struct {
-	//...原全局变量
-	//需要添加loop中的跳出条件为全局变量
-}
 
 
 type Membership struct {
 	MSP           string
-	X509          string            `json:"X509"`
+	Attributes    map[string]string
 	enable        bool
 }
 
@@ -58,33 +54,19 @@ type Participant struct {
 	MultiMaximum  int               `json:"MultiMaximum"`
 	MultiMinimum  int               `json:"MultiMinimum"`
 	locked        bool
-	Attributes    map[string]string
-}
-
-
-
-type MutiMessage struct {
-	MutiMessageID        string       `json:"MessageID"`
-	MutiMsgState         ElementState `json:"MsgState"`  //enable/completed
-	MutiType             int          //1-->loop 2-->sequence 3-->parallel
-	MsgList              *Message      //存MessageID，loop需要动态添加
-	loopCardinalityOrMax      int          //顺序/并行-->个数，loop-->次数
-
-    isBefore             bool         //loop专属属性，发消息前/后检测条件
-	loopConditionName    string        //loop专属属性,循环跳出条件，对应相应全局变量
-
+	X509          string            `json:"X509"`
 }
 
 type Message struct {
 	MessageID            string       `json:"MessageID"`
 	MsgState             ElementState `json:"MsgState"`  //disable/enable/completed
-	MiniMsgList          *MiniMessage      //存minimsgInstanceID
+	MiniMsgList          *string      //存minimsgInstanceID 也可以map:minimsginstanceID-->minimsgstate
 	SendParticipantID    string
 	ReceiveParticipantID string   
 }
 
 type MiniMessage struct {
-	MiniMessageID        string 
+	MessageInstanceID    string 
 	FireflyTranID        string       `json:"FireflyTranID"`
 	MiniMsgState         ElementState `json:"MsgState"`  //enable/wtf/completed
 	Format               string       `json:"Format"`
@@ -153,49 +135,12 @@ func (cc *SmartContract) check_participant(ctx contractapi.TransactionContextInt
 	return true
 }
 
-func (cc *SmartContract) Create_message_ByMuti(ctx contractapi.TransactionContextInterface, instanceID string, MutiMessageID string) error {
+
+func (cc *SmartContract) Create_mini_message(ctx contractapi.TransactionContextInterface, instanceID string, bigMessageID string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
 
-	MutiMsg, err := cc.ReadMsg(ctx, instanceID, "MutiMessageID")
-
-	switch MutiMsg.MutiType {
-	//loop
-	case 1:
-		cc.CreateMessage("message_cccc_0")//只创建一个
-		//TODO: testBefore 逻辑写在这 return
-
-		cc.createmini()
-		cc.SetInstance(ctx, instance)
-	
-	case 2:
-		cc.CreateMessage("message_cccc_{0}", ENABLED) //仅对第一个进行ENABLED
-		cc.createmini()
-		for i := 1; i < MutiMsg.loopCardinality; i++ {
-			cc.CreateMessage("message_cccc_{i}", DISABLED)
-			cc.createmini()
-		}
-		
-		cc.SetInstance(ctx, instance)
-
-	case 3:
-		//全部ENABLED
-		for i := 0; i < MutiMsg.loopCardinality; i++ {
-			cc.CreateMessage("message_cccc_{i}", ENABLED)
-		}
-		cc.createmini()
-		cc.SetInstance(ctx, instance)
-	default:
-		// 执行默认语句块
-	}
-
-
-
-func (cc *SmartContract) Create_mini_message(ctx contractapi.TransactionContextInterface, instanceID string, MessageID string) error {
-	stub := ctx.GetStub()
-	instance, err := cc.GetInstance(ctx, instanceID)
-
-	msg, err := cc.ReadMsg(ctx, instanceID, "MessageID")
+	msg, err := cc.ReadMsg(ctx, instanceID, "bigMessageID")
 
 
 	//这一块可以封装为readLocked函数
@@ -325,6 +270,15 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
     cc.CreateMessage(Message_01k4b43)
 
 
+	//默认创建max个mini消息
+	/*
+	while(i<max){
+		cc.CreateMiniMessage(ctx, &instance, "Message_01k4b43_{instanceID}",发送方i,接收方i)
+	}
+	*/
+
+
+
 	cc.CreateMessage(ctx, &instance, "Message_1f0gefc", "Participant_0oa2za9", "Participant_0jwk4tk", "", DISABLED, `{"properties":{"MessageContent":{"type":"string","description":""},"priceOK":{"type":"boolean","description":""}},"required":["MessageContent","priceOK"],"files":{},"file required":[]}`)
 	cc.CreateGateway(ctx, &instance, "Gateway_1ltys0e", DISABLED)
 
@@ -381,8 +335,6 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 
 }
 
-//TODO:需要实现的函数
-/*
 ChangeMiniMsgState
 check_MAX
 check_MIN
@@ -390,12 +342,6 @@ LockParticipant
 ChangeMsgState
 ChangeSendParticipantMsgListState
 ChangeReceiveParticipantMsgListState
-GetAllminiMessageState
-GetAllMsgState
-...
-...
-
-*/
 
 func (cc *SmartContract) Event_0ehnwwz(ctx contractapi.TransactionContextInterface, instanceID string) error {
 	stub := ctx.GetStub()
@@ -431,21 +377,13 @@ func (cc *SmartContract) Message_aaaaa_Send(ctx contractapi.TransactionContextIn
 
 	minimsg, err := cc.ReadminiMsg(ctx, instanceID, "Message_aaaaa", minimsginstanceID)
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_aaaaa")
-	MutiMsg, err := cc.ReadMutiMsg(ctx, instanceID, "Message_aaaaa")
-
-	
-	if MutiMsg.isBefore == true && MutiMsg.loopConditionName == "xxx"{
-		cc.ChangeMutiMsgState()
-		return
-	}
-
 
 	if err != nil {
 		return err
 	}
 
 	
-	//检查中消息状态
+	//检查大消息状态
 	if msg.MsgState != ENABLED {
 		errorMessage := fmt.Sprintf("Message state %s is not allowed", msg.MessageID)
 		fmt.Println(errorMessage)
@@ -497,7 +435,6 @@ func (cc *SmartContract) Message_aaaaa_Confirm(ctx contractapi.TransactionContex
 
 	minimsg, err := cc.ReadMiniMsg(ctx, instanceID, "Message_aaaaa", minimsginstanceID)
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_aaaaa")
-	MutiMsg, err := cc.ReadMutiMsg(ctx, instanceID, "Message_aaaaa")
 
 	if err != nil {
 		return err
@@ -510,7 +447,7 @@ func (cc *SmartContract) Message_aaaaa_Confirm(ctx contractapi.TransactionContex
 		return fmt.Errorf(errorMessage)
 	}
 
-	//先检查中消息
+	//先检查大消息
 	if msg.MsgState != ENABLED{
 		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
 		fmt.Println(errorMessage)
@@ -538,48 +475,13 @@ func (cc *SmartContract) Message_aaaaa_Confirm(ctx contractapi.TransactionContex
 	//完成单个小消息
 	cc.ChangeMiniMsgState(ctx, instance, minimsg.minimsgInstanceID, COMPLETED)
 	stub.SetEvent("Message_aaaaa_{InstanceID}", []byte("Message has been COMPLETED"))
-
-	//检查所有小消息，是否完成中消息
-	if GetAllminiMessageState("Message_aaaaa") == true {
-
-		cc.ChangeMsgState(ctx, instance, "Message_aaaaa", COMPLETED)
-
-		if MutiMsg.isBefore == true {
-			return
-		}
-
-		//分情况检查所有中消息，是否完成大消息
-		switch MutiMsg.MutiType {
-		case 1:
-			if len(MutiMsg.MsgList)< MutiMsg.loopCardinality  && MutiMsg.loopConditionName != "xxx"{
-				cc.CreateMessage()
-				cc.addMsgList()
-			}else if len(MutiMsg.MsgList) ==  MutiMsg.loopCardinality || MutiMsg.loopConditionName == "xxx"{
-				cc.ChangeMutiMsgState()
-			}
-
-		case 2:
-			if len(MutiMsg.MsgList)< MutiMsg.loopCardinality{
-				cc.CreateMessage()
-				cc.addMsgList()
-			}else if len(MutiMsg.MsgList) ==  MutiMsg.loopCardinality{
-				cc.ChangeMutiMsgState()
-			}
-			//由于1，2有顺序，可以只检查len
-
-		case 3:
-			if GetAllMsgState("Message_aaaaa") == true{
-				cc.ChangeMutiMsg()
-			}
-		}
-	}
 	cc.SetInstance(ctx, instance)
 	
 	return nil
 }
 
 //第一次涉及到某Participant时调用
-func (cc *SmartContract) Message_aaaaa_LockParticipant(ctx contractapi.TransactionContextInterface, instanceID string) error {
+func (cc *SmartContract) Message_aaaaa_Advance(ctx contractapi.TransactionContextInterface, instanceID string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_aaaaa")
@@ -587,7 +489,7 @@ func (cc *SmartContract) Message_aaaaa_LockParticipant(ctx contractapi.Transacti
 		return err
 	}
 
-	//这里设想默认接收方和发送方都有权利推进，也可以根据一对多 多对一 和多对多分别设计
+	//这里设想默认接收方和发送方都有权利推进
 	if cc.check_participant(ctx, instanceID, {msg.ReceiveParticipantID, msg.sendParticipantID}) == false {
 		errorMessage := fmt.Sprintf("Participant %s is not allowed to Advance", msg.SendParticipantID)
 		fmt.Println(errorMessage)
@@ -611,3 +513,4 @@ func (cc *SmartContract) Message_aaaaa_LockParticipant(ctx contractapi.Transacti
 
 
 //TODO：任务muti 可以参考使用 建模参数 
+

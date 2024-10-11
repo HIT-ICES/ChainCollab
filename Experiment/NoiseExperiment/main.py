@@ -129,71 +129,56 @@ def run_experiment(
     # 3. contract interface id: get from firefly
 
     # param = """{"Participant_1080bkg":{"msp":"Testmembership-2.org.comMSP","attributes":{},"isMulti":false,"multiMaximum":0,"multiMinimum":0,"x509":"eDUwOTo6Q049bWVtYmVyMSxPVT1jbGllbnQ6OkNOPWNhLnRlc3RNZW1iZXJzaGlwLTIub3JnLmNvbSxPVT1GYWJyaWMsTz10ZXN0TWVtYmVyc2hpcC0yLm9yZy5jb20sU1Q9Tm9ydGggQ2Fyb2xpbmEsQz1VUw==@Testmembership-2.org.comMSP"},"Participant_1gcdqza":{"msp":"Testorg-testconsortium.org.comMSP","attributes":{},"isMulti":false,"multiMaximum":0,"multiMinimum":0,"x509":"eDUwOTo6Q049dGVzdE1lbWJlcixPVT1jbGllbnQ6OkNOPWNhLnRlc3RPcmctdGVzdENvbnNvcnRpdW0ub3JnLmNvbSxPVT1GYWJyaWMsTz10ZXN0T3JnLXRlc3RDb25zb3J0aXVtLm9yZy5jb20sU1Q9Tm9ydGggQ2Fyb2xpbmEsQz1VUw==@Testorg-testconsortium.org.comMSP"},"Participant_0sktaei":{"msp":"Testmembership-1.org.comMSP","attributes":{},"isMulti":false,"multiMaximum":0,"multiMinimum":0,"x509":"eDUwOTo6Q049bWVtYmVyMixPVT1jbGllbnQ6OkNOPWNhLnRlc3RNZW1iZXJzaGlwLTEub3JnLmNvbSxPVT1GYWJyaWMsTz10ZXN0TWVtYmVyc2hpcC0xLm9yZy5jb20sU1Q9Tm9ydGggQ2Fyb2xpbmEsQz1VUw==@Testmembership-1.org.comMSP"},"Activity_1yl9tfp_DecisionID":"decision_0tybghz","Activity_1yl9tfp_ParamMapping":{"VIPpoints":"VIPpoints","need_external_provider":"need_external_provider","externalAvailable":"externalAvailable"},"Activity_1yl9tfp_Content":"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<definitions xmlns=\"https://www.omg.org/spec/DMN/20191111/MODEL/\" xmlns:biodi=\"http://bpmn.io/schema/dmn/biodi/2.0\" xmlns:dmndi=\"https://www.omg.org/spec/DMN/20191111/DMNDI/\" xmlns:dc=\"http://www.omg.org/spec/DMN/20180521/DC/\" xmlns:di=\"http://www.omg.org/spec/DMN/20180521/DI/\" id=\"definitions_1olsuce\" name=\"definitions\" namespace=\"http://camunda.org/schema/1.0/dmn\" exporter=\"Camunda Modeler\" exporterVersion=\"5.22.0\">\n  <decision id=\"decision_0tybghz\" name=\"customer1\">\n    <informationRequirement id=\"InformationRequirement_1hoht1b\">\n      <requiredInput href=\"#InputData_1g61x6h\" />\n    </informationRequirement>\n    <informationRequirement id=\"InformationRequirement_0h8ttmr\">\n      <requiredInput href=\"#InputData_04naupt\" />\n    </informationRequirement>\n    <decisionTable id=\"decisionTable_1v3tii8\" hitPolicy=\"FIRST\">\n      <input id=\"input1\" label=\"VIPpoints\" biodi:width=\"192\">\n        <inputExpression id=\"inputExpression1\" typeRef=\"number\">\n          <text>VIPpoints</text>\n        </inputExpression>\n      </input>\n      <input id=\"InputClause_1i7xu16\" label=\"need_external_provider\" biodi:width=\"192\">\n        <inputExpression id=\"LiteralExpression_1hd5g8t\" typeRef=\"boolean\">\n          <text>need_external_provider</text>\n        </inputExpression>\n      </input>\n      <output id=\"output1\" label=\"externalAvailable\" name=\"externalAvailable\" typeRef=\"boolean\" />\n      <rule id=\"DecisionRule_0cs4468\">\n        <inputEntry id=\"UnaryTests_1aut0oo\">\n          <text>&lt;=9999</text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_0lq0fko\">\n          <text></text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_11etaq9\">\n          <text>false</text>\n        </outputEntry>\n      </rule>\n      <rule id=\"DecisionRule_1vbhylp\">\n        <inputEntry id=\"UnaryTests_17t02el\">\n          <text></text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_1ik5kui\">\n          <text>false</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_1amyrv5\">\n          <text>false</text>\n        </outputEntry>\n      </rule>\n      <rule id=\"DecisionRule_1l5kdzl\">\n        <inputEntry id=\"UnaryTests_0d8927n\">\n          <text>&gt;=10000</text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_0bqww61\">\n          <text>true</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_0z0fcvd\">\n          <text>true</text>\n        </outputEntry>\n      </rule>\n    </decisionTable>\n  </decision>\n  <inputData id=\"InputData_1g61x6h\" name=\"VIPpoints\" />\n  <inputData id=\"InputData_04naupt\" name=\"need_external_provider\" />\n  <dmndi:DMNDI>\n    <dmndi:DMNDiagram id=\"DMNDiagram_1flr508\">\n      <dmndi:DMNShape id=\"DMNShape_0fg1a7g\" dmnElementRef=\"decision_0tybghz\">\n        <dc:Bounds height=\"80\" width=\"180\" x=\"460\" y=\"70\" />\n      </dmndi:DMNShape>\n      <dmndi:DMNShape id=\"DMNShape_0g5yhqk\" dmnElementRef=\"InputData_1g61x6h\">\n        <dc:Bounds height=\"45\" width=\"125\" x=\"258\" y=\"238\" />\n      </dmndi:DMNShape>\n      <dmndi:DMNShape id=\"DMNShape_1inp6do\" dmnElementRef=\"InputData_04naupt\">\n        <dc:Bounds height=\"45\" width=\"125\" x=\"678\" y=\"258\" />\n      </dmndi:DMNShape>\n      <dmndi:DMNEdge id=\"DMNEdge_06eiibn\" dmnElementRef=\"InformationRequirement_1hoht1b\">\n        <di:waypoint x=\"321\" y=\"238\" />\n        <di:waypoint x=\"520\" y=\"170\" />\n        <di:waypoint x=\"520\" y=\"150\" />\n      </dmndi:DMNEdge>\n      <dmndi:DMNEdge id=\"DMNEdge_1qs00fv\" dmnElementRef=\"InformationRequirement_0h8ttmr\">\n        <di:waypoint x=\"741\" y=\"258\" />\n        <di:waypoint x=\"580\" y=\"170\" />\n        <di:waypoint x=\"580\" y=\"150\" />\n      </dmndi:DMNEdge>\n    </dmndi:DMNDiagram>\n  </dmndi:DMNDI>\n</definitions>\n","Activity_0ibsbry_DecisionID":"decision_0tybghz","Activity_0ibsbry_ParamMapping":{"invoiceType":"invoiceType","invoice":"invoice","invoiceTypeAvailable":"invoiceAvailable"},"Activity_0ibsbry_Content":"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<definitions xmlns=\"https://www.omg.org/spec/DMN/20191111/MODEL/\" xmlns:biodi=\"http://bpmn.io/schema/dmn/biodi/2.0\" xmlns:dmndi=\"https://www.omg.org/spec/DMN/20191111/DMNDI/\" xmlns:dc=\"http://www.omg.org/spec/DMN/20180521/DC/\" id=\"definitions_1olsuce\" name=\"definitions\" namespace=\"http://camunda.org/schema/1.0/dmn\" exporter=\"Camunda Modeler\" exporterVersion=\"5.22.0\">\n  <decision id=\"decision_0tybghz\" name=\"customer2\">\n    <decisionTable id=\"decisionTable_1v3tii8\" hitPolicy=\"FIRST\">\n      <input id=\"input1\" label=\"invoiceType\" biodi:width=\"192\">\n        <inputExpression id=\"inputExpression1\" typeRef=\"string\">\n          <text>invoiceType</text>\n        </inputExpression>\n      </input>\n      <input id=\"InputClause_02k362l\" label=\"invoice\">\n        <inputExpression id=\"LiteralExpression_1uexm9z\" typeRef=\"boolean\">\n          <text>invoice</text>\n        </inputExpression>\n      </input>\n      <output id=\"output1\" label=\"invoiceTypeAvailable\" name=\"invoiceTypeAvailable\" typeRef=\"boolean\" biodi:width=\"192\" />\n      <rule id=\"DecisionRule_1oyddrr\">\n        <inputEntry id=\"UnaryTests_1wvkvfa\">\n          <text>\"HIT\"</text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_0xgibym\">\n          <text>true</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_1esf1bm\">\n          <text>true</text>\n        </outputEntry>\n      </rule>\n      <rule id=\"DecisionRule_0f5g2m7\">\n        <inputEntry id=\"UnaryTests_069nkt8\">\n          <text>\"HITwh\"</text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_0m8uhu2\">\n          <text>true</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_0cm8blh\">\n          <text>true</text>\n        </outputEntry>\n      </rule>\n      <rule id=\"DecisionRule_0bo63a3\">\n        <inputEntry id=\"UnaryTests_1dkdmmv\">\n          <text></text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_086c8ll\">\n          <text>true</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_0rhhni5\">\n          <text>false</text>\n        </outputEntry>\n      </rule>\n      <rule id=\"DecisionRule_1wdnie7\">\n        <inputEntry id=\"UnaryTests_0t432ic\">\n          <text></text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_0yb6s1z\">\n          <text>false</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_14n15xx\">\n          <text>false</text>\n        </outputEntry>\n      </rule>\n    </decisionTable>\n  </decision>\n  <dmndi:DMNDI>\n    <dmndi:DMNDiagram id=\"DMNDiagram_19nwh5y\">\n      <dmndi:DMNShape id=\"DMNShape_03xv25j\" dmnElementRef=\"decision_0tybghz\">\n        <dc:Bounds height=\"80\" width=\"180\" x=\"150\" y=\"80\" />\n      </dmndi:DMNShape>\n    </dmndi:DMNDiagram>\n  </dmndi:DMNDI>\n</definitions>\n"}"""
+
     param = {
-        "Participant_1080bkg": {
-            "msp": "Testmembership-2.org.comMSP",
+        "Participant_0oa2za9": {
+            "msp": "Mem3.org.comMSP",
             "attributes": {},
             "isMulti": False,
             "multiMaximum": 0,
             "multiMinimum": 0,
-            "x509": "eDUwOTo6Q049dXNlcjEsT1U9Y2xpZW50OjpDTj1jYS50ZXN0TWVtYmVyc2hpcC0yLm9yZy5jb20sT1U9RmFicmljLE89dGVzdE1lbWJlcnNoaXAtMi5vcmcuY29tLFNUPU5vcnRoIENhcm9saW5hLEM9VVM=@Testmembership-2.org.comMSP",
+            "x509": "eDUwOTo6Q049dXNlcjMsT1U9Y2xpZW50OjpDTj1jYS5tZW0zLm9yZy5jb20sT1U9RmFicmljLE89bWVtMy5vcmcuY29tLFNUPU5vcnRoIENhcm9saW5hLEM9VVM=@Mem3.org.comMSP",
         },
-        "Participant_0sktaei": {
-            "msp": "Testmembership-1.org.comMSP",
+        "Participant_0jwk4tk": {
+            "msp": "Mem2.org.comMSP",
             "attributes": {},
             "isMulti": False,
             "multiMaximum": 0,
             "multiMinimum": 0,
-            "x509": "eDUwOTo6Q049dXNlcjQsT1U9Y2xpZW50OjpDTj1jYS50ZXN0TWVtYmVyc2hpcC0xLm9yZy5jb20sT1U9RmFicmljLE89dGVzdE1lbWJlcnNoaXAtMS5vcmcuY29tLFNUPU5vcnRoIENhcm9saW5hLEM9VVM=@Testmembership-1.org.comMSP",
+            "x509": "eDUwOTo6Q049dXNlcjIsT1U9Y2xpZW50OjpDTj1jYS5tZW0yLm9yZy5jb20sT1U9RmFicmljLE89bWVtMi5vcmcuY29tLFNUPU5vcnRoIENhcm9saW5hLEM9VVM=@Mem2.org.comMSP",
         },
-        "Activity_0b1f7uv_DecisionID": "decision_0tybghz",
-        "Activity_0b1f7uv_ParamMapping": {
-            "VIPpoints": "VIPpoints",
-            "VIPLevel": "VIPLevel",
+        "Participant_0cb2p7d": {
+            "msp": "Organization-consortium.org.comMSP",
+            "attributes": {},
+            "isMulti": False,
+            "multiMaximum": 0,
+            "multiMinimum": 0,
+            "x509": "eDUwOTo6Q049dXNlcjEsT1U9Y2xpZW50OjpDTj1jYS5Pcmdhbml6YXRpb24tQ29uc29ydGl1bS5vcmcuY29tLE9VPUZhYnJpYyxPPU9yZ2FuaXphdGlvbi1Db25zb3J0aXVtLm9yZy5jb20sU1Q9Tm9ydGggQ2Fyb2xpbmEsQz1VUw==@Organization-consortium.org.comMSP",
         },
-        "Activity_0b1f7uv_Content": '<?xml version="1.0" encoding="UTF-8"?>\n<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/2.0" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" id="definitions_1olsuce" name="definitions" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="5.22.0">\n  <decision id="decision_0tybghz" name="hotel">\n    <decisionTable id="decisionTable_1v3tii8" hitPolicy="FIRST">\n      <input id="input1" label="VIPpoints" biodi:width="192">\n        <inputExpression id="inputExpression1" typeRef="number">\n          <text>VIPpoints</text>\n        </inputExpression>\n      </input>\n      <output id="output1" label="VIPLevel" name="VIPLevel" typeRef="number" biodi:width="192" />\n      <rule id="DecisionRule_08kwp22">\n        <inputEntry id="UnaryTests_0vmrwyu">\n          <text>&lt;=1000</text>\n        </inputEntry>\n        <outputEntry id="LiteralExpression_1ho5mn3">\n          <text>1</text>\n        </outputEntry>\n      </rule>\n      <rule id="DecisionRule_02zzdqo">\n        <inputEntry id="UnaryTests_0b0w1s8">\n          <text>&lt;=10000</text>\n        </inputEntry>\n        <outputEntry id="LiteralExpression_0guurcv">\n          <text>2</text>\n        </outputEntry>\n      </rule>\n      <rule id="DecisionRule_07he19l">\n        <inputEntry id="UnaryTests_0t8x9hw">\n          <text>&gt;10000</text>\n        </inputEntry>\n        <outputEntry id="LiteralExpression_1ijp91q">\n          <text>3</text>\n        </outputEntry>\n      </rule>\n    </decisionTable>\n  </decision>\n  <dmndi:DMNDI>\n    <dmndi:DMNDiagram id="DMNDiagram_0zie7i5">\n      <dmndi:DMNShape id="DMNShape_0ok3y22" dmnElementRef="decision_0tybghz">\n        <dc:Bounds height="80" width="180" x="150" y="150" />\n      </dmndi:DMNShape>\n    </dmndi:DMNDiagram>\n  </dmndi:DMNDI>\n</definitions>\n',
+        "Activity_12arovy_DecisionID": "decision_0tybghz",
+        "Activity_12arovy_ParamMapping": {"price": "Price", "discount": "discount"},
+        "Activity_12arovy_Content": '<?xml version="1.0" encoding="UTF-8"?>\n<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/2.0" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" id="definitions_1olsuce" name="definitions" namespace="http://camunda.org/schema/1.0/dmn" exporter="dmn-js (https://demo.bpmn.io/dmn)" exporterVersion="16.4.0">\n  <decision id="decision_0tybghz" name="">\n    <decisionTable id="decisionTable_1v3tii8">\n      <input id="input1" label="price">\n        <inputExpression id="inputExpression1" typeRef="number">\n          <text>price</text>\n        </inputExpression>\n      </input>\n      <output id="output1" label="discount" name="discount" typeRef="boolean" biodi:width="192" />\n      <rule id="DecisionRule_1s51owg">\n        <inputEntry id="UnaryTests_05mwgq3">\n          <text>&gt;=1000</text>\n        </inputEntry>\n        <outputEntry id="LiteralExpression_19i7d5n">\n          <text>true</text>\n        </outputEntry>\n      </rule>\n      <rule id="DecisionRule_1fvljw2">\n        <inputEntry id="UnaryTests_0w4gn9v">\n          <text>&lt;1000</text>\n        </inputEntry>\n        <outputEntry id="LiteralExpression_1mm1wl8">\n          <text>False</text>\n        </outputEntry>\n      </rule>\n    </decisionTable>\n  </decision>\n  <dmndi:DMNDI>\n    <dmndi:DMNDiagram id="DMNDiagram_1xxktam">\n      <dmndi:DMNShape id="DMNShape_00d928b" dmnElementRef="decision_0tybghz">\n        <dc:Bounds height="80" width="180" x="150" y="150" />\n      </dmndi:DMNShape>\n    </dmndi:DMNDiagram>\n  </dmndi:DMNDI>\n</definitions>\n',
     }
+    url = "http://127.0.0.1:5001/api/v1/namespaces/default/apis/purcha-aa9ab7"
+    contract_name = "purcha"
 
     create_instance_params = {"input": {"initParametersBytes": json.dumps(param)}}
-    url = "http://127.0.0.1:5001/api/v1/namespaces/default/apis/hotel-6ef5e3"
+    contract_interface_id = "13c2aa37-7d06-4c08-ba24-eff90e7170d9"
 
     participant_map = {
-        "Participant_1080bkg": {
-            "key": "Testmembership-2.org.comMSP::x509::CN=user1,OU=client::CN=ca.testMembership-2.org.com,OU=Fabric,O=testMembership-2.org.com,ST=North Carolina,C=US",
-            "fireflyUrl": "http://localhost:5001/api/v1/namespaces/default/apis/hotel-6ef5e3",
+        "Participant_0oa2za9": {
+            "key": "Mem3.org.comMSP::x509::CN=user3,OU=client::CN=ca.mem3.org.com,OU=Fabric,O=mem3.org.com,ST=North Carolina,C=US",
+            "fireflyUrl": "http://localhost:5001/api/v1/namespaces/default/apis/purcha-aa9ab7",
         },
-        "Participant_0sktaei": {
-            "key": "Testmembership-1.org.comMSP::x509::CN=user4,OU=client::CN=ca.testMembership-1.org.com,OU=Fabric,O=testMembership-1.org.com,ST=North Carolina,C=US",
-            "fireflyUrl": "http://localhost:5002/api/v1/namespaces/default/apis/hotel-6ef5e3",
+        "Participant_0jwk4tk": {
+            "key": "Mem2.org.comMSP::x509::CN=user2,OU=client::CN=ca.mem2.org.com,OU=Fabric,O=mem2.org.com,ST=North Carolina,C=US",
+            "fireflyUrl": "http://localhost:5002/api/v1/namespaces/default/apis/purcha-aa9ab7",
         },
-    }
-
-    """  {
-        "Participant_1080bkg": {
-            "key": "Testmembership-2.org.comMSP::x509::CN=user1,OU=client::CN=ca.testMembership-2.org.com,OU=Fabric,O=testMembership-2.org.com,ST=North Carolina,C=US",
-            "fireflyUrl": "http://localhost:5001/api/v1/namespaces/default/apis/supply-13a8c2",
-        },
-        "Participant_19mgbdn": {
-            "key": "Testmembership-2.org.comMSP::x509::CN=user2,OU=client::CN=ca.testMembership-2.org.com,OU=Fabric,O=testMembership-2.org.com,ST=North Carolina,C=US",
-            "fireflyUrl": "http://localhost:5001/api/v1/namespaces/default/apis/supply-13a8c2",
-        },
-        "Participant_09cjol2": {
-            "key": "Testmembership-2.org.comMSP::x509::CN=user3,OU=client::CN=ca.testMembership-2.org.com,OU=Fabric,O=testMembership-2.org.com,ST=North Carolina,C=US",
-            "fireflyUrl": "http://localhost:5001/api/v1/namespaces/default/apis/supply-13a8c2",
-        },
-        "Participant_0sktaei": {
-            "key": "Testmembership-1.org.comMSP::x509::CN=user4,OU=client::CN=ca.testMembership-1.org.com,OU=Fabric,O=testMembership-1.org.com,ST=North Carolina,C=US",
-            "fireflyUrl": "http://localhost:5002/api/v1/namespaces/default/apis/supply-13a8c2",
-        },
-        "Participant_19j1e3o": {
-            "key": "Testorg-testconsortium.org.comMSP::x509::CN=user5,OU=client::CN=ca.testOrg-testConsortium.org.com,OU=Fabric,O=testOrg-testConsortium.org.com,ST=North Carolina,C=US",
-            "fireflyUrl": "http://localhost:5003/api/v1/namespaces/default/apis/supply-13a8c2",
+        "Participant_0cb2p7d": {
+            "key": "Organization-consortium.org.comMSP::x509::CN=user1,OU=client::CN=ca.Organization-Consortium.org.com,OU=Fabric,O=Organization-Consortium.org.com,ST=North Carolina,C=US",
+            "fireflyUrl": "http://localhost:5003/api/v1/namespaces/default/apis/purcha-aa9ab7",
         },
     }
-    """
-
-    contract_name = "hotel"
-    contract_interface_id = "cfcf778b-b9da-486d-a65d-c25d73383d7d"
 
     if create_listener:
         create_listener_and_subscribe(

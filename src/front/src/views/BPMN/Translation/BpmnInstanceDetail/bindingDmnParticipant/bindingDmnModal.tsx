@@ -29,9 +29,17 @@ const DmnBindingBlock = (
     const dmnToUse = dmns.filter((dmn) => dmn.id === dmnId)
     const [decisions, { }, refreshDecisions] = useDecisions(dmnToUse.length > 0 ? dmnToUse[0].dmnContent : "")
     const mainDecision = decisions.find((decision) => decision.is_main)
-    const availableInput = mainDecision?.inputs ?? []
-    const availableOutput = mainDecision?.outputs ?? []
+    const availableInput1 = mainDecision?.inputs ?? []
+    const availableOutput1 = mainDecision?.outputs ?? []
 
+    const availableInput = decisions.reduce((accumulator, decisions) => {  
+        const decisionInputs = Array.isArray(decisions.inputs) ? decisions.inputs : [];  
+        return [...accumulator, ...decisionInputs];  
+    }, []);
+    const availableOutput = decisions.reduce((accumulator, decisions) => {  
+        const decisionOutputs = Array.isArray(decisions.outputs) ? decisions.outputs : [];  
+        return [...accumulator, ...decisionOutputs];  
+    }, []);
     const [currentParamMapping, setCurrentParamMapping] = useState({})
 
     useEffect(() => {
