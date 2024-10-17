@@ -453,12 +453,12 @@ class Choreography:
 
 if __name__ == "__main__":
     # ,"SupplyChain_new111.bpmn","Purchase.bpmn",
-    file_name_list = ["Purchase_new2.bpmn","SupplyChain_new2.bpmn","Rental Claim_new2.bpmn"]
+    file_name_list = ["SupplyChainPaperXXX.bpmn"]
     # file_name_list = ["Hotel Booking.bpmn"]
     for file_name in file_name_list:
         choreography = Choreography()
         choreography.load_diagram_from_xml_file(
-            f"./resource/bpmn_add/{file_name}"
+            f"./resource/paper/{file_name}"
         )
 
         ### find all simple path
@@ -469,6 +469,6 @@ if __name__ == "__main__":
             paths = choreography.generate_invoke_path(start_event.id, end_event.id)
             all_paths.extend(paths)
 
-        with open(f"./resource/bpmn/{file_name.split(".")[0]}-path.json", "w") as f:
+        with open(f"./resource/paper{file_name.split(".")[0]}-path.json", "w") as f:
             json.dump(all_paths, f)
         print(f"File {file_name} is done")

@@ -1,0 +1,111 @@
+[{
+    "name": "task4",
+    "steps": [
+      {
+        "element_name": "Event_0ehnwwz",
+        "element_type": "Event",
+        "metaInfo": "",
+        "parameters": [],
+        "invoker": "",
+        "state_change": [
+          {
+            "element_name": "Event_0ehnwwz",
+            "element_type": "Event",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Message_0q9hvem",
+            "element_type": "Message",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Message_0q9hvem",
+        "element_type": "Message",
+        "metaInfo": "{\"properties\":{\"orderContent\":{\"type\":\"string\",\"description\":\"\"},\"productAvalibale\":{\"type\":\"boolean\",\"description\":\"is product avaliable\"}},\"required\":[\"orderContent\",\"productAvalibale\"],\"files\":{},\"file required\":[]}",
+        "parameters": ["Sample Order Content", false],
+        "invoker": "Participant_0jwk4tk",
+        "state_change": [
+          {
+            "element_name": "Message_0q9hvem",
+            "element_type": "Message",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Gateway_1ltys0e",
+            "element_type": "Gateway",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Gateway_1ltys0e",
+        "element_type": "Gateway",
+        "metaInfo": "Is product available?",
+        "parameters": [],
+        "invoker": "",
+        "state_change": [
+          {
+            "element_name": "Gateway_1ltys0e",
+            "element_type": "Gateway",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Message_14wu8ts",
+            "element_type": "Message",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Message_14wu8ts",
+        "element_type": "Message",
+        "metaInfo": "{\"properties\":{\"MessageContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"MessageContent\"],\"files\":{},\"file required\":[]}",
+        "parameters": ["Unfortunately, the product is not available."],
+        "invoker": "Participant_0oa2za9",
+        "state_change": [
+          {
+            "element_name": "Message_14wu8ts",
+            "element_type": "Message",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Event_194zr5n",
+            "element_type": "Event",
+            "pre_state": "disable",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Event_194zr5n",
+        "element_type": "Event",
+        "metaInfo": "",
+        "parameters": [],
+        "invoker": "",
+        "state_change": [
+          {
+            "element_name": "Event_194zr5n",
+            "element_type": "Event",
+            "pre_state": "enable",
+            "post_state": "done"
+          }
+        ]
+      }
+    ],
+    "invoke_path": [
+      "Event_0ehnwwz",
+      "Message_0q9hvem",
+      "Gateway_1ltys0e",
+      "Message_14wu8ts",
+      "Event_194zr5n"
+    ]
+  }]

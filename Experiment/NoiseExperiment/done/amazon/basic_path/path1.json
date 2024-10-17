@@ -1,0 +1,219 @@
+[{
+    "name": "task1",
+    "steps": [
+        {
+            "element_name": "Event_0ojehz6",
+            "element_type": "Event",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Event_0ojehz6",
+                    "element_type": "Event",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_09krt7c",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"question name\":{\"type\":\"string\",\"description\":\"\"},\"description\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"question name\",\"description\"],\"files\":{},\"file required\":[]}",
+            "parameters": ["Sample Question", "Description for the question"],
+            "invoker": "Participant_12df78t",
+            "state_change": [
+                {
+                    "element_name": "Event_0ojehz6",
+                    "element_type": "Event",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Gateway_0jgq0a6",
+                    "element_type": "Gateway",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Gateway_0jgq0a6",
+            "element_type": "Gateway",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Gateway_0jgq0a6",
+                    "element_type": "Gateway",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_1bhhp1n",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"serviceType\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"serviceType\"],\"files\":{},\"file required\":[]}",
+            "parameters": ["Service Type"],
+            "invoker": "Participant_12df78t",
+            "state_change": [
+                {
+                    "element_name": "Gateway_0jgq0a6",
+                    "element_type": "Gateway",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Message_076ulzs",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_076ulzs",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"time\":{\"type\":\"string\",\"description\":\"\"},\"description\":{\"type\":\"string\",\"description\":\"\"},\"EC2 resource ID\":{\"type\":\"string\",\"description\":\"\"},\"logs\":{\"type\":\"string\",\"description\":\"\"},\"other information\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"time\",\"description\",\"EC2 resource ID\",\"logs\"],\"files\":{},\"file required\":[]}",
+            "parameters": ["2023-10-01T00:00:00Z", "Some description", "EC2-Resource-ID", "Log details","more details"],
+            "invoker": "Participant_12df78t",
+            "state_change": [
+                {
+                    "element_name": "Message_1bhhp1n",
+                    "element_type": "Message",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Gateway_0auc3he",
+                    "element_type": "Gateway",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Gateway_0auc3he",
+            "element_type": "Gateway",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Gateway_0auc3he",
+                    "element_type": "Gateway",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_12n6jjk",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"type\":{\"type\":\"string\",\"description\":\"\"},\"duration\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"type\",\"duration\"],\"files\":{},\"file required\":[]}",
+            "parameters": ["regional", 5],
+            "invoker": "Participant_12df78t",
+            "state_change": [
+                {
+                    "element_name": "Gateway_0auc3he",
+                    "element_type": "Gateway",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Activity_0tya4bp",
+                    "element_type": "Activity",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Activity_0tya4bp",
+            "element_type": "Activity",
+            "metaInfo": "{\"inputs\":[{\"name\":\"type\",\"type\":\"string\",\"description\":\"\"},{\"name\":\"duration\",\"type\":\"number\",\"description\":\"\"}],\"outputs\":[{\"name\":\"confirm\",\"type\":\"boolean\",\"description\":\"\"}]}",
+            "parameters": ["Type", 5],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Message_12n6jjk",
+                    "element_type": "Message",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Gateway_0ivv4vg",
+                    "element_type": "Gateway",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Gateway_0ivv4vg",
+            "element_type": "Gateway",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Gateway_0ivv4vg",
+                    "element_type": "Gateway",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_01jq2zl",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"amount\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"amount\"],\"files\":{},\"file required\":[]}",
+            "parameters": [100],
+            "invoker": "Participant_1p9owwo",
+            "state_change": [
+                {
+                    "element_name": "Gateway_0ivv4vg",
+                    "element_type": "Gateway",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "Event_0ci2gl8",
+                    "element_type": "Event",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Event_0ci2gl8",
+            "element_type": "Event",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Event_0ci2gl8",
+                    "element_type": "Event",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        }
+    ],
+    "invoke_path": [
+        "Event_0ojehz6",
+        "Message_09krt7c",
+        "Gateway_0jgq0a6",
+        "Message_1bhhp1n",
+        "Message_076ulzs",
+        "Gateway_0auc3he",
+        "Message_12n6jjk",
+        "Activity_0tya4bp",
+        "Gateway_0ivv4vg",
+        "Message_01jq2zl",
+        "Event_0ci2gl8"
+    ]
+}]

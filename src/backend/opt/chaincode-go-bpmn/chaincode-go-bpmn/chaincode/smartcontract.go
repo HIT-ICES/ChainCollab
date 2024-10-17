@@ -848,9 +848,9 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 
 	cc.CreateActionEvent(ctx, &instance, "Event_13pbqdz", DISABLED)
 
-	cc.CreateMessage(ctx, &instance, "Message_1dmeexg", "Participant_19j1e3o", "Participant_19mgbdn", "", DISABLED, `{}`)
-	cc.CreateMessage(ctx, &instance, "Message_1dzkcn0", "Participant_19j1e3o", "Participant_19mgbdn", "", DISABLED, `{}`)
-	cc.CreateMessage(ctx, &instance, "Message_1oxmq1k", "Participant_19j1e3o", "Participant_19mgbdn", "", DISABLED, `{}`)
+	cc.CreateMessage(ctx, &instance, "Message_1dmeexg", "Participant_19j1e3o", "Participant_19mgbdn", "", DISABLED, `{"properties":{"confirm3":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, &instance, "Message_1dzkcn0", "Participant_19j1e3o", "Participant_19mgbdn", "", DISABLED, `{"properties":{"confirm2":{"type":"boolean","description":""}},"required":[],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, &instance, "Message_1oxmq1k", "Participant_19j1e3o", "Participant_19mgbdn", "", DISABLED, `{"properties":{"confirm1":{"type":"boolean","description":""}},"required":[],"files":{},"file required":[]}`)
 	cc.CreateMessage(ctx, &instance, "Message_196q1fj", "Participant_19mgbdn", "Participant_0w6qkdf", "", DISABLED, `{"properties":{},"required":[],"files":{"deliveryNote":{"type":"file","description":"A document confirming the delivery of goods"}},"file required":["deliveryNote"]}`)
 	cc.CreateMessage(ctx, &instance, "Message_04wmlqe", "Participant_19mgbdn", "Participant_0w6qkdf", "", DISABLED, `{"properties":{"productionStart":{"type":"string","description":"Notification of the commencement of production, including the date and time"}},"required":["productionStart"],"files":{},"file required":[]}`)
 	cc.CreateMessage(ctx, &instance, "Message_0d2xte5", "Participant_19j1e3o", "Participant_19mgbdn", "", DISABLED, `{"properties":{"deliveryConfirmation":{"type":"boolean","description":"Confirmation of whether the supplies have been successfully delivered"}},"required":["deliveryConfirmation"],"files":{},"file required":[]}`)
@@ -1704,9 +1704,6 @@ func (cc *SmartContract) Gateway_0ep8cuh(ctx contractapi.TransactionContextInter
 
     FinalPriority:=currentMemory.FinalPriority
 
-if true {
-	    cc.ChangeMsgState(ctx, instance, "Message_0d2xte5", ENABLED)
-}
 if FinalPriority=="Low" {
 	    cc.ChangeMsgState(ctx, instance, "Message_1oxmq1k", ENABLED)
 }
@@ -1715,6 +1712,9 @@ if FinalPriority=="High" {
 }
 if FinalPriority=="Medium" {
 	    cc.ChangeMsgState(ctx, instance, "Message_1dzkcn0", ENABLED)
+}
+if FinalPriority=="VeryLow" {
+	    cc.ChangeMsgState(ctx, instance, "Message_0d2xte5", ENABLED)
 }
     
 	cc.SetInstance(ctx, instance)
