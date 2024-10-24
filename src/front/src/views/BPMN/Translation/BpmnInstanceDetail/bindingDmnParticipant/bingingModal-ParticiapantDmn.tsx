@@ -37,7 +37,7 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 		const chaincode_url = bpmn.firefly_url;
 
 		if (onlyReturnParam) {
-			return { param: singleObject, url: chaincode_url.slice(0,-4), contract_name:bpmn.name.split(".")[0], };
+			return { param: singleObject, url: chaincode_url.slice(0, -4), contract_name: bpmn.name.split(".")[0], };
 		}
 
 		await invokeCreateInstance(chaincode_url, singleObject);
@@ -199,7 +199,7 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 					Get CreateInstance Param
 				</Button>
 
-				<div style={{ textAlign: "center", height: "400px" }}>
+				<div style={{ textAlign: "center"}}>
 					<SVGDisplayComponent bpmnId={bpmnId} />
 				</div>
 				{errorMessage && (
@@ -218,7 +218,7 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 
 // TODO 调整SVG大小到固定尺寸
 const SVGDisplayComponent = ({ bpmnId }) => {
-	const [svgContent, {}, refreshSvg] = useBpmnSvg(bpmnId);
+	const [svgContent, { }, refreshSvg] = useBpmnSvg(bpmnId);
 
 	return (
 		<div

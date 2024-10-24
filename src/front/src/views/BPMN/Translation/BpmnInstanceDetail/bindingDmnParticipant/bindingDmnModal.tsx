@@ -32,13 +32,13 @@ const DmnBindingBlock = (
     const availableInput1 = mainDecision?.inputs ?? []
     const availableOutput1 = mainDecision?.outputs ?? []
 
-    const availableInput = decisions.reduce((accumulator, decisions) => {  
-        const decisionInputs = Array.isArray(decisions.inputs) ? decisions.inputs : [];  
-        return [...accumulator, ...decisionInputs];  
+    const availableInput = decisions.reduce((accumulator, decisions) => {
+        const decisionInputs = Array.isArray(decisions.inputs) ? decisions.inputs : [];
+        return [...accumulator, ...decisionInputs];
     }, []);
-    const availableOutput = decisions.reduce((accumulator, decisions) => {  
-        const decisionOutputs = Array.isArray(decisions.outputs) ? decisions.outputs : [];  
-        return [...accumulator, ...decisionOutputs];  
+    const availableOutput = decisions.reduce((accumulator, decisions) => {
+        const decisionOutputs = Array.isArray(decisions.outputs) ? decisions.outputs : [];
+        return [...accumulator, ...decisionOutputs];
     }, []);
     const [currentParamMapping, setCurrentParamMapping] = useState({})
 
@@ -398,7 +398,7 @@ export const BindingDmnModal = ({
                         setCurrentBusinessRuleId(
                             record.businessRuleId
                         )
-                    }} >绑定</Button>
+                    }} >Binding</Button>
                 )
             }
         }
