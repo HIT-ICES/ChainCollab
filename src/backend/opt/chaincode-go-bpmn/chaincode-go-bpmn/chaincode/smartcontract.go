@@ -1531,10 +1531,10 @@ func (cc *SmartContract) Activity_0rm8bkp_Continue(ctx contractapi.TransactionCo
 	err = cc.SetGlobalVariable(ctx, instance, globalVariable)
 
 	// Change the BusinessRule State
-	cc.ChangeBusinessRuleState(ctx, instance, "Activity_0rm8bkp", COMPLETED)
+	cc.ChangeBusinessRuleState(ctx, instance, "Activity_0rm8bkp", ENABLED)
 
     
-        cc.ChangeGtwState(ctx, instance, "Gateway_0ep8cuh", ENABLED)
+        // cc.ChangeGtwState(ctx, instance, "Gateway_0ep8cuh", ENABLED)
     
 
 	cc.SetInstance(ctx, instance)

@@ -5,6 +5,9 @@ import websockets
 import json
 import threading
 from concurrent.futures import ThreadPoolExecutor
+import time
+
+from ..myRedis import setKV, readKV
 
 
 async def listen(executor, uri, listen_subscription_name, listen_action):
@@ -46,10 +49,20 @@ class DMNContentRequiredAction:
         instance_ID = eventContent.get("InstanceID")
         Cid = eventContent.get("CID")
         func_name = eventContent.get("Func")
+        # print("DMNContentRequired, read from IPFS", int(time.time() * 1000))
+        time_a = int(time.time() * 1000)
         dmn_content = self.read_from_ipfs(self.ipfs_url, Cid)
-        self.invoke_dmn_contract(
-            dmn_content=dmn_content, instance_id=instance_ID, func_name=func_name
-        )
+        # print("DMNContentRequired, invoke dmn contract", int(time.time() * 1000))
+        time_b = int(time.time() * 1000)
+        created_time, op_id = self.invoke_dmn_contract(dmn_content=dmn_content, instance_id=instance_ID, func_name=func_name)
+        time_c = int(time.time() * 1000)
+
+        setKV("executor_ipfsStart", time_a)
+        setKV("executor_ipfsEnd", time_b)
+        setKV("executor_invokeStart", created_time)
+        setKV("executor_end", time_c)
+        setKV("executor_op", op_id)
+
 
     def read_from_ipfs(self, url, cid):
         response = requests.get(f"{url}{cid}")
@@ -62,12 +75,12 @@ class DMNContentRequiredAction:
         # 构造请求
         response = requests.post(
             url,
-            data=json.dumps(
-                {"input": {"ContentOfDmn": dmn_content, "InstanceID": instance_id}}
-            ),
+            data=json.dumps({"input": {"ContentOfDmn": dmn_content, "InstanceID": instance_id}}),
             headers={"Content-Type": "application/json"},
         )
         print(response.text)
+        res = json.loads(response.text)
+        return res['created'], res['id']
 
 
 if __name__ == "__main__":
@@ -83,8 +96,6 @@ if __name__ == "__main__":
             executor=executor,
             uri=ws_uri,
             listen_subscription_name=listen_subscription_name,
-            listen_action=DMNContentRequiredAction(
-                core_url=core_url, chaincode_url=chaincode_url
-            ).handle_read_dmn,
+            listen_action=DMNContentRequiredAction(core_url=core_url, chaincode_url=chaincode_url).handle_read_dmn,
         )
     )

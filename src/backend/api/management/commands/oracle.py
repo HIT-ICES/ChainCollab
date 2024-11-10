@@ -9,12 +9,16 @@ import asyncio
 from asgiref.sync import sync_to_async
 import json
 from concurrent.futures import ThreadPoolExecutor
+import time
+
+import traceback
 
 # In-memory data structure to track events with created listeners
 created_listeners = set()
 executor = ThreadPoolExecutor()
 ws_uri = "ws://localhost:5000/ws"  # 替换为你的 WebSocket 服务器地址
 
+from .myRedis import setKV, readKV
 
 async def listener_task(chaincode_url, event_type, subscription_name, bpmn_id):
     async with websockets.connect(ws_uri) as websocket:
@@ -38,11 +42,13 @@ async def listener_task(chaincode_url, event_type, subscription_name, bpmn_id):
                 match event_type:
                     case "DMNContentRequired":
                         try:
+                            setKV("executor_start", int(time.time()*1000))
+                            print("Handling DMN Content Required")
                             DMNContentRequiredAction(
                                 "http://127.0.0.1:5000/", chaincode_url=chaincode_url
                             ).handle_read_dmn(message)
                         except Exception as e:
-                            print(e)
+                            traceback.print_exc()
                     case "InstanceCreated":
                         try:
                             InstanceCreatedAction(
