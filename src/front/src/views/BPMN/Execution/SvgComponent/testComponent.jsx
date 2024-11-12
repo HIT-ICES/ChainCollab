@@ -45,7 +45,10 @@ const TestComponentV2 = ({processFunc, calcFunc}) => {
 			<Input placeholder="Input" onChange={(e)=>{
                 setTestTimes(Number.parseInt(e.target.value))}} />
             {/* 进度条 */}
-            {testing?<LinearProgress value={Math.round(processingNum*100/testTimes)} />:null}
+            {/* {testing?<LinearProgress value={Math.round(processingNum*100/testTimes)} />:null} */}
+			{testing?
+			<h5>{processingNum} / {testTimes}</h5>:null
+			}
 			<LoadingButton
 				loading={testing}
 				onClick={() => {

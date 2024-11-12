@@ -244,12 +244,13 @@ const InputComponentForMessage = ({
 				id: id,
 			};
 		});
+		// console.log(Identity)
 		const data = {
 			data: [dataItem1, ...dataItem2],
 			group: {
 				members: [
 					{
-						identity: Identity,
+						identity: "did:firefly:org/org_002d93",
 					},
 				],
 			},
@@ -264,8 +265,6 @@ const InputComponentForMessage = ({
 			"default/messages",
 			output_obj,
 		)(coreURL, data);
-		console.log("SENDDATA");
-		console.log(res);
 		output_obj["message_id"] = res.header.id;
 		output_obj["message_create_time"] = res.header.created;
 		const fireflyMessageID = res.header.id;
@@ -328,6 +327,8 @@ const InputComponentForMessage = ({
 						core_url,
 						output_obj["message_id"],
 					);
+					const confirm_time = message.confirmed;
+					output_obj["confirm_time"] = confirm_time;
 					const batch_id = message["batch"];
 					const batch = await getBatchWithId(core_url, batch_id);
 					const batch_time = batch["created"];
@@ -352,7 +353,7 @@ const InputComponentForMessage = ({
 						{
 							step: "Private Data Bus",
 							start_time: timeList["Data_start_time"],
-							end_time: timeList["Data_end_time"],
+							end_time: timeList["confirm_time"],
 						},
 						{
 							step: "IPFS",
@@ -599,7 +600,7 @@ const ControlPanel = ({
 					processFunc={async (readFromRedis) => {
 						const output = {};
 						const data = await onHandleBusinessRule(output);
-						await sleep(5000);
+						await sleep(20000);
 						const txid = data.tx;
 						const invoke_start_time = data.created;
 						output["invoke_start_time"] = invoke_start_time;
