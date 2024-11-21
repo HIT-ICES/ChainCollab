@@ -3,7 +3,7 @@ import redis
 r = redis.StrictRedis(host='localhost', port=6379, db=0)
 
 def setKV(key, value):
-    print("SAVE KV")
+    # print("SAVE KV", key, value)
     r.set(key, value)
 
 def readKV(key):

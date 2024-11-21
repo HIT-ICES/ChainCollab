@@ -213,7 +213,7 @@ def invoke_api(
     else:
         full_param = {
             "input": {
-                "InstanceID": instance_id,
+                "InstanceID": instance_id
             },
         }
 

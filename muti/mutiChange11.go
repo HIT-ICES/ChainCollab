@@ -44,21 +44,26 @@ type StateMemory struct {
 	//需要添加loop中的跳出条件为全局变量
 }
 
+type User struct {
+	User          string
+	X509          string        
+	enable        bool
+	Attributes    map[string]string
+}
 
 type Membership struct {
 	MSP           string
-	X509          string            `json:"X509"`
-	enable        bool
+	UserList      *User
 }
 
 type Participant struct {
-	ParticipantID string            `json:"ParticipantID"`
-	MSPList       *Membership       `json:"MSPList"`
-	IsMulti       bool              `json:"IsMulti"`
-	MultiMaximum  int               `json:"MultiMaximum"`
-	MultiMinimum  int               `json:"MultiMinimum"`
-	locked        bool
-	Attributes    map[string]string
+	ParticipantID   string            `json:"ParticipantID"`
+	MSPList         *Membership       `json:"MSPList"`
+	IsMulti         bool              `json:"IsMulti"`
+	MultiMaximum    int               `json:"MultiMaximum"`
+	MultiMinimum    int               `json:"MultiMinimum"`
+	locked          bool
+	
 }
 
 
@@ -68,7 +73,7 @@ type MutiMessage struct {
 	MutiMsgState         ElementState `json:"MsgState"`  //enable/completed
 	MutiType             int          //1-->loop 2-->sequence 3-->parallel
 	MsgList              *Message      //存MessageID，loop需要动态添加
-	loopCardinalityOrMax      int          //顺序/并行-->个数，loop-->次数
+	loopCardinalityOrMax int          //顺序/并行-->个数，loop-->次数
 
     isBefore             bool         //loop专属属性，发消息前/后检测条件
 	loopConditionName    string        //loop专属属性,循环跳出条件，对应相应全局变量
@@ -87,7 +92,6 @@ type MiniMessage struct {
 	MiniMessageID        string 
 	FireflyTranID        string       `json:"FireflyTranID"`
 	MiniMsgState         ElementState `json:"MsgState"`  //enable/wtf/completed
-	Format               string       `json:"Format"`
 	SendMSP              string       //这个消息指定的发送方
 	receiveMSP           string       //这个消息指定的接收方
 }

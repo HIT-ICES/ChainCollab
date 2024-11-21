@@ -140,7 +140,6 @@
       <bpmn2:participantRef>Participant_0oa2za9</bpmn2:participantRef>
       <bpmn2:participantRef>Participant_0jwk4tk</bpmn2:participantRef>
       <bpmn2:messageFlowRef>MessageFlow_0nq8x22</bpmn2:messageFlowRef>
-      <bpmn2:messageFlowRef>MessageFlow_087eb7v</bpmn2:messageFlowRef>
     </bpmn2:choreographyTask>
     <bpmn2:sequenceFlow id="Flow_1alyrr0" name="priceOK==true" sourceRef="Gateway_025uwvp" targetRef="ChoreographyTask_13g05bg" />
     <bpmn2:choreographyTask id="ChoreographyTask_1k9vb6k" name="Notify payment refused" initiatingParticipantRef="Participant_0jwk4tk">
@@ -149,7 +148,6 @@
       <bpmn2:participantRef>Participant_0oa2za9</bpmn2:participantRef>
       <bpmn2:participantRef>Participant_0jwk4tk</bpmn2:participantRef>
       <bpmn2:messageFlowRef>MessageFlow_0s1vo46</bpmn2:messageFlowRef>
-      <bpmn2:messageFlowRef>MessageFlow_0rrnhjx</bpmn2:messageFlowRef>
     </bpmn2:choreographyTask>
     <bpmn2:sequenceFlow id="Flow_1eug3xo" name="priceOK==false" sourceRef="Gateway_025uwvp" targetRef="ChoreographyTask_1k9vb6k" />
     <bpmn2:endEvent id="Event_0e3j88g" name="No product purchased/sold">
@@ -162,7 +160,6 @@
       <bpmn2:outgoing>Flow_0qasdjj</bpmn2:outgoing>
       <bpmn2:participantRef>Participant_0oa2za9</bpmn2:participantRef>
       <bpmn2:participantRef>Participant_0jwk4tk</bpmn2:participantRef>
-      <bpmn2:messageFlowRef>MessageFlow_1k478t1</bpmn2:messageFlowRef>
       <bpmn2:messageFlowRef>MessageFlow_0tb3its</bpmn2:messageFlowRef>
     </bpmn2:choreographyTask>
     <bpmn2:endEvent id="Event_1o9guxu" name="Product purchased/sold">
@@ -173,7 +170,7 @@
       <bpmn2:incoming>Flow_1w7smbz</bpmn2:incoming>
     </bpmn2:endEvent>
     <bpmn2:sequenceFlow id="Flow_1w7smbz" sourceRef="ChoreographyTask_0huz12d" targetRef="Event_194zr5n" />
-    <bpmn2:businessRuleTask id="Activity_12arovy">
+    <bpmn2:businessRuleTask id="Activity_12arovy" name="purchase">
       <bpmn2:documentation>{"inputs":[{"name":"Price","type":"number","description":""}],"outputs":[{"name":"discount","type":"boolean","description":""}]}</bpmn2:documentation>
       <bpmn2:incoming>Flow_0lnnht6</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1ocsrxv</bpmn2:outgoing>
@@ -192,7 +189,6 @@
       <bpmn2:participantRef>Participant_0oa2za9</bpmn2:participantRef>
       <bpmn2:participantRef>Participant_0jwk4tk</bpmn2:participantRef>
       <bpmn2:messageFlowRef>MessageFlow_1qi88x8</bpmn2:messageFlowRef>
-      <bpmn2:messageFlowRef>MessageFlow_1ma3yld</bpmn2:messageFlowRef>
     </bpmn2:choreographyTask>
     <bpmn2:sequenceFlow id="Flow_1j4bvpd" name="discount==true" sourceRef="Gateway_13i0b7w" targetRef="ChoreographyTask_06fwl21" />
     <bpmn2:sequenceFlow id="Flow_0lon5nm" sourceRef="ChoreographyTask_06fwl21" targetRef="ChoreographyTask_1yl8kdd" />
