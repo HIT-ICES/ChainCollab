@@ -4,8 +4,13 @@ with open("chaincode_snippet/snippet.json", "r") as f:
     content = json.load(f)
 
 
-def import_code():
-    return content["import"]
+def import_code(
+    if_oracle: bool = False,
+):
+    extra_imports = ""
+    if if_oracle:
+        extra_imports += content["OracleImport"] + "\n"
+    return content["importFrame"].format(extra_imports=extra_imports)
 
 
 def contract_definition_code():
@@ -43,9 +48,7 @@ def CreateInstance_code(
         return content["InitEndFrame"].format(end_event=event)
 
     def InitMessage(message: str, sender: str, receiver: str, properties) -> str:
-        return content["InitMessageFrame"].format(
-            message=message, sender=sender, receiver=receiver, format=properties
-        )
+        return content["InitMessageFrame"].format(message=message, sender=sender, receiver=receiver, format=properties)
 
     def InitGateway(gateway: str) -> str:
         return content["InitGatewayFrame"].format(gateway=gateway)
@@ -95,11 +98,7 @@ def CreateInstance_code(
         ),
         event_content="\n".join(
             [
-                '"'
-                + business_rule
-                + '"'
-                + " : "
-                + f"initParameters.{business_rule}_Content,"
+                '"' + business_rule + '"' + " : " + f"initParameters.{business_rule}_Content,"
                 for business_rule in business_rules
             ]
         ),
@@ -117,8 +116,10 @@ def ChangeMsgState_code(msg, state: str):
 def ChangeGtwState_code(gtw, state: str):
     return content["ChangeGtwStateFrame"].format(gateway=gtw, state=state)
 
+
 def ChangeBusinessRuleState_code(business_rule, state: str):
     return content["ChangeBusinessRuleStateFrame"].format(business_rule=business_rule, state=state)
+
 
 def StartEvent_code(
     event,
@@ -146,14 +147,14 @@ def MessageSend_code(
     after_all_hook: str = "",
     more_parameters: str = "",
     put_more_parameters: str = "",
-    change_self_state: str = ""
+    change_self_state: str = "",
 ):
     return content["MessageSendFuncFrame"].format(
         message=message,
         after_all_hook=after_all_hook,
         more_parameters=more_parameters,
         put_more_parameters=put_more_parameters,
-        change_self_state=change_self_state
+        change_self_state=change_self_state,
     )
 
 
@@ -310,11 +311,13 @@ def PutState_code(name: str, value: str):
     return content["PutStateFuncFrame"].format(name=name, value=value)
 
 
-def SetGlobalVariable_code(items:str=""):
+def SetGlobalVariable_code(items: str = ""):
     return content["SetGlobalVariableFuncFrame"].format(items=items)
+
 
 def SetGlobalVaribaleItem_code(name: str, value: str):
     return content["SetGlobalVaribaleFuncItemFrame"].format(name=name, value=value)
+
 
 def ReadState_code(name: str):
     return content["ReadStateFuncFrame"].format(stateName=name)

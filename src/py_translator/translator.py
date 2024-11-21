@@ -51,9 +51,7 @@ default_config = {
 
 
 class GoChaincodeTranslator:
-    def __init__(
-        self, bpmnContent: str, bpmn_file: str = None, config: dict = default_config
-    ):
+    def __init__(self, bpmnContent: str, bpmn_file: str = None, config: dict = default_config):
         self._config = config
         self._choreography: Optional[Choreography] = None
         self._global_variabels: Optional[dict] = None
@@ -69,9 +67,7 @@ class GoChaincodeTranslator:
         # add choreography to self
         self._choreography = choreography
         # analyze parameter from properties and sequence flow
-        self._global_parameters, self._judge_parameters = (
-            self._extract_global_parameters()
-        )
+        self._global_parameters, self._judge_parameters = self._extract_global_parameters()
         self._instance_initparameters = self._extract_instance_initparameters()
 
     def _extract_global_parameters(self) -> dict:
@@ -86,9 +82,7 @@ class GoChaincodeTranslator:
         global_parameters = (
             {}
         )  # {'is_available': {'definition': {'message_id': ['Message_0r9lypd'], 'type': 'boolean', 'description': 'Is the service available?'}}
-        judge_parameters = (
-            {}
-        )  # {sequence_flow_id: {name: value, type: type, relation: relation}}
+        judge_parameters = {}  # {sequence_flow_id: {name: value, type: type, relation: relation}}
         message_properties = (
             {}
         )  # {'product Id': {'message_id': ['Message_1qbk325'], 'type': 'string', 'description': 'Delivered product id'}, 'payment amount': {'message_id': ['Message_0o8eyir', 'Message_1q05nnw'], 'type': 'number', 'description': 'payment amount'}
@@ -120,12 +114,8 @@ class GoChaincodeTranslator:
         # Step 2: extract parameters from sequence flow and business rule
         # Step 3: match parameters from properties to that from sequence flow and business rule
 
-        for business_rule in choreography.query_element_with_type(
-            NodeType.BUSINESS_RULE_TASK
-        ):
-            input_and_output_def_of_business_rule = json.loads(
-                business_rule.documentation
-            )
+        for business_rule in choreography.query_element_with_type(NodeType.BUSINESS_RULE_TASK):
+            input_and_output_def_of_business_rule = json.loads(business_rule.documentation)
             # {"input":[{{"name":"","type":""}}],"output":{"name":"","type":""}}
             for input_def in input_and_output_def_of_business_rule.get("inputs", []):
                 prop_defination = message_properties.get(input_def["name"])
@@ -154,9 +144,7 @@ class GoChaincodeTranslator:
             **business_rule_outputs,
         }
 
-        for sequence_flow in choreography.query_element_with_type(
-            EdgeType.SEQUENCE_FLOW
-        ):
+        for sequence_flow in choreography.query_element_with_type(EdgeType.SEQUENCE_FLOW):
             name = sequence_flow.name
             if name == "":
                 continue
@@ -174,9 +162,7 @@ class GoChaincodeTranslator:
             match name:
                 case x if "==" in x:
                     prop, value = x.split("==")
-                    prop_defination = message_properties_plus_business_rule_outputs.get(
-                        prop
-                    )
+                    prop_defination = message_properties_plus_business_rule_outputs.get(prop)
                     if prop_defination is None:
                         # Parse Error!
                         continue
@@ -191,9 +177,7 @@ class GoChaincodeTranslator:
                     }
                 case x if "!=" in x:
                     prop, value = x.split("!=")
-                    prop_defination = message_properties_plus_business_rule_outputs.get(
-                        prop
-                    )
+                    prop_defination = message_properties_plus_business_rule_outputs.get(prop)
                     if prop_defination is None:
                         # Parse Error!
                         continue
@@ -208,9 +192,7 @@ class GoChaincodeTranslator:
                     }
                 case x if ">" in x:
                     prop, value = x.split(">")
-                    prop_defination = message_properties_plus_business_rule_outputs.get(
-                        prop
-                    )
+                    prop_defination = message_properties_plus_business_rule_outputs.get(prop)
                     if prop_defination is None:
                         # Parse Error!
                         continue
@@ -225,9 +207,7 @@ class GoChaincodeTranslator:
                     }
                 case x if "<" in x:
                     prop, value = x.split("<")
-                    prop_defination = message_properties_plus_business_rule_outputs.get(
-                        prop
-                    )
+                    prop_defination = message_properties_plus_business_rule_outputs.get(prop)
                     if prop_defination is None:
                         # Parse Error!
                         continue
@@ -242,9 +222,7 @@ class GoChaincodeTranslator:
                     }
                 case x if ">=" in x:
                     prop, value = x.split(">=")
-                    prop_defination = message_properties_plus_business_rule_outputs.get(
-                        prop
-                    )
+                    prop_defination = message_properties_plus_business_rule_outputs.get(prop)
                     if prop_defination is None:
                         # Parse Error!
                         continue
@@ -259,9 +237,7 @@ class GoChaincodeTranslator:
                     }
                 case x if "<=" in x:
                     prop, value = x.split("<=")
-                    prop_defination = message_properties_plus_business_rule_outputs.get(
-                        prop
-                    )
+                    prop_defination = message_properties_plus_business_rule_outputs.get(prop)
                     if prop_defination is None:
                         # Parse Error!
                         continue
@@ -289,9 +265,7 @@ class GoChaincodeTranslator:
             # string -> string
             # float -> float64
             temp_list.append(
-                snippet.StructParameterDefinition_code(
-                    public_the_name(name), type_change_from_bpmn_to_go(_type)
-                )
+                snippet.StructParameterDefinition_code(public_the_name(name), type_change_from_bpmn_to_go(_type))
             )
         return "\n\t".join(temp_list)
 
@@ -308,9 +282,7 @@ class GoChaincodeTranslator:
                 "multi_maximum": participant.multi_maximum,
             }
         # DMN ELEMENTS: TODO
-        business_rules = self._choreography.query_element_with_type(
-            NodeType.BUSINESS_RULE_TASK
-        )
+        business_rules = self._choreography.query_element_with_type(NodeType.BUSINESS_RULE_TASK)
         instance_initparameters["BusinessRuleTask"] = {}
         for business_rule in business_rules:
             instance_initparameters["BusinessRuleTask"][business_rule.id] = {}
@@ -321,11 +293,7 @@ class GoChaincodeTranslator:
         temp_list = []
         # add Participant
         for name, prop in instance_initparameters["Participant"].items():
-            temp_list.append(
-                snippet.StructParameterDefinition_code(
-                    public_the_name(name), "Participant"
-                )
-            )
+            temp_list.append(snippet.StructParameterDefinition_code(public_the_name(name), "Participant"))
         # DMN ELEMENTS: TODO
         for name, prop in instance_initparameters["BusinessRuleTask"].items():
             # temp_list.append(
@@ -335,65 +303,37 @@ class GoChaincodeTranslator:
             # )
             # only Content、DecisionID、ParamMapping
             # content field of DMN
+            temp_list.append(snippet.StructParameterDefinition_code(public_the_name(name) + "_DecisionID", "string"))
             temp_list.append(
-                snippet.StructParameterDefinition_code(
-                    public_the_name(name) + "_DecisionID", "string"
-                )
+                snippet.StructParameterDefinition_code(public_the_name(name) + "_ParamMapping", "map[string]string")
             )
-            temp_list.append(
-                snippet.StructParameterDefinition_code(
-                    public_the_name(name) + "_ParamMapping", "map[string]string"
-                )
-            )
-            temp_list.append(
-                snippet.StructParameterDefinition_code(
-                    public_the_name(name) + "_Content", "string"
-                )
-            )
+            temp_list.append(snippet.StructParameterDefinition_code(public_the_name(name) + "_Content", "string"))
         return "\n\t".join(temp_list)
 
     def _generate_create_instance_code(self):
         choreography = self._choreography
         temp_list = []
-        start_event: StartEvent = choreography.query_element_with_type(
-            NodeType.START_EVENT
-        )[0]
+        start_event: StartEvent = choreography.query_element_with_type(NodeType.START_EVENT)[0]
         end_events: EndEvent = choreography.query_element_with_type(NodeType.END_EVENT)
-        message_flows: List[MessageFlow] = choreography.query_element_with_type(
-            EdgeType.MESSAGE_FLOW
-        )
+        message_flows: List[MessageFlow] = choreography.query_element_with_type(EdgeType.MESSAGE_FLOW)
         gateways: List[Union[ExclusiveGateway, ParallelGateway, EventBasedGateway]] = (
             choreography.query_element_with_type(NodeType.EXCLUSIVE_GATEWAY)
             + choreography.query_element_with_type(NodeType.PARALLEL_GATEWAY)
             + choreography.query_element_with_type(NodeType.EVENT_BASED_GATEWAY)
         )
 
-        participants_exist = [
-            element.id
-            for element in choreography.query_element_with_type(NodeType.PARTICIPANT)
-        ]
+        participants_exist = [element.id for element in choreography.query_element_with_type(NodeType.PARTICIPANT)]
 
         participant_to_be_added = [
             {
                 "id": participant,
-                "is_multi": bool_handle(
-                    self._instance_initparameters["Participant"][participant][
-                        "is_multi"
-                    ]
-                ),
-                "multi_maximum": self._instance_initparameters["Participant"][
-                    participant
-                ]["multi_maximum"],
-                "multi_minimum": self._instance_initparameters["Participant"][
-                    participant
-                ]["multi_minimum"],
+                "is_multi": bool_handle(self._instance_initparameters["Participant"][participant]["is_multi"]),
+                "multi_maximum": self._instance_initparameters["Participant"][participant]["multi_maximum"],
+                "multi_minimum": self._instance_initparameters["Participant"][participant]["multi_minimum"],
             }
             for participant in participants_exist
         ]
-        business_rules = [
-            business_rule
-            for business_rule in self._instance_initparameters["BusinessRuleTask"]
-        ]
+        business_rules = [business_rule for business_rule in self._instance_initparameters["BusinessRuleTask"]]
         temp_list.append(
             snippet.CreateInstance_code(
                 start_event=start_event.id,
@@ -415,19 +355,11 @@ class GoChaincodeTranslator:
 
         return temp_list
 
-    def _generate_change_state_code(
-        self, element: Element, state: str = "ENABLED"
-    ) -> str:
+    def _generate_change_state_code(self, element: Element, state: str = "ENABLED") -> str:
         match element.type:
             case NodeType.CHOREOGRAPHY_TASK:
-                return snippet.ChangeMsgState_code(
-                    element.init_message_flow.message.id, state
-                )
-            case (
-                NodeType.EXCLUSIVE_GATEWAY
-                | NodeType.PARALLEL_GATEWAY
-                | NodeType.EVENT_BASED_GATEWAY
-            ):
+                return snippet.ChangeMsgState_code(element.init_message_flow.message.id, state)
+            case NodeType.EXCLUSIVE_GATEWAY | NodeType.PARALLEL_GATEWAY | NodeType.EVENT_BASED_GATEWAY:
                 return snippet.ChangeGtwState_code(element.id, state)
             case NodeType.END_EVENT:
                 return snippet.ChangeEventState_code(element.id, state)
@@ -439,14 +371,8 @@ class GoChaincodeTranslator:
     def _generate_check_state_code(self, element: Element, state: str = "ENABLED"):
         match element.type:
             case NodeType.CHOREOGRAPHY_TASK:
-                return snippet.CheckMessageState_code(
-                    element.init_message_flow.message.id, state
-                )
-            case (
-                NodeType.EXCLUSIVE_GATEWAY
-                | NodeType.PARALLEL_GATEWAY
-                | NodeType.EVENT_BASED_GATEWAY
-            ):
+                return snippet.CheckMessageState_code(element.init_message_flow.message.id, state)
+            case NodeType.EXCLUSIVE_GATEWAY | NodeType.PARALLEL_GATEWAY | NodeType.EVENT_BASED_GATEWAY:
                 return snippet.CheckGatewayState_code(element.id, state)
             case NodeType.END_EVENT:
                 return snippet.CheckEventState_code(element.id, state)
@@ -460,10 +386,7 @@ class GoChaincodeTranslator:
         }
         params_to_add = []
         for parameter in message_global_parameters:
-            if (
-                message.id
-                in message_global_parameters[parameter]["definition"]["message_id"]
-            ):
+            if message.id in message_global_parameters[parameter]["definition"]["message_id"]:
                 params_to_add.append(
                     (
                         parameter,
@@ -472,20 +395,13 @@ class GoChaincodeTranslator:
                 )
         return params_to_add
 
-    def _generate_message_record_parameters_code(
-        self, message: Message
-    ) -> Tuple[str, str]:
+    def _generate_message_record_parameters_code(self, message: Message) -> Tuple[str, str]:
         params_to_add = self._get_message_params(message)
         # generate parameters code
         more_params_code = (
             ", "
             + ", ".join(
-                [
-                    public_the_name(param[0])
-                    + " "
-                    + type_change_from_bpmn_to_go(param[1])
-                    for param in params_to_add
-                ]
+                [public_the_name(param[0]) + " " + type_change_from_bpmn_to_go(param[1]) for param in params_to_add]
             )
             if params_to_add
             else ""
@@ -512,30 +428,22 @@ class GoChaincodeTranslator:
         )
         return more_params_code, put_more_params_code
 
-    def _event_based_gateway_hook_code(
-        self, event_based_gateway: EventBasedGateway, currentElement: Element
-    ):
+    def _event_based_gateway_hook_code(self, event_based_gateway: EventBasedGateway, currentElement: Element):
         # find all other branches
         other_elements = []
         for outgoing in event_based_gateway.outgoings:
             if outgoing.target != currentElement:
                 other_elements.append(outgoing.target)
-        temp_list = [
-            self._generate_change_state_code(element, "DISABLED")
-            for element in other_elements
-        ]
+        temp_list = [self._generate_change_state_code(element, "DISABLED") for element in other_elements]
         return "\n".join(temp_list)
 
-    def _parallel_gateway_merge_hook_code(
-        self, parallel_gateway: ParallelGateway, currentElement: Element
-    ):
+    def _parallel_gateway_merge_hook_code(self, parallel_gateway: ParallelGateway, currentElement: Element):
         # find all other branches
-        other_elements = [ incoming.source for incoming in parallel_gateway.incomings if incoming.source != currentElement]
-        # check if other branches are "COMPLETED"
-        conditions = [
-            self._generate_check_state_code(element, "COMPLETED")
-            for element in other_elements
+        other_elements = [
+            incoming.source for incoming in parallel_gateway.incomings if incoming.source != currentElement
         ]
+        # check if other branches are "COMPLETED"
+        conditions = [self._generate_check_state_code(element, "COMPLETED") for element in other_elements]
         combined_condition = snippet.CombineConditions_Any_False_code(conditions)
         return snippet.ConditionToHalt_code(combined_condition)
 
@@ -587,9 +495,7 @@ class GoChaincodeTranslator:
             temp_list.append(
                 snippet.MessageComplete_code(
                     message=message_id,
-                    change_next_state_code=self._generate_change_state_code(
-                        next_element
-                    ),
+                    change_next_state_code=self._generate_change_state_code(next_element),
                     pre_activate_next_hook="\n\t".join(pre_activate_next_hook),
                 )
             )
@@ -600,17 +506,13 @@ class GoChaincodeTranslator:
         init_message_flow = choreography_task.init_message_flow
         return_message_flow = choreography_task.return_message_flow
 
-        pre_activate_next_hook = self._hook_codes[choreography_task.id][
-            "pre_activate_next"
-        ]
+        pre_activate_next_hook = self._hook_codes[choreography_task.id]["pre_activate_next"]
         when_triggered_code = self._hook_codes[choreography_task.id]["when_triggered"]
 
         if not init_message_flow:
             return temp_list
 
-        more_parameters, put_more_parameters = (
-            self._generate_message_record_parameters_code(init_message_flow.message)
-        )
+        more_parameters, put_more_parameters = self._generate_message_record_parameters_code(init_message_flow.message)
 
         if not return_message_flow:
             temp_list.extend(
@@ -638,8 +540,8 @@ class GoChaincodeTranslator:
             )
         )
 
-        more_parameters, put_more_parameters = (
-            self._generate_message_record_parameters_code(return_message_flow.message)
+        more_parameters, put_more_parameters = self._generate_message_record_parameters_code(
+            return_message_flow.message
         )
 
         temp_list.extend(
@@ -678,9 +580,7 @@ class GoChaincodeTranslator:
         # judge type
         # type One : one come and multiple out, branch by condition
         # type Two : multiple come and one out, wait for any come
-        pre_activate_next_hook = self._hook_codes[exclusive_gateway.id][
-            "pre_activate_next"
-        ]
+        pre_activate_next_hook = self._hook_codes[exclusive_gateway.id]["pre_activate_next"]
         when_triggered_code = self._hook_codes[exclusive_gateway.id]["when_triggered"]
 
         if len(exclusive_gateway.incomings) == 1:
@@ -692,11 +592,7 @@ class GoChaincodeTranslator:
                     + list(
                         set(
                             [
-                                snippet.ReadState_code(
-                                    public_the_name(
-                                        judge_parameters[outgoing.id]["name"]
-                                    )
-                                )
+                                snippet.ReadState_code(public_the_name(judge_parameters[outgoing.id]["name"]))
                                 for outgoing in exclusive_gateway.outgoings
                                 if outgoing.id in judge_parameters
                             ]
@@ -719,35 +615,26 @@ class GoChaincodeTranslator:
             # outgoings should be only one, otherwise it is not a valid BPMN!!!!
             code = snippet.ExclusiveGateway_merge_code(
                 gateway=exclusive_gateway.id,
-                change_next_state_code=self._generate_change_state_code(
-                    exclusive_gateway.outgoings[0].target
-                ),
+                change_next_state_code=self._generate_change_state_code(exclusive_gateway.outgoings[0].target),
                 pre_activate_next_hook="\n\t".join(pre_activate_next_hook),
                 after_all_hook="\n\t".join(when_triggered_code),
             )
             temp_list.append(code)
         return temp_list
 
-    def _generate_chaincode_for_parallel_gateway(
-        self, parallel_gateway: ParallelGateway
-    ):
+    def _generate_chaincode_for_parallel_gateway(self, parallel_gateway: ParallelGateway):
         temp_list = []
         # judge type
         # type One : one come and multiple out, activate all out
         # type Two : multiple come and one out, wait for all come
-        pre_activate_next_hook = self._hook_codes[parallel_gateway.id][
-            "pre_activate_next"
-        ]
+        pre_activate_next_hook = self._hook_codes[parallel_gateway.id]["pre_activate_next"]
         when_triggered_code = self._hook_codes[parallel_gateway.id]["when_triggered"]
         if len(parallel_gateway.incomings) == 1:
             # type One
             code = snippet.ParallelGateway_split_code(
                 gateway=parallel_gateway.id,
                 change_next_state_code="\n".join(
-                    [
-                        self._generate_change_state_code(outgoing.target)
-                        for outgoing in parallel_gateway.outgoings
-                    ]
+                    [self._generate_change_state_code(outgoing.target) for outgoing in parallel_gateway.outgoings]
                 ),
                 pre_activate_next_hook="\n\t".join(pre_activate_next_hook),
                 after_all_hook="\n\t".join(when_triggered_code),
@@ -760,11 +647,7 @@ class GoChaincodeTranslator:
             code = snippet.ParallelGateway_merge_code(
                 gateway=parallel_gateway.id,
                 change_next_state_code="\n".join(
-                    [
-                        self._generate_change_state_code(
-                            parallel_gateway.outgoings[0].target
-                        )
-                    ]
+                    [self._generate_change_state_code(parallel_gateway.outgoings[0].target)]
                 ),
                 pre_activate_next_hook="\n\t".join(pre_activate_next_hook),
                 after_all_hook="\n\t".join(when_triggered_code),
@@ -779,17 +662,12 @@ class GoChaincodeTranslator:
     ):
         temp_list = []
         # No other type
-        pre_activate_next_hook = self._hook_codes[event_based_gateway.id][
-            "pre_activate_next"
-        ]
+        pre_activate_next_hook = self._hook_codes[event_based_gateway.id]["pre_activate_next"]
         when_triggered_code = self._hook_codes[event_based_gateway.id]["when_triggered"]
         code = snippet.EventBasedGateway_code(
             gateway=event_based_gateway.id,
             change_next_state_code="\n".join(
-                [
-                    self._generate_change_state_code(outgoing.target)
-                    for outgoing in event_based_gateway.outgoings
-                ]
+                [self._generate_change_state_code(outgoing.target) for outgoing in event_based_gateway.outgoings]
             ),
             pre_activate_next_hook="\n\t".join(pre_activate_next_hook),
             after_all_hook="\n\t".join(when_triggered_code),
@@ -803,9 +681,7 @@ class GoChaincodeTranslator:
         temp_list.append(
             snippet.StartEvent_code(
                 start_event.id,
-                change_next_state_code=self._generate_change_state_code(
-                    start_event.outgoing.target
-                ),
+                change_next_state_code=self._generate_change_state_code(start_event.outgoing.target),
             )
         )
         return temp_list
@@ -835,23 +711,18 @@ class GoChaincodeTranslator:
                 change_next_state_code="",
             )
         )
-        print(business_rule.outgoing.target)
         temp_list.append(
             snippet.BusinessRuleContinueFuncFrame_code(
                 business_rule.id,
                 pre_activate_next_hook="",
                 after_all_hook="\n\t".join(when_triggered_code),
-                change_next_state_code=self._generate_change_state_code(
-                    business_rule.outgoing.target
-                ),
+                change_next_state_code=self._generate_change_state_code(business_rule.outgoing.target),
             )
         )
 
         return temp_list
 
-    def generate_chaincode(
-        self, output_path: str = "resource/chaincode.go", is_output: bool = False
-    ):
+    def generate_chaincode(self, output_path: str = "resource/chaincode.go", is_output: bool = False):
         ############
         # Init: Set general state
         ############
@@ -866,18 +737,16 @@ class GoChaincodeTranslator:
         # Generate Part: Add common code to chaincode
         ########
         chaincode_list.append(snippet.package_code())
-        chaincode_list.append(snippet.import_code())
-        chaincode_list.append(snippet.contract_definition_code())
-        # global variable definition
         chaincode_list.append(
-            snippet.StateMemoryDefinition_code(self._generate_parameters_code())
-        )
-        # initParams definition
-        chaincode_list.append(
-            snippet.InitParametersTypeDefFrame_code(
-                self._generate_instance_initparameters_code()
+            snippet.import_code(
+                if_oracle=len(self._choreography.query_element_with_type(NodeType.BUSINESS_RULE_TASK)) > 0
             )
         )
+        chaincode_list.append(snippet.contract_definition_code())
+        # global variable definition
+        chaincode_list.append(snippet.StateMemoryDefinition_code(self._generate_parameters_code()))
+        # initParams definition
+        chaincode_list.append(snippet.InitParametersTypeDefFrame_code(self._generate_instance_initparameters_code()))
         chaincode_list.append(snippet.fix_part_code())
         # chaincode_list.append(snippet.CheckRegisterFunc_code())
         # chaincode_list.append(snippet.RegisterFunc_code())
@@ -892,33 +761,21 @@ class GoChaincodeTranslator:
         #########
 
         # find all event based gateways, and set after_all hook to turn off other branches
-        for event_based_gateway in self._choreography.query_element_with_type(
-            NodeType.EVENT_BASED_GATEWAY
-        ):
+        for event_based_gateway in self._choreography.query_element_with_type(NodeType.EVENT_BASED_GATEWAY):
             if len(event_based_gateway.outgoings) > 1:
                 for outgoing in event_based_gateway.outgoings:
-                    self._hook_codes[outgoing.target.id].setdefault(
-                        "when_triggered", []
-                    ).append(
+                    self._hook_codes[outgoing.target.id].setdefault("when_triggered", []).append(
                         # generate some code to turn off other branches
-                        self._event_based_gateway_hook_code(
-                            event_based_gateway, outgoing.target
-                        )
+                        self._event_based_gateway_hook_code(event_based_gateway, outgoing.target)
                     )
 
         # find all parallel to parrallel gateways, and set pre_activate_next hook to check if other branch finished
-        for parallel_gateway in self._choreography.query_element_with_type(
-            NodeType.PARALLEL_GATEWAY
-        ):
+        for parallel_gateway in self._choreography.query_element_with_type(NodeType.PARALLEL_GATEWAY):
             if len(parallel_gateway.incomings) > 1:
                 for incoming in parallel_gateway.incomings:
-                    self._hook_codes[incoming.source.id].setdefault(
-                        "pre_activate_next", []
-                    ).append(
+                    self._hook_codes[incoming.source.id].setdefault("pre_activate_next", []).append(
                         # generate some code to check if other branch finished
-                        self._parallel_gateway_merge_hook_code(
-                            parallel_gateway, incoming.source
-                        )
+                        self._parallel_gateway_merge_hook_code(parallel_gateway, incoming.source)
                     )
 
         #####
@@ -927,35 +784,34 @@ class GoChaincodeTranslator:
 
         for element in self._choreography.nodes:
             if element.type == NodeType.CHOREOGRAPHY_TASK:
-                chaincode_list.extend(
-                    self._generate_chaincode_for_choreography_task(element)
-                )
+                chaincode_list.extend(self._generate_chaincode_for_choreography_task(element))
             if element.type == NodeType.EXCLUSIVE_GATEWAY:
-                chaincode_list.extend(
-                    self._generate_chaincode_for_exclusive_gateway(element)
-                )
+                chaincode_list.extend(self._generate_chaincode_for_exclusive_gateway(element))
             if element.type == NodeType.PARALLEL_GATEWAY:
-                chaincode_list.extend(
-                    self._generate_chaincode_for_parallel_gateway(element)
-                )
+                chaincode_list.extend(self._generate_chaincode_for_parallel_gateway(element))
             if element.type == NodeType.EVENT_BASED_GATEWAY:
-                chaincode_list.extend(
-                    self._generate_chaincode_for_event_based_gateway(element)
-                )
+                chaincode_list.extend(self._generate_chaincode_for_event_based_gateway(element))
             if element.type == NodeType.START_EVENT:
                 chaincode_list.extend(self._generate_chaincode_for_start_event(element))
             if element.type == NodeType.END_EVENT:
                 chaincode_list.extend(self._generate_chaincode_for_end_event(element))
             if element.type == NodeType.BUSINESS_RULE_TASK:
-                chaincode_list.extend(
-                    self._generate_chaincode_for_business_rule(element)
-                )
+                chaincode_list.extend(self._generate_chaincode_for_business_rule(element))
+        go_code = "\n\n".join(chaincode_list)
 
-        # OutPut the chaincode
+        import subprocess
+
+        try:
+            process = subprocess.run(["goimports"], input=go_code, text=True, capture_output=True, check=True)
+            go_code = process.stdout
+        except subprocess.CalledProcessError as e:
+            print(f"Error during formatting: {e.stderr}")
+
         if is_output:
             with open(output_path, "w") as f:
-                f.write("\n\n".join(chaincode_list))
-        return "\n\n".join(chaincode_list)
+                f.write(go_code)
+
+        return go_code
 
     def _fireflytran_ffi_param(self):
         return {
@@ -988,9 +844,7 @@ class GoChaincodeTranslator:
         }
         return item
 
-    def generate_ffi_items_for_choreography_task(
-        self, choreography_task: ChoreographyTask
-    ):
+    def generate_ffi_items_for_choreography_task(self, choreography_task: ChoreographyTask):
         items = []
         next_element = choreography_task.outgoing.target
         init_message_flow = choreography_task.init_message_flow
@@ -1001,9 +855,7 @@ class GoChaincodeTranslator:
 
         if not return_message_flow:
             params = self._get_message_params(init_message_flow.message)
-            params = [
-                {"name": param[0], "schema": {"type": param[1]}} for param in params
-            ]
+            params = [{"name": param[0], "schema": {"type": param[1]}} for param in params]
             # find parameters
             items.append(
                 self._generate_ffi_item(
@@ -1066,9 +918,7 @@ class GoChaincodeTranslator:
         )
         return items
 
-    def _generate_ffi_items_for_business_rule_task(
-        self, business_rule_task: NodeType.BUSINESS_RULE_TASK
-    ) -> list:
+    def _generate_ffi_items_for_business_rule_task(self, business_rule_task: NodeType.BUSINESS_RULE_TASK) -> list:
         first_name = business_rule_task.id
         continue_method = business_rule_task.id + "_Continue"
         return [
@@ -1103,9 +953,7 @@ class GoChaincodeTranslator:
     def _generate_ffi_events(self) -> list:
         return [{"name": "DMNContentRequired"}, {"name": "InstanceCreated"}]
 
-    def generate_ffi(
-        self, is_output: bool = False, output_path: str = "resource/ffi.json"
-    ) -> str:
+    def generate_ffi(self, is_output: bool = False, output_path: str = "resource/ffi.json") -> str:
         ffi_items = []
 
         # Init
@@ -1204,13 +1052,9 @@ class GoChaincodeTranslator:
         for element in self._choreography.nodes:
             match element.type:
                 case NodeType.CHOREOGRAPHY_TASK:
-                    ffi_items.extend(
-                        self.generate_ffi_items_for_choreography_task(element)
-                    )
+                    ffi_items.extend(self.generate_ffi_items_for_choreography_task(element))
                 case NodeType.BUSINESS_RULE_TASK:
-                    ffi_items.extend(
-                        self._generate_ffi_items_for_business_rule_task(element)
-                    )
+                    ffi_items.extend(self._generate_ffi_items_for_business_rule_task(element))
                     pass
                 case (
                     NodeType.EXCLUSIVE_GATEWAY
@@ -1243,9 +1087,7 @@ class GoChaincodeTranslator:
     def get_participants(self):
         return {
             participant.id: participant.name
-            for participant in self._choreography.query_element_with_type(
-                NodeType.PARTICIPANT
-            )
+            for participant in self._choreography.query_element_with_type(NodeType.PARTICIPANT)
         }
 
     def get_messages(self):
@@ -1264,9 +1106,7 @@ class GoChaincodeTranslator:
                 "name": business_rule.name,
                 "documentation": business_rule.documentation,
             }
-            for business_rule in self._choreography.query_element_with_type(
-                NodeType.BUSINESS_RULE_TASK
-            )
+            for business_rule in self._choreography.query_element_with_type(NodeType.BUSINESS_RULE_TASK)
         }
 
 

@@ -1,4 +1,4 @@
-package main
+package chaincode
 
 
 import (
@@ -12,7 +12,7 @@ import (
 	"encoding/hex"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
-	"IBC/Oracle/oracle"
+	#extra_imports#
 )
 
 
@@ -1150,7 +1150,7 @@ func (cc *SmartContract) Activity_1mj4mr7(ctx contractapi.TransactionContextInte
 
 	// Get the CID
 
-	res,err := cc.Invoke_Other_chaincode(ctx, "oracle:v1", "default", oracle.EncodeGetDataItemArgs(
+	res,err := cc.Invoke_Other_chaincode(ctx, "Oracle:v1", "default", oracle.EncodeGetDataItemArgs(
 		instanceID, "Activity_1mj4mr7",
 	))
 	if err != nil {
@@ -1238,7 +1238,7 @@ func (cc *SmartContract) Activity_1mj4mr7_Continue(ctx contractapi.TransactionCo
 
 	// Invoke DMN Engine Chaincode
 	var resJson []byte
-	resJson, err=cc.Invoke_Other_chaincode(ctx, "asset:v1","default", _args)
+	resJson, err=cc.Invoke_Other_chaincode(ctx, "DMNEngine:v1","default", _args)
 
 	// Set the Result
 	var res map[string]interface{}
