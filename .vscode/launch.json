@@ -1,0 +1,58 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "Python 调试程序: Django",
+            "type": "debugpy",
+            "request": "launch",
+            "args": [
+                "runserver"
+            ],
+            "django": true,
+            "autoStartBrowser": false,
+            "program": "/home/logres/system/src/backend/manage.py",
+            // python interpreter
+            "python": "/home/logres/system/src/backend/venv/bin/python"
+        },
+        {
+            "name": "Python 调试程序: scan_db_create_SC_listener",
+            "type": "debugpy",
+            "request": "launch",
+            "args": [
+                "scan_db_create_SC_listener"
+            ],
+            "django": true,
+            "autoStartBrowser": false,
+            "program": "/home/logres/system/src/backend/manage.py",
+            // python interpreter
+            "python": "/home/logres/system/src/backend/venv/bin/python"
+        },
+        {
+            "name": "Python 调试程序: 当前文件",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+        },
+        {
+            "name": "Noise Experiment",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/home/logres/system/Experiment/NoiseExperiment/main.py",
+            "args": [
+                "run",
+                "-input",
+                "/home/logres/system/Experiment/NoiseExperiment/resource/customer/basic_path/path3.json",
+                "-output",
+                "/home/logres/system/Experiment/NoiseExperiment/resource/customer/BugTest/path3.json",
+                "-N",
+                "100",
+                "-listen"
+            ]
+        }
+    ]
+}
