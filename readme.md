@@ -10,6 +10,7 @@ This branch serves as an **overview page** for introducing our research results 
 IBC is an integrated framework combining blockchain with BPMN choreography. It provides features such as Blockchain-as-a-Service (BaaS) for Fabric, Smart Contract generation based on BPMN choreography, and interactive modeling tools.
 
 **Paper**: IBC: An Integrated framework combining blockchain with BPMN choreography to enhance multi-party collaboration[https://doi.org/10.1109/ICWS62655.2024.00067](https://doi.org/10.1109/ICWS62655.2024.00067)
+
 **Status**: Completed.
 
 ---
