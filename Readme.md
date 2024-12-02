@@ -2,7 +2,7 @@
 
 # IBC: An <u>**I**</u>ntegrated Framework Combining <u>**B**</u>lockchain with BPMN <u>**C**</u>horeography
 
-![Framework](./Readme_img/IBC.svg)
+![Framework](./Readme_img/life.png)
 
 [![video](./Readme_img/player.png)](https://www.youtube.com/watch?v=NukOZ39KPiE)
 
@@ -56,81 +56,190 @@
               └───────────────┘  
               
 ```
+# Detailed Tutorial
 
-## Deploy Guide
+### 1. install wsl/Ubuntu
 
-### Prerequisites
+Ubuntu-20.04
 
-This project is based on Docker containers, which requires a Linux system/WSL2 environment, as well as Docker and Docker Compose.
 
-### Requirements
-#### docker pull images
-  pull docker images : 
-  1. `docker pull yeasy/hyperledger-fabric-peer:2.2.0` 
-  2. `docker pull hyperledger/fabric-ca:latest`
-  
-#### create docker net work
-      `docker network create cello-net`
 
-#### give the permission to the /etc/hosts
-      `sudo chmod 777 /etc/hosts`
-      
-#### GCC and Make
+### 2. install docker
+
+##### by script
+
+```
+ curl -fsSL https://test.docker.com -o test-docker.sh
+ sudo sh test-docker.sh
+ sudo apt install docker-compose
+```
+
+
+
+### 3. other essential
+
+##### GCC and other
 
  `sudo apt-get install build-essential`
 
-#### Python3
+##### python3.10+
 
-`sudo apt-get install python3-dev`
+sudo apt update
 
-#### libgraphviz-dev
+(sudo apt install software-properties-common)
 
-``` shell
-apt-get update && apt-get install -y gettext-base graphviz libgraphviz-dev && apt-get autoclean && apt-get clean && apt-get autoremove && rm -rf /var/cache/apt/
-```
+(sudo add-apt-repository ppa:deadsnakes/ppa)
 
-### Database Configuration
+sudo apt install python3.10
 
-Using docker compose to start the database service.
+sudo apt-get install python3.10-venv
 
-``` shell
-docker-compose -f docker-compose.yml up -d
-```
+（sudo apt install libpython3.10-dev）
 
-### backend Configuration
+（pip install setuptools==68.0.0）
 
-#### Dependency
+sudo apt-get install python3-dev
 
-``` shell
-pip install -r requirements.txt
-```
+##### libgraphviz
 
-recommended to use python-venv.
+`apt-get update \`
+`&& apt-get install -y gettext-base graphviz libgraphviz-dev \`
+`&& apt-get autoclean \`
+`&& apt-get clean \`
+`&& apt-get autoremove && rm -rf /var/cache/apt/`
 
-#### Setting up the database
+##### Go
 
-``` shell
-python3 manage.py makemigrations
-python3 manage.py migrate
-```
+###### 1. intsall
 
-------
+wget https://golang.google.cn/dl/go1.21.12.linux-amd64.tar.gz
 
-### agent Configuration
+sudo tar -C /usr/local -zxvf go1.21.12.linux-amd64.tar.gz
 
-#### Dependency
+###### 2. go environment
 
-``` shell
-pip install -r requirements.txt
-```
+export GOROOT=/usr/local/go
 
-Recommended to use python-venv.
+export PATH=$PATH:$GOROOT/bin 
 
-#### Start the agent
+source
 
-``` shell
-gunicorn server:app -c ./gunicorn.conf.py
-```
+###### 3. go dependency
+
+Set go proxy: https://goproxy.cn
+
+go env -w GOPROXY=https://goproxy.cn,direct
+
+ export http_proxy=172.26.224.1:7890
+
+ export https_proxy=172.26.224.1:7890
+
+cd /IBC/src/backend/opt/chaincode-go-bpmn
+
+go mod tidy
+
+###### 4. go download firefly
+
+go install github.com/hyperledger/firefly-cli/ff@latest
+
+firefly environment
+
+
+
+##### docker image
+
+docker pull yeasy/hyperledger-fabric-peer:2.2.0
+
+docker pull hyperledger/fabric-ca:latest 
+
+(docker pull hyperledger/fabric-ca:1.5.7)
+
+(docker tag <id> hyperledger/fabric-ca:latest)
+
+
+
+##### other 
+
+sudo chmod 777 /etc/hosts
+
+
+
+##### cello相关
+
+docker network create cello-net
+
+
+ export http_proxy=172.26.224.1:7890
+
+ export https_proxy=172.26.224.1:7890
+
+ff start cello_env --verbose 
+
+
+
+##### clone ChainCollab
+
+git clone https://github.com/XinzheShen182/ChainCollab
+
+git switch ChainCollab
+
+
+
+### Backend + oracle
+
+`python -m venv venv_name`
+
+`source venv_name/bin/activate`
+
+`pip install -r requirements.txt`
+
+
+
+### front
+
+sudo apt install npm
+
+sudo apt install nodejs
+
+npm install
+
+
+
+### agent
+
+`python -m venv venv_name`
+
+`source venv_name/bin/activate`
+
+`pip install -r requirements.txt`
+
+
+### translator
+
+Similar to above
+
+
+
+### 运行
+
+1. source startrc
+
+2. Enter the following commands in 5 terminals respectively:
+
+（1）start_front
+
+（2）start_agent
+
+（3）start_backend
+
+（4）start_translator
+
+ (5) start_oracle
+
+
+
+
+
 
 
 

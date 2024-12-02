@@ -197,7 +197,7 @@ source startrc
 
 （4）start_translator
 
- (5)start_oracle
+ (5) start_oracle
  
 
  还有一个debug功能，自动创建平台测试环境。
