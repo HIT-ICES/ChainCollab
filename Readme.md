@@ -1,6 +1,6 @@
 
 
-# IBC: An <u>**I**</u>ntegrated Framework Combining <u>**B**</u>lockchain with BPMN <u>**C**</u>horeography
+# BlockCollab: A Hybrid BPMN-DMN Framework for Blockchain-Based Inter-organizational Processes and Decisions Collaboration
 
 ![Framework](./Readme_img/life.png)
 
@@ -25,8 +25,13 @@
                ┌────┴──────────┐  - data of performance test
                │ Performance   │    * data of physical resources construction time
                │ Test          |    * data of chaincode execution time
-               └───────────────┘    * data of chaincode generation time
-
+               └────┬──────────┘    * data of chaincode generation time
+                    |
+               ┌────┴──────────┐  - Comformance Test Related
+               │NoiseExperiment│    * cases of extended-BPMN
+               │               |    * path extracted from cases
+               └───────────────┘    * comformance experiment result
+                    
 
 
 ┌──────────┐  ┌───────────────┐  - connector to the Docker Engine
@@ -40,13 +45,13 @@
               │               |    * environment management
               └─────┬─────────┘    
                     │
-              ┌─────┴─────────┐  - mirco-service to translate BPMN to chaincode
-              │ chaincode     │    
-              │ translator    │        
+              ┌─────┴─────────┐  - mirco-service to translate BPMN into chaincode
+              │ py_translator │    
+              │               │        
               └─────┬─────────┘
                     │
-              ┌─────┴─────────┐  - modeling tool to create BPMN choreography model
-              │ chor_js       │
+              ┌─────┴─────────┐  - Vscode plugin that manage sinppets for chaincode generation 
+              │ jsoncodeeditor│  
               │               │        
               └─────┬─────────┘
                     │   

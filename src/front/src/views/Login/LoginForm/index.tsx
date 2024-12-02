@@ -39,9 +39,9 @@ const App: React.FC = () => {
   useEffect(() => {
     if (registerStatus !== 'idle') {
       if (registerStatus === 'failed') {
-        message.error('注册失败');
+        message.error('Register Failed');
       } else if (registerStatus === 'success') {
-        message.success('注册成功');
+        message.success('Register Succeeded');
         loginForm.setFieldsValue({
           email: registerForm.getFieldValue('email'),
           password: registerForm.getFieldValue('password')
@@ -71,11 +71,11 @@ const App: React.FC = () => {
   };
 
   const validateMessages = {
-    required: "${label}是必填项!",
+    required: "${label} is required!",
     types: {
-      email: "${label}不是有效的邮箱!",
+      email: "${label} is not valid email!",
       pattern: {
-        mismatch: "${label}格式不正确!",
+        mismatch: "${label} format not correct!",
       },
     },
   };
@@ -85,7 +85,7 @@ const App: React.FC = () => {
       if (!value || form.getFieldValue("password") === value) {
         return Promise.resolve();
       }
-      return Promise.reject(new Error("两次输入的密码不一致!"));
+      return Promise.reject(new Error("The two passwords do not match.!"));
     },
   });
 
@@ -93,7 +93,7 @@ const App: React.FC = () => {
     <div className={`${loginFormBox} global-center`}>
       <LoginTitle />
       <Tabs defaultActiveKey="1" centered activeKey={activeKey} onChange={onKeyChange} >
-        <TabPane tab="登录" key="1">
+        <TabPane tab="Login" key="1">
           {/* 登录表单 */}
           <Form
             form={loginForm}
@@ -104,21 +104,21 @@ const App: React.FC = () => {
           >
             <Form.Item
               name="email"
-              rules={[{ required: true, message: "请填写邮箱" }]}
+              rules={[{ required: true, message: "Please Input Email" }]}
             >
               <Input
                 prefix={<UserOutlined className="site-form-item-icon" />}
-                placeholder="邮箱"
+                placeholder="Email"
               />
             </Form.Item>
             <Form.Item
               name="password"
-              rules={[{ required: true, message: "请填写密码！" }]}
+              rules={[{ required: true, message: "Please Input Password" }]}
             >
               <Input
                 prefix={<LockOutlined className="site-form-item-icon" />}
                 type="password"
-                placeholder="密码"
+                placeholder="Password"
               />
             </Form.Item>
             <Form.Item>
@@ -127,11 +127,11 @@ const App: React.FC = () => {
                 style={{ justifyContent: "space-between" }}
               >
                 <Form.Item name="remember" valuePropName="checked" noStyle>
-                  <Checkbox>记住账号密码</Checkbox>
+                  <Checkbox>Remember the password</Checkbox>
                 </Form.Item>
 
                 <a className="login-form-forgot" href="">
-                  忘记密码？
+                  Forgot Password?
                 </a>
               </div>
             </Form.Item>
@@ -143,13 +143,13 @@ const App: React.FC = () => {
                 className={loginFormButton}
                 loading={loginStatus}
               >
-                登录
+                Login
               </Button>
             </Form.Item>
           </Form>
         </TabPane>
 
-        <TabPane tab="注册" key="2">
+        <TabPane tab="Register" key="2">
           {/* 注册表单 */}
           <Form
             name="register"
@@ -159,45 +159,45 @@ const App: React.FC = () => {
           >
             <Form.Item
               name="username"
-              label="用户名"
+              label="Username"
               rules={[
                 { required: true },
                 {
                   pattern: /^[a-zA-Z0-9]{3,}$/,
-                  message: "用户名格式不正确!",
+                  message: "username format worng!",
                 },
               ]}
             >
-              <Input prefix={<HomeOutlined />} placeholder="用户名" />
+              <Input prefix={<HomeOutlined />} placeholder="Username" />
             </Form.Item>
             <Form.Item
               name="email"
-              label="邮箱"
+              label="Email"
               rules={[{ required: true }, { type: "email" }]}
             >
-              <Input prefix={<MailOutlined />} placeholder="邮箱" />
+              <Input prefix={<MailOutlined />} placeholder="Email" />
             </Form.Item>
             <Form.Item
               name="password"
-              label="密码"
+              label="Password"
               rules={[{ required: true }]}
               hasFeedback
             >
-              <Input.Password prefix={<LockOutlined />} placeholder="密码" />
+              <Input.Password prefix={<LockOutlined />} placeholder="Password" />
             </Form.Item>
             <Form.Item
               name="confirmPassword"
-              label="确认密码"
+              label="Confirm Password"
               dependencies={["password"]}
               hasFeedback
               rules={[
-                { required: true, message: "请再次输入密码！" },
+                { required: true, message: "Please re-enter the password!" },
                 passwordValidator(registerForm),
               ]}
             >
               <Input.Password
                 prefix={<LockOutlined />}
-                placeholder="确认密码"
+                placeholder="Confirm Password"
               />
             </Form.Item>
             <Form.Item>
@@ -207,7 +207,7 @@ const App: React.FC = () => {
                 className={loginFormButton}
                 loading={registerStatus === 'register'}
               >
-                注册
+                Register
               </Button>
             </Form.Item>
           </Form>
