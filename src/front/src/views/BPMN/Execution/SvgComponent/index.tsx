@@ -318,7 +318,7 @@ const InputComponentForMessage = ({
 				flexDirection: "column",
 			}}
 		>
-			<TestComponentV2
+			{/* <TestComponentV2
 				processFunc={async () => {
 					const output_obj = {};
 					await onHandleMessage(formRef.current.getFieldsValue(), output_obj);
@@ -372,7 +372,7 @@ const InputComponentForMessage = ({
 					];
 					return res;
 				}}
-			/>
+			/> */}
 			<Form
 				layout="horizontal"
 				className={flexContainerStyle}
@@ -381,7 +381,6 @@ const InputComponentForMessage = ({
 				ref={formRef}
 				onFinish={onHandleMessage}
 			>
-				<h1>LOGRES</h1>
 				{Object.keys(format.properties).map((key) => {
 					console.log("format.properties", format.properties);
 					return (
@@ -435,8 +434,6 @@ const InputComponentForMessage = ({
 					</Button>
 				</Form.Item>
 			</Form>
-			{/* Message Related Experiment */}
-			<h1>LOGRES</h1>
 		</div>
 	);
 };
@@ -467,7 +464,8 @@ const TimeDecorator = (func, label, url_pattern, output_obj = {}) => {
 
 const TimeStampHandler = (time) => {
 	if (!time) return "";
-	if (typeof time === "number" || time.startsWith("17")) return Math.round(time);
+	if (typeof time === "number" || time.startsWith("17"))
+		return Math.round(time);
 	if (typeof time === "string") return new Date(time).getTime();
 };
 
@@ -487,16 +485,21 @@ const ControlPanel = ({
 	const msp = queryParams.get("msp");
 	const type = currentElement?.type;
 	const Identity = queryParams.get("identity");
+
+	const temp_map = {
+		"user1":"Participant_1080bkg",
+		"user2":"Participant_0sktaei"
+	}
 	const isYourTurn = (() => {
 		if (type === "event") return currentElement?.EventState === 1;
 		if (type === "gateway") return currentElement?.GatewayState === 1;
 		if (type === "message")
 			return (
-				currentElement?.MsgState === 1 ||
+				currentElement?.MsgState === 1 && currentElement?.SendMspID === temp_map[identity.name] ||
 				// currentElement?.sendMspID === msp ||
-				currentElement?.MsgState === 2
+				currentElement?.MsgState === 2 
 			);
-		// currentElement?.receiveMspID === msp;
+			// currentElement?.receiveMspID === msp;
 		if (type === "businessRule") return currentElement?.State === 1;
 	})();
 	// debugger
@@ -568,15 +571,15 @@ const ControlPanel = ({
 			</div>
 		);
 
-	const onHandleBusinessRule = async (output={}) => {
-		const res = await TimeDecorator(invokeBusinessRuleAction, "BusinessRule", "invoke/Activity", output)(
-			coreURL,
-			contractName,
-			currentElement.BusinessRuleID,
-			instanceId,
-		);
+	const onHandleBusinessRule = async (output = {}) => {
+		const res = await TimeDecorator(
+			invokeBusinessRuleAction,
+			"BusinessRule",
+			"invoke/Activity",
+			output,
+		)(coreURL, contractName, currentElement.BusinessRuleID, instanceId);
 
-		return res
+		return res;
 	};
 
 	if (type === "businessRule")
@@ -595,7 +598,7 @@ const ControlPanel = ({
 				>
 					Next
 				</Button>
-				<TestComponentV2
+				{/* <TestComponentV2
 					processFunc={async (readFromRedis) => {
 						const output = {};
 						const data = await onHandleBusinessRule(output);
@@ -604,19 +607,29 @@ const ControlPanel = ({
 						const invoke_start_time = data.created;
 						output["invoke_start_time"] = invoke_start_time;
 						const events = await getEventWithTX(coreURL, txid);
-						const event_time = events[0].created; 
+						const event_time = events[0].created;
 						output["event_time"] = event_time;
 
 						output["executor_end"] = await readFromRedis("executor_end");
 						output["executor_start"] = await readFromRedis("executor_start");
-						output["executor_ipfsEnd"] = await readFromRedis("executor_ipfsEnd");
-						output["executor_ipfsStart"] = await readFromRedis("executor_ipfsStart");
-						output["executor_invokeStart"] = await readFromRedis("executor_invokeStart");
+						output["executor_ipfsEnd"] =
+							await readFromRedis("executor_ipfsEnd");
+						output["executor_ipfsStart"] =
+							await readFromRedis("executor_ipfsStart");
+						output["executor_invokeStart"] = await readFromRedis(
+							"executor_invokeStart",
+						);
 						const executor_op = await readFromRedis("executor_op");
-						const operation = await getOperationWithId("http://127.0.0.1:5000", executor_op);
+						const operation = await getOperationWithId(
+							"http://127.0.0.1:5000",
+							executor_op,
+						);
 						const executor_tx = operation.tx;
-						const events2 = await getEventWithTX("http://127.0.0.1:5000", executor_tx);
-						output["event_time_2"] =  events2[0].created
+						const events2 = await getEventWithTX(
+							"http://127.0.0.1:5000",
+							executor_tx,
+						);
+						output["event_time_2"] = events2[0].created;
 						for (const key in output) {
 							output[key] = TimeStampHandler(output[key]);
 						}
@@ -627,44 +640,44 @@ const ControlPanel = ({
 						// API Invoker, BPMN SC, Event Bus, Executor, IPFS, API Invoker, DMN SC
 						const res = [
 							{
-								"step": "API Invoker",
-								"start_time": time_obj["BusinessRule_start_time"],
-								"end_time": time_obj["BusinessRule_end_time"],
+								step: "API Invoker",
+								start_time: time_obj["BusinessRule_start_time"],
+								end_time: time_obj["BusinessRule_end_time"],
 							},
 							{
-								"step": "BPMN SC",
-								"start_time": time_obj["invoke_start_time"],
-								"end_time": time_obj["event_time"],
+								step: "BPMN SC",
+								start_time: time_obj["invoke_start_time"],
+								end_time: time_obj["event_time"],
 							},
 							{
-								"step": "Event Bus",
-								"start_time": time_obj["event_time"],
-								"end_time": time_obj["executor_start"],
+								step: "Event Bus",
+								start_time: time_obj["event_time"],
+								end_time: time_obj["executor_start"],
 							},
 							{
-								"step": "Executor",
-								"start_time": time_obj["executor_start"],
-								"end_time": time_obj["executor_end"],
-							},
-						    {
-								"step": "IPFS",
-								"start_time": time_obj["executor_ipfsStart"],
-								"end_time": time_obj["executor_ipfsEnd"],
+								step: "Executor",
+								start_time: time_obj["executor_start"],
+								end_time: time_obj["executor_end"],
 							},
 							{
-								"step": "API Invoker2",
-								"start_time": time_obj["executor_ipfsEnd"],
-								"end_time": time_obj["executor_end"],
+								step: "IPFS",
+								start_time: time_obj["executor_ipfsStart"],
+								end_time: time_obj["executor_ipfsEnd"],
 							},
 							{
-								"step": "DMN SC",
-								"start_time": time_obj["executor_invokeStart"],
-								"end_time": time_obj["event_time_2"],
-							}
-						]
+								step: "API Invoker2",
+								start_time: time_obj["executor_ipfsEnd"],
+								end_time: time_obj["executor_end"],
+							},
+							{
+								step: "DMN SC",
+								start_time: time_obj["executor_invokeStart"],
+								end_time: time_obj["event_time_2"],
+							},
+						];
 						return res;
 					}}
-				/>
+				/> */}
 			</div>
 		);
 
@@ -783,7 +796,6 @@ const IdentitySelector = ({ identity, setIdentity }) => {
 
 import { useAllFireflyData } from "./hook";
 import axios from "axios";
-import { time } from "console";
 
 const ExecutionPage = (props) => {
 	const bpmnInstanceId = window.location.pathname.split("/").pop();
@@ -875,9 +887,9 @@ const ExecutionPage = (props) => {
 
 		const generateStylesWithMsgList = (msgList) => {
 			let styles = { "& svg": {} };
-			msgList.forEach((msg) => {
-				if (msg.color === "unColored" && msg.color === "") return;
-
+			for (const msg of msgList) {
+				if (msg.color === "unColored" && msg.color === "") continue;
+		
 				const selector = (() => {
 					console.log(msg);
 					if (msg.type === "event")
@@ -904,26 +916,26 @@ const ExecutionPage = (props) => {
 					//     fill: `${msg.color} !important`,
 					// }
 				};
-			});
+			}
 			return styles;
 		};
 		const newStyles = generateStylesWithMsgList(updatedMsgList);
 		setSvgStyle(newStyles);
 	};
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		renderSvg();
 	}, [fireflyDataReady]);
 
-	// useEffect(() => {
-	//     const task = setInterval(() => {
-	//         syncFireflyData();
-	//     }, 3000);
-	//     return () => {
-	//         clearInterval(task);
-	//     }
-	// }
-	//     , []);
+	useEffect(() => {
+		const task = setInterval(() => {
+			syncFireflyData();
+		}, 1000);
+		return () => {
+			clearInterval(task);
+		};
+	}, [syncFireflyData]);
 
 	return (
 		<div className="Execution">

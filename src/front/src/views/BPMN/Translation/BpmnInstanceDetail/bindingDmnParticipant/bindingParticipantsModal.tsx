@@ -176,10 +176,10 @@ const BindingParticipantComponent = ({ clickedActionIndex, showBindingParticipan
             width: '100%',          // 容器宽度为100%
             marginBottom: '10px'    // 可选，为行添加底部间距
           }}>
-            <label htmlFor="validationSelect">选择校验方式 :</label>
+            <label htmlFor="validationSelect">Choose Verify Method</label>
             <Select id="validationSelect" value={showBindingParticipantValueMap.get(clickedActionIndex)?.selectedValidationType} onChange={handleValidationTypeChange} style={{ width: 'auto', flexGrow: 1, paddingLeft: "10px" }}>
-              <Select.Option value="equal">相等</Select.Option>
-              <Select.Option value="group">一类</Select.Option>
+              <Select.Option value="equal">Exact User</Select.Option>
+              <Select.Option value="group">With Some Conditions</Select.Option>
             </Select>
           </div>
           <div style={{
@@ -192,7 +192,7 @@ const BindingParticipantComponent = ({ clickedActionIndex, showBindingParticipan
             {showBindingParticipantMap.get(clickedActionIndex)?.showMspSection && (
               <div>
                 <label htmlFor="mspSelect">
-                  {showBindingParticipantValueMap.get(clickedActionIndex)?.selectedValidationType === 'equal' ? '选择Membership :' : '选择Membership(可选) :'}
+                  {showBindingParticipantValueMap.get(clickedActionIndex)?.selectedValidationType === 'equal' ? 'Choose Membership :' : 'Choose Membership(Optional) :'}
                 </label>
                 <Select
                   style={{ width: 'auto', flexGrow: 1, paddingLeft: "10px" }}
@@ -204,7 +204,7 @@ const BindingParticipantComponent = ({ clickedActionIndex, showBindingParticipan
                   }}
                 >
                   <Select.Option value="" key="default">
-                    请选择一个选项
+                    Choose One Choice
                   </Select.Option>
                   {
                     membershipList.map((member) => {
@@ -234,7 +234,7 @@ const BindingParticipantComponent = ({ clickedActionIndex, showBindingParticipan
                   width: '100%',          // 容器宽度为100%
                   marginBottom: '10px'    // 可选，为行添加底部间距
                 }}>
-                  <label htmlFor="userSelect">选择用户:</label>
+                  <label htmlFor="userSelect">Choose User</label>
                   <Select
                     id="userSelect"
                     value={showBindingParticipantValueMap.get(clickedActionIndex)?.selectedUser}
@@ -302,7 +302,7 @@ export const BindingParticipant = ({ participants, showBindingParticipantMap, se
             onClick={() => {
               setClickedActionIndex(record.participantId)
             }}>
-            绑定
+            Bind
           </Button>
         )
       }

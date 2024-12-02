@@ -398,7 +398,7 @@ export const BindingDmnModal = ({
                         setCurrentBusinessRuleId(
                             record.businessRuleId
                         )
-                    }} >绑定</Button>
+                    }} >Binding</Button>
                 )
             }
         }

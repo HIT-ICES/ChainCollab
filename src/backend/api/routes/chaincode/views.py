@@ -237,12 +237,6 @@ class ChainCodeViewSet(viewsets.ViewSet):
             for _, _, files in os.walk(file_path):
                 cc_targz = os.path.join(file_path + "/" + files[0])
                 break
-            # fabric_resource_set = request.user.organization
-
-            # qs = Node.objects.filter(type="peer", fabric_resource_set=fabric_resource_set)
-            # if not qs.exists():
-            #     raise ResourceNotFound
-            # peer_node = qs.first()
             peer_nodes = Node.objects.filter(type="peer", id__in=peer_node_list)
 
             flag = False
@@ -250,18 +244,8 @@ class ChainCodeViewSet(viewsets.ViewSet):
                 envs = init_env_vars(peer_node, peer_node.fabric_resource_set)
 
                 peer_channel_cli = PeerChainCode("v2.2.0", **envs)
-                # import time
-
-                # start_time = time.time()
                 print(peer_node.id)
                 res = peer_channel_cli.lifecycle_install(cc_targz)
-                # print("install time:", time.time() - start_time)
-                # with open("install.log", "a") as f:
-                #     f.write(
-                #         "install chaincode {} time: {}\n".format(
-                #             chaincode_id, time.time() - start_time
-                #         )
-                #     )
                 if res != 0:
                     flag = True
             if flag == True:

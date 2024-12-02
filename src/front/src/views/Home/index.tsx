@@ -1,7 +1,5 @@
-import React from 'react';
 import styled from 'styled-components';
 import { Typography, Button } from 'antd';
-import { RightOutlined } from '@ant-design/icons';
 
 const { Title, Paragraph } = Typography;
 
@@ -26,24 +24,39 @@ const DocumentLink = styled(Button)`
   }
 `;
 
+const StyledParagraph = styled.p`
+  font-size: 16px;
+  line-height: 1.8;
+  margin: 20px 0;
+  padding: 16px;
+  background: linear-gradient(135deg, #f9f9f9, #f1f1f1);
+  border-left: 4px solid #1bb6fe;
+  border-radius: 8px;
+  color: #333;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: justify;
+`;
+
 function HomePage() {
   return (
     <HomePageContainer>
-      <Title level={1}>企业多方协作平台</Title>
-      <Paragraph>
-        欢迎来到企业多方协作平台，我们致力于提供基于区块链技术的安全、透明和高效的协作解决方案。
-      </Paragraph>
-      <Paragraph>
-        利用区块链技术，我们保证了数据的不可篡改性和可追溯性，为企业合作提供了信任基础。
-      </Paragraph>
-      <Paragraph>
-        了解更多关于我们如何利用区块链技术实现协作的信息，请选择以下选项：
-      </Paragraph>
-      <DocumentLink type="primary" href="/quickstart">快速开始</DocumentLink>
-      <DocumentLink type="primary" href="/platform-introduction">平台介绍</DocumentLink>
-      <DocumentLink type="primary" href="/team-introduction">团队介绍</DocumentLink>
+      <Title level={1}>BlockCollab</Title>
+      <StyledParagraph>
+        Welcome to the enterprise multi-party collaboration platform. We are committed to providing secure, transparent, and efficient collaboration solutions based on blockchain technology.
+      </StyledParagraph>
+      <StyledParagraph>
+        Using blockchain technology, we ensure data immutability and traceability, establishing a foundation of trust for enterprise cooperation.
+      </StyledParagraph>
+      <StyledParagraph>
+        To learn more about how we leverage blockchain technology for collaboration, please choose from the following options:
+      </StyledParagraph>
+      <DocumentLink type="primary" href="/quickstart">Quick Start</DocumentLink>
+      <DocumentLink type="primary" href="/platform-introduction">Platform Introduction</DocumentLink>
+      <DocumentLink type="primary" href="/team-introduction">Team Introduction</DocumentLink>
     </HomePageContainer>
   );
 }
+
+
 
 export default HomePage;

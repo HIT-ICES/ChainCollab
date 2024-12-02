@@ -108,8 +108,8 @@ export const BindingModal = ({
             onCancel={() => setOpen(false)}
             // Button
             onOk={() => { handleBinding() }}
-            okText="确认"
-            cancelText="取消"
+            okText="Confirm"
+            cancelText="Cancel"
         >
             <Table
                 columns={colums}
