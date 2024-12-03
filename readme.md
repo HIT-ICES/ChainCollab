@@ -20,6 +20,8 @@ IBC is an integrated framework combining blockchain with BPMN choreography. It p
 **Overview**:  
 Built on IBC, BlockCollab offers more granular identity management in the BaaS layer. It also supports advanced BPMN choreography and DMN modeling, referred to as the extended-BPMN model.
 
+**Paper**: A Hybrid BPMN-DMN Framework for Secure Inter-organizational Processes and Decisions Collaboration on Permissioned Blockchain. [https://arxiv.org/abs/2412.01196](https://arxiv.org/abs/2412.01196)
+
 **Status**: Completed.
 
 ---
@@ -28,5 +30,19 @@ Built on IBC, BlockCollab offers more granular identity management in the BaaS l
 
 **Overview**:  
 Multi-BlockCollab addresses challenges related to multi-tasking and multi-participant management in BPMN choreography.
+
+**Status**: In Progress.
+
+## Multi-Blockchain-BlockCollab
+
+**Overview**:  
+Multi-Blockchain-BlockCollab addresses challenges related to deployment BPMN choreography to multiple types of blockchains.
+
+**Status**: In Progress.
+
+## Did-BlockCollab
+
+**Overview**:  
+Did-BlockCollab addresses challenges related to Introducing DID into BPMN choreography.
 
 **Status**: In Progress.
