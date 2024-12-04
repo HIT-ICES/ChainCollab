@@ -10,7 +10,7 @@
 ## Main Features
  1) **A standardized business collaboration modeling method** that integrates DMN with the BPMN choreography model for modeling business processes and  decisions in multi-organizational collaborations.
  2)  **A SC Translator** translates integrated BPMN-DMN business models into Hyperledger Fabric SC code, enabling the execution of multi-instance collaborative business processes and decision execution. At the same time, managing collaborative identities based on blockchain Attribute-Based Access Control (ABAC).
- 3)  **An innovative hybrid on-chain and off-chain execution environment** based on IBC is proposed. The hybrid environment provides: a) a collaboration model to ensure participants clearly understand their roles and map physical resources to optimize the construction of the environment; b) a blockchain-based on-chain and off-chain environment using Hyperledger Fabric and InterPlanetary File System (IPFS); c) a connector that links on-chain and off-chain systems, supporting smooth integration with external systems; d) Integration with an Oracle, bridging the gap between reality and blockchain.
+ 3)  **An innovative hybrid on-chain and off-chain execution environment** based on IBC is proposed. The hybrid environment provides: (1) a collaboration model to ensure participants clearly understand their roles and map physical resources to optimize the construction of the environment; (2) a blockchain-based on-chain and off-chain environment using Hyperledger Fabric and InterPlanetary File System (IPFS); (3) a connector that links on-chain and off-chain systems, supporting smooth integration with external systems; (4) Integration with an Oracle, bridging the gap between reality and blockchain.
 
 ## Project Structure 
 
