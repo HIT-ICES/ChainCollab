@@ -2,9 +2,10 @@
 
 # IBC: An <u>**I**</u>ntegrated Framework Combining <u>**B**</u>lockchain with BPMN <u>**C**</u>horeography
 
-![Framework](./Readme_img/IBC.svg)
 
 [![video](./Readme_img/player.png)](https://www.youtube.com/watch?v=NukOZ39KPiE)
+
+![Framework](./Readme_img/IBC.svg)
 
 ## Main Features
 
