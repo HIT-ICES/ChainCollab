@@ -1,15 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xs="http://www.w3.org/2001/XMLSchema" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://bpmn.io/schema/bpmn">
-  <bpmn2:message id="Message_1dmeexg" name="Supplies Delivery Confirmation" />
-  <bpmn2:message id="Message_1dzkcn0" name="Supplies Delivery Confirmation" />
-  <bpmn2:message id="Message_1oxmq1k" name="Supplies Delivery Confirmation" />
-  <bpmn2:message id="Message_196q1fj" name="Goods Delivery Confirmatio">
+  <bpmn2:message id="Message_1dmeexg" name="Supplies Delivery Confirmation4">
+    <bpmn2:documentation>{"properties":{"confirm3":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
+  </bpmn2:message>
+  <bpmn2:message id="Message_1dzkcn0" name="Supplies Delivery Confirmation3">
+    <bpmn2:documentation>{"properties":{"confirm2":{"type":"boolean","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
+  </bpmn2:message>
+  <bpmn2:message id="Message_1oxmq1k" name="Supplies Delivery Confirmation2">
+    <bpmn2:documentation>{"properties":{"confirm1":{"type":"boolean","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
+  </bpmn2:message>
+  <bpmn2:message id="Message_196q1fj" name="Goods Delivery Confirmation">
     <bpmn2:documentation>{"properties":{},"required":[],"files":{"deliveryNote":{"type":"file","description":"A document confirming the delivery of goods"}},"file required":["deliveryNote"]}</bpmn2:documentation>
   </bpmn2:message>
-  <bpmn2:message id="Message_04wmlqe" name="Supplies Delivery Confirmation">
+  <bpmn2:message id="Message_04wmlqe" name="Supplies Delivery Information">
     <bpmn2:documentation>{"properties":{"productionStart":{"type":"string","description":"Notification of the commencement of production, including the date and time"}},"required":["productionStart"],"files":{},"file required":[]}</bpmn2:documentation>
   </bpmn2:message>
-  <bpmn2:message id="Message_0d2xte5" name="Supplies Delivery Confirmation">
+  <bpmn2:message id="Message_0d2xte5" name="Supplies Delivery Confirmation1">
     <bpmn2:documentation>{"properties":{"deliveryConfirmation":{"type":"boolean","description":"Confirmation of whether the supplies have been successfully delivered"}},"required":["deliveryConfirmation"],"files":{},"file required":[]}</bpmn2:documentation>
   </bpmn2:message>
   <bpmn2:message id="Message_1io2g9u" name="Waybill Transmission">
@@ -123,7 +129,7 @@
       <bpmn2:messageFlowRef>MessageFlow_12csdsd</bpmn2:messageFlowRef>
     </bpmn2:choreographyTask>
     <bpmn2:choreographyTask id="ChoreographyTask_0p8dcch" name="Deliver supplies slowly" initiatingParticipantRef="Participant_19j1e3o">
-      <bpmn2:incoming>Flow_07u4u9g</bpmn2:incoming>
+      <bpmn2:incoming>Flow_0005j8y</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1rdmhkh</bpmn2:outgoing>
       <bpmn2:participantRef>Participant_19j1e3o</bpmn2:participantRef>
       <bpmn2:participantRef>Participant_19mgbdn</bpmn2:participantRef>
@@ -150,12 +156,12 @@
     <bpmn2:sequenceFlow id="Flow_1tf8ufi" sourceRef="ChoreographyTask_0s4ig1m" targetRef="ChoreographyTask_1q3p8t2" />
     <bpmn2:sequenceFlow id="Flow_0imjwmb" sourceRef="ChoreographyTask_1cceq4q" targetRef="ChoreographyTask_1tkm8jm" />
     <bpmn2:businessRuleTask id="Activity_0rm8bkp" name="Priority Decision">
-      <bpmn2:documentation>{"inputs":[],"outputs":[]}</bpmn2:documentation>
+      <bpmn2:documentation>{"inputs":[{"name":"numberOfUnits","type":"number","description":" Total number of units in the order requested"},{"name":"urgent","type":"boolean","description":"Indicates whether the order requires urgent delivery."},{"name":"supplierReputation","type":"number","description":"A numerical rating representing the supplier's reputation."}],"outputs":[{"name":"finalPriority","type":"string","description":""}]}</bpmn2:documentation>
       <bpmn2:incoming>Flow_19s99wl</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1jxt9fr</bpmn2:outgoing>
     </bpmn2:businessRuleTask>
     <bpmn2:sequenceFlow id="Flow_19s99wl" sourceRef="ChoreographyTask_0q1fvry" targetRef="Activity_0rm8bkp" />
-    <bpmn2:sequenceFlow id="Flow_1jxt9fr" name="finalPriority==Very Low" sourceRef="Activity_0rm8bkp" targetRef="Gateway_0ep8cuh" />
+    <bpmn2:sequenceFlow id="Flow_1jxt9fr" sourceRef="Activity_0rm8bkp" targetRef="Gateway_0ep8cuh" />
     <bpmn2:choreographyTask id="ChoreographyTask_1573x71" name="Deliver supplies" initiatingParticipantRef="Participant_19j1e3o">
       <bpmn2:incoming>Flow_0bna2ku</bpmn2:incoming>
       <bpmn2:outgoing>Flow_12cq02s</bpmn2:outgoing>
@@ -187,20 +193,20 @@
     </bpmn2:exclusiveGateway>
     <bpmn2:sequenceFlow id="Flow_1rdmhkh" sourceRef="ChoreographyTask_0p8dcch" targetRef="Gateway_1cr0nma" />
     <bpmn2:sequenceFlow id="Flow_0kh4ywx" sourceRef="Gateway_1cr0nma" targetRef="ChoreographyTask_0s4ig1m" />
-    <bpmn2:sequenceFlow id="Flow_0bna2ku" name="finalPriority==Low" sourceRef="Gateway_0ep8cuh" targetRef="ChoreographyTask_1573x71" />
-    <bpmn2:sequenceFlow id="Flow_1ihncup" name="finalPriority==Medium" sourceRef="Gateway_0ep8cuh" targetRef="ChoreographyTask_1qfvx9k" />
-    <bpmn2:sequenceFlow id="Flow_0r6rayf" name="finalPriority==High" sourceRef="Gateway_0ep8cuh" targetRef="ChoreographyTask_01sje89" />
+    <bpmn2:sequenceFlow id="Flow_0bna2ku" name="finalPriority==&#34;Low&#34;" sourceRef="Gateway_0ep8cuh" targetRef="ChoreographyTask_1573x71" />
+    <bpmn2:sequenceFlow id="Flow_1ihncup" name="finalPriority==&#34;Medium&#34;" sourceRef="Gateway_0ep8cuh" targetRef="ChoreographyTask_1qfvx9k" />
+    <bpmn2:sequenceFlow id="Flow_0r6rayf" name="finalPriority==&#34;High&#34;" sourceRef="Gateway_0ep8cuh" targetRef="ChoreographyTask_01sje89" />
     <bpmn2:sequenceFlow id="Flow_12cq02s" sourceRef="ChoreographyTask_1573x71" targetRef="Gateway_1cr0nma" />
     <bpmn2:sequenceFlow id="Flow_0ieovgu" sourceRef="ChoreographyTask_1qfvx9k" targetRef="Gateway_1cr0nma" />
     <bpmn2:sequenceFlow id="Flow_1sdqx53" sourceRef="ChoreographyTask_01sje89" targetRef="Gateway_1cr0nma" />
     <bpmn2:exclusiveGateway id="Gateway_0ep8cuh">
       <bpmn2:incoming>Flow_1jxt9fr</bpmn2:incoming>
-      <bpmn2:outgoing>Flow_07u4u9g</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_0bna2ku</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_0r6rayf</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_1ihncup</bpmn2:outgoing>
+      <bpmn2:outgoing>Flow_0005j8y</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
-    <bpmn2:sequenceFlow id="Flow_07u4u9g" sourceRef="Gateway_0ep8cuh" targetRef="ChoreographyTask_0p8dcch" />
+    <bpmn2:sequenceFlow id="Flow_0005j8y" name="finalPriority==&#34;VeryLow&#34;" sourceRef="Gateway_0ep8cuh" targetRef="ChoreographyTask_0p8dcch" />
   </bpmn2:choreography>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_Choreography_1" bpmnElement="Choreography">
@@ -367,7 +373,7 @@
         <di:waypoint x="930" y="480" />
         <di:waypoint x="905" y="480" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="790" y="246" width="80" height="27" />
+          <dc:Bounds x="798" y="246" width="84" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="ChoreographyTask_1573x71_di" bpmnElement="ChoreographyTask_1573x71">
@@ -418,7 +424,7 @@
         <di:waypoint x="880" y="400" />
         <di:waypoint x="781" y="400" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="786" y="416" width="88" height="14" />
+          <dc:Bounds x="789" y="416" width="83" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1ihncup_di" bpmnElement="Flow_1ihncup">
@@ -426,7 +432,7 @@
         <di:waypoint x="880" y="560" />
         <di:waypoint x="781" y="560" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="798" y="566" width="83" height="27" />
+          <dc:Bounds x="800" y="566" width="80" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0r6rayf_di" bpmnElement="Flow_0r6rayf">
@@ -434,7 +440,7 @@
         <di:waypoint x="880" y="720" />
         <di:waypoint x="781" y="720" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="795" y="726" width="90" height="14" />
+          <dc:Bounds x="797" y="726" width="87" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_12cq02s_di" bpmnElement="Flow_12cq02s">
@@ -455,10 +461,13 @@
       <bpmndi:BPMNShape id="Gateway_0ep8cuh_di" bpmnElement="Gateway_0ep8cuh" isMarkerVisible="true">
         <dc:Bounds x="855" y="455" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_07u4u9g_di" bpmnElement="Flow_07u4u9g">
-        <di:waypoint x="880" y="450" />
+      <bpmndi:BPMNEdge id="Flow_0005j8y_di" bpmnElement="Flow_0005j8y">
+        <di:waypoint x="880" y="455" />
         <di:waypoint x="880" y="240" />
         <di:waypoint x="781" y="240" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="798" y="246" width="84" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
     <bpmndi:BPMNLabelStyle id="BPMNLabelStyle_1">

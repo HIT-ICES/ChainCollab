@@ -1,0 +1,155 @@
+[{
+    "name": "landlord_claim_process_3",
+    "steps": [
+      {
+        "element_name": "Event_19zgkxm",
+        "element_type": "Event",
+        "metaInfo": "",
+        "parameters": [],
+        "invoker": "",
+        "state_change": [
+          {
+            "element_name": "Event_19zgkxm",
+            "element_type": "Event",
+            "pre_state": "enable",
+            "post_state": "done"
+          }
+        ]
+      },
+      {
+        "element_name": "Gateway_10ut9pb",
+        "element_type": "Gateway",
+        "metaInfo": "",
+        "parameters": [],
+        "invoker": "",
+        "state_change": [
+          {
+            "element_name": "Gateway_10ut9pb",
+            "element_type": "Gateway",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Event_19zgkxm",
+            "element_type": "Event",
+            "pre_state": "done",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Message_0dckgao",
+        "element_type": "Message",
+        "metaInfo": "{\"properties\":{\"BondContent\":{\"type\":\"string\",\"description\":\"\"},\"damageNumber\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"BondContent\",\"damageNumber\"],\"files\":{},\"file required\":[]}",
+        "parameters": ["Bond details content", 5],
+        "invoker": "Participant_1exbsak",
+        "state_change": [
+          {
+            "element_name": "Message_0dckgao",
+            "element_type": "Message",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Gateway_10ut9pb",
+            "element_type": "Gateway",
+            "pre_state": "done",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Activity_0oacu9j",
+        "element_type": "Activity",
+        "metaInfo": "{\"inputs\":[{\"name\":\"damageNumber\",\"type\":\"number\",\"description\":\"\"}],\"outputs\":[{\"name\":\"refund\",\"type\":\"boolean\",\"description\":\"\"}]}",
+        "parameters": [5],
+        "invoker": "",
+        "state_change": [
+          {
+            "element_name": "Activity_0oacu9j",
+            "element_type": "Activity",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Message_0dckgao",
+            "element_type": "Message",
+            "pre_state": "done",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Gateway_11zw5fs",
+        "element_type": "Gateway",
+        "metaInfo": "",
+        "parameters": [],
+        "invoker": "",
+        "state_change": [
+          {
+            "element_name": "Gateway_11zw5fs",
+            "element_type": "Gateway",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Activity_0oacu9j",
+            "element_type": "Activity",
+            "pre_state": "done",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Message_0zoy0sz",
+        "element_type": "Message",
+        "metaInfo": "{\"properties\":{\"refundbond\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"refundbond\"],\"files\":{},\"file required\":[]}",
+        "parameters": [50],
+        "invoker": "Participant_0h34s41",
+        "state_change": [
+          {
+            "element_name": "Message_0zoy0sz",
+            "element_type": "Message",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Gateway_11zw5fs",
+            "element_type": "Gateway",
+            "pre_state": "done",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Event_0fzlrii",
+        "element_type": "Event",
+        "metaInfo": "",
+        "parameters": [],
+        "invoker": "",
+        "state_change": [
+          {
+            "element_name": "Event_0fzlrii",
+            "element_type": "Event",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Message_0zoy0sz",
+            "element_type": "Message",
+            "pre_state": "done",
+            "post_state": "enable"
+          }
+        ]
+      }
+    ],
+    "invoke_path": [
+      "Event_19zgkxm",
+      "Gateway_10ut9pb",
+      "Message_0dckgao",
+      "Activity_0oacu9j",
+      "Gateway_11zw5fs",
+      "Message_0zoy0sz",
+      "Event_0fzlrii"
+    ]
+  }]

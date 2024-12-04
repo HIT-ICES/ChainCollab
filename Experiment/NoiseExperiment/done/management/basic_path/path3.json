@@ -1,0 +1,249 @@
+[{
+    "name": "task3",
+    "steps": [
+        {
+            "element_name": "Event_1y0sgtz",
+            "element_type": "Event",
+            "metaInfo": "Start event for the workflow.",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Event_1y0sgtz",
+                    "element_type": "Event",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "ChoreographyTask_1xoz3od",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_1ejkslm",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"Content\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+            "parameters": ["Registration Request"],
+            "invoker": "Participant_0a0qr98",
+            "state_change": [
+                {
+                    "element_name": "ChoreographyTask_1xoz3od",
+                    "element_type": "Message",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Gateway_0e7k79c",
+                    "element_type": "Gateway",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Gateway_0e7k79c",
+            "element_type": "Gateway",
+            "metaInfo": "Event-based gateway that determines control flow.",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Gateway_0e7k79c",
+                    "element_type": "Gateway",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "ChoreographyTask_0p0fmsg",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_02echpq",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"content\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+            "parameters": ["Sending APEFD Status"],
+            "invoker": "Participant_0ykkst0",
+            "state_change": [
+                {
+                    "element_name": "ChoreographyTask_0p0fmsg",
+                    "element_type": "Message",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Gateway_067p6u8",
+                    "element_type": "Gateway",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Gateway_067p6u8",
+            "element_type": "Gateway",
+            "metaInfo": "Exclusive gateway to evaluate conditions.",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Gateway_067p6u8",
+                    "element_type": "Gateway",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "ChoreographyTask_00l67sg",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_02ng01e",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"complete\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"complete\"],\"files\":{},\"file required\":[]}",
+            "parameters": [true],
+            "invoker": "Participant_1be5jmm",
+            "state_change": [
+                {
+                    "element_name": "ChoreographyTask_00l67sg",
+                    "element_type": "Message",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Message_094ld7m",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_094ld7m",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"quality\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"quality\"],\"files\":{},\"file required\":[]}",
+            "parameters": ["bad"],
+            "invoker": "Participant_0ykkst0",
+            "state_change": [
+                {
+                    "element_name": "Message_02ng01e",
+                    "element_type": "Message",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Activity_18dcm0h",
+                    "element_type": "Activity",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Activity_18dcm0h",
+            "element_type": "Activity",
+            "metaInfo": "{\"inputs\":[{\"name\":\"quality\",\"type\":\"string\",\"description\":\"\"}],\"outputs\":[{\"name\":\"qualified\",\"type\":\"boolean\",\"description\":\"\"}]}",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Message_094ld7m",
+                    "element_type": "Message",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Gateway_1fl1t0k",
+                    "element_type": "Gateway",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Gateway_1fl1t0k",
+            "element_type": "Gateway",
+            "metaInfo": "Gateway to determine next steps based on the quality check result.",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Gateway_1fl1t0k",
+                    "element_type": "Gateway",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Message_1h1vc49",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_1h1vc49",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"id\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"id\"],\"files\":{},\"file required\":[]}",
+            "parameters": ["Feedback on low quality"], 
+            "invoker": "Participant_1be5jmm",
+            "state_change": [
+                {
+                    "element_name": "Gateway_1fl1t0k",
+                    "element_type": "Gateway",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Event_1pm2yw6",
+                    "element_type": "Event",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Event_1pm2yw6",
+            "element_type": "Event",
+            "metaInfo": "End event for the process indicating the need for further actions.",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Message_1h1vc49",
+                    "element_type": "Message",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Event_1pm2yw6",
+                    "element_type": "Event",
+                    "pre_state": "disable",
+                    "post_state": "done"
+                }
+            ]
+        }
+    ],
+    "invoke_path": [
+        "Event_1y0sgtz",
+        "Message_1ejkslm",
+        "Gateway_0e7k79c",
+        "Message_02echpq",
+        "Gateway_067p6u8",
+        "Message_02ng01e",
+        "Message_094ld7m",
+        "Activity_18dcm0h",
+        "Gateway_1fl1t0k",
+        "Message_1h1vc49",
+        "Event_1pm2yw6"
+    ]
+}]
