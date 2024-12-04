@@ -5,7 +5,7 @@
 ![Framework](./Readme_img/life.png)
 
 ## Vedio 
-[![video](./Readme_img/BlockCollab Vedio.png)](https://www.youtube.com/watch?v=Ir1F8Y6AhdE)
+[![video](./Readme_img/BlockCollabVedio.png)](https://www.youtube.com/watch?v=Ir1F8Y6AhdE)
 
 ## Main Features
 
