@@ -8,11 +8,9 @@
 [![video](./Readme_img/BlockCollabVedio.png)](https://www.youtube.com/watch?v=Ir1F8Y6AhdE)
 
 ## Main Features
-
-- **Multi-party collaborative model management**: IBC provides a multi-party collaborative model management platform, which can be used to manage the life cycle of models, including model creation, modification, deletion, and version management.
-- **Physical resources construction**: IBC could quickly build blockchain as you need.
-- **BPMN choreography modeling and executing**: IBC provides a visualized BPMN choreography modeling tool, which can be used to model the business process of multi-party collaboration.
-
+ 1) **A standardized business collaboration modeling method** that integrates DMN with the BPMN choreography model for modeling business processes and  decisions in multi-organizational collaborations.
+ 2)  **A SC Translator** translates integrated BPMN-DMN business models into Hyperledger Fabric SC code, enabling the execution of multi-instance collaborative business processes and decision execution. At the same time, managing collaborative identities based on blockchain Attribute-Based Access Control (ABAC).
+ 3)  **An innovative hybrid on-chain and off-chain execution environment** based on IBC is proposed. The hybrid environment provides: a) a collaboration model to ensure participants clearly understand their roles and map physical resources to optimize the construction of the environment; b) a blockchain-based on-chain and off-chain environment using Hyperledger Fabric and InterPlanetary File System (IPFS); c) a connector that links on-chain and off-chain systems, supporting smooth integration with external systems; d) Integration with an Oracle, bridging the gap between reality and blockchain.
 
 ## Project Structure 
 
