@@ -186,7 +186,7 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 						/>
 					</div>
 				</div>
-				{/* <Button
+				<Button
 					type="primary"
 					onClick={async () => {
 						const { param, url, contract_name } = await CreateInstance(true);
@@ -197,7 +197,7 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 					}}
 				>
 					Get CreateInstance Param
-				</Button> */}
+				</Button>
 
 				<div style={{ textAlign: "center", height: "400px", marginTop:"-350px", marginBottom:"400px" }}>
 					<SVGDisplayComponent bpmnId={bpmnId} />
