@@ -234,6 +234,10 @@ if __name__ == "__main__":
             if append_only_mode:
                 random_mode = ""
                 random_num = 0
+                rate = 0
+            else:
+                random_num = args.n
+                rate = args.N * 0.01
 
             # 标记已完成
             finished_tasks = []
@@ -262,8 +266,7 @@ if __name__ == "__main__":
                 if content["name"] not in finished_tasks
             ]
 
-            random_num = args.n
-            rate = args.N * 0.01
+            
             experiment_num = [
                 int(
                     (
@@ -274,7 +277,7 @@ if __name__ == "__main__":
                     * rate
                 )
                 for task in all_tasks
-            ]
+            ] if rate !=0 else [1 for task in all_tasks]
             print(experiment_num)
 
             # 执行
@@ -333,24 +336,12 @@ if __name__ == "__main__":
                         origin_result = json.load(f)
                 else:
                     origin_result = []
+                print(origin_result)
+                print(results)
                 with open(args.output, "w") as f:
                     if not append_only_mode:
                         results.extend(origin_result)
-                        json.dump(results, f, indent=4)
-                    else:
-                        # Only append to existing one, never create a new task
-                        for origin in origin_result:
-                            for result in results:
-                                if result["task_name"] == origin["task_name"]:
-                                    # Add all res with different index_path
-                                    extra_path = []
-                                    for res in result["results"]:
-                                        if res["index_path"] not in [
-                                            o["index_path"] for o in origin["results"]
-                                        ]:
-                                            extra_path.append(res)
-                                    origin["results"].extend(extra_path)
-                        json.dump(origin_result, f, indent=4)
+                    json.dump(results, f, indent=4)
                 # 恢复标准输出到控制台
                 sys.stdout = sys.__stdout__
 
