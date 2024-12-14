@@ -70,7 +70,7 @@ Ubuntu-20.04
 
 ### 2. install docker
 
-##### by script
+#### by script
 
 ```
  curl -fsSL https://test.docker.com -o test-docker.sh
@@ -82,11 +82,11 @@ Ubuntu-20.04
 
 ### 3. other essential
 
-##### GCC and other
+#### GCC and other
 
- `sudo apt-get install build-essential`
+ sudo apt-get install build-essential
 
-##### python3.10+
+#### python3.10+
 
 sudo apt update
 
@@ -104,23 +104,23 @@ sudo apt-get install python3.10-venv
 
 sudo apt-get install python3-dev
 
-##### libgraphviz
+#### libgraphviz
 
-`apt-get update \`
-`&& apt-get install -y gettext-base graphviz libgraphviz-dev \`
-`&& apt-get autoclean \`
-`&& apt-get clean \`
-`&& apt-get autoremove && rm -rf /var/cache/apt/`
+apt-get update 
+&& apt-get install -y gettext-base graphviz libgraphviz-dev 
+&& apt-get autoclean 
+&& apt-get clean 
+&& apt-get autoremove && rm -rf /var/cache/apt/
 
-##### Go
+#### Go
 
-###### 1. intsall
+###### （1） intsall
 
 wget https://golang.google.cn/dl/go1.21.12.linux-amd64.tar.gz
 
 sudo tar -C /usr/local -zxvf go1.21.12.linux-amd64.tar.gz
 
-###### 2. go environment
+###### （2） go environment
 
 export GOROOT=/usr/local/go
 
@@ -128,7 +128,7 @@ export PATH=$PATH:$GOROOT/bin
 
 source
 
-###### 3. go dependency
+###### （3） go dependency
 
 Set go proxy: https://goproxy.cn
 
@@ -142,7 +142,7 @@ cd /IBC/src/backend/opt/chaincode-go-bpmn
 
 go mod tidy
 
-###### 4. go download firefly
+###### （4） go download firefly
 
 go install github.com/hyperledger/firefly-cli/ff@latest
 
@@ -150,7 +150,7 @@ firefly environment
 
 
 
-##### docker image
+#### docker image
 
 docker pull yeasy/hyperledger-fabric-peer:2.2.0
 
@@ -162,13 +162,13 @@ docker pull hyperledger/fabric-ca:latest
 
 
 
-##### other 
+#### other 
 
 sudo chmod 777 /etc/hosts
 
 
 
-##### cello相关
+#### cello related
 
 docker network create cello-net
 
@@ -181,7 +181,7 @@ ff start cello_env --verbose
 
 
 
-##### clone ChainCollab
+### 4. clone ChainCollab
 
 git clone https://github.com/XinzheShen182/ChainCollab
 
@@ -189,17 +189,17 @@ git switch ChainCollab
 
 
 
-### Backend + oracle
+### 5. Backend + oracle
 
-`python -m venv venv_name`
+python -m venv venv_name
 
-`source venv_name/bin/activate`
+source venv_name/bin/activate
 
-`pip install -r requirements.txt`
+pip install -r requirements.txt
 
 
 
-### front
+### 6. front
 
 sudo apt install npm
 
@@ -209,22 +209,22 @@ npm install
 
 
 
-### agent
+### 7. agent
 
-`python -m venv venv_name`
+python -m venv venv_name
 
-`source venv_name/bin/activate`
+source venv_name/bin/activate
 
-`pip install -r requirements.txt`
+pip install -r requirements.txt
 
 
-### translator
+### 8. translator
 
 Similar to above
 
 
 
-### 运行
+### 9. run
 
 1. source startrc
 
