@@ -4,6 +4,7 @@ import networkx as nx
 import xml.etree.ElementTree as ET
 import json
 
+
 from .elements import (
     NodeType,
     EdgeType,
@@ -309,6 +310,8 @@ class Choreography:
 
         all_paths = simple_paths + paths_with_cycle
 
+        print(all_paths)
+
         def handle_parallel_gateway(choreography, path)->tuple:
             fix_part = []
             sign = 0
@@ -411,7 +414,7 @@ class Choreography:
                     choreography_task := choreography.get_element_with_id(step["element"])
                 ).type == NodeType.CHOREOGRAPHY_TASK:
                     message_flows = choreography_task.message_flows
-                    print(message_flows)
+                    # print(message_flows)
                     init_participant = choreography_task.init_participant
                     init_message_flow = list(
                         filter(lambda x: x.source == init_participant, message_flows)
@@ -451,24 +454,32 @@ class Choreography:
         ]
 
 
+
 if __name__ == "__main__":
-    # ,"SupplyChain_new111.bpmn","Purchase.bpmn",
-    file_name_list = ["Purchase_new2.bpmn","SupplyChain_new2.bpmn","Rental Claim_new2.bpmn"]
-    # file_name_list = ["Hotel Booking.bpmn"]
+
+    file_name_list = ["Blood_analysis.bpmn"]
+    # "Purchase_new2.bpmn"
+    
+
     for file_name in file_name_list:
         choreography = Choreography()
         choreography.load_diagram_from_xml_file(
-            f"./resource/bpmn_add/{file_name}"
+            f"./resource/bpmn/{file_name}"
         )
 
         ### find all simple path
         all_paths = []
         start_event = choreography.query_element_with_type(NodeType.START_EVENT)[0]
         end_events = choreography.query_element_with_type(NodeType.END_EVENT)
+        
+        
         for end_event in end_events:
+            
             paths = choreography.generate_invoke_path(start_event.id, end_event.id)
             all_paths.extend(paths)
 
         with open(f"./resource/bpmn/{file_name.split(".")[0]}-path.json", "w") as f:
             json.dump(all_paths, f)
         print(f"File {file_name} is done")
+        
+
