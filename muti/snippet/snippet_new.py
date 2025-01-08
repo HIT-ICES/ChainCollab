@@ -37,9 +37,9 @@ def singleMessageMachine(json_data,messageName, targetName):
 
 
 
-def parallelGatewayMachine(json_data):
+def parallelGatewayMachine(json_data,level):
 
-    #TODO：主要是要识别出并行网关层级关系，并拼装这个层级关系，
+    #TODO：在parser里解析出层级关系，并基于这个层级关系，递归拼装这个并行网关状态机，
     #Gateway_0onpe6x---Gateway_1fbifca
     #    transport order forwarding
     #        mem2_participant1
@@ -49,7 +49,7 @@ def parallelGatewayMachine(json_data):
 
 
 
-    #最后类似于这样。lock不用管，后面会写一个函数统一处理
+    #最后类似于这样。lock不用管，后面会写一个函数统一增强逻辑
      
     '''
     "Gateway_0onpe6x---Gateway_1fbifca": {
