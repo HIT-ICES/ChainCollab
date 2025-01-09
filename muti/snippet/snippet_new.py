@@ -1,22 +1,35 @@
 import json
+from typing import List
 
 
-data = {
-    "context": {
-        
-    },
+# TODO:1.并行网关-->并行状态机   2.事件网关 得特殊处理，和ondone冲突。后面应该还是要统一处理ondone和这个网关。 3.排他条件网关=ondone+condition
+       
+
+
+
+#主状态机
+mainMachine = {
+    "context": {},
     "id": "",
     "initial": "",
-    "states": {
-        
-    },
+    "states": {},
 }
 
-def initMachine(json_data,id,initmachine):
-    json_data["id"]=id
-    json_data["initial"]=initmachine
 
-def singleMessageMachine(json_data,messageName, targetName):
+#actions：DMN结果，激活mutiparticipant,MutiTask循环自增 等函数
+#guards：mutiparticipant条件，网关条件，mutiTask跳出条件
+additionalContent = {
+    "actions": {},
+    "services": {},
+    "guards": {},
+    "delays": {},
+  }
+
+def initMachine(id,initmachine):
+    mainMachine["id"]=id
+    mainMachine["initial"]=initmachine
+
+def singleMessageMachine(baseMachine,messageName, *targetName):
     newData = {
         messageName: {
             "initial": "enable",
@@ -29,15 +42,17 @@ def singleMessageMachine(json_data,messageName, targetName):
                 },
                 "done": {"type": "final"},
             },
-            "onDone": {"target": targetName, "actions": []},
         }
     }
+    
+    if targetName:
+        newData[messageName]["onDone"] = {"target": targetName, "actions": []}
 
-    json_data["states"].update(newData)
+    baseMachine["states"].update(newData)
 
 
 
-def parallelGatewayMachine(json_data,level):
+def parallelGatewayMachine(level):
 
     #TODO：在parser里解析出层级关系，并基于这个层级关系，递归拼装这个并行网关状态机，
     #Gateway_0onpe6x---Gateway_1fbifca
@@ -202,20 +217,141 @@ def parallelGatewayMachine(json_data,level):
       },'''
     pass
 
-def mutiTaskMachine(json_data):
+
+def MutiTaskLoopMachine(basicMachine,name,targetName,loopMax,LoopConditionExpression,isMutiParticipant,*participants):
+    
+    newData = {
+      name: {
+          "initial": "",
+          "states": {
+          },
+          "onDone": [
+            {
+              "target": name,
+              "cond": name + "_NotLoopMax",
+              "actions": [
+                {
+                  "type": name + "_LoopAdd",
+                },
+              ],
+            },
+            {
+              "target": targetName,
+              "cond": name + "_LoopMax",
+              "actions": [],
+            },
+          ],
+        }
+    }
+    if LoopConditionExpression:
+        newData[name]["onDone"].append({
+            "target": targetName,
+            "cond": name + "_LoopConditionMeet",
+            "actions": [],
+        })
+
+    if isMutiParticipant:
+        newData[name]["type"] = "parallel"
+
+        # TODO:如果同时是mutiparticiant的情况，则需要动态的拼接
+        newData[name]["states"].update({})
+
+        newData[name]["initial"] = participants[0]
+    else:
+        singleMessageMachine(newData[name],name)
+        newData[name]["initial"] = "enable"
+
+
+    LoopAdd = {
+        name + "_LoopAdd": "assign({{{name}_loop: (context) => context.{name}_loop + 1}})".format(name=name),
+    }
+    ConditionLoopNotMax={
+        name + "_NotLoopMax": "(context, event) => {{return context.{name}_loop !== context.{name}_loopMax;}}".format(name=name),
+    }
+    ConditionLoopMax = {
+        name + "_LoopMax": "(context, event) => {{return context.{name}_loop === context.{name}_loopMax;}}".format(name=name),
+    }
+
+    #TODO:这边==问题，先不管了。
+    LoopConditionMeet = {
+        name + "_LoopConditionMeet": "(context, event) => {{return context.{expression};}}".format(expression=LoopConditionExpression),
+    }
+  
+    basicMachine["states"].update(newData)
+    basicMachine["context"].update({name+"_loop": 1, name+"_loopMax": loopMax})
+
+    additionalContent["actions"].update(LoopAdd)
+    additionalContent["guards"].update(ConditionLoopNotMax)
+    additionalContent["guards"].update(ConditionLoopMax)
+    if LoopConditionExpression:
+        additionalContent["guards"].update(LoopConditionMeet)
+    
+
+
+
+def MutiTaskPallelMachine():
     pass
 
-def DMNMachine(json_data):
+    
+
+def DMNMachine(basicMachine,name,DMNOutput:List[str]):
+    newData = {
+        "priority decison": {
+        "initial": "enable",
+        "states": {
+          "enable": {
+            "on": {
+              "next": [
+                {
+                  "target": "done",
+                  "actions": [name+"_setDMNResult"+"_{key}".format(key=key) for key in DMNOutput],
+                },
+              ],
+            },
+          },
+          "done": {
+            "type": "final",
+          },
+        },
+        "onDone": [
+        
+        ],
+      },
+    }
+
+    basicMachine["states"].update(newData)
+
+    #TODO:context可以扩展为更多类型
+    #把DMNOutput数组写入到context中
+    basicMachine["context"].update({name+"_"+key: None for key in DMNOutput})
+
+    #如果有多个DMNresult
+    additionalContent["actions"].update({
+        name+"_setDMNResult_{key}".format(key=key): "assign({{{name}_{key}: (context,event) => event.values.{key}}})".format(name=name,key=key) for key in DMNOutput
+    })
+  
+
+def SetMachineFirstTime():
     pass
 
-def SetMachineFirstTime(json_data):
-    pass
+
+
+
+initMachine("supplypaper","Name1111")
+
+singleMessageMachine(mainMachine,"Name1111", "Name2222")
+singleMessageMachine(mainMachine,"Name2222", "Name3333")
+
+MutiTaskLoopMachine(mainMachine,"cccc","bbbbb",5,"result==1",True,"mem1_participant1","mem2_participant1","mem3_participant1")
+
+MutiTaskLoopMachine(mainMachine,"ddddd","bbbbb",5,None,False)
+
+DMNMachine(mainMachine,"eeeee",["result1","result2","result3"])
 
 
 
 
-initMachine(data,"supplypaper","Name1111")
-singleMessageMachine(data, "Name1111", "Name2222")
-singleMessageMachine(data, "Name2222", "Name3333")
 
-print(json.dumps(data, indent=4, ensure_ascii=False))
+print(json.dumps(mainMachine, indent=4, ensure_ascii=False))
+#这一部分，函数需要去除引号
+print(json.dumps(additionalContent, indent=4,ensure_ascii=False).replace("\"",""))
