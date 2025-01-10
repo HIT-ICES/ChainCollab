@@ -289,3 +289,27 @@ class Choreography:
     def load_diagram_from_string(self, xml_string, target=""):
         root = ET.fromstring(xml_string)
         self.load_from_root(root, target)
+
+    @property
+    def simple_paths(self, start_id, end_id)->list[NodeType]:
+        return nx.all_simple_paths(self.topology_graph_without_message, start_id, end_id)
+    
+    @property
+    def simple_paths_with_cycle(self, start_id, end_id):
+        simple_paths =  nx.all_simple_paths(self.topology_graph_without_message, start_id, end_id)
+
+        cycles = list(nx.simple_cycles(self.topology_graph_without_message))
+        paths_with_cycle = []
+        for simple_path in simple_paths:
+            for cycle in cycles:
+                for index, step in enumerate(simple_path):
+                    if cycle[0] == step:
+                        path_with_cycle = (
+                            simple_path.copy()[:index]
+                            + cycle
+                            + simple_path.copy()[index:]
+                        )
+                        paths_with_cycle.append(path_with_cycle)
+
+        all_paths = simple_paths + paths_with_cycle
+        return all_paths
