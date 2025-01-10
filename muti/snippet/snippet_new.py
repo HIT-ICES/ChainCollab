@@ -2,7 +2,13 @@ import json
 from typing import List
 
 
-# TODO:1.并行网关-->并行状态机   2.事件网关 得特殊处理，和ondone冲突。后面应该还是要统一处理ondone和这个网关。 3.排他条件网关=ondone+condition
+# TODO:1.Ondone连接               1.1.事件网关 得特殊处理，和ondone冲突。后面应该还是要统一处理ondone和这个网关。 1.2.排他条件网关=ondone+condition
+# TODO:2.并行网关-->并行状态机 
+# TODO:3.MutiParticipantMachine   3.1 第一次  3.2 后续
+# TODO:4.MutiTaskMachine          4.1 MutiTaskPallelMachine
+
+
+
        
 
 
@@ -29,6 +35,51 @@ def initMachine(id,initmachine):
     mainMachine["id"]=id
     mainMachine["initial"]=initmachine
 
+
+
+def SetOndone(baseMachine,targetName):
+    baseMachine["onDone"] = {"target": targetName, "actions": []}
+
+
+
+#处理条件排他网关
+#targetList: 
+"""
+onDone: [
+          {
+            target: "confirmation2",
+            cond: "finalPriorityLow",
+            actions: [],
+          },
+          {
+            target: "confirmation3",
+            cond: "finalPriorityMedium",
+            actions: [],
+          },
+          {
+            target: "confirmation4",
+            cond: "finalPriorityHigh",
+            actions: [],
+          },
+          {
+            target: "confirmation1",
+            cond: "finalPriorityVeryLow",
+            actions: [],
+          },
+        ],
+"""
+def SetConditionOndone(baseMachine,targetList):
+    
+
+    """
+    finalPriorityLow: (context, event) => {
+        return context.finalPriority === "Low";
+      },
+    """
+    for target in targetList:
+        baseMachine["onDone"].update({"target": target["targetName"], "cond": target["conditionName"], "actions": []})
+    #TODO:
+ 
 def singleMessageMachine(baseMachine,messageName, *targetName):
     newData = {
         messageName: {
@@ -243,6 +294,7 @@ def MutiTaskLoopMachine(basicMachine,name,targetName,loopMax,LoopConditionExpres
           ],
         }
     }
+
     if LoopConditionExpression:
         newData[name]["onDone"].append({
             "target": targetName,
@@ -333,6 +385,13 @@ def DMNMachine(basicMachine,name,DMNOutput:List[str]):
 
 def SetMachineFirstTime():
     pass
+
+
+
+
+
+
+
 
 
 
