@@ -181,7 +181,27 @@ class ChainCodeViewSet(viewsets.ViewSet):
                                     found = True
                                     os.chdir(cwd)
                                     break
-
+                case "javascripts":
+                    chaincode_path = file_path
+                    found = False
+                    # change the language to node for the chaincode package
+                    language = "node"
+                    for _, dirs, _ in os.walk(file_path):
+                        if found:
+                            break
+                        elif dirs:
+                            for each in dirs:
+                                chaincode_path += "/" + each
+                                if os.path.exists(chaincode_path + "/package.json"):
+                                    cwd = os.getcwd()
+                                    print("cwd:", cwd)
+                                    os.chdir(chaincode_path)
+                                    os.system(
+                                        "npm install --proxy=http://192.168.96.1:7897"
+                                    )
+                                    found = True
+                                    os.chdir(cwd)
+                                    break
             # find a resource_set.sub_resource_set in env
             # fabric_resource_set = request.user.organization
             fabric_resource_set = env_resource_set.sub_resource_set.get()
