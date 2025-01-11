@@ -9,422 +9,544 @@ from typing import List
 
 # 微调 1."next3-2-3"此类名称改为元素名称 -->手动改
 
+class XstateJSONElement:
 
-# 主状态机
-mainMachine = {
-    "context": {},
-    "id": "",
-    "initial": "",
-    "states": {},
-}
-
-
-# actions：DMN结果，激活mutiparticipant,MutiTask循环自增 等函数
-# guards：mutiparticipant条件，网关条件，mutiTask跳出条件
-additionalContent = {
-    "actions": {},
-    "services": {},
-    "guards": {},
-    "delays": {},
-}
-
-
-def initMachine(id, initmachine):
-    mainMachine["id"] = id
-    mainMachine["initial"] = initmachine
-
-
-def SetOndone(baseMachine, targetName):
-    baseMachine["onDone"] = {"target": targetName, "actions": []}
-
-
-# 处理条件排他网关
-"""
-targetList:[
-          {
-            targetName: "",
-            condition: "",
-          },
-          {...},
-        ],
-"""
-def ExclusiveGatewayMachine(baseMachine, targetList, name):
-    newData = {
-        name: {
-            "always": [],
-        },
-    }
-
-    for target in targetList:
-        newData[name]["always"].append(
-            {
-                "target": target["targetName"],
-                "cond": name + "__" + target["targetName"],
-                "actions": [],
-            }
-        )
-        additionalContent["guards"].update(
-            {
-                name
-                + "__"
-                + target[
-                    "targetName"
-                ]: "(context, event) => {{return context.{condition};}}".format(
-                    condition=target["condition"]
-                )
-            }
-        )
-    baseMachine["states"].update(newData)
-
-
-# 处理基于事件的网关
-"""
-targetList:[
-          {
-            targetName: "",
-            event: "",
-          },
-          {...},
-        ],
-"""
-def EventGatewayMachine(baseMachine, targetList, name):
-    newData = {
-        name: {
-            "on": {},
-        },
-    }
-
-    for target in targetList:
-        newData[name]["on"].update(
-            {
-                target["event"]: [
-                    {
-                        "target": target["targetName"],
-                        "actions": [],
-                    },
-                ]
-            }
-        )
-
-    baseMachine["states"].update(newData)
-
-
-def singleMessageMachine(baseMachine, name, targetName=None):
-    newData = {
-        name: {
-            "initial": "enable",
-            "states": {
-                "enable": {
-                    "on": {"next1-1": [{"target": "wait for confirm", "actions": []}]}
-                },
-                "wait for confirm": {
-                    "on": {"next1-2": [{"target": "done", "actions": []}]}
-                },
-                "done": {"type": "final"},
-            },
-        }
-    }
-
-    if targetName:
-        newData[name]["onDone"] = {"target": targetName, "actions": []}
-
-    baseMachine["states"].update(newData)
-
-
-def parallelGatewayMachine(level):
-
-    # TODO：在parser里解析出层级关系，并基于这个层级关系，递归拼装这个并行网关状态机，
-    # Gateway_0onpe6x---Gateway_1fbifca
-    #    transport order forwarding
-    #        mem2_participant1
-    #        mem3_participant1
-    #        mem1_participant1
-    #    supply order forwarding
-
-    # lock不用管，后面会写一个函数统一增强逻辑
-    pass
-
-
-def MutiTaskLoopMachine(
-    basicMachine,
-    name,
-    loopMax,
-    LoopConditionExpression,
-    isMutiParticipant,
-    targetName=None,
-):
-
-    newData = {
-        name: {
+    def __init__(self):
+        # 主状态机
+        self.mainMachine = {
+            "context": {},
+            "id": "",
             "initial": "",
             "states": {},
-            "onDone": [
-                {
-                    "target": name,
-                    "cond": name + "_NotLoopMax",
-                    "actions": [
-                        {
-                            "type": name + "_LoopAdd",
-                        },
-                    ],
-                },
-            ],
         }
-    }
 
-    if LoopConditionExpression:
-        newData[name]["onDone"].append(
+        # actions：DMN结果，激活mutiparticipant,MutiTask循环自增 等函数
+        # guards：mutiparticipant条件，网关条件，mutiTask跳出条件
+        self.additionalContent = {
+            "actions": {},
+            "services": {},
+            "guards": {},
+            "delays": {},
+        }
+
+    def initMachine(self,id, initmachine):
+        self.mainMachine["id"] = id
+        self.mainMachine["initial"] = initmachine
+
+
+    def SetOndone(self,baseMachine, targetName):
+        baseMachine["onDone"] = {"target": targetName, "actions": []}
+
+
+    # 处理条件排他网关
+    """
+    targetList:[
             {
-                "target": targetName,
-                "cond": name + "_LoopConditionMeet",
-                "actions": [],
-            }
-        )
+                targetName: "",
+                condition: "",
+            },
+            {...},
+            ],
+    """
+    def ExclusiveGatewayMachine(self,baseMachine, targetList, name):
+        newData = {
+            name: {
+                "always": [],
+            },
+        }
 
-    if isMutiParticipant:
+        for target in targetList:
+            newData[name]["always"].append(
+                {
+                    "target": target["targetName"],
+                    "cond": name + "__" + target["targetName"],
+                    "actions": [],
+                }
+            )
+            self.additionalContent["guards"].update(
+                {
+                    name
+                    + "__"
+                    + target[
+                        "targetName"
+                    ]: "(context, event) => {{return context.{condition};}}".format(
+                        condition=target["condition"]
+                    )
+                }
+            )
+        baseMachine["states"].update(newData)
+
+
+    # 处理基于事件的网关
+    """
+    targetList:[
+            {
+                targetName: "",
+                event: "",
+            },
+            {...},
+            ],
+    """
+    def EventGatewayMachine(self,baseMachine, targetList, name):
+        newData = {
+            name: {
+                "on": {},
+            },
+        }
+
+        for target in targetList:
+            newData[name]["on"].update(
+                {
+                    target["event"]: [
+                        {
+                            "target": target["targetName"],
+                            "actions": [],
+                        },
+                    ]
+                }
+            )
+
+        baseMachine["states"].update(newData)
+
+
+    def singleMessageMachine(self,baseMachine, name, targetName=None):
+        newData = {
+            name: {
+                "initial": "enable",
+                "states": {
+                    "enable": {
+                        "on": {"next1-1": [{"target": "wait for confirm", "actions": []}]}
+                    },
+                    "wait for confirm": {
+                        "on": {"next1-2": [{"target": "done", "actions": []}]}
+                    },
+                    "done": {"type": "final"},
+                },
+            }
+        }
+
+        if targetName:
+            newData[name]["onDone"] = {"target": targetName, "actions": []}
+
+        baseMachine["states"].update(newData)
+
+
+    def parallelGatewayMachine(self,level):
+
+        # TODO：在parser里解析出层级关系，并基于这个层级关系，递归拼装这个并行网关状态机，
+        # Gateway_0onpe6x---Gateway_1fbifca
+        #    transport order forwarding
+        #        mem2_participant1
+        #        mem3_participant1
+        #        mem1_participant1
+        #    supply order forwarding
+
+        # lock不用管，后面会写一个函数统一增强逻辑
         pass
-        # TODO:如果同时是mutiparticiant的情况，则需要动态的拼接
-
-    else:
-        singleMessageMachine(newData[name], name)
-        newData[name]["initial"] = "enable"
-
-    LoopAdd = {
-        name
-        + "_LoopAdd": "assign({{{name}_loop: (context) => context.{name}_loop + 1}})".format(
-            name=name
-        ),
-    }
-    ConditionLoopNotMax = {
-        name
-        + "_NotLoopMax": "(context, event) => {{return context.{name}_loop !== context.{name}_loopMax;}}".format(
-            name=name
-        ),
-    }
-    ConditionLoopMax = {
-        name
-        + "_LoopMax": "(context, event) => {{return context.{name}_loop === context.{name}_loopMax;}}".format(
-            name=name
-        ),
-    }
-
-    # TODO:这边==问题，先不管了。
-    LoopConditionMeet = {
-        name
-        + "_LoopConditionMeet": "(context, event) => {{return context.{expression};}}".format(
-            expression=LoopConditionExpression
-        ),
-    }
-
-    basicMachine["context"].update({name + "_loop": 1, name + "_loopMax": loopMax})
-
-    additionalContent["actions"].update(LoopAdd)
-    additionalContent["guards"].update(ConditionLoopNotMax)
-    additionalContent["guards"].update(ConditionLoopMax)
-    if LoopConditionExpression:
-        additionalContent["guards"].update(LoopConditionMeet)
-
-    if targetName:
-        newData[name]["onDone"].append(
-            {
-                "target": targetName,
-                "cond": name + "_LoopMax",
-                "actions": [],
-            }
-        )
-    basicMachine["states"].update(newData)
 
 
-def MutiTaskPallelMachine():
-    pass
+    def MutiTaskLoopMachine(
+        self,
+        baseMachine,
+        name,
+        loopMax,
+        LoopConditionExpression,
+        isMutiParticipant=False,
+        targetName=None,
+        MutiParticipantParam={}
+    ):
 
-
-def DMNMachine(basicMachine, name, DMNOutput: List[str], targetName=None):
-    newData = {
-        name: {
-            "initial": "enable",
-            "states": {
-                "enable": {
-                    "on": {
-                        "next": [
+        newData = {
+            name: {
+                "initial": "",
+                "states": {},
+                "onDone": [
+                    {
+                        "target": name,
+                        "cond": name + "_NotLoopMax",
+                        "actions": [
                             {
-                                "target": "done",
-                                "actions": [
-                                    name + "_setDMNResult" + "_{key}".format(key=key)
-                                    for key in DMNOutput
-                                ],
+                                "type": name + "_LoopAdd",
                             },
                         ],
                     },
-                },
-                "done": {
-                    "type": "final",
-                },
-            },
-            "onDone": [],
-        },
-    }
-
-    if targetName:
-        SetOndone(newData[name], targetName)
-
-    basicMachine["states"].update(newData)
-
-    # TODO:context可以扩展为更多类型
-    # 把DMNOutput数组写入到context中
-    basicMachine["context"].update({name + "_" + key: None for key in DMNOutput})
-
-    # 如果有多个DMNresult
-    additionalContent["actions"].update(
-        {
-            name
-            + "_setDMNResult_{key}".format(
-                key=key
-            ): "assign({{{name}_{key}: (context,event) => event.values.{key}}})".format(
-                name=name, key=key
-            )
-            for key in DMNOutput
+                ],
+            }
         }
-    )
+
+        if LoopConditionExpression:
+            newData[name]["onDone"].append(
+                {
+                    "target": targetName,
+                    "cond": name + "_LoopConditionMeet",
+                    "actions": [],
+                }
+            )
 
 
-def MutiParticipantMachine(name, max, firstTime=False, targetName=None):
+        # ！这里可能有拼装问题。
+        if isMutiParticipant:
+            self.MutiParticipantMachine(newData[name], MutiParticipantParam["name"], MutiParticipantParam["max"],MutiParticipantParam["firstTime"])
+            newData[name]["initial"] = MutiParticipantParam["name"]
 
-    newData = {
-        name: {
-            "initial": "machine1",
-            "states": {},
-            "onDone": [],
-        },
-    }
+        else:
+            self.singleMessageMachine(newData[name], name)
+            newData[name]["initial"] = "enable"
 
-    machineDict = {}
+        LoopAdd = {
+            name
+            + "_LoopAdd": "assign({{{name}_loop: (context) => context.{name}_loop + 1}})".format(
+                name=name
+            ),
+        }
+        ConditionLoopNotMax = {
+            name
+            + "_NotLoopMax": "(context, event) => {{return context.{name}_loop !== context.{name}_loopMax;}}".format(
+                name=name
+            ),
+        }
+        ConditionLoopMax = {
+            name
+            + "_LoopMax": "(context, event) => {{return context.{name}_loop === context.{name}_loopMax;}}".format(
+                name=name
+            ),
+        }
 
-    for index in range(1, max + 1):
-        machineDict.update(
-            {
-                "machine"
-                + str(index): {
-                    "initial": "disable",
-                    "states": {
-                        "disable": {
-                            "always": [
+        # TODO:这边==问题，先不管了。
+        LoopConditionMeet = {
+            name
+            + "_LoopConditionMeet": "(context, event) => {{return context.{expression};}}".format(
+                expression=LoopConditionExpression
+            ),
+        }
+
+        baseMachine["context"].update({name + "_loop": 1, name + "_loopMax": loopMax})
+
+        self.additionalContent["actions"].update(LoopAdd)
+        self.additionalContent["guards"].update(ConditionLoopNotMax)
+        self.additionalContent["guards"].update(ConditionLoopMax)
+        if LoopConditionExpression:
+            self.additionalContent["guards"].update(LoopConditionMeet)
+
+        if targetName:
+            newData[name]["onDone"].append(
+                {
+                    "target": targetName,
+                    "cond": name + "_LoopMax",
+                    "actions": [],
+                }
+            )
+        baseMachine["states"].update(newData)
+
+
+    def MutiTaskPallelMachine(
+        self,
+        baseMachine,
+        name,
+        ParallelNum,
+        isMutiParticipant=False,
+        targetName=None,
+        MutiParticipantParam={}):
+
+        newData = {
+            name: {
+                "initial": "",
+                "states": {},
+                "type": "parallel",
+                "onDone": [
+                ],
+            }
+        }
+
+        if isMutiParticipant:
+            for index in range(1,ParallelNum+1):
+                self.MutiParticipantMachine(newData[name], name+"_instance_"+str(index), MutiParticipantParam["max"])
+            newData[name]["initial"] = name+"_instance_1"
+
+        else:
+            for index in range(1,ParallelNum+1):
+                self.singleMessageMachine(newData[name], name+"_instance_"+str(index))
+            newData[name]["initial"] = name+"_instance_1"
+
+
+
+        if targetName:
+            newData[name]["onDone"] = {"target": targetName, "actions": []}
+
+        baseMachine["states"].update(newData)
+
+
+
+
+    def DMNMachine(self,baseMachine, name, DMNOutput: List[str], targetName=None):
+        newData = {
+            name: {
+                "initial": "enable",
+                "states": {
+                    "enable": {
+                        "on": {
+                            "next": [
                                 {
-                                    "target": "enable",
-                                    "cond": "active_" + name + "_machine_" + str(index),
-                                    "actions": [],
-                                },
-                                {
-                                    "target": "locked_done",
-                                    "cond": "inactive_"
-                                    + name
-                                    + "_machine_"
-                                    + str(index),
-                                    "actions": [],
+                                    "target": "done",
+                                    "actions": [
+                                        name + "_setDMNResult" + "_{key}".format(key=key)
+                                        for key in DMNOutput
+                                    ],
                                 },
                             ],
                         },
+                    },
+                    "done": {
+                        "type": "final",
+                    },
+                },
+                "onDone": [],
+            },
+        }
+
+        if targetName:
+            self.SetOndone(newData[name], targetName)
+
+        baseMachine["states"].update(newData)
+
+        # TODO:context可以扩展为更多类型
+        # 把DMNOutput数组写入到context中
+        baseMachine["context"].update({name + "_" + key: None for key in DMNOutput})
+
+        # 如果有多个DMNresult
+        self.additionalContent["actions"].update(
+            {
+                name
+                + "_setDMNResult_{key}".format(
+                    key=key
+                ): "assign({{{name}_{key}: (context,event) => event.values.{key}}})".format(
+                    name=name, key=key
+                )
+                for key in DMNOutput
+            }
+        )
+
+
+    def MutiParticipantMachine(self,baseMachine,name, max, firstTime=False, targetName=None):
+
+        newData = {
+            name: {
+                "initial": "",
+                "states": {},
+                "onDone": [],
+            },
+        }
+
+        machineDict = {}
+
+
+        if firstTime:
+            for index in range(1, max + 1):
+                self.mainMachine["context"].update({name+"_machine_" + str(index): False})
+                self.additionalContent["guards"].update(
+                    {
+                        "active_"+name+"_machine_" + str(index): "(context, event) => {return context."+name+"_machine_" + str(index)+";}",
+                    }
+                )
+                self.additionalContent["guards"].update(
+                    {
+                        "inactive_"+name+"_machine_" + str(index): "(context, event) => {return !context."+name+"_machine_" + str(index)+";}",
+                    }
+                )
+                self.additionalContent["actions"].update(
+                    {
+                        "activate_"+name+"_machine_" + str(index): "assign({"+name+"_machine_" + str(index)+":true})",
+                    }
+                )
+                machineDict.update(
+                    {
+                        "machine_"
+                        + str(index): {
+                        "initial": "enable",
+                        "states": {
                         "enable": {
                             "on": {
-                                "next3-2-2": [
-                                    {
-                                        "target": "wait for confirm",
-                                        "actions": [],
-                                    },
-                                ],
+                            "next2-2-1": [
+                                {
+                                "target": "wait for confirm",
+                                "actions": [],
+                                },
+                            ],
                             },
-                        },
-                        "locked_done": {
-                            "type": "final",
                         },
                         "wait for confirm": {
                             "on": {
-                                "next3-2-3": [
-                                    {
-                                        "target": "done",
-                                        "actions": [],
-                                    },
-                                ],
+                            "next2-2-2": [
+                                {
+                                "target": "done",
+                                "actions": [],
+                                },
+                            ],
                             },
                         },
                         "done": {
-                            "type": "final",
+                            "entry": {
+                            "type": "activate_"+name+"_machine_" + str(index),
+                            },
+                        },
                         },
                     },
-                },
-            }
-        )
-
-    if firstTime:
-        newData[name]["states"].update(
-            {
-                "unlocked": {
-                    "states": machineDict,
-                    "on": {
-                        "advance": [
-                            {
-                                "target": "transport order forwarding--locked",
-                                "actions": [],
-                            }
-                        ]
-                    },
-                    "type": "parallel",
+                    }
+                )
+            newData[name]["states"].update(
+                {
+                    "unlocked": {
+                        "states": machineDict,
+                        "on": {
+                            "advance": [
+                                {
+                                    "target": "locked",
+                                    "actions": [],
+                                }
+                            ]
+                        },
+                        "type": "parallel",
+                    }
                 }
+            )
+            newData[name]["states"].update({"locked": {"type": "final"}})
+            newData[name]["initial"]="unlocked"
+
+        else:
+            for index in range(1, max + 1):
+                machineDict.update(
+                    {
+                        "machine_"
+                        + str(index): {
+                            "initial": "disable",
+                            "states": {
+                                "disable": {
+                                    "always": [
+                                        {
+                                            "target": "enable",
+                                            "cond": "active_" + name + "_machine_" + str(index),
+                                            "actions": [],
+                                        },
+                                        {
+                                            "target": "locked_done",
+                                            "cond": "inactive_"
+                                            + name
+                                            + "_machine_"
+                                            + str(index),
+                                            "actions": [],
+                                        },
+                                    ],
+                                },
+                                "enable": {
+                                    "on": {
+                                        "next3-2-2": [
+                                            {
+                                                "target": "wait for confirm",
+                                                "actions": [],
+                                            },
+                                        ],
+                                    },
+                                },
+                                "locked_done": {
+                                    "type": "final",
+                                },
+                                "wait for confirm": {
+                                    "on": {
+                                        "next3-2-3": [
+                                            {
+                                                "target": "done",
+                                                "actions": [],
+                                            },
+                                        ],
+                                    },
+                                },
+                                "done": {
+                                    "type": "final",
+                                },
+                            },
+                        },
+                    }
+                )
+            newData[name]["states"].update(machineDict)
+            newData[name]["type"] = "parallel"
+            newData[name]["initial"]="machine_1"
+
+        if targetName:
+            self.SetOndone(newData[name], targetName)
+
+        baseMachine["states"].update(newData)
+
+
+    def ParallelGatewayMachine(
+            self,
+            baseMachine,
+            name,
+            Gatewaystruct,
+            targetName=None
+            ):
+        
+        newData = {
+            name: {
+                "initial": "",
+                "states": {},
+                "type": "parallel",
+                "onDone": [
+                ],
             }
-        )
-        newData[name]["states"].update({"locked": {"type": "final"}})
+        }
 
-    else:
-        newData[name]["states"].update(machineDict)
-        newData[name]["type"] = "parallel"
+        if targetName:
+            newData[name]["onDone"] = {"target": targetName, "actions": []}
+        baseMachine["states"].update(newData)
 
-    if targetName:
-        SetOndone(newData[name], targetName)
+    
+if __name__ == "__main__":
+    xstateJSONElement = XstateJSONElement()
 
-    mainMachine["states"].update(newData)
+    xstateJSONElement.initMachine("supplypaper", "Name1111")
 
+    
+    xstateJSONElement.singleMessageMachine(xstateJSONElement.mainMachine, "Name1111", "Name2222")
+    xstateJSONElement.singleMessageMachine(xstateJSONElement.mainMachine, "Name2222", "Name3333")
 
+    xstateJSONElement.MutiTaskLoopMachine(xstateJSONElement.mainMachine, "cccc", 5, "result==1", True, "bbbbb",{"name":"dsjhfjka","max":3,"firstTime":True})
 
+    xstateJSONElement.MutiTaskLoopMachine(xstateJSONElement.mainMachine, "bbbbb", 5, None, False, "ddddd")
 
+    xstateJSONElement.DMNMachine(xstateJSONElement.mainMachine, "eeeee", ["result1", "result2", "result3"], "aaaa")
 
-initMachine("supplypaper", "Name1111")
-
-singleMessageMachine(mainMachine, "Name1111", "Name2222")
-singleMessageMachine(mainMachine, "Name2222", "Name3333")
-
-MutiTaskLoopMachine(mainMachine, "cccc", 5, "result==1", True, "bbbbb")
-MutiTaskLoopMachine(mainMachine, "bbbbb", 5, None, False, "ddddd")
-
-DMNMachine(mainMachine, "eeeee", ["result1", "result2", "result3"], "aaaa")
-
-ExclusiveGatewayMachine(
-    mainMachine,
-    [
-        {"targetName": "Name1111", "condition": "result==1"},
-        {"targetName": "Name2222", "condition": "result==2"},
-        {"targetName": "Name3333", "condition": "result==3"},
-    ],
-    "Gateway_111",
-)
-EventGatewayMachine(
-    mainMachine,
-    [
-        {"targetName": "Name1111", "event": "event1"},
-        {"targetName": "Name2222", "event": "event2"},
-        {"targetName": "Name3333", "event": "event3"},
-    ],
-    "Gateway_222",
-)
+    xstateJSONElement.ExclusiveGatewayMachine(
+        xstateJSONElement.mainMachine,
+        [
+            {"targetName": "Name1111", "condition": "result==1"},
+            {"targetName": "Name2222", "condition": "result==2"},
+            {"targetName": "Name3333", "condition": "result==3"},
+        ],
+        "Gateway_111",
+    )
+    xstateJSONElement.EventGatewayMachine(
+        xstateJSONElement.mainMachine,
+        [
+            {"targetName": "Name1111", "event": "event1"},
+            {"targetName": "Name2222", "event": "event2"},
+            {"targetName": "Name3333", "event": "event3"},
+        ],
+        "Gateway_222",
+    )
 
 
-MutiParticipantMachine("jjjjjj", 3, False, "kkkkk")
-MutiParticipantMachine("kkkkk", 3, True, "lllll")
+    xstateJSONElement.MutiParticipantMachine(xstateJSONElement.mainMachine,"jjjjjj", 3, False, "kkkkk")
+    xstateJSONElement.MutiParticipantMachine(xstateJSONElement.mainMachine,"kkkkk", 3, True, "lllll")
+    
 
 
-print(json.dumps(mainMachine, indent=4, ensure_ascii=False))
-# 这一部分，函数需要去除引号
-print(
-    json.dumps(additionalContent, indent=4, ensure_ascii=False)
-    .replace('"', "")
-    .replace("\\", "")
-)
+    xstateJSONElement.MutiTaskPallelMachine(xstateJSONElement.mainMachine,"ppppp", 3, False, "qqqqq")
+    xstateJSONElement.MutiTaskPallelMachine(xstateJSONElement.mainMachine,"qqqqq", 3, True, "rrrrr",{"name":"dsjhfjka","max":3})
+
+    print(json.dumps(xstateJSONElement.mainMachine, indent=4, ensure_ascii=False))
+    # 这一部分，函数需要去除引号
+    print(
+        json.dumps(xstateJSONElement.additionalContent, indent=4, ensure_ascii=False)
+        .replace('"', "")
+        .replace("\\", "")
+    )
