@@ -1,5 +1,7 @@
 import json
 from translator.parser import Choreography
+from pprint import pprint
+from copy import deepcopy
 from translator.elements import (
     Element,
     StartEvent,
@@ -13,9 +15,10 @@ from translator.elements import (
 
 ident = 0
 
-def print():
-    pass
 
+def format_print(*content):
+    # print("  " * ident, *content)
+    pass
 
 
 def method_to_extract_parallel_gateway(choreography: Choreography):
@@ -30,11 +33,13 @@ def method_to_extract_parallel_gateway(choreography: Choreography):
         # 2. match if a nested machine is start with current element
         # 3. print the nested machine start with current element recursively
 
+        global ident
+        ident+=1
         for element in machine["direct_elements"]:
-            print(element)
-            if element in machine["nested_machines"]:
-                print_machine(machine["nested_machines"][element])
-
+            format_print(element)
+        for nested_machine in machine["nested_machines"]:
+            print_machine(nested_machine)
+        ident-=1
         # Parallel Gateway
 
     def next_elements(source_element) -> list[Element]:
@@ -47,6 +52,9 @@ def method_to_extract_parallel_gateway(choreography: Choreography):
         return []
 
     def handle_parallel_gateway(start_element, outer_machine) -> Element:
+        global ident
+        ident += 1
+
         # 0. scan all path
         # 1. Create a new machine for every path
         # 2. Add all the elements between the start_element and end_element to the new machine
@@ -68,36 +76,34 @@ def method_to_extract_parallel_gateway(choreography: Choreography):
             return end_element
 
         end_element = find_merged_parallel_gateway(start_element)
-        
-        print(f"START: handle elements between {start_element.id} and {end_element.id}")
 
+        format_print(f"START: handle elements between {start_element.id} and {end_element.id}")
 
         for idx, element in enumerate(next_elements(start_element)):
             # generate a new machine for every path
-            new_machine = blank_machine.copy()
-            new_machine["start_element"] = start_element
+            new_machine = deepcopy(blank_machine)
+            new_machine["start_element"] = start_element.id
             new_machine["machine_name"] = f"{start_element.id} to {end_element.id} path {idx}"
-
             cursor = element
-            print("FOR", element.id)
-            print(end_element.id)
+            format_print("FOR", idx, element.id, "to", end_element.id)
             while cursor.id != end_element.id:
-                print(cursor.id)
                 if not is_split_parallel_gateway(cursor):
-                    new_machine["direct_elements"].append(cursor)
+                    new_machine["direct_elements"].append(cursor.id)
                     cursor = next_elements(cursor)[0]  # Emit Situation But Parallel Gateway
                     continue
                 if is_split_parallel_gateway(cursor):
-                    new_machine["direct_elements"].append(cursor)
-                    end_element = handle_parallel_gateway(cursor, new_machine)
-                    new_machine["direct_elements"].append(end_element)
-                    cursor = end_element
+                    new_machine["direct_elements"].append(cursor.id)
+                    inner_end_element = handle_parallel_gateway(cursor, new_machine)
+                    cursor = next_elements(inner_end_element)[0]
+                    new_machine["direct_elements"].append(inner_end_element.id)
+                    print(new_machine["direct_elements"])
                     continue
+            # new_machine["direct_elements"].append(end_element.id)
+            outer_machine["nested_machines"].append(new_machine)
 
-            outer_machine["nested_machines"][element] = new_machine
-        
-        print(f"END:handle elements between {start_element.id} and {end_element.id} ")
+        format_print(f"END:handle elements between {start_element.id} and {end_element.id} ")
 
+        ident -= 1
         return end_element
 
     def handle_exclusive_gateway(start_element, outer_machine) -> Element:
@@ -112,26 +118,32 @@ def method_to_extract_parallel_gateway(choreography: Choreography):
     end_element = choreography.query_element_with_type(NodeType.END_EVENT)[0]
 
     machine = {
-        "start_element": start_element,  # commonly is startElement or a Gateway
+        "start_element": start_element.id,  # commonly is startElement or a Gateway
         "machine_name": f"{start_element.id} to {end_element.id}",
         "direct_elements": [],
-        "nested_machines": {},
+        "nested_machines": [],
     }
 
-    blank_machine = {"start_element": None, "machine_name": "", "direct_elements": [], "nested_machines": {}}
+    blank_machine = {"start_element": None, "machine_name": "", "direct_elements": [], "nested_machines": []}
 
     cursor = start_element
     while cursor.id != end_element.id:
         if cursor.type not in [NodeType.PARALLEL_GATEWAY]:
-            machine["direct_elements"].append(cursor)
+            machine["direct_elements"].append(cursor.id)
             assert len(next_elements(cursor)) == 1
             cursor = next_elements(cursor)[0]
             continue
         if cursor.type == NodeType.PARALLEL_GATEWAY:
-            machine["direct_elements"].append(cursor)
-            end_element = handle_parallel_gateway(cursor, machine)
-            machine["direct_elements"].append(end_element)
-            cursor = next_elements(end_element)[0]
+            machine["direct_elements"].append(cursor.id)
+            inner_end_element = handle_parallel_gateway(cursor, machine)
+            machine["direct_elements"].append(inner_end_element.id)
+            cursor = next_elements(inner_end_element)[0]
+
+    machine["direct_elements"].append(end_element.id)
+    with open("res.json", 'w', encoding="utf-8") as f:
+        json.dump(machine, f)
+    print_machine(machine)
+    pprint(machine)
 
 
 if "__main__" == __name__:
