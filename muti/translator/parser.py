@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 import json
 
 
-from .elements import (
+from elements import (
     NodeType,
     EdgeType,
     RootType,
@@ -24,7 +24,7 @@ from .elements import (
 )
 
 from typing import List, Optional, Tuple, Any, Protocol
-from .protocals import ElementProtocol, GraphProtocol
+from protocals import ElementProtocol, GraphProtocol
 
 
 class Choreography:

@@ -1,8 +1,8 @@
 import json
-from translator.parser import Choreography
+from parser import Choreography
 from pprint import pprint
 from copy import deepcopy
-from translator.elements import (
+from elements import (
     Element,
     StartEvent,
     ParallelGateway,
@@ -148,5 +148,5 @@ def method_to_extract_parallel_gateway(choreography: Choreography):
 
 if "__main__" == __name__:
     choreography = Choreography()
-    choreography.load_diagram_from_xml_file("./bpmn_muti/parallel.bpmn")
+    choreography.load_diagram_from_xml_file("../bpmn_muti/parallel.bpmn")
     res = method_to_extract_parallel_gateway(choreography)

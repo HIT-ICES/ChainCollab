@@ -9,7 +9,7 @@ inspect({
   url: "https://statecharts.io/inspect",
   iframe: false,
 });
-
+/*
 export const machine = createMachine(
   {
     context: {
@@ -1434,6 +1434,7 @@ export const machine = createMachine(
     delays: {},
   }
 );
+*/
 
 function App() {
   const [state, send] = useMachine(machine, { devTools: true });
