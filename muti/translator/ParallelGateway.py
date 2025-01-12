@@ -148,5 +148,5 @@ def method_to_extract_parallel_gateway(choreography: Choreography):
 
 if "__main__" == __name__:
     choreography = Choreography()
-    choreography.load_diagram_from_xml_file("../bpmn_muti/parallel.bpmn")
+    choreography.load_diagram_from_xml_file("../bpmn_muti/Blood_analysis.bpmn")
     res = method_to_extract_parallel_gateway(choreography)

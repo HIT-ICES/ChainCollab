@@ -43,7 +43,7 @@ from elements import (
 
 def translate_bpmn2json():
     choreography = Choreography()
-    choreography.load_diagram_from_xml_file("../bpmn_muti/Purchase_new2.bpmn")
+    choreography.load_diagram_from_xml_file("../bpmn_muti/blood_analysis.bpmn")
     a = choreography.query_element_with_type(NodeType.CHOREOGRAPHY_TASK)[0]
     print(a.outgoing.target.id)
     xstateJSONElement = XstateJSONElement()
