@@ -7,7 +7,7 @@
         "params":{
             "aaa":None,
             #根据类型填入信息
-            #1.mutiParicipant特殊信息:max, isFirstTime,participantName<---需要算法识别出首次   
+            #1.mutiParicipant特殊信息:max, isFirstTime<---需要算法识别出首次,participantName 
             #2.mutiTask特殊信息:loopMax,LoopConditionExpression,[isMutiParticipant=False,MutiParticipantParam={}]
             #3.DMN特殊信息:DMNOutputNameList
         }
@@ -147,3 +147,21 @@ def translate_bpmn2json():
 
 if __name__ == "__main__":
     translate_bpmn2json()
+    {
+        "startevent":None,
+        "ParallelGateway1 TO ParallelGateway2":{
+            "task1(message下同) TO task2":{
+                "task1":None,
+                "task2":None,
+            },
+            "task1 TO task2":{
+                "task3":None,
+                "task4":None
+            }
+        },
+        "task5":None,
+        "DMN1":None,
+        "ExclusiveGateway1":None,
+        "task6":None,
+        "endevent":None
+    }

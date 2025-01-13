@@ -9,7 +9,7 @@ inspect({
   url: "https://statecharts.io/inspect",
   iframe: false,
 });
-/*
+
 export const machine = createMachine(
   {
     context: {
@@ -1434,7 +1434,6 @@ export const machine = createMachine(
     delays: {},
   }
 );
-*/
 
 function App() {
   const [state, send] = useMachine(machine, { devTools: true });
@@ -1463,9 +1462,7 @@ function App() {
       <button onClick={() => send("next3-1-2")}>next3-1-2</button>
       <button onClick={() => send("next3-1-3")}>next3-1-3</button>
 
-      <button onClick={() => send({ type: "next", value1: "VeryLow" })}>
-        nextWithParam
-      </button>
+      <button onClick={() => send({ type: "next", value1: "VeryLow" })}>nextWithParam</button>
 
       <button onClick={() => send("next3-1-2")}>next3-1-2</button>
       <button onClick={() => send("next3-1-3")}>next3-1-3</button>
