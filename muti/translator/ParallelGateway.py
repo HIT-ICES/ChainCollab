@@ -121,11 +121,11 @@ def method_to_extract_parallel_gateway(choreography: Choreography):
 
     with open("res.json", "w", encoding="utf-8") as f:
         json.dump(machine, f)
-    print_machine(machine)
-    pprint(machine)
+    # print_machine(machine)
+    # pprint(machine)
 
 
 if "__main__" == __name__:
     choreography = Choreography()
-    choreography.load_diagram_from_xml_file("../bpmn_muti/Blood_analysis.bpmn")
+    choreography.load_diagram_from_xml_file("../bpmn_muti/MultiSample.bpmn")
     res = method_to_extract_parallel_gateway(choreography)
