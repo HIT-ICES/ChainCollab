@@ -32,6 +32,12 @@ class EdgeType(Enum):
 class TerminalType(Enum):
     BPMNDiagram = "BPMNDiagram"
 
+class TaskLoopType(Enum):
+    NONE = "None"
+    STANDARD = "Standard"
+    MULTI_INSTANCE_PARALLEL = "MultiInstanceParallel"
+    MULTI_INSTANCE_SEQUENTIAL = "MultiInstanceSequential"
+
 
 class PropertyMeta(type):
     def __new__(cls, name, bases, attrs):
@@ -165,6 +171,8 @@ class ChoreographyTask(Element):
         "id",
         "name",
         "type",
+        "is_multi",
+        "loop_type",
         "incoming",
         "outgoing",
         "participants",
@@ -189,6 +197,8 @@ class ChoreographyTask(Element):
         participants: Tuple[str, ...] = (),
         init_participant: str = "",
         message_flows: Tuple[str, ...] = (),
+        is_multi: bool = False,
+        loop_type: str = "",
     ):
         super().__init__(graph, id, name)
         self._incoming: dict = initObjectProperties(incoming)
@@ -200,6 +210,8 @@ class ChoreographyTask(Element):
         self._message_flows: List[dict] = [
             initObjectProperties(message_flow) for message_flow in message_flows
         ]
+        self._is_multi: bool = is_multi
+        self._loop_type: str = loop_type
 
     @property
     def init_message_flow(self):

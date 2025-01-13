@@ -721,38 +721,38 @@
     }
 },
 {
-    actions: {
-        eeeee_setDMNResult_result1: assign({eeeee_result1: (context,event) => event.values.result1}),
-        eeeee_setDMNResult_result2: assign({eeeee_result2: (context,event) => event.values.result2}),
-        eeeee_setDMNResult_result3: assign({eeeee_result3: (context,event) => event.values.result3}),
-        activate_mutiparticipant1_machine_1: assign({mutiparticipant1_machine_1:true}),
-        activate_mutiparticipant1_machine_2: assign({mutiparticipant1_machine_2:true}),
-        activate_mutiparticipant1_machine_3: assign({mutiparticipant1_machine_3:true}),
-        aaaaa_LoopAdd: assign({aaaaa_loop: (context) => context.aaaaa_loop + 1}),
-        bbbbb_LoopAdd: assign({bbbbb_loop: (context) => context.bbbbb_loop + 1}),
-        activate_mutiparticipant3_machine_1: assign({mutiparticipant3_machine_1:true}),
-        activate_mutiparticipant3_machine_2: assign({mutiparticipant3_machine_2:true})
+    "actions": {
+        "eeeee_setDMNResult_result1": "assign({eeeee_result1: (context,event) => event.values.result1})",
+        "eeeee_setDMNResult_result2": "assign({eeeee_result2: (context,event) => event.values.result2})",
+        "eeeee_setDMNResult_result3": "assign({eeeee_result3: (context,event) => event.values.result3})",
+        "activate_mutiparticipant1_machine_1": "assign({mutiparticipant1_machine_1:true})",
+        "activate_mutiparticipant1_machine_2": "assign({mutiparticipant1_machine_2:true})",
+        "activate_mutiparticipant1_machine_3": "assign({mutiparticipant1_machine_3:true})",
+        "aaaaa_LoopAdd": "assign({aaaaa_loop: (context) => context.aaaaa_loop + 1})",
+        "bbbbb_LoopAdd": "assign({bbbbb_loop: (context) => context.bbbbb_loop + 1})",
+        "activate_mutiparticipant3_machine_1": "assign({mutiparticipant3_machine_1:true})",
+        "activate_mutiparticipant3_machine_2": "assign({mutiparticipant3_machine_2:true})"
     },
-    services: {},
-    guards: {
-        Gateway_111__aaaaa: (context, event) => {return context.eeeee_result1==1;},
-        Gateway_111__Name2222: (context, event) => {return context.eeeee_result1==2;},
-        Gateway_111__Gateway_222: (context, event) => {return context.eeeee_result1==3;},
-        active_mutiparticipant1_machine_1: (context, event) => {return context.mutiparticipant1_machine_1;},
-        inactive_mutiparticipant1_machine_1: (context, event) => {return !context.mutiparticipant1_machine_1;},
-        active_mutiparticipant1_machine_2: (context, event) => {return context.mutiparticipant1_machine_2;},
-        inactive_mutiparticipant1_machine_2: (context, event) => {return !context.mutiparticipant1_machine_2;},
-        active_mutiparticipant1_machine_3: (context, event) => {return context.mutiparticipant1_machine_3;},
-        inactive_mutiparticipant1_machine_3: (context, event) => {return !context.mutiparticipant1_machine_3;},
-        aaaaa_NotLoopMax: (context, event) => {return context.aaaaa_loop !== context.aaaaa_loopMax;},
-        aaaaa_LoopMax: (context, event) => {return context.aaaaa_loop === context.aaaaa_loopMax;},
-        aaaaa_LoopConditionMeet: (context, event) => {return context.eeeee_result1==4;},
-        bbbbb_NotLoopMax: (context, event) => {return context.bbbbb_loop !== context.bbbbb_loopMax;},
-        bbbbb_LoopMax: (context, event) => {return context.bbbbb_loop === context.bbbbb_loopMax;},
-        active_mutiparticipant3_machine_1: (context, event) => {return context.mutiparticipant3_machine_1;},
-        inactive_mutiparticipant3_machine_1: (context, event) => {return !context.mutiparticipant3_machine_1;},
-        active_mutiparticipant3_machine_2: (context, event) => {return context.mutiparticipant3_machine_2;},
-        inactive_mutiparticipant3_machine_2: (context, event) => {return !context.mutiparticipant3_machine_2;}
+    "services": {},
+    "guards": {
+        "Gateway_111__aaaaa": "(context, event) => {return context.eeeee_result1==1;}",
+        "Gateway_111__Name2222": "(context, event) => {return context.eeeee_result1==2;}",
+        "Gateway_111__Gateway_222": "(context, event) => {return context.eeeee_result1==3;}",
+        "active_mutiparticipant1_machine_1": "(context, event) => {return context.mutiparticipant1_machine_1;}",
+        "inactive_mutiparticipant1_machine_1": "(context, event) => {return !context.mutiparticipant1_machine_1;}",
+        "active_mutiparticipant1_machine_2": "(context, event) => {return context.mutiparticipant1_machine_2;}",
+        "inactive_mutiparticipant1_machine_2": "(context, event) => {return !context.mutiparticipant1_machine_2;}",
+        "active_mutiparticipant1_machine_3": "(context, event) => {return context.mutiparticipant1_machine_3;}",
+        "inactive_mutiparticipant1_machine_3": "(context, event) => {return !context.mutiparticipant1_machine_3;}",
+        "aaaaa_NotLoopMax": "(context, event) => {return context.aaaaa_loop !== context.aaaaa_loopMax;}",
+        "aaaaa_LoopMax": "(context, event) => {return context.aaaaa_loop === context.aaaaa_loopMax;}",
+        "aaaaa_LoopConditionMeet": "(context, event) => {return context.eeeee_result1==4;}",
+        "bbbbb_NotLoopMax": "(context, event) => {return context.bbbbb_loop !== context.bbbbb_loopMax;}",
+        "bbbbb_LoopMax": "(context, event) => {return context.bbbbb_loop === context.bbbbb_loopMax;}",
+        "active_mutiparticipant3_machine_1": "(context, event) => {return context.mutiparticipant3_machine_1;}",
+        "inactive_mutiparticipant3_machine_1": "(context, event) => {return !context.mutiparticipant3_machine_1;}",
+        "active_mutiparticipant3_machine_2": "(context, event) => {return context.mutiparticipant3_machine_2;}",
+        "inactive_mutiparticipant3_machine_2": "(context, event) => {return !context.mutiparticipant3_machine_2;}"
     },
-    delays: {}
+    "delays": {}
 }

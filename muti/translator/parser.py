@@ -9,6 +9,7 @@ from elements import (
     NodeType,
     EdgeType,
     RootType,
+    TaskLoopType,
     Participant,
     Message,
     StartEvent,
@@ -45,20 +46,15 @@ class Choreography:
         ]
 
     def query_edge_with_source_and_target(self, source_id, target_id):
-        return [
-            element
-            for element in self.edges
-            if element.source.id == source_id and element.target.id == target_id
-        ]
+        return [element for element in self.edges if element.source.id == source_id and element.target.id == target_id]
 
     def _parse_node(self, element: ET.Element):
         bpmn2prefix = "{http://www.omg.org/spec/BPMN/20100524/MODEL}"
         split_tag = element.tag.split("}")[1]
         match split_tag:
             case NodeType.PARTICIPANT.value:
-                participant_multiplicity = element.findall(
-                    f"./{bpmn2prefix}participantMultiplicity"
-                )
+                assert len(element.findall(f"./{bpmn2prefix}participantMultiplicity")) <= 1
+                participant_multiplicity = element.findall(f"./{bpmn2prefix}participantMultiplicity")
 
                 is_multi = False
                 multi_maximum = 0
@@ -66,12 +62,8 @@ class Choreography:
 
                 if participant_multiplicity:
                     is_multi = True
-                    multi_maximum = int(
-                        participant_multiplicity[0].attrib.get("maximum", 0)
-                    )
-                    multi_minimum = int(
-                        participant_multiplicity[0].attrib.get("minimum", 0)
-                    )
+                    multi_maximum = int(participant_multiplicity[0].attrib.get("maximum", 0))
+                    multi_minimum = int(participant_multiplicity[0].attrib.get("minimum", 0))
 
                 return Participant(
                     self,
@@ -83,9 +75,7 @@ class Choreography:
                 )
             case NodeType.MESSAGE.value:
                 documentation_list = element.findall(f"./{bpmn2prefix}documentation")
-                documentation = (
-                    documentation_list[0].text if documentation_list else None
-                )
+                documentation = documentation_list[0].text if documentation_list else None
                 return Message(
                     self,
                     element.attrib["id"],
@@ -95,9 +85,7 @@ class Choreography:
             case NodeType.BUSINESS_RULE_TASK.value:
                 # Parser Input & Output
                 documentation_list = element.findall(f"./{bpmn2prefix}documentation")
-                documentation = (
-                    documentation_list[0].text if documentation_list else None
-                )
+                documentation = documentation_list[0].text if documentation_list else None
                 return BusinessRuleTask(
                     self,
                     element.attrib["id"],
@@ -121,63 +109,47 @@ class Choreography:
                     incoming=element.findall(f"./{bpmn2prefix}incoming")[0].text,
                 )
             case NodeType.CHOREOGRAPHY_TASK.value:
+                is_multi = False
+                loop_type = TaskLoopType.NONE
+                if (the_type := element.attrib.get("loopType", "")) != "":
+                    is_multi = True
+                    loop_type = TaskLoopType(the_type)
+
                 return ChoreographyTask(
                     self,
                     element.attrib["id"],
                     element.attrib.get("name", ""),
                     incoming=element.findall(f"./{bpmn2prefix}incoming")[0].text,
                     outgoing=element.findall(f"./{bpmn2prefix}outgoing")[0].text,
-                    participants=[
-                        element.text
-                        for element in element.findall(f"./{bpmn2prefix}participantRef")
-                    ],
-                    message_flows=[
-                        element.text
-                        for element in element.findall(f"./{bpmn2prefix}messageFlowRef")
-                    ],
+                    participants=[element.text for element in element.findall(f"./{bpmn2prefix}participantRef")],
+                    message_flows=[element.text for element in element.findall(f"./{bpmn2prefix}messageFlowRef")],
                     init_participant=element.attrib.get("initiatingParticipantRef", ""),
+                    is_multi=is_multi,
+                    loop_type=loop_type,
                 )
             case NodeType.EXCLUSIVE_GATEWAY.value:
                 return ExclusiveGateway(
                     self,
                     element.attrib["id"],
                     element.attrib.get("name", ""),
-                    incomings=[
-                        element.text
-                        for element in element.findall(f"./{bpmn2prefix}incoming")
-                    ],
-                    outgoings=[
-                        element.text
-                        for element in element.findall(f"./{bpmn2prefix}outgoing")
-                    ],
+                    incomings=[element.text for element in element.findall(f"./{bpmn2prefix}incoming")],
+                    outgoings=[element.text for element in element.findall(f"./{bpmn2prefix}outgoing")],
                 )
             case NodeType.PARALLEL_GATEWAY.value:
                 return ParallelGateway(
                     self,
                     element.attrib["id"],
                     element.attrib.get("name", ""),
-                    incomings=[
-                        element.text
-                        for element in element.findall(f"./{bpmn2prefix}incoming")
-                    ],
-                    outgoings=[
-                        element.text
-                        for element in element.findall(f"./{bpmn2prefix}outgoing")
-                    ],
+                    incomings=[element.text for element in element.findall(f"./{bpmn2prefix}incoming")],
+                    outgoings=[element.text for element in element.findall(f"./{bpmn2prefix}outgoing")],
                 )
             case NodeType.EVENT_BASED_GATEWAY.value:
                 return EventBasedGateway(
                     self,
                     element.attrib["id"],
                     element.attrib.get("name", ""),
-                    incomings=[
-                        element.text
-                        for element in element.findall(f"./{bpmn2prefix}incoming")
-                    ],
-                    outgoings=[
-                        element.text
-                        for element in element.findall(f"./{bpmn2prefix}outgoing")
-                    ],
+                    incomings=[element.text for element in element.findall(f"./{bpmn2prefix}incoming")],
+                    outgoings=[element.text for element in element.findall(f"./{bpmn2prefix}outgoing")],
                 )
 
     def _parse_edge(self, element):
@@ -280,7 +252,6 @@ class Choreography:
         self._parse_messages(root)
         self._init_element_properties()
 
-
     def load_diagram_from_xml_file(self, file_path, target=""):
         document = ET.parse(file_path, ET.XMLParser(encoding="utf-8"))
         root = document.getroot()
@@ -291,12 +262,12 @@ class Choreography:
         self.load_from_root(root, target)
 
     @property
-    def simple_paths(self, start_id, end_id)->list[NodeType]:
+    def simple_paths(self, start_id, end_id) -> list[NodeType]:
         return nx.all_simple_paths(self.topology_graph_without_message, start_id, end_id)
-    
+
     @property
     def simple_paths_with_cycle(self, start_id, end_id):
-        simple_paths =  nx.all_simple_paths(self.topology_graph_without_message, start_id, end_id)
+        simple_paths = nx.all_simple_paths(self.topology_graph_without_message, start_id, end_id)
 
         cycles = list(nx.simple_cycles(self.topology_graph_without_message))
         paths_with_cycle = []
@@ -304,11 +275,7 @@ class Choreography:
             for cycle in cycles:
                 for index, step in enumerate(simple_path):
                     if cycle[0] == step:
-                        path_with_cycle = (
-                            simple_path.copy()[:index]
-                            + cycle
-                            + simple_path.copy()[index:]
-                        )
+                        path_with_cycle = simple_path.copy()[:index] + cycle + simple_path.copy()[index:]
                         paths_with_cycle.append(path_with_cycle)
 
         all_paths = simple_paths + paths_with_cycle

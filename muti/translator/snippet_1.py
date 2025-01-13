@@ -559,5 +559,5 @@ if __name__ == "__main__":
 
         # 保存 additionalContent 的 JSON 内容，去掉引号
         additional_content = json.dumps(xstateJSONElement.additionalContent, indent=4, ensure_ascii=False)
-        additional_content_no_quotes = additional_content.replace('"', "").replace("\\", "")
-        file.write(additional_content_no_quotes)
+        # additional_content_no_quotes = additional_content.replace('"', "").replace("\\", "")
+        file.write(additional_content)
