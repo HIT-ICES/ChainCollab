@@ -347,6 +347,66 @@ class XstateJSONElement:
         )
     
 
+    # 如果double muti: max2=0,participantName2=None 为发送方
+    def ChooseMutiParticipantMachineWithDouble(self,baseMachine,name, max, participantName,max2=0,participantName2=None,targetName=None):
+        if participantName2==None:
+            self.ChooseMutiParticipantMachine(baseMachine,name, max, participantName,targetName=None)
+            return
+        
+        elif max2 and participantName2:
+            newData = {
+                name: {
+                    "initial": name+"_toLock_"+participantName,
+                    "states": {
+                        "done":{
+                            "type":"final",
+                        }
+                    },
+                    "onDone": [],
+                },
+            }
+            self.ChooseMutiParticipantMachine(newData[name],name+"_toLock_"+participantName, max, participantName,name+"_toLock_"+participantName2)
+            
+            newData2 = {
+                name+"_toLock_"+participantName2: {
+                    "initial": "unlocked",
+                    "states": {
+                        "locked": {
+                            "type": "final",
+                        }
+                    },
+                    "onDone": [],
+                },
+            }
+            self.SetOndone(newData2[name], "done")
+            '''
+            newData3 = {
+                "unlocked": {
+                    "initial": name+"_toLock_"+participantName2+"_"+str(1),
+                    "states": {
+
+                    },
+                    "type": "parallel",
+                    "onDone": [],
+                },
+            }
+            self.SetOndone(newData3["unlocked"], "locked")
+            for index in range(1,max2+1-1):
+                self.ChooseMutiParticipantMachine(newData3["unlocked"],name+"_toLock_"+participantName2+"_"+str(index), max2, participantName2)
+            # TODO: 接收方active逻辑
+
+            
+            newData2[name]["states"].update(newData3)
+            '''
+
+
+            newData[name]["states"].update(newData2)
+            if targetName:
+                self.SetOndone(newData[name], targetName)
+            baseMachine["states"].update(newData)
+    
+
+    #这里的participantName为muti的，single的不用给
     def ChooseMutiParticipantMachine(self,baseMachine,name, max, participantName,targetName=None):
         newData = {
             name: {
