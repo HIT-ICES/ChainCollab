@@ -44,7 +44,13 @@ def method_to_extract_parallel_gateway(choreography: Choreography):
         return []
 
     def init_blank_machine():
-        return {"start_element": None, "machine_name": "", "direct_elements": [], "nested_machines": []}
+        return {
+            "start_element": None,
+            "end_element": None,
+            "machine_name": "",
+            "direct_elements": [],
+            "nested_machines": [],
+        }
 
     def single_path_logic(machine, start_element, stop_condition_func: Callable[[Element], bool]):
         cursor = start_element
@@ -97,6 +103,7 @@ def method_to_extract_parallel_gateway(choreography: Choreography):
             cursor = element
             format_print("FOR", idx, element.id, "to", end_element.id)
             single_path_logic(new_machine, cursor, lambda x: x.id == end_element.id)
+            new_machine["end_element"] = end_element.id
             outer_machine["nested_machines"].append(new_machine)
 
         format_print(f"END:handle elements between {start_element.id} and {end_element.id} ")
