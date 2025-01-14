@@ -196,9 +196,9 @@ class ChainCodeViewSet(viewsets.ViewSet):
                                     cwd = os.getcwd()
                                     print("cwd:", cwd)
                                     os.chdir(chaincode_path)
-                                    os.system(
-                                        "npm install --proxy=http://192.168.96.1:7897"
-                                    )
+                                    # os.system(
+                                    #     "npm install --proxy=http://192.168.96.1:7897"
+                                    # )
                                     found = True
                                     os.chdir(cwd)
                                     break

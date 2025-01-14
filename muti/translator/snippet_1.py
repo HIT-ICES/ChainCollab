@@ -204,7 +204,8 @@ class XstateJSONElement:
 
         # ！这里可能有拼装问题。
         if isMutiParticipant:
-            self.MutiParticipantMachine(newData[name], MutiParticipantParam["name"], MutiParticipantParam["max"], MutiParticipantParam["participantName"],MutiParticipantParam["firstTime"])
+            self.ChooseMutiParticipantMachine(newData[name], MutiParticipantParam["name"], MutiParticipantParam["max"], MutiParticipantParam["participantName"])
+            # self.MutiParticipantMachine(newData[name], MutiParticipantParam["name"], MutiParticipantParam["max"], MutiParticipantParam["participantName"],MutiParticipantParam["firstTime"])
             newData[name]["initial"] = MutiParticipantParam["name"]
 
         else:
@@ -278,7 +279,8 @@ class XstateJSONElement:
 
         if isMutiParticipant:
             for index in range(1,ParallelNum+1):
-                self.MutiParticipantMachine(newData[name], name+"_instance_"+str(index), MutiParticipantParam["max"],MutiParticipantParam["participantName"])
+                self.ChooseMutiParticipantMachine(newData[name], name+"_instance_"+str(index), MutiParticipantParam["max"],MutiParticipantParam["participantName"])
+                # self.MutiParticipantMachine(newData[name], name+"_instance_"+str(index), MutiParticipantParam["max"],MutiParticipantParam["participantName"])
             newData[name]["initial"] = name+"_instance_1"
 
         else:
@@ -307,7 +309,7 @@ class XstateJSONElement:
                                 {
                                     "target": "done",
                                     "actions": [
-                                        name + "_setDMNResult" + "_{key}".format(key=key)
+                                        {"type":name + "_setDMNResult" + "_{key}".format(key=key)}
                                         for key in DMNOutput
                                     ],
                                 },
@@ -343,12 +345,72 @@ class XstateJSONElement:
                 for key in DMNOutput
             }
         )
+    
+
+    def ChooseMutiParticipantMachine(self,baseMachine,name, max, participantName,targetName=None):
+        newData = {
+            name: {
+                "initial": "pending",
+                "states": {
+                    "pending": {
+                        "always": [
+                            {
+                                "target": name+"_firstTime",
+                                "cond": participantName+"_isNotLocked",
+                                "actions": [
+                                    {
+                                        "type": "lock_"+participantName,
+                                    }
+                                ],
+                            },
+                            {
+                                "target": name,
+                                "cond": participantName+"_isLocked",
+                                "actions": [],
+                            },
+                        ],
+                    },
+                    "done": {
+                        "type": "final",
+                    },
+                    
+                },
+                "onDone": [],
+            },
+        }
+        self.mainMachine["context"].update({participantName+"_locked": False})
+        self.additionalContent["guards"].update(
+            {
+                participantName+"_isLocked": "(context, event) => {return context."+participantName+"_locked;}",
+            }
+        )
+        self.additionalContent["guards"].update(
+            {
+                participantName+"_isNotLocked": "(context, event) => {return !context."+participantName+"_locked;}",
+            }
+        )
+        self.additionalContent["actions"].update(
+            {
+                "lock_"+participantName: "assign({"+participantName+"_locked:true})",
+            }
+        )
+        
+        #为了ondone,加一个done
+        self.MutiParticipantMachine(newData[name],name, max, participantName,False,"done")
+        self.MutiParticipantMachine(newData[name],name, max, participantName,True,"done")
+
+        if targetName:
+            self.SetOndone(newData[name], targetName)
+        baseMachine["states"].update(newData)
+
+        
+
 
 
     def MutiParticipantMachine(self,baseMachine,name, max, participantName,firstTime=False, targetName=None):
 
         newData = {
-            name: {
+            name+"_firstTime" if firstTime else name: {
                 "initial": "",
                 "states": {},
                 "onDone": [],
@@ -411,7 +473,7 @@ class XstateJSONElement:
                     },
                     }
                 )
-            newData[name]["states"].update(
+            newData[name+"_firstTime"]["states"].update(
                 {
                     "unlocked": {
                         "states": machineDict,
@@ -427,8 +489,8 @@ class XstateJSONElement:
                     }
                 }
             )
-            newData[name]["states"].update({"locked": {"type": "final"}})
-            newData[name]["initial"]="unlocked"
+            newData[name+"_firstTime"]["states"].update({"locked": {"type": "final"}})
+            newData[name+"_firstTime"]["initial"]="unlocked"
 
         else:
             for index in range(1, max + 1):
@@ -490,7 +552,7 @@ class XstateJSONElement:
             newData[name]["initial"]="machine_1"
 
         if targetName:
-            self.SetOndone(newData[name], targetName)
+            self.SetOndone(newData[name+"_firstTime"] if firstTime else newData[name], targetName)
 
         baseMachine["states"].update(newData)
 
@@ -545,12 +607,14 @@ if __name__ == "__main__":
         ],
         "Gateway_222",
     )
-    xstateJSONElement.MutiTaskLoopMachine(xstateJSONElement.mainMachine, "aaaaa", 2, "eeeee_result1==4", True, "bbbbb",{"name":"dsjhfjka","max":3,"firstTime":True,"participantName":"mutiparticipant1"})
+    xstateJSONElement.MutiTaskLoopMachine(xstateJSONElement.mainMachine, "aaaaa", 2, "eeeee_result1==4", True, "bbbbb",{"name":"dsjhfjka","max":3,"participantName":"mutiparticipant1"})
     xstateJSONElement.MutiTaskLoopMachine(xstateJSONElement.mainMachine, "bbbbb", 2, None, False, "ddddd")
-    xstateJSONElement.MutiParticipantMachine(xstateJSONElement.mainMachine,"ddddd", 2, "mutiparticipant3", True, "kkkkk")
-    xstateJSONElement.MutiParticipantMachine(xstateJSONElement.mainMachine,"kkkkk", 2, "mutiparticipant3",False, "lllll")
+    #xstateJSONElement.MutiParticipantMachine(xstateJSONElement.mainMachine,"ddddd", 2, "mutiparticipant3", True, "kkkkk")
+    #xstateJSONElement.MutiParticipantMachine(xstateJSONElement.mainMachine,"ddddd", 2, "mutiparticipant3", False, "kkkkk")
+    xstateJSONElement.ChooseMutiParticipantMachine(xstateJSONElement.mainMachine,"ddddd", 2, "mutiparticipant3", "kkkkk")
+    xstateJSONElement.ChooseMutiParticipantMachine(xstateJSONElement.mainMachine,"kkkkk", 2, "mutiparticipant3", "lllll")
     xstateJSONElement.MutiTaskPallelMachine(xstateJSONElement.mainMachine,"lllll", 3, False, "qqqqq")
-    xstateJSONElement.MutiTaskPallelMachine(xstateJSONElement.mainMachine,"qqqqq", 3, False, "end",{"name":"dsjhfjka","max":3,"participantName":"mutiparticipant3"})
+    xstateJSONElement.MutiTaskPallelMachine(xstateJSONElement.mainMachine,"qqqqq", 3, True, "end",{"name":"sdafsdfdd","max":3,"participantName":"mutiparticipant3"})
 
     with open('output.txt', 'w', encoding='utf-8') as file:
         # 保存 mainMachine 的 JSON 内容
@@ -559,5 +623,5 @@ if __name__ == "__main__":
 
         # 保存 additionalContent 的 JSON 内容，去掉引号
         additional_content = json.dumps(xstateJSONElement.additionalContent, indent=4, ensure_ascii=False)
-        additional_content_no_quotes = additional_content.replace('"', "").replace("\\", "")
-        file.write(additional_content_no_quotes)
+        additional_content = additional_content.replace('"', "").replace("\\", "")
+        file.write(additional_content)
