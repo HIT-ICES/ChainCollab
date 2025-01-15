@@ -1,22 +1,29 @@
 '''
 1.提取所有元素的重要信息,并使用写好的Parallel算法处理成层次结构
-    {
+dataMap={
+    "element_id":{
         "name":None,
         "targetName":None,
         "type":None,
         "params":{
+            "type":{
+                "is_mutiparticipant":False,
+                "is_mutitask_loop":False,
+                "is_mutitask_loop_condition":False,
+                "is_mutitask_parallel":False
+            },
             "mutiParticipant":{
                 "max":3,
                 "mutiparticipantName":"aaa",
-            }
+            },
             "mutiTask":{
                 "loopMax":3,
                 "LoopConditionExpression":"aaa",
                 "ParallelNum":3
-            }
+            },
             "DMN":{
                 "DMNOutputNameList":[]
-            }
+            },
             "ExclusiveGateway":{
                 "targetList":[
                     {
@@ -24,7 +31,7 @@
                         "condition":"aaa"
                     }
                 ]
-            }
+            },
             "EventGateway":{
                 "targetList":[
                     {
@@ -35,6 +42,17 @@
             }
         }
     }
+    "parallelGateway_next":{
+            "parallGatewat_end_id":"target_id"
+        }
+    "start_event":{
+        "element_id":"target_id"
+    }
+    "end_event":[
+        "element_id1",
+        "element_id2"
+    ]
+}
    
 2.根据 
      1.层次结构
@@ -95,6 +113,12 @@ def extract_element_info(element: Element):
         metaData["targetName"] = element.outgoing.target.id
     
 
+    if element.type==NodeType.END_EVENT:
+        return element.id
+    
+    if element.type==NodeType.START_EVENT:
+        return {element.id:element.outgoing.target.id}
+
     #处理排他网关
     if element.type==NodeType.EXCLUSIVE_GATEWAY:
         metaData["params"]["ExclusiveGateway"]["targetList"] = [{"targetName":edge.target.id,"condition":"edge.condition"} for edge in element.outgoings]
@@ -154,14 +178,6 @@ def extract_element_info(element: Element):
 
         return [metaData1,metaData2]
 
-        
-
-
-    
-
-
-    #TODO:根据类型填入信息
-
     return metaData
 
 
@@ -181,20 +197,22 @@ def get_element_machineInfo(choreography:Choreography):
     for element in EventBasedGateways:
         dataMap[element.id] = extract_element_info(element)
 
-    endEvents = choreography.query_element_with_type(NodeType.END_EVENT)
-    for element in endEvents:
-        dataMap[element.id] = extract_element_info(element)
-
-    startEvent = choreography.query_element_with_type(NodeType.START_EVENT)[0]
-    dataMap[startEvent.id] = extract_element_info(startEvent)
-
     businessRules = choreography.query_element_with_type(NodeType.BUSINESS_RULE_TASK)
     for element in businessRules:
         dataMap[element.id] = extract_element_info(element)
 
     ParallelGateways = choreography.query_element_with_type(NodeType.PARALLEL_GATEWAY)
-    for element in ExclusiveGateways:
-        dataMap["_next"][element.id] = extract_element_info(element)
+    for element in ParallelGateways:
+        dataMap["parallelGateway_next"][element.id] = extract_element_info(element)
+
+    
+
+    endEvents = choreography.query_element_with_type(NodeType.END_EVENT)
+    for element in endEvents:
+        dataMap["end_event"].append(extract_element_info(element))
+
+    startEvent = choreography.query_element_with_type(NodeType.START_EVENT)[0]
+    dataMap["start_event"] = extract_element_info(startEvent)
     
 
 
@@ -205,22 +223,21 @@ def get_element_machineInfo(choreography:Choreography):
     return dataMap
 
 
-def DFS_translate(tree, currentMachine,dataMap,mainMachine,addtionalContent,name,endName,xstateJSONElement):
-
+def DFS_translate(tree, currentMachine,dataMap,name,endName,xstateJSONElement):
     if "Fixed" in name:
         currentMachine["type"] = "parallel"
-        xstateJSONElement.SetOndone(currentMachine,dataMap["_next"][endName])
+        xstateJSONElement.SetOndone(currentMachine,dataMap["parallelGateway_next"][endName])
 
     for node in tree["direct_elements"]:
         if node in dataMap.keys():
-            addMachine(currentMachine, dataMap[node],mainMachine,addtionalContent,xstateJSONElement)
+            addMachine(currentMachine, dataMap[node],xstateJSONElement)
 
     for branch in tree["nested_machines"]:
         childrenName = "Fixed_"+branch["start_element"]+"_TO_"+ branch["end_element"]       
-        DFS_translate(branch, currentMachine["states"][childrenName], dataMap,mainMachine,addtionalContent,childrenName,branch["end_element"],xstateJSONElement)
+        DFS_translate(branch, currentMachine["states"][childrenName], dataMap,childrenName,branch["end_element"],xstateJSONElement)
    
         
-def addMachine(currentMachine, data,mainMachine,addtionalContent,xstateJSONElement):
+def addMachine(currentMachine, data,xstateJSONElement):
     match data["type"]:
         case NodeType.EXCLUSIVE_GATEWAY.value:
             xstateJSONElement.ExclusiveGatewayMachine(currentMachine,data["params"]["ExclusiveGateway"]["targetList"],data["name"])
@@ -231,77 +248,56 @@ def addMachine(currentMachine, data,mainMachine,addtionalContent,xstateJSONEleme
         case NodeType.CHOREOGRAPHY_TASK.value:
             if data["params"]["type"]["is_mutiparticipant"]:
                 if data["params"]["type"]["is_mutitask_loop_condition"]:
-                    xstateJSONElement
+                    xstateJSONElement.MutiTaskLoopMachine(currentMachine, data["name"], data["params"]["mutiTask"]["loopMax"], data["params"]["mutiTask"]["LoopConditionExpression"], True, data["targetName"],{"max":data["params"]["mutiParticipant"]["max"],"participantName":data["params"]["mutiParticipant"]["mutiparticipantName"]})
                 elif data["params"]["type"]["is_mutitask_loop"]:
-                    xstateJSONElement
+                    xstateJSONElement.MutiTaskLoopMachine(currentMachine, data["name"], data["params"]["mutiTask"]["loopMax"], None, True, data["targetName"],{"max":data["params"]["mutiParticipant"]["max"],"participantName":data["params"]["mutiParticipant"]["mutiparticipantName"]})
                 elif data["params"]["type"]["is_mutitask_parallel"]:
-                    xstateJSONElement
+                    xstateJSONElement.MutiTaskPallelMachine(currentMachine,data["name"], data["params"]["mutiParticipant"]["max"], True, data["targetName"],{"max":data["params"]["mutiParticipant"]["max"],"participantName":data["params"]["mutiParticipant"]["mutiparticipantName"]})
                 else:
-                    xstateJSONElement
+                    xstateJSONElement.ChooseMutiParticipantMachine(currentMachine, data["name"], data["params"]["mutiParticipant"]["max"], data["params"]["mutiParticipant"]["mutiparticipantName"], data["targetName"])
             else:
                 if data["params"]["type"]["is_mutitask_loop_condition"]:
-                    xstateJSONElement
+                    xstateJSONElement.MutiTaskLoopMachine(currentMachine, data["name"], data["params"]["mutiTask"]["loopMax"],  data["params"]["mutiTask"]["LoopConditionExpression"], False, data["targetName"])
                 elif data["params"]["type"]["is_mutitask_loop"]:
-                    xstateJSONElement
+                    xstateJSONElement.MutiTaskLoopMachine(currentMachine, data["name"], data["params"]["mutiTask"]["loopMax"], None, False, data["targetName"])
                 elif data["params"]["type"]["is_mutitask_parallel"]:
-                    xstateJSONElement
+                    xstateJSONElement.MutiTaskPallelMachine(currentMachine,data["name"], data["params"]["mutiTask"]["ParallelNum"], False, data["targetName"])
                 else:
-                    xstateJSONElement
+                    xstateJSONElement.singleMessageMachine(currentMachine, data["name"], data["targetName"])
         case _:
+            print("error")
             pass
            
 
 
-def translate_bpmn2json():
+def translate_bpmn2json(choreography_id,file):
     choreography = Choreography()
-    choreography.load_diagram_from_xml_file("../bpmn_muti/Blood_analysis.bpmn")
+    choreography.load_diagram_from_xml_file(file)
     dataMap = get_element_machineInfo(choreography)
     tree = method_to_extract_parallel_gateway(choreography)
     xstateJSONElement = XstateJSONElement()
-
-    # TODO:
-    xstateJSONElement.initMainMachine()
-    DFS_translate()
+    xstateJSONElement.initMainMachine(choreography_id, dataMap["start_event"].keys()[0],dataMap["start_event"][dataMap["start_event"].keys()[0]],dataMap["end_event"])
+    DFS_translate(tree, xstateJSONElement.mainMachine,dataMap,choreography_id,None,xstateJSONElement)
 
     print(xstateJSONElement.additionalContent)
     print(xstateJSONElement.mainMachine)
     
-   
-
 
 
 if __name__ == "__main__":
-    # translate_bpmn2json()
+    translate_bpmn2json("Choreography_hsdkfjhk","../bpmn_muti/Blood_analysis.bpmn")
 
+
+
+
+
+    """
     choreography = Choreography()
     choreography.load_diagram_from_xml_file("../bpmn_muti/Blood_analysis.bpmn")
-
     element = choreography.query_element_with_type(NodeType.PARALLEL_GATEWAY)[0]
     print(element.outgoings[1].id)
-
-
     data={
         "sss":1
     }
     print("sss" in data.keys())
-
-    if "sss" in data.keys():
-        print("AA")
-    {
-        "startevent":None,
-        "ParallelGateway1 TO ParallelGateway2":{
-            "task1(message下同) TO task2":{
-                "task1":None,
-                "task2":None,
-            },
-            "task1 TO task2":{
-                "task3":None,
-                "task4":None
-            }
-        },
-        "task5":None,
-        "DMN1":None,
-        "ExclusiveGateway1":None,
-        "task6":None,
-        "endevent":None
-    }
+    """

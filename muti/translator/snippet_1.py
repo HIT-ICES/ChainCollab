@@ -31,7 +31,7 @@ class XstateJSONElement:
             "delays": {},
         }
 
-    def initMainMachine(self,id, startEventName,targetName,endEventName):
+    def initMainMachine(self,id, startEventName,targetName,endEventNameList):
         self.mainMachine["id"] = id
         self.mainMachine["initial"] = startEventName
         self.mainMachine["states"].update({
@@ -42,11 +42,12 @@ class XstateJSONElement:
                 },
             }
         })
-        self.mainMachine["states"].update({
-            endEventName: {
-                "type": "final",
-            }
-        })
+        for endEventName in endEventNameList:
+            self.mainMachine["states"].update({
+                endEventName: {
+                    "type": "final",
+                }
+            })
         
         
 
@@ -204,9 +205,9 @@ class XstateJSONElement:
 
         # ！这里可能有拼装问题。
         if isMutiParticipant:
-            self.ChooseMutiParticipantMachine(newData[name], MutiParticipantParam["name"], MutiParticipantParam["max"], MutiParticipantParam["participantName"])
+            self.ChooseMutiParticipantMachine(newData[name], name+"_instance", MutiParticipantParam["max"], MutiParticipantParam["participantName"])
             # self.MutiParticipantMachine(newData[name], MutiParticipantParam["name"], MutiParticipantParam["max"], MutiParticipantParam["participantName"],MutiParticipantParam["firstTime"])
-            newData[name]["initial"] = MutiParticipantParam["name"]
+            newData[name]["initial"] = name+"_instance"
 
         else:
             self.singleMessageMachine(newData[name], name+"_instance")
@@ -642,7 +643,7 @@ class XstateJSONElement:
     
 if __name__ == "__main__":
     xstateJSONElement = XstateJSONElement()
-    xstateJSONElement.initMainMachine("supplypaper", "start", "Name1111", "end")
+    xstateJSONElement.initMainMachine("supplypaper", "start", "Name1111", ["end"])
 
     xstateJSONElement.singleMessageMachine(xstateJSONElement.mainMachine, "Name1111", "Name2222")
     xstateJSONElement.singleMessageMachine(xstateJSONElement.mainMachine, "Name2222", "eeeee")
@@ -667,14 +668,14 @@ if __name__ == "__main__":
         ],
         "Gateway_222",
     )
-    xstateJSONElement.MutiTaskLoopMachine(xstateJSONElement.mainMachine, "aaaaa", 2, "eeeee_result1==4", True, "bbbbb",{"name":"dsjhfjka","max":3,"participantName":"mutiparticipant1"})
+    xstateJSONElement.MutiTaskLoopMachine(xstateJSONElement.mainMachine, "aaaaa", 2, "eeeee_result1==4", True, "bbbbb",{"max":3,"participantName":"mutiparticipant1"})
     xstateJSONElement.MutiTaskLoopMachine(xstateJSONElement.mainMachine, "bbbbb", 2, None, False, "ddddd")
     #xstateJSONElement.MutiParticipantMachine(xstateJSONElement.mainMachine,"ddddd", 2, "mutiparticipant3", True, "kkkkk")
     #xstateJSONElement.MutiParticipantMachine(xstateJSONElement.mainMachine,"ddddd", 2, "mutiparticipant3", False, "kkkkk")
     xstateJSONElement.ChooseMutiParticipantMachine(xstateJSONElement.mainMachine,"ddddd", 2, "mutiparticipant3", "kkkkk")
     xstateJSONElement.ChooseMutiParticipantMachine(xstateJSONElement.mainMachine,"kkkkk", 2, "mutiparticipant3", "lllll")
     xstateJSONElement.MutiTaskPallelMachine(xstateJSONElement.mainMachine,"lllll", 3, False, "qqqqq")
-    xstateJSONElement.MutiTaskPallelMachine(xstateJSONElement.mainMachine,"qqqqq", 3, True, "end",{"name":"sdafsdfdd","max":3,"participantName":"mutiparticipant3"})
+    xstateJSONElement.MutiTaskPallelMachine(xstateJSONElement.mainMachine,"qqqqq", 3, True, "end",{"max":3,"participantName":"mutiparticipant3"})
 
     with open('output.txt', 'w', encoding='utf-8') as file:
         # 保存 mainMachine 的 JSON 内容
