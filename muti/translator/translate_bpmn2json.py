@@ -73,7 +73,11 @@ dataMap={
 '''
 
 
+# 1.gateway对
+
+
 from enum import Enum
+import json
 from snippet_1 import XstateJSONElement
 
 from parser import Choreography
@@ -92,10 +96,26 @@ from elements import (
 from ParallelGateway import method_to_extract_parallel_gateway
 
 
+def handle_targetName(flowElement,pairs):
+    # 处理后接choreographyTask
+    if flowElement.target.type==NodeType.CHOREOGRAPHY_TASK:
+        if flowElement.target.init_participant.id == flowElement.target.message_flows[0].source.id:
+            return flowElement.target.message_flows[0].message.id
+        else:
+            return flowElement.target.message_flows[1].message.id
+    #处理后接gatewayMachine
+    if flowElement.target.type==NodeType.PARALLEL_GATEWAY:
+        for pair in pairs:
+            if pair.find(flowElement.target.id) != -1:
+                return pair
+    
+               
+    return flowElement.target.id
 
-def extract_element_info(element: Element):
+
+def extract_element_info(element: Element,pairs):
     metaData = {
-        "type": element.type.value,
+        "type": element.type,
         "name": element.id,
         "targetName": None,
         "params": {
@@ -104,29 +124,51 @@ def extract_element_info(element: Element):
                 "is_mutitask_loop":False,
                 "is_mutitask_loop_condition":False,
                 "is_mutitask_parallel":False
-            }
+            },
+            "mutiParticipant":{
+                "max":None,
+                "mutiparticipantName":None,
+            },
+            "mutiTask":{
+                "loopMax":None,
+                "LoopConditionExpression":None,
+                "ParallelNum":None
+            },
+            "DMN":{
+                "DMNOutputNameList":[]
+            },
+            "ExclusiveGateway":{
+                "targetList":[]
+            },
+            "EventGateway":{
+                "targetList":[]
+            },
+            "ChoreographyTaskName":None
         }
     }
     if element.type==NodeType.END_EVENT or element.type==NodeType.PARALLEL_GATEWAY or element.type==NodeType.EXCLUSIVE_GATEWAY or element.type==NodeType.EVENT_BASED_GATEWAY:
         metaData["targetName"] =None
+    #处理支线结束节点
+    elif element.outgoing.target.type==NodeType.PARALLEL_GATEWAY and len(element.outgoing.target.outgoings)==1:
+        metaData["targetName"] = "done"
     else:
-        metaData["targetName"] = element.outgoing.target.id
+        metaData["targetName"] = handle_targetName(element.outgoing,pairs)
     
 
     if element.type==NodeType.END_EVENT:
         return element.id
     
     if element.type==NodeType.START_EVENT:
-        return {element.id:element.outgoing.target.id}
+        return [element.id,handle_targetName(element.outgoing,pairs)]
 
     #处理排他网关
     if element.type==NodeType.EXCLUSIVE_GATEWAY:
-        metaData["params"]["ExclusiveGateway"]["targetList"] = [{"targetName":edge.target.id,"condition":"edge.condition"} for edge in element.outgoings]
+        metaData["params"]["ExclusiveGateway"]["targetList"] = [{"targetName":handle_targetName(edge,pairs),"condition":"edge.condition"} for edge in element.outgoings]
         return metaData
 
     #处理事件网关
     if element.type==NodeType.EXCLUSIVE_GATEWAY:
-        metaData["params"]["EventGateway"]["targetList"] = [{"targetName":edge.target.id,"event":edge.id} for edge in element.outgoings]
+        metaData["params"]["EventGateway"]["targetList"] = [{"targetName":handle_targetName(edge,pairs),"event":edge.id} for edge in element.outgoings]
         return metaData
     #处理DMN
     if element.type==NodeType.BUSINESS_RULE_TASK:
@@ -134,11 +176,11 @@ def extract_element_info(element: Element):
         return metaData
     
     if element.type==NodeType.PARALLEL_GATEWAY:
-        return element.outgoings[0].target.id
+        return [handle_targetName(edge,pairs) for edge in element.outgoings]
 
     #处理task
     if element.type==NodeType.CHOREOGRAPHY_TASK:
-        metaData["type"] = "message"
+        metaData["params"]["ChoreographyTaskName"] = element.id
         if hasattr(element,"loop_max"):
             metaData["params"]["mutiTask"]["loopMax"] = element.loop_max
             metaData["params"]["type"]["is_mutitask_loop"] = True
@@ -151,101 +193,161 @@ def extract_element_info(element: Element):
         
         metaData1 = deepcopy(metaData)
         metaData2 = deepcopy(metaData)
+        if len(element.message_flows)==2:
+            if element.init_participant.id == element.message_flows[0].source.id:
+                metaData1["name"] = element.message_flows[0].message.id
+                metaData2["name"] = element.message_flows[1].message.id
+            else:
+                metaData1["name"] = element.message_flows[1].message.id
+                metaData2["name"] = element.message_flows[0].message.id
 
-        if element.init_participant.id == element.message_flows[0].source.id:
+            if hasattr(element,"participants"):
+                #未考虑双muti
+                if element.participants[0].is_multi:
+                    metaData1["params"]["mutiParticipant"]["max"] = element.participants[0].multi_maximum
+                    metaData1["params"]["mutiParticipant"]["mutiparticipantName"] = element.participants[0].id
+                    metaData1["params"]["type"]["is_mutiparticipant"] = True
+                    metaData2["params"]["mutiParticipant"]["max"] = element.participants[0].multi_maximum
+                    metaData2["params"]["mutiParticipant"]["mutiparticipantName"] = element.participants[0].id
+                    metaData2["params"]["type"]["is_mutiparticipant"] = True
+                if element.participants[1].is_multi:
+                    metaData1["params"]["mutiParticipant"]["max"] = element.participants[1].multi_maximum
+                    metaData1["params"]["mutiParticipant"]["mutiparticipantName"] = element.participants[1].id
+                    metaData1["params"]["type"]["is_mutiparticipant"] = True
+                    metaData2["params"]["mutiParticipant"]["max"] = element.participants[1].multi_maximum
+                    metaData2["params"]["mutiParticipant"]["mutiparticipantName"] = element.participants[1].id
+                    metaData2["params"]["type"]["is_mutiparticipant"] = True
+
+            return [metaData1,metaData2]
+        elif len(element.message_flows)==1:
             metaData1["name"] = element.message_flows[0].message.id
-            metaData2["name"] = element.message_flows[1].message.id
-        else:
-            metaData1["name"] = element.message_flows[1].message.id
-            metaData2["name"] = element.message_flows[0].message.id
-
-        if hasattr(element,"participants"):
-            #未考虑双muti
-            if element.participants[0].is_multi:
-                metaData1["params"]["mutiParticipant"]["max"] = element.participants[0].multi_maximum
-                metaData1["params"]["mutiParticipant"]["mutiparticipantName"] = element.participants[0].multi_maximum
-                metaData1["params"]["type"]["is_mutiparticipant"] = True
-                metaData2["params"]["mutiParticipant"]["max"] = element.participants[0].multi_maximum
-                metaData2["params"]["mutiParticipant"]["mutiparticipantName"] = element.participants[0].multi_maximum
-                metaData2["params"]["type"]["is_mutiparticipant"] = True
-            if element.participants[1].is_multi:
-                metaData1["params"]["mutiParticipant"]["max"] = element.participants[1].multi_maximum
-                metaData1["params"]["mutiParticipant"]["mutiparticipantName"] = element.participants[1].multi_maximum
-                metaData1["params"]["type"]["is_mutiparticipant"] = True
-                metaData2["params"]["mutiParticipant"]["max"] = element.participants[1].multi_maximum
-                metaData2["params"]["mutiParticipant"]["mutiparticipantName"] = element.participants[1].multi_maximum
-                metaData2["params"]["type"]["is_mutiparticipant"] = True
-
-        return [metaData1,metaData2]
+            if hasattr(element,"participants"):
+                #未考虑双muti
+                if element.participants[0].is_multi:
+                    metaData1["params"]["mutiParticipant"]["max"] = element.participants[0].multi_maximum
+                    metaData1["params"]["mutiParticipant"]["mutiparticipantName"] = element.participants[0].id
+                    metaData1["params"]["type"]["is_mutiparticipant"] = True
+                if element.participants[1].is_multi:
+                    metaData1["params"]["mutiParticipant"]["max"] = element.participants[1].multi_maximum
+                    metaData1["params"]["mutiParticipant"]["mutiparticipantName"] = element.participants[1].id
+                    metaData1["params"]["type"]["is_mutiparticipant"] = True
+            return [metaData1]
 
     return metaData
 
 
-def get_element_machineInfo(choreography:Choreography):
+def get_element_machineInfo(choreography:Choreography,pairs):
     
-    dataMap = {}
+    dataMap = {
+        "parallelGateway_next":{},
+        "start_event":[],
+        "end_event":[]
+    }
 
     choreographyTasks = choreography.query_element_with_type(NodeType.CHOREOGRAPHY_TASK)
     for element in choreographyTasks:
-        ordered_messages = extract_element_info(element)
-        dataMap[element.id] = ordered_messages
+        dataMap[element.id]=[]
+        ordered_messages = extract_element_info(element,pairs)
+        for message in ordered_messages:
+            dataMap[element.id].append(message)
     
     ExclusiveGateways = choreography.query_element_with_type(NodeType.EXCLUSIVE_GATEWAY)
     EventBasedGateways = choreography.query_element_with_type(NodeType.EVENT_BASED_GATEWAY)
     for element in ExclusiveGateways:
-        dataMap[element.id] = extract_element_info(element)
+        dataMap[element.id] = extract_element_info(element,pairs)
     for element in EventBasedGateways:
-        dataMap[element.id] = extract_element_info(element)
+        dataMap[element.id] = extract_element_info(element,pairs)
 
     businessRules = choreography.query_element_with_type(NodeType.BUSINESS_RULE_TASK)
     for element in businessRules:
-        dataMap[element.id] = extract_element_info(element)
+        dataMap[element.id] = extract_element_info(element,pairs)
 
     ParallelGateways = choreography.query_element_with_type(NodeType.PARALLEL_GATEWAY)
     for element in ParallelGateways:
-        dataMap["parallelGateway_next"][element.id] = extract_element_info(element)
+        dataMap["parallelGateway_next"][element.id] = extract_element_info(element,pairs)
 
     
 
     endEvents = choreography.query_element_with_type(NodeType.END_EVENT)
     for element in endEvents:
-        dataMap["end_event"].append(extract_element_info(element))
+        dataMap["end_event"].append(extract_element_info(element,pairs))
 
     startEvent = choreography.query_element_with_type(NodeType.START_EVENT)[0]
-    dataMap["start_event"] = extract_element_info(startEvent)
+    dataMap["start_event"].extend(extract_element_info(startEvent,pairs))
+
     
 
 
 
-    for key, data in dataMap.items():
-        print({key: data})
+    # for key, data in dataMap.items():
+    #     print({key: data})
     
     return dataMap
 
 
-def DFS_translate(tree, currentMachine,dataMap,name,endName,xstateJSONElement):
-    if "Fixed" in name:
-        currentMachine["type"] = "parallel"
-        xstateJSONElement.SetOndone(currentMachine,dataMap["parallelGateway_next"][endName])
-
+def DFS_translate(tree, currentMachine,dataMap,xstateJSONElement):
+ 
     for node in tree["direct_elements"]:
-        if node in dataMap.keys():
-            addMachine(currentMachine, dataMap[node],xstateJSONElement)
+        if node in list(dataMap.keys()):
+            if isinstance(dataMap[node],list):
+                for message in dataMap[node]:
+                    addMachine(currentMachine, message,xstateJSONElement)
+            else:
+                addMachine(currentMachine, dataMap[node],xstateJSONElement)
 
     for branch in tree["nested_machines"]:
-        childrenName = "Fixed_"+branch["start_element"]+"_TO_"+ branch["end_element"]       
-        DFS_translate(branch, currentMachine["states"][childrenName], dataMap,childrenName,branch["end_element"],xstateJSONElement)
+        childrenName = branch["start_element"]+"_TO_"+ branch["end_element"]
+        
+        currentMachine["states"][childrenName] = {
+            "initial": "",
+            "states": {},
+            "onDone": [],
+            "type": "parallel",
+        }
+        xstateJSONElement.SetOndone(currentMachine["states"][childrenName],dataMap["parallelGateway_next"][branch["end_element"]][0])
+
+    for branch in tree["nested_machines"]:
+        childrenName = branch["start_element"]+"_TO_"+ branch["end_element"]
+        initElement = ""
+        for Element in branch["direct_elements"]:
+            for nextElement in dataMap["parallelGateway_next"][branch["start_element"]]:
+                #如果initElement是message
+                if isinstance(dataMap[Element],list):
+                    for messageElement in dataMap[Element]:
+                        if nextElement==messageElement["name"]:
+                            initElement = nextElement
+                else: 
+                    if nextElement==dataMap[Element]["name"]:
+                        #如果initElement是并行网关状态机
+                        if dataMap[Element]["type"] == NodeType.PARALLEL_GATEWAY:
+                            initElement = "f(pair)"
+                        initElement = nextElement
+        currentMachine["states"][childrenName]["states"][branch["machine_name"]]={
+            "initial": initElement,
+            "states": {
+                "done":{
+                    "type":"final"
+                }
+            },
+            "onDone": []
+        }
+
+    for branch in tree["nested_machines"]:
+        childrenName = branch["start_element"]+"_TO_"+ branch["end_element"]
+        # xstateJSONElement.SetOndone(currentMachine["states"][childrenName],dataMap["parallelGateway_next"][branch["end_element"]])       
+        DFS_translate(branch, currentMachine["states"][childrenName]["states"][branch["machine_name"]], dataMap,xstateJSONElement)
    
         
 def addMachine(currentMachine, data,xstateJSONElement):
     match data["type"]:
-        case NodeType.EXCLUSIVE_GATEWAY.value:
+        case NodeType.EXCLUSIVE_GATEWAY:
             xstateJSONElement.ExclusiveGatewayMachine(currentMachine,data["params"]["ExclusiveGateway"]["targetList"],data["name"])
-        case NodeType.EVENT_BASED_GATEWAY.value:
+        case NodeType.EVENT_BASED_GATEWAY:
             xstateJSONElement.EventGatewayMachine(currentMachine,data["params"]["EventGateway"]["targetList"],data["name"])
-        case NodeType.BUSINESS_RULE_TASK.value:
+        case NodeType.BUSINESS_RULE_TASK:
             xstateJSONElement.DMNMachine(currentMachine,data["name"],["result1"],data["targetName"]) #暂时一个output
-        case NodeType.CHOREOGRAPHY_TASK.value:
+        case NodeType.CHOREOGRAPHY_TASK:
+            print(data["name"])
             if data["params"]["type"]["is_mutiparticipant"]:
                 if data["params"]["type"]["is_mutitask_loop_condition"]:
                     xstateJSONElement.MutiTaskLoopMachine(currentMachine, data["name"], data["params"]["mutiTask"]["loopMax"], data["params"]["mutiTask"]["LoopConditionExpression"], True, data["targetName"],{"max":data["params"]["mutiParticipant"]["max"],"participantName":data["params"]["mutiParticipant"]["mutiparticipantName"]})
@@ -273,19 +375,33 @@ def addMachine(currentMachine, data,xstateJSONElement):
 def translate_bpmn2json(choreography_id,file):
     choreography = Choreography()
     choreography.load_diagram_from_xml_file(file)
-    dataMap = get_element_machineInfo(choreography)
-    tree = method_to_extract_parallel_gateway(choreography)
-    xstateJSONElement = XstateJSONElement()
-    xstateJSONElement.initMainMachine(choreography_id, dataMap["start_event"].keys()[0],dataMap["start_event"][dataMap["start_event"].keys()[0]],dataMap["end_event"])
-    DFS_translate(tree, xstateJSONElement.mainMachine,dataMap,choreography_id,None,xstateJSONElement)
+    
+    method_to_extract_parallel_gateway(choreography)
+    with open("res.json", 'r', encoding='utf-8') as file:
+        tree = json.load(file)
+    ParallelGateway_pairs = tree["parallel_gateway_pairs"]
 
-    print(xstateJSONElement.additionalContent)
-    print(xstateJSONElement.mainMachine)
+    dataMap = get_element_machineInfo(choreography,ParallelGateway_pairs)
+
+    print(dataMap)
+
+    
+    xstateJSONElement = XstateJSONElement()
+    xstateJSONElement.initMainMachine(choreography_id, dataMap["start_event"][0],dataMap["start_event"][1],dataMap["end_event"])
+    DFS_translate(tree, xstateJSONElement.mainMachine,dataMap,xstateJSONElement)
+
+
+
+    with open("mainMachine.json", "w", encoding="utf-8") as f:
+        json.dump(xstateJSONElement.mainMachine, f)
+        
+    with open("additionalContent.json", "w", encoding="utf-8") as f:
+        json.dump(xstateJSONElement.additionalContent, f)
     
 
 
 if __name__ == "__main__":
-    translate_bpmn2json("Choreography_hsdkfjhk","../bpmn_muti/Blood_analysis.bpmn")
+    translate_bpmn2json("Choreography_hsdkfjhk","../bpmn_muti/supplypaper_new.bpmn")
 
 
 
@@ -294,10 +410,9 @@ if __name__ == "__main__":
     """
     choreography = Choreography()
     choreography.load_diagram_from_xml_file("../bpmn_muti/Blood_analysis.bpmn")
-    element = choreography.query_element_with_type(NodeType.PARALLEL_GATEWAY)[0]
-    print(element.outgoings[1].id)
-    data={
-        "sss":1
-    }
-    print("sss" in data.keys())
+    element = choreography.query_element_with_type(NodeType.CHOREOGRAPHY_TASK)[0]
+    print(element.outgoing.target.type)
     """
+
+
+    

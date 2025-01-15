@@ -1,0 +1,278 @@
+{
+    "context": {
+        "Activity_1mj4mr7_result1": null
+    },
+    "id": "Choreography_hsdkfjhk",
+    "initial": "StartEvent_0m7hz56",
+    "states": {
+        "StartEvent_0m7hz56": {
+            "always": {
+                "target": "ParallelGateway_1pgjqtw_TO_Gateway_1m6dgym",
+                "actions": []
+            }
+        },
+        "EndEvent_110myff": {
+            "type": "final"
+        },
+        "Message_1rqbibd": {
+            "initial": "enable",
+            "states": {
+                "enable": {
+                    "on": {
+                        "send_Message_1rqbibd": [
+                            {
+                                "target": "wait for confirm",
+                                "actions": []
+                            }
+                        ]
+                    }
+                },
+                "wait for confirm": {
+                    "on": {
+                        "confirm_Message_1rqbibd": [
+                            {
+                                "target": "done",
+                                "actions": []
+                            }
+                        ]
+                    }
+                },
+                "done": {
+                    "type": "final"
+                }
+            },
+            "onDone": {
+                "target": "Activity_1mj4mr7",
+                "actions": []
+            }
+        },
+        "Activity_1mj4mr7": {
+            "initial": "enable",
+            "states": {
+                "enable": {
+                    "on": {
+                        "execute_DMN_Activity_1mj4mr7": [
+                            {
+                                "target": "done",
+                                "actions": [
+                                    {
+                                        "type": "Activity_1mj4mr7_setDMNResult_result1"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                "done": {
+                    "type": "final"
+                }
+            },
+            "onDone": {
+                "target": "Gateway_0o8snyv",
+                "actions": []
+            }
+        },
+        "Gateway_0o8snyv": {
+            "always": [
+                {
+                    "target": "EndEvent_110myff",
+                    "cond": "Gateway_0o8snyv__EndEvent_110myff",
+                    "actions": []
+                },
+                {
+                    "target": "Message_0gd0z61",
+                    "cond": "Gateway_0o8snyv__Message_0gd0z61",
+                    "actions": []
+                }
+            ]
+        },
+        "Message_0gd0z61": {
+            "initial": "enable",
+            "states": {
+                "enable": {
+                    "on": {
+                        "send_Message_0gd0z61": [
+                            {
+                                "target": "wait for confirm",
+                                "actions": []
+                            }
+                        ]
+                    }
+                },
+                "wait for confirm": {
+                    "on": {
+                        "confirm_Message_0gd0z61": [
+                            {
+                                "target": "done",
+                                "actions": []
+                            }
+                        ]
+                    }
+                },
+                "done": {
+                    "type": "final"
+                }
+            },
+            "onDone": {
+                "target": "EndEvent_110myff",
+                "actions": []
+            }
+        },
+        "ParallelGateway_1pgjqtw_TO_Gateway_1m6dgym": {
+            "initial": "",
+            "states": {
+                "ParallelGateway_1pgjqtw to Gateway_1m6dgym path 0": {
+                    "initial": "Message_0gswvmq",
+                    "states": {
+                        "done": {
+                            "type": "final"
+                        },
+                        "Message_0gswvmq": {
+                            "initial": "enable",
+                            "states": {
+                                "enable": {
+                                    "on": {
+                                        "send_Message_0gswvmq": [
+                                            {
+                                                "target": "wait for confirm",
+                                                "actions": []
+                                            }
+                                        ]
+                                    }
+                                },
+                                "wait for confirm": {
+                                    "on": {
+                                        "confirm_Message_0gswvmq": [
+                                            {
+                                                "target": "done",
+                                                "actions": []
+                                            }
+                                        ]
+                                    }
+                                },
+                                "done": {
+                                    "type": "final"
+                                }
+                            },
+                            "onDone": {
+                                "target": "Message_1vzqd37",
+                                "actions": []
+                            }
+                        },
+                        "Message_1vzqd37": {
+                            "initial": "enable",
+                            "states": {
+                                "enable": {
+                                    "on": {
+                                        "send_Message_1vzqd37": [
+                                            {
+                                                "target": "wait for confirm",
+                                                "actions": []
+                                            }
+                                        ]
+                                    }
+                                },
+                                "wait for confirm": {
+                                    "on": {
+                                        "confirm_Message_1vzqd37": [
+                                            {
+                                                "target": "done",
+                                                "actions": []
+                                            }
+                                        ]
+                                    }
+                                },
+                                "done": {
+                                    "type": "final"
+                                }
+                            },
+                            "onDone": {
+                                "target": "done",
+                                "actions": []
+                            }
+                        }
+                    },
+                    "onDone": []
+                },
+                "ParallelGateway_1pgjqtw to Gateway_1m6dgym path 1": {
+                    "initial": "Message_0wq8mc6",
+                    "states": {
+                        "done": {
+                            "type": "final"
+                        },
+                        "Message_0wq8mc6": {
+                            "initial": "enable",
+                            "states": {
+                                "enable": {
+                                    "on": {
+                                        "send_Message_0wq8mc6": [
+                                            {
+                                                "target": "wait for confirm",
+                                                "actions": []
+                                            }
+                                        ]
+                                    }
+                                },
+                                "wait for confirm": {
+                                    "on": {
+                                        "confirm_Message_0wq8mc6": [
+                                            {
+                                                "target": "done",
+                                                "actions": []
+                                            }
+                                        ]
+                                    }
+                                },
+                                "done": {
+                                    "type": "final"
+                                }
+                            },
+                            "onDone": {
+                                "target": "Message_13mh6mk",
+                                "actions": []
+                            }
+                        },
+                        "Message_13mh6mk": {
+                            "initial": "enable",
+                            "states": {
+                                "enable": {
+                                    "on": {
+                                        "send_Message_13mh6mk": [
+                                            {
+                                                "target": "wait for confirm",
+                                                "actions": []
+                                            }
+                                        ]
+                                    }
+                                },
+                                "wait for confirm": {
+                                    "on": {
+                                        "confirm_Message_13mh6mk": [
+                                            {
+                                                "target": "done",
+                                                "actions": []
+                                            }
+                                        ]
+                                    }
+                                },
+                                "done": {
+                                    "type": "final"
+                                }
+                            },
+                            "onDone": {
+                                "target": "done",
+                                "actions": []
+                            }
+                        }
+                    },
+                    "onDone": []
+                }
+            },
+            "onDone": {
+                "target": "Message_1rqbibd",
+                "actions": []
+            },
+            "type": "parallel"
+        }
+    }
+}
