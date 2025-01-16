@@ -73,7 +73,12 @@ dataMap={
 '''
 
 
-# 1.gateway对
+# 存在的问题： 1.不支持的属性目前写死为字符串
+#             2.ExclusiveGateway没有condition的情况(收束)待完善
+#             3.ParallelGateway后面紧跟着嵌套ParallelGateway的情况无法处理
+#             4.不支持双muti
+#             5.condition未写FEEL表达式支持
+              
 
 
 from enum import Enum

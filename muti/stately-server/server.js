@@ -123,7 +123,7 @@ app.post("/transition", (req, res) => {
 });
 
 // 启动服务器
-const PORT = 3000;
+const PORT = 3001;
 app.listen(PORT, () => {
 	console.log(`State Machine API is running on http://localhost:${PORT}`);
 });
