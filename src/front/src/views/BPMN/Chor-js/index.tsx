@@ -14,8 +14,6 @@ import { addBPMN } from "@/api/externalResource.js";
 import { useAppSelector } from "@/redux/hooks.ts";
 
 
-import magicPropertiesProvider from "./CustomerProperties/Provider/magic";;
-
 const ChorJs = () => {
 	const isModelerHandling = useRef(false);
 	// const [modeler, setModeler] = useState(null);
@@ -310,8 +308,7 @@ const ChorJs = () => {
 				additionalModules: [
 					PropertiesPanelModule,
 					PropertiesProviderModule,
-					TestPaletteProvider,
-					magicPropertiesProvider,
+					TestPaletteProvider
 				],
 				keyboard: {
 					bindTo: document,
@@ -323,8 +320,6 @@ const ChorJs = () => {
 
 			// toggle side panels
 
-			console.log("panels", panels);
-			console.log("panelListener", panelListeners)
 			panels.forEach((panel) =>
 				panel.addEventListener("click", panelListeners[panel]),
 			);

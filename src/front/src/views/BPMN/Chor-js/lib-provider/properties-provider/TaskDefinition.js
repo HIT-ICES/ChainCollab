@@ -15,7 +15,7 @@ export default function choreographyTaskDefinition(
         group.entries = group.entries.concat(
             stringProperty(
                 element,
-                "loopCharacteristics",
+                "root",
                 "loopCardinality",
                 "Loop Cardinality",
                 true,
@@ -24,7 +24,7 @@ export default function choreographyTaskDefinition(
         group.entries = group.entries.concat(
             stringProperty(
                 element,
-                "loopCharacteristics",
+                "root",
                 "completionCondition",
                 "Completion Condition",
                 true,
@@ -36,7 +36,7 @@ export default function choreographyTaskDefinition(
         group.entries = group.entries.concat(
             stringProperty(
                 element,
-                "loopCharacteristics",
+                "root",
                 "loopCardinality",
                 "Loop Cardinality",
                 true,
@@ -48,7 +48,7 @@ export default function choreographyTaskDefinition(
         group.entries = group.entries.concat(
             stringProperty(
                 element,
-                "loopCharacteristics",
+                "root",
                 "loopCardinality",
                 "Loop Cardinality",
                 true,
