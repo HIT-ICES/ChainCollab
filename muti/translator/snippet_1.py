@@ -31,7 +31,7 @@ class XstateJSONElement:
             "delays": {},
         }
 
-    def initMainMachine(self,id, startEventName,targetName,endEventName):
+    def initMainMachine(self,id, startEventName,targetName,endEventNameList):
         self.mainMachine["id"] = id
         self.mainMachine["initial"] = startEventName
         self.mainMachine["states"].update({
@@ -42,11 +42,12 @@ class XstateJSONElement:
                 },
             }
         })
-        self.mainMachine["states"].update({
-            endEventName: {
-                "type": "final",
-            }
-        })
+        for endEventName in endEventNameList:
+            self.mainMachine["states"].update({
+                endEventName: {
+                    "type": "final",
+                }
+            })
         
         
 
@@ -204,9 +205,9 @@ class XstateJSONElement:
 
         # ！这里可能有拼装问题。
         if isMutiParticipant:
-            self.ChooseMutiParticipantMachine(newData[name], MutiParticipantParam["name"], MutiParticipantParam["max"], MutiParticipantParam["participantName"])
+            self.ChooseMutiParticipantMachine(newData[name], name+"_instance", MutiParticipantParam["max"], MutiParticipantParam["participantName"])
             # self.MutiParticipantMachine(newData[name], MutiParticipantParam["name"], MutiParticipantParam["max"], MutiParticipantParam["participantName"],MutiParticipantParam["firstTime"])
-            newData[name]["initial"] = MutiParticipantParam["name"]
+            newData[name]["initial"] = name+"_instance"
 
         else:
             self.singleMessageMachine(newData[name], name+"_instance")
@@ -347,6 +348,66 @@ class XstateJSONElement:
         )
     
 
+    # 如果double muti: max2=0,participantName2=None 为发送方
+    def ChooseMutiParticipantMachineWithDouble(self,baseMachine,name, max, participantName,max2=0,participantName2=None,targetName=None):
+        if participantName2==None:
+            self.ChooseMutiParticipantMachine(baseMachine,name, max, participantName,targetName=None)
+            return
+        
+        elif max2 and participantName2:
+            newData = {
+                name: {
+                    "initial": name+"_toLock_"+participantName,
+                    "states": {
+                        "done":{
+                            "type":"final",
+                        }
+                    },
+                    "onDone": [],
+                },
+            }
+            self.ChooseMutiParticipantMachine(newData[name],name+"_toLock_"+participantName, max, participantName,name+"_toLock_"+participantName2)
+            
+            newData2 = {
+                name+"_toLock_"+participantName2: {
+                    "initial": "unlocked",
+                    "states": {
+                        "locked": {
+                            "type": "final",
+                        }
+                    },
+                    "onDone": [],
+                },
+            }
+            self.SetOndone(newData2[name], "done")
+            '''
+            newData3 = {
+                "unlocked": {
+                    "initial": name+"_toLock_"+participantName2+"_"+str(1),
+                    "states": {
+
+                    },
+                    "type": "parallel",
+                    "onDone": [],
+                },
+            }
+            self.SetOndone(newData3["unlocked"], "locked")
+            for index in range(1,max2+1-1):
+                self.ChooseMutiParticipantMachine(newData3["unlocked"],name+"_toLock_"+participantName2+"_"+str(index), max2, participantName2)
+            # TODO: 接收方active逻辑
+
+            
+            newData2[name]["states"].update(newData3)
+            '''
+
+
+            newData[name]["states"].update(newData2)
+            if targetName:
+                self.SetOndone(newData[name], targetName)
+            baseMachine["states"].update(newData)
+    
+
+    #这里的participantName为muti的，single的不用给
     def ChooseMutiParticipantMachine(self,baseMachine,name, max, participantName,targetName=None):
         newData = {
             name: {
@@ -582,7 +643,7 @@ class XstateJSONElement:
     
 if __name__ == "__main__":
     xstateJSONElement = XstateJSONElement()
-    xstateJSONElement.initMainMachine("supplypaper", "start", "Name1111", "end")
+    xstateJSONElement.initMainMachine("supplypaper", "start", "Name1111", ["end"])
 
     xstateJSONElement.singleMessageMachine(xstateJSONElement.mainMachine, "Name1111", "Name2222")
     xstateJSONElement.singleMessageMachine(xstateJSONElement.mainMachine, "Name2222", "eeeee")
@@ -607,14 +668,14 @@ if __name__ == "__main__":
         ],
         "Gateway_222",
     )
-    xstateJSONElement.MutiTaskLoopMachine(xstateJSONElement.mainMachine, "aaaaa", 2, "eeeee_result1==4", True, "bbbbb",{"name":"dsjhfjka","max":3,"participantName":"mutiparticipant1"})
+    xstateJSONElement.MutiTaskLoopMachine(xstateJSONElement.mainMachine, "aaaaa", 2, "eeeee_result1==4", True, "bbbbb",{"max":3,"participantName":"mutiparticipant1"})
     xstateJSONElement.MutiTaskLoopMachine(xstateJSONElement.mainMachine, "bbbbb", 2, None, False, "ddddd")
     #xstateJSONElement.MutiParticipantMachine(xstateJSONElement.mainMachine,"ddddd", 2, "mutiparticipant3", True, "kkkkk")
     #xstateJSONElement.MutiParticipantMachine(xstateJSONElement.mainMachine,"ddddd", 2, "mutiparticipant3", False, "kkkkk")
     xstateJSONElement.ChooseMutiParticipantMachine(xstateJSONElement.mainMachine,"ddddd", 2, "mutiparticipant3", "kkkkk")
     xstateJSONElement.ChooseMutiParticipantMachine(xstateJSONElement.mainMachine,"kkkkk", 2, "mutiparticipant3", "lllll")
     xstateJSONElement.MutiTaskPallelMachine(xstateJSONElement.mainMachine,"lllll", 3, False, "qqqqq")
-    xstateJSONElement.MutiTaskPallelMachine(xstateJSONElement.mainMachine,"qqqqq", 3, True, "end",{"name":"sdafsdfdd","max":3,"participantName":"mutiparticipant3"})
+    xstateJSONElement.MutiTaskPallelMachine(xstateJSONElement.mainMachine,"qqqqq", 3, True, "end",{"max":3,"participantName":"mutiparticipant3"})
 
     with open('output.txt', 'w', encoding='utf-8') as file:
         # 保存 mainMachine 的 JSON 内容

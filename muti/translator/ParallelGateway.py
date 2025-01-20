@@ -14,6 +14,8 @@ def format_print(*content):
 
 
 def method_to_extract_parallel_gateway(choreography: Choreography):
+
+    ParallelGatewayPairStrSet = set()
     def is_split_parallel_gateway(element):
         return element.type == NodeType.PARALLEL_GATEWAY and len(element.outgoings) > 1
 
@@ -93,6 +95,8 @@ def method_to_extract_parallel_gateway(choreography: Choreography):
 
         end_element = find_merged_parallel_gateway(start_element)
 
+        ParallelGatewayPairStrSet.add(f"{start_element.id}_TO_{end_element.id}")
+
         format_print(f"START: handle elements between {start_element.id} and {end_element.id}")
 
         for idx, element in enumerate(next_elements(start_element)):
@@ -125,11 +129,16 @@ def method_to_extract_parallel_gateway(choreography: Choreography):
     machine["start_element"] = start_element.id
     machine["machine_name"] = f"{start_element.id} to {end_element.id}"
     single_path_logic(machine, start_element, lambda x: False)
-
+    machine["parallel_gateway_pairs"] = []
+    machine["parallel_gateway_pairs"].extend(ParallelGatewayPairStrSet)
+    
     with open("res.json", "w", encoding="utf-8") as f:
         json.dump(machine, f)
     # print_machine(machine)
     # pprint(machine)
+
+    with open("res.json", "w", encoding="utf-8") as f:
+        json.dump(machine, f)
 
 
 if "__main__" == __name__:
