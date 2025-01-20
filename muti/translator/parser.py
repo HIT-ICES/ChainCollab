@@ -111,9 +111,13 @@ class Choreography:
             case NodeType.CHOREOGRAPHY_TASK.value:
                 is_multi = False
                 loop_type = TaskLoopType.NONE
+                loop_cardinality = 0
+                completion_condition = ""
                 if (the_type := element.attrib.get("loopType", "")) != "":
                     is_multi = True
                     loop_type = TaskLoopType(the_type)
+                    loop_cardinality = int(element.attrib.get("loopCardinality", 0))
+                    completion_condition = element.attrib.get("completionCondition", "")
 
                 return ChoreographyTask(
                     self,
@@ -126,6 +130,8 @@ class Choreography:
                     init_participant=element.attrib.get("initiatingParticipantRef", ""),
                     is_multi=is_multi,
                     loop_type=loop_type,
+                    loop_cardinality=loop_cardinality,
+                    completion_condition=completion_condition,
                 )
             case NodeType.EXCLUSIVE_GATEWAY.value:
                 return ExclusiveGateway(

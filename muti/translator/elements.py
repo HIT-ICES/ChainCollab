@@ -173,6 +173,8 @@ class ChoreographyTask(Element):
         "type",
         "is_multi",
         "loop_type",
+        "loop_cardinality",
+        "completion_condition",
         "incoming",
         "outgoing",
         "participants",
@@ -199,6 +201,8 @@ class ChoreographyTask(Element):
         message_flows: Tuple[str, ...] = (),
         is_multi: bool = False,
         loop_type: str = "",
+        loop_cardinality: int = 0,
+        completion_condition: str = "",
     ):
         super().__init__(graph, id, name)
         self._incoming: dict = initObjectProperties(incoming)
