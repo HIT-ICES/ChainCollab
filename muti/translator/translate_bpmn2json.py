@@ -63,7 +63,6 @@ dataMap={
 
 
   exlusiveGateway      的   condition
-  dmn                  的   dmnOutputNameList 应该要document提取? 
   mutiTask_顺序多实例   的   loop_max 
   mutiTask_带跳出循环   的   loop_condition
   mutiTask_并行多实例   的   parallel_num
@@ -168,16 +167,18 @@ def extract_element_info(element: Element,pairs):
 
     #处理排他网关
     if element.type==NodeType.EXCLUSIVE_GATEWAY:
-        metaData["params"]["ExclusiveGateway"]["targetList"] = [{"targetName":handle_targetName(edge,pairs),"condition":"edge.condition"} for edge in element.outgoings]
+        metaData["params"]["ExclusiveGateway"]["targetList"] = [{"targetName":handle_targetName(edge,pairs),"condition":edge.name if edge.name != "" else None} for edge in element.outgoings]
         return metaData
 
     #处理事件网关
-    if element.type==NodeType.EXCLUSIVE_GATEWAY:
+    if element.type==NodeType.EVENT_BASED_GATEWAY:
         metaData["params"]["EventGateway"]["targetList"] = [{"targetName":handle_targetName(edge,pairs),"event":edge.id} for edge in element.outgoings]
         return metaData
     #处理DMN
     if element.type==NodeType.BUSINESS_RULE_TASK:
-        metaData["params"]["DMN"]["DMNOutputNameList"] = "element.dmnOutputNameList"
+        parsed_data = json.loads(element.documentation)
+        output_names = [output['name'] for output in parsed_data['outputs']]
+        metaData["params"]["DMN"]["DMNOutputNameList"] = output_names
         return metaData
     
     if element.type==NodeType.PARALLEL_GATEWAY:
@@ -186,15 +187,23 @@ def extract_element_info(element: Element,pairs):
     #处理task
     if element.type==NodeType.CHOREOGRAPHY_TASK:
         metaData["params"]["ChoreographyTaskName"] = element.id
-        if hasattr(element,"loop_max"):
-            metaData["params"]["mutiTask"]["loopMax"] = element.loop_max
-            metaData["params"]["type"]["is_mutitask_loop"] = True
-            if hasattr(element,"loop_condition"):
-                metaData["params"]["mutiTask"]["LoopConditionExpression"] = element.loop_condition
-                metaData["params"]["type"]["is_mutitask_loop_condition"] = True
-        elif hasattr(element,"parallel_num"):
-            metaData["params"]["mutiTask"]["ParallelNum"] = element.parallel_num
-            metaData["params"]["type"]["is_mutitask_parallel"] = True
+
+
+        if hasattr(element,"loop_type"):
+            match element.loop_type:
+                case "Standard":
+                    metaData["params"]["mutiTask"]["loopMax"] = element.loop_cardinality
+                    metaData["params"]["type"]["is_mutitask_loop"] = True
+                    metaData["params"]["mutiTask"]["LoopConditionExpression"] = element.completion_condition
+                    metaData["params"]["type"]["is_mutitask_loop_condition"] = True
+                case "MultiInstanceParallel":
+                    metaData["params"]["mutiTask"]["loopMax"] = element.loop_cardinality
+                    metaData["params"]["type"]["is_mutitask_parallel"] = True   
+                case "MultiInstanceSequential":
+                    metaData["params"]["mutiTask"]["loopMax"] = element.loop_cardinality
+                    metaData["params"]["type"]["is_mutitask_loop"] = True
+                case "None":
+                    pass
         
         metaData1 = deepcopy(metaData)
         metaData2 = deepcopy(metaData)
@@ -266,6 +275,7 @@ def get_element_machineInfo(choreography:Choreography,pairs):
     businessRules = choreography.query_element_with_type(NodeType.BUSINESS_RULE_TASK)
     for element in businessRules:
         dataMap[element.id] = extract_element_info(element,pairs)
+        print(dataMap[element.id])
 
     ParallelGateways = choreography.query_element_with_type(NodeType.PARALLEL_GATEWAY)
     for element in ParallelGateways:
@@ -350,9 +360,8 @@ def addMachine(currentMachine, data,xstateJSONElement):
         case NodeType.EVENT_BASED_GATEWAY:
             xstateJSONElement.EventGatewayMachine(currentMachine,data["params"]["EventGateway"]["targetList"],data["name"])
         case NodeType.BUSINESS_RULE_TASK:
-            xstateJSONElement.DMNMachine(currentMachine,data["name"],["result1"],data["targetName"]) #暂时一个output
+            xstateJSONElement.DMNMachine(currentMachine,data["name"],data["params"]["DMN"]["DMNOutputNameList"],data["targetName"])
         case NodeType.CHOREOGRAPHY_TASK:
-            print(data["name"])
             if data["params"]["type"]["is_mutiparticipant"]:
                 if data["params"]["type"]["is_mutitask_loop_condition"]:
                     xstateJSONElement.MutiTaskLoopMachine(currentMachine, data["name"], data["params"]["mutiTask"]["loopMax"], data["params"]["mutiTask"]["LoopConditionExpression"], True, data["targetName"],{"max":data["params"]["mutiParticipant"]["max"],"participantName":data["params"]["mutiParticipant"]["mutiparticipantName"]})
@@ -388,8 +397,6 @@ def translate_bpmn2json(choreography_id,file):
 
     dataMap = get_element_machineInfo(choreography,ParallelGateway_pairs)
 
-    print(dataMap)
-
     
     xstateJSONElement = XstateJSONElement()
     xstateJSONElement.initMainMachine(choreography_id, dataMap["start_event"][0],dataMap["start_event"][1],dataMap["end_event"])
@@ -412,12 +419,19 @@ if __name__ == "__main__":
 
 
 
-    """
+    
     choreography = Choreography()
-    choreography.load_diagram_from_xml_file("../bpmn_muti/Blood_analysis.bpmn")
-    element = choreography.query_element_with_type(NodeType.CHOREOGRAPHY_TASK)[0]
-    print(element.outgoing.target.type)
-    """
-
+    choreography.load_diagram_from_xml_file("../bpmn_muti/supplypaper_new.bpmn")
+    elements = choreography.query_element_with_type(NodeType.BUSINESS_RULE_TASK)
+    for element in elements:
+        print(element.documentation)
+        parsed_data = json.loads(element.documentation)
+        output_names = [output['name'] for output in parsed_data['outputs']]
+        print(output_names)
 
     
+    
+
+
+
+

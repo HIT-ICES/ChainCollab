@@ -87,8 +87,8 @@ class XstateJSONElement:
                     + "__"
                     + target[
                         "targetName"
-                    ]: "(context, event) => {{return context.{condition};}}".format(
-                        condition=target["condition"]
+                    ]: "(context, event) => {{return {condition};}}".format(
+                        condition="context." + target["condition"] if target["condition"] else "true"
                     )
                 }
             )
@@ -332,7 +332,7 @@ class XstateJSONElement:
 
         # TODO:context可以扩展为更多类型
         # 把DMNOutput数组写入到context中
-        baseMachine["context"].update({name + "_" + key: None for key in DMNOutput})
+        baseMachine["context"].update({key: None for key in DMNOutput})
 
         # 如果有多个DMNresult
         self.additionalContent["actions"].update(
@@ -340,7 +340,7 @@ class XstateJSONElement:
                 name
                 + "_setDMNResult_{key}".format(
                     key=key
-                ): "assign({{{name}_{key}: (context,event) => event.values.{key}}})".format(
+                ): "assign({{{key}: (context,event) => event.values.{key}}})".format(
                     name=name, key=key
                 )
                 for key in DMNOutput

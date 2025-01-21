@@ -3,7 +3,7 @@
         "lock_Participant_19j1e3o": "assign({Participant_19j1e3o_locked:true})",
         "activate_Participant_19j1e3o_machine_1": "assign({Participant_19j1e3o_machine_1:true})",
         "activate_Participant_19j1e3o_machine_2": "assign({Participant_19j1e3o_machine_2:true})",
-        "Activity_0rm8bkp_setDMNResult_result1": "assign({Activity_0rm8bkp_result1: (context,event) => event.values.result1})"
+        "Activity_0rm8bkp_setDMNResult_finalPriority": "assign({finalPriority: (context,event) => event.values.finalPriority})"
     },
     "services": {},
     "guards": {
@@ -13,10 +13,10 @@
         "inactive_Participant_19j1e3o_machine_1": "(context, event) => {return !context.Participant_19j1e3o_machine_1;}",
         "active_Participant_19j1e3o_machine_2": "(context, event) => {return context.Participant_19j1e3o_machine_2;}",
         "inactive_Participant_19j1e3o_machine_2": "(context, event) => {return !context.Participant_19j1e3o_machine_2;}",
-        "Gateway_0ep8cuh__Message_1oxmq1k": "(context, event) => {return context.Activity_0rm8bkp_result1==\"Low\";}",
-        "Gateway_0ep8cuh__Message_1dmeexg": "(context, event) => {return context.Activity_0rm8bkp_result1==\"High\";}",
-        "Gateway_0ep8cuh__Message_1dzkcn0": "(context, event) => {return context.Activity_0rm8bkp_result1==\"Medium\";}",
-        "Gateway_0ep8cuh__Message_0d2xte5": "(context, event) => {return context.Activity_0rm8bkp_result1==\"VeryLow\";}",
+        "Gateway_0ep8cuh__Message_1oxmq1k": "(context, event) => {return context.finalPriority==\"Low\";}",
+        "Gateway_0ep8cuh__Message_1dmeexg": "(context, event) => {return context.finalPriority==\"High\";}",
+        "Gateway_0ep8cuh__Message_1dzkcn0": "(context, event) => {return context.finalPriority==\"Medium\";}",
+        "Gateway_0ep8cuh__Message_0d2xte5": "(context, event) => {return context.finalPriority==\"VeryLow\";}",
         "Gateway_1cr0nma__Message_04wmlqe": "(context, event) => {return true;}"
     },
     "delays": {}
