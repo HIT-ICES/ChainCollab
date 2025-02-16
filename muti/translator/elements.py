@@ -216,6 +216,8 @@ class ChoreographyTask(Element):
         ]
         self._is_multi: bool = is_multi
         self._loop_type: str = loop_type
+        self._loop_cardinality: int = loop_cardinality
+        self._completion_condition: str = completion_condition
 
     @property
     def init_message_flow(self):

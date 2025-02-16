@@ -95,7 +95,8 @@ from elements import (
     EventBasedGateway,
     NodeType,
     EdgeType,
-    EndEvent
+    EndEvent,
+    TaskLoopType
 )
 from ParallelGateway import method_to_extract_parallel_gateway
 
@@ -190,18 +191,20 @@ def extract_element_info(element: Element,pairs):
 
 
         if hasattr(element,"loop_type"):
+            print(element.loop_type)
             match element.loop_type:
-                case "Standard":
+                case TaskLoopType.STANDARD:
                     metaData["params"]["mutiTask"]["loopMax"] = element.loop_cardinality
                     metaData["params"]["type"]["is_mutitask_loop"] = True
                     metaData["params"]["mutiTask"]["LoopConditionExpression"] = element.completion_condition
                     metaData["params"]["type"]["is_mutitask_loop_condition"] = True
-                case "MultiInstanceParallel":
+                case TaskLoopType.MULTI_INSTANCE_PARALLEL:
                     metaData["params"]["mutiTask"]["loopMax"] = element.loop_cardinality
                     metaData["params"]["type"]["is_mutitask_parallel"] = True   
-                case "MultiInstanceSequential":
+                case TaskLoopType.MULTI_INSTANCE_SEQUENTIAL:
                     metaData["params"]["mutiTask"]["loopMax"] = element.loop_cardinality
                     metaData["params"]["type"]["is_mutitask_loop"] = True
+                    print(element.id)
                 case "None":
                     pass
         
@@ -275,7 +278,6 @@ def get_element_machineInfo(choreography:Choreography,pairs):
     businessRules = choreography.query_element_with_type(NodeType.BUSINESS_RULE_TASK)
     for element in businessRules:
         dataMap[element.id] = extract_element_info(element,pairs)
-        print(dataMap[element.id])
 
     ParallelGateways = choreography.query_element_with_type(NodeType.PARALLEL_GATEWAY)
     for element in ParallelGateways:
@@ -366,6 +368,7 @@ def addMachine(currentMachine, data,xstateJSONElement):
                 if data["params"]["type"]["is_mutitask_loop_condition"]:
                     xstateJSONElement.MutiTaskLoopMachine(currentMachine, data["name"], data["params"]["mutiTask"]["loopMax"], data["params"]["mutiTask"]["LoopConditionExpression"], True, data["targetName"],{"max":data["params"]["mutiParticipant"]["max"],"participantName":data["params"]["mutiParticipant"]["mutiparticipantName"]})
                 elif data["params"]["type"]["is_mutitask_loop"]:
+                    print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
                     xstateJSONElement.MutiTaskLoopMachine(currentMachine, data["name"], data["params"]["mutiTask"]["loopMax"], None, True, data["targetName"],{"max":data["params"]["mutiParticipant"]["max"],"participantName":data["params"]["mutiParticipant"]["mutiparticipantName"]})
                 elif data["params"]["type"]["is_mutitask_parallel"]:
                     xstateJSONElement.MutiTaskPallelMachine(currentMachine,data["name"], data["params"]["mutiParticipant"]["max"], True, data["targetName"],{"max":data["params"]["mutiParticipant"]["max"],"participantName":data["params"]["mutiParticipant"]["mutiparticipantName"]})
@@ -413,7 +416,7 @@ def translate_bpmn2json(choreography_id,file):
 
 
 if __name__ == "__main__":
-    translate_bpmn2json("Choreography_hsdkfjhk","../bpmn_muti/supplypaper_new.bpmn")
+    translate_bpmn2json("NewTest_paper","../bpmn_muti/supplypaper_new111.bpmn")
 
 
 
@@ -421,13 +424,16 @@ if __name__ == "__main__":
 
     
     choreography = Choreography()
-    choreography.load_diagram_from_xml_file("../bpmn_muti/supplypaper_new.bpmn")
-    elements = choreography.query_element_with_type(NodeType.BUSINESS_RULE_TASK)
+    choreography.load_diagram_from_xml_file("../bpmn_muti/supplypaper_new111.bpmn")
+    elements = choreography.query_element_with_type(NodeType.CHOREOGRAPHY_TASK)
     for element in elements:
-        print(element.documentation)
-        parsed_data = json.loads(element.documentation)
+        if element.id == "ChoreographyTask_0p8dcch":
+            print("aaaaaaaaaa")
+            print(element.loop_type)
+            print(element.loop_cardinality)
+        """parsed_data = json.loads(element.documentation)
         output_names = [output['name'] for output in parsed_data['outputs']]
-        print(output_names)
+        print(output_names)"""
 
     
     
