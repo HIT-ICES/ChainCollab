@@ -1,16 +1,6 @@
 import json
 from typing import List
 
-
-# 1.Ondone连接               1.1.事件网关 得特殊处理，和ondone冲突。后面应该还是要统一处理ondone和这个网关。 1.2.排他条件网关=ondone+condition
-# TODO:2.并行网关-->并行状态机  在translator中实现？
-# 3.MutiParticipantMachine   3.1 第一次  3.2 后续
-# 4.MutiTaskMachine          4.1 MutiTaskPallelMachine
-
-# 微调 1."next3-2-3"此类名称改为元素名称 -->手动改
-# participant参数
-
-
 class XstateJSONElement:
 
     def __init__(self):
@@ -48,6 +38,20 @@ class XstateJSONElement:
                     "type": "final",
                 }
             })
+        
+    def initGlobal(self,variables):
+        for key in variables:
+            self.mainMachine["context"].update({key: None})
+            self.additionalContent["actions"].update(
+                {
+                "set_MessageGlobal_{key}".format(
+                        key=key
+                    ): "assign({{{key}: (context,event) => event.values.{key}}})".format(
+                        key=key
+                    )
+                }
+            )
+
         
         
 
@@ -87,8 +91,8 @@ class XstateJSONElement:
                     + "__"
                     + target[
                         "targetName"
-                    ]: "(context, event) => {{return context.{condition};}}".format(
-                        condition=target["condition"]
+                    ]: "(context, event) => {{return {condition};}}".format(
+                        condition="context." + target["condition"] if target["condition"] else "true"
                     )
                 }
             )
@@ -127,40 +131,27 @@ class XstateJSONElement:
         baseMachine["states"].update(newData)
 
 
-    def singleMessageMachine(self,baseMachine, name, targetName=None):
+    def singleMessageMachine(self,baseMachine, name, targetName=None,GlobalVariables=None):
         newData = {
             name: {
                 "initial": "enable",
                 "states": {
                     "enable": {
-                        "on": {"send_"+name: [{"target": "wait for confirm", "actions": []}]}
+                        "on": {"Send_"+name: [{"target": "wait for confirm", "actions": []}]}
                     },
                     "wait for confirm": {
-                        "on": {"confirm_"+name: [{"target": "done", "actions": []}]}
+                        "on": {"Confirm_"+name: [{"target": "done", "actions": []}]}
                     },
                     "done": {"type": "final"},
                 },
             }
         }
-
+        if GlobalVariables:
+            newData[name]["states"]["wait for confirm"]["on"]["Confirm_"+name][0]["actions"].append({"type": "set_MessageGlobal_{key}".format(key=key) for key in GlobalVariables})
         if targetName:
             newData[name]["onDone"] = {"target": targetName, "actions": []}
 
         baseMachine["states"].update(newData)
-
-
-    def parallelGatewayMachine(self,level):
-
-        # TODO：在parser里解析出层级关系，并基于这个层级关系，递归拼装这个并行网关状态机，
-        # Gateway_0onpe6x---Gateway_1fbifca
-        #    transport order forwarding
-        #        mem2_participant1
-        #        mem3_participant1
-        #        mem1_participant1
-        #    supply order forwarding
-
-        # lock不用管，后面会写一个函数统一增强逻辑
-        pass
 
 
     def MutiTaskLoopMachine(
@@ -203,15 +194,14 @@ class XstateJSONElement:
             )
 
 
-        # ！这里可能有拼装问题。
         if isMutiParticipant:
-            self.ChooseMutiParticipantMachine(newData[name], name+"_instance", MutiParticipantParam["max"], MutiParticipantParam["participantName"])
+            self.ChooseMutiParticipantMachine(newData[name], name, MutiParticipantParam["max"], MutiParticipantParam["participantName"])
             # self.MutiParticipantMachine(newData[name], MutiParticipantParam["name"], MutiParticipantParam["max"], MutiParticipantParam["participantName"],MutiParticipantParam["firstTime"])
-            newData[name]["initial"] = name+"_instance"
+            newData[name]["initial"] = name+"_"
 
         else:
-            self.singleMessageMachine(newData[name], name+"_instance")
-            newData[name]["initial"] = name+"_instance"
+            self.singleMessageMachine(newData[name], name+"_")
+            newData[name]["initial"] = name+"_"
 
         LoopAdd = {
             name
@@ -280,14 +270,14 @@ class XstateJSONElement:
 
         if isMutiParticipant:
             for index in range(1,ParallelNum+1):
-                self.ChooseMutiParticipantMachine(newData[name], name+"_instance_"+str(index), MutiParticipantParam["max"],MutiParticipantParam["participantName"])
+                self.ChooseMutiParticipantMachine(newData[name], name+"_"+str(index), MutiParticipantParam["max"],MutiParticipantParam["participantName"])
                 # self.MutiParticipantMachine(newData[name], name+"_instance_"+str(index), MutiParticipantParam["max"],MutiParticipantParam["participantName"])
-            newData[name]["initial"] = name+"_instance_1"
+            newData[name]["initial"] = name+"_1"
 
         else:
             for index in range(1,ParallelNum+1):
-                self.singleMessageMachine(newData[name], name+"_instance_"+str(index))
-            newData[name]["initial"] = name+"_instance_1"
+                self.singleMessageMachine(newData[name], name+"_"+str(index))
+            newData[name]["initial"] = name+"_1"
 
 
 
@@ -332,7 +322,7 @@ class XstateJSONElement:
 
         # TODO:context可以扩展为更多类型
         # 把DMNOutput数组写入到context中
-        baseMachine["context"].update({name + "_" + key: None for key in DMNOutput})
+        baseMachine["context"].update({key: None for key in DMNOutput})
 
         # 如果有多个DMNresult
         self.additionalContent["actions"].update(
@@ -340,15 +330,16 @@ class XstateJSONElement:
                 name
                 + "_setDMNResult_{key}".format(
                     key=key
-                ): "assign({{{name}_{key}: (context,event) => event.values.{key}}})".format(
+                ): "assign({{{key}: (context,event) => event.values.{key}}})".format(
                     name=name, key=key
                 )
                 for key in DMNOutput
             }
         )
     
-
-    # 如果double muti: max2=0,participantName2=None 为发送方
+    """
+    # 如果double muti: max2 participantName2 为发送方
+    # TODO
     def ChooseMutiParticipantMachineWithDouble(self,baseMachine,name, max, participantName,max2=0,participantName2=None,targetName=None):
         if participantName2==None:
             self.ChooseMutiParticipantMachine(baseMachine,name, max, participantName,targetName=None)
@@ -405,7 +396,8 @@ class XstateJSONElement:
             if targetName:
                 self.SetOndone(newData[name], targetName)
             baseMachine["states"].update(newData)
-    
+    """   
+
 
     #这里的participantName为muti的，single的不用给
     def ChooseMutiParticipantMachine(self,baseMachine,name, max, participantName,targetName=None):
@@ -507,7 +499,7 @@ class XstateJSONElement:
                         "states": {
                         "enable": {
                             "on": {
-                            "send_"+name+"_machine"+str(index): [
+                            "Send_"+name+"_"+str(index): [
                                 {
                                 "target": "wait for confirm",
                                 "actions": [],
@@ -517,7 +509,7 @@ class XstateJSONElement:
                         },
                         "wait for confirm": {
                             "on": {
-                            "confirm_"+name+"_machine"+str(index): [
+                            "Confirm_"+name+"_"+str(index): [
                                 {
                                 "target": "done",
                                 "actions": [],
@@ -580,7 +572,7 @@ class XstateJSONElement:
                                 },
                                 "enable": {
                                     "on": {
-                                        "send_"+name+"_machine"+str(index): [
+                                        "Send_"+name+"_"+str(index): [
                                             {
                                                 "target": "wait for confirm",
                                                 "actions": [],
@@ -593,7 +585,7 @@ class XstateJSONElement:
                                 },
                                 "wait for confirm": {
                                     "on": {
-                                        "confirm_"+name+"_machine"+str(index): [
+                                        "Confirm_"+name+"_"+str(index): [
                                             {
                                                 "target": "done",
                                                 "actions": [],
@@ -617,7 +609,7 @@ class XstateJSONElement:
 
         baseMachine["states"].update(newData)
 
-
+    """
     def ParallelGatewayMachine(
             self,
             baseMachine,
@@ -639,7 +631,7 @@ class XstateJSONElement:
         if targetName:
             newData[name]["onDone"] = {"target": targetName, "actions": []}
         baseMachine["states"].update(newData)
-
+    """
     
 if __name__ == "__main__":
     xstateJSONElement = XstateJSONElement()
