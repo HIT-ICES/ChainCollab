@@ -42,22 +42,22 @@ export default function ChorPropertiesProvider(injector, bpmnFactory) {
 
 		if (is(element, "bpmn:Participant")) {
 			console.log("It is a participant");
-				participantDefinition(
-					detailsGroup,
-					element,
-					bpmnFactory,
-					element.businessObject,
-				);
+			participantDefinition(
+				detailsGroup,
+				element,
+				bpmnFactory,
+				element.businessObject,
+			);
 		}
 
 		if (is(element, "bpmn:ChoreographyTask")) {
 			console.log("It is a choreography task");
-      choreographyTaskDefinition(
-        detailsGroup,
-        element,
-        bpmnFactory,
-        element.businessObject,
-      );
+			choreographyTaskDefinition(
+				detailsGroup,
+				element,
+				bpmnFactory,
+				element.businessObject,
+			);
 		}
 
 		return generalTab;

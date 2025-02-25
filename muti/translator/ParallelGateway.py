@@ -1,9 +1,9 @@
 from typing import Callable
 import json
-from parser import Choreography
+from choreography_parser.parser import Choreography
 from pprint import pprint
 from copy import deepcopy
-from elements import Element, NodeType
+from choreography_parser.elements import Element, NodeType
 
 ident = 0
 

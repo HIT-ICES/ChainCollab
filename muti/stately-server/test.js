@@ -1,4 +1,4 @@
-const { createMachine, createActor } = require('xstate'); // 使用 CommonJS 语法导入 xstate
+const { createMachine } = require('xstate'); // 使用 CommonJS 语法导入 xstate
 
 // 创建带有子状态机的状态机
 const machine = createMachine({
@@ -31,7 +31,7 @@ const machine = createMachine({
 });
 
 // 创建 actor 实例
-const actor = createActor(machine);
+const actor = createMachine(machine);
 
 const init_snapshot = actor.getPersistedSnapshot();
 console.log(typeof(init_snapshot))
@@ -52,7 +52,7 @@ console.log('Serialized Persisted Snapshot:', serializedSnapshot);
 // 反序列化快照
 const deserializedSnapshot = JSON.parse(serializedSnapshot);
 // 模拟重新加载状态机并导入快照
-const newActor = createActor(machine,{
+const newActor = createMachine(machine,{
   snapshot: deserializedSnapshot
 });
 
