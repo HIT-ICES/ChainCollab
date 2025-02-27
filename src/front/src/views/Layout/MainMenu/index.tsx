@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Menu, Modal } from "antd";
+import { Form, Input, Menu, Modal, Select } from "antd";
 const { SubMenu } = Menu;
 import { useLocation, useNavigate } from "react-router-dom";
 import { DesktopOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
@@ -142,6 +142,7 @@ const AddEnvModal: React.FC<{
 }> = ({ isModalOpen = false, setIsModalOpen, setSync }) => {
   type FieldType = {
     envName?: string;
+    envType?: string;
   };
   const [form] = Form.useForm<FieldType>();
   const dispatch = useAppDispatch();
@@ -186,6 +187,22 @@ const AddEnvModal: React.FC<{
           ]}
         >
           <Input allowClear />
+        </Form.Item>
+        <Form.Item<FieldType>
+          label="Environment Type"
+          name="envType"
+          rules={[
+            { required: false, message: "Please choose environment type!" },
+          ]}
+        >
+          <Select
+            defaultValue="Fabric"
+            options={[
+              { value: 'Ethereum', label: 'Ethereum' },
+              { value: 'Fabric', label: 'Fabric' },
+              { value: 'Quorum', label: 'Quorum', disabled: true },
+            ]}
+          />
         </Form.Item>
       </Form>
     </Modal>

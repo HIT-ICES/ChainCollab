@@ -4,12 +4,13 @@ from rest_framework.response import Response
 
 from api.common.enums import FabricNodeType
 
-from .serializers import EnvironmentSerializer
+from .serializers import EnvironmentSerializer, EthEnvironmentSerializer
 from rest_framework.decorators import action
 
 from api.models import (
     Consortium,
     Environment,
+    EthEnvironment,
     ResourceSet,
     Agent,
     Membership,
@@ -653,3 +654,29 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         response = {"ffiContent": ffiContent}
 
         return Response(response, status=status.HTTP_200_OK)
+
+class EthEnvironmentViewSet(viewsets.ModelViewSet):
+    def create(self, request, *args, **kwargs):
+        """
+        创建EthEnvironment
+        """
+        consortium_id = request.parser_context["kwargs"].get("consortium_id")
+        name = request.data.get("name")
+        try:
+            consortium = Consortium.objects.get(pk=consortium_id)
+        except Consortium.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        environment = EthEnvironment.objects.create(consortium=consortium, name=name)
+        environment.save()
+        serializer = EthEnvironmentSerializer(environment)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    def list(self, request, *args, **kwargs):
+        """
+        获取EthEnvironment列表
+        """
+        consortium_id = request.parser_context["kwargs"].get("consortium_id")
+        queryset = EthEnvironment.objects.filter(consortium_id=consortium_id)
+        serializer = EthEnvironmentSerializer(queryset, many=True)
+        return Response(serializer.data)

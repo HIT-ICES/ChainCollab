@@ -12,6 +12,8 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.permissions import IsAuthenticated
 import yaml
 import json
+import subprocess
+from subprocess import Popen, call
 
 from api.config import CELLO_HOME, CURRENT_IP, DEFAULT_CHANNEL_NAME, FABRIC_CONFIG
 
@@ -212,3 +214,105 @@ class FireflyViewSet(viewsets.ModelViewSet):
             "membership_name": firefly.resource_set.membership.name,
         }
         return Response(ok(data))
+    
+    @action(methods=["post"], detail=False, url_path="init_eth")
+    def init_eth(self, request, pk=None, *args, **kwargs):
+        try:
+            datadir_command = f"""geth --datadir ./datadir account new"""
+            datadir_output = call(datadir_command, shell=True)
+            compose_file_path = "/home/rhq/workspace/projects/ICES/ChainCollab/src/backend/opt/config/ethereum/docker-compose.yml"
+            subprocess.run(["docker-compose", "-f", compose_file_path, "up", "-d"], check=True)
+            container_id = subprocess.check_output(["docker", "ps", "-q", "-f", "name=mybootnode"]).decode().strip()
+            container_name = subprocess.check_output(["docker", "ps", "--format", "{{.Names}}", "-f", "name=mybootnode"]).decode().strip()
+            
+            geth_attach_command = ["docker", "exec", "-i", container_id, "geth", "attach"]
+            geth_attach_process = subprocess.Popen(geth_attach_command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+            geth_attach_process.stdin.write("personal.unlockAccount(\"0x365acf78c44060caf3a4789d804df11e3b4aa17d\", \"\", 0)\n")
+            geth_attach_process.stdin.flush()
+            output, error = geth_attach_process.communicate()
+            print("Geth Attach Output:", output)
+            print("Geth Attach Error:", error)
+            
+            firefly_name = "eth-rpc1"  # 替换为实际的 firefly 名称
+            manifest_file_path = "/home/qkl03/workspace/ICES/files/manifest.json"  # 替换为实际的 manifest 文件路径
+            remote_node_url = f"http://{container_name}:8545"
+            ff_init_command = [
+                self.ff_path,
+                "init",
+                "ethereum",
+                firefly_name,
+                "-n",
+                "remote-rpc",
+                "--remote-node-url",
+                remote_node_url,
+                "--chain-id",
+                "3456",
+                "--connector-config",
+                "/home/qkl03/workspace/ICES/files/ethereum_connector_config.json",
+                "-m",
+                manifest_file_path,
+                "--remote-node-deploy",
+            ]
+            output = call(ff_init_command, shell=True)
+            
+            # 获取容器的网络信息
+            inspect_command = ["docker", "inspect", container_name]
+            inspect_output = subprocess.check_output(inspect_command).decode().strip()
+            container_info = json.loads(inspect_output)[0]
+            network_name = list(container_info["NetworkSettings"]["Networks"].keys())[0]
+            # firefly_config_path需要替换
+            firefly_stack_path = self.firefly_config_path + firefly_name
+            # 读取YAML文件
+            with open(firefly_stack_path + "/docker-compose.override.yml", "r") as file:
+                data = yaml.safe_load(file)
+            # 添加配置
+            data["networks"] = {"default": {"name": network_name, "external": True}}
+            # 将修改后的数据写回文件
+            with open(firefly_stack_path + "/docker-compose.override.yml", "w") as file:
+                yaml.dump(data, file)
+        except Exception as e:
+            traceback.print_exc(e)
+            err_msg = "firefly init fail for {}!".format(e)
+            raise Exception(err_msg)
+
+    @action(methods=["post"], detail=False, url_path="start_eth")
+    def start_eth(self, request, pk=None, *args, **kwargs):
+        # 需要在启动前，进入对应的eth容器，并记录那3个组织账号，给组织转账
+        try:
+            
+            # env_id = request.parser_context["kwargs"].get("environment_id")
+            # env = Environment.objects.get(id=env_id)
+            # Firefly_cli().start(firefly_name="cello_" + env.name.lower())
+            # return Response(status=status.HTTP_202_ACCEPTED)
+            
+            env_id = request.parser_context["kwargs"].get("environment_id")
+            env = Environment.objects.get(id=env_id)
+            firefly_name = "cello_" + env.name.lower()
+
+            # 进入对应的第一个eth容器
+            container_name = "mybootnode"  
+            geth_attach_command = ["docker", "exec", "-i", container_name, "geth", "attach"]
+            geth_attach_process = subprocess.Popen(geth_attach_command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+
+            get_accounts_command = "eth.accounts\n"
+            geth_attach_process.stdin.write(get_accounts_command)
+            geth_attach_process.stdin.flush()
+            output, error = geth_attach_process.communicate()
+            accounts = output.strip().split('\n')[-1].strip('[]').replace("'", "").split(', ')[:3]
+
+            sender_account = "0x365acf78c44060caf3a4789d804df11e3b4aa17d"  # 发送者账号由初始规定，可根据实际情况修改
+            unlock_command = f"personal.unlockAccount(\"{sender_account}\", \"\", 0)\n"
+            geth_attach_process.stdin.write(unlock_command)
+            geth_attach_process.stdin.flush()
+            for account in accounts:
+                transfer_command = f"eth.sendTransaction({{from: \"{sender_account}\", to: \"{account}\", value: web3.toWei(1, 'ether')}})\n"
+                geth_attach_process.stdin.write(transfer_command)
+                geth_attach_process.stdin.flush()
+
+            # 启动Firefly，存疑
+            Firefly_cli().start(firefly_name=firefly_name)
+            return Response(status=status.HTTP_202_ACCEPTED)
+        
+        except Exception as e:
+            traceback.print_exc()
+            return Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)

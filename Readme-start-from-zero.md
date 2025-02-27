@@ -18,8 +18,6 @@ wsl --unregister Ubuntu-20.04
 
 wsl --import Ubuntu-20.04 D:\Ubuntu_20_04\ D:\export.tar --version 2
 
-
-
 ### 2. 安装docker
 
 ##### 使用官方脚本自动安装(或者安装docker desktop)
@@ -29,8 +27,6 @@ wsl --import Ubuntu-20.04 D:\Ubuntu_20_04\ D:\export.tar --version 2
  sudo sh test-docker.sh
  sudo apt install docker-compose
 ```
-
-
 
 ### 3.其他必备前置安装
 
@@ -44,6 +40,7 @@ sudo apt update
 
 (sudo apt install software-properties-common)
 
+添加python存储库
 (sudo add-apt-repository ppa:deadsnakes/ppa)
 
 sudo apt install python3.10
@@ -56,13 +53,23 @@ sudo apt-get install python3.10-venv
 
 sudo apt-get install python3-dev
 
+##### 建立python软链接（可选）
+
+sudo apt install python-is-python3
+首先，删除原有链接
+rm /usr/bin/python
+其次，找到python3的安装路径
+which python3
+然后，找到的路径建立新链接
+ln -s /usr/bin/python3 /usr/bin/python
+
 ##### 安装libgraphviz
 
-`apt-get update \`
-`&& apt-get install -y gettext-base graphviz libgraphviz-dev \`
-`&& apt-get autoclean \`
-`&& apt-get clean \`
-`&& apt-get autoremove && rm -rf /var/cache/apt/`
+sudo apt-get update \
+&& sudo apt-get install -y gettext-base graphviz libgraphviz-dev \
+&& sudo apt-get autoclean \
+&& sudo apt-get clean \
+&& sudo apt-get autoremove && rm -rf /var/cache/apt/
 
 ##### 安装Go及相关
 
@@ -76,7 +83,7 @@ sudo tar -C /usr/local -zxvf go1.21.12.linux-amd64.tar.gz
 
 export GOROOT=/usr/local/go
 
-export PATH=$PATH:$GOROOT/bin 
+export PATH=$PATH:$GOROOT/bin
 
 然后source
 
@@ -104,8 +111,6 @@ go install github.com/hyperledger/firefly-cli/ff@latest
 
 配置firefly环境变量（目录到bin）
 
-
-
 ##### docker镜像
 
 docker pull yeasy/hyperledger-fabric-peer:2.2.0
@@ -114,19 +119,15 @@ docker pull hyperledger/fabric-ca:latest （如果报错，删除，执行下面
 
 (docker pull hyperledger/fabric-ca:1.5.7)
 
-(docker tag <id> hyperledger/fabric-ca:latest)
-
-
+(docker tag `<id>` hyperledger/fabric-ca:latest)
 
 ##### 其他
 
 赋予权限：sudo chmod 777 /etc/hosts
 
-
-
 ##### cello相关
 
-docker network create cello-net（仅定义网络）
+ docker network create cello-net（cello-net网络必须创建，不然后台agent进行ca相关操作时将会出错）
 
 （先打开代理，配置文件打开注释）
 
@@ -136,50 +137,40 @@ docker network create cello-net（仅定义网络）
 
 ff start cello_env --verbose (拉取cello相关镜像，并start)
 
-
-
-##### 克隆IBC
+##### 克隆IBC（改名了）
 
 git clone https://github.com/XinzheShen182/IBC
 
 git switch NewCodeGenerate
 
-
-
 ### Backend + oracle 配置
 
-创建：`python -m venv venv_name`
+创建：`python -m venv venv`
 
-激活：`source venv_name/bin/activate`
+激活：`c`
 
-`pip install -r requirements.txt`
-
-
+`pip install -r requirements.txt` （确保build-essentials and python3-dev安装完成）
 
 ### front配置
+
 (node版本20以上，npm install不成功，删掉node-modules重来/按照yarn，yarn install) 单独给npm和yarn配置代理会快
 sudo apt install npm
 
 sudo apt install nodejs
 
-npm install
-
-
+npm install ionic --loglevel verbose
 
 ### agent配置
 
-`python -m venv venv_name`
+`python -m venv venv`
 
-`source venv_name/bin/activate`
+`source venv/bin/activate`
 
 `pip install -r requirements.txt`
-
 
 ### translator配置
 
 到pytranslator文件夹同上步骤安装即可
-
-
 
 ### 运行
 
@@ -198,7 +189,6 @@ source startrc
 （4）start_translator
 
  (5) start_oracle
- 
 
  还有一个debug功能，自动创建平台测试环境。
 
@@ -208,19 +198,15 @@ source startrc
 
 添加org-->添加con-->邀请org/添加mem-->添加env-一步步来，手动添加chaincode-->...
 
-
-
-
-
 ### 可能的问题
 
-1.安装docker后，可以测试一下`service docker start` `service docker status`，running表示正常，异常提示`Docker is not running`可参考[https://blog.csdn.net/ACkingdom/article/details/125747583；](https://blog.csdn.net/ACkingdom/article/details/125747583%EF%BC%9B)
+1.安装docker后，可以测试一下 `service docker start` `service docker status`，running表示正常，异常提示 `Docker is not running`可参考[https://blog.csdn.net/ACkingdom/article/details/125747583；](https://blog.csdn.net/ACkingdom/article/details/125747583%EF%BC%9B)
 
-2.启动服务容器时，若输出`TypeError: kwargs_from_env() got an unexpected keyword argument 'ssl_version'`说明docker-compose版本和Docker Engine版本不符，通过
+2.启动服务容器时，若输出 `TypeError: kwargs_from_env() got an unexpected keyword argument 'ssl_version'`说明docker-compose版本和Docker Engine版本不符，通过
 
 `docker version --format '{{.Server.Version}}'`查Docker Engine的版本，`docker-compose --version`查看docker-compose版本，要对应。对应表:[撰写文件版本和升级_Docker中文网 (dockerdocs.cn)](https://dockerdocs.cn/compose/compose-file/compose-versioning/) 若输出 `Couldn't connect to Docker daemon`就在命令前加sudo,或考虑将当前用户加入docker用户组；
 
-3.,安装requirements.txt时，若报错`[Errno 13] Permission denied`，执行`pip install --user -r requirements.txt`，此时若报错 `Can not perform a '--user'`，需要打开自己设置的venv文件夹的pyvenv.cfg文件，将`include-system-site-packages`属性设置为`true`，重新执行，若使用vscode修改pyvenv.cfg文件时提示无法更改，用chmod 777 你的目录... /venv/pyvenv.cfg改一下权限或者以管理员模式打开vscode就可以了；
+3.,安装requirements.txt时，若报错 `[Errno 13] Permission denied`，执行 `pip install --user -r requirements.txt`，此时若报错 `Can not perform a '--user'`，需要打开自己设置的venv文件夹的pyvenv.cfg文件，将 `include-system-site-packages`属性设置为 `true`，重新执行，若使用vscode修改pyvenv.cfg文件时提示无法更改，用chmod 777 你的目录... /venv/pyvenv.cfg改一下权限或者以管理员模式打开vscode就可以了；
 
 4.启动agent时，若报权限错误，可以在命令前加sudo,或将当前用户加入docker用户组；
 

@@ -1,0 +1,31 @@
+version: '3.7'
+
+services:
+  mybootnode:
+    hostname: mybootnode
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: 
+      - --http   # 对于较新版本的Geth，使用--http代替--rpc，注意以下参数的配置都缺一不可，详细原因可参见以下文档： https://geth.ethereum.org/docs/interacting-with-geth/rpc  https://registry.hub.docker.com/r/ethereum/client-go
+      - --http.addr=http://0.0.0.0
+      - --http.port=8545
+      - --http.api=admin,eth,miner,web3,personal,net,txpool
+      - --networkid=${NETWORK_ID}
+      - --http.corsdomain="*"
+      - --http.vhosts=*
+      - --nodiscover
+      - --genesis /genesis.json
+      - --mine
+      - --miner.threads=3
+      - --miner.etherbase=0xb41e0ae2e204707485eafa4b22ebbc9aaedefb78
+      - --allow-insecure-unlock
+
+    ports:
+      - "8545:8545"   # RPC端口
+      - "30303:30303" # P2P网络端口
+    volumes:
+      - ./datadir/keystore:/root/.ethereum/keystore
+      # - ./genesis.json:/genesis.json

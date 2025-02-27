@@ -148,7 +148,7 @@ const Overview: React.FC = () => {
                   onClick={() => { handleSetUpFabricNetwork() }}
                   loading={setupFabricNetWorkLoading}
                 >
-                  SetUp Fabric Newwork
+                  SetUp Fabric Network
                 </LoadingButton>
               </Col>
             </Row>

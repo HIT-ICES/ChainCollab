@@ -816,6 +816,50 @@ class Environment(models.Model):
     create_at = models.DateTimeField(
         help_text="create time of environment", auto_now_add=True
     )
+    
+class EthEnvironment(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        help_text="ID of environment",
+        default=make_uuid,
+        editable=False,
+        unique=True,
+    )
+    name = models.TextField(help_text="name of environment")
+    create_at = models.DateTimeField(
+        help_text="create time of environment", auto_now_add=True
+    )
+    consortium = models.ForeignKey(
+        "Consortium",
+        help_text="consortium of environment",
+        null=True,
+        on_delete=models.CASCADE,
+    )
+    network = models.ForeignKey(Network, null=True, on_delete=models.DO_NOTHING)
+    status = models.CharField(
+        help_text="status of environment,can be CREATED|INITIALIZED|STARTED|ACTIVATED", # need to change
+        max_length=32,
+        default="CREATED",
+    )
+    # 下方参数存疑
+    # firefly_status = models.CharField(
+    #     help_text="status of firefly,can be NO|CHAINCODEINSTALLED|STARTED",
+    #     max_length=32,
+    #     default="NO",
+    # )
+    # Oracle_status = models.CharField(
+    #     help_text="status of Oracle,can be NO|CHAINCODEINSTALLED",
+    #     max_length=32,
+    #     default="NO",
+    # )
+    # DMN_status = models.CharField(
+    #     help_text="status of DMN,can be NO|CHAINCODEINSTALLED",
+    #     max_length=32,
+    #     default="NO",
+    # )
+    create_at = models.DateTimeField(
+        help_text="create time of environment", auto_now_add=True
+    )
 
 
 class LoleidoOrganization(models.Model):

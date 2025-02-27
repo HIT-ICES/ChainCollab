@@ -60,7 +60,7 @@ export const NaiveFabricStepBar = (props) => {
       },
       {
         title: "Active",
-        description: "Chennel been Setup",
+        description: "Channel been Setup",
       }
     ];
 
