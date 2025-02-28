@@ -1,70 +1,147 @@
-const { createMachine } = require('xstate'); // 使用 CommonJS 语法导入 xstate
+const { json } = require('express');
+const { createMachine, createActor, setup, initialTransition, transition, assign } = require('xstate'); // 使用 CommonJS 语法导入 xstate
 
-// 创建带有子状态机的状态机
-const machine = createMachine({
-  id: 'trafficLight',
-  initial: 'operational',
+const stateMachine = {
+  initial: 'idle',
+  context: ({ input }) => {
+    console.log(input)
+    return {
+      username: input.username ? input.username : "default",
+      password: input.password ? input.password : "default",
+      error: null
+    }
+  },
   states: {
-    operational: {
-      initial: 'green',
-      states: {
-        green: {
-          on: { TIMER: 'yellow' }
-        },
-        yellow: {
-          on: { TIMER: 'red' }
-        },
-        red: {
-          on: { TIMER: 'green' }
-        }
-      },
+    idle: {
       on: {
-        POWER_OUTAGE: 'offline'
+        LOGIN: {
+          target: 'loading',
+          cond: 'isFormValid', // 检查表单是否有效
+          actions: 'updateCredentials' // 清除之前的错误信息
+        }
       }
     },
-    offline: {
+    loading: {
+      entry: 'logLoading', // 进入 loading 状态时记录日志
       on: {
-        POWER_RESTORED: 'operational'
+        RESOLVE: 'success',
+        REJECT: {
+          target: 'failure',
+          actions: 'logFailure' // 记录登录失败
+        }
+      }
+    },
+    success: {
+      entry: 'logSuccess', // 进入 success 状态时记录日志
+      type: 'final' // 最终状态
+    },
+    failure: {
+      on: {
+        RETRY: {
+          target: 'idle',
+          actions: 'clearError' // 重试时清除错误信息
+        }
       }
     }
   }
-});
+}
 
-// 创建 actor 实例
-const actor = createMachine(machine);
+// assign({ finalPriority: (context, event) => event.values.finalPriority })
 
-const init_snapshot = actor.getPersistedSnapshot();
-console.log(typeof(init_snapshot))
 
-// 启动 actor
-actor.start();
+// const actions = {
+//   updateCredentials: assign(({ context, event }) => {
+//     return {
+//       username: event.username,
+//       password: event.password
+//     }
+//   }),
+//   clearError: (context) => {
+//     context.error = null;
+//   },
+//   logSuccess: (context) => {
+//     console.log('登录成功！用户名:', context.context.username);
+//   },
+//   logFailure: (context, event) => {
+//     console.log('登录失败！错误信息:', context.error);
+//   },
+//   logLoading: () => {
+//     console.log('正在登录...');
+//   }
+// }
 
-// 发送事件给 actor
-actor.send({type:'TIMER'}); // 从 green -> yellow
 
-// 获取持久化快照
-const persistedSnapshot = actor.getPersistedSnapshot();
+const fs = require('fs');
+fs.promises.readFile('./actions.json', 'utf8').then(
+  (value) => {
+    const actionsContent = JSON.parse(value).actions;
+    const guardsContent = JSON.parse(value).guards
+    actions = {}
+    guards = {}
+    for (const key in actionsContent) {
+      actions[key] = eval(actionsContent[key]);
+    }
+    for (const key in guardsContent) {
+      guards[key] = eval(guardsContent[key]);
+    }
 
-// 序列化快照
-const serializedSnapshot = JSON.stringify(persistedSnapshot);
-console.log('Serialized Persisted Snapshot:', serializedSnapshot);
+    console.log(actions)
+    console.log(guards)
 
-// 反序列化快照
-const deserializedSnapshot = JSON.parse(serializedSnapshot);
-// 模拟重新加载状态机并导入快照
-const newActor = createMachine(machine,{
-  snapshot: deserializedSnapshot
-});
+    const loginMachine = createMachine(
+      stateMachine,
+      {
+        actions: actions,
+        guards: guards,
+      }
+    )
 
-console.log('Restored Persisted Snapshot:', newActor.getPersistedSnapshot());
+    // console.log(stateMachineDescription)
 
-// 启动新的 actor
-newActor.start();
+    const actor = createActor(loginMachine, {
+      input: {
+        username: "",
+        password: ""
+      }
+    })
+    actor.start();
 
-// 继续发送事件
-newActor.send({type:'TIMER'}); // 从 red -> green
-newActor.send({type:'POWER_OUTAGE'}); // 从 operational -> offline
+    console.log(actor.getSnapshot().value)
 
-// 获取新的持久化快照
-const finalPersistedSnapshot = newActor.getPersistedSnapshot();
-console.log('Final Persisted Snapshot:', JSON.stringify(finalPersistedSnapshot));
+    actor.send({
+      type: 'LOGIN',
+      username: 'admin',
+      password: '123456'
+    });
+
+    console.log(actor.getSnapshot().value, actor.getSnapshot().context)
+
+    const tempSnapshot = actor.getPersistedSnapshot()
+
+    console.log(tempSnapshot)
+
+    actor.stop()
+
+
+    // // from 断点
+
+    const newActor = createActor(loginMachine, {
+      snapshot: tempSnapshot,
+    })
+
+    // snapshot 优先级 比 input高
+
+    newActor.start()
+
+    console.log(newActor.getSnapshot().value, newActor.getSnapshot().context)
+
+    newActor.send({ type: "RESOLVE" })
+
+    console.log(newActor.getSnapshot().value, newActor.getSnapshot().context)
+
+  }
+);
+
+
+
+
