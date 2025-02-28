@@ -962,6 +962,14 @@ const ExecutionPage = (props) => {
 			>
 				Refresh
 			</Button>
+			<Button
+				onClick={() => {
+					syncFireflyData();
+					renderSvg();
+				}}
+			>
+				Refresh
+			</Button>
 		</div>
 	);
 };

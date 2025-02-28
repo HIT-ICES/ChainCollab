@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { Card, Row, Col, Button, Steps, Modal, Table, Select, Input } from "antd"
 import { useLocation, useNavigate } from "react-router-dom";
 import { retrieveBPMN, packageBpmn, updateBPMNStatus, updateBpmnEnv, updateBPMNFireflyUrl, updateBpmnEvents } from "@/api/externalResource"
-import { generateChaincode, getMessagesByBpmnContent } from "@/api/translator"
+import { generateChaincode, generateStatechartCode, getMessagesByBpmnContent } from "@/api/translator"
 import { useAvaliableEnvs, useBpmnDetailData } from "./hooks"
 import axios from "axios"
 const steps = [
@@ -40,6 +40,9 @@ const BPMNOverview = () => {
     const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
     const [chainCodeContentForModify, setChainCodeContentForModify] = useState("");
     const [ffiContentForModify, setFFIContentForModify] = useState("");
+
+    const [statechartMainContentForModify, setStatechartMainContentForModify] = useState("");
+    const [statechartAdditionalContentForModify, setStatechartAdditionalContentForModify] = useState("");
 
 
     const navigate = useNavigate();
@@ -105,7 +108,7 @@ const BPMNOverview = () => {
     const ModifyModal = () => {
 
         const onModify = async () => {
-            await packageBpmn(chainCodeContentForModify, ffiContentForModify, currentOrgId, bpmnId);
+            await packageBpmn(statechartMainContentForModify, statechartAdditionalContentForModify, chainCodeContentForModify, ffiContentForModify, currentOrgId, bpmnId);
             refetchBpmn()
             setButtonLoading(false);
         }
@@ -146,6 +149,28 @@ const BPMNOverview = () => {
                         height: "300px",
                     }}
                 />
+                <h2>Xstate statechart JSON</h2>
+                <Input.TextArea
+                    value={statechartMainContentForModify}
+                    onChange={(e) => {
+                        setStatechartMainContentForModify(e.target.value);
+                    }}
+                    style={{
+                        width: "1000px",
+                        height: "300px",
+                    }}
+                />
+                <h2>Xstate statechart additionalCode</h2>
+                <Input.TextArea
+                    value={statechartAdditionalContentForModify}
+                    onChange={(e) => {
+                        setStatechartAdditionalContentForModify(e.target.value);
+                    }}
+                    style={{
+                        width: "1000px",
+                        height: "300px",
+                    }}
+                />
             </Modal>
         )
     }
@@ -155,10 +180,20 @@ const BPMNOverview = () => {
             setButtonLoading(true);
             const bpmn = await retrieveBPMN(bpmnId);
             const res = await generateChaincode(bpmn.bpmnContent);
+            const statechart_res = await generateStatechartCode(bpmn.bpmnContent);
+
+            const mainMachine = statechart_res.mainCode;
+            const additionalCode = statechart_res.additionalCode;
+
+            setStatechartMainContentForModify(mainMachine);
+            setStatechartAdditionalContentForModify(additionalCode);
+
             const chaincode_content = res.bpmnContent;
             const ffi_content = res.ffiContent;
+
             setChainCodeContentForModify(chaincode_content);
             setFFIContentForModify(ffi_content);
+
             setIsModifyModalOpen(true);
             // await packageBPMN(chaincode_content, ffi_content, bpmnInstanceId, currentOrgId);
             // syncInstance()

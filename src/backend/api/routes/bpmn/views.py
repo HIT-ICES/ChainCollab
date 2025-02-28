@@ -149,6 +149,8 @@ class BPMNViewsSet(viewsets.ModelViewSet):
             orgid = request.data.get("orgId")
             chaincodeContent = request.data.get("chaincodeContent")
             ffiContent = request.data.get("ffiContent")
+            statechartMainContentForModify = request.data.get("statechartMainContentForModify")
+            statechartAdditionalContentForModify = request.data.get("statechartAdditionalContentForModify")
             bpmn = BPMN.objects.get(pk=bpmn_id)
             env_id = bpmn.environment.id
 
@@ -185,6 +187,8 @@ class BPMNViewsSet(viewsets.ModelViewSet):
             bpmn.chaincode_content = chaincodeContent
             bpmn.chaincode = chaincode
             bpmn.status = "Generated"
+            bpmn.statechartMainContent = statechartMainContentForModify
+            bpmn.statechartAdditionalContent = statechartAdditionalContentForModify
             # consortium = consortium,
             bpmn.save()
 

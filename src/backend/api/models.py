@@ -1238,6 +1238,17 @@ class BPMN(models.Model):
         null=True,
         on_delete=models.CASCADE,
     )
+    statechartMainContent = models.TextField(
+        help_text="statechart json file part",
+        null=True,
+        blank=True,
+    )
+    statechartAdditionalContent = models.TextField(
+        help_text="statechart js file part",
+        null=True,
+        blank=True,
+    )
+    
 
 
 class BPMNInstance(models.Model):

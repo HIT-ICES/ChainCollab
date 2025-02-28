@@ -18,6 +18,22 @@ export const generateChaincode = async (bpmnContent: string) => {
     }
 }
 
+export const generateStatechartCode = async (bpmnContent: string) => {
+    try {
+        const res = await translatorAPI.post(`/statechart/generate`, {
+            bpmnContent: bpmnContent,
+            // participantMspMap: mapInfo
+        })
+        return {
+            mainCode: res.data.statechartMainContent,
+            additionalCode: res.data.statechartAdditionalContent,
+            timeCost: res.data.timeCost
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 export const getParticipantsByContent = async (bpmnContent: string) => {
     try {
         const response = await translatorAPI.post(`/chaincode/getPartByBpmnC`, {

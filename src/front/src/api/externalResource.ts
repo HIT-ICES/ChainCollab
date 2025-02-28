@@ -215,11 +215,13 @@ export const getMapInfoofBPMNInstance = async (bpmnInstanceId: string, bpmnId: s
     }
 }
 
-export const packageBpmn = async (chaincodeContent: string, ffiContent: string, orgId: string, bpmnId: string, consortiumId: string = '1') => {
+export const packageBpmn = async (statechartMainContentForModify:string, statechartAdditionalContentForModify:string, chaincodeContent: string, ffiContent: string, orgId: string, bpmnId: string, consortiumId: string = '1') => {
     try {
         const response = await api.post(`/consortiums/${consortiumId}/bpmns/${bpmnId}/package`, {
             chaincodeContent: chaincodeContent,
             ffiContent: ffiContent,
+            statechartMainContentForModify: statechartMainContentForModify,
+            statechartAdditionalContentForModify: statechartAdditionalContentForModify,
             orgId: orgId
         })
         return response.data;
