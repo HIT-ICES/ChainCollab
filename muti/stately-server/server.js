@@ -86,7 +86,7 @@ app.post("/transition", (req, res) => {
 		);
 		*/
 		
-		const machine = createMachine(machineDescription,additionalContent);
+		const machine = createMachine(machineDescription, additionalContent);
 
 
 		const service = interpret(machine).onTransition((state) => {

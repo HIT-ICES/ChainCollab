@@ -3,6 +3,7 @@ import elementReferenceProperty from 'bpmn-js-properties-panel/lib/provider/bpmn
 import entryFactory from 'bpmn-js-properties-panel/lib/factory/EntryFactory';
 import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
 
+
 export default function MessageDefinition(group, element, bpmnFactory, messageEventDefinition) {
 
   // Technically, the eventDefinitionReference function is only meant for events, however, it works well for our purpose, too.

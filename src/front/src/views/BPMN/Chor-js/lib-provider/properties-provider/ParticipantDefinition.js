@@ -1,5 +1,3 @@
-import eventDefinitionReference from "bpmn-js-properties-panel/lib/provider/bpmn/parts/implementation/EventDefinitionReference";
-import elementReferenceProperty from "bpmn-js-properties-panel/lib/provider/bpmn/parts/implementation/ElementReferenceProperty";
 import {stringProperty} from './PropertiesTool'
 
 export default function participantDefinition(
