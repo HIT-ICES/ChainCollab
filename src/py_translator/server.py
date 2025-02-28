@@ -12,6 +12,8 @@ from dmn_parser.parser import DMNParser
 from choreography_parser.parser import Choreography
 from choreography_parser.elements import NodeType
 
+import statechart_translator.translate_bpmn2json
+
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -24,10 +26,18 @@ app.add_middleware(
 class ChaincodeGenerateParams(BaseModel):
     bpmnContent: str
 
+class StatechartGenerateParams(BaseModel):
+    bpmnContent: str
+
 
 class ChaincodeGenerateResponse(BaseModel):
     bpmnContent: str
     ffiContent: str
+    timecost: str = None
+
+class StatechartGenerateResponse(BaseModel):
+    statechartMainContent: str
+    statechartAdditionalContent: str
     timecost: str = None
 
 
@@ -37,6 +47,11 @@ async def generate_chaincode(params: ChaincodeGenerateParams):
     chaincode = translator.generate_chaincode()
     ffi = translator.generate_ffi()
     return ChaincodeGenerateResponse(bpmnContent=chaincode, ffiContent=ffi)
+
+@app.post("/api/v1/statechart/generate")
+async def generate_statechart(params: ChaincodeGenerateParams):
+    statechartMainContent,statechartAdditionalContent = statechart_translator.translate_bpmn2json.translate_bpmn2json("MainMachine",params.bpmnContent)
+    return StatechartGenerateResponse(statechartMainContent=statechartMainContent, statechartAdditionalContent=statechartAdditionalContent)
 
 
 class ChaincodePartParams(BaseModel):

@@ -8,7 +8,6 @@ const { createMachine, interpret, assign } = require("xstate");
 //使用v4版本的xstate
 
 
-
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
@@ -127,3 +126,6 @@ const PORT = 3001;
 app.listen(PORT, () => {
 	console.log(`State Machine API is running on http://localhost:${PORT}`);
 });
+
+
+
