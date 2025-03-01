@@ -4,6 +4,7 @@ import ReactDOM from "react-dom";
 import { createMachine, assign } from "xstate";
 import { useMachine } from "@xstate/react";
 import { inspect } from "@xstate/inspect";
+import { interpret } from 'xstate/lib/interpreter';
 
 inspect({
   url: "https://statecharts.io/inspect",
@@ -1436,7 +1437,66 @@ export const machine = createMachine(
 );
 
 function App() {
-  const [state, send] = useMachine(machine, { devTools: true });
+  //const [state1, send] = useMachine(machine, { devTools: true });
+
+  const service1 = interpret(machine)
+  .onEvent(event => {
+    console.log('监听到事件:', event);
+  })
+  .start();
+
+
+
+  
+  const service2 = interpret(machine2,{ devTools: true }).start();
+  while(true){
+    service2.send(event1)
+  }
+  
+
+  
+  
+
+  //const snapshot = { 
+  //  value:{
+  //    "Goods Order Request":"wait for confirm"
+  //  }
+  //}
+
+  //service.send(snapshot);
+
+  /*service.state = {
+    "actions": [],
+    "activities": {},
+    "meta": {},
+    "events": [],
+    "value": {
+        "Goods Order Request": "wait for confirm"
+    },
+    "context": {
+        "mem1_p1": false,
+        "mem2_p1": false,
+        "mem3_p1": false,
+        "confirmation1_loop": 1,
+        "confirmation1_loopMax": 3,
+        "finalPriority": ""
+    },
+    "_event": {
+        "name": "xstate.init",
+        "data": {
+            "type": "xstate.init"
+        },
+        "$$type": "scxml",
+        "type": "external"
+    },
+    "_sessionid": "x:0",
+    "event": {
+        "type": "xstate.init"
+    },
+    "children": {},
+    "done": false,
+    "tags": []
+}*/
 
   return (
     <div className="App">

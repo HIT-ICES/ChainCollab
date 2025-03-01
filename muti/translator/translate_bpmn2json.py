@@ -84,10 +84,10 @@ from enum import Enum
 import json
 from snippet_1 import XstateJSONElement
 
-from muti.translator.choreography_parser.parser import Choreography
+from choreography_parser.parser import Choreography
 from pprint import pprint
 from copy import deepcopy
-from muti.translator.choreography_parser.elements import (
+from choreography_parser.elements import (
     Element,
     StartEvent,
     ParallelGateway,

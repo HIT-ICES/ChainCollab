@@ -1,1 +1,28 @@
-{"actions": {"set_MessageGlobal_finalPriority": "assign({finalPriority: (context,event) => event.values.finalPriority})", "lock_Participant_19j1e3o": "assign({Participant_19j1e3o_locked:true})", "activate_Participant_19j1e3o_machine_1": "assign({Participant_19j1e3o_machine_1:true})", "activate_Participant_19j1e3o_machine_2": "assign({Participant_19j1e3o_machine_2:true})", "Message_0i5t589_LoopAdd": "assign({Message_0i5t589_loop: (context) => context.Message_0i5t589_loop + 1})", "Message_0d2xte5_LoopAdd": "assign({Message_0d2xte5_loop: (context) => context.Message_0d2xte5_loop + 1})"}, "services": {}, "guards": {"Participant_19j1e3o_isLocked": "(context, event) => {return context.Participant_19j1e3o_locked;}", "Participant_19j1e3o_isNotLocked": "(context, event) => {return !context.Participant_19j1e3o_locked;}", "active_Participant_19j1e3o_machine_1": "(context, event) => {return context.Participant_19j1e3o_machine_1;}", "inactive_Participant_19j1e3o_machine_1": "(context, event) => {return !context.Participant_19j1e3o_machine_1;}", "active_Participant_19j1e3o_machine_2": "(context, event) => {return context.Participant_19j1e3o_machine_2;}", "inactive_Participant_19j1e3o_machine_2": "(context, event) => {return !context.Participant_19j1e3o_machine_2;}", "Message_0i5t589_NotLoopMax": "(context, event) => {return context.Message_0i5t589_loop !== context.Message_0i5t589_loopMax;}", "Message_0i5t589_LoopMax": "(context, event) => {return context.Message_0i5t589_loop === context.Message_0i5t589_loopMax;}", "Message_0i5t589_LoopConditionMeet": "(context, event) => {return context.true;}", "Gateway_0ep8cuh__Message_1oxmq1k": "(context, event) => {return context.finalPriority==\"Low\";}", "Gateway_0ep8cuh__Message_0d2xte5": "(context, event) => {return context.finalPriority==\"VeryLow\";}", "Gateway_1cr0nma__Event_13pbqdz": "(context, event) => {return true;}", "Message_0d2xte5_NotLoopMax": "(context, event) => {return context.Message_0d2xte5_loop !== context.Message_0d2xte5_loopMax;}", "Message_0d2xte5_LoopMax": "(context, event) => {return context.Message_0d2xte5_loop === context.Message_0d2xte5_loopMax;}"}, "delays": {}}
+{
+    "actions": {
+        "set_MessageGlobal_finalPriority": "assign({finalPriority: ({context, event}) => event.values.finalPriority})",
+        "lock_Participant_19j1e3o": "assign({Participant_19j1e3o_locked:true})",
+        "activate_Participant_19j1e3o_machine_1": "assign({Participant_19j1e3o_machine_1:true})",
+        "activate_Participant_19j1e3o_machine_2": "assign({Participant_19j1e3o_machine_2:true})",
+        "Message_0i5t589_LoopAdd": "assign({Message_0i5t589_loop: ({context}) => context.Message_0i5t589_loop + 1})",
+        "Message_0d2xte5_LoopAdd": "assign({Message_0d2xte5_loop: ({context}) => context.Message_0d2xte5_loop + 1})"
+    },
+    "services": {},
+    "guards": {
+        "Participant_19j1e3o_isLocked": "({context, event},params) => {return context.Participant_19j1e3o_locked;}",
+        "Participant_19j1e3o_isNotLocked": "({context, event},params) => {return !context.Participant_19j1e3o_locked;}",
+        "active_Participant_19j1e3o_machine_1": "({context, event},params) => {return context.Participant_19j1e3o_machine_1;}",
+        "inactive_Participant_19j1e3o_machine_1": "({context, event},params) => {return !context.Participant_19j1e3o_machine_1;}",
+        "active_Participant_19j1e3o_machine_2": "({context, event},params) => {return context.Participant_19j1e3o_machine_2;}",
+        "inactive_Participant_19j1e3o_machine_2": "({context, event},params) => {return !context.Participant_19j1e3o_machine_2;}",
+        "Message_0i5t589_NotLoopMax": "({context, event},params) => {return context.Message_0i5t589_loop !== context.Message_0i5t589_loopMax;}",
+        "Message_0i5t589_LoopMax": "({context, event},params) => {return context.Message_0i5t589_loop === context.Message_0i5t589_loopMax;}",
+        "Message_0i5t589_LoopConditionMeet": "({context, event},params) => {return context.true;}",
+        "Gateway_0ep8cuh__Message_1oxmq1k": "({context, event},params) => {return context.finalPriority==\"Low\";}",
+        "Gateway_0ep8cuh__Message_0d2xte5": "({context, event},params) => {return context.finalPriority==\"VeryLow\";}",
+        "Gateway_1cr0nma__Event_13pbqdz": "({context, event},params) => {return true;}",
+        "Message_0d2xte5_NotLoopMax": "({context, event},params) => {return context.Message_0d2xte5_loop !== context.Message_0d2xte5_loopMax;}",
+        "Message_0d2xte5_LoopMax": "({context, event},params) => {return context.Message_0d2xte5_loop === context.Message_0d2xte5_loopMax;}"
+    },
+    "delays": {}
+}
