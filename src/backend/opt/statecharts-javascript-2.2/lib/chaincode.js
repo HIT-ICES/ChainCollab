@@ -1,16 +1,15 @@
-'use strict';
-
 const { Contract } = require('fabric-contract-api');
 const { createMachine, createActor, assign } = require('xstate');
 
 class StateMachineContract extends Contract {
-    async get_default_snapshot(ctx, machineDescriptionStr, additionalContentStr) {
+    async GetDefaultSnapshot(ctx, machineDescriptionStr, additionalContentStr) {
         try {
             const machineDescription = JSON.parse(machineDescriptionStr);
             const additionalContent = JSON.parse(additionalContentStr);
 
             const actionsContent = additionalContent.actions;
             const guardsContent = additionalContent.guards;
+            
             const actions = {};
             const guards = {};
 
@@ -30,22 +29,21 @@ class StateMachineContract extends Contract {
             )
 
             const actor = createActor(BPMNMachione, {})
-
             const snapshot = actor.getPersistedSnapshot();
-
             return JSON.stringify(snapshot);
         } catch (error) {
             throw new Error(`Error getting default snapshot: ${error.message}`);
         }
     }
 
-    async executeStateMachine(ctx, machineDescriptionStr, additionalContentStr, snapshotStr, eventStr) {
+    async ExecuteStateMachine(ctx, machineDescriptionStr, additionalContentStr, snapshotStr, eventStr) {
         try {
             const machineDescription = JSON.parse(machineDescriptionStr);
             const additionalContent = JSON.parse(additionalContentStr);
 
             const actionsContent = additionalContent.actions;
             const guardsContent = additionalContent.guards;
+            
             const actions = {};
             const guards = {};
 

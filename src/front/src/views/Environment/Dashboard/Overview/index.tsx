@@ -109,17 +109,17 @@ const Overview: React.FC = () => {
     setSync()
     await StartFireflyForEnv(currentEnvId)
     setSync()
-    await InstallOracle(currentOrgId, currentEnvId)
-    // register interface
-    const oracleFFI = await requestOracleFFI()
-    const res = await registerInterface(systemFireflyURL,oracleFFI.ffiContent, "Oracle")
-    await new Promise((resolve, reject) => {
-      setTimeout(resolve, 5000)
-    })
-    const res2 = await registerAPI(systemFireflyURL, "Oracle", "default", "Oracle", res.id)
-    setSync()
-    await InstallDmnEngine(currentOrgId, currentEnvId)
-    setSync()
+    // await InstallOracle(currentOrgId, currentEnvId)
+    // // register interface
+    // const oracleFFI = await requestOracleFFI()
+    // const res = await registerInterface(systemFireflyURL,oracleFFI.ffiContent, "Oracle")
+    // await new Promise((resolve, reject) => {
+    //   setTimeout(resolve, 5000)
+    // })
+    // const res2 = await registerAPI(systemFireflyURL, "Oracle", "default", "Oracle", res.id)
+    // setSync()
+    // await InstallDmnEngine(currentOrgId, currentEnvId)
+    // setSync()
     await InstallStateChartEngine(currentOrgId, currentEnvId)
     setSync()
     setSetupComponentLoading(false)
