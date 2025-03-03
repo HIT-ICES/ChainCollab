@@ -46,7 +46,7 @@ class XstateJSONElement:
                 {
                 "set_MessageGlobal_{key}".format(
                         key=key
-                    ): "assign({{{key}: (context,event) => event.values.{key}}})".format(
+                    ): "assign({{{key}: ({{context, event}}) => event.values.{key}}})".format(
                         key=key
                     )
                 }
@@ -81,7 +81,7 @@ class XstateJSONElement:
             newData[name]["always"].append(
                 {
                     "target": target["targetName"],
-                    "cond": name + "__" + target["targetName"],
+                    "guard": name + "__" + target["targetName"],
                     "actions": [],
                 }
             )
@@ -91,7 +91,7 @@ class XstateJSONElement:
                     + "__"
                     + target[
                         "targetName"
-                    ]: "(context, event) => {{return {condition};}}".format(
+                    ]: "({{context, event}},params) => {{return {condition};}}".format(
                         condition="context." + target["condition"] if target["condition"] else "true"
                     )
                 }
@@ -172,7 +172,7 @@ class XstateJSONElement:
                 "onDone": [
                     {
                         "target": name,
-                        "cond": name + "_NotLoopMax",
+                        "guard": name + "_NotLoopMax",
                         "actions": [
                             {
                                 "type": name + "_LoopAdd",
@@ -188,7 +188,7 @@ class XstateJSONElement:
             newData[name]["onDone"].append(
                 {
                     "target": targetName,
-                    "cond": name + "_LoopConditionMeet",
+                    "guard": name + "_LoopConditionMeet",
                     "actions": [],
                 }
             )
@@ -205,19 +205,19 @@ class XstateJSONElement:
 
         LoopAdd = {
             name
-            + "_LoopAdd": "assign({{{name}_loop: (context) => context.{name}_loop + 1}})".format(
+            + "_LoopAdd": "assign({{{name}_loop: ({{context}}) => context.{name}_loop + 1}})".format(
                 name=name
             ),
         }
         ConditionLoopNotMax = {
             name
-            + "_NotLoopMax": "(context, event) => {{return context.{name}_loop !== context.{name}_loopMax;}}".format(
+            + "_NotLoopMax": "({{context, event}},params) => {{return context.{name}_loop !== context.{name}_loopMax;}}".format(
                 name=name
             ),
         }
         ConditionLoopMax = {
             name
-            + "_LoopMax": "(context, event) => {{return context.{name}_loop === context.{name}_loopMax;}}".format(
+            + "_LoopMax": "({{context, event}},params) => {{return context.{name}_loop === context.{name}_loopMax;}}".format(
                 name=name
             ),
         }
@@ -225,7 +225,7 @@ class XstateJSONElement:
         # TODO:这边==问题，先不管了。
         LoopConditionMeet = {
             name
-            + "_LoopConditionMeet": "(context, event) => {{return context.{expression};}}".format(
+            + "_LoopConditionMeet": "({{context, event}},params) => {{return context.{expression};}}".format(
                 expression=LoopConditionExpression
             ),
         }
@@ -242,7 +242,7 @@ class XstateJSONElement:
             newData[name]["onDone"].append(
                 {
                     "target": targetName,
-                    "cond": name + "_LoopMax",
+                    "guard": name + "_LoopMax",
                     "actions": [],
                 }
             )
@@ -330,7 +330,7 @@ class XstateJSONElement:
                 name
                 + "_setDMNResult_{key}".format(
                     key=key
-                ): "assign({{{key}: (context,event) => event.values.{key}}})".format(
+                ): "assign({{{key}: ({{context, event}}) => event.values.{key}}})".format(
                     name=name, key=key
                 )
                 for key in DMNOutput
@@ -409,7 +409,7 @@ class XstateJSONElement:
                         "always": [
                             {
                                 "target": name+"_firstTime",
-                                "cond": participantName+"_isNotLocked",
+                                "guard": participantName+"_isNotLocked",
                                 "actions": [
                                     {
                                         "type": "lock_"+participantName,
@@ -418,7 +418,7 @@ class XstateJSONElement:
                             },
                             {
                                 "target": name,
-                                "cond": participantName+"_isLocked",
+                                "guard": participantName+"_isLocked",
                                 "actions": [],
                             },
                         ],
@@ -434,12 +434,12 @@ class XstateJSONElement:
         self.mainMachine["context"].update({participantName+"_locked": False})
         self.additionalContent["guards"].update(
             {
-                participantName+"_isLocked": "(context, event) => {return context."+participantName+"_locked;}",
+                participantName+"_isLocked": "({context, event},params) => {return context."+participantName+"_locked;}",
             }
         )
         self.additionalContent["guards"].update(
             {
-                participantName+"_isNotLocked": "(context, event) => {return !context."+participantName+"_locked;}",
+                participantName+"_isNotLocked": "({context, event},params) => {return !context."+participantName+"_locked;}",
             }
         )
         self.additionalContent["actions"].update(
@@ -478,12 +478,12 @@ class XstateJSONElement:
                 self.mainMachine["context"].update({participantName+"_machine_" + str(index): False})
                 self.additionalContent["guards"].update(
                     {
-                        "active_"+participantName+"_machine_" + str(index): "(context, event) => {return context."+participantName+"_machine_" + str(index)+";}",
+                        "active_"+participantName+"_machine_" + str(index): "({context, event},params) => {return context."+participantName+"_machine_" + str(index)+";}",
                     }
                 )
                 self.additionalContent["guards"].update(
                     {
-                        "inactive_"+participantName+"_machine_" + str(index): "(context, event) => {return !context."+participantName+"_machine_" + str(index)+";}",
+                        "inactive_"+participantName+"_machine_" + str(index): "({context, event},params) => {return !context."+participantName+"_machine_" + str(index)+";}",
                     }
                 )
                 self.additionalContent["actions"].update(
@@ -557,12 +557,12 @@ class XstateJSONElement:
                                     "always": [
                                         {
                                             "target": "enable",
-                                            "cond": "active_" + participantName + "_machine_" + str(index),
+                                            "guard": "active_" + participantName + "_machine_" + str(index),
                                             "actions": [],
                                         },
                                         {
                                             "target": "locked_done",
-                                            "cond": "inactive_"
+                                            "guard": "inactive_"
                                             + participantName
                                             + "_machine_"
                                             + str(index),

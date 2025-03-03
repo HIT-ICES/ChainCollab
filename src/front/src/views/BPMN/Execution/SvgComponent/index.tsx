@@ -968,7 +968,7 @@ const ExecutionPage = (props) => {
 					renderSvg();
 				}}
 			>
-				Refresh
+				StateCharts Detail
 			</Button>
 		</div>
 	);
