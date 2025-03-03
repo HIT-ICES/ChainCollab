@@ -23,6 +23,7 @@ from api.config import (
     CURRENT_IP,
     ORACLE_CONTRACT_PATH,
     DMN_CONTRACT_PATH,
+    STATE_ENGINE_CONTRACT_PATH
 )
 from api.utils.test_time import timeitwithname
 from .utils import (
@@ -638,6 +639,60 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         )
 
         env.DMN_status = "CHAINCODEINSTALLED"
+        env.save()
+
+        return Response(status=status.HTTP_200_OK)
+
+    @action(methods=["post"], detail=True, url_path="install_state_engine")
+    def install_state_chart_engine(self, request, pk=None, *args, **kwargs):
+        """
+        启动State Chart Engine: 部署合约
+        """
+        try:
+            env = Environment.objects.get(pk=pk)
+        except Environment.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if env.status != "ACTIVATED":
+            return Response(
+                {"message": "Environment has not been activated or has started"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        headers = request.headers
+        org_id = request.data.get("org_id")
+
+        chaincode_id = packageChaincodeForEnv(
+            env_id=env.id,
+            file_path=STATE_ENGINE_CONTRACT_PATH + "/state-chart-engine.zip",
+            chaincode_name="StateChartEngine",
+            version="1.0",
+            org_id=org_id,
+            auth=headers["Authorization"],
+            language="java",
+        )
+
+        installChaincodeForEnv(
+            env_id=env.id,
+            chaincode_id=chaincode_id,
+            auth=headers["Authorization"],
+        )
+
+        approveChaincodeForEnv(
+            env_id=env.id,
+            channel_name=DEFAULT_CHANNEL_NAME,
+            chaincode_name="StateChartEngine",
+            auth=headers["Authorization"],
+        )
+
+        commmitChaincodeForEnv(
+            env_id=env.id,
+            channel_name=DEFAULT_CHANNEL_NAME,
+            chaincode_name="StateChartEngine",
+            auth=headers["Authorization"],
+        )
+
+        env.StateChart_status = "CHAINCODEINSTALLED"
         env.save()
 
         return Response(status=status.HTTP_200_OK)

@@ -140,6 +140,17 @@ export const InstallDmnEngine = async (orgId: string, envId: string) => {
     }
 }
 
+export const InstallStateChartEngine = async (orgId: string, envId: string) => {
+    try {
+        const response = await api.post(`/environments/${envId}/install_state_engine`, {
+            org_id: orgId
+        })
+        return response.data;
+    } catch (error) {
+        return error;
+    }
+}
+
 export const requestOracleFFI = async () => {
     try {
         const response = await api.get(`/environments/requestOracleFFI`)

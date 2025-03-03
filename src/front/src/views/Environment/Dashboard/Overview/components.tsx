@@ -8,6 +8,8 @@ import { purple } from "@mui/material/colors";
 import FireflyIcon from "@/assets/icons/fireflyIcon.svg"
 import OracleIcon from "@/assets/icons/oracleIcon.svg"
 import DmnIcon from "@/assets/icons/dmnIcon.svg"
+import stateEngineIcon from "@/assets/icons/stateEngineIcon.svg"
+import Chaincode from '../../Fabric/Chaincode';
 
 
 const { Title, Text } = Typography;
@@ -135,6 +137,18 @@ export const DMNComponentCard = ({
     <CustomCard
       color="#ffaa00"
       logo={<img src={DmnIcon} alt="firefly" style={{ width: 100, height: 100 }} />} title="DMN" status={[
+        { key: "ChainCode", value: ChaincodeStatus }
+      ]} />
+  );
+}
+
+export const StateChartEngineCard = ({
+  ChaincodeStatus = false
+}) => {
+  return (
+    <CustomCard
+      color="#FF6663"
+      logo={<img src={stateEngineIcon} alt="firefly" style={{ width: 100, height: 100 }} />} title="StateChartEngine" status={[
         { key: "ChainCode", value: ChaincodeStatus }
       ]} />
   );
