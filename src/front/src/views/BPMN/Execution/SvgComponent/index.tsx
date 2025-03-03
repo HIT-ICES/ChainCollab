@@ -964,8 +964,6 @@ const ExecutionPage = (props) => {
 			</Button>
 			<Button
 				onClick={() => {
-					syncFireflyData();
-					renderSvg();
 				}}
 			>
 				StateCharts Detail
