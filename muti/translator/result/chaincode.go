@@ -686,13 +686,17 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 		return "", fmt.Errorf("failed to unmarshal. %s", err.Error())
 	}
 
+	res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default", stateCharts.EncodeGetDefaultSnapshotArgs(initParameters.StateMachineDescription))
+
+	initialSnapshot := stateCharts.DecodeGetDefaultSnapshotResult(res)
+
 	instance := ContractInstance{
 		InstanceID:              instanceID,
 		InstanceStateMemory:     StateMemory{},
 		InstanceMessages:        make(map[string]*CollectiveMessage),
 		InstanceParticipants:    make(map[string]*CollectiveParticipant),
 		InstanceBusinessRules:   make(map[string]*BusinessRule),
-		CurrentState:            "",
+		CurrentState:            initialSnapshot,
 		StateMachineDescription: initParameters.StateMachineDescription,
 	}
 
@@ -788,7 +792,7 @@ func (cc *SmartContract) Event_06sexe6(ctx contractapi.TransactionContextInterfa
 	eventJsonString := string(eventJsonBytes)
 
 	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts", "default",
-		stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
 
 	if err != nil {
 		return err
@@ -955,12 +959,12 @@ func (cc *SmartContract) Message_1wswgqu_Send(ctx contractapi.TransactionContext
 			collectiveMsg.Messages[key1] = make(map[string]Message)
 		}
 
-		if len(collectiveMsg.Messages[key1]) >= sendParticipant.MultiMaximum {
+		if len(collectiveMsg.Messages[key1]) >= receiveParticipant.MultiMaximum {
 			fmt.Println("The number of messages sent by the participant exceeds the maximum")
 			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
 		}
 
-		for i := 0; i < sendParticipant.MultiMaximum; i++ {
+		for i := 0; i < receiveParticipant.MultiMaximum; i++ {
 			key2 := fmt.Sprintf("%d", i)
 			newAtomicMsg := Message{
 				MessageID:             collectiveMsgName,
@@ -990,7 +994,7 @@ func (cc *SmartContract) Message_1wswgqu_Send(ctx contractapi.TransactionContext
 
 	for _, event := range eventsToTrigger {
 		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, event))
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
@@ -1007,7 +1011,7 @@ func (cc *SmartContract) Message_1wswgqu_Send(ctx contractapi.TransactionContext
 	return nil
 }
 
-func (cc *SmartContract) Message_1wswgqu_Complete(ctx contractapi.TransactionContextInterface, targetTaskID int, ConfirmTargetX509 string, instanceID string) error {
+func (cc *SmartContract) Message_1wswgqu_Complete(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, ConfirmTargetX509 string) error {
 	stub := ctx.GetStub()
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
@@ -1166,7 +1170,7 @@ func (cc *SmartContract) Message_1wswgqu_Complete(ctx contractapi.TransactionCon
 
 	for _, event := range eventsToTrigger {
 		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, event))
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
 		if err != nil {
 			return err
 		}
@@ -1253,7 +1257,7 @@ func (cc *SmartContract) Message_1wswgqu_Advance(
 	eventJsonString := string(eventJsonBytes)
 
 	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
@@ -1292,7 +1296,7 @@ func (cc *SmartContract) Gateway_0onpe6x(ctx contractapi.TransactionContextInter
 	eventJsonString := string(eventJsonBytes)
 
 	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
 
 	if err != nil {
 		return err
@@ -1458,12 +1462,12 @@ func (cc *SmartContract) Message_0cba4t6_Send(ctx contractapi.TransactionContext
 			collectiveMsg.Messages[key1] = make(map[string]Message)
 		}
 
-		if len(collectiveMsg.Messages[key1]) >= sendParticipant.MultiMaximum {
+		if len(collectiveMsg.Messages[key1]) >= receiveParticipant.MultiMaximum {
 			fmt.Println("The number of messages sent by the participant exceeds the maximum")
 			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
 		}
 
-		for i := 0; i < sendParticipant.MultiMaximum; i++ {
+		for i := 0; i < receiveParticipant.MultiMaximum; i++ {
 			key2 := fmt.Sprintf("%d", i)
 			newAtomicMsg := Message{
 				MessageID:             collectiveMsgName,
@@ -1493,7 +1497,7 @@ func (cc *SmartContract) Message_0cba4t6_Send(ctx contractapi.TransactionContext
 
 	for _, event := range eventsToTrigger {
 		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, event))
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
@@ -1510,7 +1514,7 @@ func (cc *SmartContract) Message_0cba4t6_Send(ctx contractapi.TransactionContext
 	return nil
 }
 
-func (cc *SmartContract) Message_0cba4t6_Complete(ctx contractapi.TransactionContextInterface, targetTaskID int, ConfirmTargetX509 string, instanceID string) error {
+func (cc *SmartContract) Message_0cba4t6_Complete(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, ConfirmTargetX509 string) error {
 	stub := ctx.GetStub()
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
@@ -1669,7 +1673,7 @@ func (cc *SmartContract) Message_0cba4t6_Complete(ctx contractapi.TransactionCon
 
 	for _, event := range eventsToTrigger {
 		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, event))
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
 		if err != nil {
 			return err
 		}
@@ -1756,7 +1760,7 @@ func (cc *SmartContract) Message_0cba4t6_Advance(
 	eventJsonString := string(eventJsonBytes)
 
 	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
@@ -1925,12 +1929,12 @@ func (cc *SmartContract) Message_0pm90nx_Send(ctx contractapi.TransactionContext
 			collectiveMsg.Messages[key1] = make(map[string]Message)
 		}
 
-		if len(collectiveMsg.Messages[key1]) >= sendParticipant.MultiMaximum {
+		if len(collectiveMsg.Messages[key1]) >= receiveParticipant.MultiMaximum {
 			fmt.Println("The number of messages sent by the participant exceeds the maximum")
 			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
 		}
 
-		for i := 0; i < sendParticipant.MultiMaximum; i++ {
+		for i := 0; i < receiveParticipant.MultiMaximum; i++ {
 			key2 := fmt.Sprintf("%d", i)
 			newAtomicMsg := Message{
 				MessageID:             collectiveMsgName,
@@ -1960,7 +1964,7 @@ func (cc *SmartContract) Message_0pm90nx_Send(ctx contractapi.TransactionContext
 
 	for _, event := range eventsToTrigger {
 		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, event))
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
@@ -1977,7 +1981,7 @@ func (cc *SmartContract) Message_0pm90nx_Send(ctx contractapi.TransactionContext
 	return nil
 }
 
-func (cc *SmartContract) Message_0pm90nx_Complete(ctx contractapi.TransactionContextInterface, targetTaskID int, ConfirmTargetX509 string, instanceID string) error {
+func (cc *SmartContract) Message_0pm90nx_Complete(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, ConfirmTargetX509 string) error {
 	stub := ctx.GetStub()
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
@@ -2136,7 +2140,7 @@ func (cc *SmartContract) Message_0pm90nx_Complete(ctx contractapi.TransactionCon
 
 	for _, event := range eventsToTrigger {
 		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, event))
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
 		if err != nil {
 			return err
 		}
@@ -2223,7 +2227,7 @@ func (cc *SmartContract) Message_0pm90nx_Advance(
 	eventJsonString := string(eventJsonBytes)
 
 	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
@@ -2262,7 +2266,7 @@ func (cc *SmartContract) Gateway_1fbifca(ctx contractapi.TransactionContextInter
 	eventJsonString := string(eventJsonBytes)
 
 	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
 
 	if err != nil {
 		return err
@@ -2428,12 +2432,12 @@ func (cc *SmartContract) Message_0rwz1km_Send(ctx contractapi.TransactionContext
 			collectiveMsg.Messages[key1] = make(map[string]Message)
 		}
 
-		if len(collectiveMsg.Messages[key1]) >= sendParticipant.MultiMaximum {
+		if len(collectiveMsg.Messages[key1]) >= receiveParticipant.MultiMaximum {
 			fmt.Println("The number of messages sent by the participant exceeds the maximum")
 			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
 		}
 
-		for i := 0; i < sendParticipant.MultiMaximum; i++ {
+		for i := 0; i < receiveParticipant.MultiMaximum; i++ {
 			key2 := fmt.Sprintf("%d", i)
 			newAtomicMsg := Message{
 				MessageID:             collectiveMsgName,
@@ -2463,7 +2467,7 @@ func (cc *SmartContract) Message_0rwz1km_Send(ctx contractapi.TransactionContext
 
 	for _, event := range eventsToTrigger {
 		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, event))
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
@@ -2480,7 +2484,7 @@ func (cc *SmartContract) Message_0rwz1km_Send(ctx contractapi.TransactionContext
 	return nil
 }
 
-func (cc *SmartContract) Message_0rwz1km_Complete(ctx contractapi.TransactionContextInterface, targetTaskID int, ConfirmTargetX509 string, instanceID string) error {
+func (cc *SmartContract) Message_0rwz1km_Complete(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, ConfirmTargetX509 string) error {
 	stub := ctx.GetStub()
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
@@ -2639,7 +2643,7 @@ func (cc *SmartContract) Message_0rwz1km_Complete(ctx contractapi.TransactionCon
 
 	for _, event := range eventsToTrigger {
 		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, event))
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
 		if err != nil {
 			return err
 		}
@@ -2726,7 +2730,7 @@ func (cc *SmartContract) Message_0rwz1km_Advance(
 	eventJsonString := string(eventJsonBytes)
 
 	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
@@ -2897,12 +2901,12 @@ func (cc *SmartContract) Message_1io2g9u_Send(ctx contractapi.TransactionContext
 			collectiveMsg.Messages[key1] = make(map[string]Message)
 		}
 
-		if len(collectiveMsg.Messages[key1]) >= sendParticipant.MultiMaximum {
+		if len(collectiveMsg.Messages[key1]) >= receiveParticipant.MultiMaximum {
 			fmt.Println("The number of messages sent by the participant exceeds the maximum")
 			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
 		}
 
-		for i := 0; i < sendParticipant.MultiMaximum; i++ {
+		for i := 0; i < receiveParticipant.MultiMaximum; i++ {
 			key2 := fmt.Sprintf("%d", i)
 			newAtomicMsg := Message{
 				MessageID:             collectiveMsgName,
@@ -2933,7 +2937,7 @@ func (cc *SmartContract) Message_1io2g9u_Send(ctx contractapi.TransactionContext
 
 	for _, event := range eventsToTrigger {
 		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, event))
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
@@ -2962,7 +2966,7 @@ func (cc *SmartContract) Message_1io2g9u_Send(ctx contractapi.TransactionContext
 	return nil
 }
 
-func (cc *SmartContract) Message_1io2g9u_Complete(ctx contractapi.TransactionContextInterface, targetTaskID int, ConfirmTargetX509 string, instanceID string) error {
+func (cc *SmartContract) Message_1io2g9u_Complete(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, ConfirmTargetX509 string) error {
 	stub := ctx.GetStub()
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
@@ -3121,7 +3125,7 @@ func (cc *SmartContract) Message_1io2g9u_Complete(ctx contractapi.TransactionCon
 
 	for _, event := range eventsToTrigger {
 		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, event))
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
 		if err != nil {
 			return err
 		}
@@ -3208,7 +3212,7 @@ func (cc *SmartContract) Message_1io2g9u_Advance(
 	eventJsonString := string(eventJsonBytes)
 
 	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
@@ -3377,12 +3381,12 @@ func (cc *SmartContract) Message_0d2xte5_Send(ctx contractapi.TransactionContext
 			collectiveMsg.Messages[key1] = make(map[string]Message)
 		}
 
-		if len(collectiveMsg.Messages[key1]) >= sendParticipant.MultiMaximum {
+		if len(collectiveMsg.Messages[key1]) >= receiveParticipant.MultiMaximum {
 			fmt.Println("The number of messages sent by the participant exceeds the maximum")
 			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
 		}
 
-		for i := 0; i < sendParticipant.MultiMaximum; i++ {
+		for i := 0; i < receiveParticipant.MultiMaximum; i++ {
 			key2 := fmt.Sprintf("%d", i)
 			newAtomicMsg := Message{
 				MessageID:             collectiveMsgName,
@@ -3412,7 +3416,7 @@ func (cc *SmartContract) Message_0d2xte5_Send(ctx contractapi.TransactionContext
 
 	for _, event := range eventsToTrigger {
 		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, event))
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
@@ -3429,7 +3433,7 @@ func (cc *SmartContract) Message_0d2xte5_Send(ctx contractapi.TransactionContext
 	return nil
 }
 
-func (cc *SmartContract) Message_0d2xte5_Complete(ctx contractapi.TransactionContextInterface, targetTaskID int, ConfirmTargetX509 string, instanceID string) error {
+func (cc *SmartContract) Message_0d2xte5_Complete(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, ConfirmTargetX509 string) error {
 	stub := ctx.GetStub()
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
@@ -3588,7 +3592,7 @@ func (cc *SmartContract) Message_0d2xte5_Complete(ctx contractapi.TransactionCon
 
 	for _, event := range eventsToTrigger {
 		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, event))
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
 		if err != nil {
 			return err
 		}
@@ -3675,7 +3679,7 @@ func (cc *SmartContract) Message_0d2xte5_Advance(
 	eventJsonString := string(eventJsonBytes)
 
 	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
@@ -3710,7 +3714,7 @@ func (cc *SmartContract) Event_13pbqdz(ctx contractapi.TransactionContextInterfa
 	eventJsonString := string(eventJsonBytes)
 
 	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts", "default",
-		stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
 
 	if err != nil {
 		return err
@@ -3877,12 +3881,12 @@ func (cc *SmartContract) Message_1oxmq1k_Send(ctx contractapi.TransactionContext
 			collectiveMsg.Messages[key1] = make(map[string]Message)
 		}
 
-		if len(collectiveMsg.Messages[key1]) >= sendParticipant.MultiMaximum {
+		if len(collectiveMsg.Messages[key1]) >= receiveParticipant.MultiMaximum {
 			fmt.Println("The number of messages sent by the participant exceeds the maximum")
 			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
 		}
 
-		for i := 0; i < sendParticipant.MultiMaximum; i++ {
+		for i := 0; i < receiveParticipant.MultiMaximum; i++ {
 			key2 := fmt.Sprintf("%d", i)
 			newAtomicMsg := Message{
 				MessageID:             collectiveMsgName,
@@ -3912,7 +3916,7 @@ func (cc *SmartContract) Message_1oxmq1k_Send(ctx contractapi.TransactionContext
 
 	for _, event := range eventsToTrigger {
 		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, event))
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
@@ -3929,7 +3933,7 @@ func (cc *SmartContract) Message_1oxmq1k_Send(ctx contractapi.TransactionContext
 	return nil
 }
 
-func (cc *SmartContract) Message_1oxmq1k_Complete(ctx contractapi.TransactionContextInterface, targetTaskID int, ConfirmTargetX509 string, instanceID string) error {
+func (cc *SmartContract) Message_1oxmq1k_Complete(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, ConfirmTargetX509 string) error {
 	stub := ctx.GetStub()
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
@@ -4088,7 +4092,7 @@ func (cc *SmartContract) Message_1oxmq1k_Complete(ctx contractapi.TransactionCon
 
 	for _, event := range eventsToTrigger {
 		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, event))
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
 		if err != nil {
 			return err
 		}
@@ -4175,7 +4179,7 @@ func (cc *SmartContract) Message_1oxmq1k_Advance(
 	eventJsonString := string(eventJsonBytes)
 
 	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
@@ -4214,7 +4218,7 @@ func (cc *SmartContract) Gateway_1cr0nma(ctx contractapi.TransactionContextInter
 	eventJsonString := string(eventJsonBytes)
 
 	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
 
 	if err != nil {
 		return err
@@ -4250,7 +4254,7 @@ func (cc *SmartContract) Gateway_0ep8cuh(ctx contractapi.TransactionContextInter
 	eventJsonString := string(eventJsonBytes)
 
 	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
 
 	if err != nil {
 		return err
@@ -4416,12 +4420,12 @@ func (cc *SmartContract) Message_0i5t589_Send(ctx contractapi.TransactionContext
 			collectiveMsg.Messages[key1] = make(map[string]Message)
 		}
 
-		if len(collectiveMsg.Messages[key1]) >= sendParticipant.MultiMaximum {
+		if len(collectiveMsg.Messages[key1]) >= receiveParticipant.MultiMaximum {
 			fmt.Println("The number of messages sent by the participant exceeds the maximum")
 			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
 		}
 
-		for i := 0; i < sendParticipant.MultiMaximum; i++ {
+		for i := 0; i < receiveParticipant.MultiMaximum; i++ {
 			key2 := fmt.Sprintf("%d", i)
 			newAtomicMsg := Message{
 				MessageID:             collectiveMsgName,
@@ -4451,7 +4455,7 @@ func (cc *SmartContract) Message_0i5t589_Send(ctx contractapi.TransactionContext
 
 	for _, event := range eventsToTrigger {
 		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, event))
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
@@ -4468,7 +4472,7 @@ func (cc *SmartContract) Message_0i5t589_Send(ctx contractapi.TransactionContext
 	return nil
 }
 
-func (cc *SmartContract) Message_0i5t589_Complete(ctx contractapi.TransactionContextInterface, targetTaskID int, ConfirmTargetX509 string, instanceID string) error {
+func (cc *SmartContract) Message_0i5t589_Complete(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, ConfirmTargetX509 string) error {
 	stub := ctx.GetStub()
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
@@ -4627,7 +4631,7 @@ func (cc *SmartContract) Message_0i5t589_Complete(ctx contractapi.TransactionCon
 
 	for _, event := range eventsToTrigger {
 		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, event))
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
 		if err != nil {
 			return err
 		}
@@ -4714,7 +4718,7 @@ func (cc *SmartContract) Message_0i5t589_Advance(
 	eventJsonString := string(eventJsonBytes)
 
 	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
@@ -4883,12 +4887,12 @@ func (cc *SmartContract) Message_0oi7nug_Send(ctx contractapi.TransactionContext
 			collectiveMsg.Messages[key1] = make(map[string]Message)
 		}
 
-		if len(collectiveMsg.Messages[key1]) >= sendParticipant.MultiMaximum {
+		if len(collectiveMsg.Messages[key1]) >= receiveParticipant.MultiMaximum {
 			fmt.Println("The number of messages sent by the participant exceeds the maximum")
 			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
 		}
 
-		for i := 0; i < sendParticipant.MultiMaximum; i++ {
+		for i := 0; i < receiveParticipant.MultiMaximum; i++ {
 			key2 := fmt.Sprintf("%d", i)
 			newAtomicMsg := Message{
 				MessageID:             collectiveMsgName,
@@ -4918,7 +4922,7 @@ func (cc *SmartContract) Message_0oi7nug_Send(ctx contractapi.TransactionContext
 
 	for _, event := range eventsToTrigger {
 		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, event))
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
@@ -4935,7 +4939,7 @@ func (cc *SmartContract) Message_0oi7nug_Send(ctx contractapi.TransactionContext
 	return nil
 }
 
-func (cc *SmartContract) Message_0oi7nug_Complete(ctx contractapi.TransactionContextInterface, targetTaskID int, ConfirmTargetX509 string, instanceID string) error {
+func (cc *SmartContract) Message_0oi7nug_Complete(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, ConfirmTargetX509 string) error {
 	stub := ctx.GetStub()
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
@@ -5094,7 +5098,7 @@ func (cc *SmartContract) Message_0oi7nug_Complete(ctx contractapi.TransactionCon
 
 	for _, event := range eventsToTrigger {
 		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, event))
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
 		if err != nil {
 			return err
 		}
@@ -5181,7 +5185,7 @@ func (cc *SmartContract) Message_0oi7nug_Advance(
 	eventJsonString := string(eventJsonBytes)
 
 	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
@@ -5350,12 +5354,12 @@ func (cc *SmartContract) Message_1ip9ryp_Send(ctx contractapi.TransactionContext
 			collectiveMsg.Messages[key1] = make(map[string]Message)
 		}
 
-		if len(collectiveMsg.Messages[key1]) >= sendParticipant.MultiMaximum {
+		if len(collectiveMsg.Messages[key1]) >= receiveParticipant.MultiMaximum {
 			fmt.Println("The number of messages sent by the participant exceeds the maximum")
 			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
 		}
 
-		for i := 0; i < sendParticipant.MultiMaximum; i++ {
+		for i := 0; i < receiveParticipant.MultiMaximum; i++ {
 			key2 := fmt.Sprintf("%d", i)
 			newAtomicMsg := Message{
 				MessageID:             collectiveMsgName,
@@ -5385,7 +5389,7 @@ func (cc *SmartContract) Message_1ip9ryp_Send(ctx contractapi.TransactionContext
 
 	for _, event := range eventsToTrigger {
 		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, event))
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
@@ -5402,7 +5406,7 @@ func (cc *SmartContract) Message_1ip9ryp_Send(ctx contractapi.TransactionContext
 	return nil
 }
 
-func (cc *SmartContract) Message_1ip9ryp_Complete(ctx contractapi.TransactionContextInterface, targetTaskID int, ConfirmTargetX509 string, instanceID string) error {
+func (cc *SmartContract) Message_1ip9ryp_Complete(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, ConfirmTargetX509 string) error {
 	stub := ctx.GetStub()
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
@@ -5561,7 +5565,7 @@ func (cc *SmartContract) Message_1ip9ryp_Complete(ctx contractapi.TransactionCon
 
 	for _, event := range eventsToTrigger {
 		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, event))
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
 		if err != nil {
 			return err
 		}
@@ -5648,7 +5652,7 @@ func (cc *SmartContract) Message_1ip9ryp_Advance(
 	eventJsonString := string(eventJsonBytes)
 
 	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeTriggerActionArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}

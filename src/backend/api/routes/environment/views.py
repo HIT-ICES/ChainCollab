@@ -669,7 +669,7 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
             version="1.0",
             org_id=org_id,
             auth=headers["Authorization"],
-            language="java",
+            language="javascript",
         )
 
         installChaincodeForEnv(
