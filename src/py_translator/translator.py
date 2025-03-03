@@ -666,7 +666,7 @@ class GoChaincodeTranslator:
 
         return temp_list
 
-    def generate_new_chaincode(self, output_path: str = "result/chaincode.go", is_output: bool = False):
+    def generate_chaincode(self, output_path: str = "result/chaincode.go", is_output: bool = False):
 
         chaincode_list = []
 
@@ -692,91 +692,6 @@ class GoChaincodeTranslator:
         chaincode_list.append(snippet.InvokeChaincodeFunc_code())
         # generate InitLedger
         chaincode_list.extend(self._generate_create_instance_code())
-
-        #####
-        # Real Generate Code: from start event to end event to create the chaincode for every element
-        #####
-
-        for element in self._choreography.nodes:
-            if element.type == NodeType.CHOREOGRAPHY_TASK:
-                chaincode_list.extend(self._generate_chaincode_for_choreography_task(element))
-            if element.type == NodeType.EXCLUSIVE_GATEWAY:
-                chaincode_list.extend(self._generate_chaincode_for_exclusive_gateway(element))
-            if element.type == NodeType.PARALLEL_GATEWAY:
-                chaincode_list.extend(self._generate_chaincode_for_parallel_gateway(element))
-            if element.type == NodeType.EVENT_BASED_GATEWAY:
-                chaincode_list.extend(self._generate_chaincode_for_event_based_gateway(element))
-            if element.type == NodeType.START_EVENT:
-                chaincode_list.extend(self._generate_chaincode_for_start_event(element))
-            if element.type == NodeType.END_EVENT:
-                chaincode_list.extend(self._generate_chaincode_for_end_event(element))
-            if element.type == NodeType.BUSINESS_RULE_TASK:
-                chaincode_list.extend(self._generate_chaincode_for_business_rule(element))
-        go_code = "\n\n".join(chaincode_list)
-
-        go_code = tidy_chaincode(go_code)
-
-        if is_output:
-            with open(output_path, "w") as f:
-                f.write(go_code)
-
-        return go_code
-
-    def generate_chaincode(self, output_path: str = "result/chaincode.go", is_output: bool = False):
-        ############
-        # Init: Set general state
-        ############
-        # init Hook
-        self._hook_codes = {
-            key: {"pre_activate_next": [], "when_triggered": []}
-            for key in [node.id for node in self._choreography.nodes]
-        }
-
-        chaincode_list = []
-        ########
-        # Generate Part: Add common code to chaincode
-        ########
-        chaincode_list.append(snippet.package_code())
-        chaincode_list.append(
-            snippet.import_code(
-                if_oracle=len(self._choreography.query_element_with_type(NodeType.BUSINESS_RULE_TASK)) > 0
-            )
-        )
-        chaincode_list.append(snippet.contract_definition_code())
-        # global variable definition
-        chaincode_list.append(snippet.StateMemoryDefinition_code(self._generate_parameters_code()))
-        # initParams definition
-        chaincode_list.append(snippet.InitParametersTypeDefFrame_code(self._generate_instance_initparameters_code()))
-        chaincode_list.append(snippet.fix_part_code())
-        # chaincode_list.append(snippet.CheckRegisterFunc_code())
-        # chaincode_list.append(snippet.RegisterFunc_code())
-        chaincode_list.append(snippet.InvokeChaincodeFunc_code())
-
-        # generate InitLedger
-
-        chaincode_list.extend(self._generate_create_instance_code())
-
-        #########
-        # Hook Generate: check structure caused hook code to be inserted into the chaincode, prepare code for real generation
-        #########
-
-        # find all event based gateways, and set after_all hook to turn off other branches
-        for event_based_gateway in self._choreography.query_element_with_type(NodeType.EVENT_BASED_GATEWAY):
-            if len(event_based_gateway.outgoings) > 1:
-                for outgoing in event_based_gateway.outgoings:
-                    self._hook_codes[outgoing.target.id].setdefault("when_triggered", []).append(
-                        # generate some code to turn off other branches
-                        self._event_based_gateway_hook_code(event_based_gateway, outgoing.target)
-                    )
-
-        # find all parallel to parrallel gateways, and set pre_activate_next hook to check if other branch finished
-        for parallel_gateway in self._choreography.query_element_with_type(NodeType.PARALLEL_GATEWAY):
-            if len(parallel_gateway.incomings) > 1:
-                for incoming in parallel_gateway.incomings:
-                    self._hook_codes[incoming.source.id].setdefault("pre_activate_next", []).append(
-                        # generate some code to check if other branch finished
-                        self._parallel_gateway_merge_hook_code(parallel_gateway, incoming.source)
-                    )
 
         #####
         # Real Generate Code: from start event to end event to create the chaincode for every element
@@ -1031,5 +946,5 @@ if __name__ == "__main__":
         bpmn_file="/home/logres/system/muti/bpmn_muti/supplypaper_test2.bpmn",
     )
     # go_chaincode_translator.generate_chaincode(is_output=False)
-    go_chaincode_translator.generate_new_chaincode(is_output=True, output_path="./resource/chaincode.go")
+    go_chaincode_translator.generate_chaincode(is_output=True, output_path="./resource/chaincode.go")
     go_chaincode_translator.generate_ffi(is_output=True, output_path="./resource/ffi.json")

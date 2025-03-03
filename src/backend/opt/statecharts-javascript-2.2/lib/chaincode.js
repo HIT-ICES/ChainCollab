@@ -9,10 +9,9 @@ class StateMachineContract extends Contract {
 
             const actionsContent = additionalContent.actions;
             const guardsContent = additionalContent.guards;
-
+            
             const actions = {};
             const guards = {};
-
 
             for (const key in actionsContent) {
                 actions[key] = eval(actionsContent[key]);
@@ -44,7 +43,7 @@ class StateMachineContract extends Contract {
 
             const actionsContent = additionalContent.actions;
             const guardsContent = additionalContent.guards;
-
+            
             const actions = {};
             const guards = {};
 
