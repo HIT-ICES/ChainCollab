@@ -1,5 +1,5 @@
 const { Contract } = require('fabric-contract-api');
-const { createMachine, createActor } = require('xstate');
+const { createMachine, createActor, assign } = require('xstate');
 
 class StateMachineContract extends Contract {
     async GetDefaultSnapshot(ctx, machineDescriptionStr, additionalContentStr) {
@@ -9,6 +9,10 @@ class StateMachineContract extends Contract {
 
             const actionsContent = additionalContent.actions;
             const guardsContent = additionalContent.guards;
+
+            const actions = {};
+            const guards = {};
+
 
             for (const key in actionsContent) {
                 actions[key] = eval(actionsContent[key]);
@@ -41,6 +45,8 @@ class StateMachineContract extends Contract {
             const actionsContent = additionalContent.actions;
             const guardsContent = additionalContent.guards;
 
+            const actions = {};
+            const guards = {};
 
             for (const key in actionsContent) {
                 actions[key] = eval(actionsContent[key]);
