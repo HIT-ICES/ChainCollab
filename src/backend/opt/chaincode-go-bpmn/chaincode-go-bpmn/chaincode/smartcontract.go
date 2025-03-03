@@ -10,6 +10,8 @@ import (
 
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+
+	"IBC/StateCharts/stateCharts"
 )
 
 type SmartContract struct {
@@ -17,11 +19,16 @@ type SmartContract struct {
 }
 
 type StateMemory struct {
+	FinalPriority string `json:"FinalPriority"`
 }
 
 type InitParameters struct {
-	Participant_17tx0st Participant `json:"Participant_17tx0st"`
-	Participant_00k92jw Participant `json:"Participant_00k92jw"`
+	Participant_0w6qkdf     ParticipantForInit `json:"Participant_0w6qkdf"`
+	Participant_19mgbdn     ParticipantForInit `json:"Participant_19mgbdn"`
+	Participant_09cjol2     ParticipantForInit `json:"Participant_09cjol2"`
+	Participant_0sa2v7d     ParticipantForInit `json:"Participant_0sa2v7d"`
+	Participant_19j1e3o     ParticipantForInit `json:"Participant_19j1e3o"`
+	StateMachineDescription string             `json:"stateMachineDescription"`
 }
 
 type ContractInstance struct {
@@ -30,54 +37,69 @@ type ContractInstance struct {
 	// global Memory
 	InstanceStateMemory StateMemory `json:"stateMemory"`
 	// map type from string to Message、Gateway、ActionEvent
-	InstanceMessages      map[string]*Message      `json:"InstanceMessages"`
-	InstanceGateways      map[string]*Gateway      `json:"InstanceGateways"`
-	InstanceActionEvents  map[string]*ActionEvent  `json:"InstanceActionEvents"`
-	InstanceBusinessRules map[string]*BusinessRule `json:"InstanceBusinessRule"`
-	InstanceParticipants  map[string]*Participant  `json:"InstanceParticipants"`
+	InstanceMessages          map[string]*CollectiveMessage     `json:"InstanceMessages"`
+	InstanceBusinessRules     map[string]*BusinessRule          `json:"InstanceBusinessRule"`
+	InstanceParticipants      map[string]*CollectiveParticipant `json:"InstanceParticipants"`
+	InstanceChoreographyTasks map[string]*ChoreographyTask      `json:"InstanceChoreographyTasks"`
 	// state of the instance
-	InstanceState InstanceState `json:"InstanceState"`
+	CurrentState            string `json:"CurrentState"`
+	StateMachineDescription string `json:"StateMachineDescription"`
 }
 
-type ElementState int
-
-const (
-	DISABLED = iota
-	ENABLED
-	WAITINGFORCONFIRMATION // means wait continue in BusinessRule
-	COMPLETED
-)
-
-type InstanceState int
+type CollectiveParticipant struct {
+	ParticipantID string                 `json:"PartcipantID"`
+	Participants  map[string]Participant `json:"Participants"`
+	IsMulti       bool                   `json:"IsMulti"`
+	IsLocked      bool                   `json:"IsLocked"`
+	MultiMaximum  int                    `json:"MultiMaximum"`
+	MultiMinimum  int                    `json:"MultiMinimum"`
+	Attributes    map[string]string      `json:"Attributes"`
+}
 
 type Participant struct {
-	ParticipantID string            `json:"ParticipantID"`
-	MSP           string            `json:"MSP"`
-	Attributes    map[string]string `json:"Attributes"`
-	IsMulti       bool              `json:"IsMulti"`
-	MultiMaximum  int               `json:"MultiMaximum"`
-	MultiMinimum  int               `json:"MultiMinimum"`
+	// ID To Sync With OuterEngine
+	ParticipantID string `json:"ParticipantID"`
+	MSP           string `json:"MSP"`
+	IsMulti       bool   `json:"IsMulti"`
+	X509          string `json:"X509"`
+}
 
-	X509 string `json:"X509"`
+type ParticipantForInit struct {
+	PartcipantID string            `json:"PartcipantID"`
+	IsMulti      bool              `json:"IsMulti"`
+	MultiMaximum int               `json:"MultiMaximum"`
+	MultiMinimum int               `json:"MultiMinimum"`
+	Attributes   map[string]string `json:"Attributes"`
+	MSP          string            `json:"MSP"`
+	X509         string            `json:"X509"`
+}
+
+type ChoreographyTask struct {
+	ChoreographyTaskID   string `json:"ChoreographyTaskID"`
+	IsMulti              bool   `json:"IsMulti"`
+	MultiType            string `json:"MultiType"`
+	InitMessageCount     int    `json:"InitMessageCount"`
+	ResponseMessageCount int    `json:"ResponseMessageCount"`
+	InitMessage          string `json:"InitMessage"`
+	ResponseMessage      string `json:"ResponseMessage"`
+}
+
+type CollectiveMessage struct {
+	ChoreographyTaskID    string                        `json:"ChoreographyTaskID"`
+	MessageID             string                        `json:"MessageID"`
+	Messages              map[string]map[string]Message `json:"Messages"`
+	IsMulti               bool                          `json:"IsMulti"`
+	MessageConfirmedCount int                           `json:"MessageConfirmedCount"`
+	SendParticipantID     string                        `json:"SendMspID"`
+	ReceiveParticipantID  string                        `json:"ReceiveMspID"`
+	Format                string                        `json:"Format"`
 }
 
 type Message struct {
-	MessageID            string       `json:"MessageID"`
-	SendParticipantID    string       `json:"SendMspID"`
-	ReceiveParticipantID string       `json:"ReceiveMspID"`
-	FireflyTranID        string       `json:"FireflyTranID"`
-	MsgState             ElementState `json:"MsgState"`
-	Format               string       `json:"Format"`
-}
-
-type Gateway struct {
-	GatewayID    string       `json:"GatewayID"`
-	GatewayState ElementState `json:"GatewayState"`
-}
-
-type ActionEvent struct {
-	EventID    string       `json:"EventID"`
-	EventState ElementState `json:"EventState"`
+	MessageID             string `json:"MessageID"`
+	SendParticipantKey    string `json:"SendParticipantKey"`
+	ReceiveParticipantKey string `json:"ReceiveParticipantKey"`
+	FireflyTranID         string `json:"FireflyTranID"`
 }
 
 type BusinessRule struct {
@@ -85,7 +107,6 @@ type BusinessRule struct {
 	Hash           string            `json:"Hash"`
 	DecisionID     string            `json:"DecisionID"`
 	ParamMapping   map[string]string `json:"ParamMapping"`
-	State          ElementState      `json:"State"`
 }
 
 func (cc *SmartContract) CreateBusinessRule(ctx contractapi.TransactionContextInterface, instance *ContractInstance, BusinessRuleID string, DMNContent string, DecisionID string, ParamMapping map[string]string) (*BusinessRule, error) {
@@ -96,13 +117,11 @@ func (cc *SmartContract) CreateBusinessRule(ctx contractapi.TransactionContextIn
 		return nil, err
 	}
 
-	// 创建业务规则对象
 	instance.InstanceBusinessRules[BusinessRuleID] = &BusinessRule{
 		BusinessRuleID: BusinessRuleID,
 		Hash:           Hash,
 		DecisionID:     DecisionID,
 		ParamMapping:   ParamMapping,
-		State:          DISABLED,
 	}
 
 	returnBusinessRule, ok := instance.InstanceBusinessRules[BusinessRuleID]
@@ -113,78 +132,93 @@ func (cc *SmartContract) CreateBusinessRule(ctx contractapi.TransactionContextIn
 	return returnBusinessRule, nil
 }
 
-func (cc *SmartContract) CreateParticipant(ctx contractapi.TransactionContextInterface, instance *ContractInstance, participantID string, msp string, attributes map[string]string, x509 string, IsMulti bool, MultiMaximum int, MultiMinimum int) (*Participant, error) {
-
-	// 创建参与者对象
-	instance.InstanceParticipants[participantID] = &Participant{
+func (cc *SmartContract) CreateParticipant(ctx contractapi.TransactionContextInterface, instance *ContractInstance, participantID string, msp string, attributes map[string]string, x509 string, IsMulti bool, MultiMaximum int, MultiMinimum int) (*CollectiveParticipant, error) {
+	collectiveParticipant := &CollectiveParticipant{
 		ParticipantID: participantID,
-		MSP:           msp,
-		Attributes:    attributes,
+		Participants:  make(map[string]Participant), // 初始化 Participants 映射
 		IsMulti:       IsMulti,
+		IsLocked:      false,
 		MultiMaximum:  MultiMaximum,
 		MultiMinimum:  MultiMinimum,
-		X509:          x509,
+		Attributes:    attributes,
 	}
 
-	returnParticipant, ok := instance.InstanceParticipants[participantID]
-	if !ok {
-		return nil, fmt.Errorf("无法将实例元素转换为Participant")
+	if !IsMulti {
+		participant := Participant{
+			ParticipantID: participantID,
+			MSP:           msp,
+			IsMulti:       IsMulti,
+			X509:          x509,
+		}
+		collectiveParticipant.Participants[participantID] = participant
 	}
 
-	return returnParticipant, nil
+	instance.InstanceParticipants[participantID] = collectiveParticipant
 
+	return collectiveParticipant, nil
 }
 
-func (cc *SmartContract) CreateMessage(ctx contractapi.TransactionContextInterface, instance *ContractInstance, messageID string, sendParticipantID string, receiveParticipantID string, fireflyTranID string, msgState ElementState, format string) (*Message, error) {
-
-	// 创建消息对象
-	instance.InstanceMessages[messageID] = &Message{
-		MessageID:            messageID,
-		SendParticipantID:    sendParticipantID,
-		ReceiveParticipantID: receiveParticipantID,
-		FireflyTranID:        fireflyTranID,
-		MsgState:             msgState,
-		Format:               format,
+func (cc *SmartContract) CreateChoreographyTask(
+	ctx contractapi.TransactionContextInterface,
+	instance *ContractInstance,
+	choreographyTaskID string,
+	isMulti bool,
+	multiType string,
+	initMessage string,
+	responseMessage string,
+) (*ChoreographyTask, error) {
+	choreographyTask := &ChoreographyTask{
+		ChoreographyTaskID:   choreographyTaskID,
+		IsMulti:              isMulti,
+		MultiType:            multiType,
+		InitMessageCount:     0,
+		ResponseMessageCount: 0,
+		InitMessage:          initMessage,
+		ResponseMessage:      responseMessage,
 	}
 
-	returnMessage, ok := instance.InstanceMessages[messageID]
-	if !ok {
-		return nil, fmt.Errorf("无法将实例元素转换为Message")
-	}
+	instance.InstanceChoreographyTasks[choreographyTaskID] = choreographyTask
 
-	return returnMessage, nil
+	return choreographyTask, nil
 }
 
-func (cc *SmartContract) CreateGateway(ctx contractapi.TransactionContextInterface, instance *ContractInstance, gatewayID string, gatewayState ElementState) (*Gateway, error) {
+// TODO： Method To Register Participant in CollectiveParticipant
 
-	// 创建网关对象
-	instance.InstanceGateways[gatewayID] = &Gateway{
-		GatewayID:    gatewayID,
-		GatewayState: gatewayState,
+func (cc *SmartContract) CreateMessage(
+	ctx contractapi.TransactionContextInterface,
+	instance *ContractInstance,
+	messageID string,
+	sendParticipantID string,
+	receiveParticipantID string,
+	fireflyTranID string,
+	format string,
+	IsMulti bool,
+	choreographyTaskID string,
+) (*CollectiveMessage, error) {
+	collectiveMessage := &CollectiveMessage{
+		ChoreographyTaskID:    choreographyTaskID,
+		MessageID:             messageID,
+		Messages:              make(map[string]map[string]Message), // 初始化 Messages 映射
+		IsMulti:               IsMulti,
+		MessageConfirmedCount: 0,
+		SendParticipantID:     sendParticipantID,
+		ReceiveParticipantID:  receiveParticipantID,
+		Format:                format,
 	}
 
-	returnGateway, ok := instance.InstanceGateways[gatewayID]
-	if !ok {
-		return nil, fmt.Errorf("无法将实例元素转换为Gateway")
+	if !IsMulti {
+		message := Message{
+			MessageID:             fmt.Sprintf("%s_0", messageID),
+			SendParticipantKey:    fmt.Sprintf("%s_0", sendParticipantID),
+			ReceiveParticipantKey: fmt.Sprintf("%s_0", receiveParticipantID),
+			FireflyTranID:         fireflyTranID,
+		}
+		collectiveMessage.Messages["nonMulti"]["nonMulti"] = message
 	}
 
-	return returnGateway, nil
-}
+	instance.InstanceMessages[messageID] = collectiveMessage
 
-func (cc *SmartContract) CreateActionEvent(ctx contractapi.TransactionContextInterface, instance *ContractInstance, eventID string, eventState ElementState) (*ActionEvent, error) {
-	// 创建事件对象
-	instance.InstanceActionEvents[eventID] = &ActionEvent{
-		EventID:    eventID,
-		EventState: eventState,
-	}
-
-	returnEvent, ok := instance.InstanceActionEvents[eventID]
-	if !ok {
-		return nil, fmt.Errorf("无法将实例元素转换为ActionEvent")
-	}
-
-	return returnEvent, nil
-
+	return collectiveMessage, nil
 }
 
 func (cc *SmartContract) GetInstance(ctx contractapi.TransactionContextInterface, instanceID string) (*ContractInstance, error) {
@@ -224,291 +258,27 @@ func (cc *SmartContract) SetInstance(ctx contractapi.TransactionContextInterface
 	return nil
 }
 
-// Read function
-func (c *SmartContract) ReadMsg(ctx contractapi.TransactionContextInterface, instanceID string, messageID string) (*Message, error) {
-	instanceJson, err := ctx.GetStub().GetState(instanceID)
-	if err != nil {
-		return nil, err
-	}
-	if instanceJson == nil {
-		errorMessage := fmt.Sprintf("Instance %s does not exist", instanceID)
-		fmt.Println(errorMessage)
-		return nil, errors.New(errorMessage)
-	}
-
-	var instance ContractInstance
-	err = json.Unmarshal(instanceJson, &instance)
-	if err != nil {
-		fmt.Println(err.Error())
-		return nil, err
-	}
-
-	msg, ok := instance.InstanceMessages[messageID]
+func (c *SmartContract) ChangeMsgFireflyTranID(ctx contractapi.TransactionContextInterface, instance *ContractInstance, fireflyTranID string, messageID string, key1 string, key2 string) error {
+	collectiveMessage, ok := instance.InstanceMessages[messageID]
 	if !ok {
-		errorMessage := fmt.Sprintf("Message %s does not exist", messageID)
-		fmt.Println(errorMessage)
-		return nil, errors.New(errorMessage)
-	}
-
-	return msg, nil
-}
-
-func (c *SmartContract) ReadGtw(ctx contractapi.TransactionContextInterface, instanceID string, gatewayID string) (*Gateway, error) {
-
-	instanceJson, err := ctx.GetStub().GetState(instanceID)
-	if err != nil {
-		return nil, err
-	}
-	if instanceJson == nil {
-		errorMessage := fmt.Sprintf("Instance %s does not exist", instanceID)
-		fmt.Println(errorMessage)
-		return nil, errors.New(errorMessage)
-	}
-
-	var instance ContractInstance
-	err = json.Unmarshal(instanceJson, &instance)
-	if err != nil {
-		fmt.Println(err.Error())
-		return nil, err
-	}
-
-	gtw, ok := instance.InstanceGateways[gatewayID]
-	if !ok {
-		errorMessage := fmt.Sprintf("Gateway %s does not exist", gatewayID)
-		fmt.Println(errorMessage)
-		return nil, errors.New(errorMessage)
-	}
-
-	return gtw, nil
-
-}
-
-func (c *SmartContract) ReadEvent(ctx contractapi.TransactionContextInterface, instanceID string, eventID string) (*ActionEvent, error) {
-
-	instanceJson, err := ctx.GetStub().GetState(instanceID)
-	if err != nil {
-		return nil, err
-	}
-	if instanceJson == nil {
-		errorMessage := fmt.Sprintf("Instance %s does not exist", instanceID)
-		fmt.Println(errorMessage)
-		return nil, errors.New(errorMessage)
-	}
-
-	var instance ContractInstance
-	err = json.Unmarshal(instanceJson, &instance)
-	if err != nil {
-		fmt.Println(err.Error())
-		return nil, err
-	}
-
-	actionEvent, ok := instance.InstanceActionEvents[eventID]
-	if !ok {
-		errorMessage := fmt.Sprintf("Event %s does not exist", eventID)
-		fmt.Println(errorMessage)
-		return nil, errors.New(errorMessage)
-	}
-
-	return actionEvent, nil
-
-}
-
-// Change State  function
-func (c *SmartContract) ChangeMsgState(ctx contractapi.TransactionContextInterface, instance *ContractInstance, messageID string, msgState ElementState) error {
-	msg, ok := instance.InstanceMessages[messageID]
-	if !ok {
-		errorMessage := fmt.Sprintf("Message %s does not exist", messageID)
+		errorMessage := fmt.Sprintf("CollectiveMessage %s does not exist", messageID)
 		fmt.Println(errorMessage)
 		return errors.New(errorMessage)
 	}
-	msg.MsgState = msgState
-	return nil
-}
 
-func (c *SmartContract) ChangeMsgFireflyTranID(ctx contractapi.TransactionContextInterface, instance *ContractInstance, fireflyTranID string, messageID string) error {
-	msg, ok := instance.InstanceMessages[messageID]
+	message, ok := collectiveMessage.Messages[key1][key2]
 	if !ok {
-		errorMessage := fmt.Sprintf("Message %s does not exist", messageID)
+		errorMessage := fmt.Sprintf("Message with key1 %s key2 %s does not exist in CollectiveMessage %s", key1, key2, messageID)
 		fmt.Println(errorMessage)
 		return errors.New(errorMessage)
 	}
-	msg.FireflyTranID = fireflyTranID
+
+	message.FireflyTranID = fireflyTranID
+	collectiveMessage.Messages[key1][key2] = message
+
+	instance.InstanceMessages[messageID] = collectiveMessage
+
 	return nil
-
-}
-
-func (c *SmartContract) ChangeGtwState(ctx contractapi.TransactionContextInterface, instance *ContractInstance, gatewayID string, gtwState ElementState) error {
-	gtw, ok := instance.InstanceGateways[gatewayID]
-	if !ok {
-		errorMessage := fmt.Sprintf("Gateway %s does not exist", gatewayID)
-		fmt.Println(errorMessage)
-		return errors.New(errorMessage)
-	}
-	gtw.GatewayState = gtwState
-	return nil
-}
-
-func (c *SmartContract) ChangeEventState(ctx contractapi.TransactionContextInterface, instance *ContractInstance, eventID string, eventState ElementState) error {
-	actionEvent, ok := instance.InstanceActionEvents[eventID]
-	if !ok {
-		errorMessage := fmt.Sprintf("Event %s does not exist", eventID)
-		fmt.Println(errorMessage)
-		return errors.New(errorMessage)
-	}
-	actionEvent.EventState = eventState
-	return nil
-
-}
-
-func (cc *SmartContract) ChangeBusinessRuleState(ctx contractapi.TransactionContextInterface, instance *ContractInstance, BusinessRuleID string, state ElementState) error {
-	businessRule, ok := instance.InstanceBusinessRules[BusinessRuleID]
-	if !ok {
-		errorMessage := fmt.Sprintf("BusinessRule %s does not exist", BusinessRuleID)
-		fmt.Println(errorMessage)
-		return errors.New(errorMessage)
-	}
-	businessRule.State = state
-	return nil
-
-}
-
-//get all message
-
-func (cc *SmartContract) GetAllMessages(ctx contractapi.TransactionContextInterface, instanceID string) ([]*Message, error) {
-	instanceJson, err := ctx.GetStub().GetState(instanceID)
-	if err != nil {
-		return nil, err
-	}
-	if instanceJson == nil {
-		errorMessage := fmt.Sprintf("Instance %s does not exist", instanceID)
-		fmt.Println(errorMessage)
-		return nil, errors.New(errorMessage)
-	}
-
-	var instance ContractInstance
-	err = json.Unmarshal(instanceJson, &instance)
-	if err != nil {
-		fmt.Println(err.Error())
-		return nil, err
-	}
-
-	var messages []*Message
-	for _, msg := range instance.InstanceMessages {
-		messages = append(messages, msg)
-	}
-
-	return messages, nil
-}
-
-func (cc *SmartContract) GetAllGateways(ctx contractapi.TransactionContextInterface, instanceID string) ([]*Gateway, error) {
-
-	instanceJson, err := ctx.GetStub().GetState(instanceID)
-	if err != nil {
-		return nil, err
-	}
-	if instanceJson == nil {
-		errorMessage := fmt.Sprintf("Instance %s does not exist", instanceID)
-		fmt.Println(errorMessage)
-		return nil, errors.New(errorMessage)
-	}
-
-	var instance ContractInstance
-	err = json.Unmarshal(instanceJson, &instance)
-	if err != nil {
-		fmt.Println(err.Error())
-		return nil, err
-	}
-
-	var gateways []*Gateway
-	for _, gtw := range instance.InstanceGateways {
-		gateways = append(gateways, gtw)
-	}
-
-	return gateways, nil
-}
-
-func (cc *SmartContract) GetAllActionEvents(ctx contractapi.TransactionContextInterface, instanceID string) ([]*ActionEvent, error) {
-
-	instanceJson, err := ctx.GetStub().GetState(instanceID)
-	if err != nil {
-		return nil, err
-	}
-	if instanceJson == nil {
-		errorMessage := fmt.Sprintf("Instance %s does not exist", instanceID)
-		fmt.Println(errorMessage)
-		return nil, errors.New(errorMessage)
-	}
-
-	var instance ContractInstance
-	err = json.Unmarshal(instanceJson, &instance)
-	if err != nil {
-		fmt.Println(err.Error())
-		return nil, err
-	}
-
-	var actionEvents []*ActionEvent
-	for _, event := range instance.InstanceActionEvents {
-		actionEvents = append(actionEvents, event)
-	}
-
-	return actionEvents, nil
-
-}
-
-func (cc *SmartContract) GetAllParticipants(ctx contractapi.TransactionContextInterface, instanceID string) ([]*Participant, error) {
-
-	instanceJson, err := ctx.GetStub().GetState(instanceID)
-	if err != nil {
-		return nil, err
-	}
-	if instanceJson == nil {
-		errorMessage := fmt.Sprintf("Instance %s does not exist", instanceID)
-		fmt.Println(errorMessage)
-		return nil, errors.New(errorMessage)
-	}
-
-	var instance ContractInstance
-	err = json.Unmarshal(instanceJson, &instance)
-	if err != nil {
-		fmt.Println(err.Error())
-		return nil, err
-	}
-
-	var participants []*Participant
-	for _, participant := range instance.InstanceParticipants {
-		participants = append(participants, participant)
-	}
-
-	return participants, nil
-
-}
-
-func (cc *SmartContract) GetAllBusinessRules(ctx contractapi.TransactionContextInterface, instanceID string) ([]*BusinessRule, error) {
-
-	instanceJson, err := ctx.GetStub().GetState(instanceID)
-	if err != nil {
-		return nil, err
-	}
-	if instanceJson == nil {
-		errorMessage := fmt.Sprintf("Instance %s does not exist", instanceID)
-		fmt.Println(errorMessage)
-		return nil, errors.New(errorMessage)
-	}
-
-	var instance ContractInstance
-	err = json.Unmarshal(instanceJson, &instance)
-	if err != nil {
-		fmt.Println(err.Error())
-		return nil, err
-	}
-
-	var businessRules []*BusinessRule
-	for _, businessRule := range instance.InstanceBusinessRules {
-		businessRules = append(businessRules, businessRule)
-	}
-
-	return businessRules, nil
-
 }
 
 func (cc *SmartContract) ReadGlobalVariable(ctx contractapi.TransactionContextInterface, instanceID string) (*StateMemory, error) {
@@ -567,8 +337,7 @@ func (cc *SmartContract) ReadBusinessRule(ctx contractapi.TransactionContextInte
 	return businessRule, nil
 }
 
-func (cc *SmartContract) ReadParticipant(ctx contractapi.TransactionContextInterface, instanceID string, participantID string) (*Participant, error) {
-
+func (cc *SmartContract) ReadCollectiveParticipant(ctx contractapi.TransactionContextInterface, instanceID string, participantID string) (*CollectiveParticipant, error) {
 	instanceJson, err := ctx.GetStub().GetState(instanceID)
 	if err != nil {
 		return nil, err
@@ -586,111 +355,161 @@ func (cc *SmartContract) ReadParticipant(ctx contractapi.TransactionContextInter
 		return nil, err
 	}
 
-	participant, ok := instance.InstanceParticipants[participantID]
+	collectiveParticipant, ok := instance.InstanceParticipants[participantID]
 	if !ok {
-		errorMessage := fmt.Sprintf("Participant %s does not exist", participantID)
+		errorMessage := fmt.Sprintf("CollectiveParticipant %s does not exist", participantID)
 		fmt.Println(errorMessage)
 		return nil, errors.New(errorMessage)
 	}
 
-	return participant, nil
-
+	return collectiveParticipant, nil
 }
 
-// Don't use, since it not conform the rule of one commit one invoke
-func (cc *SmartContract) WriteParticipant(ctx contractapi.TransactionContextInterface, instanceID string, participantID string, participant *Participant) error {
-	stub := ctx.GetStub()
-
-	instanceJson, err := stub.GetState(instanceID)
+func (cc *SmartContract) ReadAtomicParticipant(ctx contractapi.TransactionContextInterface, instanceID string, participantID string, key string) (*Participant, error) {
+	instanceJson, err := ctx.GetStub().GetState(instanceID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if instanceJson == nil {
 		errorMessage := fmt.Sprintf("Instance %s does not exist", instanceID)
 		fmt.Println(errorMessage)
-		return errors.New(errorMessage)
+		return nil, errors.New(errorMessage)
 	}
 
 	var instance ContractInstance
 	err = json.Unmarshal(instanceJson, &instance)
 	if err != nil {
 		fmt.Println(err.Error())
-		return err
+		return nil, err
 	}
 
-	instance.InstanceParticipants[participantID] = participant
-
-	instanceJson, err = json.Marshal(instance)
-	if err != nil {
-		fmt.Println(err.Error())
-		return err
+	collectiveParticipant, ok := instance.InstanceParticipants[participantID]
+	if !ok {
+		errorMessage := fmt.Sprintf("CollectiveParticipant %s does not exist", participantID)
+		fmt.Println(errorMessage)
+		return nil, errors.New(errorMessage)
+	}
+	atomicParticipant, ok := collectiveParticipant.Participants[key]
+	if !ok {
+		errorMessage := fmt.Sprintf("Participant with key %s does not exist in CollectiveParticipant %s", key, participantID)
+		fmt.Println(errorMessage)
+		return nil, errors.New(errorMessage)
 	}
 
-	err = stub.PutState(instanceID, instanceJson)
-	if err != nil {
-		fmt.Println(err.Error())
-		return err
-	}
-
-	return nil
-
+	return &atomicParticipant, nil
 }
 
-func (cc *SmartContract) check_msp(ctx contractapi.TransactionContextInterface, instanceID string, target_participant string) bool {
-	// Read the target participant's msp
-	targetParticipant, err := cc.ReadParticipant(ctx, instanceID, target_participant)
+func (cc *SmartContract) get_X509_identity(ctx contractapi.TransactionContextInterface) string {
+	mspID, _ := ctx.GetClientIdentity().GetMSPID()
+	certificateID, _ := ctx.GetClientIdentity().GetID()
+	return certificateID + "@" + mspID
+}
+
+func (cc *SmartContract) check_msp(ctx contractapi.TransactionContextInterface, instanceID string, target_participant string, key string) bool {
+	targetParticipant, err := cc.ReadAtomicParticipant(ctx, instanceID, target_participant, key)
 	if err != nil {
+		fmt.Printf("Failed to read participant: %v\n", err)
 		return false
 	}
+
 	mspID, err := ctx.GetClientIdentity().GetMSPID()
 	if err != nil {
+		fmt.Printf("Failed to get client MSP ID: %v\n", err)
 		return false
 	}
+
 	return mspID == targetParticipant.MSP
 }
 
 func (cc *SmartContract) check_attribute(ctx contractapi.TransactionContextInterface, instanceID string, target_participant string, attributeName string) bool {
-	targetParticipant, err := cc.ReadParticipant(ctx, instanceID, target_participant)
+	collectiveParticipant, err := cc.ReadCollectiveParticipant(ctx, instanceID, target_participant)
 	if err != nil {
+		fmt.Printf("Failed to read collective participant: %v\n", err)
 		return false
 	}
-	if ctx.GetClientIdentity().AssertAttributeValue(attributeName, targetParticipant.Attributes[attributeName]) != nil {
+
+	attributeValue, ok := collectiveParticipant.Attributes[attributeName]
+	if !ok {
+		fmt.Printf("Attribute %s does not exist for collective participant %s\n", attributeName, target_participant)
+		return false
+	}
+
+	if ctx.GetClientIdentity().AssertAttributeValue(attributeName, attributeValue) != nil {
+		fmt.Printf("Client attribute value does not match for attribute %s\n", attributeName)
 		return false
 	}
 
 	return true
 }
 
-func (cc *SmartContract) check_participant(ctx contractapi.TransactionContextInterface, instanceID string, target_participant string) bool {
-	// Read the target participant's msp
-	targetParticipant, err := cc.ReadParticipant(ctx, instanceID, target_participant)
+func (cc *SmartContract) check_participant(ctx contractapi.TransactionContextInterface, instanceID string, target_participant string, key string) bool {
+	collectiveParticipant, err := cc.ReadCollectiveParticipant(ctx, instanceID, target_participant)
 	if err != nil {
+		fmt.Printf("Failed to read collective participant: %v\n", err)
 		return false
 	}
 
-	if !targetParticipant.IsMulti {
-		// check X509 = MSPID + @ + ID
-		mspID, _ := ctx.GetClientIdentity().GetMSPID()
-		pid, _ := ctx.GetClientIdentity().GetID()
-		if targetParticipant.X509 == pid+"@"+mspID {
+	if key == "" {
+		// only check Participant based on Attributes in CollectiveParticipant
+	}
+
+	if !collectiveParticipant.IsMulti {
+		defaultKey := fmt.Sprintf("%s_0", target_participant)
+		defaultParticipant, ok := collectiveParticipant.Participants[defaultKey]
+		if !ok {
+			fmt.Printf("Default participant with key %s does not exist\n", defaultKey)
+			return false
+		}
+
+		if defaultParticipant.X509 != "" {
+			expectedX509 := cc.get_X509_identity(ctx)
+			if defaultParticipant.X509 != expectedX509 {
+				fmt.Printf("X509 does not match. Expected: %s, Actual: %s\n", expectedX509, defaultParticipant.X509)
+				return false
+			}
 			return true
-		} else {
-			return false
 		}
+
+		for attrName := range collectiveParticipant.Attributes {
+			if !cc.check_attribute(ctx, instanceID, target_participant, attrName) {
+				fmt.Printf("Attribute check failed for attribute %s\n", attrName)
+				return false
+			}
+		}
+		return true
 	}
 
-	// check MSP if msp!=''
-	if targetParticipant.MSP != "" && !cc.check_msp(ctx, instanceID, target_participant) {
+	participant, ok := collectiveParticipant.Participants[key]
+	if !ok {
+		fmt.Printf("Participant with key %s does not exist\n", key)
 		return false
 	}
 
-	// check all attributes
-	for key, _ := range targetParticipant.Attributes {
-		if !cc.check_attribute(ctx, instanceID, target_participant, key) {
+	if participant.X509 != "" {
+		mspID, err := ctx.GetClientIdentity().GetMSPID()
+		if err != nil {
+			fmt.Printf("Failed to get client MSP ID: %v\n", err)
+			return false
+		}
+		pid, err := ctx.GetClientIdentity().GetID()
+		if err != nil {
+			fmt.Printf("Failed to get client ID: %v\n", err)
+			return false
+		}
+		expectedX509 := pid + "@" + mspID
+		if participant.X509 != expectedX509 {
+			fmt.Printf("X509 does not match. Expected: %s, Actual: %s\n", expectedX509, participant.X509)
+			return false
+		}
+		return true
+	}
+
+	for attrName := range collectiveParticipant.Attributes {
+		if !cc.check_attribute(ctx, instanceID, target_participant, attrName) {
+			fmt.Printf("Attribute check failed for attribute %s\n", attrName)
 			return false
 		}
 	}
-
 	return true
 }
 
@@ -726,39 +545,96 @@ func (s *SmartContract) hashXML(ctx contractapi.TransactionContextInterface, xml
 	return hashString, nil
 }
 
-// func (s *SmartContract) UpdateCID(ctx contractapi.TransactionContextInterface, instanceID string, BusinessRuleID string, cid string) error {
-// 	instanceBytes, err := ctx.GetStub().GetState(instanceID)
-// 	if err != nil {
-// 		return fmt.Errorf("failed to read from world state: %v", err)
-// 	}
-// 	if instanceBytes == nil {
-// 		return fmt.Errorf("the record %s does not exist", instanceID)
-// 	}
+func (c *SmartContract) ReadCollectiveMsg(ctx contractapi.TransactionContextInterface, instanceID string, messageID string) (*CollectiveMessage, error) {
+	instanceJson, err := ctx.GetStub().GetState(instanceID)
+	if err != nil {
+		return nil, err
+	}
+	if instanceJson == nil {
+		errorMessage := fmt.Sprintf("Instance %s does not exist", instanceID)
+		fmt.Println(errorMessage)
+		return nil, errors.New(errorMessage)
+	}
 
-// 	// Unmarshal the JSON to a Instance
-// 	var instance ContractInstance
-// 	err = json.Unmarshal(instanceBytes, &instance)
+	var instance ContractInstance
+	err = json.Unmarshal(instanceJson, &instance)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
 
-// 	if err != nil {
-// 		return fmt.Errorf("failed to unmarshal JSON: %v", err)
-// 	}
-// 	// Update the Cid field
-// 	instance.InstanceBusinessRules[BusinessRuleID].CID = cid
+	collectiveMsg, ok := instance.InstanceMessages[messageID]
+	if !ok {
+		errorMessage := fmt.Sprintf("CollectiveMessage %s does not exist", messageID)
+		fmt.Println(errorMessage)
+		return nil, errors.New(errorMessage)
+	}
 
-// 	// Marshal the updated struct to JSON
-// 	instanceBytes, err = json.Marshal(instance)
-// 	if err != nil {
-// 		return fmt.Errorf("failed to marshal JSON: %v", err)
-// 	}
+	return collectiveMsg, nil
+}
 
-// 	// Put the updated record back into the ledger
-// 	err = ctx.GetStub().PutState(instanceID, instanceBytes)
-// 	if err != nil {
-// 		return fmt.Errorf("failed to update record in world state: %v", err)
-// 	}
+func (c *SmartContract) ReadAtomicMsg(ctx contractapi.TransactionContextInterface, instanceID string, messageID string, key1 string, key2 string) (*Message, error) {
+	instanceJson, err := ctx.GetStub().GetState(instanceID)
+	if err != nil {
+		return nil, err
+	}
+	if instanceJson == nil {
+		errorMessage := fmt.Sprintf("Instance %s does not exist", instanceID)
+		fmt.Println(errorMessage)
+		return nil, errors.New(errorMessage)
+	}
 
-// 	return nil
-// }
+	var instance ContractInstance
+	err = json.Unmarshal(instanceJson, &instance)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+
+	collectiveMsg, ok := instance.InstanceMessages[messageID]
+	if !ok {
+		errorMessage := fmt.Sprintf("CollectiveMessage %s does not exist", messageID)
+		fmt.Println(errorMessage)
+		return nil, errors.New(errorMessage)
+	}
+
+	atomicMsg, ok := collectiveMsg.Messages[key1][key2]
+	if !ok {
+		errorMessage := fmt.Sprintf("Message with key1 %s, key2 %s does not exist in CollectiveMessage %s", key1, key2, messageID)
+		fmt.Println(errorMessage)
+		return nil, errors.New(errorMessage)
+	}
+
+	return &atomicMsg, nil
+}
+
+func (c *SmartContract) ReadChoreographyTask(ctx contractapi.TransactionContextInterface, instanceID string, choreographyTaskID string) (*ChoreographyTask, error) {
+	instanceJson, err := ctx.GetStub().GetState(instanceID)
+	if err != nil {
+		return nil, err
+	}
+	if instanceJson == nil {
+		errorMessage := fmt.Sprintf("Instance %s does not exist", instanceID)
+		fmt.Println(errorMessage)
+		return nil, errors.New(errorMessage)
+	}
+
+	var instance ContractInstance
+	err = json.Unmarshal(instanceJson, &instance)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+
+	choreographyTask, ok := instance.InstanceChoreographyTasks[choreographyTaskID]
+	if !ok {
+		errorMessage := fmt.Sprintf("ChoreographyTask %s does not exist", choreographyTaskID)
+		fmt.Println(errorMessage)
+		return nil, errors.New(errorMessage)
+	}
+
+	return choreographyTask, nil
+}
 
 func (cc *SmartContract) Invoke_Other_chaincode(ctx contractapi.TransactionContextInterface, chaincodeName string, channel string, _args [][]byte) ([]byte, error) {
 	stub := ctx.GetStub()
@@ -810,26 +686,51 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 		return "", fmt.Errorf("failed to unmarshal. %s", err.Error())
 	}
 
+	res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default", stateCharts.EncodeGetDefaultSnapshotArgs(initParameters.StateMachineDescription))
+
+	initialSnapshot := stateCharts.DecodeGetDefaultSnapshotResult(res)
+
 	instance := ContractInstance{
-		InstanceID:            instanceID,
-		InstanceStateMemory:   StateMemory{},
-		InstanceMessages:      make(map[string]*Message),
-		InstanceActionEvents:  make(map[string]*ActionEvent),
-		InstanceGateways:      make(map[string]*Gateway),
-		InstanceParticipants:  make(map[string]*Participant),
-		InstanceBusinessRules: make(map[string]*BusinessRule),
+		InstanceID:              instanceID,
+		InstanceStateMemory:     StateMemory{},
+		InstanceMessages:        make(map[string]*CollectiveMessage),
+		InstanceParticipants:    make(map[string]*CollectiveParticipant),
+		InstanceBusinessRules:   make(map[string]*BusinessRule),
+		CurrentState:            initialSnapshot,
+		StateMachineDescription: initParameters.StateMachineDescription,
 	}
 
 	// Update the currentInstanceID
 
-	cc.CreateParticipant(ctx, &instance, "Participant_17tx0st", initParameters.Participant_17tx0st.MSP, initParameters.Participant_17tx0st.Attributes, initParameters.Participant_17tx0st.X509, initParameters.Participant_17tx0st.IsMulti, 10, 0)
-	cc.CreateParticipant(ctx, &instance, "Participant_00k92jw", initParameters.Participant_00k92jw.MSP, initParameters.Participant_00k92jw.Attributes, initParameters.Participant_00k92jw.X509, initParameters.Participant_00k92jw.IsMulti, 0, 0)
-	cc.CreateActionEvent(ctx, &instance, "Event_0ooh8t8", ENABLED)
-
-	cc.CreateActionEvent(ctx, &instance, "Event_1rmj9g7", DISABLED)
-
-	cc.CreateMessage(ctx, &instance, "Message_0ip1epl", "Participant_00k92jw", "Participant_17tx0st", "", DISABLED, `{"properties":{"fff":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}`)
-	cc.CreateMessage(ctx, &instance, "Message_0j305jt", "Participant_17tx0st", "Participant_00k92jw", "", DISABLED, `{"properties":{"aaa":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}`)
+	cc.CreateParticipant(ctx, &instance, "Participant_0w6qkdf", initParameters.Participant_0w6qkdf.MSP, initParameters.Participant_0w6qkdf.Attributes, initParameters.Participant_0w6qkdf.X509, initParameters.Participant_0w6qkdf.IsMulti, 0, 0)
+	cc.CreateParticipant(ctx, &instance, "Participant_19mgbdn", initParameters.Participant_19mgbdn.MSP, initParameters.Participant_19mgbdn.Attributes, initParameters.Participant_19mgbdn.X509, initParameters.Participant_19mgbdn.IsMulti, 0, 0)
+	cc.CreateParticipant(ctx, &instance, "Participant_09cjol2", initParameters.Participant_09cjol2.MSP, initParameters.Participant_09cjol2.Attributes, initParameters.Participant_09cjol2.X509, initParameters.Participant_09cjol2.IsMulti, 0, 0)
+	cc.CreateParticipant(ctx, &instance, "Participant_0sa2v7d", initParameters.Participant_0sa2v7d.MSP, initParameters.Participant_0sa2v7d.Attributes, initParameters.Participant_0sa2v7d.X509, initParameters.Participant_0sa2v7d.IsMulti, 0, 0)
+	cc.CreateParticipant(ctx, &instance, "Participant_19j1e3o", initParameters.Participant_19j1e3o.MSP, initParameters.Participant_19j1e3o.Attributes, initParameters.Participant_19j1e3o.X509, initParameters.Participant_19j1e3o.IsMulti, 2, 2)
+	cc.CreateMessage(ctx, &instance, "Message_1wswgqu", "Participant_0w6qkdf", "Participant_19mgbdn", "", `{"properties":{"orderDetails":{"type":"string","description":"Detailed list of goods ordered"}},"required":["orderDetails"],"files":{},"file required":[]}`, false, "ChoreographyTask_0tyax7p")
+	cc.CreateMessage(ctx, &instance, "Message_0cba4t6", "Participant_09cjol2", "Participant_0sa2v7d", "", `{"properties":{"supplyOrderId":{"type":"string","description":" Identifier of the supply order being forwarded"}},"required":["supplyOrderId"],"files":{},"file required":[]}`, false, "ChoreographyTask_0i0ht39")
+	cc.CreateMessage(ctx, &instance, "Message_0pm90nx", "Participant_09cjol2", "Participant_19mgbdn", "", `{"properties":{"transportOrderId":{"type":"string","description":"Identifier of the transport order being forwarded"}},"required":["transportOrderId"],"files":{},"file required":[]}`, false, "ChoreographyTask_145bktk")
+	cc.CreateMessage(ctx, &instance, "Message_0rwz1km", "Participant_19j1e3o", "Participant_0sa2v7d", "", `{"properties":{"requestId":{"type":"number","description":" Unique identifier of the request for additional details "},"numberOfUnits":{"type":"number","description":" Total number of units in the order requested"},"urgent":{"type":"boolean","description":"Indicates whether the order requires urgent delivery."}},"required":["requestId","numberOfUnits","urgent"],"files":{},"file required":[]}`, true, "ChoreographyTask_1cceq4q")
+	cc.CreateMessage(ctx, &instance, "Message_1io2g9u", "Participant_0sa2v7d", "Participant_19mgbdn", "", `{"properties":{"finalPriority":{"type":"string","description":""}},"required":["finalPriority"],"files":{},"file required":[]}`, false, "ChoreographyTask_0q1fvry")
+	cc.CreateMessage(ctx, &instance, "Message_0d2xte5", "Participant_19j1e3o", "Participant_19mgbdn", "", `{"properties":{"deliveryConfirmation":{"type":"boolean","description":"Confirmation of whether the supplies have been successfully delivered"}},"required":["deliveryConfirmation"],"files":{},"file required":[]}`, true, "ChoreographyTask_0p8dcch")
+	cc.CreateMessage(ctx, &instance, "Message_0d2xte5_1", "Participant_19j1e3o", "Participant_19mgbdn", "", `{"properties":{"deliveryConfirmation":{"type":"boolean","description":"Confirmation of whether the supplies have been successfully delivered"}},"required":["deliveryConfirmation"],"files":{},"file required":[]}`, true, "ChoreographyTask_0p8dcch")
+	cc.CreateMessage(ctx, &instance, "Message_0d2xte5_2", "Participant_19j1e3o", "Participant_19mgbdn", "", `{"properties":{"deliveryConfirmation":{"type":"boolean","description":"Confirmation of whether the supplies have been successfully delivered"}},"required":["deliveryConfirmation"],"files":{},"file required":[]}`, true, "ChoreographyTask_0p8dcch")
+	cc.CreateMessage(ctx, &instance, "Message_1oxmq1k", "Participant_19j1e3o", "Participant_19mgbdn", "", `{"properties":{"confirm1":{"type":"boolean","description":""}},"required":[],"files":{},"file required":[]}`, true, "ChoreographyTask_1573x71")
+	cc.CreateMessage(ctx, &instance, "Message_0i5t589", "Participant_0sa2v7d", "Participant_19j1e3o", "", `{"properties":{"fdfff":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}`, true, "ChoreographyTask_0894ivm")
+	cc.CreateMessage(ctx, &instance, "Message_0oi7nug", "Participant_0w6qkdf", "Participant_0sa2v7d", "", `{"properties":{"jjjjjj":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}`, false, "ChoreographyTask_1qqc59o")
+	cc.CreateMessage(ctx, &instance, "Message_0oi7nug_1", "Participant_0w6qkdf", "Participant_0sa2v7d", "", `{"properties":{"jjjjjj":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}`, false, "ChoreographyTask_1qqc59o")
+	cc.CreateMessage(ctx, &instance, "Message_0oi7nug_2", "Participant_0w6qkdf", "Participant_0sa2v7d", "", `{"properties":{"jjjjjj":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}`, false, "ChoreographyTask_1qqc59o")
+	cc.CreateMessage(ctx, &instance, "Message_1ip9ryp", "Participant_0w6qkdf", "Participant_19mgbdn", "", `{"properties":{"dsfsdafsdgggg":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}`, false, "ChoreographyTask_193uaq3")
+	cc.CreateChoreographyTask(ctx, &instance, "ChoreographyTask_0tyax7p", false, "TaskLoopType.NONE", "Message_1wswgqu", "")
+	cc.CreateChoreographyTask(ctx, &instance, "ChoreographyTask_0i0ht39", false, "TaskLoopType.NONE", "Message_0cba4t6", "")
+	cc.CreateChoreographyTask(ctx, &instance, "ChoreographyTask_145bktk", false, "TaskLoopType.NONE", "Message_0pm90nx", "")
+	cc.CreateChoreographyTask(ctx, &instance, "ChoreographyTask_1cceq4q", false, "TaskLoopType.NONE", "Message_0rwz1km", "")
+	cc.CreateChoreographyTask(ctx, &instance, "ChoreographyTask_0q1fvry", false, "TaskLoopType.NONE", "Message_1io2g9u", "")
+	cc.CreateChoreographyTask(ctx, &instance, "ChoreographyTask_0p8dcch", true, "TaskLoopType.MULTI_INSTANCE_SEQUENTIAL", "Message_0d2xte5", "")
+	cc.CreateChoreographyTask(ctx, &instance, "ChoreographyTask_1573x71", false, "TaskLoopType.NONE", "Message_1oxmq1k", "")
+	cc.CreateChoreographyTask(ctx, &instance, "ChoreographyTask_0894ivm", true, "TaskLoopType.STANDARD", "Message_0i5t589", "")
+	cc.CreateChoreographyTask(ctx, &instance, "ChoreographyTask_1qqc59o", true, "TaskLoopType.MULTI_INSTANCE_PARALLEL", "Message_0oi7nug", "")
+	cc.CreateChoreographyTask(ctx, &instance, "ChoreographyTask_193uaq3", false, "TaskLoopType.NONE", "Message_1ip9ryp", "")
 
 	// Save the instance
 	instanceBytes, err := json.Marshal(instance)
@@ -878,112 +779,4897 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 
 }
 
-func (cc *SmartContract) Event_0ooh8t8(ctx contractapi.TransactionContextInterface, instanceID string) error {
+func (cc *SmartContract) Event_06sexe6(ctx contractapi.TransactionContextInterface, instanceID string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
 
-	actionEvent, err := cc.ReadEvent(ctx, instanceID, "Event_0ooh8t8")
+	event := map[string]interface{}{
+		"type": "Event_06sexe6",
+	}
+
+	eventJsonBytes, _ := json.Marshal(event)
+
+	eventJsonString := string(eventJsonBytes)
+
+	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+
 	if err != nil {
 		return err
 	}
 
-	if actionEvent.EventState != ENABLED {
-		errorMessage := fmt.Sprintf("Event state %s is not allowed", actionEvent.EventID)
+	state, changed := stateCharts.DecodeTriggerActionResult(res)
+	if !changed {
+		return errors.New("Invalid transition")
+	}
+
+	instance.CurrentState = state
+
+	cc.SetInstance(ctx, instance)
+
+	stub.SetEvent("Event_06sexe6", []byte("Contract has been started successfully"))
+
+	return nil
+}
+
+func (cc *SmartContract) Message_1wswgqu_Send(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, fireflyTranID string) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_1wswgqu"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	participant_id := collectiveMsg.SendParticipantID
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_1wswgqu_%d", targetTaskID)
+	}
+
+	// MultiParticipant Address Located
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	var errorMessage string
+	var key1, key2 string
+	var msgsToHandle []Message = make([]Message, 0)
+	var eventsToTrigger []string = make([]string, 0)
+	var event map[string]interface{}
+	var eventJsonBytes []byte
+	var eventJsonString string
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		// 一对一
+		key1 = "nonMulti"
+		key2 = "nonMulti"
+
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": "Send_Message_1wswgqu",
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+		participant_key := key1
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == false {
+		// 多对一
+		key1 = cc.get_X509_identity(ctx)
+		key2 = "nonMulti"
+
+		// // Auth
+
+		// Check if Locked
+		if sendParticipant.IsLocked == true {
+			// check if registered
+			if _, ok := sendParticipant.Participants[key1]; ok {
+				// check X509
+				participant_key := key1
+				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+					fmt.Println(errorMessage)
+					return fmt.Errorf(errorMessage)
+				}
+			} else {
+				return fmt.Errorf("The participant is locked and the participant is not registered")
+			}
+		} else {
+			// else check if Participant has reach Maximum
+			if sendParticipant.MultiMaximum <= len(sendParticipant.Participants) {
+				return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+			}
+
+			// Attributes Based Access Control
+			if cc.check_participant(ctx, instanceID, participant_id, "") == false {
+				errorMessage = fmt.Sprintf("Participant can't not register itself due to no conformance attributes")
+				return fmt.Errorf(errorMessage)
+			}
+
+			// Register self, using a increasing key
+			participant_increasing_key := fmt.Sprintf("%d", len(sendParticipant.Participants))
+			// create new Participant if not exist
+			msp, _ := ctx.GetClientIdentity().GetMSPID()
+			newParticipant := Participant{
+				ParticipantID: participant_increasing_key,
+				MSP:           msp,
+				IsMulti:       true,
+				X509:          key1,
+			}
+			sendParticipant.Participants[key1] = newParticipant
+		}
+
+		// Created Message
+
+		if _, ok := collectiveMsg.Messages[key1]; ok {
+
+		} else {
+			collectiveMsg.Messages[key1] = make(map[string]Message)
+			newAtomicMsg := Message{
+				MessageID:             collectiveMsgName,
+				SendParticipantKey:    key1,
+				ReceiveParticipantKey: key2,
+				FireflyTranID:         "",
+			}
+			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+		}
+
+		message_increasing_key := len(sendParticipant.Participants)
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Send_Message_1wswgqu_%d", message_increasing_key),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+	} else if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == true {
+		// 一对多
+		key1 = "nonMulti"
+
+		participant_key := key1
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+		// create Maximum Number of Message
+		if _, ok := collectiveMsg.Messages[key1]; ok {
+			// Have Been Created, Repeated Operation
+		} else {
+			collectiveMsg.Messages[key1] = make(map[string]Message)
+		}
+
+		if len(collectiveMsg.Messages[key1]) >= receiveParticipant.MultiMaximum {
+			fmt.Println("The number of messages sent by the participant exceeds the maximum")
+			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+		}
+
+		for i := 0; i < receiveParticipant.MultiMaximum; i++ {
+			key2 := fmt.Sprintf("%d", i)
+			newAtomicMsg := Message{
+				MessageID:             collectiveMsgName,
+				SendParticipantKey:    key1,
+				ReceiveParticipantKey: key2,
+				FireflyTranID:         "",
+			}
+			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+		}
+
+		for key, value := range collectiveMsg.Messages[key1] {
+			msgsToHandle = append(msgsToHandle, value)
+			event = map[string]interface{}{
+				"type": fmt.Sprintf("Send_Message_1wswgqu_%s", key),
+			}
+			eventJsonBytes, _ = json.Marshal(event)
+			eventJsonString = string(eventJsonBytes)
+			eventsToTrigger = append(eventsToTrigger, eventJsonString)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		// 多对多 UnSupport Type
+		errorMessage = "Multi To Multi Task, Unsupported Operation"
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
-	cc.ChangeEventState(ctx, instance, "Event_0ooh8t8", COMPLETED)
-	stub.SetEvent("Event_0ooh8t8", []byte("Contract has been started successfully"))
-	cc.SetInstance(ctx, instance)
+	for _, event := range eventsToTrigger {
+		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+		state, changed := stateCharts.DecodeTriggerActionResult(res)
+		if !changed {
+			return fmt.Errorf("The state machine does not change")
+		}
+		instance.CurrentState = state
+	}
 
-	cc.ChangeMsgState(ctx, instance, "Message_0j305jt", ENABLED)
+	for _, msg := range msgsToHandle {
+		cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID, key1, key2)
+	}
 
+	stub.SetEvent(collectiveMsgName, []byte("Message is waiting for confirmation"))
 	cc.SetInstance(ctx, instance)
 	return nil
 }
 
-func (cc *SmartContract) Message_0j305jt_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
+func (cc *SmartContract) Message_1wswgqu_Complete(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, ConfirmTargetX509 string) error {
 	stub := ctx.GetStub()
-	instance, err := cc.GetInstance(ctx, instanceID)
-	msg, err := cc.ReadMsg(ctx, instanceID, "Message_0j305jt")
-	if err != nil {
-		return err
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_1wswgqu"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	participant_id := collectiveMsg.ReceiveParticipantID
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_1wswgqu_%d", targetTaskID)
 	}
 
-	//
-	if cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {
-		errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", msg.SendParticipantID)
-		fmt.Println(errorMessage)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	var errorMessage string
+	var key1, key2 string
+	var msgsToHandle []Message = make([]Message, 0)
+	var eventsToTrigger []string = make([]string, 0)
+	var event map[string]interface{}
+	var eventJsonString string
+	var eventJsonBytes []byte
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		// 一对一
+		key1 = "nonMulti"
+		key2 = "nonMulti"
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": "Confirm_Message_1wswgqu",
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+		participant_key := key2
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == false {
+		// 多对一 回应
+		// 1. 响应所有消息
+		// 2. 添加Target
+
+		key1 = ConfirmTargetX509
+		key2 = "nonMulti"
+
+		participant_key := key2
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+		// Which To Confirm? Decided By ConfirmTargetX509
+		confirmTargetSender, ok := sendParticipant.Participants[key1]
+		if !ok {
+			errorMessage := "UnExisted ConfirmTarget"
+			return fmt.Errorf(errorMessage)
+		}
+
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1]["nonMulti"])
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Confirm_Message_1wswgqu_%s", confirmTargetSender.ParticipantID),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+	} else if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == true {
+		// 一对多 回应，响应自己的部分，修改计数器
+		key1 = "nonMulti"
+		key2 = cc.get_X509_identity(ctx)
+
+		if receiveParticipant.IsLocked == true {
+			// check if key2 in it
+			if _, ok := receiveParticipant.Participants[key2]; ok {
+				// check Participant
+				participant_key := key2
+				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+					fmt.Println(errorMessage)
+					return fmt.Errorf(errorMessage)
+				}
+			} else {
+				return fmt.Errorf("The participant is locked and the participant is not registered")
+			}
+		} else {
+
+			if receiveParticipant.MultiMaximum <= len(receiveParticipant.Participants) {
+				errorMessage := "ReceiveParticipants Has Reach the Maximum"
+				return fmt.Errorf(errorMessage)
+			}
+
+			if cc.check_participant(ctx, instanceID, participant_id, "") != true {
+				errorMessage := "Not Allowed To participate as a Receiver"
+				return fmt.Errorf(errorMessage)
+			}
+
+			// create new Participant if not exist
+			x509 := cc.get_X509_identity(ctx)
+			participant_increasing_key := len(receiveParticipant.Participants)
+			msp, _ := ctx.GetClientIdentity().GetMSPID()
+			newParticipant := Participant{
+				ParticipantID: fmt.Sprintf("%d", participant_increasing_key),
+				MSP:           msp,
+				IsMulti:       true,
+				X509:          x509,
+			}
+			receiveParticipant.Participants[key2] = newParticipant
+		}
+
+		// get the message and increase it's confirmedCount
+
+		if collectiveMsg.MessageConfirmedCount >= receiveParticipant.MultiMaximum {
+			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+		}
+
+		message_increasing_key := fmt.Sprintf("%d", collectiveMsg.MessageConfirmedCount)
+		msg := collectiveMsg.Messages[key1][message_increasing_key]
+		delete(collectiveMsg.Messages[key1], message_increasing_key)
+		collectiveMsg.Messages[key1][key2] = msg
+		collectiveMsg.MessageConfirmedCount += 1
+
+		msgsToHandle = append(msgsToHandle, msg)
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Confirm_Message_1wswgqu_%d", message_increasing_key),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		// 多对多 UnSupported Operations?
+		errorMessage = fmt.Sprintf("UnSupported Operation")
 		return fmt.Errorf(errorMessage)
 	}
 
-	if msg.MsgState != ENABLED {
-		errorMessage := fmt.Sprintf("Message state %s is not allowed", msg.MessageID)
-		fmt.Println(errorMessage)
-		return fmt.Errorf(errorMessage)
+	for _, event := range eventsToTrigger {
+		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+		if err != nil {
+			return err
+		}
+		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		if !changed {
+			return fmt.Errorf("The state machine does not change")
+		}
+
+		instance.CurrentState = state
 	}
 
-	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
-	cc.ChangeMsgState(ctx, instance, "Message_0j305jt", COMPLETED)
-
-	stub.SetEvent("Message_0j305jt", []byte("Message is waiting for confirmation"))
-	cc.SetInstance(ctx, instance)
-
-	cc.ChangeMsgState(ctx, instance, "Message_0ip1epl", ENABLED)
+	stub.SetEvent(collectiveMsgName, []byte("Message is Confirmed !"))
 	cc.SetInstance(ctx, instance)
 	return nil
 }
 
-func (cc *SmartContract) Message_0ip1epl_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
+func (cc *SmartContract) Message_1wswgqu_Advance(
+	ctx contractapi.TransactionContextInterface,
+	instanceID string,
+	targetTaskID string,
+) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_1wswgqu"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_1wswgqu_%d", targetTaskID)
+	}
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	// Check if Multi
+	if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		return fmt.Errorf("Unsupport Operation")
+	}
+
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		return fmt.Errorf("Not Invalid Operation")
+	}
+
+	var participantToLock *CollectiveParticipant
+	if sendParticipant.IsMulti {
+		// check if invoker in receiveParticipants
+		if cc.check_participant(ctx, instanceID, receiveParticipantID, "") == false {
+			return fmt.Errorf("Not Allowed To Advance")
+		}
+		participantToLock = receiveParticipant
+	} else {
+		// check if invoker in senderParticipants
+		if cc.check_participant(ctx, instanceID, sendParticipantID, "") == false {
+			return fmt.Errorf("Not Allowd To Advance")
+		}
+		participantToLock = sendParticipant
+	}
+
+	if len(participantToLock.Participants) < participantToLock.MultiMinimum {
+		errorMessage := fmt.Sprintf(
+			"Messages count %d does not meet the minimum requirement %d for participant %s",
+			len(collectiveMsg.Messages),
+			participantToLock.MultiMinimum,
+			participantToLock.ParticipantID,
+		)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	event := map[string]interface{}{
+		"type": "AdvanceMessage_1wswgqu",
+	}
+	eventJsonBytes, _ := json.Marshal(event)
+
+	eventJsonString := string(eventJsonBytes)
+
+	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+	if err != nil {
+		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
+	}
+	state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	if !changed {
+		return fmt.Errorf("Invalid Operation")
+	}
+	instance.CurrentState = state
+
+	participantToLock.IsLocked = true
+
+	err = cc.SetInstance(ctx, instance)
+	if err != nil {
+		return fmt.Errorf("failed to set instance: %v", err)
+	}
+
+	stub.SetEvent("AdvanceMessage_1wswgqu", []byte("CollectiveMessage advanced successfully"))
+	return nil
+}
+
+func (cc *SmartContract) Gateway_0onpe6x(ctx contractapi.TransactionContextInterface, instanceID string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
-	msg, err := cc.ReadMsg(ctx, instanceID, "Message_0ip1epl")
+
 	if err != nil {
 		return err
 	}
 
-	//
-	if cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {
-		errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", msg.SendParticipantID)
-		fmt.Println(errorMessage)
-		return fmt.Errorf(errorMessage)
+	event := map[string]interface{}{
+		"type": "Gateway_0onpe6x",
 	}
 
-	if msg.MsgState != ENABLED {
-		errorMessage := fmt.Sprintf("Message state %s is not allowed", msg.MessageID)
-		fmt.Println(errorMessage)
-		return fmt.Errorf(errorMessage)
+	eventJsonBytes, _ := json.Marshal(event)
+
+	eventJsonString := string(eventJsonBytes)
+
+	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+
+	if err != nil {
+		return err
+	}
+	new_status, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	if !changed {
+		return errors.New("Invalid transition")
 	}
 
-	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
-	cc.ChangeMsgState(ctx, instance, "Message_0ip1epl", COMPLETED)
-
-	stub.SetEvent("Message_0ip1epl", []byte("Message is waiting for confirmation"))
+	instance.CurrentState = new_status
 	cc.SetInstance(ctx, instance)
 
-	cc.ChangeEventState(ctx, instance, "Event_1rmj9g7", ENABLED)
+	stub.SetEvent("Gateway_0onpe6x", []byte("Gateway has been done"))
+
+	return nil
+}
+
+func (cc *SmartContract) Message_0cba4t6_Send(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, fireflyTranID string) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_0cba4t6"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	participant_id := collectiveMsg.SendParticipantID
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_0cba4t6_%d", targetTaskID)
+	}
+
+	// MultiParticipant Address Located
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	var errorMessage string
+	var key1, key2 string
+	var msgsToHandle []Message = make([]Message, 0)
+	var eventsToTrigger []string = make([]string, 0)
+	var event map[string]interface{}
+	var eventJsonBytes []byte
+	var eventJsonString string
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		// 一对一
+		key1 = "nonMulti"
+		key2 = "nonMulti"
+
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": "Send_Message_0cba4t6",
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+		participant_key := key1
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == false {
+		// 多对一
+		key1 = cc.get_X509_identity(ctx)
+		key2 = "nonMulti"
+
+		// // Auth
+
+		// Check if Locked
+		if sendParticipant.IsLocked == true {
+			// check if registered
+			if _, ok := sendParticipant.Participants[key1]; ok {
+				// check X509
+				participant_key := key1
+				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+					fmt.Println(errorMessage)
+					return fmt.Errorf(errorMessage)
+				}
+			} else {
+				return fmt.Errorf("The participant is locked and the participant is not registered")
+			}
+		} else {
+			// else check if Participant has reach Maximum
+			if sendParticipant.MultiMaximum <= len(sendParticipant.Participants) {
+				return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+			}
+
+			// Attributes Based Access Control
+			if cc.check_participant(ctx, instanceID, participant_id, "") == false {
+				errorMessage = fmt.Sprintf("Participant can't not register itself due to no conformance attributes")
+				return fmt.Errorf(errorMessage)
+			}
+
+			// Register self, using a increasing key
+			participant_increasing_key := fmt.Sprintf("%d", len(sendParticipant.Participants))
+			// create new Participant if not exist
+			msp, _ := ctx.GetClientIdentity().GetMSPID()
+			newParticipant := Participant{
+				ParticipantID: participant_increasing_key,
+				MSP:           msp,
+				IsMulti:       true,
+				X509:          key1,
+			}
+			sendParticipant.Participants[key1] = newParticipant
+		}
+
+		// Created Message
+
+		if _, ok := collectiveMsg.Messages[key1]; ok {
+
+		} else {
+			collectiveMsg.Messages[key1] = make(map[string]Message)
+			newAtomicMsg := Message{
+				MessageID:             collectiveMsgName,
+				SendParticipantKey:    key1,
+				ReceiveParticipantKey: key2,
+				FireflyTranID:         "",
+			}
+			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+		}
+
+		message_increasing_key := len(sendParticipant.Participants)
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Send_Message_0cba4t6_%d", message_increasing_key),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+	} else if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == true {
+		// 一对多
+		key1 = "nonMulti"
+
+		participant_key := key1
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+		// create Maximum Number of Message
+		if _, ok := collectiveMsg.Messages[key1]; ok {
+			// Have Been Created, Repeated Operation
+		} else {
+			collectiveMsg.Messages[key1] = make(map[string]Message)
+		}
+
+		if len(collectiveMsg.Messages[key1]) >= receiveParticipant.MultiMaximum {
+			fmt.Println("The number of messages sent by the participant exceeds the maximum")
+			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+		}
+
+		for i := 0; i < receiveParticipant.MultiMaximum; i++ {
+			key2 := fmt.Sprintf("%d", i)
+			newAtomicMsg := Message{
+				MessageID:             collectiveMsgName,
+				SendParticipantKey:    key1,
+				ReceiveParticipantKey: key2,
+				FireflyTranID:         "",
+			}
+			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+		}
+
+		for key, value := range collectiveMsg.Messages[key1] {
+			msgsToHandle = append(msgsToHandle, value)
+			event = map[string]interface{}{
+				"type": fmt.Sprintf("Send_Message_0cba4t6_%s", key),
+			}
+			eventJsonBytes, _ = json.Marshal(event)
+			eventJsonString = string(eventJsonBytes)
+			eventsToTrigger = append(eventsToTrigger, eventJsonString)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		// 多对多 UnSupport Type
+		errorMessage = "Multi To Multi Task, Unsupported Operation"
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	for _, event := range eventsToTrigger {
+		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+		state, changed := stateCharts.DecodeTriggerActionResult(res)
+		if !changed {
+			return fmt.Errorf("The state machine does not change")
+		}
+		instance.CurrentState = state
+	}
+
+	for _, msg := range msgsToHandle {
+		cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID, key1, key2)
+	}
+
+	stub.SetEvent(collectiveMsgName, []byte("Message is waiting for confirmation"))
 	cc.SetInstance(ctx, instance)
 	return nil
 }
 
-func (cc *SmartContract) Event_1rmj9g7(ctx contractapi.TransactionContextInterface, instanceID string) error {
+func (cc *SmartContract) Message_0cba4t6_Complete(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, ConfirmTargetX509 string) error {
 	stub := ctx.GetStub()
-	instance, err := cc.GetInstance(ctx, instanceID)
-	event, err := cc.ReadEvent(ctx, instanceID, "Event_1rmj9g7")
-	if err != nil {
-		return err
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_0cba4t6"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	participant_id := collectiveMsg.ReceiveParticipantID
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_0cba4t6_%d", targetTaskID)
 	}
 
-	if event.EventState != ENABLED {
-		errorMessage := fmt.Sprintf("Event state %s is not allowed", event.EventID)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	var errorMessage string
+	var key1, key2 string
+	var msgsToHandle []Message = make([]Message, 0)
+	var eventsToTrigger []string = make([]string, 0)
+	var event map[string]interface{}
+	var eventJsonString string
+	var eventJsonBytes []byte
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		// 一对一
+		key1 = "nonMulti"
+		key2 = "nonMulti"
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": "Confirm_Message_0cba4t6",
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+		participant_key := key2
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == false {
+		// 多对一 回应
+		// 1. 响应所有消息
+		// 2. 添加Target
+
+		key1 = ConfirmTargetX509
+		key2 = "nonMulti"
+
+		participant_key := key2
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+		// Which To Confirm? Decided By ConfirmTargetX509
+		confirmTargetSender, ok := sendParticipant.Participants[key1]
+		if !ok {
+			errorMessage := "UnExisted ConfirmTarget"
+			return fmt.Errorf(errorMessage)
+		}
+
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1]["nonMulti"])
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Confirm_Message_0cba4t6_%s", confirmTargetSender.ParticipantID),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+	} else if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == true {
+		// 一对多 回应，响应自己的部分，修改计数器
+		key1 = "nonMulti"
+		key2 = cc.get_X509_identity(ctx)
+
+		if receiveParticipant.IsLocked == true {
+			// check if key2 in it
+			if _, ok := receiveParticipant.Participants[key2]; ok {
+				// check Participant
+				participant_key := key2
+				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+					fmt.Println(errorMessage)
+					return fmt.Errorf(errorMessage)
+				}
+			} else {
+				return fmt.Errorf("The participant is locked and the participant is not registered")
+			}
+		} else {
+
+			if receiveParticipant.MultiMaximum <= len(receiveParticipant.Participants) {
+				errorMessage := "ReceiveParticipants Has Reach the Maximum"
+				return fmt.Errorf(errorMessage)
+			}
+
+			if cc.check_participant(ctx, instanceID, participant_id, "") != true {
+				errorMessage := "Not Allowed To participate as a Receiver"
+				return fmt.Errorf(errorMessage)
+			}
+
+			// create new Participant if not exist
+			x509 := cc.get_X509_identity(ctx)
+			participant_increasing_key := len(receiveParticipant.Participants)
+			msp, _ := ctx.GetClientIdentity().GetMSPID()
+			newParticipant := Participant{
+				ParticipantID: fmt.Sprintf("%d", participant_increasing_key),
+				MSP:           msp,
+				IsMulti:       true,
+				X509:          x509,
+			}
+			receiveParticipant.Participants[key2] = newParticipant
+		}
+
+		// get the message and increase it's confirmedCount
+
+		if collectiveMsg.MessageConfirmedCount >= receiveParticipant.MultiMaximum {
+			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+		}
+
+		message_increasing_key := fmt.Sprintf("%d", collectiveMsg.MessageConfirmedCount)
+		msg := collectiveMsg.Messages[key1][message_increasing_key]
+		delete(collectiveMsg.Messages[key1], message_increasing_key)
+		collectiveMsg.Messages[key1][key2] = msg
+		collectiveMsg.MessageConfirmedCount += 1
+
+		msgsToHandle = append(msgsToHandle, msg)
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Confirm_Message_0cba4t6_%d", message_increasing_key),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		// 多对多 UnSupported Operations?
+		errorMessage = fmt.Sprintf("UnSupported Operation")
+		return fmt.Errorf(errorMessage)
+	}
+
+	for _, event := range eventsToTrigger {
+		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+		if err != nil {
+			return err
+		}
+		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		if !changed {
+			return fmt.Errorf("The state machine does not change")
+		}
+
+		instance.CurrentState = state
+	}
+
+	stub.SetEvent(collectiveMsgName, []byte("Message is Confirmed !"))
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_0cba4t6_Advance(
+	ctx contractapi.TransactionContextInterface,
+	instanceID string,
+	targetTaskID string,
+) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_0cba4t6"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_0cba4t6_%d", targetTaskID)
+	}
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	// Check if Multi
+	if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		return fmt.Errorf("Unsupport Operation")
+	}
+
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		return fmt.Errorf("Not Invalid Operation")
+	}
+
+	var participantToLock *CollectiveParticipant
+	if sendParticipant.IsMulti {
+		// check if invoker in receiveParticipants
+		if cc.check_participant(ctx, instanceID, receiveParticipantID, "") == false {
+			return fmt.Errorf("Not Allowed To Advance")
+		}
+		participantToLock = receiveParticipant
+	} else {
+		// check if invoker in senderParticipants
+		if cc.check_participant(ctx, instanceID, sendParticipantID, "") == false {
+			return fmt.Errorf("Not Allowd To Advance")
+		}
+		participantToLock = sendParticipant
+	}
+
+	if len(participantToLock.Participants) < participantToLock.MultiMinimum {
+		errorMessage := fmt.Sprintf(
+			"Messages count %d does not meet the minimum requirement %d for participant %s",
+			len(collectiveMsg.Messages),
+			participantToLock.MultiMinimum,
+			participantToLock.ParticipantID,
+		)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
-	cc.ChangeEventState(ctx, instance, event.EventID, COMPLETED)
-	stub.SetEvent("Event_1rmj9g7", []byte("EndEvent has been done"))
+	event := map[string]interface{}{
+		"type": "AdvanceMessage_0cba4t6",
+	}
+	eventJsonBytes, _ := json.Marshal(event)
+
+	eventJsonString := string(eventJsonBytes)
+
+	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+	if err != nil {
+		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
+	}
+	state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	if !changed {
+		return fmt.Errorf("Invalid Operation")
+	}
+	instance.CurrentState = state
+
+	participantToLock.IsLocked = true
+
+	err = cc.SetInstance(ctx, instance)
+	if err != nil {
+		return fmt.Errorf("failed to set instance: %v", err)
+	}
+
+	stub.SetEvent("AdvanceMessage_0cba4t6", []byte("CollectiveMessage advanced successfully"))
+	return nil
+}
+
+func (cc *SmartContract) Message_0pm90nx_Send(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, fireflyTranID string) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_0pm90nx"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	participant_id := collectiveMsg.SendParticipantID
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_0pm90nx_%d", targetTaskID)
+	}
+
+	// MultiParticipant Address Located
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	var errorMessage string
+	var key1, key2 string
+	var msgsToHandle []Message = make([]Message, 0)
+	var eventsToTrigger []string = make([]string, 0)
+	var event map[string]interface{}
+	var eventJsonBytes []byte
+	var eventJsonString string
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		// 一对一
+		key1 = "nonMulti"
+		key2 = "nonMulti"
+
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": "Send_Message_0pm90nx",
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+		participant_key := key1
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == false {
+		// 多对一
+		key1 = cc.get_X509_identity(ctx)
+		key2 = "nonMulti"
+
+		// // Auth
+
+		// Check if Locked
+		if sendParticipant.IsLocked == true {
+			// check if registered
+			if _, ok := sendParticipant.Participants[key1]; ok {
+				// check X509
+				participant_key := key1
+				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+					fmt.Println(errorMessage)
+					return fmt.Errorf(errorMessage)
+				}
+			} else {
+				return fmt.Errorf("The participant is locked and the participant is not registered")
+			}
+		} else {
+			// else check if Participant has reach Maximum
+			if sendParticipant.MultiMaximum <= len(sendParticipant.Participants) {
+				return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+			}
+
+			// Attributes Based Access Control
+			if cc.check_participant(ctx, instanceID, participant_id, "") == false {
+				errorMessage = fmt.Sprintf("Participant can't not register itself due to no conformance attributes")
+				return fmt.Errorf(errorMessage)
+			}
+
+			// Register self, using a increasing key
+			participant_increasing_key := fmt.Sprintf("%d", len(sendParticipant.Participants))
+			// create new Participant if not exist
+			msp, _ := ctx.GetClientIdentity().GetMSPID()
+			newParticipant := Participant{
+				ParticipantID: participant_increasing_key,
+				MSP:           msp,
+				IsMulti:       true,
+				X509:          key1,
+			}
+			sendParticipant.Participants[key1] = newParticipant
+		}
+
+		// Created Message
+
+		if _, ok := collectiveMsg.Messages[key1]; ok {
+
+		} else {
+			collectiveMsg.Messages[key1] = make(map[string]Message)
+			newAtomicMsg := Message{
+				MessageID:             collectiveMsgName,
+				SendParticipantKey:    key1,
+				ReceiveParticipantKey: key2,
+				FireflyTranID:         "",
+			}
+			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+		}
+
+		message_increasing_key := len(sendParticipant.Participants)
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Send_Message_0pm90nx_%d", message_increasing_key),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+	} else if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == true {
+		// 一对多
+		key1 = "nonMulti"
+
+		participant_key := key1
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+		// create Maximum Number of Message
+		if _, ok := collectiveMsg.Messages[key1]; ok {
+			// Have Been Created, Repeated Operation
+		} else {
+			collectiveMsg.Messages[key1] = make(map[string]Message)
+		}
+
+		if len(collectiveMsg.Messages[key1]) >= receiveParticipant.MultiMaximum {
+			fmt.Println("The number of messages sent by the participant exceeds the maximum")
+			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+		}
+
+		for i := 0; i < receiveParticipant.MultiMaximum; i++ {
+			key2 := fmt.Sprintf("%d", i)
+			newAtomicMsg := Message{
+				MessageID:             collectiveMsgName,
+				SendParticipantKey:    key1,
+				ReceiveParticipantKey: key2,
+				FireflyTranID:         "",
+			}
+			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+		}
+
+		for key, value := range collectiveMsg.Messages[key1] {
+			msgsToHandle = append(msgsToHandle, value)
+			event = map[string]interface{}{
+				"type": fmt.Sprintf("Send_Message_0pm90nx_%s", key),
+			}
+			eventJsonBytes, _ = json.Marshal(event)
+			eventJsonString = string(eventJsonBytes)
+			eventsToTrigger = append(eventsToTrigger, eventJsonString)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		// 多对多 UnSupport Type
+		errorMessage = "Multi To Multi Task, Unsupported Operation"
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	for _, event := range eventsToTrigger {
+		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+		state, changed := stateCharts.DecodeTriggerActionResult(res)
+		if !changed {
+			return fmt.Errorf("The state machine does not change")
+		}
+		instance.CurrentState = state
+	}
+
+	for _, msg := range msgsToHandle {
+		cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID, key1, key2)
+	}
+
+	stub.SetEvent(collectiveMsgName, []byte("Message is waiting for confirmation"))
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_0pm90nx_Complete(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, ConfirmTargetX509 string) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_0pm90nx"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	participant_id := collectiveMsg.ReceiveParticipantID
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_0pm90nx_%d", targetTaskID)
+	}
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	var errorMessage string
+	var key1, key2 string
+	var msgsToHandle []Message = make([]Message, 0)
+	var eventsToTrigger []string = make([]string, 0)
+	var event map[string]interface{}
+	var eventJsonString string
+	var eventJsonBytes []byte
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		// 一对一
+		key1 = "nonMulti"
+		key2 = "nonMulti"
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": "Confirm_Message_0pm90nx",
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+		participant_key := key2
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == false {
+		// 多对一 回应
+		// 1. 响应所有消息
+		// 2. 添加Target
+
+		key1 = ConfirmTargetX509
+		key2 = "nonMulti"
+
+		participant_key := key2
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+		// Which To Confirm? Decided By ConfirmTargetX509
+		confirmTargetSender, ok := sendParticipant.Participants[key1]
+		if !ok {
+			errorMessage := "UnExisted ConfirmTarget"
+			return fmt.Errorf(errorMessage)
+		}
+
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1]["nonMulti"])
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Confirm_Message_0pm90nx_%s", confirmTargetSender.ParticipantID),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+	} else if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == true {
+		// 一对多 回应，响应自己的部分，修改计数器
+		key1 = "nonMulti"
+		key2 = cc.get_X509_identity(ctx)
+
+		if receiveParticipant.IsLocked == true {
+			// check if key2 in it
+			if _, ok := receiveParticipant.Participants[key2]; ok {
+				// check Participant
+				participant_key := key2
+				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+					fmt.Println(errorMessage)
+					return fmt.Errorf(errorMessage)
+				}
+			} else {
+				return fmt.Errorf("The participant is locked and the participant is not registered")
+			}
+		} else {
+
+			if receiveParticipant.MultiMaximum <= len(receiveParticipant.Participants) {
+				errorMessage := "ReceiveParticipants Has Reach the Maximum"
+				return fmt.Errorf(errorMessage)
+			}
+
+			if cc.check_participant(ctx, instanceID, participant_id, "") != true {
+				errorMessage := "Not Allowed To participate as a Receiver"
+				return fmt.Errorf(errorMessage)
+			}
+
+			// create new Participant if not exist
+			x509 := cc.get_X509_identity(ctx)
+			participant_increasing_key := len(receiveParticipant.Participants)
+			msp, _ := ctx.GetClientIdentity().GetMSPID()
+			newParticipant := Participant{
+				ParticipantID: fmt.Sprintf("%d", participant_increasing_key),
+				MSP:           msp,
+				IsMulti:       true,
+				X509:          x509,
+			}
+			receiveParticipant.Participants[key2] = newParticipant
+		}
+
+		// get the message and increase it's confirmedCount
+
+		if collectiveMsg.MessageConfirmedCount >= receiveParticipant.MultiMaximum {
+			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+		}
+
+		message_increasing_key := fmt.Sprintf("%d", collectiveMsg.MessageConfirmedCount)
+		msg := collectiveMsg.Messages[key1][message_increasing_key]
+		delete(collectiveMsg.Messages[key1], message_increasing_key)
+		collectiveMsg.Messages[key1][key2] = msg
+		collectiveMsg.MessageConfirmedCount += 1
+
+		msgsToHandle = append(msgsToHandle, msg)
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Confirm_Message_0pm90nx_%d", message_increasing_key),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		// 多对多 UnSupported Operations?
+		errorMessage = fmt.Sprintf("UnSupported Operation")
+		return fmt.Errorf(errorMessage)
+	}
+
+	for _, event := range eventsToTrigger {
+		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+		if err != nil {
+			return err
+		}
+		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		if !changed {
+			return fmt.Errorf("The state machine does not change")
+		}
+
+		instance.CurrentState = state
+	}
+
+	stub.SetEvent(collectiveMsgName, []byte("Message is Confirmed !"))
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_0pm90nx_Advance(
+	ctx contractapi.TransactionContextInterface,
+	instanceID string,
+	targetTaskID string,
+) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_0pm90nx"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_0pm90nx_%d", targetTaskID)
+	}
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	// Check if Multi
+	if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		return fmt.Errorf("Unsupport Operation")
+	}
+
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		return fmt.Errorf("Not Invalid Operation")
+	}
+
+	var participantToLock *CollectiveParticipant
+	if sendParticipant.IsMulti {
+		// check if invoker in receiveParticipants
+		if cc.check_participant(ctx, instanceID, receiveParticipantID, "") == false {
+			return fmt.Errorf("Not Allowed To Advance")
+		}
+		participantToLock = receiveParticipant
+	} else {
+		// check if invoker in senderParticipants
+		if cc.check_participant(ctx, instanceID, sendParticipantID, "") == false {
+			return fmt.Errorf("Not Allowd To Advance")
+		}
+		participantToLock = sendParticipant
+	}
+
+	if len(participantToLock.Participants) < participantToLock.MultiMinimum {
+		errorMessage := fmt.Sprintf(
+			"Messages count %d does not meet the minimum requirement %d for participant %s",
+			len(collectiveMsg.Messages),
+			participantToLock.MultiMinimum,
+			participantToLock.ParticipantID,
+		)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	event := map[string]interface{}{
+		"type": "AdvanceMessage_0pm90nx",
+	}
+	eventJsonBytes, _ := json.Marshal(event)
+
+	eventJsonString := string(eventJsonBytes)
+
+	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+	if err != nil {
+		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
+	}
+	state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	if !changed {
+		return fmt.Errorf("Invalid Operation")
+	}
+	instance.CurrentState = state
+
+	participantToLock.IsLocked = true
+
+	err = cc.SetInstance(ctx, instance)
+	if err != nil {
+		return fmt.Errorf("failed to set instance: %v", err)
+	}
+
+	stub.SetEvent("AdvanceMessage_0pm90nx", []byte("CollectiveMessage advanced successfully"))
+	return nil
+}
+
+func (cc *SmartContract) Gateway_1fbifca(ctx contractapi.TransactionContextInterface, instanceID string) error {
+	stub := ctx.GetStub()
+	instance, err := cc.GetInstance(ctx, instanceID)
+
+	if err != nil {
+		return err
+	}
+
+	event := map[string]interface{}{
+		"type": "Gateway_1fbifca",
+	}
+
+	eventJsonBytes, _ := json.Marshal(event)
+
+	eventJsonString := string(eventJsonBytes)
+
+	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+
+	if err != nil {
+		return err
+	}
+	new_status, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	if !changed {
+		return errors.New("Invalid transition")
+	}
+
+	instance.CurrentState = new_status
+	cc.SetInstance(ctx, instance)
+
+	stub.SetEvent("Gateway_1fbifca", []byte("Gateway has been done"))
+
+	return nil
+}
+
+func (cc *SmartContract) Message_0rwz1km_Send(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, fireflyTranID string) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_0rwz1km"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	participant_id := collectiveMsg.SendParticipantID
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_0rwz1km_%d", targetTaskID)
+	}
+
+	// MultiParticipant Address Located
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	var errorMessage string
+	var key1, key2 string
+	var msgsToHandle []Message = make([]Message, 0)
+	var eventsToTrigger []string = make([]string, 0)
+	var event map[string]interface{}
+	var eventJsonBytes []byte
+	var eventJsonString string
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		// 一对一
+		key1 = "nonMulti"
+		key2 = "nonMulti"
+
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": "Send_Message_0rwz1km",
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+		participant_key := key1
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == false {
+		// 多对一
+		key1 = cc.get_X509_identity(ctx)
+		key2 = "nonMulti"
+
+		// // Auth
+
+		// Check if Locked
+		if sendParticipant.IsLocked == true {
+			// check if registered
+			if _, ok := sendParticipant.Participants[key1]; ok {
+				// check X509
+				participant_key := key1
+				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+					fmt.Println(errorMessage)
+					return fmt.Errorf(errorMessage)
+				}
+			} else {
+				return fmt.Errorf("The participant is locked and the participant is not registered")
+			}
+		} else {
+			// else check if Participant has reach Maximum
+			if sendParticipant.MultiMaximum <= len(sendParticipant.Participants) {
+				return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+			}
+
+			// Attributes Based Access Control
+			if cc.check_participant(ctx, instanceID, participant_id, "") == false {
+				errorMessage = fmt.Sprintf("Participant can't not register itself due to no conformance attributes")
+				return fmt.Errorf(errorMessage)
+			}
+
+			// Register self, using a increasing key
+			participant_increasing_key := fmt.Sprintf("%d", len(sendParticipant.Participants))
+			// create new Participant if not exist
+			msp, _ := ctx.GetClientIdentity().GetMSPID()
+			newParticipant := Participant{
+				ParticipantID: participant_increasing_key,
+				MSP:           msp,
+				IsMulti:       true,
+				X509:          key1,
+			}
+			sendParticipant.Participants[key1] = newParticipant
+		}
+
+		// Created Message
+
+		if _, ok := collectiveMsg.Messages[key1]; ok {
+
+		} else {
+			collectiveMsg.Messages[key1] = make(map[string]Message)
+			newAtomicMsg := Message{
+				MessageID:             collectiveMsgName,
+				SendParticipantKey:    key1,
+				ReceiveParticipantKey: key2,
+				FireflyTranID:         "",
+			}
+			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+		}
+
+		message_increasing_key := len(sendParticipant.Participants)
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Send_Message_0rwz1km_%d", message_increasing_key),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+	} else if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == true {
+		// 一对多
+		key1 = "nonMulti"
+
+		participant_key := key1
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+		// create Maximum Number of Message
+		if _, ok := collectiveMsg.Messages[key1]; ok {
+			// Have Been Created, Repeated Operation
+		} else {
+			collectiveMsg.Messages[key1] = make(map[string]Message)
+		}
+
+		if len(collectiveMsg.Messages[key1]) >= receiveParticipant.MultiMaximum {
+			fmt.Println("The number of messages sent by the participant exceeds the maximum")
+			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+		}
+
+		for i := 0; i < receiveParticipant.MultiMaximum; i++ {
+			key2 := fmt.Sprintf("%d", i)
+			newAtomicMsg := Message{
+				MessageID:             collectiveMsgName,
+				SendParticipantKey:    key1,
+				ReceiveParticipantKey: key2,
+				FireflyTranID:         "",
+			}
+			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+		}
+
+		for key, value := range collectiveMsg.Messages[key1] {
+			msgsToHandle = append(msgsToHandle, value)
+			event = map[string]interface{}{
+				"type": fmt.Sprintf("Send_Message_0rwz1km_%s", key),
+			}
+			eventJsonBytes, _ = json.Marshal(event)
+			eventJsonString = string(eventJsonBytes)
+			eventsToTrigger = append(eventsToTrigger, eventJsonString)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		// 多对多 UnSupport Type
+		errorMessage = "Multi To Multi Task, Unsupported Operation"
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	for _, event := range eventsToTrigger {
+		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+		state, changed := stateCharts.DecodeTriggerActionResult(res)
+		if !changed {
+			return fmt.Errorf("The state machine does not change")
+		}
+		instance.CurrentState = state
+	}
+
+	for _, msg := range msgsToHandle {
+		cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID, key1, key2)
+	}
+
+	stub.SetEvent(collectiveMsgName, []byte("Message is waiting for confirmation"))
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_0rwz1km_Complete(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, ConfirmTargetX509 string) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_0rwz1km"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	participant_id := collectiveMsg.ReceiveParticipantID
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_0rwz1km_%d", targetTaskID)
+	}
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	var errorMessage string
+	var key1, key2 string
+	var msgsToHandle []Message = make([]Message, 0)
+	var eventsToTrigger []string = make([]string, 0)
+	var event map[string]interface{}
+	var eventJsonString string
+	var eventJsonBytes []byte
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		// 一对一
+		key1 = "nonMulti"
+		key2 = "nonMulti"
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": "Confirm_Message_0rwz1km",
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+		participant_key := key2
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == false {
+		// 多对一 回应
+		// 1. 响应所有消息
+		// 2. 添加Target
+
+		key1 = ConfirmTargetX509
+		key2 = "nonMulti"
+
+		participant_key := key2
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+		// Which To Confirm? Decided By ConfirmTargetX509
+		confirmTargetSender, ok := sendParticipant.Participants[key1]
+		if !ok {
+			errorMessage := "UnExisted ConfirmTarget"
+			return fmt.Errorf(errorMessage)
+		}
+
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1]["nonMulti"])
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Confirm_Message_0rwz1km_%s", confirmTargetSender.ParticipantID),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+	} else if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == true {
+		// 一对多 回应，响应自己的部分，修改计数器
+		key1 = "nonMulti"
+		key2 = cc.get_X509_identity(ctx)
+
+		if receiveParticipant.IsLocked == true {
+			// check if key2 in it
+			if _, ok := receiveParticipant.Participants[key2]; ok {
+				// check Participant
+				participant_key := key2
+				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+					fmt.Println(errorMessage)
+					return fmt.Errorf(errorMessage)
+				}
+			} else {
+				return fmt.Errorf("The participant is locked and the participant is not registered")
+			}
+		} else {
+
+			if receiveParticipant.MultiMaximum <= len(receiveParticipant.Participants) {
+				errorMessage := "ReceiveParticipants Has Reach the Maximum"
+				return fmt.Errorf(errorMessage)
+			}
+
+			if cc.check_participant(ctx, instanceID, participant_id, "") != true {
+				errorMessage := "Not Allowed To participate as a Receiver"
+				return fmt.Errorf(errorMessage)
+			}
+
+			// create new Participant if not exist
+			x509 := cc.get_X509_identity(ctx)
+			participant_increasing_key := len(receiveParticipant.Participants)
+			msp, _ := ctx.GetClientIdentity().GetMSPID()
+			newParticipant := Participant{
+				ParticipantID: fmt.Sprintf("%d", participant_increasing_key),
+				MSP:           msp,
+				IsMulti:       true,
+				X509:          x509,
+			}
+			receiveParticipant.Participants[key2] = newParticipant
+		}
+
+		// get the message and increase it's confirmedCount
+
+		if collectiveMsg.MessageConfirmedCount >= receiveParticipant.MultiMaximum {
+			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+		}
+
+		message_increasing_key := fmt.Sprintf("%d", collectiveMsg.MessageConfirmedCount)
+		msg := collectiveMsg.Messages[key1][message_increasing_key]
+		delete(collectiveMsg.Messages[key1], message_increasing_key)
+		collectiveMsg.Messages[key1][key2] = msg
+		collectiveMsg.MessageConfirmedCount += 1
+
+		msgsToHandle = append(msgsToHandle, msg)
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Confirm_Message_0rwz1km_%d", message_increasing_key),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		// 多对多 UnSupported Operations?
+		errorMessage = fmt.Sprintf("UnSupported Operation")
+		return fmt.Errorf(errorMessage)
+	}
+
+	for _, event := range eventsToTrigger {
+		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+		if err != nil {
+			return err
+		}
+		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		if !changed {
+			return fmt.Errorf("The state machine does not change")
+		}
+
+		instance.CurrentState = state
+	}
+
+	stub.SetEvent(collectiveMsgName, []byte("Message is Confirmed !"))
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_0rwz1km_Advance(
+	ctx contractapi.TransactionContextInterface,
+	instanceID string,
+	targetTaskID string,
+) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_0rwz1km"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_0rwz1km_%d", targetTaskID)
+	}
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	// Check if Multi
+	if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		return fmt.Errorf("Unsupport Operation")
+	}
+
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		return fmt.Errorf("Not Invalid Operation")
+	}
+
+	var participantToLock *CollectiveParticipant
+	if sendParticipant.IsMulti {
+		// check if invoker in receiveParticipants
+		if cc.check_participant(ctx, instanceID, receiveParticipantID, "") == false {
+			return fmt.Errorf("Not Allowed To Advance")
+		}
+		participantToLock = receiveParticipant
+	} else {
+		// check if invoker in senderParticipants
+		if cc.check_participant(ctx, instanceID, sendParticipantID, "") == false {
+			return fmt.Errorf("Not Allowd To Advance")
+		}
+		participantToLock = sendParticipant
+	}
+
+	if len(participantToLock.Participants) < participantToLock.MultiMinimum {
+		errorMessage := fmt.Sprintf(
+			"Messages count %d does not meet the minimum requirement %d for participant %s",
+			len(collectiveMsg.Messages),
+			participantToLock.MultiMinimum,
+			participantToLock.ParticipantID,
+		)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	event := map[string]interface{}{
+		"type": "AdvanceMessage_0rwz1km",
+	}
+	eventJsonBytes, _ := json.Marshal(event)
+
+	eventJsonString := string(eventJsonBytes)
+
+	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+	if err != nil {
+		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
+	}
+	state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	if !changed {
+		return fmt.Errorf("Invalid Operation")
+	}
+	instance.CurrentState = state
+
+	participantToLock.IsLocked = true
+
+	err = cc.SetInstance(ctx, instance)
+	if err != nil {
+		return fmt.Errorf("failed to set instance: %v", err)
+	}
+
+	stub.SetEvent("AdvanceMessage_0rwz1km", []byte("CollectiveMessage advanced successfully"))
+	return nil
+}
+
+func (cc *SmartContract) Message_1io2g9u_Send(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, fireflyTranID string, FinalPriority string) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_1io2g9u"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	participant_id := collectiveMsg.SendParticipantID
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_1io2g9u_%d", targetTaskID)
+	}
+
+	// MultiParticipant Address Located
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	var errorMessage string
+	var key1, key2 string
+	var msgsToHandle []Message = make([]Message, 0)
+	var eventsToTrigger []string = make([]string, 0)
+	var event map[string]interface{}
+	var eventJsonBytes []byte
+	var eventJsonString string
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		// 一对一
+		key1 = "nonMulti"
+		key2 = "nonMulti"
+
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type":          "Send_Message_1io2g9u",
+			"FinalPriority": FinalPriority,
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+		participant_key := key1
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == false {
+		// 多对一
+		key1 = cc.get_X509_identity(ctx)
+		key2 = "nonMulti"
+
+		// // Auth
+
+		// Check if Locked
+		if sendParticipant.IsLocked == true {
+			// check if registered
+			if _, ok := sendParticipant.Participants[key1]; ok {
+				// check X509
+				participant_key := key1
+				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+					fmt.Println(errorMessage)
+					return fmt.Errorf(errorMessage)
+				}
+			} else {
+				return fmt.Errorf("The participant is locked and the participant is not registered")
+			}
+		} else {
+			// else check if Participant has reach Maximum
+			if sendParticipant.MultiMaximum <= len(sendParticipant.Participants) {
+				return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+			}
+
+			// Attributes Based Access Control
+			if cc.check_participant(ctx, instanceID, participant_id, "") == false {
+				errorMessage = fmt.Sprintf("Participant can't not register itself due to no conformance attributes")
+				return fmt.Errorf(errorMessage)
+			}
+
+			// Register self, using a increasing key
+			participant_increasing_key := fmt.Sprintf("%d", len(sendParticipant.Participants))
+			// create new Participant if not exist
+			msp, _ := ctx.GetClientIdentity().GetMSPID()
+			newParticipant := Participant{
+				ParticipantID: participant_increasing_key,
+				MSP:           msp,
+				IsMulti:       true,
+				X509:          key1,
+			}
+			sendParticipant.Participants[key1] = newParticipant
+		}
+
+		// Created Message
+
+		if _, ok := collectiveMsg.Messages[key1]; ok {
+
+		} else {
+			collectiveMsg.Messages[key1] = make(map[string]Message)
+			newAtomicMsg := Message{
+				MessageID:             collectiveMsgName,
+				SendParticipantKey:    key1,
+				ReceiveParticipantKey: key2,
+				FireflyTranID:         "",
+			}
+			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+		}
+
+		message_increasing_key := len(sendParticipant.Participants)
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type":          fmt.Sprintf("Send_Message_1io2g9u_%d", message_increasing_key),
+			"FinalPriority": FinalPriority,
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+	} else if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == true {
+		// 一对多
+		key1 = "nonMulti"
+
+		participant_key := key1
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+		// create Maximum Number of Message
+		if _, ok := collectiveMsg.Messages[key1]; ok {
+			// Have Been Created, Repeated Operation
+		} else {
+			collectiveMsg.Messages[key1] = make(map[string]Message)
+		}
+
+		if len(collectiveMsg.Messages[key1]) >= receiveParticipant.MultiMaximum {
+			fmt.Println("The number of messages sent by the participant exceeds the maximum")
+			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+		}
+
+		for i := 0; i < receiveParticipant.MultiMaximum; i++ {
+			key2 := fmt.Sprintf("%d", i)
+			newAtomicMsg := Message{
+				MessageID:             collectiveMsgName,
+				SendParticipantKey:    key1,
+				ReceiveParticipantKey: key2,
+				FireflyTranID:         "",
+			}
+			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+		}
+
+		for key, value := range collectiveMsg.Messages[key1] {
+			msgsToHandle = append(msgsToHandle, value)
+			event = map[string]interface{}{
+				"type":          fmt.Sprintf("Send_Message_1io2g9u_%s", key),
+				"FinalPriority": FinalPriority,
+			}
+			eventJsonBytes, _ = json.Marshal(event)
+			eventJsonString = string(eventJsonBytes)
+			eventsToTrigger = append(eventsToTrigger, eventJsonString)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		// 多对多 UnSupport Type
+		errorMessage = "Multi To Multi Task, Unsupported Operation"
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	for _, event := range eventsToTrigger {
+		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+		state, changed := stateCharts.DecodeTriggerActionResult(res)
+		if !changed {
+			return fmt.Errorf("The state machine does not change")
+		}
+		instance.CurrentState = state
+	}
+
+	for _, msg := range msgsToHandle {
+		cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID, key1, key2)
+	}
+
+	globalMemory, readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
+	if readGloabolError != nil {
+		fmt.Println(readGloabolError.Error())
+		return readGloabolError
+	}
+	globalMemory.FinalPriority = FinalPriority
+	setGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)
+	if setGloabolErrror != nil {
+		fmt.Println(setGloabolErrror.Error())
+		return setGloabolErrror
+	}
+
+	stub.SetEvent(collectiveMsgName, []byte("Message is waiting for confirmation"))
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_1io2g9u_Complete(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, ConfirmTargetX509 string) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_1io2g9u"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	participant_id := collectiveMsg.ReceiveParticipantID
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_1io2g9u_%d", targetTaskID)
+	}
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	var errorMessage string
+	var key1, key2 string
+	var msgsToHandle []Message = make([]Message, 0)
+	var eventsToTrigger []string = make([]string, 0)
+	var event map[string]interface{}
+	var eventJsonString string
+	var eventJsonBytes []byte
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		// 一对一
+		key1 = "nonMulti"
+		key2 = "nonMulti"
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": "Confirm_Message_1io2g9u",
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+		participant_key := key2
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == false {
+		// 多对一 回应
+		// 1. 响应所有消息
+		// 2. 添加Target
+
+		key1 = ConfirmTargetX509
+		key2 = "nonMulti"
+
+		participant_key := key2
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+		// Which To Confirm? Decided By ConfirmTargetX509
+		confirmTargetSender, ok := sendParticipant.Participants[key1]
+		if !ok {
+			errorMessage := "UnExisted ConfirmTarget"
+			return fmt.Errorf(errorMessage)
+		}
+
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1]["nonMulti"])
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Confirm_Message_1io2g9u_%s", confirmTargetSender.ParticipantID),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+	} else if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == true {
+		// 一对多 回应，响应自己的部分，修改计数器
+		key1 = "nonMulti"
+		key2 = cc.get_X509_identity(ctx)
+
+		if receiveParticipant.IsLocked == true {
+			// check if key2 in it
+			if _, ok := receiveParticipant.Participants[key2]; ok {
+				// check Participant
+				participant_key := key2
+				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+					fmt.Println(errorMessage)
+					return fmt.Errorf(errorMessage)
+				}
+			} else {
+				return fmt.Errorf("The participant is locked and the participant is not registered")
+			}
+		} else {
+
+			if receiveParticipant.MultiMaximum <= len(receiveParticipant.Participants) {
+				errorMessage := "ReceiveParticipants Has Reach the Maximum"
+				return fmt.Errorf(errorMessage)
+			}
+
+			if cc.check_participant(ctx, instanceID, participant_id, "") != true {
+				errorMessage := "Not Allowed To participate as a Receiver"
+				return fmt.Errorf(errorMessage)
+			}
+
+			// create new Participant if not exist
+			x509 := cc.get_X509_identity(ctx)
+			participant_increasing_key := len(receiveParticipant.Participants)
+			msp, _ := ctx.GetClientIdentity().GetMSPID()
+			newParticipant := Participant{
+				ParticipantID: fmt.Sprintf("%d", participant_increasing_key),
+				MSP:           msp,
+				IsMulti:       true,
+				X509:          x509,
+			}
+			receiveParticipant.Participants[key2] = newParticipant
+		}
+
+		// get the message and increase it's confirmedCount
+
+		if collectiveMsg.MessageConfirmedCount >= receiveParticipant.MultiMaximum {
+			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+		}
+
+		message_increasing_key := fmt.Sprintf("%d", collectiveMsg.MessageConfirmedCount)
+		msg := collectiveMsg.Messages[key1][message_increasing_key]
+		delete(collectiveMsg.Messages[key1], message_increasing_key)
+		collectiveMsg.Messages[key1][key2] = msg
+		collectiveMsg.MessageConfirmedCount += 1
+
+		msgsToHandle = append(msgsToHandle, msg)
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Confirm_Message_1io2g9u_%d", message_increasing_key),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		// 多对多 UnSupported Operations?
+		errorMessage = fmt.Sprintf("UnSupported Operation")
+		return fmt.Errorf(errorMessage)
+	}
+
+	for _, event := range eventsToTrigger {
+		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+		if err != nil {
+			return err
+		}
+		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		if !changed {
+			return fmt.Errorf("The state machine does not change")
+		}
+
+		instance.CurrentState = state
+	}
+
+	stub.SetEvent(collectiveMsgName, []byte("Message is Confirmed !"))
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_1io2g9u_Advance(
+	ctx contractapi.TransactionContextInterface,
+	instanceID string,
+	targetTaskID string,
+) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_1io2g9u"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_1io2g9u_%d", targetTaskID)
+	}
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	// Check if Multi
+	if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		return fmt.Errorf("Unsupport Operation")
+	}
+
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		return fmt.Errorf("Not Invalid Operation")
+	}
+
+	var participantToLock *CollectiveParticipant
+	if sendParticipant.IsMulti {
+		// check if invoker in receiveParticipants
+		if cc.check_participant(ctx, instanceID, receiveParticipantID, "") == false {
+			return fmt.Errorf("Not Allowed To Advance")
+		}
+		participantToLock = receiveParticipant
+	} else {
+		// check if invoker in senderParticipants
+		if cc.check_participant(ctx, instanceID, sendParticipantID, "") == false {
+			return fmt.Errorf("Not Allowd To Advance")
+		}
+		participantToLock = sendParticipant
+	}
+
+	if len(participantToLock.Participants) < participantToLock.MultiMinimum {
+		errorMessage := fmt.Sprintf(
+			"Messages count %d does not meet the minimum requirement %d for participant %s",
+			len(collectiveMsg.Messages),
+			participantToLock.MultiMinimum,
+			participantToLock.ParticipantID,
+		)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	event := map[string]interface{}{
+		"type": "AdvanceMessage_1io2g9u",
+	}
+	eventJsonBytes, _ := json.Marshal(event)
+
+	eventJsonString := string(eventJsonBytes)
+
+	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+	if err != nil {
+		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
+	}
+	state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	if !changed {
+		return fmt.Errorf("Invalid Operation")
+	}
+	instance.CurrentState = state
+
+	participantToLock.IsLocked = true
+
+	err = cc.SetInstance(ctx, instance)
+	if err != nil {
+		return fmt.Errorf("failed to set instance: %v", err)
+	}
+
+	stub.SetEvent("AdvanceMessage_1io2g9u", []byte("CollectiveMessage advanced successfully"))
+	return nil
+}
+
+func (cc *SmartContract) Message_0d2xte5_Send(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, fireflyTranID string) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_0d2xte5"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	participant_id := collectiveMsg.SendParticipantID
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_0d2xte5_%d", targetTaskID)
+	}
+
+	// MultiParticipant Address Located
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	var errorMessage string
+	var key1, key2 string
+	var msgsToHandle []Message = make([]Message, 0)
+	var eventsToTrigger []string = make([]string, 0)
+	var event map[string]interface{}
+	var eventJsonBytes []byte
+	var eventJsonString string
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		// 一对一
+		key1 = "nonMulti"
+		key2 = "nonMulti"
+
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": "Send_Message_0d2xte5",
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+		participant_key := key1
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == false {
+		// 多对一
+		key1 = cc.get_X509_identity(ctx)
+		key2 = "nonMulti"
+
+		// // Auth
+
+		// Check if Locked
+		if sendParticipant.IsLocked == true {
+			// check if registered
+			if _, ok := sendParticipant.Participants[key1]; ok {
+				// check X509
+				participant_key := key1
+				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+					fmt.Println(errorMessage)
+					return fmt.Errorf(errorMessage)
+				}
+			} else {
+				return fmt.Errorf("The participant is locked and the participant is not registered")
+			}
+		} else {
+			// else check if Participant has reach Maximum
+			if sendParticipant.MultiMaximum <= len(sendParticipant.Participants) {
+				return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+			}
+
+			// Attributes Based Access Control
+			if cc.check_participant(ctx, instanceID, participant_id, "") == false {
+				errorMessage = fmt.Sprintf("Participant can't not register itself due to no conformance attributes")
+				return fmt.Errorf(errorMessage)
+			}
+
+			// Register self, using a increasing key
+			participant_increasing_key := fmt.Sprintf("%d", len(sendParticipant.Participants))
+			// create new Participant if not exist
+			msp, _ := ctx.GetClientIdentity().GetMSPID()
+			newParticipant := Participant{
+				ParticipantID: participant_increasing_key,
+				MSP:           msp,
+				IsMulti:       true,
+				X509:          key1,
+			}
+			sendParticipant.Participants[key1] = newParticipant
+		}
+
+		// Created Message
+
+		if _, ok := collectiveMsg.Messages[key1]; ok {
+
+		} else {
+			collectiveMsg.Messages[key1] = make(map[string]Message)
+			newAtomicMsg := Message{
+				MessageID:             collectiveMsgName,
+				SendParticipantKey:    key1,
+				ReceiveParticipantKey: key2,
+				FireflyTranID:         "",
+			}
+			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+		}
+
+		message_increasing_key := len(sendParticipant.Participants)
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Send_Message_0d2xte5_%d", message_increasing_key),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+	} else if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == true {
+		// 一对多
+		key1 = "nonMulti"
+
+		participant_key := key1
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+		// create Maximum Number of Message
+		if _, ok := collectiveMsg.Messages[key1]; ok {
+			// Have Been Created, Repeated Operation
+		} else {
+			collectiveMsg.Messages[key1] = make(map[string]Message)
+		}
+
+		if len(collectiveMsg.Messages[key1]) >= receiveParticipant.MultiMaximum {
+			fmt.Println("The number of messages sent by the participant exceeds the maximum")
+			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+		}
+
+		for i := 0; i < receiveParticipant.MultiMaximum; i++ {
+			key2 := fmt.Sprintf("%d", i)
+			newAtomicMsg := Message{
+				MessageID:             collectiveMsgName,
+				SendParticipantKey:    key1,
+				ReceiveParticipantKey: key2,
+				FireflyTranID:         "",
+			}
+			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+		}
+
+		for key, value := range collectiveMsg.Messages[key1] {
+			msgsToHandle = append(msgsToHandle, value)
+			event = map[string]interface{}{
+				"type": fmt.Sprintf("Send_Message_0d2xte5_%s", key),
+			}
+			eventJsonBytes, _ = json.Marshal(event)
+			eventJsonString = string(eventJsonBytes)
+			eventsToTrigger = append(eventsToTrigger, eventJsonString)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		// 多对多 UnSupport Type
+		errorMessage = "Multi To Multi Task, Unsupported Operation"
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	for _, event := range eventsToTrigger {
+		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+		state, changed := stateCharts.DecodeTriggerActionResult(res)
+		if !changed {
+			return fmt.Errorf("The state machine does not change")
+		}
+		instance.CurrentState = state
+	}
+
+	for _, msg := range msgsToHandle {
+		cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID, key1, key2)
+	}
+
+	stub.SetEvent(collectiveMsgName, []byte("Message is waiting for confirmation"))
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_0d2xte5_Complete(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, ConfirmTargetX509 string) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_0d2xte5"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	participant_id := collectiveMsg.ReceiveParticipantID
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_0d2xte5_%d", targetTaskID)
+	}
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	var errorMessage string
+	var key1, key2 string
+	var msgsToHandle []Message = make([]Message, 0)
+	var eventsToTrigger []string = make([]string, 0)
+	var event map[string]interface{}
+	var eventJsonString string
+	var eventJsonBytes []byte
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		// 一对一
+		key1 = "nonMulti"
+		key2 = "nonMulti"
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": "Confirm_Message_0d2xte5",
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+		participant_key := key2
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == false {
+		// 多对一 回应
+		// 1. 响应所有消息
+		// 2. 添加Target
+
+		key1 = ConfirmTargetX509
+		key2 = "nonMulti"
+
+		participant_key := key2
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+		// Which To Confirm? Decided By ConfirmTargetX509
+		confirmTargetSender, ok := sendParticipant.Participants[key1]
+		if !ok {
+			errorMessage := "UnExisted ConfirmTarget"
+			return fmt.Errorf(errorMessage)
+		}
+
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1]["nonMulti"])
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Confirm_Message_0d2xte5_%s", confirmTargetSender.ParticipantID),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+	} else if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == true {
+		// 一对多 回应，响应自己的部分，修改计数器
+		key1 = "nonMulti"
+		key2 = cc.get_X509_identity(ctx)
+
+		if receiveParticipant.IsLocked == true {
+			// check if key2 in it
+			if _, ok := receiveParticipant.Participants[key2]; ok {
+				// check Participant
+				participant_key := key2
+				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+					fmt.Println(errorMessage)
+					return fmt.Errorf(errorMessage)
+				}
+			} else {
+				return fmt.Errorf("The participant is locked and the participant is not registered")
+			}
+		} else {
+
+			if receiveParticipant.MultiMaximum <= len(receiveParticipant.Participants) {
+				errorMessage := "ReceiveParticipants Has Reach the Maximum"
+				return fmt.Errorf(errorMessage)
+			}
+
+			if cc.check_participant(ctx, instanceID, participant_id, "") != true {
+				errorMessage := "Not Allowed To participate as a Receiver"
+				return fmt.Errorf(errorMessage)
+			}
+
+			// create new Participant if not exist
+			x509 := cc.get_X509_identity(ctx)
+			participant_increasing_key := len(receiveParticipant.Participants)
+			msp, _ := ctx.GetClientIdentity().GetMSPID()
+			newParticipant := Participant{
+				ParticipantID: fmt.Sprintf("%d", participant_increasing_key),
+				MSP:           msp,
+				IsMulti:       true,
+				X509:          x509,
+			}
+			receiveParticipant.Participants[key2] = newParticipant
+		}
+
+		// get the message and increase it's confirmedCount
+
+		if collectiveMsg.MessageConfirmedCount >= receiveParticipant.MultiMaximum {
+			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+		}
+
+		message_increasing_key := fmt.Sprintf("%d", collectiveMsg.MessageConfirmedCount)
+		msg := collectiveMsg.Messages[key1][message_increasing_key]
+		delete(collectiveMsg.Messages[key1], message_increasing_key)
+		collectiveMsg.Messages[key1][key2] = msg
+		collectiveMsg.MessageConfirmedCount += 1
+
+		msgsToHandle = append(msgsToHandle, msg)
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Confirm_Message_0d2xte5_%d", message_increasing_key),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		// 多对多 UnSupported Operations?
+		errorMessage = fmt.Sprintf("UnSupported Operation")
+		return fmt.Errorf(errorMessage)
+	}
+
+	for _, event := range eventsToTrigger {
+		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+		if err != nil {
+			return err
+		}
+		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		if !changed {
+			return fmt.Errorf("The state machine does not change")
+		}
+
+		instance.CurrentState = state
+	}
+
+	stub.SetEvent(collectiveMsgName, []byte("Message is Confirmed !"))
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_0d2xte5_Advance(
+	ctx contractapi.TransactionContextInterface,
+	instanceID string,
+	targetTaskID string,
+) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_0d2xte5"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_0d2xte5_%d", targetTaskID)
+	}
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	// Check if Multi
+	if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		return fmt.Errorf("Unsupport Operation")
+	}
+
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		return fmt.Errorf("Not Invalid Operation")
+	}
+
+	var participantToLock *CollectiveParticipant
+	if sendParticipant.IsMulti {
+		// check if invoker in receiveParticipants
+		if cc.check_participant(ctx, instanceID, receiveParticipantID, "") == false {
+			return fmt.Errorf("Not Allowed To Advance")
+		}
+		participantToLock = receiveParticipant
+	} else {
+		// check if invoker in senderParticipants
+		if cc.check_participant(ctx, instanceID, sendParticipantID, "") == false {
+			return fmt.Errorf("Not Allowd To Advance")
+		}
+		participantToLock = sendParticipant
+	}
+
+	if len(participantToLock.Participants) < participantToLock.MultiMinimum {
+		errorMessage := fmt.Sprintf(
+			"Messages count %d does not meet the minimum requirement %d for participant %s",
+			len(collectiveMsg.Messages),
+			participantToLock.MultiMinimum,
+			participantToLock.ParticipantID,
+		)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	event := map[string]interface{}{
+		"type": "AdvanceMessage_0d2xte5",
+	}
+	eventJsonBytes, _ := json.Marshal(event)
+
+	eventJsonString := string(eventJsonBytes)
+
+	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+	if err != nil {
+		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
+	}
+	state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	if !changed {
+		return fmt.Errorf("Invalid Operation")
+	}
+	instance.CurrentState = state
+
+	participantToLock.IsLocked = true
+
+	err = cc.SetInstance(ctx, instance)
+	if err != nil {
+		return fmt.Errorf("failed to set instance: %v", err)
+	}
+
+	stub.SetEvent("AdvanceMessage_0d2xte5", []byte("CollectiveMessage advanced successfully"))
+	return nil
+}
+
+func (cc *SmartContract) Event_13pbqdz(ctx contractapi.TransactionContextInterface, instanceID string) error {
+	stub := ctx.GetStub()
+	instance, err := cc.GetInstance(ctx, instanceID)
+
+	event := map[string]interface{}{
+		"type": "Event_13pbqdz",
+	}
+
+	eventJsonBytes, _ := json.Marshal(event)
+
+	eventJsonString := string(eventJsonBytes)
+
+	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+
+	if err != nil {
+		return err
+	}
+
+	state, changed := stateCharts.DecodeTriggerActionResult(res)
+	if !changed {
+		return errors.New("Invalid transition")
+	}
+
+	instance.CurrentState = state
 
 	cc.SetInstance(ctx, instance)
+
+	stub.SetEvent("Event_13pbqdz", []byte("Contract has been started successfully"))
+
+	return nil
+}
+
+func (cc *SmartContract) Message_1oxmq1k_Send(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, fireflyTranID string) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_1oxmq1k"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	participant_id := collectiveMsg.SendParticipantID
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_1oxmq1k_%d", targetTaskID)
+	}
+
+	// MultiParticipant Address Located
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	var errorMessage string
+	var key1, key2 string
+	var msgsToHandle []Message = make([]Message, 0)
+	var eventsToTrigger []string = make([]string, 0)
+	var event map[string]interface{}
+	var eventJsonBytes []byte
+	var eventJsonString string
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		// 一对一
+		key1 = "nonMulti"
+		key2 = "nonMulti"
+
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": "Send_Message_1oxmq1k",
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+		participant_key := key1
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == false {
+		// 多对一
+		key1 = cc.get_X509_identity(ctx)
+		key2 = "nonMulti"
+
+		// // Auth
+
+		// Check if Locked
+		if sendParticipant.IsLocked == true {
+			// check if registered
+			if _, ok := sendParticipant.Participants[key1]; ok {
+				// check X509
+				participant_key := key1
+				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+					fmt.Println(errorMessage)
+					return fmt.Errorf(errorMessage)
+				}
+			} else {
+				return fmt.Errorf("The participant is locked and the participant is not registered")
+			}
+		} else {
+			// else check if Participant has reach Maximum
+			if sendParticipant.MultiMaximum <= len(sendParticipant.Participants) {
+				return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+			}
+
+			// Attributes Based Access Control
+			if cc.check_participant(ctx, instanceID, participant_id, "") == false {
+				errorMessage = fmt.Sprintf("Participant can't not register itself due to no conformance attributes")
+				return fmt.Errorf(errorMessage)
+			}
+
+			// Register self, using a increasing key
+			participant_increasing_key := fmt.Sprintf("%d", len(sendParticipant.Participants))
+			// create new Participant if not exist
+			msp, _ := ctx.GetClientIdentity().GetMSPID()
+			newParticipant := Participant{
+				ParticipantID: participant_increasing_key,
+				MSP:           msp,
+				IsMulti:       true,
+				X509:          key1,
+			}
+			sendParticipant.Participants[key1] = newParticipant
+		}
+
+		// Created Message
+
+		if _, ok := collectiveMsg.Messages[key1]; ok {
+
+		} else {
+			collectiveMsg.Messages[key1] = make(map[string]Message)
+			newAtomicMsg := Message{
+				MessageID:             collectiveMsgName,
+				SendParticipantKey:    key1,
+				ReceiveParticipantKey: key2,
+				FireflyTranID:         "",
+			}
+			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+		}
+
+		message_increasing_key := len(sendParticipant.Participants)
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Send_Message_1oxmq1k_%d", message_increasing_key),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+	} else if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == true {
+		// 一对多
+		key1 = "nonMulti"
+
+		participant_key := key1
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+		// create Maximum Number of Message
+		if _, ok := collectiveMsg.Messages[key1]; ok {
+			// Have Been Created, Repeated Operation
+		} else {
+			collectiveMsg.Messages[key1] = make(map[string]Message)
+		}
+
+		if len(collectiveMsg.Messages[key1]) >= receiveParticipant.MultiMaximum {
+			fmt.Println("The number of messages sent by the participant exceeds the maximum")
+			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+		}
+
+		for i := 0; i < receiveParticipant.MultiMaximum; i++ {
+			key2 := fmt.Sprintf("%d", i)
+			newAtomicMsg := Message{
+				MessageID:             collectiveMsgName,
+				SendParticipantKey:    key1,
+				ReceiveParticipantKey: key2,
+				FireflyTranID:         "",
+			}
+			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+		}
+
+		for key, value := range collectiveMsg.Messages[key1] {
+			msgsToHandle = append(msgsToHandle, value)
+			event = map[string]interface{}{
+				"type": fmt.Sprintf("Send_Message_1oxmq1k_%s", key),
+			}
+			eventJsonBytes, _ = json.Marshal(event)
+			eventJsonString = string(eventJsonBytes)
+			eventsToTrigger = append(eventsToTrigger, eventJsonString)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		// 多对多 UnSupport Type
+		errorMessage = "Multi To Multi Task, Unsupported Operation"
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	for _, event := range eventsToTrigger {
+		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+		state, changed := stateCharts.DecodeTriggerActionResult(res)
+		if !changed {
+			return fmt.Errorf("The state machine does not change")
+		}
+		instance.CurrentState = state
+	}
+
+	for _, msg := range msgsToHandle {
+		cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID, key1, key2)
+	}
+
+	stub.SetEvent(collectiveMsgName, []byte("Message is waiting for confirmation"))
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_1oxmq1k_Complete(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, ConfirmTargetX509 string) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_1oxmq1k"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	participant_id := collectiveMsg.ReceiveParticipantID
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_1oxmq1k_%d", targetTaskID)
+	}
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	var errorMessage string
+	var key1, key2 string
+	var msgsToHandle []Message = make([]Message, 0)
+	var eventsToTrigger []string = make([]string, 0)
+	var event map[string]interface{}
+	var eventJsonString string
+	var eventJsonBytes []byte
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		// 一对一
+		key1 = "nonMulti"
+		key2 = "nonMulti"
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": "Confirm_Message_1oxmq1k",
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+		participant_key := key2
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == false {
+		// 多对一 回应
+		// 1. 响应所有消息
+		// 2. 添加Target
+
+		key1 = ConfirmTargetX509
+		key2 = "nonMulti"
+
+		participant_key := key2
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+		// Which To Confirm? Decided By ConfirmTargetX509
+		confirmTargetSender, ok := sendParticipant.Participants[key1]
+		if !ok {
+			errorMessage := "UnExisted ConfirmTarget"
+			return fmt.Errorf(errorMessage)
+		}
+
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1]["nonMulti"])
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Confirm_Message_1oxmq1k_%s", confirmTargetSender.ParticipantID),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+	} else if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == true {
+		// 一对多 回应，响应自己的部分，修改计数器
+		key1 = "nonMulti"
+		key2 = cc.get_X509_identity(ctx)
+
+		if receiveParticipant.IsLocked == true {
+			// check if key2 in it
+			if _, ok := receiveParticipant.Participants[key2]; ok {
+				// check Participant
+				participant_key := key2
+				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+					fmt.Println(errorMessage)
+					return fmt.Errorf(errorMessage)
+				}
+			} else {
+				return fmt.Errorf("The participant is locked and the participant is not registered")
+			}
+		} else {
+
+			if receiveParticipant.MultiMaximum <= len(receiveParticipant.Participants) {
+				errorMessage := "ReceiveParticipants Has Reach the Maximum"
+				return fmt.Errorf(errorMessage)
+			}
+
+			if cc.check_participant(ctx, instanceID, participant_id, "") != true {
+				errorMessage := "Not Allowed To participate as a Receiver"
+				return fmt.Errorf(errorMessage)
+			}
+
+			// create new Participant if not exist
+			x509 := cc.get_X509_identity(ctx)
+			participant_increasing_key := len(receiveParticipant.Participants)
+			msp, _ := ctx.GetClientIdentity().GetMSPID()
+			newParticipant := Participant{
+				ParticipantID: fmt.Sprintf("%d", participant_increasing_key),
+				MSP:           msp,
+				IsMulti:       true,
+				X509:          x509,
+			}
+			receiveParticipant.Participants[key2] = newParticipant
+		}
+
+		// get the message and increase it's confirmedCount
+
+		if collectiveMsg.MessageConfirmedCount >= receiveParticipant.MultiMaximum {
+			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+		}
+
+		message_increasing_key := fmt.Sprintf("%d", collectiveMsg.MessageConfirmedCount)
+		msg := collectiveMsg.Messages[key1][message_increasing_key]
+		delete(collectiveMsg.Messages[key1], message_increasing_key)
+		collectiveMsg.Messages[key1][key2] = msg
+		collectiveMsg.MessageConfirmedCount += 1
+
+		msgsToHandle = append(msgsToHandle, msg)
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Confirm_Message_1oxmq1k_%d", message_increasing_key),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		// 多对多 UnSupported Operations?
+		errorMessage = fmt.Sprintf("UnSupported Operation")
+		return fmt.Errorf(errorMessage)
+	}
+
+	for _, event := range eventsToTrigger {
+		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+		if err != nil {
+			return err
+		}
+		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		if !changed {
+			return fmt.Errorf("The state machine does not change")
+		}
+
+		instance.CurrentState = state
+	}
+
+	stub.SetEvent(collectiveMsgName, []byte("Message is Confirmed !"))
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_1oxmq1k_Advance(
+	ctx contractapi.TransactionContextInterface,
+	instanceID string,
+	targetTaskID string,
+) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_1oxmq1k"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_1oxmq1k_%d", targetTaskID)
+	}
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	// Check if Multi
+	if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		return fmt.Errorf("Unsupport Operation")
+	}
+
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		return fmt.Errorf("Not Invalid Operation")
+	}
+
+	var participantToLock *CollectiveParticipant
+	if sendParticipant.IsMulti {
+		// check if invoker in receiveParticipants
+		if cc.check_participant(ctx, instanceID, receiveParticipantID, "") == false {
+			return fmt.Errorf("Not Allowed To Advance")
+		}
+		participantToLock = receiveParticipant
+	} else {
+		// check if invoker in senderParticipants
+		if cc.check_participant(ctx, instanceID, sendParticipantID, "") == false {
+			return fmt.Errorf("Not Allowd To Advance")
+		}
+		participantToLock = sendParticipant
+	}
+
+	if len(participantToLock.Participants) < participantToLock.MultiMinimum {
+		errorMessage := fmt.Sprintf(
+			"Messages count %d does not meet the minimum requirement %d for participant %s",
+			len(collectiveMsg.Messages),
+			participantToLock.MultiMinimum,
+			participantToLock.ParticipantID,
+		)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	event := map[string]interface{}{
+		"type": "AdvanceMessage_1oxmq1k",
+	}
+	eventJsonBytes, _ := json.Marshal(event)
+
+	eventJsonString := string(eventJsonBytes)
+
+	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+	if err != nil {
+		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
+	}
+	state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	if !changed {
+		return fmt.Errorf("Invalid Operation")
+	}
+	instance.CurrentState = state
+
+	participantToLock.IsLocked = true
+
+	err = cc.SetInstance(ctx, instance)
+	if err != nil {
+		return fmt.Errorf("failed to set instance: %v", err)
+	}
+
+	stub.SetEvent("AdvanceMessage_1oxmq1k", []byte("CollectiveMessage advanced successfully"))
+	return nil
+}
+
+func (cc *SmartContract) Gateway_1cr0nma(ctx contractapi.TransactionContextInterface, instanceID string) error {
+	stub := ctx.GetStub()
+	instance, err := cc.GetInstance(ctx, instanceID)
+
+	if err != nil {
+		return err
+	}
+
+	event := map[string]interface{}{
+		"type": "Gateway_1cr0nma",
+	}
+
+	eventJsonBytes, _ := json.Marshal(event)
+
+	eventJsonString := string(eventJsonBytes)
+
+	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+
+	if err != nil {
+		return err
+	}
+	new_status, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	if !changed {
+		return errors.New("Invalid transition")
+	}
+
+	instance.CurrentState = new_status
+	cc.SetInstance(ctx, instance)
+
+	stub.SetEvent("Gateway_1cr0nma", []byte("Gateway has been done"))
+
+	return nil
+}
+
+func (cc *SmartContract) Gateway_0ep8cuh(ctx contractapi.TransactionContextInterface, instanceID string) error {
+	stub := ctx.GetStub()
+	instance, err := cc.GetInstance(ctx, instanceID)
+
+	if err != nil {
+		return err
+	}
+
+	event := map[string]interface{}{
+		"type": "Gateway_0ep8cuh",
+	}
+
+	eventJsonBytes, _ := json.Marshal(event)
+
+	eventJsonString := string(eventJsonBytes)
+
+	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+
+	if err != nil {
+		return err
+	}
+	new_status, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	if !changed {
+		return errors.New("Invalid transition")
+	}
+
+	instance.CurrentState = new_status
+	cc.SetInstance(ctx, instance)
+
+	stub.SetEvent("Gateway_0ep8cuh", []byte("Gateway has been done"))
+
+	return nil
+}
+
+func (cc *SmartContract) Message_0i5t589_Send(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, fireflyTranID string) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_0i5t589"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	participant_id := collectiveMsg.SendParticipantID
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_0i5t589_%d", targetTaskID)
+	}
+
+	// MultiParticipant Address Located
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	var errorMessage string
+	var key1, key2 string
+	var msgsToHandle []Message = make([]Message, 0)
+	var eventsToTrigger []string = make([]string, 0)
+	var event map[string]interface{}
+	var eventJsonBytes []byte
+	var eventJsonString string
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		// 一对一
+		key1 = "nonMulti"
+		key2 = "nonMulti"
+
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": "Send_Message_0i5t589",
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+		participant_key := key1
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == false {
+		// 多对一
+		key1 = cc.get_X509_identity(ctx)
+		key2 = "nonMulti"
+
+		// // Auth
+
+		// Check if Locked
+		if sendParticipant.IsLocked == true {
+			// check if registered
+			if _, ok := sendParticipant.Participants[key1]; ok {
+				// check X509
+				participant_key := key1
+				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+					fmt.Println(errorMessage)
+					return fmt.Errorf(errorMessage)
+				}
+			} else {
+				return fmt.Errorf("The participant is locked and the participant is not registered")
+			}
+		} else {
+			// else check if Participant has reach Maximum
+			if sendParticipant.MultiMaximum <= len(sendParticipant.Participants) {
+				return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+			}
+
+			// Attributes Based Access Control
+			if cc.check_participant(ctx, instanceID, participant_id, "") == false {
+				errorMessage = fmt.Sprintf("Participant can't not register itself due to no conformance attributes")
+				return fmt.Errorf(errorMessage)
+			}
+
+			// Register self, using a increasing key
+			participant_increasing_key := fmt.Sprintf("%d", len(sendParticipant.Participants))
+			// create new Participant if not exist
+			msp, _ := ctx.GetClientIdentity().GetMSPID()
+			newParticipant := Participant{
+				ParticipantID: participant_increasing_key,
+				MSP:           msp,
+				IsMulti:       true,
+				X509:          key1,
+			}
+			sendParticipant.Participants[key1] = newParticipant
+		}
+
+		// Created Message
+
+		if _, ok := collectiveMsg.Messages[key1]; ok {
+
+		} else {
+			collectiveMsg.Messages[key1] = make(map[string]Message)
+			newAtomicMsg := Message{
+				MessageID:             collectiveMsgName,
+				SendParticipantKey:    key1,
+				ReceiveParticipantKey: key2,
+				FireflyTranID:         "",
+			}
+			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+		}
+
+		message_increasing_key := len(sendParticipant.Participants)
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Send_Message_0i5t589_%d", message_increasing_key),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+	} else if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == true {
+		// 一对多
+		key1 = "nonMulti"
+
+		participant_key := key1
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+		// create Maximum Number of Message
+		if _, ok := collectiveMsg.Messages[key1]; ok {
+			// Have Been Created, Repeated Operation
+		} else {
+			collectiveMsg.Messages[key1] = make(map[string]Message)
+		}
+
+		if len(collectiveMsg.Messages[key1]) >= receiveParticipant.MultiMaximum {
+			fmt.Println("The number of messages sent by the participant exceeds the maximum")
+			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+		}
+
+		for i := 0; i < receiveParticipant.MultiMaximum; i++ {
+			key2 := fmt.Sprintf("%d", i)
+			newAtomicMsg := Message{
+				MessageID:             collectiveMsgName,
+				SendParticipantKey:    key1,
+				ReceiveParticipantKey: key2,
+				FireflyTranID:         "",
+			}
+			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+		}
+
+		for key, value := range collectiveMsg.Messages[key1] {
+			msgsToHandle = append(msgsToHandle, value)
+			event = map[string]interface{}{
+				"type": fmt.Sprintf("Send_Message_0i5t589_%s", key),
+			}
+			eventJsonBytes, _ = json.Marshal(event)
+			eventJsonString = string(eventJsonBytes)
+			eventsToTrigger = append(eventsToTrigger, eventJsonString)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		// 多对多 UnSupport Type
+		errorMessage = "Multi To Multi Task, Unsupported Operation"
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	for _, event := range eventsToTrigger {
+		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+		state, changed := stateCharts.DecodeTriggerActionResult(res)
+		if !changed {
+			return fmt.Errorf("The state machine does not change")
+		}
+		instance.CurrentState = state
+	}
+
+	for _, msg := range msgsToHandle {
+		cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID, key1, key2)
+	}
+
+	stub.SetEvent(collectiveMsgName, []byte("Message is waiting for confirmation"))
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_0i5t589_Complete(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, ConfirmTargetX509 string) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_0i5t589"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	participant_id := collectiveMsg.ReceiveParticipantID
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_0i5t589_%d", targetTaskID)
+	}
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	var errorMessage string
+	var key1, key2 string
+	var msgsToHandle []Message = make([]Message, 0)
+	var eventsToTrigger []string = make([]string, 0)
+	var event map[string]interface{}
+	var eventJsonString string
+	var eventJsonBytes []byte
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		// 一对一
+		key1 = "nonMulti"
+		key2 = "nonMulti"
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": "Confirm_Message_0i5t589",
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+		participant_key := key2
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == false {
+		// 多对一 回应
+		// 1. 响应所有消息
+		// 2. 添加Target
+
+		key1 = ConfirmTargetX509
+		key2 = "nonMulti"
+
+		participant_key := key2
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+		// Which To Confirm? Decided By ConfirmTargetX509
+		confirmTargetSender, ok := sendParticipant.Participants[key1]
+		if !ok {
+			errorMessage := "UnExisted ConfirmTarget"
+			return fmt.Errorf(errorMessage)
+		}
+
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1]["nonMulti"])
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Confirm_Message_0i5t589_%s", confirmTargetSender.ParticipantID),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+	} else if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == true {
+		// 一对多 回应，响应自己的部分，修改计数器
+		key1 = "nonMulti"
+		key2 = cc.get_X509_identity(ctx)
+
+		if receiveParticipant.IsLocked == true {
+			// check if key2 in it
+			if _, ok := receiveParticipant.Participants[key2]; ok {
+				// check Participant
+				participant_key := key2
+				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+					fmt.Println(errorMessage)
+					return fmt.Errorf(errorMessage)
+				}
+			} else {
+				return fmt.Errorf("The participant is locked and the participant is not registered")
+			}
+		} else {
+
+			if receiveParticipant.MultiMaximum <= len(receiveParticipant.Participants) {
+				errorMessage := "ReceiveParticipants Has Reach the Maximum"
+				return fmt.Errorf(errorMessage)
+			}
+
+			if cc.check_participant(ctx, instanceID, participant_id, "") != true {
+				errorMessage := "Not Allowed To participate as a Receiver"
+				return fmt.Errorf(errorMessage)
+			}
+
+			// create new Participant if not exist
+			x509 := cc.get_X509_identity(ctx)
+			participant_increasing_key := len(receiveParticipant.Participants)
+			msp, _ := ctx.GetClientIdentity().GetMSPID()
+			newParticipant := Participant{
+				ParticipantID: fmt.Sprintf("%d", participant_increasing_key),
+				MSP:           msp,
+				IsMulti:       true,
+				X509:          x509,
+			}
+			receiveParticipant.Participants[key2] = newParticipant
+		}
+
+		// get the message and increase it's confirmedCount
+
+		if collectiveMsg.MessageConfirmedCount >= receiveParticipant.MultiMaximum {
+			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+		}
+
+		message_increasing_key := fmt.Sprintf("%d", collectiveMsg.MessageConfirmedCount)
+		msg := collectiveMsg.Messages[key1][message_increasing_key]
+		delete(collectiveMsg.Messages[key1], message_increasing_key)
+		collectiveMsg.Messages[key1][key2] = msg
+		collectiveMsg.MessageConfirmedCount += 1
+
+		msgsToHandle = append(msgsToHandle, msg)
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Confirm_Message_0i5t589_%d", message_increasing_key),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		// 多对多 UnSupported Operations?
+		errorMessage = fmt.Sprintf("UnSupported Operation")
+		return fmt.Errorf(errorMessage)
+	}
+
+	for _, event := range eventsToTrigger {
+		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+		if err != nil {
+			return err
+		}
+		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		if !changed {
+			return fmt.Errorf("The state machine does not change")
+		}
+
+		instance.CurrentState = state
+	}
+
+	stub.SetEvent(collectiveMsgName, []byte("Message is Confirmed !"))
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_0i5t589_Advance(
+	ctx contractapi.TransactionContextInterface,
+	instanceID string,
+	targetTaskID string,
+) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_0i5t589"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_0i5t589_%d", targetTaskID)
+	}
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	// Check if Multi
+	if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		return fmt.Errorf("Unsupport Operation")
+	}
+
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		return fmt.Errorf("Not Invalid Operation")
+	}
+
+	var participantToLock *CollectiveParticipant
+	if sendParticipant.IsMulti {
+		// check if invoker in receiveParticipants
+		if cc.check_participant(ctx, instanceID, receiveParticipantID, "") == false {
+			return fmt.Errorf("Not Allowed To Advance")
+		}
+		participantToLock = receiveParticipant
+	} else {
+		// check if invoker in senderParticipants
+		if cc.check_participant(ctx, instanceID, sendParticipantID, "") == false {
+			return fmt.Errorf("Not Allowd To Advance")
+		}
+		participantToLock = sendParticipant
+	}
+
+	if len(participantToLock.Participants) < participantToLock.MultiMinimum {
+		errorMessage := fmt.Sprintf(
+			"Messages count %d does not meet the minimum requirement %d for participant %s",
+			len(collectiveMsg.Messages),
+			participantToLock.MultiMinimum,
+			participantToLock.ParticipantID,
+		)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	event := map[string]interface{}{
+		"type": "AdvanceMessage_0i5t589",
+	}
+	eventJsonBytes, _ := json.Marshal(event)
+
+	eventJsonString := string(eventJsonBytes)
+
+	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+	if err != nil {
+		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
+	}
+	state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	if !changed {
+		return fmt.Errorf("Invalid Operation")
+	}
+	instance.CurrentState = state
+
+	participantToLock.IsLocked = true
+
+	err = cc.SetInstance(ctx, instance)
+	if err != nil {
+		return fmt.Errorf("failed to set instance: %v", err)
+	}
+
+	stub.SetEvent("AdvanceMessage_0i5t589", []byte("CollectiveMessage advanced successfully"))
+	return nil
+}
+
+func (cc *SmartContract) Message_0oi7nug_Send(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, fireflyTranID string) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_0oi7nug"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	participant_id := collectiveMsg.SendParticipantID
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_0oi7nug_%d", targetTaskID)
+	}
+
+	// MultiParticipant Address Located
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	var errorMessage string
+	var key1, key2 string
+	var msgsToHandle []Message = make([]Message, 0)
+	var eventsToTrigger []string = make([]string, 0)
+	var event map[string]interface{}
+	var eventJsonBytes []byte
+	var eventJsonString string
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		// 一对一
+		key1 = "nonMulti"
+		key2 = "nonMulti"
+
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": "Send_Message_0oi7nug",
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+		participant_key := key1
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == false {
+		// 多对一
+		key1 = cc.get_X509_identity(ctx)
+		key2 = "nonMulti"
+
+		// // Auth
+
+		// Check if Locked
+		if sendParticipant.IsLocked == true {
+			// check if registered
+			if _, ok := sendParticipant.Participants[key1]; ok {
+				// check X509
+				participant_key := key1
+				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+					fmt.Println(errorMessage)
+					return fmt.Errorf(errorMessage)
+				}
+			} else {
+				return fmt.Errorf("The participant is locked and the participant is not registered")
+			}
+		} else {
+			// else check if Participant has reach Maximum
+			if sendParticipant.MultiMaximum <= len(sendParticipant.Participants) {
+				return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+			}
+
+			// Attributes Based Access Control
+			if cc.check_participant(ctx, instanceID, participant_id, "") == false {
+				errorMessage = fmt.Sprintf("Participant can't not register itself due to no conformance attributes")
+				return fmt.Errorf(errorMessage)
+			}
+
+			// Register self, using a increasing key
+			participant_increasing_key := fmt.Sprintf("%d", len(sendParticipant.Participants))
+			// create new Participant if not exist
+			msp, _ := ctx.GetClientIdentity().GetMSPID()
+			newParticipant := Participant{
+				ParticipantID: participant_increasing_key,
+				MSP:           msp,
+				IsMulti:       true,
+				X509:          key1,
+			}
+			sendParticipant.Participants[key1] = newParticipant
+		}
+
+		// Created Message
+
+		if _, ok := collectiveMsg.Messages[key1]; ok {
+
+		} else {
+			collectiveMsg.Messages[key1] = make(map[string]Message)
+			newAtomicMsg := Message{
+				MessageID:             collectiveMsgName,
+				SendParticipantKey:    key1,
+				ReceiveParticipantKey: key2,
+				FireflyTranID:         "",
+			}
+			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+		}
+
+		message_increasing_key := len(sendParticipant.Participants)
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Send_Message_0oi7nug_%d", message_increasing_key),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+	} else if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == true {
+		// 一对多
+		key1 = "nonMulti"
+
+		participant_key := key1
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+		// create Maximum Number of Message
+		if _, ok := collectiveMsg.Messages[key1]; ok {
+			// Have Been Created, Repeated Operation
+		} else {
+			collectiveMsg.Messages[key1] = make(map[string]Message)
+		}
+
+		if len(collectiveMsg.Messages[key1]) >= receiveParticipant.MultiMaximum {
+			fmt.Println("The number of messages sent by the participant exceeds the maximum")
+			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+		}
+
+		for i := 0; i < receiveParticipant.MultiMaximum; i++ {
+			key2 := fmt.Sprintf("%d", i)
+			newAtomicMsg := Message{
+				MessageID:             collectiveMsgName,
+				SendParticipantKey:    key1,
+				ReceiveParticipantKey: key2,
+				FireflyTranID:         "",
+			}
+			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+		}
+
+		for key, value := range collectiveMsg.Messages[key1] {
+			msgsToHandle = append(msgsToHandle, value)
+			event = map[string]interface{}{
+				"type": fmt.Sprintf("Send_Message_0oi7nug_%s", key),
+			}
+			eventJsonBytes, _ = json.Marshal(event)
+			eventJsonString = string(eventJsonBytes)
+			eventsToTrigger = append(eventsToTrigger, eventJsonString)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		// 多对多 UnSupport Type
+		errorMessage = "Multi To Multi Task, Unsupported Operation"
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	for _, event := range eventsToTrigger {
+		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+		state, changed := stateCharts.DecodeTriggerActionResult(res)
+		if !changed {
+			return fmt.Errorf("The state machine does not change")
+		}
+		instance.CurrentState = state
+	}
+
+	for _, msg := range msgsToHandle {
+		cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID, key1, key2)
+	}
+
+	stub.SetEvent(collectiveMsgName, []byte("Message is waiting for confirmation"))
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_0oi7nug_Complete(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, ConfirmTargetX509 string) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_0oi7nug"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	participant_id := collectiveMsg.ReceiveParticipantID
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_0oi7nug_%d", targetTaskID)
+	}
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	var errorMessage string
+	var key1, key2 string
+	var msgsToHandle []Message = make([]Message, 0)
+	var eventsToTrigger []string = make([]string, 0)
+	var event map[string]interface{}
+	var eventJsonString string
+	var eventJsonBytes []byte
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		// 一对一
+		key1 = "nonMulti"
+		key2 = "nonMulti"
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": "Confirm_Message_0oi7nug",
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+		participant_key := key2
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == false {
+		// 多对一 回应
+		// 1. 响应所有消息
+		// 2. 添加Target
+
+		key1 = ConfirmTargetX509
+		key2 = "nonMulti"
+
+		participant_key := key2
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+		// Which To Confirm? Decided By ConfirmTargetX509
+		confirmTargetSender, ok := sendParticipant.Participants[key1]
+		if !ok {
+			errorMessage := "UnExisted ConfirmTarget"
+			return fmt.Errorf(errorMessage)
+		}
+
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1]["nonMulti"])
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Confirm_Message_0oi7nug_%s", confirmTargetSender.ParticipantID),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+	} else if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == true {
+		// 一对多 回应，响应自己的部分，修改计数器
+		key1 = "nonMulti"
+		key2 = cc.get_X509_identity(ctx)
+
+		if receiveParticipant.IsLocked == true {
+			// check if key2 in it
+			if _, ok := receiveParticipant.Participants[key2]; ok {
+				// check Participant
+				participant_key := key2
+				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+					fmt.Println(errorMessage)
+					return fmt.Errorf(errorMessage)
+				}
+			} else {
+				return fmt.Errorf("The participant is locked and the participant is not registered")
+			}
+		} else {
+
+			if receiveParticipant.MultiMaximum <= len(receiveParticipant.Participants) {
+				errorMessage := "ReceiveParticipants Has Reach the Maximum"
+				return fmt.Errorf(errorMessage)
+			}
+
+			if cc.check_participant(ctx, instanceID, participant_id, "") != true {
+				errorMessage := "Not Allowed To participate as a Receiver"
+				return fmt.Errorf(errorMessage)
+			}
+
+			// create new Participant if not exist
+			x509 := cc.get_X509_identity(ctx)
+			participant_increasing_key := len(receiveParticipant.Participants)
+			msp, _ := ctx.GetClientIdentity().GetMSPID()
+			newParticipant := Participant{
+				ParticipantID: fmt.Sprintf("%d", participant_increasing_key),
+				MSP:           msp,
+				IsMulti:       true,
+				X509:          x509,
+			}
+			receiveParticipant.Participants[key2] = newParticipant
+		}
+
+		// get the message and increase it's confirmedCount
+
+		if collectiveMsg.MessageConfirmedCount >= receiveParticipant.MultiMaximum {
+			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+		}
+
+		message_increasing_key := fmt.Sprintf("%d", collectiveMsg.MessageConfirmedCount)
+		msg := collectiveMsg.Messages[key1][message_increasing_key]
+		delete(collectiveMsg.Messages[key1], message_increasing_key)
+		collectiveMsg.Messages[key1][key2] = msg
+		collectiveMsg.MessageConfirmedCount += 1
+
+		msgsToHandle = append(msgsToHandle, msg)
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Confirm_Message_0oi7nug_%d", message_increasing_key),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		// 多对多 UnSupported Operations?
+		errorMessage = fmt.Sprintf("UnSupported Operation")
+		return fmt.Errorf(errorMessage)
+	}
+
+	for _, event := range eventsToTrigger {
+		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+		if err != nil {
+			return err
+		}
+		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		if !changed {
+			return fmt.Errorf("The state machine does not change")
+		}
+
+		instance.CurrentState = state
+	}
+
+	stub.SetEvent(collectiveMsgName, []byte("Message is Confirmed !"))
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_0oi7nug_Advance(
+	ctx contractapi.TransactionContextInterface,
+	instanceID string,
+	targetTaskID string,
+) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_0oi7nug"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_0oi7nug_%d", targetTaskID)
+	}
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	// Check if Multi
+	if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		return fmt.Errorf("Unsupport Operation")
+	}
+
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		return fmt.Errorf("Not Invalid Operation")
+	}
+
+	var participantToLock *CollectiveParticipant
+	if sendParticipant.IsMulti {
+		// check if invoker in receiveParticipants
+		if cc.check_participant(ctx, instanceID, receiveParticipantID, "") == false {
+			return fmt.Errorf("Not Allowed To Advance")
+		}
+		participantToLock = receiveParticipant
+	} else {
+		// check if invoker in senderParticipants
+		if cc.check_participant(ctx, instanceID, sendParticipantID, "") == false {
+			return fmt.Errorf("Not Allowd To Advance")
+		}
+		participantToLock = sendParticipant
+	}
+
+	if len(participantToLock.Participants) < participantToLock.MultiMinimum {
+		errorMessage := fmt.Sprintf(
+			"Messages count %d does not meet the minimum requirement %d for participant %s",
+			len(collectiveMsg.Messages),
+			participantToLock.MultiMinimum,
+			participantToLock.ParticipantID,
+		)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	event := map[string]interface{}{
+		"type": "AdvanceMessage_0oi7nug",
+	}
+	eventJsonBytes, _ := json.Marshal(event)
+
+	eventJsonString := string(eventJsonBytes)
+
+	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+	if err != nil {
+		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
+	}
+	state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	if !changed {
+		return fmt.Errorf("Invalid Operation")
+	}
+	instance.CurrentState = state
+
+	participantToLock.IsLocked = true
+
+	err = cc.SetInstance(ctx, instance)
+	if err != nil {
+		return fmt.Errorf("failed to set instance: %v", err)
+	}
+
+	stub.SetEvent("AdvanceMessage_0oi7nug", []byte("CollectiveMessage advanced successfully"))
+	return nil
+}
+
+func (cc *SmartContract) Message_1ip9ryp_Send(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, fireflyTranID string) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_1ip9ryp"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	participant_id := collectiveMsg.SendParticipantID
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_1ip9ryp_%d", targetTaskID)
+	}
+
+	// MultiParticipant Address Located
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	var errorMessage string
+	var key1, key2 string
+	var msgsToHandle []Message = make([]Message, 0)
+	var eventsToTrigger []string = make([]string, 0)
+	var event map[string]interface{}
+	var eventJsonBytes []byte
+	var eventJsonString string
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		// 一对一
+		key1 = "nonMulti"
+		key2 = "nonMulti"
+
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": "Send_Message_1ip9ryp",
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+		participant_key := key1
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == false {
+		// 多对一
+		key1 = cc.get_X509_identity(ctx)
+		key2 = "nonMulti"
+
+		// // Auth
+
+		// Check if Locked
+		if sendParticipant.IsLocked == true {
+			// check if registered
+			if _, ok := sendParticipant.Participants[key1]; ok {
+				// check X509
+				participant_key := key1
+				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+					fmt.Println(errorMessage)
+					return fmt.Errorf(errorMessage)
+				}
+			} else {
+				return fmt.Errorf("The participant is locked and the participant is not registered")
+			}
+		} else {
+			// else check if Participant has reach Maximum
+			if sendParticipant.MultiMaximum <= len(sendParticipant.Participants) {
+				return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+			}
+
+			// Attributes Based Access Control
+			if cc.check_participant(ctx, instanceID, participant_id, "") == false {
+				errorMessage = fmt.Sprintf("Participant can't not register itself due to no conformance attributes")
+				return fmt.Errorf(errorMessage)
+			}
+
+			// Register self, using a increasing key
+			participant_increasing_key := fmt.Sprintf("%d", len(sendParticipant.Participants))
+			// create new Participant if not exist
+			msp, _ := ctx.GetClientIdentity().GetMSPID()
+			newParticipant := Participant{
+				ParticipantID: participant_increasing_key,
+				MSP:           msp,
+				IsMulti:       true,
+				X509:          key1,
+			}
+			sendParticipant.Participants[key1] = newParticipant
+		}
+
+		// Created Message
+
+		if _, ok := collectiveMsg.Messages[key1]; ok {
+
+		} else {
+			collectiveMsg.Messages[key1] = make(map[string]Message)
+			newAtomicMsg := Message{
+				MessageID:             collectiveMsgName,
+				SendParticipantKey:    key1,
+				ReceiveParticipantKey: key2,
+				FireflyTranID:         "",
+			}
+			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+		}
+
+		message_increasing_key := len(sendParticipant.Participants)
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Send_Message_1ip9ryp_%d", message_increasing_key),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+	} else if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == true {
+		// 一对多
+		key1 = "nonMulti"
+
+		participant_key := key1
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+		// create Maximum Number of Message
+		if _, ok := collectiveMsg.Messages[key1]; ok {
+			// Have Been Created, Repeated Operation
+		} else {
+			collectiveMsg.Messages[key1] = make(map[string]Message)
+		}
+
+		if len(collectiveMsg.Messages[key1]) >= receiveParticipant.MultiMaximum {
+			fmt.Println("The number of messages sent by the participant exceeds the maximum")
+			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+		}
+
+		for i := 0; i < receiveParticipant.MultiMaximum; i++ {
+			key2 := fmt.Sprintf("%d", i)
+			newAtomicMsg := Message{
+				MessageID:             collectiveMsgName,
+				SendParticipantKey:    key1,
+				ReceiveParticipantKey: key2,
+				FireflyTranID:         "",
+			}
+			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+		}
+
+		for key, value := range collectiveMsg.Messages[key1] {
+			msgsToHandle = append(msgsToHandle, value)
+			event = map[string]interface{}{
+				"type": fmt.Sprintf("Send_Message_1ip9ryp_%s", key),
+			}
+			eventJsonBytes, _ = json.Marshal(event)
+			eventJsonString = string(eventJsonBytes)
+			eventsToTrigger = append(eventsToTrigger, eventJsonString)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		// 多对多 UnSupport Type
+		errorMessage = "Multi To Multi Task, Unsupported Operation"
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	for _, event := range eventsToTrigger {
+		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+		state, changed := stateCharts.DecodeTriggerActionResult(res)
+		if !changed {
+			return fmt.Errorf("The state machine does not change")
+		}
+		instance.CurrentState = state
+	}
+
+	for _, msg := range msgsToHandle {
+		cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID, key1, key2)
+	}
+
+	stub.SetEvent(collectiveMsgName, []byte("Message is waiting for confirmation"))
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_1ip9ryp_Complete(ctx contractapi.TransactionContextInterface, instanceID string, targetTaskID int, ConfirmTargetX509 string) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_1ip9ryp"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	participant_id := collectiveMsg.ReceiveParticipantID
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_1ip9ryp_%d", targetTaskID)
+	}
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	var errorMessage string
+	var key1, key2 string
+	var msgsToHandle []Message = make([]Message, 0)
+	var eventsToTrigger []string = make([]string, 0)
+	var event map[string]interface{}
+	var eventJsonString string
+	var eventJsonBytes []byte
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		// 一对一
+		key1 = "nonMulti"
+		key2 = "nonMulti"
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
+
+		event = map[string]interface{}{
+			"type": "Confirm_Message_1ip9ryp",
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+		participant_key := key2
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == false {
+		// 多对一 回应
+		// 1. 响应所有消息
+		// 2. 添加Target
+
+		key1 = ConfirmTargetX509
+		key2 = "nonMulti"
+
+		participant_key := key2
+		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+			fmt.Println(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
+
+		// Which To Confirm? Decided By ConfirmTargetX509
+		confirmTargetSender, ok := sendParticipant.Participants[key1]
+		if !ok {
+			errorMessage := "UnExisted ConfirmTarget"
+			return fmt.Errorf(errorMessage)
+		}
+
+		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1]["nonMulti"])
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Confirm_Message_1ip9ryp_%s", confirmTargetSender.ParticipantID),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+	} else if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == true {
+		// 一对多 回应，响应自己的部分，修改计数器
+		key1 = "nonMulti"
+		key2 = cc.get_X509_identity(ctx)
+
+		if receiveParticipant.IsLocked == true {
+			// check if key2 in it
+			if _, ok := receiveParticipant.Participants[key2]; ok {
+				// check Participant
+				participant_key := key2
+				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
+					fmt.Println(errorMessage)
+					return fmt.Errorf(errorMessage)
+				}
+			} else {
+				return fmt.Errorf("The participant is locked and the participant is not registered")
+			}
+		} else {
+
+			if receiveParticipant.MultiMaximum <= len(receiveParticipant.Participants) {
+				errorMessage := "ReceiveParticipants Has Reach the Maximum"
+				return fmt.Errorf(errorMessage)
+			}
+
+			if cc.check_participant(ctx, instanceID, participant_id, "") != true {
+				errorMessage := "Not Allowed To participate as a Receiver"
+				return fmt.Errorf(errorMessage)
+			}
+
+			// create new Participant if not exist
+			x509 := cc.get_X509_identity(ctx)
+			participant_increasing_key := len(receiveParticipant.Participants)
+			msp, _ := ctx.GetClientIdentity().GetMSPID()
+			newParticipant := Participant{
+				ParticipantID: fmt.Sprintf("%d", participant_increasing_key),
+				MSP:           msp,
+				IsMulti:       true,
+				X509:          x509,
+			}
+			receiveParticipant.Participants[key2] = newParticipant
+		}
+
+		// get the message and increase it's confirmedCount
+
+		if collectiveMsg.MessageConfirmedCount >= receiveParticipant.MultiMaximum {
+			return fmt.Errorf("The number of messages sent by the participant exceeds the maximum")
+		}
+
+		message_increasing_key := fmt.Sprintf("%d", collectiveMsg.MessageConfirmedCount)
+		msg := collectiveMsg.Messages[key1][message_increasing_key]
+		delete(collectiveMsg.Messages[key1], message_increasing_key)
+		collectiveMsg.Messages[key1][key2] = msg
+		collectiveMsg.MessageConfirmedCount += 1
+
+		msgsToHandle = append(msgsToHandle, msg)
+
+		event = map[string]interface{}{
+			"type": fmt.Sprintf("Confirm_Message_1ip9ryp_%d", message_increasing_key),
+		}
+
+		eventJsonBytes, _ = json.Marshal(event)
+
+		eventJsonString = string(eventJsonBytes)
+
+		eventsToTrigger = append(eventsToTrigger, eventJsonString)
+
+	} else if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		// 多对多 UnSupported Operations?
+		errorMessage = fmt.Sprintf("UnSupported Operation")
+		return fmt.Errorf(errorMessage)
+	}
+
+	for _, event := range eventsToTrigger {
+		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+		if err != nil {
+			return err
+		}
+		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		if !changed {
+			return fmt.Errorf("The state machine does not change")
+		}
+
+		instance.CurrentState = state
+	}
+
+	stub.SetEvent(collectiveMsgName, []byte("Message is Confirmed !"))
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_1ip9ryp_Advance(
+	ctx contractapi.TransactionContextInterface,
+	instanceID string,
+	targetTaskID string,
+) error {
+	stub := ctx.GetStub()
+	instance, _ := cc.GetInstance(ctx, instanceID)
+
+	collectiveMsgName := "Message_1ip9ryp"
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+
+	// MultiTask Address Located
+	choreographyTaskID := collectiveMsg.ChoreographyTaskID
+
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	if choreographyTask.IsMulti == true {
+		collectiveMsgName = fmt.Sprintf("Message_1ip9ryp_%d", targetTaskID)
+	}
+
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+
+	sendParticipantID := collectiveMsg.SendParticipantID
+	receiveParticipantID := collectiveMsg.ReceiveParticipantID
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+
+	// Check if Multi
+	if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
+		return fmt.Errorf("Unsupport Operation")
+	}
+
+	if sendParticipant.IsMulti == false && receiveParticipant.IsMulti == false {
+		return fmt.Errorf("Not Invalid Operation")
+	}
+
+	var participantToLock *CollectiveParticipant
+	if sendParticipant.IsMulti {
+		// check if invoker in receiveParticipants
+		if cc.check_participant(ctx, instanceID, receiveParticipantID, "") == false {
+			return fmt.Errorf("Not Allowed To Advance")
+		}
+		participantToLock = receiveParticipant
+	} else {
+		// check if invoker in senderParticipants
+		if cc.check_participant(ctx, instanceID, sendParticipantID, "") == false {
+			return fmt.Errorf("Not Allowd To Advance")
+		}
+		participantToLock = sendParticipant
+	}
+
+	if len(participantToLock.Participants) < participantToLock.MultiMinimum {
+		errorMessage := fmt.Sprintf(
+			"Messages count %d does not meet the minimum requirement %d for participant %s",
+			len(collectiveMsg.Messages),
+			participantToLock.MultiMinimum,
+			participantToLock.ParticipantID,
+		)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	event := map[string]interface{}{
+		"type": "AdvanceMessage_1ip9ryp",
+	}
+	eventJsonBytes, _ := json.Marshal(event)
+
+	eventJsonString := string(eventJsonBytes)
+
+	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+	if err != nil {
+		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
+	}
+	state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	if !changed {
+		return fmt.Errorf("Invalid Operation")
+	}
+	instance.CurrentState = state
+
+	participantToLock.IsLocked = true
+
+	err = cc.SetInstance(ctx, instance)
+	if err != nil {
+		return fmt.Errorf("failed to set instance: %v", err)
+	}
+
+	stub.SetEvent("AdvanceMessage_1ip9ryp", []byte("CollectiveMessage advanced successfully"))
 	return nil
 }

@@ -3,7 +3,8 @@ module chaincode-go-bpmn
 go 1.14
 
 require (
-	IBC/Oracle v0.0.0
+	IBC/StateCharts v0.0.0-00010101000000-000000000000
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/hyperledger/fabric-chaincode-go v0.0.0-20210718160520-38d29fabecb9
 	github.com/hyperledger/fabric-contract-api-go v1.1.1
 	github.com/hyperledger/fabric-protos-go v0.0.0-20201028172056-a3136dde2354
@@ -12,3 +13,5 @@ require (
 )
 
 replace IBC/Oracle => ../../../oracle-go
+
+replace IBC/StateCharts => ../../../stateCharts-go
