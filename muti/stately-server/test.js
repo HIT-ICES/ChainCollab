@@ -46,31 +46,6 @@ const stateMachine = {
   }
 }
 
-// assign({ finalPriority: (context, event) => event.values.finalPriority })
-
-
-// const actions = {
-//   updateCredentials: assign(({ context, event }) => {
-//     return {
-//       username: event.username,
-//       password: event.password
-//     }
-//   }),
-//   clearError: (context) => {
-//     context.error = null;
-//   },
-//   logSuccess: (context) => {
-//     console.log('登录成功！用户名:', context.context.username);
-//   },
-//   logFailure: (context, event) => {
-//     console.log('登录失败！错误信息:', context.error);
-//   },
-//   logLoading: () => {
-//     console.log('正在登录...');
-//   }
-// }
-
-
 const fs = require('fs');
 fs.promises.readFile('./actions.json', 'utf8').then(
   (value) => {
@@ -141,7 +116,3 @@ fs.promises.readFile('./actions.json', 'utf8').then(
 
   }
 );
-
-
-
-

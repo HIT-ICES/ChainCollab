@@ -163,6 +163,7 @@ def MessageSend_code(
     after_all_hook: str = "",
     more_parameters: str = "",
     put_more_parameters: str = "",
+    put_more_event_parameters: str = "",
     change_self_state: str = "",
     key: str = "0",
 ):
@@ -171,6 +172,7 @@ def MessageSend_code(
         after_all_hook=after_all_hook,
         more_parameters=more_parameters,
         put_more_parameters=put_more_parameters,
+        put_more_event_parameters=put_more_event_parameters,
         change_self_state=change_self_state,
         msg_key=f"{message}_{key}",
     )

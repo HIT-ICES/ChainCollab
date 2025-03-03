@@ -1,23 +1,79 @@
 const { Contract } = require('fabric-contract-api');
-const { createMachine, interpret } = require('xstate');
+const { createMachine, createActor } = require('xstate');
 
 class StateMachineContract extends Contract {
-    async executeStateMachine(ctx, machineDescriptionStr, snapshotStr, context, eventStr) {
+    async GetDefaultSnapshot(ctx, machineDescriptionStr, additionalContentStr) {
         try {
             const machineDescription = JSON.parse(machineDescriptionStr);
-            const snapshot = JSON.parse(snapshotStr);
-            const event = JSON.parse(eventStr);
-    
-            const machine = createMachine(machineDescription);
-    
-            const service = interpret(machine).start(snapshot);
+            const additionalContent = JSON.parse(additionalContentStr);
 
-            const res = service.send(event);
-    
-            const changed = res.changed;
-            const newSnapshot = service.getSnapshot();
-            service.stop();
-    
+            const actionsContent = additionalContent.actions;
+            const guardsContent = additionalContent.guards;
+
+            for (const key in actionsContent) {
+                actions[key] = eval(actionsContent[key]);
+            }
+            for (const key in guardsContent) {
+                guards[key] = eval(guardsContent[key]);
+            }
+
+            const BPMNMachione = createMachine(
+                machineDescription,
+                {
+                    actions: actions,
+                    guards: guards,
+                }
+            )
+
+            const actor = createActor(BPMNMachione, {})
+            const snapshot = actor.getPersistedSnapshot();
+            return JSON.stringify(snapshot);
+        } catch (error) {
+            throw new Error(`Error getting default snapshot: ${error.message}`);
+        }
+    }
+
+    async ExecuteStateMachine(ctx, machineDescriptionStr, additionalContentStr, snapshotStr, eventStr) {
+        try {
+            const machineDescription = JSON.parse(machineDescriptionStr);
+            const additionalContent = JSON.parse(additionalContentStr);
+
+            const actionsContent = additionalContent.actions;
+            const guardsContent = additionalContent.guards;
+
+
+            for (const key in actionsContent) {
+                actions[key] = eval(actionsContent[key]);
+            }
+            for (const key in guardsContent) {
+                guards[key] = eval(guardsContent[key]);
+            }
+
+
+            const snapshot = JSON.parse(snapshotStr);
+
+            const event = JSON.parse(eventStr);
+
+            const BPMNMachione = createMachine(
+                machineDescription,
+                {
+                    actions: actions,
+                    guards: guards,
+                }
+            )
+
+            const actor = createActor(BPMNMachione, {
+                snapshot: snapshot
+            })
+
+            actor.start()
+            actor.send(event);
+
+            const newSnapshot = actor.getPersistedSnapshot();
+
+            const changed = newSnapshot !== snapshot;
+
+
             return JSON.stringify({
                 snapshot: newSnapshot,
                 changed: changed
@@ -26,27 +82,6 @@ class StateMachineContract extends Contract {
             throw new Error(`Error executing state machine: ${error.message}`);
         }
     }
-
-    async getAllElementState(ctx, machineDescriptionStr, snapshotStr) {
-        // recongnize all element with their status, and output
-    }
-
-    async createInitState(ctx, machineDescriptionStr) {
-        try {
-            const machineDescription = JSON.parse(machineDescriptionStr);
-
-            const machine = createMachine(machineDescription);
-            const service = interpret(machine).start();
-
-            const initSnapshot = service.getSnapshot();
-            service.stop();
-
-            return JSON.stringify(initSnapshot);
-        } catch (error) {
-            throw new Error(`Error creating initial state: ${error.message}`);
-        }
-    }
-
 }
 
 module.exports = StateMachineContract;

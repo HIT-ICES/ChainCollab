@@ -513,7 +513,18 @@ class GoChaincodeTranslator:
             if params_to_add
             else ""
         )
-        return more_params_code, put_more_params_code
+
+        # generate event send state code
+        put_more_event_parameter_code = (
+            "\n".join(
+                [
+                    f'"{public_the_name(param[0])}": {public_the_name(param[0])},' for param in params_to_add
+                ]
+            )
+        )
+
+        return more_params_code, put_more_params_code, put_more_event_parameter_code
+
 
     def _event_based_gateway_hook_code(self, event_based_gateway: EventBasedGateway, currentElement: Element):
         # find all other branches
@@ -542,6 +553,7 @@ class GoChaincodeTranslator:
             message_id,
             more_params_code,
             put_more_params_code,
+            put_more_event_parameters,
             need_confirm=True,
         ):
             code_list = []
@@ -550,6 +562,7 @@ class GoChaincodeTranslator:
                     message=message_id,
                     more_parameters=more_params_code,
                     put_more_parameters=put_more_params_code,
+                    put_more_event_parameters=put_more_event_parameters,
                 )
             )
             if need_confirm:
@@ -568,18 +581,19 @@ class GoChaincodeTranslator:
         # print(choreography_task.loop_type)
 
         # Handle single instance or standard multi-instance
-        more_parameters, put_more_parameters = self._generate_message_record_parameters_code(init_message_flow.message)
+        more_parameters, put_more_parameters, put_more_event_parameters = self._generate_message_record_parameters_code(init_message_flow.message)
         temp_list.extend(
             generate_chaincode_for_message(
                 message_id=init_message_flow.message.id,
                 more_params_code=more_parameters,
                 put_more_params_code=put_more_parameters,
+                put_more_event_parameters=put_more_event_parameters,
                 need_confirm=self._config["NeedConfirm"],
             )
         )
 
         if return_message_flow:
-            more_parameters, put_more_parameters = self._generate_message_record_parameters_code(
+            more_parameters, put_more_parameters,put_more_event_parameters = self._generate_message_record_parameters_code(
                 return_message_flow.message
             )
             temp_list.extend(
@@ -587,6 +601,7 @@ class GoChaincodeTranslator:
                     message_id=return_message_flow.message.id,
                     more_params_code=more_parameters,
                     put_more_params_code=put_more_parameters,
+                    put_more_event_parameters=put_more_event_parameters,
                     need_confirm=self._config["NeedConfirm"],
                 )
             )
@@ -932,6 +947,7 @@ class GoChaincodeTranslator:
     def _generate_ffi_events(self) -> list:
         return [{"name": "DMNContentRequired"}, {"name": "InstanceCreated"}]
 
+    # TODO: Generate FFI For New Type of Chaincode
     def generate_ffi(self, is_output: bool = False, output_path: str = "resource/ffi.json") -> str:
         ffi_items = []
 
@@ -1079,8 +1095,8 @@ class GoChaincodeTranslator:
 if __name__ == "__main__":
     go_chaincode_translator = GoChaincodeTranslator(
         None,
-        bpmn_file="/home/logres/system/src/py_translator/resource/bpmn/Blood_analysis_with_multi_message_without_dmn.bpmn",
+        bpmn_file="/home/logres/system/muti/bpmn_muti/supplypaper_test2.bpmn",
     )
     # go_chaincode_translator.generate_chaincode(is_output=False)
-    go_chaincode_translator.generate_new_chaincode(is_output="result/chaincode_new.go")
+    go_chaincode_translator.generate_new_chaincode(is_output=True)
     # go_chaincode_translator.generate_ffi(is_output=True)

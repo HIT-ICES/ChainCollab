@@ -29,6 +29,7 @@ import {
   InstallFirefly,
   InstallOracle,
   InstallDmnEngine,
+  InstallStateChartEngine,
   StartFireflyForEnv,
   requestOracleFFI
 } from "@/api/resourceAPI";
@@ -55,6 +56,7 @@ import {
   FireflyComponentCard,
   OracleComponentCard,
   DMNComponentCard,
+  StateChartEngineCard,
 
   JoinModal
 } from "./components.tsx";
@@ -117,6 +119,8 @@ const Overview: React.FC = () => {
     const res2 = await registerAPI(systemFireflyURL, "Oracle", "default", "Oracle", res.id)
     setSync()
     await InstallDmnEngine(currentOrgId, currentEnvId)
+    setSync()
+    await InstallStateChartEngine(currentOrgId, currentEnvId)
     setSync()
     setSetupComponentLoading(false)
   }
@@ -198,6 +202,7 @@ const Overview: React.FC = () => {
               <FireflyComponentCard ChaincodeStatus={envInfo.fireflyStatus!=="NO"} ClusterStatus={envInfo.fireflyStatus==="STARTED"}  />
               <OracleComponentCard ChaincodeStatus ={envInfo.oracleStatus==="CHAINCODEINSTALLED"}/>
               <DMNComponentCard  ChaincodeStatus ={envInfo.dmnStatus==="CHAINCODEINSTALLED"} />
+              <StateChartEngineCard ChaincodeStatus = {false} />
             </Row>
           </Card.Grid>
 
