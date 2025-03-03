@@ -664,12 +664,12 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
 
         chaincode_id = packageChaincodeForEnv(
             env_id=env.id,
-            file_path=STATE_ENGINE_CONTRACT_PATH + "/state-chart-engine.zip",
+            file_path=STATE_ENGINE_CONTRACT_PATH + "/statecharts-javascript-2.2.zip",
             chaincode_name="StateChartEngine",
             version="1.0",
             org_id=org_id,
             auth=headers["Authorization"],
-            language="javascript",
+            language="javascripts",
         )
 
         installChaincodeForEnv(

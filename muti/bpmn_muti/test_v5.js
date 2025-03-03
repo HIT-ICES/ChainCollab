@@ -1,15 +1,29 @@
-import { createMachine } from "xstate";
+import "./styles.css";
+import React from "react";
+import ReactDOM from "react-dom";
+//import { createMachine, assign } from "xstate";
+import { createMachine, assign, createActor } from "xstate";
+// import { inspect } from "@xstate/inspect";
+import { createBrowserInspector } from "@statelyai/inspect";
+
+//inspect({
+//  url: "https://statecharts.io/inspect",
+//  iframe: false,
+//});
+
+const { inspect } = createBrowserInspector();
+
 export const machine = createMachine(
   {
     context: {
       finalPriority: null,
-      Message_0d2xte5_loop: 1,
-      Message_0i5t589_loop: 1,
-      Message_0d2xte5_loopMax: 3,
-      Message_0i5t589_loopMax: 2,
       Participant_19j1e3o_locked: false,
       Participant_19j1e3o_machine_1: false,
       Participant_19j1e3o_machine_2: false,
+      Message_0i5t589_loop: 1,
+      Message_0i5t589_loopMax: 2,
+      Message_0d2xte5_loop: 1,
+      Message_0d2xte5_loopMax: 3,
     },
     id: "NewTest_paper",
     initial: "Event_06sexe6",
@@ -19,6 +33,9 @@ export const machine = createMachine(
           target: "Message_1wswgqu",
           actions: [],
         },
+      },
+      Event_13pbqdz: {
+        type: "final",
       },
       Message_1wswgqu: {
         initial: "enable",
@@ -52,310 +69,6 @@ export const machine = createMachine(
           actions: [],
         },
       },
-      Gateway_0onpe6x_TO_Gateway_1fbifca: {
-        states: {
-          "Gateway_0onpe6x to Gateway_1fbifca path 0": {
-            initial: "Message_0cba4t6",
-            states: {
-              Message_0cba4t6: {
-                initial: "enable",
-                states: {
-                  enable: {
-                    on: {
-                      Send_Message_0cba4t6: [
-                        {
-                          target: "wait for confirm",
-                          actions: [],
-                        },
-                      ],
-                    },
-                  },
-                  "wait for confirm": {
-                    on: {
-                      Confirm_Message_0cba4t6: [
-                        {
-                          target: "done",
-                          actions: [],
-                        },
-                      ],
-                    },
-                  },
-                  done: {
-                    type: "final",
-                  },
-                },
-                onDone: {
-                  target: "Message_1ip9ryp",
-                  actions: [],
-                },
-              },
-              Message_1ip9ryp: {
-                initial: "enable",
-                states: {
-                  enable: {
-                    on: {
-                      Send_Message_1ip9ryp: [
-                        {
-                          target: "wait for confirm",
-                          actions: [],
-                        },
-                      ],
-                    },
-                  },
-                  "wait for confirm": {
-                    on: {
-                      Confirm_Message_1ip9ryp: [
-                        {
-                          target: "done",
-                          actions: [],
-                        },
-                      ],
-                    },
-                  },
-                  done: {
-                    type: "final",
-                  },
-                },
-                onDone: {
-                  target: "done",
-                  actions: [],
-                },
-              },
-              done: {
-                type: "final",
-              },
-            },
-          },
-          "Gateway_0onpe6x to Gateway_1fbifca path 1": {
-            initial: "Message_0pm90nx",
-            states: {
-              Message_0pm90nx: {
-                initial: "pending",
-                states: {
-                  pending: {
-                    always: [
-                      {
-                        target: "Message_0pm90nx_firstTime",
-                        guard: "Participant_19j1e3o_isNotLocked",
-                        actions: [
-                          {
-                            type: "lock_Participant_19j1e3o",
-                          },
-                        ],
-                      },
-                      {
-                        target: "Message_0pm90nx",
-                        guard: "Participant_19j1e3o_isLocked",
-                        actions: [],
-                      },
-                    ],
-                  },
-                  Message_0pm90nx_firstTime: {
-                    initial: "unlocked",
-                    states: {
-                      unlocked: {
-                        states: {
-                          machine_1: {
-                            initial: "enable",
-                            states: {
-                              enable: {
-                                on: {
-                                  Send_Message_0pm90nx1: [
-                                    {
-                                      target: "wait for confirm",
-                                      actions: [],
-                                    },
-                                  ],
-                                },
-                              },
-                              "wait for confirm": {
-                                on: {
-                                  Confirm_Message_0pm90nx1: [
-                                    {
-                                      target: "done",
-                                      actions: [],
-                                    },
-                                  ],
-                                },
-                              },
-                              done: {
-                                entry: {
-                                  type: "activate_Participant_19j1e3o_machine_1",
-                                },
-                              },
-                            },
-                          },
-                          machine_2: {
-                            initial: "enable",
-                            states: {
-                              enable: {
-                                on: {
-                                  Send_Message_0pm90nx2: [
-                                    {
-                                      target: "wait for confirm",
-                                      actions: [],
-                                    },
-                                  ],
-                                },
-                              },
-                              "wait for confirm": {
-                                on: {
-                                  Confirm_Message_0pm90nx2: [
-                                    {
-                                      target: "done",
-                                      actions: [],
-                                    },
-                                  ],
-                                },
-                              },
-                              done: {
-                                entry: {
-                                  type: "activate_Participant_19j1e3o_machine_2",
-                                },
-                              },
-                            },
-                          },
-                        },
-                        on: {
-                          advance: [
-                            {
-                              target: "locked",
-                              actions: [],
-                            },
-                          ],
-                        },
-                        type: "parallel",
-                      },
-                      locked: {
-                        type: "final",
-                      },
-                    },
-                    onDone: {
-                      target: "done",
-                      actions: [],
-                    },
-                  },
-                  Message_0pm90nx: {
-                    initial: "machine_1",
-                    states: {
-                      machine_1: {
-                        initial: "disable",
-                        states: {
-                          disable: {
-                            always: [
-                              {
-                                target: "enable",
-                                guard: "active_Participant_19j1e3o_machine_1",
-                                actions: [],
-                              },
-                              {
-                                target: "locked_done",
-                                guard: "inactive_Participant_19j1e3o_machine_1",
-                                actions: [],
-                              },
-                            ],
-                          },
-                          enable: {
-                            on: {
-                              Send_Message_0pm90nx1: [
-                                {
-                                  target: "wait for confirm",
-                                  actions: [],
-                                },
-                              ],
-                            },
-                          },
-                          locked_done: {
-                            type: "final",
-                          },
-                          "wait for confirm": {
-                            on: {
-                              Confirm_Message_0pm90nx1: [
-                                {
-                                  target: "done",
-                                  actions: [],
-                                },
-                              ],
-                            },
-                          },
-                          done: {
-                            type: "final",
-                          },
-                        },
-                      },
-                      machine_2: {
-                        initial: "disable",
-                        states: {
-                          disable: {
-                            always: [
-                              {
-                                target: "enable",
-                                guard: "active_Participant_19j1e3o_machine_2",
-                                actions: [],
-                              },
-                              {
-                                target: "locked_done",
-                                guard: "inactive_Participant_19j1e3o_machine_2",
-                                actions: [],
-                              },
-                            ],
-                          },
-                          enable: {
-                            on: {
-                              Send_Message_0pm90nx2: [
-                                {
-                                  target: "wait for confirm",
-                                  actions: [],
-                                },
-                              ],
-                            },
-                          },
-                          locked_done: {
-                            type: "final",
-                          },
-                          "wait for confirm": {
-                            on: {
-                              Confirm_Message_0pm90nx2: [
-                                {
-                                  target: "done",
-                                  actions: [],
-                                },
-                              ],
-                            },
-                          },
-                          done: {
-                            type: "final",
-                          },
-                        },
-                      },
-                    },
-                    type: "parallel",
-                    onDone: {
-                      target: "done",
-                      actions: [],
-                    },
-                  },
-                  done: {
-                    type: "final",
-                  },
-                },
-                onDone: {
-                  target: "done",
-                  actions: [],
-                },
-              },
-              done: {
-                type: "final",
-              },
-            },
-          },
-        },
-        type: "parallel",
-        onDone: {
-          target: "Message_0rwz1km",
-          actions: [],
-        },
-      },
       Message_0rwz1km: {
         initial: "pending",
         states: {
@@ -377,6 +90,109 @@ export const machine = createMachine(
               },
             ],
           },
+          done: {
+            type: "final",
+          },
+          Message_0rwz1km: {
+            initial: "machine_1",
+            states: {
+              machine_1: {
+                initial: "disable",
+                states: {
+                  disable: {
+                    always: [
+                      {
+                        target: "enable",
+                        guard: "active_Participant_19j1e3o_machine_1",
+                        actions: [],
+                      },
+                      {
+                        target: "locked_done",
+                        guard: "inactive_Participant_19j1e3o_machine_1",
+                        actions: [],
+                      },
+                    ],
+                  },
+                  enable: {
+                    on: {
+                      Send_Message_0rwz1km_1: [
+                        {
+                          target: "wait for confirm",
+                          actions: [],
+                        },
+                      ],
+                    },
+                  },
+                  locked_done: {
+                    type: "final",
+                  },
+                  "wait for confirm": {
+                    on: {
+                      Confirm_Message_0rwz1km_1: [
+                        {
+                          target: "done",
+                          actions: [],
+                        },
+                      ],
+                    },
+                  },
+                  done: {
+                    type: "final",
+                  },
+                },
+              },
+              machine_2: {
+                initial: "disable",
+                states: {
+                  disable: {
+                    always: [
+                      {
+                        target: "enable",
+                        guard: "active_Participant_19j1e3o_machine_2",
+                        actions: [],
+                      },
+                      {
+                        target: "locked_done",
+                        guard: "inactive_Participant_19j1e3o_machine_2",
+                        actions: [],
+                      },
+                    ],
+                  },
+                  enable: {
+                    on: {
+                      Send_Message_0rwz1km_2: [
+                        {
+                          target: "wait for confirm",
+                          actions: [],
+                        },
+                      ],
+                    },
+                  },
+                  locked_done: {
+                    type: "final",
+                  },
+                  "wait for confirm": {
+                    on: {
+                      Confirm_Message_0rwz1km_2: [
+                        {
+                          target: "done",
+                          actions: [],
+                        },
+                      ],
+                    },
+                  },
+                  done: {
+                    type: "final",
+                  },
+                },
+              },
+            },
+            onDone: {
+              target: "done",
+              actions: [],
+            },
+            type: "parallel",
+          },
           Message_0rwz1km_firstTime: {
             initial: "unlocked",
             states: {
@@ -387,7 +203,7 @@ export const machine = createMachine(
                     states: {
                       enable: {
                         on: {
-                          Send_Message_0rwz1km1: [
+                          Send_Message_0rwz1km_1: [
                             {
                               target: "wait for confirm",
                               actions: [],
@@ -397,7 +213,7 @@ export const machine = createMachine(
                       },
                       "wait for confirm": {
                         on: {
-                          Confirm_Message_0rwz1km1: [
+                          Confirm_Message_0rwz1km_1: [
                             {
                               target: "done",
                               actions: [],
@@ -417,7 +233,7 @@ export const machine = createMachine(
                     states: {
                       enable: {
                         on: {
-                          Send_Message_0rwz1km2: [
+                          Send_Message_0rwz1km_2: [
                             {
                               target: "wait for confirm",
                               actions: [],
@@ -427,7 +243,7 @@ export const machine = createMachine(
                       },
                       "wait for confirm": {
                         on: {
-                          Confirm_Message_0rwz1km2: [
+                          Confirm_Message_0rwz1km_2: [
                             {
                               target: "done",
                               actions: [],
@@ -462,109 +278,6 @@ export const machine = createMachine(
               actions: [],
             },
           },
-          Message_0rwz1km: {
-            initial: "machine_1",
-            states: {
-              machine_1: {
-                initial: "disable",
-                states: {
-                  disable: {
-                    always: [
-                      {
-                        target: "enable",
-                        guard: "active_Participant_19j1e3o_machine_1",
-                        actions: [],
-                      },
-                      {
-                        target: "locked_done",
-                        guard: "inactive_Participant_19j1e3o_machine_1",
-                        actions: [],
-                      },
-                    ],
-                  },
-                  enable: {
-                    on: {
-                      Send_Message_0rwz1km1: [
-                        {
-                          target: "wait for confirm",
-                          actions: [],
-                        },
-                      ],
-                    },
-                  },
-                  locked_done: {
-                    type: "final",
-                  },
-                  "wait for confirm": {
-                    on: {
-                      Confirm_Message_0rwz1km1: [
-                        {
-                          target: "done",
-                          actions: [],
-                        },
-                      ],
-                    },
-                  },
-                  done: {
-                    type: "final",
-                  },
-                },
-              },
-              machine_2: {
-                initial: "disable",
-                states: {
-                  disable: {
-                    always: [
-                      {
-                        target: "enable",
-                        guard: "active_Participant_19j1e3o_machine_2",
-                        actions: [],
-                      },
-                      {
-                        target: "locked_done",
-                        guard: "inactive_Participant_19j1e3o_machine_2",
-                        actions: [],
-                      },
-                    ],
-                  },
-                  enable: {
-                    on: {
-                      Send_Message_0rwz1km2: [
-                        {
-                          target: "wait for confirm",
-                          actions: [],
-                        },
-                      ],
-                    },
-                  },
-                  locked_done: {
-                    type: "final",
-                  },
-                  "wait for confirm": {
-                    on: {
-                      Confirm_Message_0rwz1km2: [
-                        {
-                          target: "done",
-                          actions: [],
-                        },
-                      ],
-                    },
-                  },
-                  done: {
-                    type: "final",
-                  },
-                },
-              },
-            },
-            type: "parallel",
-            onDone: {
-              target: "done",
-              actions: [],
-            },
-          },
-          done: {
-            type: "final",
-          },
         },
         onDone: {
           target: "Message_0i5t589",
@@ -572,15 +285,15 @@ export const machine = createMachine(
         },
       },
       Message_0i5t589: {
-        initial: "Message_0i5t589_instance",
+        initial: "Message_0i5t589_",
         states: {
-          Message_0i5t589_instance: {
+          Message_0i5t589: {
             initial: "pending",
             states: {
               pending: {
                 always: [
                   {
-                    target: "Message_0i5t589_instance_firstTime",
+                    target: "Message_0i5t589_firstTime",
                     guard: "Participant_19j1e3o_isNotLocked",
                     actions: [
                       {
@@ -589,13 +302,116 @@ export const machine = createMachine(
                     ],
                   },
                   {
-                    target: "Message_0i5t589_instance",
+                    target: "Message_0i5t589",
                     guard: "Participant_19j1e3o_isLocked",
                     actions: [],
                   },
                 ],
               },
-              Message_0i5t589_instance_firstTime: {
+              done: {
+                type: "final",
+              },
+              Message_0i5t589: {
+                initial: "machine_1",
+                states: {
+                  machine_1: {
+                    initial: "disable",
+                    states: {
+                      disable: {
+                        always: [
+                          {
+                            target: "enable",
+                            guard: "active_Participant_19j1e3o_machine_1",
+                            actions: [],
+                          },
+                          {
+                            target: "locked_done",
+                            guard: "inactive_Participant_19j1e3o_machine_1",
+                            actions: [],
+                          },
+                        ],
+                      },
+                      enable: {
+                        on: {
+                          Send_Message_0i5t589_1: [
+                            {
+                              target: "wait for confirm",
+                              actions: [],
+                            },
+                          ],
+                        },
+                      },
+                      locked_done: {
+                        type: "final",
+                      },
+                      "wait for confirm": {
+                        on: {
+                          Confirm_Message_0i5t589_1: [
+                            {
+                              target: "done",
+                              actions: [],
+                            },
+                          ],
+                        },
+                      },
+                      done: {
+                        type: "final",
+                      },
+                    },
+                  },
+                  machine_2: {
+                    initial: "disable",
+                    states: {
+                      disable: {
+                        always: [
+                          {
+                            target: "enable",
+                            guard: "active_Participant_19j1e3o_machine_2",
+                            actions: [],
+                          },
+                          {
+                            target: "locked_done",
+                            guard: "inactive_Participant_19j1e3o_machine_2",
+                            actions: [],
+                          },
+                        ],
+                      },
+                      enable: {
+                        on: {
+                          Send_Message_0i5t589_2: [
+                            {
+                              target: "wait for confirm",
+                              actions: [],
+                            },
+                          ],
+                        },
+                      },
+                      locked_done: {
+                        type: "final",
+                      },
+                      "wait for confirm": {
+                        on: {
+                          Confirm_Message_0i5t589_2: [
+                            {
+                              target: "done",
+                              actions: [],
+                            },
+                          ],
+                        },
+                      },
+                      done: {
+                        type: "final",
+                      },
+                    },
+                  },
+                },
+                onDone: {
+                  target: "done",
+                  actions: [],
+                },
+                type: "parallel",
+              },
+              Message_0i5t589_firstTime: {
                 initial: "unlocked",
                 states: {
                   unlocked: {
@@ -605,7 +421,7 @@ export const machine = createMachine(
                         states: {
                           enable: {
                             on: {
-                              Send_Message_0i5t589_instance1: [
+                              Send_Message_0i5t589_1: [
                                 {
                                   target: "wait for confirm",
                                   actions: [],
@@ -615,7 +431,7 @@ export const machine = createMachine(
                           },
                           "wait for confirm": {
                             on: {
-                              Confirm_Message_0i5t589_instance1: [
+                              Confirm_Message_0i5t589_1: [
                                 {
                                   target: "done",
                                   actions: [],
@@ -635,7 +451,7 @@ export const machine = createMachine(
                         states: {
                           enable: {
                             on: {
-                              Send_Message_0i5t589_instance2: [
+                              Send_Message_0i5t589_2: [
                                 {
                                   target: "wait for confirm",
                                   actions: [],
@@ -645,7 +461,7 @@ export const machine = createMachine(
                           },
                           "wait for confirm": {
                             on: {
-                              Confirm_Message_0i5t589_instance2: [
+                              Confirm_Message_0i5t589_2: [
                                 {
                                   target: "done",
                                   actions: [],
@@ -680,113 +496,10 @@ export const machine = createMachine(
                   actions: [],
                 },
               },
-              Message_0i5t589_instance: {
-                initial: "machine_1",
-                states: {
-                  machine_1: {
-                    initial: "disable",
-                    states: {
-                      disable: {
-                        always: [
-                          {
-                            target: "enable",
-                            guard: "active_Participant_19j1e3o_machine_1",
-                            actions: [],
-                          },
-                          {
-                            target: "locked_done",
-                            guard: "inactive_Participant_19j1e3o_machine_1",
-                            actions: [],
-                          },
-                        ],
-                      },
-                      enable: {
-                        on: {
-                          Send_Message_0i5t589_instance1: [
-                            {
-                              target: "wait for confirm",
-                              actions: [],
-                            },
-                          ],
-                        },
-                      },
-                      locked_done: {
-                        type: "final",
-                      },
-                      "wait for confirm": {
-                        on: {
-                          Confirm_Message_0i5t589_instance1: [
-                            {
-                              target: "done",
-                              actions: [],
-                            },
-                          ],
-                        },
-                      },
-                      done: {
-                        type: "final",
-                      },
-                    },
-                  },
-                  machine_2: {
-                    initial: "disable",
-                    states: {
-                      disable: {
-                        always: [
-                          {
-                            target: "enable",
-                            guard: "active_Participant_19j1e3o_machine_2",
-                            actions: [],
-                          },
-                          {
-                            target: "locked_done",
-                            guard: "inactive_Participant_19j1e3o_machine_2",
-                            actions: [],
-                          },
-                        ],
-                      },
-                      enable: {
-                        on: {
-                          Send_Message_0i5t589_instance2: [
-                            {
-                              target: "wait for confirm",
-                              actions: [],
-                            },
-                          ],
-                        },
-                      },
-                      locked_done: {
-                        type: "final",
-                      },
-                      "wait for confirm": {
-                        on: {
-                          Confirm_Message_0i5t589_instance2: [
-                            {
-                              target: "done",
-                              actions: [],
-                            },
-                          ],
-                        },
-                      },
-                      done: {
-                        type: "final",
-                      },
-                    },
-                  },
-                },
-                type: "parallel",
-                onDone: {
-                  target: "done",
-                  actions: [],
-                },
-              },
-              done: {
-                type: "final",
-              },
             },
+            onDone: [],
           },
         },
-        type: "parallel",
         onDone: [
           {
             target: "Message_0i5t589",
@@ -808,16 +521,17 @@ export const machine = createMachine(
             actions: [],
           },
         ],
+        type: "parallel",
       },
       Message_0oi7nug: {
-        initial: "Message_0oi7nug_instance_1",
+        initial: "Message_0oi7nug_1",
         states: {
-          Message_0oi7nug_instance_1: {
+          Message_0oi7nug_1: {
             initial: "enable",
             states: {
               enable: {
                 on: {
-                  Send_Message_0oi7nug_instance_1: [
+                  Send_Message_0oi7nug_1: [
                     {
                       target: "wait for confirm",
                       actions: [],
@@ -827,7 +541,7 @@ export const machine = createMachine(
               },
               "wait for confirm": {
                 on: {
-                  Confirm_Message_0oi7nug_instance_1: [
+                  Confirm_Message_0oi7nug_1: [
                     {
                       target: "done",
                       actions: [],
@@ -840,12 +554,12 @@ export const machine = createMachine(
               },
             },
           },
-          Message_0oi7nug_instance_2: {
+          Message_0oi7nug_2: {
             initial: "enable",
             states: {
               enable: {
                 on: {
-                  Send_Message_0oi7nug_instance_2: [
+                  Send_Message_0oi7nug_2: [
                     {
                       target: "wait for confirm",
                       actions: [],
@@ -855,7 +569,7 @@ export const machine = createMachine(
               },
               "wait for confirm": {
                 on: {
-                  Confirm_Message_0oi7nug_instance_2: [
+                  Confirm_Message_0oi7nug_2: [
                     {
                       target: "done",
                       actions: [],
@@ -868,12 +582,12 @@ export const machine = createMachine(
               },
             },
           },
-          Message_0oi7nug_instance_3: {
+          Message_0oi7nug_3: {
             initial: "enable",
             states: {
               enable: {
                 on: {
-                  Send_Message_0oi7nug_instance_3: [
+                  Send_Message_0oi7nug_3: [
                     {
                       target: "wait for confirm",
                       actions: [],
@@ -883,7 +597,7 @@ export const machine = createMachine(
               },
               "wait for confirm": {
                 on: {
-                  Confirm_Message_0oi7nug_instance_3: [
+                  Confirm_Message_0oi7nug_3: [
                     {
                       target: "done",
                       actions: [],
@@ -974,6 +688,109 @@ export const machine = createMachine(
               },
             ],
           },
+          done: {
+            type: "final",
+          },
+          Message_1oxmq1k: {
+            initial: "machine_1",
+            states: {
+              machine_1: {
+                initial: "disable",
+                states: {
+                  disable: {
+                    always: [
+                      {
+                        target: "enable",
+                        guard: "active_Participant_19j1e3o_machine_1",
+                        actions: [],
+                      },
+                      {
+                        target: "locked_done",
+                        guard: "inactive_Participant_19j1e3o_machine_1",
+                        actions: [],
+                      },
+                    ],
+                  },
+                  enable: {
+                    on: {
+                      Send_Message_1oxmq1k_1: [
+                        {
+                          target: "wait for confirm",
+                          actions: [],
+                        },
+                      ],
+                    },
+                  },
+                  locked_done: {
+                    type: "final",
+                  },
+                  "wait for confirm": {
+                    on: {
+                      Confirm_Message_1oxmq1k_1: [
+                        {
+                          target: "done",
+                          actions: [],
+                        },
+                      ],
+                    },
+                  },
+                  done: {
+                    type: "final",
+                  },
+                },
+              },
+              machine_2: {
+                initial: "disable",
+                states: {
+                  disable: {
+                    always: [
+                      {
+                        target: "enable",
+                        guard: "active_Participant_19j1e3o_machine_2",
+                        actions: [],
+                      },
+                      {
+                        target: "locked_done",
+                        guard: "inactive_Participant_19j1e3o_machine_2",
+                        actions: [],
+                      },
+                    ],
+                  },
+                  enable: {
+                    on: {
+                      Send_Message_1oxmq1k_2: [
+                        {
+                          target: "wait for confirm",
+                          actions: [],
+                        },
+                      ],
+                    },
+                  },
+                  locked_done: {
+                    type: "final",
+                  },
+                  "wait for confirm": {
+                    on: {
+                      Confirm_Message_1oxmq1k_2: [
+                        {
+                          target: "done",
+                          actions: [],
+                        },
+                      ],
+                    },
+                  },
+                  done: {
+                    type: "final",
+                  },
+                },
+              },
+            },
+            onDone: {
+              target: "done",
+              actions: [],
+            },
+            type: "parallel",
+          },
           Message_1oxmq1k_firstTime: {
             initial: "unlocked",
             states: {
@@ -984,7 +801,7 @@ export const machine = createMachine(
                     states: {
                       enable: {
                         on: {
-                          Send_Message_1oxmq1k1: [
+                          Send_Message_1oxmq1k_1: [
                             {
                               target: "wait for confirm",
                               actions: [],
@@ -994,7 +811,7 @@ export const machine = createMachine(
                       },
                       "wait for confirm": {
                         on: {
-                          Confirm_Message_1oxmq1k1: [
+                          Confirm_Message_1oxmq1k_1: [
                             {
                               target: "done",
                               actions: [],
@@ -1014,7 +831,7 @@ export const machine = createMachine(
                     states: {
                       enable: {
                         on: {
-                          Send_Message_1oxmq1k2: [
+                          Send_Message_1oxmq1k_2: [
                             {
                               target: "wait for confirm",
                               actions: [],
@@ -1024,7 +841,7 @@ export const machine = createMachine(
                       },
                       "wait for confirm": {
                         on: {
-                          Confirm_Message_1oxmq1k2: [
+                          Confirm_Message_1oxmq1k_2: [
                             {
                               target: "done",
                               actions: [],
@@ -1059,125 +876,31 @@ export const machine = createMachine(
               actions: [],
             },
           },
-          Message_1oxmq1k: {
-            initial: "machine_1",
-            states: {
-              machine_1: {
-                initial: "disable",
-                states: {
-                  disable: {
-                    always: [
-                      {
-                        target: "enable",
-                        guard: "active_Participant_19j1e3o_machine_1",
-                        actions: [],
-                      },
-                      {
-                        target: "locked_done",
-                        guard: "inactive_Participant_19j1e3o_machine_1",
-                        actions: [],
-                      },
-                    ],
-                  },
-                  enable: {
-                    on: {
-                      Send_Message_1oxmq1k1: [
-                        {
-                          target: "wait for confirm",
-                          actions: [],
-                        },
-                      ],
-                    },
-                  },
-                  locked_done: {
-                    type: "final",
-                  },
-                  "wait for confirm": {
-                    on: {
-                      Confirm_Message_1oxmq1k1: [
-                        {
-                          target: "done",
-                          actions: [],
-                        },
-                      ],
-                    },
-                  },
-                  done: {
-                    type: "final",
-                  },
-                },
-              },
-              machine_2: {
-                initial: "disable",
-                states: {
-                  disable: {
-                    always: [
-                      {
-                        target: "enable",
-                        guard: "active_Participant_19j1e3o_machine_2",
-                        actions: [],
-                      },
-                      {
-                        target: "locked_done",
-                        guard: "inactive_Participant_19j1e3o_machine_2",
-                        actions: [],
-                      },
-                    ],
-                  },
-                  enable: {
-                    on: {
-                      Send_Message_1oxmq1k2: [
-                        {
-                          target: "wait for confirm",
-                          actions: [],
-                        },
-                      ],
-                    },
-                  },
-                  locked_done: {
-                    type: "final",
-                  },
-                  "wait for confirm": {
-                    on: {
-                      Confirm_Message_1oxmq1k2: [
-                        {
-                          target: "done",
-                          actions: [],
-                        },
-                      ],
-                    },
-                  },
-                  done: {
-                    type: "final",
-                  },
-                },
-              },
-            },
-            type: "parallel",
-            onDone: {
-              target: "done",
-              actions: [],
-            },
-          },
-          done: {
-            type: "final",
-          },
         },
         onDone: {
           target: "Gateway_1cr0nma",
           actions: [],
         },
       },
+      Gateway_1cr0nma: {
+        always: [
+          {
+            target: "Event_13pbqdz",
+            guard: "Gateway_1cr0nma__Event_13pbqdz",
+            actions: [],
+          },
+        ],
+      },
       Message_0d2xte5: {
-        initial: "Message_0d2xte5_instance",
+        initial: "Message_0d2xte5_",
         states: {
-          Message_0d2xte5_instance: {
+          Message_0d2xte5: {
             initial: "pending",
             states: {
               pending: {
                 always: [
                   {
-                    target: "Message_0d2xte5_instance_firstTime",
+                    target: "Message_0d2xte5_firstTime",
                     guard: "Participant_19j1e3o_isNotLocked",
                     actions: [
                       {
@@ -1186,13 +909,116 @@ export const machine = createMachine(
                     ],
                   },
                   {
-                    target: "Message_0d2xte5_instance",
+                    target: "Message_0d2xte5",
                     guard: "Participant_19j1e3o_isLocked",
                     actions: [],
                   },
                 ],
               },
-              Message_0d2xte5_instance_firstTime: {
+              done: {
+                type: "final",
+              },
+              Message_0d2xte5: {
+                initial: "machine_1",
+                states: {
+                  machine_1: {
+                    initial: "disable",
+                    states: {
+                      disable: {
+                        always: [
+                          {
+                            target: "enable",
+                            guard: "active_Participant_19j1e3o_machine_1",
+                            actions: [],
+                          },
+                          {
+                            target: "locked_done",
+                            guard: "inactive_Participant_19j1e3o_machine_1",
+                            actions: [],
+                          },
+                        ],
+                      },
+                      enable: {
+                        on: {
+                          Send_Message_0d2xte5_1: [
+                            {
+                              target: "wait for confirm",
+                              actions: [],
+                            },
+                          ],
+                        },
+                      },
+                      locked_done: {
+                        type: "final",
+                      },
+                      "wait for confirm": {
+                        on: {
+                          Confirm_Message_0d2xte5_1: [
+                            {
+                              target: "done",
+                              actions: [],
+                            },
+                          ],
+                        },
+                      },
+                      done: {
+                        type: "final",
+                      },
+                    },
+                  },
+                  machine_2: {
+                    initial: "disable",
+                    states: {
+                      disable: {
+                        always: [
+                          {
+                            target: "enable",
+                            guard: "active_Participant_19j1e3o_machine_2",
+                            actions: [],
+                          },
+                          {
+                            target: "locked_done",
+                            guard: "inactive_Participant_19j1e3o_machine_2",
+                            actions: [],
+                          },
+                        ],
+                      },
+                      enable: {
+                        on: {
+                          Send_Message_0d2xte5_2: [
+                            {
+                              target: "wait for confirm",
+                              actions: [],
+                            },
+                          ],
+                        },
+                      },
+                      locked_done: {
+                        type: "final",
+                      },
+                      "wait for confirm": {
+                        on: {
+                          Confirm_Message_0d2xte5_2: [
+                            {
+                              target: "done",
+                              actions: [],
+                            },
+                          ],
+                        },
+                      },
+                      done: {
+                        type: "final",
+                      },
+                    },
+                  },
+                },
+                onDone: {
+                  target: "done",
+                  actions: [],
+                },
+                type: "parallel",
+              },
+              Message_0d2xte5_firstTime: {
                 initial: "unlocked",
                 states: {
                   unlocked: {
@@ -1202,7 +1028,7 @@ export const machine = createMachine(
                         states: {
                           enable: {
                             on: {
-                              Send_Message_0d2xte5_instance1: [
+                              Send_Message_0d2xte5_1: [
                                 {
                                   target: "wait for confirm",
                                   actions: [],
@@ -1212,7 +1038,7 @@ export const machine = createMachine(
                           },
                           "wait for confirm": {
                             on: {
-                              Confirm_Message_0d2xte5_instance1: [
+                              Confirm_Message_0d2xte5_1: [
                                 {
                                   target: "done",
                                   actions: [],
@@ -1232,7 +1058,7 @@ export const machine = createMachine(
                         states: {
                           enable: {
                             on: {
-                              Send_Message_0d2xte5_instance2: [
+                              Send_Message_0d2xte5_2: [
                                 {
                                   target: "wait for confirm",
                                   actions: [],
@@ -1242,7 +1068,7 @@ export const machine = createMachine(
                           },
                           "wait for confirm": {
                             on: {
-                              Confirm_Message_0d2xte5_instance2: [
+                              Confirm_Message_0d2xte5_2: [
                                 {
                                   target: "done",
                                   actions: [],
@@ -1277,113 +1103,10 @@ export const machine = createMachine(
                   actions: [],
                 },
               },
-              Message_0d2xte5_instance: {
-                initial: "machine_1",
-                states: {
-                  machine_1: {
-                    initial: "disable",
-                    states: {
-                      disable: {
-                        always: [
-                          {
-                            target: "enable",
-                            guard: "active_Participant_19j1e3o_machine_1",
-                            actions: [],
-                          },
-                          {
-                            target: "locked_done",
-                            guard: "inactive_Participant_19j1e3o_machine_1",
-                            actions: [],
-                          },
-                        ],
-                      },
-                      enable: {
-                        on: {
-                          Send_Message_0d2xte5_instance1: [
-                            {
-                              target: "wait for confirm",
-                              actions: [],
-                            },
-                          ],
-                        },
-                      },
-                      locked_done: {
-                        type: "final",
-                      },
-                      "wait for confirm": {
-                        on: {
-                          Confirm_Message_0d2xte5_instance1: [
-                            {
-                              target: "done",
-                              actions: [],
-                            },
-                          ],
-                        },
-                      },
-                      done: {
-                        type: "final",
-                      },
-                    },
-                  },
-                  machine_2: {
-                    initial: "disable",
-                    states: {
-                      disable: {
-                        always: [
-                          {
-                            target: "enable",
-                            guard: "active_Participant_19j1e3o_machine_2",
-                            actions: [],
-                          },
-                          {
-                            target: "locked_done",
-                            guard: "inactive_Participant_19j1e3o_machine_2",
-                            actions: [],
-                          },
-                        ],
-                      },
-                      enable: {
-                        on: {
-                          Send_Message_0d2xte5_instance2: [
-                            {
-                              target: "wait for confirm",
-                              actions: [],
-                            },
-                          ],
-                        },
-                      },
-                      locked_done: {
-                        type: "final",
-                      },
-                      "wait for confirm": {
-                        on: {
-                          Confirm_Message_0d2xte5_instance2: [
-                            {
-                              target: "done",
-                              actions: [],
-                            },
-                          ],
-                        },
-                      },
-                      done: {
-                        type: "final",
-                      },
-                    },
-                  },
-                },
-                type: "parallel",
-                onDone: {
-                  target: "done",
-                  actions: [],
-                },
-              },
-              done: {
-                type: "final",
-              },
             },
+            onDone: [],
           },
         },
-        type: "parallel",
         onDone: [
           {
             target: "Message_0d2xte5",
@@ -1400,105 +1123,234 @@ export const machine = createMachine(
             actions: [],
           },
         ],
+        type: "parallel",
       },
-      Gateway_1cr0nma: {
-        always: {
-          target: "Event_13pbqdz",
-          guard: "Gateway_1cr0nma__Event_13pbqdz",
-          actions: [],
-        },
-      },
-      Event_13pbqdz: {
-        type: "final",
-      },
-      Message_1ni5gbl: {
-        initial: "enable",
+      Gateway_0onpe6x_TO_Gateway_1fbifca: {
+        initial: "",
         states: {
-          enable: {
-            on: {
-              Send_Message_1ni5gbl: [
-                {
-                  target: "wait for confirm",
+          "Gateway_0onpe6x to Gateway_1fbifca path 0": {
+            initial: "Message_0cba4t6",
+            states: {
+              done: {
+                type: "final",
+              },
+              Message_0cba4t6: {
+                initial: "enable",
+                states: {
+                  enable: {
+                    on: {
+                      Send_Message_0cba4t6: [
+                        {
+                          target: "wait for confirm",
+                          actions: [],
+                        },
+                      ],
+                    },
+                  },
+                  "wait for confirm": {
+                    on: {
+                      Confirm_Message_0cba4t6: [
+                        {
+                          target: "done",
+                          actions: [],
+                        },
+                      ],
+                    },
+                  },
+                  done: {
+                    type: "final",
+                  },
+                },
+                onDone: {
+                  target: "Message_1ip9ryp",
                   actions: [],
                 },
-              ],
-            },
-          },
-          "wait for confirm": {
-            on: {
-              Confirm_Message_1ni5gbl: [
-                {
+              },
+              Message_1ip9ryp: {
+                initial: "enable",
+                states: {
+                  enable: {
+                    on: {
+                      Send_Message_1ip9ryp: [
+                        {
+                          target: "wait for confirm",
+                          actions: [],
+                        },
+                      ],
+                    },
+                  },
+                  "wait for confirm": {
+                    on: {
+                      Confirm_Message_1ip9ryp: [
+                        {
+                          target: "done",
+                          actions: [],
+                        },
+                      ],
+                    },
+                  },
+                  done: {
+                    type: "final",
+                  },
+                },
+                onDone: {
                   target: "done",
                   actions: [],
                 },
-              ],
+              },
             },
+            onDone: [],
           },
-          done: {
-            type: "final",
+          "Gateway_0onpe6x to Gateway_1fbifca path 1": {
+            initial: "Message_0pm90nx",
+            states: {
+              done: {
+                type: "final",
+              },
+              Message_0pm90nx: {
+                initial: "enable",
+                states: {
+                  enable: {
+                    on: {
+                      Send_Message_0pm90nx: [
+                        {
+                          target: "wait for confirm",
+                          actions: [],
+                        },
+                      ],
+                    },
+                  },
+                  "wait for confirm": {
+                    on: {
+                      Confirm_Message_0pm90nx: [
+                        {
+                          target: "done",
+                          actions: [],
+                        },
+                      ],
+                    },
+                  },
+                  done: {
+                    type: "final",
+                  },
+                },
+                onDone: {
+                  target: "done",
+                  actions: [],
+                },
+              },
+            },
+            onDone: [],
           },
         },
         onDone: {
-          target: "Gateway_0onpe6x_TO_Gateway_1fbifca",
+          target: "Message_0rwz1km",
           actions: [],
         },
+        type: "parallel",
       },
     },
   },
   {
     actions: {
-      activate_Participant_19j1e3o_machine_1: ({ context, event }) => {},
-      activate_Participant_19j1e3o_machine_2: ({ context, event }) => {},
-      lock_Participant_19j1e3o: ({ context, event }) => {},
-      Message_0i5t589_LoopAdd: ({ context, event }) => {},
-      set_MessageGlobal_finalPriority: ({ context, event }) => {},
-      Message_0d2xte5_LoopAdd: ({ context, event }) => {},
+      set_MessageGlobal_finalPriority: assign({
+        finalPriority: ({ context, event }) => event.values.finalPriority,
+      }),
+      lock_Participant_19j1e3o: assign({ Participant_19j1e3o_locked: true }),
+      activate_Participant_19j1e3o_machine_1: assign({
+        Participant_19j1e3o_machine_1: true,
+      }),
+      activate_Participant_19j1e3o_machine_2: assign({
+        Participant_19j1e3o_machine_2: true,
+      }),
+      Message_0i5t589_LoopAdd: assign({
+        Message_0i5t589_loop: ({ context }) => context.Message_0i5t589_loop + 1,
+      }),
+      Message_0d2xte5_LoopAdd: assign({
+        Message_0d2xte5_loop: ({ context }) => context.Message_0d2xte5_loop + 1,
+      }),
     },
-    actors: {},
+    services: {},
     guards: {
-      Participant_19j1e3o_isNotLocked: ({ context, event }, params) => {
-        return false;
-      },
       Participant_19j1e3o_isLocked: ({ context, event }, params) => {
-        return false;
+        return context.Participant_19j1e3o_locked;
+      },
+      Participant_19j1e3o_isNotLocked: ({ context, event }, params) => {
+        return !context.Participant_19j1e3o_locked;
       },
       active_Participant_19j1e3o_machine_1: ({ context, event }, params) => {
-        return false;
+        return context.Participant_19j1e3o_machine_1;
       },
       inactive_Participant_19j1e3o_machine_1: ({ context, event }, params) => {
-        return false;
+        return !context.Participant_19j1e3o_machine_1;
       },
       active_Participant_19j1e3o_machine_2: ({ context, event }, params) => {
-        return false;
+        return context.Participant_19j1e3o_machine_2;
       },
       inactive_Participant_19j1e3o_machine_2: ({ context, event }, params) => {
-        return false;
+        return !context.Participant_19j1e3o_machine_2;
       },
       Message_0i5t589_NotLoopMax: ({ context, event }, params) => {
-        return false;
-      },
-      Message_0i5t589_LoopConditionMeet: ({ context, event }, params) => {
-        return false;
+        return context.Message_0i5t589_loop !== context.Message_0i5t589_loopMax;
       },
       Message_0i5t589_LoopMax: ({ context, event }, params) => {
-        return false;
+        return context.Message_0i5t589_loop === context.Message_0i5t589_loopMax;
+      },
+      Message_0i5t589_LoopConditionMeet: ({ context, event }, params) => {
+        return context.true;
       },
       Gateway_0ep8cuh__Message_1oxmq1k: ({ context, event }, params) => {
-        return false;
+        return context.finalPriority == "Low";
       },
       Gateway_0ep8cuh__Message_0d2xte5: ({ context, event }, params) => {
-        return false;
+        return context.finalPriority == "VeryLow";
       },
       Gateway_1cr0nma__Event_13pbqdz: ({ context, event }, params) => {
-        return false;
+        return true;
       },
       Message_0d2xte5_NotLoopMax: ({ context, event }, params) => {
-        return false;
+        return context.Message_0d2xte5_loop !== context.Message_0d2xte5_loopMax;
       },
       Message_0d2xte5_LoopMax: ({ context, event }, params) => {
-        return false;
+        return context.Message_0d2xte5_loop === context.Message_0d2xte5_loopMax;
       },
     },
     delays: {},
-  },
+  }
 );
+
+function App() {
+  // const [state, send] = useMachine(machine, { devTools: true });
+  const actor = createActor(machine, {
+    inspect,
+    // ... other actor options
+  });
+  actor.start();
+
+  actor.send({ type: "Send_Message_1wswgqu" });
+  actor.send({ type: "Confirm_Message_1wswgqu" });
+  actor.send({ type: "Send_Message_0cba4t6" });
+  actor.send({ type: "Confirm_Message_0cba4t6" });
+  actor.send({ type: "Send_Message_1ip9ryp" });
+  actor.send({ type: "Confirm_Message_1ip9ryp" });
+  actor.send({ type: "Send_Message_0pm90nx" });
+  actor.send({ type: "Confirm_Message_0pm90nx" });
+
+  return (
+    <div className="App">
+      <button
+        onClick={() =>
+          send({
+            type: "Confirm_Message_1io2g9u",
+            values: { finalPriority: "VeryLow" },
+          })
+        }
+      >
+        wait for confirm
+      </button>
+    </div>
+  );
+}
+
+const rootElement = document.getElementById("root");
+ReactDOM.render(<App />, rootElement);
