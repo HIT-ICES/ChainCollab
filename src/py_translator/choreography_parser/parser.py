@@ -5,10 +5,11 @@ import xml.etree.ElementTree as ET
 import json
 
 
-from .elements import (
+from choreography_parser.elements import (
     NodeType,
     EdgeType,
     RootType,
+    TaskLoopType,
     Participant,
     Message,
     StartEvent,
@@ -45,20 +46,15 @@ class Choreography:
         ]
 
     def query_edge_with_source_and_target(self, source_id, target_id):
-        return [
-            element
-            for element in self.edges
-            if element.source.id == source_id and element.target.id == target_id
-        ]
+        return [element for element in self.edges if element.source.id == source_id and element.target.id == target_id]
 
     def _parse_node(self, element: ET.Element):
         bpmn2prefix = "{http://www.omg.org/spec/BPMN/20100524/MODEL}"
         split_tag = element.tag.split("}")[1]
         match split_tag:
             case NodeType.PARTICIPANT.value:
-                participant_multiplicity = element.findall(
-                    f"./{bpmn2prefix}participantMultiplicity"
-                )
+                assert len(element.findall(f"./{bpmn2prefix}participantMultiplicity")) <= 1
+                participant_multiplicity = element.findall(f"./{bpmn2prefix}participantMultiplicity")
 
                 is_multi = False
                 multi_maximum = 0
@@ -66,12 +62,8 @@ class Choreography:
 
                 if participant_multiplicity:
                     is_multi = True
-                    multi_maximum = int(
-                        participant_multiplicity[0].attrib.get("maximum", 0)
-                    )
-                    multi_minimum = int(
-                        participant_multiplicity[0].attrib.get("minimum", 0)
-                    )
+                    multi_maximum = int(participant_multiplicity[0].attrib.get("maximum", 0))
+                    multi_minimum = int(participant_multiplicity[0].attrib.get("minimum", 0))
 
                 return Participant(
                     self,
@@ -83,9 +75,7 @@ class Choreography:
                 )
             case NodeType.MESSAGE.value:
                 documentation_list = element.findall(f"./{bpmn2prefix}documentation")
-                documentation = (
-                    documentation_list[0].text if documentation_list else None
-                )
+                documentation = documentation_list[0].text if documentation_list else None
                 return Message(
                     self,
                     element.attrib["id"],
@@ -95,9 +85,7 @@ class Choreography:
             case NodeType.BUSINESS_RULE_TASK.value:
                 # Parser Input & Output
                 documentation_list = element.findall(f"./{bpmn2prefix}documentation")
-                documentation = (
-                    documentation_list[0].text if documentation_list else None
-                )
+                documentation = documentation_list[0].text if documentation_list else None
                 return BusinessRuleTask(
                     self,
                     element.attrib["id"],
@@ -121,63 +109,53 @@ class Choreography:
                     incoming=element.findall(f"./{bpmn2prefix}incoming")[0].text,
                 )
             case NodeType.CHOREOGRAPHY_TASK.value:
+                is_multi = False
+                loop_type = TaskLoopType.NONE
+                loop_cardinality = 0
+                completion_condition = ""
+                if (the_type := element.attrib.get("loopType", "")) != "":
+                    is_multi = True
+                    loop_type = TaskLoopType(the_type)
+                    loop_cardinality = int(element.attrib.get("loopCardinality", 0))
+                    completion_condition = element.attrib.get("completionCondition", "")
+
                 return ChoreographyTask(
                     self,
                     element.attrib["id"],
                     element.attrib.get("name", ""),
                     incoming=element.findall(f"./{bpmn2prefix}incoming")[0].text,
                     outgoing=element.findall(f"./{bpmn2prefix}outgoing")[0].text,
-                    participants=[
-                        element.text
-                        for element in element.findall(f"./{bpmn2prefix}participantRef")
-                    ],
-                    message_flows=[
-                        element.text
-                        for element in element.findall(f"./{bpmn2prefix}messageFlowRef")
-                    ],
+                    participants=[element.text for element in element.findall(f"./{bpmn2prefix}participantRef")],
+                    message_flows=[element.text for element in element.findall(f"./{bpmn2prefix}messageFlowRef")],
                     init_participant=element.attrib.get("initiatingParticipantRef", ""),
+                    is_multi=is_multi,
+                    loop_type=loop_type,
+                    loop_cardinality=loop_cardinality,
+                    completion_condition=completion_condition,
                 )
             case NodeType.EXCLUSIVE_GATEWAY.value:
                 return ExclusiveGateway(
                     self,
                     element.attrib["id"],
                     element.attrib.get("name", ""),
-                    incomings=[
-                        element.text
-                        for element in element.findall(f"./{bpmn2prefix}incoming")
-                    ],
-                    outgoings=[
-                        element.text
-                        for element in element.findall(f"./{bpmn2prefix}outgoing")
-                    ],
+                    incomings=[element.text for element in element.findall(f"./{bpmn2prefix}incoming")],
+                    outgoings=[element.text for element in element.findall(f"./{bpmn2prefix}outgoing")],
                 )
             case NodeType.PARALLEL_GATEWAY.value:
                 return ParallelGateway(
                     self,
                     element.attrib["id"],
                     element.attrib.get("name", ""),
-                    incomings=[
-                        element.text
-                        for element in element.findall(f"./{bpmn2prefix}incoming")
-                    ],
-                    outgoings=[
-                        element.text
-                        for element in element.findall(f"./{bpmn2prefix}outgoing")
-                    ],
+                    incomings=[element.text for element in element.findall(f"./{bpmn2prefix}incoming")],
+                    outgoings=[element.text for element in element.findall(f"./{bpmn2prefix}outgoing")],
                 )
             case NodeType.EVENT_BASED_GATEWAY.value:
                 return EventBasedGateway(
                     self,
                     element.attrib["id"],
                     element.attrib.get("name", ""),
-                    incomings=[
-                        element.text
-                        for element in element.findall(f"./{bpmn2prefix}incoming")
-                    ],
-                    outgoings=[
-                        element.text
-                        for element in element.findall(f"./{bpmn2prefix}outgoing")
-                    ],
+                    incomings=[element.text for element in element.findall(f"./{bpmn2prefix}incoming")],
+                    outgoings=[element.text for element in element.findall(f"./{bpmn2prefix}outgoing")],
                 )
 
     def _parse_edge(self, element):
@@ -280,7 +258,6 @@ class Choreography:
         self._parse_messages(root)
         self._init_element_properties()
 
-
     def load_diagram_from_xml_file(self, file_path, target=""):
         document = ET.parse(file_path, ET.XMLParser(encoding="utf-8"))
         root = document.getroot()
@@ -290,196 +267,22 @@ class Choreography:
         root = ET.fromstring(xml_string)
         self.load_from_root(root, target)
 
-    def generate_invoke_path(self, start_id, end_id):
-        simple_paths = list(
-            nx.all_simple_paths(self.topology_graph_without_message, start_id, end_id))
+    @property
+    def simple_paths(self, start_id, end_id) -> list[NodeType]:
+        return nx.all_simple_paths(self.topology_graph_without_message, start_id, end_id)
+
+    @property
+    def simple_paths_with_cycle(self, start_id, end_id):
+        simple_paths = nx.all_simple_paths(self.topology_graph_without_message, start_id, end_id)
 
         cycles = list(nx.simple_cycles(self.topology_graph_without_message))
-        
         paths_with_cycle = []
         for simple_path in simple_paths:
             for cycle in cycles:
                 for index, step in enumerate(simple_path):
                     if cycle[0] == step:
-                        path_with_cycle = (
-                            simple_path.copy()[:index]
-                            + cycle
-                            + simple_path.copy()[index:]
-                        )
+                        path_with_cycle = simple_path.copy()[:index] + cycle + simple_path.copy()[index:]
                         paths_with_cycle.append(path_with_cycle)
 
         all_paths = simple_paths + paths_with_cycle
-
-        print(all_paths)
-
-        def handle_parallel_gateway(choreography, path)->tuple:
-            fix_part = []
-            sign = 0
-            for index, step in enumerate(path):
-                if index < sign:
-                    continue
-                if (
-                    gateway := choreography.get_element_with_id(step)
-                ).type == NodeType.PARALLEL_GATEWAY:
-                    if len(gateway.outgoings) == 1:
-                        continue
-                    # find the close gateway for it
-                    count = 0
-                    close_gateway = None
-                    for index_, step_ in enumerate(path[index + 1 :]):
-                        if "Gateway" in step_:
-                            gateway2 = choreography.get_element_with_id(step_)
-                            if (
-                                gateway2.type == NodeType.PARALLEL_GATEWAY
-                                and len(gateway2.outgoings) > 1
-                            ):
-                                count += 1
-
-                            if (
-                                gateway2.type == NodeType.PARALLEL_GATEWAY
-                                and len(gateway2.incomings) > 1
-                            ):
-                                if count == 0:
-                                    close_gateway = gateway2
-                                    break
-                                count -= 1
-                    # Replace the path between with the combination of the paths available
-                    all_available_paths = nx.all_simple_paths(
-                        choreography.topology_graph_without_message,
-                        gateway.id,
-                        close_gateway.id,
-                    )
-                    all_available_paths = list(all_available_paths)
-                    from itertools import chain
-
-                    combined_paths = list(chain(
-                        *[
-                            handle_parallel_gateway(choreography, _path[1:-1])
-                            for _path in all_available_paths
-                        ]
-                    ))
-                    close_gateway_index_in_path = path.index(close_gateway.id)
-                    fix_part.append(
-                        {
-                            "start": index,
-                            "end": close_gateway_index_in_path,
-                            "combined_paths": combined_paths,
-                        }
-                    )
-                    sign = close_gateway_index_in_path
-
-            # combine together
-            new_path = []
-            new_path += path[: fix_part[0]["start"]+1] if fix_part else path
-            for index in range(len(fix_part)):
-                next_part = fix_part[index + 1] if index + 1 < len(fix_part) else None
-                new_path += fix_part[index]["combined_paths"]
-                new_path += (
-                    path[fix_part[index]["end"]: next_part["start"]+1]
-                    if next_part
-                    else path[fix_part[index]["end"]:]
-                )
-            return tuple(new_path)
-
-        # since parallel make redundant path, we need to remove the redundant path
-        all_paths = list(set([handle_parallel_gateway(self, path) for path in all_paths]))
-        all_paths = [[{"element": step} for step in path] for path in all_paths]
-
-        ### Expand Exclusive Gateway Into Condition
-        def handle_exclusive_gateway(choreography, path):
-            new_path = []
-            for index, step in enumerate(path):
-                if (
-                    gateway := choreography.get_element_with_id(step["element"])
-                ).type == NodeType.EXCLUSIVE_GATEWAY and len(gateway.outgoings) > 1:
-                    next_node = path[index + 1]
-                    next_node = choreography.get_element_with_id(next_node["element"])
-                    edge = choreography.query_edge_with_source_and_target(
-                        gateway.id, next_node.id
-                    )[0]
-                    condition = edge.name
-                    new_path.append({"element": step["element"], "condition": condition})
-                else:
-                    new_path.append(step)
-            return new_path
-
-        all_paths = [handle_exclusive_gateway(self, path) for path in all_paths]
-
-        ### Expand Choreography Task Into Task
-
-        def handle_choreography_task(choreography, path):
-            new_path = []
-            for index, step in enumerate(path):
-                if (
-                    choreography_task := choreography.get_element_with_id(step["element"])
-                ).type == NodeType.CHOREOGRAPHY_TASK:
-                    message_flows = choreography_task.message_flows
-                    # print(message_flows)
-                    init_participant = choreography_task.init_participant
-                    init_message_flow = list(
-                        filter(lambda x: x.source == init_participant, message_flows)
-                    )[0]
-                    return_message_flow_ = list(
-                        filter(lambda x: x.target == init_participant, message_flows)
-                    )
-                    if return_message_flow_:
-                        return_message_flow = return_message_flow_[0]
-                    else:
-                        return_message_flow = None
-                    new_path.append({"element": init_message_flow.message.id})
-                    if return_message_flow:
-                        new_path.append({"element": return_message_flow.message.id})
-                else:
-                    new_path.append(step)
-            return new_path
-
-        all_paths = [handle_choreography_task(self, path) for path in all_paths]
-        new_all_paths = []
-        for path in all_paths:
-            new_path = []
-            for step in path:
-                item_to_append = step.copy()
-                if (self.get_element_with_id(step["element"])).type == NodeType.MESSAGE:
-                    item_to_append["invoker"] = self.get_message_flow_with_message(step["element"])[0].source.id
-                new_path.append(item_to_append)
-            new_all_paths.append(new_path)
-
-        return new_all_paths
-    
-    def get_message_flow_with_message(self, message_id):
-        return [
-            edge
-            for edge in self.edges
-            if edge.type == EdgeType.MESSAGE_FLOW and edge.message.id == message_id
-        ]
-
-
-
-if __name__ == "__main__":
-
-    file_name_list = ["Blood_analysis.bpmn"]
-    # "Purchase_new2.bpmn"
-    
-
-    for file_name in file_name_list:
-        choreography = Choreography()
-        choreography.load_diagram_from_xml_file(
-            f"./resource/bpmn/{file_name}"
-        )
-
-        ### find all simple path
-        all_paths = []
-        start_event = choreography.query_element_with_type(NodeType.START_EVENT)[0]
-        end_events = choreography.query_element_with_type(NodeType.END_EVENT)
-        
-        
-        for end_event in end_events:
-            
-            paths = choreography.generate_invoke_path(start_event.id, end_event.id)
-            all_paths.extend(paths)
-
-        with open(f"./resource/bpmn/{file_name.split(".")[0]}-path.json", "w") as f:
-            json.dump(all_paths, f)
-        print(f"File {file_name} is done")
-        
-
+        return all_paths

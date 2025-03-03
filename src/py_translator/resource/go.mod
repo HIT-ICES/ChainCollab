@@ -4,11 +4,13 @@ go 1.23.1
 
 require (
 	IBC/Oracle v0.0.0
+	IBC/StateCharts v0.0.0
 	github.com/hyperledger/fabric-chaincode-go v0.0.0-20230731094759-d626e9ab09b9
 	github.com/hyperledger/fabric-contract-api-go v1.2.2
 )
 
-replace IBC/Oracle => ./contracts/Oracle
+replace IBC/Oracle => ./contracts/oracle-go
+replace IBC/StateCharts => ./contracts/stateCharts-go
 
 require (
 	github.com/cucumber/gherkin/go/v26 v26.2.0 // indirect

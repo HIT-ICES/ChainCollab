@@ -6,10 +6,13 @@ with open("chaincode_snippet/snippet.json", "r") as f:
 
 def import_code(
     if_oracle: bool = False,
+    if_stateCharts: bool = False,
 ):
     extra_imports = ""
     if if_oracle:
         extra_imports += content["OracleImport"] + "\n"
+    if if_stateCharts:
+        extra_imports += "\t" + content["StateChartsImport"] + "\n"
     return content["importFrame"].format(extra_imports=extra_imports)
 
 
@@ -36,22 +39,16 @@ def globale_variable_read_and_set_code():
 def CreateInstance_code(
     start_event: str,
     end_events: list[str],
+    choreography_tasks: list[dict[str, str]],
     messages: list[dict[str, str]],
     gateways: list,
     participants: list,
     business_rules: list,
 ):
-    def InitStartEvent(event: str) -> str:
-        return content["InitStartFrame"].format(start_event=event)
-
-    def InitEndEvent(event: str) -> str:
-        return content["InitEndFrame"].format(end_event=event)
-
-    def InitMessage(message: str, sender: str, receiver: str, properties) -> str:
-        return content["InitMessageFrame"].format(message=message, sender=sender, receiver=receiver, format=properties)
-
-    def InitGateway(gateway: str) -> str:
-        return content["InitGatewayFrame"].format(gateway=gateway)
+    def InitMessage(message: str, sender: str, receiver: str, is_multi: str, properties: str, choreography_task: str) -> str:
+        return content["InitMessageFrame"].format(
+            message=message, sender=sender, receiver=receiver, format=properties, is_multi=is_multi, choreographyTask=choreography_task
+        )
 
     def InitParticipant(
         participant: str,
@@ -68,6 +65,17 @@ def CreateInstance_code(
             multi_minimum=multi_minimum,
         )
 
+    def InitChoreographyTask(
+        choreographyTask: str, is_multi: bool, multi_type: str, init_message: str, response_message: str
+    ) -> str:
+        return content["InitChoreographyTaskFrame"].format(
+            choreographyTask=choreographyTask,
+            is_multi=is_multi,
+            multi_type=multi_type,
+            init_message=init_message,
+            response_message=response_message,
+        )
+
     def InitBusinessRule(business_rule: str) -> str:
         return content["InitBusinessRuleFrame"].format(business_rule=business_rule)
 
@@ -82,19 +90,27 @@ def CreateInstance_code(
                 )
                 for participant in participants
             ]
-            + [InitStartEvent(start_event)]
-            + [InitEndEvent(end_event) for end_event in end_events]
             + [
                 InitMessage(
-                    message=message["name"],
+                    message=message["id"],
                     sender=message["sender"],
                     receiver=message["receiver"],
+                    is_multi=message["is_multi"],
                     properties=message["properties"],
+                    choreography_task=message["choreography_task"],
                 )
                 for message in messages
             ]
-            + [InitGateway(gateway) for gateway in gateways]
-            + [InitBusinessRule(business_rule) for business_rule in business_rules]
+            +[
+                InitChoreographyTask(
+                    choreographyTask=choreographyTask["id"],
+                    is_multi=choreographyTask["is_multi"],
+                    multi_type=choreographyTask["multi_type"],
+                    init_message=choreographyTask["init_message"],
+                    response_message=choreographyTask["response_message"],
+                )
+                for choreographyTask in choreography_tasks
+            ]
         ),
         event_content="\n".join(
             [
@@ -147,28 +163,33 @@ def MessageSend_code(
     after_all_hook: str = "",
     more_parameters: str = "",
     put_more_parameters: str = "",
+    put_more_event_parameters: str = "",
     change_self_state: str = "",
+    key: str = "0",
 ):
     return content["MessageSendFuncFrame"].format(
         message=message,
         after_all_hook=after_all_hook,
         more_parameters=more_parameters,
         put_more_parameters=put_more_parameters,
+        put_more_event_parameters=put_more_event_parameters,
         change_self_state=change_self_state,
+        msg_key=f"{message}_{key}",
     )
+
+
+def MessageAdvance_code(message):
+    return content["MessageAdvanceFuncFrame"].format(message=message)
 
 
 def MessageComplete_code(
     message,
-    change_next_state_code: str,
+    change_next_state_code: str = "",
     pre_activate_next_hook: str = "",
     after_all_hook: str = "",
 ):
     return content["MessageCompleteFuncFrame"].format(
-        message=message,
-        change_next_state_code=change_next_state_code,
-        pre_activate_next_hook=pre_activate_next_hook,
-        after_all_hook=after_all_hook,
+        message=message
     )
 
 
@@ -378,3 +399,11 @@ def BusinessRuleContinueFuncFrame_code(
 
 def InvokeChaincodeFunc_code():
     return content["InvokeChaincodeFunc"]
+
+
+def Gateway_code(gateway):
+    return content["GatewayFuncFrame"].format(gateway=gateway)
+
+
+def Event_code(event):
+    return content["EventFuncFrame"].format(event=event)

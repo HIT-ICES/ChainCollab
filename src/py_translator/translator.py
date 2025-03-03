@@ -14,10 +14,23 @@ from choreography_parser.elements import (
     SequenceFlow,
     Element,
     BusinessRuleTask,
+    TaskLoopType,
 )
 from choreography_parser.parser import Choreography
 from chaincode_snippet import snippet
 import json
+
+
+def tidy_chaincode(chaincode):
+    import subprocess
+
+    try:
+        process = subprocess.run(["goimports"], input=chaincode, text=True, capture_output=True, check=True)
+        go_code = process.stdout
+        return go_code
+    except subprocess.CalledProcessError as e:
+        print(f"Error during formatting: {e.stderr}")
+    return chaincode
 
 
 def type_change_from_bpmn_to_go(type: str) -> str:
@@ -44,7 +57,7 @@ def bool_handle(origin: bool) -> str:
 
 
 default_config = {
-    "NeedConfirm": False,
+    "NeedConfirm": True,
     "NeedIdentityAuth": True,
     "NeedStateCheck": True,
 }
@@ -64,9 +77,7 @@ class GoChaincodeTranslator:
             choreography.load_diagram_from_xml_file(bpmn_file)
         else:
             pass
-        # add choreography to self
         self._choreography = choreography
-        # analyze parameter from properties and sequence flow
         self._global_parameters, self._judge_parameters = self._extract_global_parameters()
         self._instance_initparameters = self._extract_instance_initparameters()
 
@@ -87,6 +98,7 @@ class GoChaincodeTranslator:
             {}
         )  # {'product Id': {'message_id': ['Message_1qbk325'], 'type': 'string', 'description': 'Delivered product id'}, 'payment amount': {'message_id': ['Message_0o8eyir', 'Message_1q05nnw'], 'type': 'number', 'description': 'payment amount'}
         business_rule_outputs = {}  # {"name":{type:"","business_rule_id":[]}}
+
         # Step 1: extract parameters from properties
         for message in choreography.query_element_with_type(NodeType.MESSAGE):
             if message.documentation == "{}":
@@ -291,10 +303,8 @@ class GoChaincodeTranslator:
     def _generate_instance_initparameters_code(self) -> str:
         instance_initparameters = self._instance_initparameters
         temp_list = []
-        # add Participant
         for name, prop in instance_initparameters["Participant"].items():
-            temp_list.append(snippet.StructParameterDefinition_code(public_the_name(name), "Participant"))
-        # DMN ELEMENTS: TODO
+            temp_list.append(snippet.StructParameterDefinition_code(public_the_name(name), "ParticipantForInit"))
         for name, prop in instance_initparameters["BusinessRuleTask"].items():
             # temp_list.append(
             #     snippet.StructParameterDefinition_code(
@@ -315,7 +325,6 @@ class GoChaincodeTranslator:
         temp_list = []
         start_event: StartEvent = choreography.query_element_with_type(NodeType.START_EVENT)[0]
         end_events: EndEvent = choreography.query_element_with_type(NodeType.END_EVENT)
-        message_flows: List[MessageFlow] = choreography.query_element_with_type(EdgeType.MESSAGE_FLOW)
         gateways: List[Union[ExclusiveGateway, ParallelGateway, EventBasedGateway]] = (
             choreography.query_element_with_type(NodeType.EXCLUSIVE_GATEWAY)
             + choreography.query_element_with_type(NodeType.PARALLEL_GATEWAY)
@@ -330,23 +339,101 @@ class GoChaincodeTranslator:
                 "is_multi": bool_handle(self._instance_initparameters["Participant"][participant]["is_multi"]),
                 "multi_maximum": self._instance_initparameters["Participant"][participant]["multi_maximum"],
                 "multi_minimum": self._instance_initparameters["Participant"][participant]["multi_minimum"],
+                "loop_type": self._instance_initparameters["Participant"][participant].get("loop_type", "Standard"),
+                "loop_cardinality": self._instance_initparameters["Participant"][participant].get(
+                    "loop_cardinality", 1
+                ),
             }
             for participant in participants_exist
         ]
         business_rules = [business_rule for business_rule in self._instance_initparameters["BusinessRuleTask"]]
+
+
+
+        def get_message_properties(message_flow: MessageFlow, choreography_task: ChoreographyTask) -> List[dict]:
+            message_id = message_flow.message.id
+            sender_id = message_flow.source.id
+            receiver_id = message_flow.target.id
+            choreography_task_id = choreography_task.id
+
+            # any of the participants is multi
+            is_multi = any([participant.is_multi for participant in choreography_task.participants])
+
+            loop_type = choreography_task.loop_type
+
+            messages = []
+            messages.append(
+                    {
+                        "id": message_id,
+                        "sender": sender_id,
+                        "receiver": receiver_id,
+                        "choreography_task": choreography_task_id,
+                        "properties": message_flow.message.documentation,
+                        "is_multi": bool_handle(is_multi),
+                    }
+                )
+            if loop_type in [TaskLoopType.MULTI_INSTANCE_PARALLEL, TaskLoopType.MULTI_INSTANCE_SEQUENTIAL] and choreography_task.loop_cardinality > 1:
+                for i in range(1, choreography_task.loop_cardinality):
+                    messages.append(
+                        {
+                            "id": f"{message_id}_{i}",
+                            "sender": sender_id,
+                            "receiver": receiver_id,
+                            "choreography_task": choreography_task_id,
+                            "properties": message_flow.message.documentation,
+                            "is_multi": bool_handle(is_multi),
+                        }
+                    )
+
+            return messages
+
+        # Generate messages with multi-instance support
+        messages = []
+        choreography_tasks = choreography.query_element_with_type(
+            NodeType.CHOREOGRAPHY_TASK
+        )  # Get all ChoreographyTasks
+        for choreography_task in choreography_tasks:
+            for message_flow in choreography_task.message_flows:  # Get MessageFlow from each ChoreographyTask
+                messages.extend(get_message_properties(message_flow, choreography_task))
+
+
+        def get_list_item(target_list, index: int, default):
+            return target_list[index] if len(target_list) > index else default
+
+        choreography_tasks = [
+            {
+                "id": choreography_task.id,
+                "is_multi": bool_handle(choreography_task.is_multi),
+                "multi_type": choreography_task.loop_type,
+                "init_message": get_list_item(
+                    [
+                        message_flow.message.id
+                        for message_flow in choreography_task.message_flows
+                        if message_flow.source.id == choreography_task.init_participant.id
+                    ],
+                    0,
+                    "",
+                ),
+                "response_message": get_list_item(
+                    [
+                        message_flow.message.id
+                        for message_flow in choreography_task.message_flows
+                        if message_flow.target.id == choreography_task.init_participant.id
+                    ],
+                    0,
+                    "",
+                ),
+            }
+            for choreography_task in choreography.query_element_with_type(NodeType.CHOREOGRAPHY_TASK)
+        ]
+
+
         temp_list.append(
             snippet.CreateInstance_code(
                 start_event=start_event.id,
                 end_events=[end_event.id for end_event in end_events],
-                messages=[
-                    {
-                        "name": message_flow.message.id,
-                        "sender": message_flow.source.id,
-                        "receiver": message_flow.target.id,
-                        "properties": message_flow.message.documentation,
-                    }
-                    for message_flow in message_flows
-                ],
+                choreography_tasks=choreography_tasks,
+                messages=messages,
                 gateways=[gateway.id for gateway in gateways],
                 participants=participant_to_be_added,
                 business_rules=business_rules,
@@ -426,7 +513,18 @@ class GoChaincodeTranslator:
             if params_to_add
             else ""
         )
-        return more_params_code, put_more_params_code
+
+        # generate event send state code
+        put_more_event_parameter_code = (
+            "\n".join(
+                [
+                    f'"{public_the_name(param[0])}": {public_the_name(param[0])},' for param in params_to_add
+                ]
+            )
+        )
+
+        return more_params_code, put_more_params_code, put_more_event_parameter_code
+
 
     def _event_based_gateway_hook_code(self, event_based_gateway: EventBasedGateway, currentElement: Element):
         # find all other branches
@@ -450,111 +548,63 @@ class GoChaincodeTranslator:
     def _generate_chaincode_for_choreography_task(
         self,
         choreography_task: ChoreographyTask,
-    ):
-
-        def generate_chaincode_for_choreography_message(
+    ) -> list:
+        def generate_chaincode_for_message(
             message_id,
             more_params_code,
             put_more_params_code,
-            next_element,
-            pre_activate_next_hook,
-            when_triggered_code,
+            put_more_event_parameters,
             need_confirm=True,
         ):
-            temp_list = []
-            if need_confirm == False:
-                temp_list.append(
-                    snippet.MessageSend_code(
-                        message=message_id,
-                        after_all_hook="\n\t".join(when_triggered_code)
-                        + "\n\t"
-                        + "\n\t".join(pre_activate_next_hook)
-                        + "\n\t"
-                        + self._generate_change_state_code(next_element),
-                        more_parameters=more_params_code,
-                        put_more_parameters=put_more_params_code,
-                        change_self_state=self._generate_change_state_code(
-                            self._choreography.get_element_with_id(message_id),
-                            "COMPLETED",
-                        ),
-                    )
-                )
-                return temp_list
-            temp_list.append(
+            code_list = []
+            code_list.append(
                 snippet.MessageSend_code(
                     message=message_id,
-                    after_all_hook="\n\t".join(when_triggered_code),
                     more_parameters=more_params_code,
                     put_more_parameters=put_more_params_code,
-                    change_self_state=self._generate_change_state_code(
-                        self._choreography.get_element_with_id(message_id),
-                        "WAITINGFORCONFIRMATION",
-                    ),
+                    put_more_event_parameters=put_more_event_parameters,
                 )
             )
-            temp_list.append(
-                snippet.MessageComplete_code(
-                    message=message_id,
-                    change_next_state_code=self._generate_change_state_code(next_element),
-                    pre_activate_next_hook="\n\t".join(pre_activate_next_hook),
-                )
-            )
-            return temp_list
+            if need_confirm:
+                code_list.append(snippet.MessageComplete_code(message=message_id))
+            code_list.append(snippet.MessageAdvance_code(message=message_id))
+            return code_list
 
         temp_list = []
-        next_element = choreography_task.outgoing.target
         init_message_flow = choreography_task.init_message_flow
         return_message_flow = choreography_task.return_message_flow
 
-        pre_activate_next_hook = self._hook_codes[choreography_task.id]["pre_activate_next"]
-        when_triggered_code = self._hook_codes[choreography_task.id]["when_triggered"]
-
         if not init_message_flow:
             return temp_list
+        # print(choreography_task.id)
+        # print(choreography_task._is_multi)
+        # print(choreography_task.loop_type)
 
-        more_parameters, put_more_parameters = self._generate_message_record_parameters_code(init_message_flow.message)
-
-        if not return_message_flow:
-            temp_list.extend(
-                generate_chaincode_for_choreography_message(
-                    message_id=init_message_flow.message.id,
-                    more_params_code=more_parameters,
-                    put_more_params_code=put_more_parameters,
-                    next_element=next_element,
-                    pre_activate_next_hook=pre_activate_next_hook,
-                    when_triggered_code=when_triggered_code,
-                    need_confirm=self._config["NeedConfirm"],
-                )
-            )
-            return temp_list
-
+        # Handle single instance or standard multi-instance
+        more_parameters, put_more_parameters, put_more_event_parameters = self._generate_message_record_parameters_code(init_message_flow.message)
         temp_list.extend(
-            generate_chaincode_for_choreography_message(
+            generate_chaincode_for_message(
                 message_id=init_message_flow.message.id,
                 more_params_code=more_parameters,
                 put_more_params_code=put_more_parameters,
-                next_element=return_message_flow.message,
-                pre_activate_next_hook="",
-                when_triggered_code=when_triggered_code,
+                put_more_event_parameters=put_more_event_parameters,
                 need_confirm=self._config["NeedConfirm"],
             )
         )
 
-        more_parameters, put_more_parameters = self._generate_message_record_parameters_code(
-            return_message_flow.message
-        )
-
-        temp_list.extend(
-            generate_chaincode_for_choreography_message(
-                message_id=return_message_flow.message.id,
-                more_params_code=more_parameters,
-                put_more_params_code=put_more_parameters,
-                next_element=next_element,
-                pre_activate_next_hook=pre_activate_next_hook,
-                when_triggered_code=when_triggered_code,
-                need_confirm=self._config["NeedConfirm"],
+        if return_message_flow:
+            more_parameters, put_more_parameters,put_more_event_parameters = self._generate_message_record_parameters_code(
+                return_message_flow.message
             )
-        )
+            temp_list.extend(
+                generate_chaincode_for_message(
+                    message_id=return_message_flow.message.id,
+                    more_params_code=more_parameters,
+                    put_more_params_code=put_more_parameters,
+                    put_more_event_parameters=put_more_event_parameters,
+                    need_confirm=self._config["NeedConfirm"],
+                )
+            )
 
         return temp_list
 
@@ -575,133 +625,27 @@ class GoChaincodeTranslator:
         self,
         exclusive_gateway: ExclusiveGateway,
     ):
-        judge_parameters = self._judge_parameters
-        temp_list = []
-        # judge type
-        # type One : one come and multiple out, branch by condition
-        # type Two : multiple come and one out, wait for any come
-        pre_activate_next_hook = self._hook_codes[exclusive_gateway.id]["pre_activate_next"]
-        when_triggered_code = self._hook_codes[exclusive_gateway.id]["when_triggered"]
-
-        if len(exclusive_gateway.incomings) == 1:
-            # type One
-            code = snippet.ExclusiveGateway_split_code(
-                gateway=exclusive_gateway.id,
-                change_next_state_code="\n".join(
-                    [snippet.ReadGlobalMemory_code()]
-                    + list(
-                        set(
-                            [
-                                snippet.ReadState_code(public_the_name(judge_parameters[outgoing.id]["name"]))
-                                for outgoing in exclusive_gateway.outgoings
-                                if outgoing.id in judge_parameters
-                            ]
-                        )
-                    )
-                    + [
-                        snippet.ConditionToDo_code(
-                            self._generate_fullfill_condition_code(outgoing),
-                            self._generate_change_state_code(outgoing.target),
-                        )
-                        for outgoing in exclusive_gateway.outgoings
-                    ]
-                ),
-                pre_activate_next_hook="\n\t".join(pre_activate_next_hook),
-                after_all_hook="\n\t".join(when_triggered_code),
-            )
-            temp_list.append(code)
-        else:
-            # type Two
-            # outgoings should be only one, otherwise it is not a valid BPMN!!!!
-            code = snippet.ExclusiveGateway_merge_code(
-                gateway=exclusive_gateway.id,
-                change_next_state_code=self._generate_change_state_code(exclusive_gateway.outgoings[0].target),
-                pre_activate_next_hook="\n\t".join(pre_activate_next_hook),
-                after_all_hook="\n\t".join(when_triggered_code),
-            )
-            temp_list.append(code)
-        return temp_list
+        return [snippet.Gateway_code(gateway=exclusive_gateway.id)]
 
     def _generate_chaincode_for_parallel_gateway(self, parallel_gateway: ParallelGateway):
-        temp_list = []
-        # judge type
-        # type One : one come and multiple out, activate all out
-        # type Two : multiple come and one out, wait for all come
-        pre_activate_next_hook = self._hook_codes[parallel_gateway.id]["pre_activate_next"]
-        when_triggered_code = self._hook_codes[parallel_gateway.id]["when_triggered"]
-        if len(parallel_gateway.incomings) == 1:
-            # type One
-            code = snippet.ParallelGateway_split_code(
-                gateway=parallel_gateway.id,
-                change_next_state_code="\n".join(
-                    [self._generate_change_state_code(outgoing.target) for outgoing in parallel_gateway.outgoings]
-                ),
-                pre_activate_next_hook="\n\t".join(pre_activate_next_hook),
-                after_all_hook="\n\t".join(when_triggered_code),
-            )
-            temp_list.append(code)
-        else:
-            # type Two
-            # Nothing special to do, check logic implemented in the hook
-            # outgoings should be only one, otherwise it is not a valid BPMN!!!!
-            code = snippet.ParallelGateway_merge_code(
-                gateway=parallel_gateway.id,
-                change_next_state_code="\n".join(
-                    [self._generate_change_state_code(parallel_gateway.outgoings[0].target)]
-                ),
-                pre_activate_next_hook="\n\t".join(pre_activate_next_hook),
-                after_all_hook="\n\t".join(when_triggered_code),
-            )
-            temp_list.append(code)
-
-        return temp_list
+        return [snippet.Gateway_code(gateway=parallel_gateway.id)]
 
     def _generate_chaincode_for_event_based_gateway(
         self,
         event_based_gateway: EventBasedGateway,
     ):
-        temp_list = []
-        # No other type
-        pre_activate_next_hook = self._hook_codes[event_based_gateway.id]["pre_activate_next"]
-        when_triggered_code = self._hook_codes[event_based_gateway.id]["when_triggered"]
-        code = snippet.EventBasedGateway_code(
-            gateway=event_based_gateway.id,
-            change_next_state_code="\n".join(
-                [self._generate_change_state_code(outgoing.target) for outgoing in event_based_gateway.outgoings]
-            ),
-            pre_activate_next_hook="\n\t".join(pre_activate_next_hook),
-            after_all_hook="\n\t".join(when_triggered_code),
-        )
-        temp_list.append(code)
-        return temp_list
+        return [snippet.Gateway_code(gateway=event_based_gateway.id)]
 
     def _generate_chaincode_for_start_event(self, start_event: StartEvent):
-        temp_list = []
-        # Assume no hook for start event
-        temp_list.append(
-            snippet.StartEvent_code(
-                start_event.id,
-                change_next_state_code=self._generate_change_state_code(start_event.outgoing.target),
-            )
-        )
-        return temp_list
+        return [snippet.Event_code(start_event.id)]
 
     def _generate_chaincode_for_end_event(self, end_event: EndEvent):
-        temp_list = []
-        when_triggered_code = self._hook_codes[end_event.id]["when_triggered"]
-
-        temp_list.append(
-            snippet.EndEvent_code(
-                end_event.id,
-                after_all_hook="\n\t".join(when_triggered_code),
-            )
-        )
-        return temp_list
+        return [snippet.Event_code(end_event.id)]
 
     def _generate_chaincode_for_business_rule(self, business_rule: BusinessRuleTask):
         temp_list = []
-        pre_activate_next_hook = self._hook_codes[business_rule.id]["pre_activate_next"]
-        when_triggered_code = self._hook_codes[business_rule.id]["when_triggered"]
+        pre_activate_next_hook = []
+        when_triggered_code = []
 
         temp_list.append(
             snippet.BusinessRuleFuncFrame_code(
@@ -722,7 +666,63 @@ class GoChaincodeTranslator:
 
         return temp_list
 
-    def generate_chaincode(self, output_path: str = "resource/chaincode.go", is_output: bool = False):
+    def generate_new_chaincode(self, output_path: str = "result/chaincode.go", is_output: bool = False):
+
+        chaincode_list = []
+
+        ########
+        # Generate Part: Add common code to chaincode
+        ########
+
+        chaincode_list.append(snippet.package_code())
+        chaincode_list.append(
+            snippet.import_code(
+                if_oracle=len(self._choreography.query_element_with_type(NodeType.BUSINESS_RULE_TASK)) > 0,
+                if_stateCharts=True,
+            )
+        )
+        chaincode_list.append(snippet.contract_definition_code())
+        # global variable definition
+        chaincode_list.append(snippet.StateMemoryDefinition_code(self._generate_parameters_code()))
+        # initParams definition
+        chaincode_list.append(snippet.InitParametersTypeDefFrame_code(self._generate_instance_initparameters_code()))
+        chaincode_list.append(snippet.fix_part_code())
+        # chaincode_list.append(snippet.CheckRegisterFunc_code())
+        # chaincode_list.append(snippet.RegisterFunc_code())
+        chaincode_list.append(snippet.InvokeChaincodeFunc_code())
+        # generate InitLedger
+        chaincode_list.extend(self._generate_create_instance_code())
+
+        #####
+        # Real Generate Code: from start event to end event to create the chaincode for every element
+        #####
+
+        for element in self._choreography.nodes:
+            if element.type == NodeType.CHOREOGRAPHY_TASK:
+                chaincode_list.extend(self._generate_chaincode_for_choreography_task(element))
+            if element.type == NodeType.EXCLUSIVE_GATEWAY:
+                chaincode_list.extend(self._generate_chaincode_for_exclusive_gateway(element))
+            if element.type == NodeType.PARALLEL_GATEWAY:
+                chaincode_list.extend(self._generate_chaincode_for_parallel_gateway(element))
+            if element.type == NodeType.EVENT_BASED_GATEWAY:
+                chaincode_list.extend(self._generate_chaincode_for_event_based_gateway(element))
+            if element.type == NodeType.START_EVENT:
+                chaincode_list.extend(self._generate_chaincode_for_start_event(element))
+            if element.type == NodeType.END_EVENT:
+                chaincode_list.extend(self._generate_chaincode_for_end_event(element))
+            if element.type == NodeType.BUSINESS_RULE_TASK:
+                chaincode_list.extend(self._generate_chaincode_for_business_rule(element))
+        go_code = "\n\n".join(chaincode_list)
+
+        go_code = tidy_chaincode(go_code)
+
+        if is_output:
+            with open(output_path, "w") as f:
+                f.write(go_code)
+
+        return go_code
+
+    def generate_chaincode(self, output_path: str = "result/chaincode.go", is_output: bool = False):
         ############
         # Init: Set general state
         ############
@@ -799,13 +799,7 @@ class GoChaincodeTranslator:
                 chaincode_list.extend(self._generate_chaincode_for_business_rule(element))
         go_code = "\n\n".join(chaincode_list)
 
-        import subprocess
-
-        try:
-            process = subprocess.run(["goimports"], input=go_code, text=True, capture_output=True, check=True)
-            go_code = process.stdout
-        except subprocess.CalledProcessError as e:
-            print(f"Error during formatting: {e.stderr}")
+        go_code = tidy_chaincode(go_code)
 
         if is_output:
             with open(output_path, "w") as f:
@@ -815,13 +809,25 @@ class GoChaincodeTranslator:
 
     def _fireflytran_ffi_param(self):
         return {
-            "name": "FireFlyTran",
+            "name": "fireFlyTran",
             "schema": {"type": "string"},
         }
 
     def _instance_id_param(self):
         return {
-            "name": "InstanceID",
+            "name": "instanceID",
+            "schema": {"type": "string"},
+        }
+    
+    def _target_task_id_param(self):
+        return {
+            "name": "targetTaskID",
+            "schema": {"type": "int"},
+        }
+
+    def _confirm_target_x509_param(self):
+        return {
+            "name": "confirmTargetX509",
             "schema": {"type": "string"},
         }
 
@@ -843,25 +849,22 @@ class GoChaincodeTranslator:
             "returns": returns,
         }
         return item
+    
+
 
     def generate_ffi_items_for_choreography_task(self, choreography_task: ChoreographyTask):
-        items = []
-        next_element = choreography_task.outgoing.target
-        init_message_flow = choreography_task.init_message_flow
-        return_message_flow = choreography_task.return_message_flow
-
-        if not init_message_flow:
-            return items
-
-        if not return_message_flow:
-            params = self._get_message_params(init_message_flow.message)
+        def generate_ffi_for_message(message_flow):
+            """为消息流生成 Send 和 Complete 的 FFI 项"""
+            items = []
+            params = self._get_message_params(message_flow.message)
             params = [{"name": param[0], "schema": {"type": param[1]}} for param in params]
-            # find parameters
+
             items.append(
                 self._generate_ffi_item(
-                    name=init_message_flow.message.id + "_Send",
+                    name=message_flow.message.id + "_Send",
                     params=[
                         self._instance_id_param(),
+                        self._target_task_id_param(),
                         self._fireflytran_ffi_param(),
                         *params,
                     ],
@@ -869,54 +872,39 @@ class GoChaincodeTranslator:
             )
             items.append(
                 self._generate_ffi_item(
-                    name=init_message_flow.message.id + "_Complete",
-                    params=[
-                        self._instance_id_param(),
-                    ],
+                    name=message_flow.message.id + "_Complete",
+                    params=[self._instance_id_param(),
+                            self._target_task_id_param(),
+                            self._confirm_target_x509_param(),
+                            ],
                 )
             )
+            items.append(
+                self._generate_ffi_item(
+                    name=message_flow.message.id + "_Advance",
+                    params=[
+                        self._instance_id_param(),
+                        self._target_task_id_param(),
+                    ]
+                )
+            )
+
             return items
 
-        params = self._get_message_params(init_message_flow.message)
-        params = [{"name": param[0], "schema": {"type": param[1]}} for param in params]
-        items.append(
-            self._generate_ffi_item(
-                name=init_message_flow.message.id + "_Send",
-                params=[
-                    self._instance_id_param(),
-                    self._fireflytran_ffi_param(),
-                    *params,
-                ],
-            )
-        )
-        items.append(
-            self._generate_ffi_item(
-                name=init_message_flow.message.id + "_Complete",
-                params=[
-                    self._instance_id_param(),
-                ],
-            )
-        )
+        items = []
+        init_message_flow = choreography_task.init_message_flow
+        return_message_flow = choreography_task.return_message_flow
 
-        params = self._get_message_params(return_message_flow.message)
-        params = [{"name": param[0], "schema": {"type": param[1]}} for param in params]
-        items.append(
-            self._generate_ffi_item(
-                name=return_message_flow.message.id + "_Send",
-                params=[
-                    self._instance_id_param(),
-                    self._fireflytran_ffi_param(),
-                    *params,
-                ],
-            )
-        )
-        items.append(
-            self._generate_ffi_item(
-                name=return_message_flow.message.id + "_Complete",
-                params=[self._instance_id_param()],
-            )
-        )
+        if not init_message_flow:
+            return items
+
+        items.extend(generate_ffi_for_message(init_message_flow))
+
+        if return_message_flow:
+            items.extend(generate_ffi_for_message(return_message_flow))
+
         return items
+    
 
     def _generate_ffi_items_for_business_rule_task(self, business_rule_task: NodeType.BUSINESS_RULE_TASK) -> list:
         first_name = business_rule_task.id
@@ -953,6 +941,7 @@ class GoChaincodeTranslator:
     def _generate_ffi_events(self) -> list:
         return [{"name": "DMNContentRequired"}, {"name": "InstanceCreated"}]
 
+    # TODO: Generate FFI For New Type of Chaincode
     def generate_ffi(self, is_output: bool = False, output_path: str = "resource/ffi.json") -> str:
         ffi_items = []
 
@@ -974,80 +963,6 @@ class GoChaincodeTranslator:
                 params=[{"name": "initParametersBytes", "schema": {"type": "string"}}],
             )
         )
-        # GetMethod GetAllMessages GetAllGateways GetAllActionEvents
-        ffi_items.append(
-            self._generate_ffi_item(
-                name="GetMethod",
-                pathname="",
-                description="Get all methods",
-                params=[
-                    self._instance_id_param(),
-                ],
-            )
-        )
-        ffi_items.append(
-            self._generate_ffi_item(
-                name="GetAllMessages",
-                pathname="",
-                description="Get all messages",
-                params=[
-                    self._instance_id_param(),
-                ],
-            )
-        )
-        ffi_items.append(
-            self._generate_ffi_item(
-                name="GetAllGateways",
-                pathname="",
-                description="Get all gateways",
-                params=[
-                    self._instance_id_param(),
-                ],
-            )
-        )
-        ffi_items.append(
-            self._generate_ffi_item(
-                name="GetAllParticipants",
-                pathname="",
-                description="Get all participants",
-                params=[
-                    self._instance_id_param(),
-                ],
-            )
-        )
-        ffi_items.append(
-            self._generate_ffi_item(
-                name="GetAllBusinessRules",
-                pathname="",
-                description="Get all business rules",
-                params=[
-                    self._instance_id_param(),
-                ],
-            )
-        )
-        ffi_items.append(
-            self._generate_ffi_item(
-                name="GetAllActionEvents",
-                pathname="",
-                description="Get all action events",
-                params=[
-                    self._instance_id_param(),
-                ],
-            )
-        )
-
-        # ffi_items.append(
-        #     self._generate_ffi_item(
-        #         name="UpdateCID",
-        #         pathname="",
-        #         description="Update the businessRule CID",
-        #         params=[
-        #             self._instance_id_param(),
-        #             {"name": "BusinessRuleID", "schema": {"type": "string"}},
-        #             {"name": "cid", "schema": {"type": "string"}},
-        #         ],
-        #     )
-        # )
 
         for element in self._choreography.nodes:
             match element.type:
@@ -1113,7 +1028,8 @@ class GoChaincodeTranslator:
 if __name__ == "__main__":
     go_chaincode_translator = GoChaincodeTranslator(
         None,
-        bpmn_file="/home/logres/system/src/py_translator/resource/bpmn/Blood_analysis.bpmn",
+        bpmn_file="/home/logres/system/muti/bpmn_muti/supplypaper_test2.bpmn",
     )
-    go_chaincode_translator.generate_chaincode(is_output=True)
-    go_chaincode_translator.generate_ffi(is_output=True)
+    # go_chaincode_translator.generate_chaincode(is_output=False)
+    go_chaincode_translator.generate_new_chaincode(is_output=True, output_path="./resource/chaincode.go")
+    go_chaincode_translator.generate_ffi(is_output=True, output_path="./resource/ffi.json")
