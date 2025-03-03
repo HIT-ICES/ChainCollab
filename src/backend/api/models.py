@@ -180,25 +180,19 @@ class Agent(models.Model):
         blank=True,
         upload_to=get_agent_config_file_path,
     )
-    created_at = models.DateTimeField(
-        help_text="Create time of agent", auto_now_add=True
-    )
+    created_at = models.DateTimeField(help_text="Create time of agent", auto_now_add=True)
 
     # free_port = models.IntegerField(
     #     help_text="Agent free port.",
     #     default=30000,
     # )
-    free_ports = ArrayField(
-        models.IntegerField(blank=True), help_text="Agent free ports.", null=True
-    )
+    free_ports = ArrayField(models.IntegerField(blank=True), help_text="Agent free ports.", null=True)
 
     def delete(self, using=None, keep_parents=False):
         if self.config_file:
             if os.path.isfile(self.config_file.path):
                 os.remove(self.config_file.path)
-                shutil.rmtree(
-                    os.path.dirname(self.config_file.path), ignore_errors=True
-                )
+                shutil.rmtree(os.path.dirname(self.config_file.path), ignore_errors=True)
 
         super(Agent, self).delete(using, keep_parents)
 
@@ -226,12 +220,8 @@ class KubernetesConfig(models.Model):
         max_length=32,
         default=separate_upper_class(K8SCredentialType.CertKey.name),
     )
-    enable_ssl = models.BooleanField(
-        help_text="Whether enable ssl for api", default=False
-    )
-    ssl_ca = models.TextField(
-        help_text="Ca file content for ssl", default="", blank=True
-    )
+    enable_ssl = models.BooleanField(help_text="Whether enable ssl for api", default=False)
+    ssl_ca = models.TextField(help_text="Ca file content for ssl", default="", blank=True)
     nfs_server = models.CharField(
         help_text="NFS server address for k8s",
         default="",
@@ -292,9 +282,7 @@ class Network(models.Model):
         max_length=64,
         default="",
     )
-    created_at = models.DateTimeField(
-        help_text="Create time of network", auto_now_add=True
-    )
+    created_at = models.DateTimeField(help_text="Create time of network", auto_now_add=True)
     consensus = models.CharField(
         help_text="Consensus of network",
         max_length=128,
@@ -316,8 +304,7 @@ class Network(models.Model):
 
 def get_compose_file_path(instance, file):
     return os.path.join(
-        "org/%s/agent/docker/compose_files/%s"
-        % (str(instance.organization.id), str(instance.id)),
+        "org/%s/agent/docker/compose_files/%s" % (str(instance.organization.id), str(instance.id)),
         "docker-compose.yml",
     )
 
@@ -353,9 +340,7 @@ class FabricCA(models.Model):
         default="adminpw",
         max_length=32,
     )
-    hosts = models.JSONField(
-        help_text="Hosts for ca", null=True, blank=True, default=list
-    )
+    hosts = models.JSONField(help_text="Hosts for ca", null=True, blank=True, default=list)
     type = models.CharField(
         help_text="Fabric ca server type",
         default=FabricCAServerType.Signature.value,
@@ -414,9 +399,7 @@ class PeerCa(models.Model):
         null=True,
         on_delete=models.CASCADE,
     )
-    address = models.CharField(
-        help_text="Node Address of ca", default="", max_length=128
-    )
+    address = models.CharField(help_text="Node Address of ca", default="", max_length=128)
     certificate = models.FileField(
         help_text="Certificate file for ca node.",
         max_length=256,
@@ -434,18 +417,10 @@ class PeerCa(models.Model):
 
 class FabricPeer(models.Model):
     name = models.CharField(help_text="Name of peer node", max_length=64, default="")
-    gossip_use_leader_reflection = models.BooleanField(
-        help_text="Gossip use leader reflection", default=True
-    )
-    gossip_org_leader = models.BooleanField(
-        help_text="Gossip org leader", default=False
-    )
-    gossip_skip_handshake = models.BooleanField(
-        help_text="Gossip skip handshake", default=True
-    )
-    local_msp_id = models.CharField(
-        help_text="Local msp id of peer node", max_length=64, default=""
-    )
+    gossip_use_leader_reflection = models.BooleanField(help_text="Gossip use leader reflection", default=True)
+    gossip_org_leader = models.BooleanField(help_text="Gossip org leader", default=False)
+    gossip_skip_handshake = models.BooleanField(help_text="Gossip skip handshake", default=True)
+    local_msp_id = models.CharField(help_text="Local msp id of peer node", max_length=64, default="")
 
 
 class Node(models.Model):
@@ -496,9 +471,7 @@ class Node(models.Model):
     #     on_delete=models.CASCADE,
     #     null=True,
     # )
-    created_at = models.DateTimeField(
-        help_text="Create time of network", auto_now_add=True
-    )
+    created_at = models.DateTimeField(help_text="Create time of network", auto_now_add=True)
     status = models.CharField(
         help_text="Status of node",
         choices=NodeStatus.to_choices(True),
@@ -564,27 +537,21 @@ class Node(models.Model):
 
 class NodeUser(models.Model):
     name = models.CharField(help_text="User name of node", max_length=64, default="")
-    secret = models.CharField(
-        help_text="User secret of node", max_length=64, default=""
-    )
+    secret = models.CharField(help_text="User secret of node", max_length=64, default="")
     user_type = models.CharField(
         help_text="User type of node",
         choices=FabricCAUserType.to_choices(),
         default=FabricCAUserType.Peer.value,
         max_length=64,
     )
-    node = models.ForeignKey(
-        Node, help_text="Node of user", on_delete=models.CASCADE, null=True
-    )
+    node = models.ForeignKey(Node, help_text="Node of user", on_delete=models.CASCADE, null=True)
     status = models.CharField(
         help_text="Status of node user",
         choices=FabricCAUserStatus.to_choices(),
         default=FabricCAUserStatus.Registering.value,
         max_length=32,
     )
-    attrs = models.CharField(
-        help_text="Attributes of node user", default="", max_length=512
-    )
+    attrs = models.CharField(help_text="Attributes of node user", default="", max_length=512)
 
     class Meta:
         ordering = ("id",)
@@ -654,12 +621,8 @@ class File(models.Model):
         on_delete=models.CASCADE,
     )
     name = models.CharField(help_text="File name", max_length=64, default="")
-    file = models.FileField(
-        help_text="File", max_length=256, blank=True, upload_to=get_file_path
-    )
-    created_at = models.DateTimeField(
-        help_text="Create time of agent", auto_now_add=True
-    )
+    file = models.FileField(help_text="File", max_length=256, blank=True, upload_to=get_file_path)
+    created_at = models.DateTimeField(help_text="Create time of agent", auto_now_add=True)
     type = models.CharField(
         choices=FileType.to_choices(True),
         max_length=32,
@@ -719,9 +682,7 @@ class Channel(models.Model):
         related_name="channels",
         # on_delete=models.SET_NULL
     )
-    create_ts = models.DateTimeField(
-        help_text="Create time of Channel", auto_now_add=True
-    )
+    create_ts = models.DateTimeField(help_text="Create time of Channel", auto_now_add=True)
     network = models.ForeignKey("Network", on_delete=models.CASCADE)
     orderers = models.ManyToManyField(
         to="Node",
@@ -738,15 +699,7 @@ class Channel(models.Model):
         return "/var/www/server/" + self.name + "_config.block"
 
     def get_channel_artifacts_path(self, artifact):
-        return (
-            CELLO_HOME
-            + "/"
-            + self.network.name
-            + "/channel-artifacts/"
-            + self.name
-            + "_"
-            + artifact
-        )
+        return CELLO_HOME + "/" + self.network.name + "/channel-artifacts/" + self.name + "_" + artifact
 
 
 class ChainCode(models.Model):
@@ -761,9 +714,7 @@ class ChainCode(models.Model):
     version = models.CharField(help_text="version of chainCode", max_length=128)
     creator = models.ForeignKey("LoLeidoOrganization", on_delete=models.CASCADE)
     language = models.CharField(help_text="language of chainCode", max_length=128)
-    create_ts = models.DateTimeField(
-        help_text="Create time of chainCode", auto_now_add=True
-    )
+    create_ts = models.DateTimeField(help_text="Create time of chainCode", auto_now_add=True)
     environment = models.ForeignKey(
         "Environment",
         help_text="environment of chainCode",
@@ -783,9 +734,7 @@ class Environment(models.Model):
         unique=True,
     )
     name = models.TextField(help_text="name of environment")
-    create_at = models.DateTimeField(
-        help_text="create time of environment", auto_now_add=True
-    )
+    create_at = models.DateTimeField(help_text="create time of environment", auto_now_add=True)
     consortium = models.ForeignKey(
         "Consortium",
         help_text="consortium of environment",
@@ -813,9 +762,10 @@ class Environment(models.Model):
         max_length=32,
         default="NO",
     )
-    create_at = models.DateTimeField(
-        help_text="create time of environment", auto_now_add=True
+    StateEngine_status = models.CharField(
+        help_text="status of StateEngine,can be NO|CHAINCODEINSTALLED", max_length=32, default="No"
     )
+    create_at = models.DateTimeField(help_text="create time of environment", auto_now_add=True)
 
 
 class LoleidoOrganization(models.Model):
@@ -906,9 +856,7 @@ class Membership(models.Model):
         on_delete=models.CASCADE,
     )
     name = models.TextField(help_text="name of membership")
-    create_at = models.DateTimeField(
-        help_text="create time of membership", auto_now_add=True
-    )
+    create_at = models.DateTimeField(help_text="create time of membership", auto_now_add=True)
     primary_contact_email = models.EmailField(
         help_text="primary contact email of membership",
         null=True,
@@ -1002,9 +950,7 @@ class Firefly(models.Model):
         fab_connect_address = f"http://{self.fab_connect_url}/identities/{name}/enroll"
         response = post(
             fab_connect_address,
-            data=json.dumps(
-                {"secret": secret, "attributes": {k: True for k in attributes}}
-            ),
+            data=json.dumps({"secret": secret, "attributes": {k: True for k in attributes}}),
         )
         return response.json()["success"]
 
@@ -1091,9 +1037,7 @@ class LoleidoOrgJoinConsortiumInvitation(models.Model):
         null=False,
         on_delete=models.CASCADE,
     )
-    role = models.TextField(
-        help_text="role of loleidoOrgJoinConsortiumInvite", default="Member"
-    )
+    role = models.TextField(help_text="role of loleidoOrgJoinConsortiumInvite", default="Member")
     message = models.TextField(
         help_text="message of loleidoOrgJoinConsortiumInvite",
     )
@@ -1107,9 +1051,7 @@ class LoleidoOrgJoinConsortiumInvitation(models.Model):
             ("rejected", "Rejected"),
         ),
     )
-    create_at = models.DateTimeField(
-        help_text="Create time of loleidoOrgJoinConsortiumInvite", auto_now_add=True
-    )
+    create_at = models.DateTimeField(help_text="Create time of loleidoOrgJoinConsortiumInvite", auto_now_add=True)
 
 
 class UserJoinOrgInvitation(models.Model):
@@ -1146,9 +1088,7 @@ class UserJoinOrgInvitation(models.Model):
             ("rejected", "Rejected"),
         ),
     )
-    create_at = models.DateTimeField(
-        help_text="Create time of userJoinOrgInvite", auto_now_add=True
-    )
+    create_at = models.DateTimeField(help_text="Create time of userJoinOrgInvite", auto_now_add=True)
     invitor = models.ForeignKey(
         UserProfile,
         help_text="related user_id",
@@ -1229,9 +1169,7 @@ class BPMN(models.Model):
         null=True,
         blank=True,
     )
-    ffiContent = models.TextField(
-        help_text="content of ffi file", null=True, blank=True, default=None
-    )
+    ffiContent = models.TextField(help_text="content of ffi file", null=True, blank=True, default=None)
     environment = models.ForeignKey(
         Environment,
         help_text="related environment_id",
@@ -1248,7 +1186,6 @@ class BPMN(models.Model):
         null=True,
         blank=True,
     )
-    
 
 
 class BPMNInstance(models.Model):
@@ -1276,12 +1213,8 @@ class BPMNInstance(models.Model):
         null=False,
         on_delete=models.CASCADE,
     )
-    create_at = models.DateTimeField(
-        help_text="Create time of BPMNInstance", auto_now_add=True
-    )
-    update_at = models.DateTimeField(
-        help_text="Update time of BPMNInstance", auto_now=True
-    )
+    create_at = models.DateTimeField(help_text="Create time of BPMNInstance", auto_now_add=True)
+    update_at = models.DateTimeField(help_text="Update time of BPMNInstance", auto_now=True)
 
 
 # class BpmnParticipantBindingRecord(models.Model):
@@ -1410,9 +1343,7 @@ class APISecretKey(models.Model):
         null=True,
         on_delete=models.CASCADE,
     )
-    create_at = models.DateTimeField(
-        help_text="Create time of APISecretKey", auto_now_add=True
-    )
+    create_at = models.DateTimeField(help_text="Create time of APISecretKey", auto_now_add=True)
 
     def save(self, *args, **kwargs):
         import hashlib
@@ -1468,9 +1399,7 @@ class FabricIdentity(models.Model):
         null=True,
         on_delete=models.CASCADE,
     )
-    create_at = models.DateTimeField(
-        help_text="Create time of FabricIdentity", auto_now_add=True
-    )
+    create_at = models.DateTimeField(help_text="Create time of FabricIdentity", auto_now_add=True)
 
     def save(self, *args, **kwargs):
         import hashlib
@@ -1505,9 +1434,7 @@ class Oracle(models.Model):
         null=True,
         on_delete=models.CASCADE,
     )
-    create_at = models.DateTimeField(
-        help_text="Create time of Oracle", auto_now_add=True
-    )
+    create_at = models.DateTimeField(help_text="Create time of Oracle", auto_now_add=True)
 
 
 class DmnEngine(models.Model):
@@ -1531,6 +1458,4 @@ class DmnEngine(models.Model):
         null=True,
         on_delete=models.CASCADE,
     )
-    create_at = models.DateTimeField(
-        help_text="Create time of DmnEngine", auto_now_add=True
-    )
+    create_at = models.DateTimeField(help_text="Create time of DmnEngine", auto_now_add=True)
