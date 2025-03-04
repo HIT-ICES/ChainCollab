@@ -1,9 +1,3 @@
-import fastapi
-import json
-
-import requests
-
-
 additionalStr = """
 {
             "actions": {
@@ -1705,29 +1699,3 @@ machineStr = """{
                 }
             }
         }"""
-
-res = requests.post(
-    "http://127.0.0.1:5001/api/v1/namespaces/default/apis/StateChartEngine5/query/get_default_snapshot",
-    json={
-        "input": {
-            "additionalContentStr": additionalStr,
-            "machineDescriptionStr": machineStr,
-        }
-    },
-)
-print("get_default_snapshot", res.text)
-
-snapshot = res.text
-res = requests.post(
-    "http://127.0.0.1:5001/api/v1/namespaces/default/apis/StateChartEngine5/query/executeStateMachine",
-    json={
-        "input": {
-            "additionalContentStr": additionalStr,
-            "machineDescriptionStr": machineStr,
-            "snapshotStr":snapshot,
-            "eventStr": "{}"
-        }
-    },
-)
-print("--------------------------------")
-print(res.text)
