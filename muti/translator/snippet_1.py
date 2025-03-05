@@ -270,15 +270,15 @@ class XstateJSONElement:
         }
 
         if isMutiParticipant:
-            for index in range(1,ParallelNum+1):
+            for index in range(0,ParallelNum):
                 self.ChooseMutiParticipantMachine(newData[name], name+"_"+str(index), MutiParticipantParam["max"],MutiParticipantParam["participantName"])
                 # self.MutiParticipantMachine(newData[name], name+"_instance_"+str(index), MutiParticipantParam["max"],MutiParticipantParam["participantName"])
-            newData[name]["initial"] = name+"_1"
+            newData[name]["initial"] = name+"_0"
 
         else:
-            for index in range(1,ParallelNum+1):
+            for index in range(0,ParallelNum):
                 self.singleMessageMachine(newData[name], name+"_"+str(index))
-            newData[name]["initial"] = name+"_1"
+            newData[name]["initial"] = name+"_0"
 
 
 
@@ -475,7 +475,7 @@ class XstateJSONElement:
 
 
         if firstTime:
-            for index in range(1, max + 1):
+            for index in range(0, max):
                 self.mainMachine["context"].update({participantName+"_machine_" + str(index): False})
                 self.additionalContent["guards"].update(
                     {
@@ -532,7 +532,7 @@ class XstateJSONElement:
                     "unlocked": {
                         "states": machineDict,
                         "on": {
-                            "advance": [
+                            "advance_"+name: [
                                 {
                                     "target": "locked",
                                     "actions": [],
@@ -547,7 +547,7 @@ class XstateJSONElement:
             newData[name+"_firstTime"]["initial"]="unlocked"
 
         else:
-            for index in range(1, max + 1):
+            for index in range(0, max):
                 machineDict.update(
                     {
                         "machine_"
@@ -603,7 +603,7 @@ class XstateJSONElement:
                 )
             newData[name]["states"].update(machineDict)
             newData[name]["type"] = "parallel"
-            newData[name]["initial"]="machine_1"
+            newData[name]["initial"]="machine_0"
 
         if targetName:
             self.SetOndone(newData[name+"_firstTime"] if firstTime else newData[name], targetName)
