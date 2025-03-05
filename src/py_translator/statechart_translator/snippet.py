@@ -85,6 +85,7 @@ class XstateJSONElement:
                     "actions": [],
                 }
             )
+            cond = target["condition"].replace('"', "'") if target["condition"] else None
             self.additionalContent["guards"].update(
                 {
                     name
@@ -92,7 +93,7 @@ class XstateJSONElement:
                     + target[
                         "targetName"
                     ]: "({{context, event}},params) => {{return {condition};}}".format(
-                        condition="context." + target["condition"] if target["condition"] else "true"
+                        condition="context." + cond if cond else "true"
                     )
                 }
             )
