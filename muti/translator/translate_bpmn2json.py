@@ -381,6 +381,9 @@ def DFS_translate(tree, currentMachine,dataMap,xstateJSONElement):
         childrenName = branch["start_element"]+"_TO_"+ branch["end_element"]
         initElement = ""
         for Element in branch["direct_elements"]:
+            #如果initElement是并行网关状态机 TODO
+            if "Gateway" in Element:
+                continue
             for nextElement in dataMap["parallelGateway_next"][branch["start_element"]]:
                 #如果initElement是message
                 if isinstance(dataMap[Element],list):
@@ -389,9 +392,6 @@ def DFS_translate(tree, currentMachine,dataMap,xstateJSONElement):
                             initElement = nextElement
                 else: 
                     if nextElement==dataMap[Element]["name"]:
-                        #如果initElement是并行网关状态机 TODO
-                        if dataMap[Element]["type"] == NodeType.PARALLEL_GATEWAY:
-                            initElement = "f(pair)"
                         initElement = nextElement
         currentMachine["states"][childrenName]["states"][branch["machine_name"]]={
             "initial": initElement,
@@ -475,11 +475,11 @@ def translate_bpmn2json(choreography_id,file):
 if __name__ == "__main__":
     # translate_bpmn2json("NewTest_paper","../bpmn_muti/supplypaper_new111.bpmn")
 
-    translate_bpmn2json("NewTest_paper","../bpmn_muti/supplypaper_test2.bpmn")
+    translate_bpmn2json("NewTest_paper2","../bpmn_muti/supply_final.bpmn")
 
 
-    choreography = Choreography()
-    choreography.load_diagram_from_xml_file("../bpmn_muti/supplypaper_new111.bpmn")
+    # choreography = Choreography()
+    # choreography.load_diagram_from_xml_file("../bpmn_muti/supply_final.bpmn")
     """elements = choreography.query_element_with_type(NodeType.EXCLUSIVE_GATEWAY)
     set1 = set()
     for element in elements:

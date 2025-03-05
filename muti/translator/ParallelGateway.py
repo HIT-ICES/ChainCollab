@@ -81,7 +81,7 @@ def method_to_extract_parallel_gateway(choreography: Choreography):
         # 4. Add the new machine to the outer machine
         # 5. Return the end_element of the new machine
         def find_merged_parallel_gateway(start_element) -> Element:
-            print("START ELEMENT", start_element.id)
+            # print("START ELEMENT", start_element.id)
             count = 1
             current_element = start_element
             while count != 0:
