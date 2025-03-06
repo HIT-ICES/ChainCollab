@@ -24,6 +24,8 @@ import {
 import { useSelector } from "react-redux";
 import TestComponentV2 from "./testComponent.jsx";
 
+import StatechartInspect from "../statechartComponent/index.tsx";
+
 import {
 	getMessageWithId,
 	getBatchWithId,
@@ -799,8 +801,7 @@ const ExecutionPage = (props) => {
 		core_url: "",
 		identity: "",
 	});
-	const [bpmnInstance, bpmnInstanceReady, syncBpmnInstance] =
-		useBPMNIntanceDetailData(bpmnInstanceId);
+	const [bpmnInstance, bpmnInstanceReady, syncBpmnInstance] = useBPMNIntanceDetailData(bpmnInstanceId);
 	const [bpmnData, bpmnReady, syncBpmn] = useBPMNDetailData(bpmnInstance.bpmn);
 
 	const contractMethodDes = JSON.parse(bpmnReady ? bpmnData.ffiContent : "{ }");
@@ -808,6 +809,16 @@ const ExecutionPage = (props) => {
 	const svgRef = useRef(null);
 	const [svgContent, setSvgContent] = useState(null);
 	const [svgStyle, setSvgStyle] = useState({});
+
+	const [isStateChartInspectOpen, setisStateChartInspectOpen] = useState(false);
+
+	const toggleStateChart = () => {
+		setisStateChartInspectOpen(prev => !prev);
+	};
+
+	const Machine = bpmnData.statechartMainContent;
+	const additional = bpmnData.statechartAdditionalContent
+	const snapshot = useStatechartsSnapshot();
 
 	useEffect(() => {
 		// set content to svgRef element
@@ -963,11 +974,11 @@ const ExecutionPage = (props) => {
 				Refresh
 			</Button>
 			<Button
-				onClick={() => {
-				}}
+				onClick={() => {toggleStateChart();}}
 			>
 				StateCharts Detail
 			</Button>
+			{isStateChartInspectOpen && <StatechartInspect machineContent={Machine} addtionalContent={additional} snapshot={snapshot} />}
 		</div>
 	);
 };

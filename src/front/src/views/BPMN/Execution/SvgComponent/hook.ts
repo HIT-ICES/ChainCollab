@@ -216,3 +216,7 @@ export const useFireflyIdentity = (coreUrl: string, idInFirefly: string) => {
     })
     return [data, isLoading]
 }
+
+
+export const useStatechartsSnapshot = () => { 
+}

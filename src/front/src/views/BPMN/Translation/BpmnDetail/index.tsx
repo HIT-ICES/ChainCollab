@@ -27,6 +27,7 @@ import { useAppSelector } from "@/redux/hooks";
 import { getAllMessages, registerDataType, initLedger, invokeFireflyListeners, invokeFireflySubscriptions } from "@/api/executionAPI"
 import { current_ip } from "@/api/apiConfig";
 import { eventNames } from "process";
+import StatechartInspect from "../../Execution/statechartComponent";
 
 const BPMNOverview = () => {
 
@@ -113,6 +114,11 @@ const BPMNOverview = () => {
             setButtonLoading(false);
         }
 
+        const [isStateChartInspectOpen, setisStateChartInspectOpen] = useState(false);
+        const toggleStateChart = () => {
+            setisStateChartInspectOpen(prev => !prev);
+        };
+
         return (
             <Modal
                 title="Modify"
@@ -171,6 +177,13 @@ const BPMNOverview = () => {
                         height: "300px",
                     }}
                 />
+                <Button
+                    type="primary"
+                    onClick={() => {toggleStateChart();}}
+                >
+                    Xstate Statechart Preview
+                </Button>
+                {isStateChartInspectOpen && <StatechartInspect machineContent={statechartMainContentForModify} addtionalContent={statechartAdditionalContentForModify} snapshot={{}} />}
             </Modal>
         )
     }

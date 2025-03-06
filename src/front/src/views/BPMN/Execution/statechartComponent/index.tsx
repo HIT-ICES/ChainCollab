@@ -1,30 +1,41 @@
-//import { createMachine, assign } from "xstate";
 import { createMachine, assign, createActor } from "xstate";
-// import { inspect } from "@xstate/inspect";
 import { createBrowserInspector } from "@statelyai/inspect";
 
-//inspect({
-//  url: "https://statecharts.io/inspect",
-//  iframe: false,
-//});
-const {inspect} = createBrowserInspector({
-  iframe: document.getElementById('inspector-iframe'),
-});
 
-export const machine = createMachine();
+const StatechartInspect = ({ machineContent, addtionalContent, snapshot}) => {
+  const inspector  = createBrowserInspector();
+  const machineContentObject = JSON.parse(machineContent);
+  const actionsContent = JSON.parse(addtionalContent).actions;
+  const guardsContent = JSON.parse(addtionalContent).guards
+  const actions = {}
+  const guards = {}
 
+  for (const key in actionsContent) {
+    // 使用 Function 构造函数从字符串创建函数
+    actions[key] = new Function(...Object.keys(assign), actionsContent[key]);
+  }
 
-const statechartInspect = (props) => {
+  for (const key in guardsContent) {
+    guards[key] = new Function(...Object.keys(assign), guardsContent[key]);
+  }
+
+  const machine = createMachine(machineContentObject,{
+    actions: actions,
+    guards: guards
+  });
+
 
   const actor = createActor(machine, {
-    inspect,
-    // ... other actor options
+    inspect: inspector.inspect,
+    snapshot: snapshot
   });
   actor.start();
+  actor.stop();
 
 	return (
-		<iframe id="inspector-iframe"></iframe>
+    <div >
+    </div>
 	);
 };
 
-export default statechartInspect;
+export default StatechartInspect;
