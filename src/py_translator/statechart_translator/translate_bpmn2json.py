@@ -203,7 +203,7 @@ def extract_element_info(element: Element,pairs,globalVariable=None):
                 case TaskLoopType.STANDARD:
                     metaData["params"]["mutiTask"]["loopMax"] = element.loop_cardinality
                     metaData["params"]["type"]["is_mutitask_loop"] = True
-                    metaData["params"]["mutiTask"]["LoopConditionExpression"] = element.completion_condition
+                    metaData["params"]["mutiTask"]["LoopConditionExpression"] = element.completion_condition if element.completion_condition != "true" else None
                     metaData["params"]["type"]["is_mutitask_loop_condition"] = True
                 case TaskLoopType.MULTI_INSTANCE_PARALLEL:
                     metaData["params"]["mutiTask"]["ParallelNum"] = element.loop_cardinality
@@ -381,6 +381,9 @@ def DFS_translate(tree, currentMachine,dataMap,xstateJSONElement):
         childrenName = branch["start_element"]+"_TO_"+ branch["end_element"]
         initElement = ""
         for Element in branch["direct_elements"]:
+            #如果initElement是并行网关状态机 TODO
+            if "Gateway" in Element:
+                continue
             for nextElement in dataMap["parallelGateway_next"][branch["start_element"]]:
                 #如果initElement是message
                 if isinstance(dataMap[Element],list):
@@ -389,9 +392,6 @@ def DFS_translate(tree, currentMachine,dataMap,xstateJSONElement):
                             initElement = nextElement
                 else: 
                     if nextElement==dataMap[Element]["name"]:
-                        #如果initElement是并行网关状态机 TODO
-                        if dataMap[Element]["type"] == NodeType.PARALLEL_GATEWAY:
-                            initElement = "f(pair)"
                         initElement = nextElement
         currentMachine["states"][childrenName]["states"][branch["machine_name"]]={
             "initial": initElement,

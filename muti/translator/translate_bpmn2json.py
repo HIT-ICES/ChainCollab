@@ -203,7 +203,7 @@ def extract_element_info(element: Element,pairs,globalVariable=None):
                 case TaskLoopType.STANDARD:
                     metaData["params"]["mutiTask"]["loopMax"] = element.loop_cardinality
                     metaData["params"]["type"]["is_mutitask_loop"] = True
-                    metaData["params"]["mutiTask"]["LoopConditionExpression"] = element.completion_condition
+                    metaData["params"]["mutiTask"]["LoopConditionExpression"] = element.completion_condition if element.completion_condition != "true" else None
                     metaData["params"]["type"]["is_mutitask_loop_condition"] = True
                 case TaskLoopType.MULTI_INSTANCE_PARALLEL:
                     metaData["params"]["mutiTask"]["ParallelNum"] = element.loop_cardinality
@@ -475,8 +475,7 @@ def translate_bpmn2json(choreography_id,file):
 if __name__ == "__main__":
     # translate_bpmn2json("NewTest_paper","../bpmn_muti/supplypaper_new111.bpmn")
 
-    translate_bpmn2json("NewTest_paper2","../bpmn_muti/supply_final.bpmn")
-
+    translate_bpmn2json("NewTest_paper2","../bpmn_muti/test_bpmn/supplypaper_test2.bpmn")
 
     # choreography = Choreography()
     # choreography.load_diagram_from_xml_file("../bpmn_muti/supply_final.bpmn")

@@ -198,11 +198,11 @@ class XstateJSONElement:
         if isMutiParticipant:
             self.ChooseMutiParticipantMachine(newData[name], name, MutiParticipantParam["max"], MutiParticipantParam["participantName"])
             # self.MutiParticipantMachine(newData[name], MutiParticipantParam["name"], MutiParticipantParam["max"], MutiParticipantParam["participantName"],MutiParticipantParam["firstTime"])
-            newData[name]["initial"] = name+"_"
+            newData[name]["initial"] = name
 
         else:
-            self.singleMessageMachine(newData[name], name+"_")
-            newData[name]["initial"] = name+"_"
+            self.singleMessageMachine(newData[name], name)
+            newData[name]["initial"] = name
 
         LoopAdd = {
             name
@@ -236,8 +236,13 @@ class XstateJSONElement:
         self.additionalContent["actions"].update(LoopAdd)
         self.additionalContent["guards"].update(ConditionLoopNotMax)
         self.additionalContent["guards"].update(ConditionLoopMax)
-        if LoopConditionExpression:
-            self.additionalContent["guards"].update(LoopConditionMeet)
+
+        if not LoopConditionExpression:
+            LoopConditionMeet = {
+                name
+                + "_LoopConditionMeet": "({context, event},params) => {return false;}",
+            }
+        self.additionalContent["guards"].update(LoopConditionMeet)
 
         if targetName:
             newData[name]["onDone"].append(
