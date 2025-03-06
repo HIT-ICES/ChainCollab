@@ -475,7 +475,7 @@ def translate_bpmn2json(choreography_id,file):
 if __name__ == "__main__":
     # translate_bpmn2json("NewTest_paper","../bpmn_muti/supplypaper_new111.bpmn")
 
-    translate_bpmn2json("NewTest_paper2","../bpmn_muti/test_bpmn/supplypaper_test2.bpmn")
+    translate_bpmn2json("NewTest_paper2","../bpmn_muti/test_bpmn/testOndone111.bpmn")
 
     # choreography = Choreography()
     # choreography.load_diagram_from_xml_file("../bpmn_muti/supply_final.bpmn")
