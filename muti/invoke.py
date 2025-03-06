@@ -1,940 +1,227 @@
-import fastapi
-import json
-
 import requests
 
 
 additionalStr = """
 {
             "actions": {
-                "lock_Participant_17tx0st": "assign({Participant_17tx0st_locked:true})",
-                "activate_Participant_17tx0st_machine_1": "assign({Participant_17tx0st_machine_1:true})",
-                "activate_Participant_17tx0st_machine_2": "assign({Participant_17tx0st_machine_2:true})",
-                "activate_Participant_17tx0st_machine_3": "assign({Participant_17tx0st_machine_3:true})",
-                "activate_Participant_17tx0st_machine_4": "assign({Participant_17tx0st_machine_4:true})",
-                "activate_Participant_17tx0st_machine_5": "assign({Participant_17tx0st_machine_5:true})",
-                "activate_Participant_17tx0st_machine_6": "assign({Participant_17tx0st_machine_6:true})",
-                "activate_Participant_17tx0st_machine_7": "assign({Participant_17tx0st_machine_7:true})",
-                "activate_Participant_17tx0st_machine_8": "assign({Participant_17tx0st_machine_8:true})",
-                "activate_Participant_17tx0st_machine_9": "assign({Participant_17tx0st_machine_9:true})",
-                "activate_Participant_17tx0st_machine_10": "assign({Participant_17tx0st_machine_10:true})"
+                "set_MessageGlobal_finalPriority": "assign({finalPriority: ({context, event}) => event.values.finalPriority})",
+                "lock_Participant_19j1e3o": "assign({Participant_19j1e3o_locked:true})",
+                "activate_Participant_19j1e3o_machine_1": "assign({Participant_19j1e3o_machine_1:true})",
+                "activate_Participant_19j1e3o_machine_2": "assign({Participant_19j1e3o_machine_2:true})",
+                "Message_0i5t589_LoopAdd": "assign({Message_0i5t589_loop: ({context}) => context.Message_0i5t589_loop + 1})",
+                "Message_0d2xte5_LoopAdd": "assign({Message_0d2xte5_loop: ({context}) => context.Message_0d2xte5_loop + 1})"
             },
             "services": {},
             "guards": {
-                "Participant_17tx0st_isLocked": "({context, event},params) => {return context.Participant_17tx0st_locked;}",
-                "Participant_17tx0st_isNotLocked": "({context, event},params) => {return !context.Participant_17tx0st_locked;}",
-                "active_Participant_17tx0st_machine_1": "({context, event},params) => {return context.Participant_17tx0st_machine_1;}",
-                "inactive_Participant_17tx0st_machine_1": "({context, event},params) => {return !context.Participant_17tx0st_machine_1;}",
-                "active_Participant_17tx0st_machine_2": "({context, event},params) => {return context.Participant_17tx0st_machine_2;}",
-                "inactive_Participant_17tx0st_machine_2": "({context, event},params) => {return !context.Participant_17tx0st_machine_2;}",
-                "active_Participant_17tx0st_machine_3": "({context, event},params) => {return context.Participant_17tx0st_machine_3;}",
-                "inactive_Participant_17tx0st_machine_3": "({context, event},params) => {return !context.Participant_17tx0st_machine_3;}",
-                "active_Participant_17tx0st_machine_4": "({context, event},params) => {return context.Participant_17tx0st_machine_4;}",
-                "inactive_Participant_17tx0st_machine_4": "({context, event},params) => {return !context.Participant_17tx0st_machine_4;}",
-                "active_Participant_17tx0st_machine_5": "({context, event},params) => {return context.Participant_17tx0st_machine_5;}",
-                "inactive_Participant_17tx0st_machine_5": "({context, event},params) => {return !context.Participant_17tx0st_machine_5;}",
-                "active_Participant_17tx0st_machine_6": "({context, event},params) => {return context.Participant_17tx0st_machine_6;}",
-                "inactive_Participant_17tx0st_machine_6": "({context, event},params) => {return !context.Participant_17tx0st_machine_6;}",
-                "active_Participant_17tx0st_machine_7": "({context, event},params) => {return context.Participant_17tx0st_machine_7;}",
-                "inactive_Participant_17tx0st_machine_7": "({context, event},params) => {return !context.Participant_17tx0st_machine_7;}",
-                "active_Participant_17tx0st_machine_8": "({context, event},params) => {return context.Participant_17tx0st_machine_8;}",
-                "inactive_Participant_17tx0st_machine_8": "({context, event},params) => {return !context.Participant_17tx0st_machine_8;}",
-                "active_Participant_17tx0st_machine_9": "({context, event},params) => {return context.Participant_17tx0st_machine_9;}",
-                "inactive_Participant_17tx0st_machine_9": "({context, event},params) => {return !context.Participant_17tx0st_machine_9;}",
-                "active_Participant_17tx0st_machine_10": "({context, event},params) => {return context.Participant_17tx0st_machine_10;}",
-                "inactive_Participant_17tx0st_machine_10": "({context, event},params) => {return !context.Participant_17tx0st_machine_10;}"
+                "Participant_19j1e3o_isLocked": "({context, event},params) => {return context.Participant_19j1e3o_locked;}",
+                "Participant_19j1e3o_isNotLocked": "({context, event},params) => {return !context.Participant_19j1e3o_locked;}",
+                "active_Participant_19j1e3o_machine_1": "({context, event},params) => {return context.Participant_19j1e3o_machine_1;}",
+                "inactive_Participant_19j1e3o_machine_1": "({context, event},params) => {return !context.Participant_19j1e3o_machine_1;}",
+                "active_Participant_19j1e3o_machine_2": "({context, event},params) => {return context.Participant_19j1e3o_machine_2;}",
+                "inactive_Participant_19j1e3o_machine_2": "({context, event},params) => {return !context.Participant_19j1e3o_machine_2;}",
+                "Message_0i5t589_NotLoopMax": "({context, event},params) => {return context.Message_0i5t589_loop !== context.Message_0i5t589_loopMax;}",
+                "Message_0i5t589_LoopMax": "({context, event},params) => {return context.Message_0i5t589_loop === context.Message_0i5t589_loopMax;}",
+                "Message_0i5t589_LoopConditionMeet": "({context, event},params) => {return context.true;}",
+                "Gateway_0ep8cuh__Message_1oxmq1k": "({context, event},params) => {return context.finalPriority==\"Low\";}", // 不要使用\", 直接使用 ' 单引号,避免json格式冲突
+                "Gateway_0ep8cuh__Message_1oxmq1k": "({context, event},params) => {return context.finalPriority=='Low';}",
+                "Gateway_0ep8cuh__Message_0d2xte5": "({context, event},params) => {return context.finalPriority==\"VeryLow\";}",
+                "Gateway_1cr0nma__Event_13pbqdz": "({context, event},params) => {return true;}",
+                "Message_0d2xte5_NotLoopMax": "({context, event},params) => {return context.Message_0d2xte5_loop !== context.Message_0d2xte5_loopMax;}",
+                "Message_0d2xte5_LoopMax": "({context, event},params) => {return context.Message_0d2xte5_loop === context.Message_0d2xte5_loopMax;}"
             },
             "delays": {}
         }
 """
 machineStr = """{
-            "context": {
-                "Participant_17tx0st_locked": false,
-                "Participant_17tx0st_machine_1": false,
-                "Participant_17tx0st_machine_2": false,
-                "Participant_17tx0st_machine_3": false,
-                "Participant_17tx0st_machine_4": false,
-                "Participant_17tx0st_machine_5": false,
-                "Participant_17tx0st_machine_6": false,
-                "Participant_17tx0st_machine_7": false,
-                "Participant_17tx0st_machine_8": false,
-                "Participant_17tx0st_machine_9": false,
-                "Participant_17tx0st_machine_10": false
-            },
-            "id": "MainMachine",
-            "initial": "Event_0ooh8t8",
+    "context": {
+        "finalPriority": null,
+        "Participant_19j1e3o_locked": false,
+        "Participant_19j1e3o_machine_1": false,
+        "Participant_19j1e3o_machine_2": false,
+        "Message_0i5t589_loop": 1,
+        "Message_0i5t589_loopMax": 2,
+        "Message_0d2xte5_loop": 1,
+        "Message_0d2xte5_loopMax": 3
+    },
+    "id": "MainMachine",
+    "initial": "Event_06sexe6",
+    "states": {
+        "Event_06sexe6": {
+            "always": {
+                "target": "Message_1wswgqu",
+                "actions": []
+            }
+        },
+        "Event_13pbqdz": {
+            "type": "final"
+        },
+        "Message_1wswgqu": {
+            "initial": "enable",
             "states": {
-                "Event_0ooh8t8": {
-                    "always": {
-                        "target": "Message_0j305jt",
-                        "actions": []
+                "enable": {
+                    "on": {
+                        "Send_Message_1wswgqu": [
+                            {
+                                "target": "wait for confirm",
+                                "actions": []
+                            }
+                        ]
                     }
                 },
-                "Event_1rmj9g7": {
+                "wait for confirm": {
+                    "on": {
+                        "Confirm_Message_1wswgqu": [
+                            {
+                                "target": "done",
+                                "actions": []
+                            }
+                        ]
+                    }
+                },
+                "done": {
+                    "type": "final"
+                }
+            },
+            "onDone": {
+                "target": "Gateway_0onpe6x_TO_Gateway_1fbifca",
+                "actions": []
+            }
+        },
+        "Message_0rwz1km": {
+            "initial": "pending",
+            "states": {
+                "pending": {
+                    "always": [
+                        {
+                            "target": "Message_0rwz1km_firstTime",
+                            "guard": "Participant_19j1e3o_isNotLocked",
+                            "actions": [
+                                {
+                                    "type": "lock_Participant_19j1e3o"
+                                }
+                            ]
+                        },
+                        {
+                            "target": "Message_0rwz1km",
+                            "guard": "Participant_19j1e3o_isLocked",
+                            "actions": []
+                        }
+                    ]
+                },
+                "done": {
                     "type": "final"
                 },
-                "Message_0j305jt": {
-                    "initial": "pending",
+                "Message_0rwz1km": {
+                    "initial": "machine_1",
                     "states": {
-                        "pending": {
-                            "always": [
-                                {
-                                    "target": "Message_0j305jt_firstTime",
-                                    "guard": "Participant_17tx0st_isNotLocked",
-                                    "actions": [
+                        "machine_1": {
+                            "initial": "disable",
+                            "states": {
+                                "disable": {
+                                    "always": [
                                         {
-                                            "type": "lock_Participant_17tx0st"
+                                            "target": "enable",
+                                            "guard": "active_Participant_19j1e3o_machine_1",
+                                            "actions": []
+                                        },
+                                        {
+                                            "target": "locked_done",
+                                            "guard": "inactive_Participant_19j1e3o_machine_1",
+                                            "actions": []
                                         }
                                     ]
                                 },
-                                {
-                                    "target": "Message_0j305jt",
-                                    "guard": "Participant_17tx0st_isLocked",
-                                    "actions": []
-                                }
-                            ]
-                        },
-                        "done": {
-                            "type": "final"
-                        },
-                        "Message_0j305jt": {
-                            "initial": "machine_1",
-                            "states": {
-                                "machine_1": {
-                                    "initial": "disable",
-                                    "states": {
-                                        "disable": {
-                                            "always": [
-                                                {
-                                                    "target": "enable",
-                                                    "guard": "active_Participant_17tx0st_machine_1",
-                                                    "actions": []
-                                                },
-                                                {
-                                                    "target": "locked_done",
-                                                    "guard": "inactive_Participant_17tx0st_machine_1",
-                                                    "actions": []
-                                                }
-                                            ]
-                                        },
-                                        "enable": {
-                                            "on": {
-                                                "Send_Message_0j305jt_1": [
-                                                    {
-                                                        "target": "wait for confirm",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "locked_done": {
-                                            "type": "final"
-                                        },
-                                        "wait for confirm": {
-                                            "on": {
-                                                "Confirm_Message_0j305jt_1": [
-                                                    {
-                                                        "target": "done",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "done": {
-                                            "type": "final"
-                                        }
-                                    }
-                                },
-                                "machine_2": {
-                                    "initial": "disable",
-                                    "states": {
-                                        "disable": {
-                                            "always": [
-                                                {
-                                                    "target": "enable",
-                                                    "guard": "active_Participant_17tx0st_machine_2",
-                                                    "actions": []
-                                                },
-                                                {
-                                                    "target": "locked_done",
-                                                    "guard": "inactive_Participant_17tx0st_machine_2",
-                                                    "actions": []
-                                                }
-                                            ]
-                                        },
-                                        "enable": {
-                                            "on": {
-                                                "Send_Message_0j305jt_2": [
-                                                    {
-                                                        "target": "wait for confirm",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "locked_done": {
-                                            "type": "final"
-                                        },
-                                        "wait for confirm": {
-                                            "on": {
-                                                "Confirm_Message_0j305jt_2": [
-                                                    {
-                                                        "target": "done",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "done": {
-                                            "type": "final"
-                                        }
-                                    }
-                                },
-                                "machine_3": {
-                                    "initial": "disable",
-                                    "states": {
-                                        "disable": {
-                                            "always": [
-                                                {
-                                                    "target": "enable",
-                                                    "guard": "active_Participant_17tx0st_machine_3",
-                                                    "actions": []
-                                                },
-                                                {
-                                                    "target": "locked_done",
-                                                    "guard": "inactive_Participant_17tx0st_machine_3",
-                                                    "actions": []
-                                                }
-                                            ]
-                                        },
-                                        "enable": {
-                                            "on": {
-                                                "Send_Message_0j305jt_3": [
-                                                    {
-                                                        "target": "wait for confirm",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "locked_done": {
-                                            "type": "final"
-                                        },
-                                        "wait for confirm": {
-                                            "on": {
-                                                "Confirm_Message_0j305jt_3": [
-                                                    {
-                                                        "target": "done",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "done": {
-                                            "type": "final"
-                                        }
-                                    }
-                                },
-                                "machine_4": {
-                                    "initial": "disable",
-                                    "states": {
-                                        "disable": {
-                                            "always": [
-                                                {
-                                                    "target": "enable",
-                                                    "guard": "active_Participant_17tx0st_machine_4",
-                                                    "actions": []
-                                                },
-                                                {
-                                                    "target": "locked_done",
-                                                    "guard": "inactive_Participant_17tx0st_machine_4",
-                                                    "actions": []
-                                                }
-                                            ]
-                                        },
-                                        "enable": {
-                                            "on": {
-                                                "Send_Message_0j305jt_4": [
-                                                    {
-                                                        "target": "wait for confirm",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "locked_done": {
-                                            "type": "final"
-                                        },
-                                        "wait for confirm": {
-                                            "on": {
-                                                "Confirm_Message_0j305jt_4": [
-                                                    {
-                                                        "target": "done",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "done": {
-                                            "type": "final"
-                                        }
-                                    }
-                                },
-                                "machine_5": {
-                                    "initial": "disable",
-                                    "states": {
-                                        "disable": {
-                                            "always": [
-                                                {
-                                                    "target": "enable",
-                                                    "guard": "active_Participant_17tx0st_machine_5",
-                                                    "actions": []
-                                                },
-                                                {
-                                                    "target": "locked_done",
-                                                    "guard": "inactive_Participant_17tx0st_machine_5",
-                                                    "actions": []
-                                                }
-                                            ]
-                                        },
-                                        "enable": {
-                                            "on": {
-                                                "Send_Message_0j305jt_5": [
-                                                    {
-                                                        "target": "wait for confirm",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "locked_done": {
-                                            "type": "final"
-                                        },
-                                        "wait for confirm": {
-                                            "on": {
-                                                "Confirm_Message_0j305jt_5": [
-                                                    {
-                                                        "target": "done",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "done": {
-                                            "type": "final"
-                                        }
-                                    }
-                                },
-                                "machine_6": {
-                                    "initial": "disable",
-                                    "states": {
-                                        "disable": {
-                                            "always": [
-                                                {
-                                                    "target": "enable",
-                                                    "guard": "active_Participant_17tx0st_machine_6",
-                                                    "actions": []
-                                                },
-                                                {
-                                                    "target": "locked_done",
-                                                    "guard": "inactive_Participant_17tx0st_machine_6",
-                                                    "actions": []
-                                                }
-                                            ]
-                                        },
-                                        "enable": {
-                                            "on": {
-                                                "Send_Message_0j305jt_6": [
-                                                    {
-                                                        "target": "wait for confirm",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "locked_done": {
-                                            "type": "final"
-                                        },
-                                        "wait for confirm": {
-                                            "on": {
-                                                "Confirm_Message_0j305jt_6": [
-                                                    {
-                                                        "target": "done",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "done": {
-                                            "type": "final"
-                                        }
-                                    }
-                                },
-                                "machine_7": {
-                                    "initial": "disable",
-                                    "states": {
-                                        "disable": {
-                                            "always": [
-                                                {
-                                                    "target": "enable",
-                                                    "guard": "active_Participant_17tx0st_machine_7",
-                                                    "actions": []
-                                                },
-                                                {
-                                                    "target": "locked_done",
-                                                    "guard": "inactive_Participant_17tx0st_machine_7",
-                                                    "actions": []
-                                                }
-                                            ]
-                                        },
-                                        "enable": {
-                                            "on": {
-                                                "Send_Message_0j305jt_7": [
-                                                    {
-                                                        "target": "wait for confirm",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "locked_done": {
-                                            "type": "final"
-                                        },
-                                        "wait for confirm": {
-                                            "on": {
-                                                "Confirm_Message_0j305jt_7": [
-                                                    {
-                                                        "target": "done",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "done": {
-                                            "type": "final"
-                                        }
-                                    }
-                                },
-                                "machine_8": {
-                                    "initial": "disable",
-                                    "states": {
-                                        "disable": {
-                                            "always": [
-                                                {
-                                                    "target": "enable",
-                                                    "guard": "active_Participant_17tx0st_machine_8",
-                                                    "actions": []
-                                                },
-                                                {
-                                                    "target": "locked_done",
-                                                    "guard": "inactive_Participant_17tx0st_machine_8",
-                                                    "actions": []
-                                                }
-                                            ]
-                                        },
-                                        "enable": {
-                                            "on": {
-                                                "Send_Message_0j305jt_8": [
-                                                    {
-                                                        "target": "wait for confirm",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "locked_done": {
-                                            "type": "final"
-                                        },
-                                        "wait for confirm": {
-                                            "on": {
-                                                "Confirm_Message_0j305jt_8": [
-                                                    {
-                                                        "target": "done",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "done": {
-                                            "type": "final"
-                                        }
-                                    }
-                                },
-                                "machine_9": {
-                                    "initial": "disable",
-                                    "states": {
-                                        "disable": {
-                                            "always": [
-                                                {
-                                                    "target": "enable",
-                                                    "guard": "active_Participant_17tx0st_machine_9",
-                                                    "actions": []
-                                                },
-                                                {
-                                                    "target": "locked_done",
-                                                    "guard": "inactive_Participant_17tx0st_machine_9",
-                                                    "actions": []
-                                                }
-                                            ]
-                                        },
-                                        "enable": {
-                                            "on": {
-                                                "Send_Message_0j305jt_9": [
-                                                    {
-                                                        "target": "wait for confirm",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "locked_done": {
-                                            "type": "final"
-                                        },
-                                        "wait for confirm": {
-                                            "on": {
-                                                "Confirm_Message_0j305jt_9": [
-                                                    {
-                                                        "target": "done",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "done": {
-                                            "type": "final"
-                                        }
-                                    }
-                                },
-                                "machine_10": {
-                                    "initial": "disable",
-                                    "states": {
-                                        "disable": {
-                                            "always": [
-                                                {
-                                                    "target": "enable",
-                                                    "guard": "active_Participant_17tx0st_machine_10",
-                                                    "actions": []
-                                                },
-                                                {
-                                                    "target": "locked_done",
-                                                    "guard": "inactive_Participant_17tx0st_machine_10",
-                                                    "actions": []
-                                                }
-                                            ]
-                                        },
-                                        "enable": {
-                                            "on": {
-                                                "Send_Message_0j305jt_10": [
-                                                    {
-                                                        "target": "wait for confirm",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "locked_done": {
-                                            "type": "final"
-                                        },
-                                        "wait for confirm": {
-                                            "on": {
-                                                "Confirm_Message_0j305jt_10": [
-                                                    {
-                                                        "target": "done",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "done": {
-                                            "type": "final"
-                                        }
-                                    }
-                                }
-                            },
-                            "onDone": {
-                                "target": "done",
-                                "actions": []
-                            },
-                            "type": "parallel"
-                        },
-                        "Message_0j305jt_firstTime": {
-                            "initial": "unlocked",
-                            "states": {
-                                "unlocked": {
-                                    "states": {
-                                        "machine_1": {
-                                            "initial": "enable",
-                                            "states": {
-                                                "enable": {
-                                                    "on": {
-                                                        "Send_Message_0j305jt_1": [
-                                                            {
-                                                                "target": "wait for confirm",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "wait for confirm": {
-                                                    "on": {
-                                                        "Confirm_Message_0j305jt_1": [
-                                                            {
-                                                                "target": "done",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "done": {
-                                                    "entry": {
-                                                        "type": "activate_Participant_17tx0st_machine_1"
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "machine_2": {
-                                            "initial": "enable",
-                                            "states": {
-                                                "enable": {
-                                                    "on": {
-                                                        "Send_Message_0j305jt_2": [
-                                                            {
-                                                                "target": "wait for confirm",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "wait for confirm": {
-                                                    "on": {
-                                                        "Confirm_Message_0j305jt_2": [
-                                                            {
-                                                                "target": "done",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "done": {
-                                                    "entry": {
-                                                        "type": "activate_Participant_17tx0st_machine_2"
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "machine_3": {
-                                            "initial": "enable",
-                                            "states": {
-                                                "enable": {
-                                                    "on": {
-                                                        "Send_Message_0j305jt_3": [
-                                                            {
-                                                                "target": "wait for confirm",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "wait for confirm": {
-                                                    "on": {
-                                                        "Confirm_Message_0j305jt_3": [
-                                                            {
-                                                                "target": "done",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "done": {
-                                                    "entry": {
-                                                        "type": "activate_Participant_17tx0st_machine_3"
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "machine_4": {
-                                            "initial": "enable",
-                                            "states": {
-                                                "enable": {
-                                                    "on": {
-                                                        "Send_Message_0j305jt_4": [
-                                                            {
-                                                                "target": "wait for confirm",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "wait for confirm": {
-                                                    "on": {
-                                                        "Confirm_Message_0j305jt_4": [
-                                                            {
-                                                                "target": "done",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "done": {
-                                                    "entry": {
-                                                        "type": "activate_Participant_17tx0st_machine_4"
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "machine_5": {
-                                            "initial": "enable",
-                                            "states": {
-                                                "enable": {
-                                                    "on": {
-                                                        "Send_Message_0j305jt_5": [
-                                                            {
-                                                                "target": "wait for confirm",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "wait for confirm": {
-                                                    "on": {
-                                                        "Confirm_Message_0j305jt_5": [
-                                                            {
-                                                                "target": "done",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "done": {
-                                                    "entry": {
-                                                        "type": "activate_Participant_17tx0st_machine_5"
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "machine_6": {
-                                            "initial": "enable",
-                                            "states": {
-                                                "enable": {
-                                                    "on": {
-                                                        "Send_Message_0j305jt_6": [
-                                                            {
-                                                                "target": "wait for confirm",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "wait for confirm": {
-                                                    "on": {
-                                                        "Confirm_Message_0j305jt_6": [
-                                                            {
-                                                                "target": "done",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "done": {
-                                                    "entry": {
-                                                        "type": "activate_Participant_17tx0st_machine_6"
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "machine_7": {
-                                            "initial": "enable",
-                                            "states": {
-                                                "enable": {
-                                                    "on": {
-                                                        "Send_Message_0j305jt_7": [
-                                                            {
-                                                                "target": "wait for confirm",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "wait for confirm": {
-                                                    "on": {
-                                                        "Confirm_Message_0j305jt_7": [
-                                                            {
-                                                                "target": "done",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "done": {
-                                                    "entry": {
-                                                        "type": "activate_Participant_17tx0st_machine_7"
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "machine_8": {
-                                            "initial": "enable",
-                                            "states": {
-                                                "enable": {
-                                                    "on": {
-                                                        "Send_Message_0j305jt_8": [
-                                                            {
-                                                                "target": "wait for confirm",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "wait for confirm": {
-                                                    "on": {
-                                                        "Confirm_Message_0j305jt_8": [
-                                                            {
-                                                                "target": "done",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "done": {
-                                                    "entry": {
-                                                        "type": "activate_Participant_17tx0st_machine_8"
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "machine_9": {
-                                            "initial": "enable",
-                                            "states": {
-                                                "enable": {
-                                                    "on": {
-                                                        "Send_Message_0j305jt_9": [
-                                                            {
-                                                                "target": "wait for confirm",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "wait for confirm": {
-                                                    "on": {
-                                                        "Confirm_Message_0j305jt_9": [
-                                                            {
-                                                                "target": "done",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "done": {
-                                                    "entry": {
-                                                        "type": "activate_Participant_17tx0st_machine_9"
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "machine_10": {
-                                            "initial": "enable",
-                                            "states": {
-                                                "enable": {
-                                                    "on": {
-                                                        "Send_Message_0j305jt_10": [
-                                                            {
-                                                                "target": "wait for confirm",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "wait for confirm": {
-                                                    "on": {
-                                                        "Confirm_Message_0j305jt_10": [
-                                                            {
-                                                                "target": "done",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "done": {
-                                                    "entry": {
-                                                        "type": "activate_Participant_17tx0st_machine_10"
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    },
+                                "enable": {
                                     "on": {
-                                        "advance": [
+                                        "Send_Message_0rwz1km_1": [
                                             {
-                                                "target": "locked",
+                                                "target": "wait for confirm",
                                                 "actions": []
                                             }
                                         ]
-                                    },
-                                    "type": "parallel"
+                                    }
                                 },
-                                "locked": {
+                                "locked_done": {
+                                    "type": "final"
+                                },
+                                "wait for confirm": {
+                                    "on": {
+                                        "Confirm_Message_0rwz1km_1": [
+                                            {
+                                                "target": "done",
+                                                "actions": []
+                                            }
+                                        ]
+                                    }
+                                },
+                                "done": {
                                     "type": "final"
                                 }
-                            },
-                            "onDone": {
-                                "target": "done",
-                                "actions": []
+                            }
+                        },
+                        "machine_2": {
+                            "initial": "disable",
+                            "states": {
+                                "disable": {
+                                    "always": [
+                                        {
+                                            "target": "enable",
+                                            "guard": "active_Participant_19j1e3o_machine_2",
+                                            "actions": []
+                                        },
+                                        {
+                                            "target": "locked_done",
+                                            "guard": "inactive_Participant_19j1e3o_machine_2",
+                                            "actions": []
+                                        }
+                                    ]
+                                },
+                                "enable": {
+                                    "on": {
+                                        "Send_Message_0rwz1km_2": [
+                                            {
+                                                "target": "wait for confirm",
+                                                "actions": []
+                                            }
+                                        ]
+                                    }
+                                },
+                                "locked_done": {
+                                    "type": "final"
+                                },
+                                "wait for confirm": {
+                                    "on": {
+                                        "Confirm_Message_0rwz1km_2": [
+                                            {
+                                                "target": "done",
+                                                "actions": []
+                                            }
+                                        ]
+                                    }
+                                },
+                                "done": {
+                                    "type": "final"
+                                }
                             }
                         }
                     },
                     "onDone": {
-                        "target": "Message_0ip1epl",
+                        "target": "done",
                         "actions": []
-                    }
+                    },
+                    "type": "parallel"
                 },
-                "Message_0ip1epl": {
-                    "initial": "pending",
+                "Message_0rwz1km_firstTime": {
+                    "initial": "unlocked",
                     "states": {
-                        "pending": {
-                            "always": [
-                                {
-                                    "target": "Message_0ip1epl_firstTime",
-                                    "guard": "Participant_17tx0st_isNotLocked",
-                                    "actions": [
-                                        {
-                                            "type": "lock_Participant_17tx0st"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "target": "Message_0ip1epl",
-                                    "guard": "Participant_17tx0st_isLocked",
-                                    "actions": []
-                                }
-                            ]
-                        },
-                        "done": {
-                            "type": "final"
-                        },
-                        "Message_0ip1epl": {
-                            "initial": "machine_1",
+                        "unlocked": {
                             "states": {
                                 "machine_1": {
-                                    "initial": "disable",
+                                    "initial": "enable",
                                     "states": {
-                                        "disable": {
-                                            "always": [
-                                                {
-                                                    "target": "enable",
-                                                    "guard": "active_Participant_17tx0st_machine_1",
-                                                    "actions": []
-                                                },
-                                                {
-                                                    "target": "locked_done",
-                                                    "guard": "inactive_Participant_17tx0st_machine_1",
-                                                    "actions": []
-                                                }
-                                            ]
-                                        },
                                         "enable": {
                                             "on": {
-                                                "Send_Message_0ip1epl_1": [
+                                                "Send_Message_0rwz1km_1": [
                                                     {
                                                         "target": "wait for confirm",
                                                         "actions": []
@@ -942,12 +229,9 @@ machineStr = """{
                                                 ]
                                             }
                                         },
-                                        "locked_done": {
-                                            "type": "final"
-                                        },
                                         "wait for confirm": {
                                             "on": {
-                                                "Confirm_Message_0ip1epl_1": [
+                                                "Confirm_Message_0rwz1km_1": [
                                                     {
                                                         "target": "done",
                                                         "actions": []
@@ -956,30 +240,18 @@ machineStr = """{
                                             }
                                         },
                                         "done": {
-                                            "type": "final"
+                                            "entry": {
+                                                "type": "activate_Participant_19j1e3o_machine_1"
+                                            }
                                         }
                                     }
                                 },
                                 "machine_2": {
-                                    "initial": "disable",
+                                    "initial": "enable",
                                     "states": {
-                                        "disable": {
-                                            "always": [
-                                                {
-                                                    "target": "enable",
-                                                    "guard": "active_Participant_17tx0st_machine_2",
-                                                    "actions": []
-                                                },
-                                                {
-                                                    "target": "locked_done",
-                                                    "guard": "inactive_Participant_17tx0st_machine_2",
-                                                    "actions": []
-                                                }
-                                            ]
-                                        },
                                         "enable": {
                                             "on": {
-                                                "Send_Message_0ip1epl_2": [
+                                                "Send_Message_0rwz1km_2": [
                                                     {
                                                         "target": "wait for confirm",
                                                         "actions": []
@@ -987,12 +259,9 @@ machineStr = """{
                                                 ]
                                             }
                                         },
-                                        "locked_done": {
-                                            "type": "final"
-                                        },
                                         "wait for confirm": {
                                             "on": {
-                                                "Confirm_Message_0ip1epl_2": [
+                                                "Confirm_Message_0rwz1km_2": [
                                                     {
                                                         "target": "done",
                                                         "actions": []
@@ -1001,713 +270,1008 @@ machineStr = """{
                                             }
                                         },
                                         "done": {
-                                            "type": "final"
-                                        }
-                                    }
-                                },
-                                "machine_3": {
-                                    "initial": "disable",
-                                    "states": {
-                                        "disable": {
-                                            "always": [
-                                                {
-                                                    "target": "enable",
-                                                    "guard": "active_Participant_17tx0st_machine_3",
-                                                    "actions": []
-                                                },
-                                                {
-                                                    "target": "locked_done",
-                                                    "guard": "inactive_Participant_17tx0st_machine_3",
-                                                    "actions": []
-                                                }
-                                            ]
-                                        },
-                                        "enable": {
-                                            "on": {
-                                                "Send_Message_0ip1epl_3": [
-                                                    {
-                                                        "target": "wait for confirm",
-                                                        "actions": []
-                                                    }
-                                                ]
+                                            "entry": {
+                                                "type": "activate_Participant_19j1e3o_machine_2"
                                             }
-                                        },
-                                        "locked_done": {
-                                            "type": "final"
-                                        },
-                                        "wait for confirm": {
-                                            "on": {
-                                                "Confirm_Message_0ip1epl_3": [
-                                                    {
-                                                        "target": "done",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "done": {
-                                            "type": "final"
-                                        }
-                                    }
-                                },
-                                "machine_4": {
-                                    "initial": "disable",
-                                    "states": {
-                                        "disable": {
-                                            "always": [
-                                                {
-                                                    "target": "enable",
-                                                    "guard": "active_Participant_17tx0st_machine_4",
-                                                    "actions": []
-                                                },
-                                                {
-                                                    "target": "locked_done",
-                                                    "guard": "inactive_Participant_17tx0st_machine_4",
-                                                    "actions": []
-                                                }
-                                            ]
-                                        },
-                                        "enable": {
-                                            "on": {
-                                                "Send_Message_0ip1epl_4": [
-                                                    {
-                                                        "target": "wait for confirm",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "locked_done": {
-                                            "type": "final"
-                                        },
-                                        "wait for confirm": {
-                                            "on": {
-                                                "Confirm_Message_0ip1epl_4": [
-                                                    {
-                                                        "target": "done",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "done": {
-                                            "type": "final"
-                                        }
-                                    }
-                                },
-                                "machine_5": {
-                                    "initial": "disable",
-                                    "states": {
-                                        "disable": {
-                                            "always": [
-                                                {
-                                                    "target": "enable",
-                                                    "guard": "active_Participant_17tx0st_machine_5",
-                                                    "actions": []
-                                                },
-                                                {
-                                                    "target": "locked_done",
-                                                    "guard": "inactive_Participant_17tx0st_machine_5",
-                                                    "actions": []
-                                                }
-                                            ]
-                                        },
-                                        "enable": {
-                                            "on": {
-                                                "Send_Message_0ip1epl_5": [
-                                                    {
-                                                        "target": "wait for confirm",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "locked_done": {
-                                            "type": "final"
-                                        },
-                                        "wait for confirm": {
-                                            "on": {
-                                                "Confirm_Message_0ip1epl_5": [
-                                                    {
-                                                        "target": "done",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "done": {
-                                            "type": "final"
-                                        }
-                                    }
-                                },
-                                "machine_6": {
-                                    "initial": "disable",
-                                    "states": {
-                                        "disable": {
-                                            "always": [
-                                                {
-                                                    "target": "enable",
-                                                    "guard": "active_Participant_17tx0st_machine_6",
-                                                    "actions": []
-                                                },
-                                                {
-                                                    "target": "locked_done",
-                                                    "guard": "inactive_Participant_17tx0st_machine_6",
-                                                    "actions": []
-                                                }
-                                            ]
-                                        },
-                                        "enable": {
-                                            "on": {
-                                                "Send_Message_0ip1epl_6": [
-                                                    {
-                                                        "target": "wait for confirm",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "locked_done": {
-                                            "type": "final"
-                                        },
-                                        "wait for confirm": {
-                                            "on": {
-                                                "Confirm_Message_0ip1epl_6": [
-                                                    {
-                                                        "target": "done",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "done": {
-                                            "type": "final"
-                                        }
-                                    }
-                                },
-                                "machine_7": {
-                                    "initial": "disable",
-                                    "states": {
-                                        "disable": {
-                                            "always": [
-                                                {
-                                                    "target": "enable",
-                                                    "guard": "active_Participant_17tx0st_machine_7",
-                                                    "actions": []
-                                                },
-                                                {
-                                                    "target": "locked_done",
-                                                    "guard": "inactive_Participant_17tx0st_machine_7",
-                                                    "actions": []
-                                                }
-                                            ]
-                                        },
-                                        "enable": {
-                                            "on": {
-                                                "Send_Message_0ip1epl_7": [
-                                                    {
-                                                        "target": "wait for confirm",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "locked_done": {
-                                            "type": "final"
-                                        },
-                                        "wait for confirm": {
-                                            "on": {
-                                                "Confirm_Message_0ip1epl_7": [
-                                                    {
-                                                        "target": "done",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "done": {
-                                            "type": "final"
-                                        }
-                                    }
-                                },
-                                "machine_8": {
-                                    "initial": "disable",
-                                    "states": {
-                                        "disable": {
-                                            "always": [
-                                                {
-                                                    "target": "enable",
-                                                    "guard": "active_Participant_17tx0st_machine_8",
-                                                    "actions": []
-                                                },
-                                                {
-                                                    "target": "locked_done",
-                                                    "guard": "inactive_Participant_17tx0st_machine_8",
-                                                    "actions": []
-                                                }
-                                            ]
-                                        },
-                                        "enable": {
-                                            "on": {
-                                                "Send_Message_0ip1epl_8": [
-                                                    {
-                                                        "target": "wait for confirm",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "locked_done": {
-                                            "type": "final"
-                                        },
-                                        "wait for confirm": {
-                                            "on": {
-                                                "Confirm_Message_0ip1epl_8": [
-                                                    {
-                                                        "target": "done",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "done": {
-                                            "type": "final"
-                                        }
-                                    }
-                                },
-                                "machine_9": {
-                                    "initial": "disable",
-                                    "states": {
-                                        "disable": {
-                                            "always": [
-                                                {
-                                                    "target": "enable",
-                                                    "guard": "active_Participant_17tx0st_machine_9",
-                                                    "actions": []
-                                                },
-                                                {
-                                                    "target": "locked_done",
-                                                    "guard": "inactive_Participant_17tx0st_machine_9",
-                                                    "actions": []
-                                                }
-                                            ]
-                                        },
-                                        "enable": {
-                                            "on": {
-                                                "Send_Message_0ip1epl_9": [
-                                                    {
-                                                        "target": "wait for confirm",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "locked_done": {
-                                            "type": "final"
-                                        },
-                                        "wait for confirm": {
-                                            "on": {
-                                                "Confirm_Message_0ip1epl_9": [
-                                                    {
-                                                        "target": "done",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "done": {
-                                            "type": "final"
-                                        }
-                                    }
-                                },
-                                "machine_10": {
-                                    "initial": "disable",
-                                    "states": {
-                                        "disable": {
-                                            "always": [
-                                                {
-                                                    "target": "enable",
-                                                    "guard": "active_Participant_17tx0st_machine_10",
-                                                    "actions": []
-                                                },
-                                                {
-                                                    "target": "locked_done",
-                                                    "guard": "inactive_Participant_17tx0st_machine_10",
-                                                    "actions": []
-                                                }
-                                            ]
-                                        },
-                                        "enable": {
-                                            "on": {
-                                                "Send_Message_0ip1epl_10": [
-                                                    {
-                                                        "target": "wait for confirm",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "locked_done": {
-                                            "type": "final"
-                                        },
-                                        "wait for confirm": {
-                                            "on": {
-                                                "Confirm_Message_0ip1epl_10": [
-                                                    {
-                                                        "target": "done",
-                                                        "actions": []
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "done": {
-                                            "type": "final"
                                         }
                                     }
                                 }
                             },
-                            "onDone": {
-                                "target": "done",
-                                "actions": []
+                            "on": {
+                                "advance": [
+                                    {
+                                        "target": "locked",
+                                        "actions": []
+                                    }
+                                ]
                             },
                             "type": "parallel"
                         },
-                        "Message_0ip1epl_firstTime": {
-                            "initial": "unlocked",
-                            "states": {
-                                "unlocked": {
-                                    "states": {
-                                        "machine_1": {
-                                            "initial": "enable",
-                                            "states": {
-                                                "enable": {
-                                                    "on": {
-                                                        "Send_Message_0ip1epl_1": [
-                                                            {
-                                                                "target": "wait for confirm",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "wait for confirm": {
-                                                    "on": {
-                                                        "Confirm_Message_0ip1epl_1": [
-                                                            {
-                                                                "target": "done",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "done": {
-                                                    "entry": {
-                                                        "type": "activate_Participant_17tx0st_machine_1"
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "machine_2": {
-                                            "initial": "enable",
-                                            "states": {
-                                                "enable": {
-                                                    "on": {
-                                                        "Send_Message_0ip1epl_2": [
-                                                            {
-                                                                "target": "wait for confirm",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "wait for confirm": {
-                                                    "on": {
-                                                        "Confirm_Message_0ip1epl_2": [
-                                                            {
-                                                                "target": "done",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "done": {
-                                                    "entry": {
-                                                        "type": "activate_Participant_17tx0st_machine_2"
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "machine_3": {
-                                            "initial": "enable",
-                                            "states": {
-                                                "enable": {
-                                                    "on": {
-                                                        "Send_Message_0ip1epl_3": [
-                                                            {
-                                                                "target": "wait for confirm",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "wait for confirm": {
-                                                    "on": {
-                                                        "Confirm_Message_0ip1epl_3": [
-                                                            {
-                                                                "target": "done",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "done": {
-                                                    "entry": {
-                                                        "type": "activate_Participant_17tx0st_machine_3"
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "machine_4": {
-                                            "initial": "enable",
-                                            "states": {
-                                                "enable": {
-                                                    "on": {
-                                                        "Send_Message_0ip1epl_4": [
-                                                            {
-                                                                "target": "wait for confirm",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "wait for confirm": {
-                                                    "on": {
-                                                        "Confirm_Message_0ip1epl_4": [
-                                                            {
-                                                                "target": "done",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "done": {
-                                                    "entry": {
-                                                        "type": "activate_Participant_17tx0st_machine_4"
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "machine_5": {
-                                            "initial": "enable",
-                                            "states": {
-                                                "enable": {
-                                                    "on": {
-                                                        "Send_Message_0ip1epl_5": [
-                                                            {
-                                                                "target": "wait for confirm",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "wait for confirm": {
-                                                    "on": {
-                                                        "Confirm_Message_0ip1epl_5": [
-                                                            {
-                                                                "target": "done",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "done": {
-                                                    "entry": {
-                                                        "type": "activate_Participant_17tx0st_machine_5"
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "machine_6": {
-                                            "initial": "enable",
-                                            "states": {
-                                                "enable": {
-                                                    "on": {
-                                                        "Send_Message_0ip1epl_6": [
-                                                            {
-                                                                "target": "wait for confirm",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "wait for confirm": {
-                                                    "on": {
-                                                        "Confirm_Message_0ip1epl_6": [
-                                                            {
-                                                                "target": "done",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "done": {
-                                                    "entry": {
-                                                        "type": "activate_Participant_17tx0st_machine_6"
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "machine_7": {
-                                            "initial": "enable",
-                                            "states": {
-                                                "enable": {
-                                                    "on": {
-                                                        "Send_Message_0ip1epl_7": [
-                                                            {
-                                                                "target": "wait for confirm",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "wait for confirm": {
-                                                    "on": {
-                                                        "Confirm_Message_0ip1epl_7": [
-                                                            {
-                                                                "target": "done",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "done": {
-                                                    "entry": {
-                                                        "type": "activate_Participant_17tx0st_machine_7"
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "machine_8": {
-                                            "initial": "enable",
-                                            "states": {
-                                                "enable": {
-                                                    "on": {
-                                                        "Send_Message_0ip1epl_8": [
-                                                            {
-                                                                "target": "wait for confirm",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "wait for confirm": {
-                                                    "on": {
-                                                        "Confirm_Message_0ip1epl_8": [
-                                                            {
-                                                                "target": "done",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "done": {
-                                                    "entry": {
-                                                        "type": "activate_Participant_17tx0st_machine_8"
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "machine_9": {
-                                            "initial": "enable",
-                                            "states": {
-                                                "enable": {
-                                                    "on": {
-                                                        "Send_Message_0ip1epl_9": [
-                                                            {
-                                                                "target": "wait for confirm",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "wait for confirm": {
-                                                    "on": {
-                                                        "Confirm_Message_0ip1epl_9": [
-                                                            {
-                                                                "target": "done",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "done": {
-                                                    "entry": {
-                                                        "type": "activate_Participant_17tx0st_machine_9"
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "machine_10": {
-                                            "initial": "enable",
-                                            "states": {
-                                                "enable": {
-                                                    "on": {
-                                                        "Send_Message_0ip1epl_10": [
-                                                            {
-                                                                "target": "wait for confirm",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "wait for confirm": {
-                                                    "on": {
-                                                        "Confirm_Message_0ip1epl_10": [
-                                                            {
-                                                                "target": "done",
-                                                                "actions": []
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                "done": {
-                                                    "entry": {
-                                                        "type": "activate_Participant_17tx0st_machine_10"
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    },
-                                    "on": {
-                                        "advance": [
-                                            {
-                                                "target": "locked",
-                                                "actions": []
-                                            }
-                                        ]
-                                    },
-                                    "type": "parallel"
-                                },
-                                "locked": {
-                                    "type": "final"
-                                }
-                            },
-                            "onDone": {
-                                "target": "done",
-                                "actions": []
-                            }
+                        "locked": {
+                            "type": "final"
                         }
                     },
                     "onDone": {
-                        "target": "Event_1rmj9g7",
+                        "target": "done",
                         "actions": []
                     }
                 }
+            },
+            "onDone": {
+                "target": "Message_0i5t589",
+                "actions": []
             }
-        }"""
+        },
+        "Message_0i5t589": {
+            "initial": "Message_0i5t589_",
+            "states": {
+                "Message_0i5t589": {
+                    "initial": "pending",
+                    "states": {
+                        "pending": {
+                            "always": [
+                                {
+                                    "target": "Message_0i5t589_firstTime",
+                                    "guard": "Participant_19j1e3o_isNotLocked",
+                                    "actions": [
+                                        {
+                                            "type": "lock_Participant_19j1e3o"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "target": "Message_0i5t589",
+                                    "guard": "Participant_19j1e3o_isLocked",
+                                    "actions": []
+                                }
+                            ]
+                        },
+                        "done": {
+                            "type": "final"
+                        },
+                        "Message_0i5t589": {
+                            "initial": "machine_1",
+                            "states": {
+                                "machine_1": {
+                                    "initial": "disable",
+                                    "states": {
+                                        "disable": {
+                                            "always": [
+                                                {
+                                                    "target": "enable",
+                                                    "guard": "active_Participant_19j1e3o_machine_1",
+                                                    "actions": []
+                                                },
+                                                {
+                                                    "target": "locked_done",
+                                                    "guard": "inactive_Participant_19j1e3o_machine_1",
+                                                    "actions": []
+                                                }
+                                            ]
+                                        },
+                                        "enable": {
+                                            "on": {
+                                                "Send_Message_0i5t589_1": [
+                                                    {
+                                                        "target": "wait for confirm",
+                                                        "actions": []
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "locked_done": {
+                                            "type": "final"
+                                        },
+                                        "wait for confirm": {
+                                            "on": {
+                                                "Confirm_Message_0i5t589_1": [
+                                                    {
+                                                        "target": "done",
+                                                        "actions": []
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "done": {
+                                            "type": "final"
+                                        }
+                                    }
+                                },
+                                "machine_2": {
+                                    "initial": "disable",
+                                    "states": {
+                                        "disable": {
+                                            "always": [
+                                                {
+                                                    "target": "enable",
+                                                    "guard": "active_Participant_19j1e3o_machine_2",
+                                                    "actions": []
+                                                },
+                                                {
+                                                    "target": "locked_done",
+                                                    "guard": "inactive_Participant_19j1e3o_machine_2",
+                                                    "actions": []
+                                                }
+                                            ]
+                                        },
+                                        "enable": {
+                                            "on": {
+                                                "Send_Message_0i5t589_2": [
+                                                    {
+                                                        "target": "wait for confirm",
+                                                        "actions": []
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "locked_done": {
+                                            "type": "final"
+                                        },
+                                        "wait for confirm": {
+                                            "on": {
+                                                "Confirm_Message_0i5t589_2": [
+                                                    {
+                                                        "target": "done",
+                                                        "actions": []
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "done": {
+                                            "type": "final"
+                                        }
+                                    }
+                                }
+                            },
+                            "onDone": {
+                                "target": "done",
+                                "actions": []
+                            },
+                            "type": "parallel"
+                        },
+                        "Message_0i5t589_firstTime": {
+                            "initial": "unlocked",
+                            "states": {
+                                "unlocked": {
+                                    "states": {
+                                        "machine_1": {
+                                            "initial": "enable",
+                                            "states": {
+                                                "enable": {
+                                                    "on": {
+                                                        "Send_Message_0i5t589_1": [
+                                                            {
+                                                                "target": "wait for confirm",
+                                                                "actions": []
+                                                            }
+                                                        ]
+                                                    }
+                                                },
+                                                "wait for confirm": {
+                                                    "on": {
+                                                        "Confirm_Message_0i5t589_1": [
+                                                            {
+                                                                "target": "done",
+                                                                "actions": []
+                                                            }
+                                                        ]
+                                                    }
+                                                },
+                                                "done": {
+                                                    "entry": {
+                                                        "type": "activate_Participant_19j1e3o_machine_1"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "machine_2": {
+                                            "initial": "enable",
+                                            "states": {
+                                                "enable": {
+                                                    "on": {
+                                                        "Send_Message_0i5t589_2": [
+                                                            {
+                                                                "target": "wait for confirm",
+                                                                "actions": []
+                                                            }
+                                                        ]
+                                                    }
+                                                },
+                                                "wait for confirm": {
+                                                    "on": {
+                                                        "Confirm_Message_0i5t589_2": [
+                                                            {
+                                                                "target": "done",
+                                                                "actions": []
+                                                            }
+                                                        ]
+                                                    }
+                                                },
+                                                "done": {
+                                                    "entry": {
+                                                        "type": "activate_Participant_19j1e3o_machine_2"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "on": {
+                                        "advance": [
+                                            {
+                                                "target": "locked",
+                                                "actions": []
+                                            }
+                                        ]
+                                    },
+                                    "type": "parallel"
+                                },
+                                "locked": {
+                                    "type": "final"
+                                }
+                            },
+                            "onDone": {
+                                "target": "done",
+                                "actions": []
+                            }
+                        }
+                    },
+                    "onDone": []
+                }
+            },
+            "onDone": [
+                {
+                    "target": "Message_0i5t589",
+                    "guard": "Message_0i5t589_NotLoopMax",
+                    "actions": [
+                        {
+                            "type": "Message_0i5t589_LoopAdd"
+                        }
+                    ]
+                },
+                {
+                    "target": "Message_0oi7nug",
+                    "guard": "Message_0i5t589_LoopConditionMeet",
+                    "actions": []
+                },
+                {
+                    "target": "Message_0oi7nug",
+                    "guard": "Message_0i5t589_LoopMax",
+                    "actions": []
+                }
+            ],
+            "type": "parallel"
+        },
+        "Message_0oi7nug": {
+            "initial": "Message_0oi7nug_1",
+            "states": {
+                "Message_0oi7nug_1": {
+                    "initial": "enable",
+                    "states": {
+                        "enable": {
+                            "on": {
+                                "Send_Message_0oi7nug_1": [
+                                    {
+                                        "target": "wait for confirm",
+                                        "actions": []
+                                    }
+                                ]
+                            }
+                        },
+                        "wait for confirm": {
+                            "on": {
+                                "Confirm_Message_0oi7nug_1": [
+                                    {
+                                        "target": "done",
+                                        "actions": []
+                                    }
+                                ]
+                            }
+                        },
+                        "done": {
+                            "type": "final"
+                        }
+                    }
+                },
+                "Message_0oi7nug_2": {
+                    "initial": "enable",
+                    "states": {
+                        "enable": {
+                            "on": {
+                                "Send_Message_0oi7nug_2": [
+                                    {
+                                        "target": "wait for confirm",
+                                        "actions": []
+                                    }
+                                ]
+                            }
+                        },
+                        "wait for confirm": {
+                            "on": {
+                                "Confirm_Message_0oi7nug_2": [
+                                    {
+                                        "target": "done",
+                                        "actions": []
+                                    }
+                                ]
+                            }
+                        },
+                        "done": {
+                            "type": "final"
+                        }
+                    }
+                },
+                "Message_0oi7nug_3": {
+                    "initial": "enable",
+                    "states": {
+                        "enable": {
+                            "on": {
+                                "Send_Message_0oi7nug_3": [
+                                    {
+                                        "target": "wait for confirm",
+                                        "actions": []
+                                    }
+                                ]
+                            }
+                        },
+                        "wait for confirm": {
+                            "on": {
+                                "Confirm_Message_0oi7nug_3": [
+                                    {
+                                        "target": "done",
+                                        "actions": []
+                                    }
+                                ]
+                            }
+                        },
+                        "done": {
+                            "type": "final"
+                        }
+                    }
+                }
+            },
+            "type": "parallel",
+            "onDone": {
+                "target": "Message_1io2g9u",
+                "actions": []
+            }
+        },
+        "Message_1io2g9u": {
+            "initial": "enable",
+            "states": {
+                "enable": {
+                    "on": {
+                        "Send_Message_1io2g9u": [
+                            {
+                                "target": "wait for confirm",
+                                "actions": []
+                            }
+                        ]
+                    }
+                },
+                "wait for confirm": {
+                    "on": {
+                        "Confirm_Message_1io2g9u": [
+                            {
+                                "target": "done",
+                                "actions": [
+                                    {
+                                        "type": "set_MessageGlobal_finalPriority"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                "done": {
+                    "type": "final"
+                }
+            },
+            "onDone": {
+                "target": "Gateway_0ep8cuh",
+                "actions": []
+            }
+        },
+        "Gateway_0ep8cuh": {
+            "always": [
+                {
+                    "target": "Message_1oxmq1k",
+                    "guard": "Gateway_0ep8cuh__Message_1oxmq1k",
+                    "actions": []
+                },
+                {
+                    "target": "Message_0d2xte5",
+                    "guard": "Gateway_0ep8cuh__Message_0d2xte5",
+                    "actions": []
+                }
+            ]
+        },
+        "Message_1oxmq1k": {
+            "initial": "pending",
+            "states": {
+                "pending": {
+                    "always": [
+                        {
+                            "target": "Message_1oxmq1k_firstTime",
+                            "guard": "Participant_19j1e3o_isNotLocked",
+                            "actions": [
+                                {
+                                    "type": "lock_Participant_19j1e3o"
+                                }
+                            ]
+                        },
+                        {
+                            "target": "Message_1oxmq1k",
+                            "guard": "Participant_19j1e3o_isLocked",
+                            "actions": []
+                        }
+                    ]
+                },
+                "done": {
+                    "type": "final"
+                },
+                "Message_1oxmq1k": {
+                    "initial": "machine_1",
+                    "states": {
+                        "machine_1": {
+                            "initial": "disable",
+                            "states": {
+                                "disable": {
+                                    "always": [
+                                        {
+                                            "target": "enable",
+                                            "guard": "active_Participant_19j1e3o_machine_1",
+                                            "actions": []
+                                        },
+                                        {
+                                            "target": "locked_done",
+                                            "guard": "inactive_Participant_19j1e3o_machine_1",
+                                            "actions": []
+                                        }
+                                    ]
+                                },
+                                "enable": {
+                                    "on": {
+                                        "Send_Message_1oxmq1k_1": [
+                                            {
+                                                "target": "wait for confirm",
+                                                "actions": []
+                                            }
+                                        ]
+                                    }
+                                },
+                                "locked_done": {
+                                    "type": "final"
+                                },
+                                "wait for confirm": {
+                                    "on": {
+                                        "Confirm_Message_1oxmq1k_1": [
+                                            {
+                                                "target": "done",
+                                                "actions": []
+                                            }
+                                        ]
+                                    }
+                                },
+                                "done": {
+                                    "type": "final"
+                                }
+                            }
+                        },
+                        "machine_2": {
+                            "initial": "disable",
+                            "states": {
+                                "disable": {
+                                    "always": [
+                                        {
+                                            "target": "enable",
+                                            "guard": "active_Participant_19j1e3o_machine_2",
+                                            "actions": []
+                                        },
+                                        {
+                                            "target": "locked_done",
+                                            "guard": "inactive_Participant_19j1e3o_machine_2",
+                                            "actions": []
+                                        }
+                                    ]
+                                },
+                                "enable": {
+                                    "on": {
+                                        "Send_Message_1oxmq1k_2": [
+                                            {
+                                                "target": "wait for confirm",
+                                                "actions": []
+                                            }
+                                        ]
+                                    }
+                                },
+                                "locked_done": {
+                                    "type": "final"
+                                },
+                                "wait for confirm": {
+                                    "on": {
+                                        "Confirm_Message_1oxmq1k_2": [
+                                            {
+                                                "target": "done",
+                                                "actions": []
+                                            }
+                                        ]
+                                    }
+                                },
+                                "done": {
+                                    "type": "final"
+                                }
+                            }
+                        }
+                    },
+                    "onDone": {
+                        "target": "done",
+                        "actions": []
+                    },
+                    "type": "parallel"
+                },
+                "Message_1oxmq1k_firstTime": {
+                    "initial": "unlocked",
+                    "states": {
+                        "unlocked": {
+                            "states": {
+                                "machine_1": {
+                                    "initial": "enable",
+                                    "states": {
+                                        "enable": {
+                                            "on": {
+                                                "Send_Message_1oxmq1k_1": [
+                                                    {
+                                                        "target": "wait for confirm",
+                                                        "actions": []
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "wait for confirm": {
+                                            "on": {
+                                                "Confirm_Message_1oxmq1k_1": [
+                                                    {
+                                                        "target": "done",
+                                                        "actions": []
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "done": {
+                                            "entry": {
+                                                "type": "activate_Participant_19j1e3o_machine_1"
+                                            }
+                                        }
+                                    }
+                                },
+                                "machine_2": {
+                                    "initial": "enable",
+                                    "states": {
+                                        "enable": {
+                                            "on": {
+                                                "Send_Message_1oxmq1k_2": [
+                                                    {
+                                                        "target": "wait for confirm",
+                                                        "actions": []
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "wait for confirm": {
+                                            "on": {
+                                                "Confirm_Message_1oxmq1k_2": [
+                                                    {
+                                                        "target": "done",
+                                                        "actions": []
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "done": {
+                                            "entry": {
+                                                "type": "activate_Participant_19j1e3o_machine_2"
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "on": {
+                                "advance": [
+                                    {
+                                        "target": "locked",
+                                        "actions": []
+                                    }
+                                ]
+                            },
+                            "type": "parallel"
+                        },
+                        "locked": {
+                            "type": "final"
+                        }
+                    },
+                    "onDone": {
+                        "target": "done",
+                        "actions": []
+                    }
+                }
+            },
+            "onDone": {
+                "target": "Gateway_1cr0nma",
+                "actions": []
+            }
+        },
+        "Gateway_1cr0nma": {
+            "always": [
+                {
+                    "target": "Event_13pbqdz",
+                    "guard": "Gateway_1cr0nma__Event_13pbqdz",
+                    "actions": []
+                }
+            ]
+        },
+        "Message_0d2xte5": {
+            "initial": "Message_0d2xte5_",
+            "states": {
+                "Message_0d2xte5": {
+                    "initial": "pending",
+                    "states": {
+                        "pending": {
+                            "always": [
+                                {
+                                    "target": "Message_0d2xte5_firstTime",
+                                    "guard": "Participant_19j1e3o_isNotLocked",
+                                    "actions": [
+                                        {
+                                            "type": "lock_Participant_19j1e3o"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "target": "Message_0d2xte5",
+                                    "guard": "Participant_19j1e3o_isLocked",
+                                    "actions": []
+                                }
+                            ]
+                        },
+                        "done": {
+                            "type": "final"
+                        },
+                        "Message_0d2xte5": {
+                            "initial": "machine_1",
+                            "states": {
+                                "machine_1": {
+                                    "initial": "disable",
+                                    "states": {
+                                        "disable": {
+                                            "always": [
+                                                {
+                                                    "target": "enable",
+                                                    "guard": "active_Participant_19j1e3o_machine_1",
+                                                    "actions": []
+                                                },
+                                                {
+                                                    "target": "locked_done",
+                                                    "guard": "inactive_Participant_19j1e3o_machine_1",
+                                                    "actions": []
+                                                }
+                                            ]
+                                        },
+                                        "enable": {
+                                            "on": {
+                                                "Send_Message_0d2xte5_1": [
+                                                    {
+                                                        "target": "wait for confirm",
+                                                        "actions": []
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "locked_done": {
+                                            "type": "final"
+                                        },
+                                        "wait for confirm": {
+                                            "on": {
+                                                "Confirm_Message_0d2xte5_1": [
+                                                    {
+                                                        "target": "done",
+                                                        "actions": []
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "done": {
+                                            "type": "final"
+                                        }
+                                    }
+                                },
+                                "machine_2": {
+                                    "initial": "disable",
+                                    "states": {
+                                        "disable": {
+                                            "always": [
+                                                {
+                                                    "target": "enable",
+                                                    "guard": "active_Participant_19j1e3o_machine_2",
+                                                    "actions": []
+                                                },
+                                                {
+                                                    "target": "locked_done",
+                                                    "guard": "inactive_Participant_19j1e3o_machine_2",
+                                                    "actions": []
+                                                }
+                                            ]
+                                        },
+                                        "enable": {
+                                            "on": {
+                                                "Send_Message_0d2xte5_2": [
+                                                    {
+                                                        "target": "wait for confirm",
+                                                        "actions": []
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "locked_done": {
+                                            "type": "final"
+                                        },
+                                        "wait for confirm": {
+                                            "on": {
+                                                "Confirm_Message_0d2xte5_2": [
+                                                    {
+                                                        "target": "done",
+                                                        "actions": []
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "done": {
+                                            "type": "final"
+                                        }
+                                    }
+                                }
+                            },
+                            "onDone": {
+                                "target": "done",
+                                "actions": []
+                            },
+                            "type": "parallel"
+                        },
+                        "Message_0d2xte5_firstTime": {
+                            "initial": "unlocked",
+                            "states": {
+                                "unlocked": {
+                                    "states": {
+                                        "machine_1": {
+                                            "initial": "enable",
+                                            "states": {
+                                                "enable": {
+                                                    "on": {
+                                                        "Send_Message_0d2xte5_1": [
+                                                            {
+                                                                "target": "wait for confirm",
+                                                                "actions": []
+                                                            }
+                                                        ]
+                                                    }
+                                                },
+                                                "wait for confirm": {
+                                                    "on": {
+                                                        "Confirm_Message_0d2xte5_1": [
+                                                            {
+                                                                "target": "done",
+                                                                "actions": []
+                                                            }
+                                                        ]
+                                                    }
+                                                },
+                                                "done": {
+                                                    "entry": {
+                                                        "type": "activate_Participant_19j1e3o_machine_1"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "machine_2": {
+                                            "initial": "enable",
+                                            "states": {
+                                                "enable": {
+                                                    "on": {
+                                                        "Send_Message_0d2xte5_2": [
+                                                            {
+                                                                "target": "wait for confirm",
+                                                                "actions": []
+                                                            }
+                                                        ]
+                                                    }
+                                                },
+                                                "wait for confirm": {
+                                                    "on": {
+                                                        "Confirm_Message_0d2xte5_2": [
+                                                            {
+                                                                "target": "done",
+                                                                "actions": []
+                                                            }
+                                                        ]
+                                                    }
+                                                },
+                                                "done": {
+                                                    "entry": {
+                                                        "type": "activate_Participant_19j1e3o_machine_2"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "on": {
+                                        "advance": [
+                                            {
+                                                "target": "locked",
+                                                "actions": []
+                                            }
+                                        ]
+                                    },
+                                    "type": "parallel"
+                                },
+                                "locked": {
+                                    "type": "final"
+                                }
+                            },
+                            "onDone": {
+                                "target": "done",
+                                "actions": []
+                            }
+                        }
+                    },
+                    "onDone": []
+                }
+            },
+            "onDone": [
+                {
+                    "target": "Message_0d2xte5",
+                    "guard": "Message_0d2xte5_NotLoopMax",
+                    "actions": [
+                        {
+                            "type": "Message_0d2xte5_LoopAdd"
+                        }
+                    ]
+                },
+                {
+                    "target": "Gateway_1cr0nma",
+                    "guard": "Message_0d2xte5_LoopMax",
+                    "actions": []
+                }
+            ],
+            "type": "parallel"
+        },
+        "Gateway_0onpe6x_TO_Gateway_1fbifca": {
+            "initial": "",
+            "states": {
+                "Gateway_0onpe6x to Gateway_1fbifca path 0": {
+                    "initial": "Message_0cba4t6",
+                    "states": {
+                        "done": {
+                            "type": "final"
+                        },
+                        "Message_0cba4t6": {
+                            "initial": "enable",
+                            "states": {
+                                "enable": {
+                                    "on": {
+                                        "Send_Message_0cba4t6": [
+                                            {
+                                                "target": "wait for confirm",
+                                                "actions": []
+                                            }
+                                        ]
+                                    }
+                                },
+                                "wait for confirm": {
+                                    "on": {
+                                        "Confirm_Message_0cba4t6": [
+                                            {
+                                                "target": "done",
+                                                "actions": []
+                                            }
+                                        ]
+                                    }
+                                },
+                                "done": {
+                                    "type": "final"
+                                }
+                            },
+                            "onDone": {
+                                "target": "Message_1ip9ryp",
+                                "actions": []
+                            }
+                        },
+                        "Message_1ip9ryp": {
+                            "initial": "enable",
+                            "states": {
+                                "enable": {
+                                    "on": {
+                                        "Send_Message_1ip9ryp": [
+                                            {
+                                                "target": "wait for confirm",
+                                                "actions": []
+                                            }
+                                        ]
+                                    }
+                                },
+                                "wait for confirm": {
+                                    "on": {
+                                        "Confirm_Message_1ip9ryp": [
+                                            {
+                                                "target": "done",
+                                                "actions": []
+                                            }
+                                        ]
+                                    }
+                                },
+                                "done": {
+                                    "type": "final"
+                                }
+                            },
+                            "onDone": {
+                                "target": "done",
+                                "actions": []
+                            }
+                        }
+                    },
+                    "onDone": []
+                },
+                "Gateway_0onpe6x to Gateway_1fbifca path 1": {
+                    "initial": "Message_0pm90nx",
+                    "states": {
+                        "done": {
+                            "type": "final"
+                        },
+                        "Message_0pm90nx": {
+                            "initial": "enable",
+                            "states": {
+                                "enable": {
+                                    "on": {
+                                        "Send_Message_0pm90nx": [
+                                            {
+                                                "target": "wait for confirm",
+                                                "actions": []
+                                            }
+                                        ]
+                                    }
+                                },
+                                "wait for confirm": {
+                                    "on": {
+                                        "Confirm_Message_0pm90nx": [
+                                            {
+                                                "target": "done",
+                                                "actions": []
+                                            }
+                                        ]
+                                    }
+                                },
+                                "done": {
+                                    "type": "final"
+                                }
+                            },
+                            "onDone": {
+                                "target": "done",
+                                "actions": []
+                            }
+                        }
+                    },
+                    "onDone": []
+                }
+            },
+            "onDone": {
+                "target": "Message_0rwz1km",
+                "actions": []
+            },
+            "type": "parallel"
+        }
+    }
+}"""
 
 res = requests.post(
-    "http://127.0.0.1:5001/api/v1/namespaces/default/apis/StateChartEngine5/query/get_default_snapshot",
+    "http://127.0.0.1:5001/api/v1/namespaces/default/apis/StateChartEngine/query/GetDefaultSnapshot",
     json={
         "input": {
             "additionalContentStr": additionalStr,
@@ -1719,7 +1283,7 @@ print("get_default_snapshot", res.text)
 
 snapshot = res.text
 res = requests.post(
-    "http://127.0.0.1:5001/api/v1/namespaces/default/apis/StateChartEngine5/query/executeStateMachine",
+    "http://127.0.0.1:5001/api/v1/namespaces/default/apis/StateChartEngine/query/ExecuteStateMachine",
     json={
         "input": {
             "additionalContentStr": additionalStr,

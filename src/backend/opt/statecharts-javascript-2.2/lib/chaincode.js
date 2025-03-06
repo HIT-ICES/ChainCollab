@@ -76,11 +76,11 @@ class StateMachineContract extends Contract {
 
             const newSnapshot = actor.getPersistedSnapshot();
 
-            const changed = newSnapshot !== snapshot;
+            const changed = JSON.stringify(newSnapshot) !== snapshotStr;
 
 
             return JSON.stringify({
-                snapshot: newSnapshot,
+                snapshot: JSON.stringify(newSnapshot),
                 changed: changed
             });
         } catch (error) {

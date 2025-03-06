@@ -202,7 +202,7 @@ const Overview: React.FC = () => {
               <FireflyComponentCard ChaincodeStatus={envInfo.fireflyStatus!=="NO"} ClusterStatus={envInfo.fireflyStatus==="STARTED"}  />
               <OracleComponentCard ChaincodeStatus ={envInfo.oracleStatus==="CHAINCODEINSTALLED"}/>
               <DMNComponentCard  ChaincodeStatus ={envInfo.dmnStatus==="CHAINCODEINSTALLED"} />
-              <StateChartEngineCard ChaincodeStatus = {false} />
+              <StateChartEngineCard ChaincodeStatus = {envInfo.stateEngineStatus==="CHAINCODEINSTALLED"} />
             </Row>
           </Card.Grid>
 

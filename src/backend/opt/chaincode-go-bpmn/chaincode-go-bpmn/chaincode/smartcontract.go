@@ -29,6 +29,7 @@ type InitParameters struct {
 	Participant_0sa2v7d     ParticipantForInit `json:"Participant_0sa2v7d"`
 	Participant_19j1e3o     ParticipantForInit `json:"Participant_19j1e3o"`
 	StateMachineDescription string             `json:"stateMachineDescription"`
+	AdditionalContent       string             `json:"additionalContent"`
 }
 
 type ContractInstance struct {
@@ -44,6 +45,7 @@ type ContractInstance struct {
 	// state of the instance
 	CurrentState            string `json:"CurrentState"`
 	StateMachineDescription string `json:"StateMachineDescription"`
+	AdditionalContent       string `json:"AdditionalContent"`
 }
 
 type CollectiveParticipant struct {
@@ -207,8 +209,9 @@ func (cc *SmartContract) CreateMessage(
 	}
 
 	if !IsMulti {
+		collectiveMessage.Messages["nonMulti"] = make(map[string]Message)
 		message := Message{
-			MessageID:             fmt.Sprintf("%s_0", messageID),
+			MessageID:             fmt.Sprintf("%s", messageID),
 			SendParticipantKey:    fmt.Sprintf("%s_0", sendParticipantID),
 			ReceiveParticipantKey: fmt.Sprintf("%s_0", receiveParticipantID),
 			FireflyTranID:         fireflyTranID,
@@ -309,24 +312,7 @@ func (cc *SmartContract) SetGlobalVariable(ctx contractapi.TransactionContextInt
 	return nil
 }
 
-func (cc *SmartContract) ReadBusinessRule(ctx contractapi.TransactionContextInterface, instanceID string, BusinessRuleID string) (*BusinessRule, error) {
-	instanceJson, err := ctx.GetStub().GetState(instanceID)
-	if err != nil {
-		return nil, err
-	}
-	if instanceJson == nil {
-		errorMessage := fmt.Sprintf("Instance %s does not exist", instanceID)
-		fmt.Println(errorMessage)
-		return nil, errors.New(errorMessage)
-	}
-
-	var instance ContractInstance
-	err = json.Unmarshal(instanceJson, &instance)
-	if err != nil {
-		fmt.Println(err.Error())
-		return nil, err
-	}
-
+func (cc *SmartContract) ReadBusinessRule(ctx contractapi.TransactionContextInterface, instance *ContractInstance, BusinessRuleID string) (*BusinessRule, error) {
 	businessRule, ok := instance.InstanceBusinessRules[BusinessRuleID]
 	if !ok {
 		errorMessage := fmt.Sprintf("BusinessRule %s does not exist", BusinessRuleID)
@@ -337,24 +323,7 @@ func (cc *SmartContract) ReadBusinessRule(ctx contractapi.TransactionContextInte
 	return businessRule, nil
 }
 
-func (cc *SmartContract) ReadCollectiveParticipant(ctx contractapi.TransactionContextInterface, instanceID string, participantID string) (*CollectiveParticipant, error) {
-	instanceJson, err := ctx.GetStub().GetState(instanceID)
-	if err != nil {
-		return nil, err
-	}
-	if instanceJson == nil {
-		errorMessage := fmt.Sprintf("Instance %s does not exist", instanceID)
-		fmt.Println(errorMessage)
-		return nil, errors.New(errorMessage)
-	}
-
-	var instance ContractInstance
-	err = json.Unmarshal(instanceJson, &instance)
-	if err != nil {
-		fmt.Println(err.Error())
-		return nil, err
-	}
-
+func (cc *SmartContract) ReadCollectiveParticipant(ctx contractapi.TransactionContextInterface, instance *ContractInstance, participantID string) (*CollectiveParticipant, error) {
 	collectiveParticipant, ok := instance.InstanceParticipants[participantID]
 	if !ok {
 		errorMessage := fmt.Sprintf("CollectiveParticipant %s does not exist", participantID)
@@ -365,24 +334,7 @@ func (cc *SmartContract) ReadCollectiveParticipant(ctx contractapi.TransactionCo
 	return collectiveParticipant, nil
 }
 
-func (cc *SmartContract) ReadAtomicParticipant(ctx contractapi.TransactionContextInterface, instanceID string, participantID string, key string) (*Participant, error) {
-	instanceJson, err := ctx.GetStub().GetState(instanceID)
-	if err != nil {
-		return nil, err
-	}
-	if instanceJson == nil {
-		errorMessage := fmt.Sprintf("Instance %s does not exist", instanceID)
-		fmt.Println(errorMessage)
-		return nil, errors.New(errorMessage)
-	}
-
-	var instance ContractInstance
-	err = json.Unmarshal(instanceJson, &instance)
-	if err != nil {
-		fmt.Println(err.Error())
-		return nil, err
-	}
-
+func (cc *SmartContract) ReadAtomicParticipant(ctx contractapi.TransactionContextInterface, instance *ContractInstance, participantID string, key string) (*Participant, error) {
 	collectiveParticipant, ok := instance.InstanceParticipants[participantID]
 	if !ok {
 		errorMessage := fmt.Sprintf("CollectiveParticipant %s does not exist", participantID)
@@ -405,8 +357,8 @@ func (cc *SmartContract) get_X509_identity(ctx contractapi.TransactionContextInt
 	return certificateID + "@" + mspID
 }
 
-func (cc *SmartContract) check_msp(ctx contractapi.TransactionContextInterface, instanceID string, target_participant string, key string) bool {
-	targetParticipant, err := cc.ReadAtomicParticipant(ctx, instanceID, target_participant, key)
+func (cc *SmartContract) check_msp(ctx contractapi.TransactionContextInterface, instance *ContractInstance, target_participant string, key string) bool {
+	targetParticipant, err := cc.ReadAtomicParticipant(ctx, instance, target_participant, key)
 	if err != nil {
 		fmt.Printf("Failed to read participant: %v\n", err)
 		return false
@@ -421,8 +373,8 @@ func (cc *SmartContract) check_msp(ctx contractapi.TransactionContextInterface, 
 	return mspID == targetParticipant.MSP
 }
 
-func (cc *SmartContract) check_attribute(ctx contractapi.TransactionContextInterface, instanceID string, target_participant string, attributeName string) bool {
-	collectiveParticipant, err := cc.ReadCollectiveParticipant(ctx, instanceID, target_participant)
+func (cc *SmartContract) check_attribute(ctx contractapi.TransactionContextInterface, instance *ContractInstance, target_participant string, attributeName string) bool {
+	collectiveParticipant, err := cc.ReadCollectiveParticipant(ctx, instance, target_participant)
 	if err != nil {
 		fmt.Printf("Failed to read collective participant: %v\n", err)
 		return false
@@ -442,8 +394,8 @@ func (cc *SmartContract) check_attribute(ctx contractapi.TransactionContextInter
 	return true
 }
 
-func (cc *SmartContract) check_participant(ctx contractapi.TransactionContextInterface, instanceID string, target_participant string, key string) bool {
-	collectiveParticipant, err := cc.ReadCollectiveParticipant(ctx, instanceID, target_participant)
+func (cc *SmartContract) check_participant(ctx contractapi.TransactionContextInterface, instance *ContractInstance, target_participant string, key string) bool {
+	collectiveParticipant, err := cc.ReadCollectiveParticipant(ctx, instance, target_participant)
 	if err != nil {
 		fmt.Printf("Failed to read collective participant: %v\n", err)
 		return false
@@ -451,10 +403,17 @@ func (cc *SmartContract) check_participant(ctx contractapi.TransactionContextInt
 
 	if key == "" {
 		// only check Participant based on Attributes in CollectiveParticipant
+		for attrName := range collectiveParticipant.Attributes {
+			if !cc.check_attribute(ctx, instance, target_participant, attrName) {
+				fmt.Printf("Attribute check failed for attribute %s\n", attrName)
+				return false
+			}
+		}
+		return true
 	}
 
 	if !collectiveParticipant.IsMulti {
-		defaultKey := fmt.Sprintf("%s_0", target_participant)
+		defaultKey := fmt.Sprintf("%s", target_participant)
 		defaultParticipant, ok := collectiveParticipant.Participants[defaultKey]
 		if !ok {
 			fmt.Printf("Default participant with key %s does not exist\n", defaultKey)
@@ -471,7 +430,7 @@ func (cc *SmartContract) check_participant(ctx contractapi.TransactionContextInt
 		}
 
 		for attrName := range collectiveParticipant.Attributes {
-			if !cc.check_attribute(ctx, instanceID, target_participant, attrName) {
+			if !cc.check_attribute(ctx, instance, target_participant, attrName) {
 				fmt.Printf("Attribute check failed for attribute %s\n", attrName)
 				return false
 			}
@@ -505,7 +464,7 @@ func (cc *SmartContract) check_participant(ctx contractapi.TransactionContextInt
 	}
 
 	for attrName := range collectiveParticipant.Attributes {
-		if !cc.check_attribute(ctx, instanceID, target_participant, attrName) {
+		if !cc.check_attribute(ctx, instance, target_participant, attrName) {
 			fmt.Printf("Attribute check failed for attribute %s\n", attrName)
 			return false
 		}
@@ -545,24 +504,7 @@ func (s *SmartContract) hashXML(ctx contractapi.TransactionContextInterface, xml
 	return hashString, nil
 }
 
-func (c *SmartContract) ReadCollectiveMsg(ctx contractapi.TransactionContextInterface, instanceID string, messageID string) (*CollectiveMessage, error) {
-	instanceJson, err := ctx.GetStub().GetState(instanceID)
-	if err != nil {
-		return nil, err
-	}
-	if instanceJson == nil {
-		errorMessage := fmt.Sprintf("Instance %s does not exist", instanceID)
-		fmt.Println(errorMessage)
-		return nil, errors.New(errorMessage)
-	}
-
-	var instance ContractInstance
-	err = json.Unmarshal(instanceJson, &instance)
-	if err != nil {
-		fmt.Println(err.Error())
-		return nil, err
-	}
-
+func (c *SmartContract) ReadCollectiveMsg(ctx contractapi.TransactionContextInterface, instance *ContractInstance, messageID string) (*CollectiveMessage, error) {
 	collectiveMsg, ok := instance.InstanceMessages[messageID]
 	if !ok {
 		errorMessage := fmt.Sprintf("CollectiveMessage %s does not exist", messageID)
@@ -573,24 +515,7 @@ func (c *SmartContract) ReadCollectiveMsg(ctx contractapi.TransactionContextInte
 	return collectiveMsg, nil
 }
 
-func (c *SmartContract) ReadAtomicMsg(ctx contractapi.TransactionContextInterface, instanceID string, messageID string, key1 string, key2 string) (*Message, error) {
-	instanceJson, err := ctx.GetStub().GetState(instanceID)
-	if err != nil {
-		return nil, err
-	}
-	if instanceJson == nil {
-		errorMessage := fmt.Sprintf("Instance %s does not exist", instanceID)
-		fmt.Println(errorMessage)
-		return nil, errors.New(errorMessage)
-	}
-
-	var instance ContractInstance
-	err = json.Unmarshal(instanceJson, &instance)
-	if err != nil {
-		fmt.Println(err.Error())
-		return nil, err
-	}
-
+func (c *SmartContract) ReadAtomicMsg(ctx contractapi.TransactionContextInterface, instance *ContractInstance, messageID string, key1 string, key2 string) (*Message, error) {
 	collectiveMsg, ok := instance.InstanceMessages[messageID]
 	if !ok {
 		errorMessage := fmt.Sprintf("CollectiveMessage %s does not exist", messageID)
@@ -608,24 +533,7 @@ func (c *SmartContract) ReadAtomicMsg(ctx contractapi.TransactionContextInterfac
 	return &atomicMsg, nil
 }
 
-func (c *SmartContract) ReadChoreographyTask(ctx contractapi.TransactionContextInterface, instanceID string, choreographyTaskID string) (*ChoreographyTask, error) {
-	instanceJson, err := ctx.GetStub().GetState(instanceID)
-	if err != nil {
-		return nil, err
-	}
-	if instanceJson == nil {
-		errorMessage := fmt.Sprintf("Instance %s does not exist", instanceID)
-		fmt.Println(errorMessage)
-		return nil, errors.New(errorMessage)
-	}
-
-	var instance ContractInstance
-	err = json.Unmarshal(instanceJson, &instance)
-	if err != nil {
-		fmt.Println(err.Error())
-		return nil, err
-	}
-
+func (c *SmartContract) ReadChoreographyTask(ctx contractapi.TransactionContextInterface, instance *ContractInstance, choreographyTaskID string) (*ChoreographyTask, error) {
 	choreographyTask, ok := instance.InstanceChoreographyTasks[choreographyTaskID]
 	if !ok {
 		errorMessage := fmt.Sprintf("ChoreographyTask %s does not exist", choreographyTaskID)
@@ -634,6 +542,15 @@ func (c *SmartContract) ReadChoreographyTask(ctx contractapi.TransactionContextI
 	}
 
 	return choreographyTask, nil
+}
+
+func (c *SmartContract) GetCurrentState(ctx contractapi.TransactionContextInterface, instanceID string) (string, error) {
+	instance, err := c.GetInstance(ctx, instanceID)
+	if err != nil {
+		return "", err
+	}
+
+	return instance.CurrentState, nil
 }
 
 func (cc *SmartContract) Invoke_Other_chaincode(ctx contractapi.TransactionContextInterface, chaincodeName string, channel string, _args [][]byte) ([]byte, error) {
@@ -686,18 +603,34 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 		return "", fmt.Errorf("failed to unmarshal. %s", err.Error())
 	}
 
-	res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default", stateCharts.EncodeGetDefaultSnapshotArgs(initParameters.StateMachineDescription))
+	fmt.Println("InitParameters: ", initParameters.StateMachineDescription)
+	fmt.Println("InitParameters: ", initParameters.AdditionalContent)
+
+	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default", stateCharts.EncodeGetDefaultSnapshotArgs(initParameters.StateMachineDescription, initParameters.AdditionalContent))
+
+	if err != nil {
+		fmt.Println("Error Happend")
+		fmt.Print(err.Error())
+	}
+
+	fmt.Println("Res:")
+	fmt.Println(string(res))
 
 	initialSnapshot := stateCharts.DecodeGetDefaultSnapshotResult(res)
 
+	fmt.Println("InitialSnapshot")
+	fmt.Println(initialSnapshot)
+
 	instance := ContractInstance{
-		InstanceID:              instanceID,
-		InstanceStateMemory:     StateMemory{},
-		InstanceMessages:        make(map[string]*CollectiveMessage),
-		InstanceParticipants:    make(map[string]*CollectiveParticipant),
-		InstanceBusinessRules:   make(map[string]*BusinessRule),
-		CurrentState:            initialSnapshot,
-		StateMachineDescription: initParameters.StateMachineDescription,
+		InstanceID:                instanceID,
+		InstanceStateMemory:       StateMemory{},
+		InstanceMessages:          make(map[string]*CollectiveMessage),
+		InstanceParticipants:      make(map[string]*CollectiveParticipant),
+		InstanceBusinessRules:     make(map[string]*BusinessRule),
+		InstanceChoreographyTasks: make(map[string]*ChoreographyTask),
+		CurrentState:              initialSnapshot,
+		StateMachineDescription:   initParameters.StateMachineDescription,
+		AdditionalContent:         initParameters.AdditionalContent,
 	}
 
 	// Update the currentInstanceID
@@ -792,13 +725,20 @@ func (cc *SmartContract) Event_06sexe6(ctx contractapi.TransactionContextInterfa
 	eventJsonString := string(eventJsonBytes)
 
 	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts", "default",
-		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
 
 	if err != nil {
 		return err
 	}
 
 	state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	fmt.Println("State")
+	fmt.Println(state)
+
+	fmt.Println("Changed")
+	fmt.Println(changed)
+
 	if !changed {
 		return errors.New("Invalid transition")
 	}
@@ -817,24 +757,28 @@ func (cc *SmartContract) Message_1wswgqu_Send(ctx contractapi.TransactionContext
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_1wswgqu"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	participant_id := collectiveMsg.SendParticipantID
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
-		collectiveMsgName = fmt.Sprintf("Message_1wswgqu_%d", targetTaskID)
+		if targetTaskID == 0 {
+			collectiveMsgName = "Message_1wswgqu"
+		} else {
+			collectiveMsgName = fmt.Sprintf("Message_1wswgqu_%d", targetTaskID)
+		}
 	}
 
 	// MultiParticipant Address Located
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	var errorMessage string
 	var key1, key2 string
@@ -861,7 +805,7 @@ func (cc *SmartContract) Message_1wswgqu_Send(ctx contractapi.TransactionContext
 		eventsToTrigger = append(eventsToTrigger, eventJsonString)
 
 		participant_key := key1
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -880,7 +824,7 @@ func (cc *SmartContract) Message_1wswgqu_Send(ctx contractapi.TransactionContext
 			if _, ok := sendParticipant.Participants[key1]; ok {
 				// check X509
 				participant_key := key1
-				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+				if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 					fmt.Println(errorMessage)
 					return fmt.Errorf(errorMessage)
@@ -895,7 +839,7 @@ func (cc *SmartContract) Message_1wswgqu_Send(ctx contractapi.TransactionContext
 			}
 
 			// Attributes Based Access Control
-			if cc.check_participant(ctx, instanceID, participant_id, "") == false {
+			if cc.check_participant(ctx, instance, participant_id, "") == false {
 				errorMessage = fmt.Sprintf("Participant can't not register itself due to no conformance attributes")
 				return fmt.Errorf(errorMessage)
 			}
@@ -916,7 +860,7 @@ func (cc *SmartContract) Message_1wswgqu_Send(ctx contractapi.TransactionContext
 		// Created Message
 
 		if _, ok := collectiveMsg.Messages[key1]; ok {
-
+			fmt.Println("The number of messages sent by the participant exceeds the maximum")
 		} else {
 			collectiveMsg.Messages[key1] = make(map[string]Message)
 			newAtomicMsg := Message{
@@ -926,9 +870,11 @@ func (cc *SmartContract) Message_1wswgqu_Send(ctx contractapi.TransactionContext
 				FireflyTranID:         "",
 			}
 			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+			messageJsonBytes, _ := json.Marshal(collectiveMsg.Messages[key1][key2])
+			fmt.Println(string(messageJsonBytes))
 		}
 
-		message_increasing_key := len(sendParticipant.Participants)
+		message_increasing_key := len(sendParticipant.Participants) - 1 // reduce the one increased by self
 		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
 
 		event = map[string]interface{}{
@@ -946,7 +892,7 @@ func (cc *SmartContract) Message_1wswgqu_Send(ctx contractapi.TransactionContext
 		key1 = "nonMulti"
 
 		participant_key := key1
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -993,14 +939,32 @@ func (cc *SmartContract) Message_1wswgqu_Send(ctx contractapi.TransactionContext
 	}
 
 	for _, event := range eventsToTrigger {
-		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+
+		fmt.Printf(event)
+
+		res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, event))
+
+		if err != nil {
+			fmt.Printf(err.Error())
+			return err
+		}
+
+		fmt.Printf(string(res))
+
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		fmt.Printf("State: %s\n", state)
+		fmt.Printf("Changed: %t\n", changed)
+
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
 		}
 		instance.CurrentState = state
 	}
+
+	instanceJson, _ := json.Marshal(instance)
+	fmt.Println(string(instanceJson))
 
 	for _, msg := range msgsToHandle {
 		cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID, key1, key2)
@@ -1016,22 +980,26 @@ func (cc *SmartContract) Message_1wswgqu_Complete(ctx contractapi.TransactionCon
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_1wswgqu"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	participant_id := collectiveMsg.ReceiveParticipantID
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
-		collectiveMsgName = fmt.Sprintf("Message_1wswgqu_%d", targetTaskID)
+		if targetTaskID == 0 {
+			collectiveMsgName = "Message_1wswgqu"
+		} else {
+			collectiveMsgName = fmt.Sprintf("Message_1wswgqu_%d", targetTaskID)
+		}
 	}
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	var errorMessage string
 	var key1, key2 string
@@ -1056,7 +1024,7 @@ func (cc *SmartContract) Message_1wswgqu_Complete(ctx contractapi.TransactionCon
 		eventsToTrigger = append(eventsToTrigger, eventJsonString)
 
 		participant_key := key2
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -1071,7 +1039,7 @@ func (cc *SmartContract) Message_1wswgqu_Complete(ctx contractapi.TransactionCon
 		key2 = "nonMulti"
 
 		participant_key := key2
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -1105,7 +1073,7 @@ func (cc *SmartContract) Message_1wswgqu_Complete(ctx contractapi.TransactionCon
 			if _, ok := receiveParticipant.Participants[key2]; ok {
 				// check Participant
 				participant_key := key2
-				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+				if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 					fmt.Println(errorMessage)
 					return fmt.Errorf(errorMessage)
@@ -1120,7 +1088,7 @@ func (cc *SmartContract) Message_1wswgqu_Complete(ctx contractapi.TransactionCon
 				return fmt.Errorf(errorMessage)
 			}
 
-			if cc.check_participant(ctx, instanceID, participant_id, "") != true {
+			if cc.check_participant(ctx, instance, participant_id, "") != true {
 				errorMessage := "Not Allowed To participate as a Receiver"
 				return fmt.Errorf(errorMessage)
 			}
@@ -1169,12 +1137,22 @@ func (cc *SmartContract) Message_1wswgqu_Complete(ctx contractapi.TransactionCon
 	}
 
 	for _, event := range eventsToTrigger {
-		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+
+		fmt.Println("Event")
+		fmt.Println(event)
+
+		res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, event))
 		if err != nil {
 			return err
 		}
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		fmt.Println("State")
+		fmt.Println(state)
+
+		fmt.Println("Changed")
+		fmt.Println(changed)
 
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
@@ -1197,22 +1175,22 @@ func (cc *SmartContract) Message_1wswgqu_Advance(
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_1wswgqu"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
 		collectiveMsgName = fmt.Sprintf("Message_1wswgqu_%d", targetTaskID)
 	}
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	// Check if Multi
 	if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
@@ -1226,13 +1204,13 @@ func (cc *SmartContract) Message_1wswgqu_Advance(
 	var participantToLock *CollectiveParticipant
 	if sendParticipant.IsMulti {
 		// check if invoker in receiveParticipants
-		if cc.check_participant(ctx, instanceID, receiveParticipantID, "") == false {
+		if cc.check_participant(ctx, instance, receiveParticipantID, "") == false {
 			return fmt.Errorf("Not Allowed To Advance")
 		}
 		participantToLock = receiveParticipant
 	} else {
 		// check if invoker in senderParticipants
-		if cc.check_participant(ctx, instanceID, sendParticipantID, "") == false {
+		if cc.check_participant(ctx, instance, sendParticipantID, "") == false {
 			return fmt.Errorf("Not Allowd To Advance")
 		}
 		participantToLock = sendParticipant
@@ -1250,18 +1228,25 @@ func (cc *SmartContract) Message_1wswgqu_Advance(
 	}
 
 	event := map[string]interface{}{
-		"type": "AdvanceMessage_1wswgqu",
+		"type": "advance_Message_1wswgqu",
 	}
 	eventJsonBytes, _ := json.Marshal(event)
 
 	eventJsonString := string(eventJsonBytes)
 
-	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+	fmt.Println("Event")
+	fmt.Println(eventJsonString)
+	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
 	state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	fmt.Println("State")
+	fmt.Println(state)
+	fmt.Println("Changed")
+	fmt.Println(changed)
 
 	if !changed {
 		return fmt.Errorf("Invalid Operation")
@@ -1295,13 +1280,19 @@ func (cc *SmartContract) Gateway_0onpe6x(ctx contractapi.TransactionContextInter
 
 	eventJsonString := string(eventJsonBytes)
 
-	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
 
 	if err != nil {
 		return err
 	}
 	new_status, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	fmt.Println("State")
+	fmt.Println(new_status)
+
+	fmt.Println("Changed")
+	fmt.Println(changed)
 
 	if !changed {
 		return errors.New("Invalid transition")
@@ -1320,24 +1311,28 @@ func (cc *SmartContract) Message_0cba4t6_Send(ctx contractapi.TransactionContext
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_0cba4t6"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	participant_id := collectiveMsg.SendParticipantID
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
-		collectiveMsgName = fmt.Sprintf("Message_0cba4t6_%d", targetTaskID)
+		if targetTaskID == 0 {
+			collectiveMsgName = "Message_0cba4t6"
+		} else {
+			collectiveMsgName = fmt.Sprintf("Message_0cba4t6_%d", targetTaskID)
+		}
 	}
 
 	// MultiParticipant Address Located
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	var errorMessage string
 	var key1, key2 string
@@ -1364,7 +1359,7 @@ func (cc *SmartContract) Message_0cba4t6_Send(ctx contractapi.TransactionContext
 		eventsToTrigger = append(eventsToTrigger, eventJsonString)
 
 		participant_key := key1
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -1383,7 +1378,7 @@ func (cc *SmartContract) Message_0cba4t6_Send(ctx contractapi.TransactionContext
 			if _, ok := sendParticipant.Participants[key1]; ok {
 				// check X509
 				participant_key := key1
-				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+				if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 					fmt.Println(errorMessage)
 					return fmt.Errorf(errorMessage)
@@ -1398,7 +1393,7 @@ func (cc *SmartContract) Message_0cba4t6_Send(ctx contractapi.TransactionContext
 			}
 
 			// Attributes Based Access Control
-			if cc.check_participant(ctx, instanceID, participant_id, "") == false {
+			if cc.check_participant(ctx, instance, participant_id, "") == false {
 				errorMessage = fmt.Sprintf("Participant can't not register itself due to no conformance attributes")
 				return fmt.Errorf(errorMessage)
 			}
@@ -1419,7 +1414,7 @@ func (cc *SmartContract) Message_0cba4t6_Send(ctx contractapi.TransactionContext
 		// Created Message
 
 		if _, ok := collectiveMsg.Messages[key1]; ok {
-
+			fmt.Println("The number of messages sent by the participant exceeds the maximum")
 		} else {
 			collectiveMsg.Messages[key1] = make(map[string]Message)
 			newAtomicMsg := Message{
@@ -1429,9 +1424,11 @@ func (cc *SmartContract) Message_0cba4t6_Send(ctx contractapi.TransactionContext
 				FireflyTranID:         "",
 			}
 			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+			messageJsonBytes, _ := json.Marshal(collectiveMsg.Messages[key1][key2])
+			fmt.Println(string(messageJsonBytes))
 		}
 
-		message_increasing_key := len(sendParticipant.Participants)
+		message_increasing_key := len(sendParticipant.Participants) - 1 // reduce the one increased by self
 		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
 
 		event = map[string]interface{}{
@@ -1449,7 +1446,7 @@ func (cc *SmartContract) Message_0cba4t6_Send(ctx contractapi.TransactionContext
 		key1 = "nonMulti"
 
 		participant_key := key1
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -1496,14 +1493,32 @@ func (cc *SmartContract) Message_0cba4t6_Send(ctx contractapi.TransactionContext
 	}
 
 	for _, event := range eventsToTrigger {
-		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+
+		fmt.Printf(event)
+
+		res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, event))
+
+		if err != nil {
+			fmt.Printf(err.Error())
+			return err
+		}
+
+		fmt.Printf(string(res))
+
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		fmt.Printf("State: %s\n", state)
+		fmt.Printf("Changed: %t\n", changed)
+
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
 		}
 		instance.CurrentState = state
 	}
+
+	instanceJson, _ := json.Marshal(instance)
+	fmt.Println(string(instanceJson))
 
 	for _, msg := range msgsToHandle {
 		cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID, key1, key2)
@@ -1519,22 +1534,26 @@ func (cc *SmartContract) Message_0cba4t6_Complete(ctx contractapi.TransactionCon
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_0cba4t6"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	participant_id := collectiveMsg.ReceiveParticipantID
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
-		collectiveMsgName = fmt.Sprintf("Message_0cba4t6_%d", targetTaskID)
+		if targetTaskID == 0 {
+			collectiveMsgName = "Message_0cba4t6"
+		} else {
+			collectiveMsgName = fmt.Sprintf("Message_0cba4t6_%d", targetTaskID)
+		}
 	}
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	var errorMessage string
 	var key1, key2 string
@@ -1559,7 +1578,7 @@ func (cc *SmartContract) Message_0cba4t6_Complete(ctx contractapi.TransactionCon
 		eventsToTrigger = append(eventsToTrigger, eventJsonString)
 
 		participant_key := key2
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -1574,7 +1593,7 @@ func (cc *SmartContract) Message_0cba4t6_Complete(ctx contractapi.TransactionCon
 		key2 = "nonMulti"
 
 		participant_key := key2
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -1608,7 +1627,7 @@ func (cc *SmartContract) Message_0cba4t6_Complete(ctx contractapi.TransactionCon
 			if _, ok := receiveParticipant.Participants[key2]; ok {
 				// check Participant
 				participant_key := key2
-				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+				if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 					fmt.Println(errorMessage)
 					return fmt.Errorf(errorMessage)
@@ -1623,7 +1642,7 @@ func (cc *SmartContract) Message_0cba4t6_Complete(ctx contractapi.TransactionCon
 				return fmt.Errorf(errorMessage)
 			}
 
-			if cc.check_participant(ctx, instanceID, participant_id, "") != true {
+			if cc.check_participant(ctx, instance, participant_id, "") != true {
 				errorMessage := "Not Allowed To participate as a Receiver"
 				return fmt.Errorf(errorMessage)
 			}
@@ -1672,12 +1691,22 @@ func (cc *SmartContract) Message_0cba4t6_Complete(ctx contractapi.TransactionCon
 	}
 
 	for _, event := range eventsToTrigger {
-		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+
+		fmt.Println("Event")
+		fmt.Println(event)
+
+		res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, event))
 		if err != nil {
 			return err
 		}
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		fmt.Println("State")
+		fmt.Println(state)
+
+		fmt.Println("Changed")
+		fmt.Println(changed)
 
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
@@ -1700,22 +1729,22 @@ func (cc *SmartContract) Message_0cba4t6_Advance(
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_0cba4t6"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
 		collectiveMsgName = fmt.Sprintf("Message_0cba4t6_%d", targetTaskID)
 	}
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	// Check if Multi
 	if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
@@ -1729,13 +1758,13 @@ func (cc *SmartContract) Message_0cba4t6_Advance(
 	var participantToLock *CollectiveParticipant
 	if sendParticipant.IsMulti {
 		// check if invoker in receiveParticipants
-		if cc.check_participant(ctx, instanceID, receiveParticipantID, "") == false {
+		if cc.check_participant(ctx, instance, receiveParticipantID, "") == false {
 			return fmt.Errorf("Not Allowed To Advance")
 		}
 		participantToLock = receiveParticipant
 	} else {
 		// check if invoker in senderParticipants
-		if cc.check_participant(ctx, instanceID, sendParticipantID, "") == false {
+		if cc.check_participant(ctx, instance, sendParticipantID, "") == false {
 			return fmt.Errorf("Not Allowd To Advance")
 		}
 		participantToLock = sendParticipant
@@ -1753,18 +1782,25 @@ func (cc *SmartContract) Message_0cba4t6_Advance(
 	}
 
 	event := map[string]interface{}{
-		"type": "AdvanceMessage_0cba4t6",
+		"type": "advance_Message_0cba4t6",
 	}
 	eventJsonBytes, _ := json.Marshal(event)
 
 	eventJsonString := string(eventJsonBytes)
 
-	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+	fmt.Println("Event")
+	fmt.Println(eventJsonString)
+	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
 	state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	fmt.Println("State")
+	fmt.Println(state)
+	fmt.Println("Changed")
+	fmt.Println(changed)
 
 	if !changed {
 		return fmt.Errorf("Invalid Operation")
@@ -1787,24 +1823,28 @@ func (cc *SmartContract) Message_0pm90nx_Send(ctx contractapi.TransactionContext
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_0pm90nx"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	participant_id := collectiveMsg.SendParticipantID
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
-		collectiveMsgName = fmt.Sprintf("Message_0pm90nx_%d", targetTaskID)
+		if targetTaskID == 0 {
+			collectiveMsgName = "Message_0pm90nx"
+		} else {
+			collectiveMsgName = fmt.Sprintf("Message_0pm90nx_%d", targetTaskID)
+		}
 	}
 
 	// MultiParticipant Address Located
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	var errorMessage string
 	var key1, key2 string
@@ -1831,7 +1871,7 @@ func (cc *SmartContract) Message_0pm90nx_Send(ctx contractapi.TransactionContext
 		eventsToTrigger = append(eventsToTrigger, eventJsonString)
 
 		participant_key := key1
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -1850,7 +1890,7 @@ func (cc *SmartContract) Message_0pm90nx_Send(ctx contractapi.TransactionContext
 			if _, ok := sendParticipant.Participants[key1]; ok {
 				// check X509
 				participant_key := key1
-				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+				if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 					fmt.Println(errorMessage)
 					return fmt.Errorf(errorMessage)
@@ -1865,7 +1905,7 @@ func (cc *SmartContract) Message_0pm90nx_Send(ctx contractapi.TransactionContext
 			}
 
 			// Attributes Based Access Control
-			if cc.check_participant(ctx, instanceID, participant_id, "") == false {
+			if cc.check_participant(ctx, instance, participant_id, "") == false {
 				errorMessage = fmt.Sprintf("Participant can't not register itself due to no conformance attributes")
 				return fmt.Errorf(errorMessage)
 			}
@@ -1886,7 +1926,7 @@ func (cc *SmartContract) Message_0pm90nx_Send(ctx contractapi.TransactionContext
 		// Created Message
 
 		if _, ok := collectiveMsg.Messages[key1]; ok {
-
+			fmt.Println("The number of messages sent by the participant exceeds the maximum")
 		} else {
 			collectiveMsg.Messages[key1] = make(map[string]Message)
 			newAtomicMsg := Message{
@@ -1896,9 +1936,11 @@ func (cc *SmartContract) Message_0pm90nx_Send(ctx contractapi.TransactionContext
 				FireflyTranID:         "",
 			}
 			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+			messageJsonBytes, _ := json.Marshal(collectiveMsg.Messages[key1][key2])
+			fmt.Println(string(messageJsonBytes))
 		}
 
-		message_increasing_key := len(sendParticipant.Participants)
+		message_increasing_key := len(sendParticipant.Participants) - 1 // reduce the one increased by self
 		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
 
 		event = map[string]interface{}{
@@ -1916,7 +1958,7 @@ func (cc *SmartContract) Message_0pm90nx_Send(ctx contractapi.TransactionContext
 		key1 = "nonMulti"
 
 		participant_key := key1
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -1963,14 +2005,32 @@ func (cc *SmartContract) Message_0pm90nx_Send(ctx contractapi.TransactionContext
 	}
 
 	for _, event := range eventsToTrigger {
-		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+
+		fmt.Printf(event)
+
+		res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, event))
+
+		if err != nil {
+			fmt.Printf(err.Error())
+			return err
+		}
+
+		fmt.Printf(string(res))
+
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		fmt.Printf("State: %s\n", state)
+		fmt.Printf("Changed: %t\n", changed)
+
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
 		}
 		instance.CurrentState = state
 	}
+
+	instanceJson, _ := json.Marshal(instance)
+	fmt.Println(string(instanceJson))
 
 	for _, msg := range msgsToHandle {
 		cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID, key1, key2)
@@ -1986,22 +2046,26 @@ func (cc *SmartContract) Message_0pm90nx_Complete(ctx contractapi.TransactionCon
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_0pm90nx"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	participant_id := collectiveMsg.ReceiveParticipantID
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
-		collectiveMsgName = fmt.Sprintf("Message_0pm90nx_%d", targetTaskID)
+		if targetTaskID == 0 {
+			collectiveMsgName = "Message_0pm90nx"
+		} else {
+			collectiveMsgName = fmt.Sprintf("Message_0pm90nx_%d", targetTaskID)
+		}
 	}
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	var errorMessage string
 	var key1, key2 string
@@ -2026,7 +2090,7 @@ func (cc *SmartContract) Message_0pm90nx_Complete(ctx contractapi.TransactionCon
 		eventsToTrigger = append(eventsToTrigger, eventJsonString)
 
 		participant_key := key2
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -2041,7 +2105,7 @@ func (cc *SmartContract) Message_0pm90nx_Complete(ctx contractapi.TransactionCon
 		key2 = "nonMulti"
 
 		participant_key := key2
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -2075,7 +2139,7 @@ func (cc *SmartContract) Message_0pm90nx_Complete(ctx contractapi.TransactionCon
 			if _, ok := receiveParticipant.Participants[key2]; ok {
 				// check Participant
 				participant_key := key2
-				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+				if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 					fmt.Println(errorMessage)
 					return fmt.Errorf(errorMessage)
@@ -2090,7 +2154,7 @@ func (cc *SmartContract) Message_0pm90nx_Complete(ctx contractapi.TransactionCon
 				return fmt.Errorf(errorMessage)
 			}
 
-			if cc.check_participant(ctx, instanceID, participant_id, "") != true {
+			if cc.check_participant(ctx, instance, participant_id, "") != true {
 				errorMessage := "Not Allowed To participate as a Receiver"
 				return fmt.Errorf(errorMessage)
 			}
@@ -2139,12 +2203,22 @@ func (cc *SmartContract) Message_0pm90nx_Complete(ctx contractapi.TransactionCon
 	}
 
 	for _, event := range eventsToTrigger {
-		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+
+		fmt.Println("Event")
+		fmt.Println(event)
+
+		res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, event))
 		if err != nil {
 			return err
 		}
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		fmt.Println("State")
+		fmt.Println(state)
+
+		fmt.Println("Changed")
+		fmt.Println(changed)
 
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
@@ -2167,22 +2241,22 @@ func (cc *SmartContract) Message_0pm90nx_Advance(
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_0pm90nx"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
 		collectiveMsgName = fmt.Sprintf("Message_0pm90nx_%d", targetTaskID)
 	}
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	// Check if Multi
 	if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
@@ -2196,13 +2270,13 @@ func (cc *SmartContract) Message_0pm90nx_Advance(
 	var participantToLock *CollectiveParticipant
 	if sendParticipant.IsMulti {
 		// check if invoker in receiveParticipants
-		if cc.check_participant(ctx, instanceID, receiveParticipantID, "") == false {
+		if cc.check_participant(ctx, instance, receiveParticipantID, "") == false {
 			return fmt.Errorf("Not Allowed To Advance")
 		}
 		participantToLock = receiveParticipant
 	} else {
 		// check if invoker in senderParticipants
-		if cc.check_participant(ctx, instanceID, sendParticipantID, "") == false {
+		if cc.check_participant(ctx, instance, sendParticipantID, "") == false {
 			return fmt.Errorf("Not Allowd To Advance")
 		}
 		participantToLock = sendParticipant
@@ -2220,18 +2294,25 @@ func (cc *SmartContract) Message_0pm90nx_Advance(
 	}
 
 	event := map[string]interface{}{
-		"type": "AdvanceMessage_0pm90nx",
+		"type": "advance_Message_0pm90nx",
 	}
 	eventJsonBytes, _ := json.Marshal(event)
 
 	eventJsonString := string(eventJsonBytes)
 
-	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+	fmt.Println("Event")
+	fmt.Println(eventJsonString)
+	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
 	state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	fmt.Println("State")
+	fmt.Println(state)
+	fmt.Println("Changed")
+	fmt.Println(changed)
 
 	if !changed {
 		return fmt.Errorf("Invalid Operation")
@@ -2265,13 +2346,19 @@ func (cc *SmartContract) Gateway_1fbifca(ctx contractapi.TransactionContextInter
 
 	eventJsonString := string(eventJsonBytes)
 
-	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
 
 	if err != nil {
 		return err
 	}
 	new_status, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	fmt.Println("State")
+	fmt.Println(new_status)
+
+	fmt.Println("Changed")
+	fmt.Println(changed)
 
 	if !changed {
 		return errors.New("Invalid transition")
@@ -2290,24 +2377,28 @@ func (cc *SmartContract) Message_0rwz1km_Send(ctx contractapi.TransactionContext
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_0rwz1km"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	participant_id := collectiveMsg.SendParticipantID
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
-		collectiveMsgName = fmt.Sprintf("Message_0rwz1km_%d", targetTaskID)
+		if targetTaskID == 0 {
+			collectiveMsgName = "Message_0rwz1km"
+		} else {
+			collectiveMsgName = fmt.Sprintf("Message_0rwz1km_%d", targetTaskID)
+		}
 	}
 
 	// MultiParticipant Address Located
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	var errorMessage string
 	var key1, key2 string
@@ -2334,7 +2425,7 @@ func (cc *SmartContract) Message_0rwz1km_Send(ctx contractapi.TransactionContext
 		eventsToTrigger = append(eventsToTrigger, eventJsonString)
 
 		participant_key := key1
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -2353,7 +2444,7 @@ func (cc *SmartContract) Message_0rwz1km_Send(ctx contractapi.TransactionContext
 			if _, ok := sendParticipant.Participants[key1]; ok {
 				// check X509
 				participant_key := key1
-				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+				if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 					fmt.Println(errorMessage)
 					return fmt.Errorf(errorMessage)
@@ -2368,7 +2459,7 @@ func (cc *SmartContract) Message_0rwz1km_Send(ctx contractapi.TransactionContext
 			}
 
 			// Attributes Based Access Control
-			if cc.check_participant(ctx, instanceID, participant_id, "") == false {
+			if cc.check_participant(ctx, instance, participant_id, "") == false {
 				errorMessage = fmt.Sprintf("Participant can't not register itself due to no conformance attributes")
 				return fmt.Errorf(errorMessage)
 			}
@@ -2389,7 +2480,7 @@ func (cc *SmartContract) Message_0rwz1km_Send(ctx contractapi.TransactionContext
 		// Created Message
 
 		if _, ok := collectiveMsg.Messages[key1]; ok {
-
+			fmt.Println("The number of messages sent by the participant exceeds the maximum")
 		} else {
 			collectiveMsg.Messages[key1] = make(map[string]Message)
 			newAtomicMsg := Message{
@@ -2399,9 +2490,11 @@ func (cc *SmartContract) Message_0rwz1km_Send(ctx contractapi.TransactionContext
 				FireflyTranID:         "",
 			}
 			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+			messageJsonBytes, _ := json.Marshal(collectiveMsg.Messages[key1][key2])
+			fmt.Println(string(messageJsonBytes))
 		}
 
-		message_increasing_key := len(sendParticipant.Participants)
+		message_increasing_key := len(sendParticipant.Participants) - 1 // reduce the one increased by self
 		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
 
 		event = map[string]interface{}{
@@ -2419,7 +2512,7 @@ func (cc *SmartContract) Message_0rwz1km_Send(ctx contractapi.TransactionContext
 		key1 = "nonMulti"
 
 		participant_key := key1
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -2466,14 +2559,32 @@ func (cc *SmartContract) Message_0rwz1km_Send(ctx contractapi.TransactionContext
 	}
 
 	for _, event := range eventsToTrigger {
-		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+
+		fmt.Printf(event)
+
+		res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, event))
+
+		if err != nil {
+			fmt.Printf(err.Error())
+			return err
+		}
+
+		fmt.Printf(string(res))
+
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		fmt.Printf("State: %s\n", state)
+		fmt.Printf("Changed: %t\n", changed)
+
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
 		}
 		instance.CurrentState = state
 	}
+
+	instanceJson, _ := json.Marshal(instance)
+	fmt.Println(string(instanceJson))
 
 	for _, msg := range msgsToHandle {
 		cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID, key1, key2)
@@ -2489,22 +2600,26 @@ func (cc *SmartContract) Message_0rwz1km_Complete(ctx contractapi.TransactionCon
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_0rwz1km"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	participant_id := collectiveMsg.ReceiveParticipantID
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
-		collectiveMsgName = fmt.Sprintf("Message_0rwz1km_%d", targetTaskID)
+		if targetTaskID == 0 {
+			collectiveMsgName = "Message_0rwz1km"
+		} else {
+			collectiveMsgName = fmt.Sprintf("Message_0rwz1km_%d", targetTaskID)
+		}
 	}
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	var errorMessage string
 	var key1, key2 string
@@ -2529,7 +2644,7 @@ func (cc *SmartContract) Message_0rwz1km_Complete(ctx contractapi.TransactionCon
 		eventsToTrigger = append(eventsToTrigger, eventJsonString)
 
 		participant_key := key2
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -2544,7 +2659,7 @@ func (cc *SmartContract) Message_0rwz1km_Complete(ctx contractapi.TransactionCon
 		key2 = "nonMulti"
 
 		participant_key := key2
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -2578,7 +2693,7 @@ func (cc *SmartContract) Message_0rwz1km_Complete(ctx contractapi.TransactionCon
 			if _, ok := receiveParticipant.Participants[key2]; ok {
 				// check Participant
 				participant_key := key2
-				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+				if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 					fmt.Println(errorMessage)
 					return fmt.Errorf(errorMessage)
@@ -2593,7 +2708,7 @@ func (cc *SmartContract) Message_0rwz1km_Complete(ctx contractapi.TransactionCon
 				return fmt.Errorf(errorMessage)
 			}
 
-			if cc.check_participant(ctx, instanceID, participant_id, "") != true {
+			if cc.check_participant(ctx, instance, participant_id, "") != true {
 				errorMessage := "Not Allowed To participate as a Receiver"
 				return fmt.Errorf(errorMessage)
 			}
@@ -2642,12 +2757,22 @@ func (cc *SmartContract) Message_0rwz1km_Complete(ctx contractapi.TransactionCon
 	}
 
 	for _, event := range eventsToTrigger {
-		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+
+		fmt.Println("Event")
+		fmt.Println(event)
+
+		res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, event))
 		if err != nil {
 			return err
 		}
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		fmt.Println("State")
+		fmt.Println(state)
+
+		fmt.Println("Changed")
+		fmt.Println(changed)
 
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
@@ -2670,22 +2795,22 @@ func (cc *SmartContract) Message_0rwz1km_Advance(
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_0rwz1km"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
 		collectiveMsgName = fmt.Sprintf("Message_0rwz1km_%d", targetTaskID)
 	}
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	// Check if Multi
 	if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
@@ -2699,13 +2824,13 @@ func (cc *SmartContract) Message_0rwz1km_Advance(
 	var participantToLock *CollectiveParticipant
 	if sendParticipant.IsMulti {
 		// check if invoker in receiveParticipants
-		if cc.check_participant(ctx, instanceID, receiveParticipantID, "") == false {
+		if cc.check_participant(ctx, instance, receiveParticipantID, "") == false {
 			return fmt.Errorf("Not Allowed To Advance")
 		}
 		participantToLock = receiveParticipant
 	} else {
 		// check if invoker in senderParticipants
-		if cc.check_participant(ctx, instanceID, sendParticipantID, "") == false {
+		if cc.check_participant(ctx, instance, sendParticipantID, "") == false {
 			return fmt.Errorf("Not Allowd To Advance")
 		}
 		participantToLock = sendParticipant
@@ -2723,18 +2848,25 @@ func (cc *SmartContract) Message_0rwz1km_Advance(
 	}
 
 	event := map[string]interface{}{
-		"type": "AdvanceMessage_0rwz1km",
+		"type": "advance_Message_0rwz1km",
 	}
 	eventJsonBytes, _ := json.Marshal(event)
 
 	eventJsonString := string(eventJsonBytes)
 
-	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+	fmt.Println("Event")
+	fmt.Println(eventJsonString)
+	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
 	state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	fmt.Println("State")
+	fmt.Println(state)
+	fmt.Println("Changed")
+	fmt.Println(changed)
 
 	if !changed {
 		return fmt.Errorf("Invalid Operation")
@@ -2757,24 +2889,28 @@ func (cc *SmartContract) Message_1io2g9u_Send(ctx contractapi.TransactionContext
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_1io2g9u"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	participant_id := collectiveMsg.SendParticipantID
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
-		collectiveMsgName = fmt.Sprintf("Message_1io2g9u_%d", targetTaskID)
+		if targetTaskID == 0 {
+			collectiveMsgName = "Message_1io2g9u"
+		} else {
+			collectiveMsgName = fmt.Sprintf("Message_1io2g9u_%d", targetTaskID)
+		}
 	}
 
 	// MultiParticipant Address Located
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	var errorMessage string
 	var key1, key2 string
@@ -2802,7 +2938,7 @@ func (cc *SmartContract) Message_1io2g9u_Send(ctx contractapi.TransactionContext
 		eventsToTrigger = append(eventsToTrigger, eventJsonString)
 
 		participant_key := key1
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -2821,7 +2957,7 @@ func (cc *SmartContract) Message_1io2g9u_Send(ctx contractapi.TransactionContext
 			if _, ok := sendParticipant.Participants[key1]; ok {
 				// check X509
 				participant_key := key1
-				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+				if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 					fmt.Println(errorMessage)
 					return fmt.Errorf(errorMessage)
@@ -2836,7 +2972,7 @@ func (cc *SmartContract) Message_1io2g9u_Send(ctx contractapi.TransactionContext
 			}
 
 			// Attributes Based Access Control
-			if cc.check_participant(ctx, instanceID, participant_id, "") == false {
+			if cc.check_participant(ctx, instance, participant_id, "") == false {
 				errorMessage = fmt.Sprintf("Participant can't not register itself due to no conformance attributes")
 				return fmt.Errorf(errorMessage)
 			}
@@ -2857,7 +2993,7 @@ func (cc *SmartContract) Message_1io2g9u_Send(ctx contractapi.TransactionContext
 		// Created Message
 
 		if _, ok := collectiveMsg.Messages[key1]; ok {
-
+			fmt.Println("The number of messages sent by the participant exceeds the maximum")
 		} else {
 			collectiveMsg.Messages[key1] = make(map[string]Message)
 			newAtomicMsg := Message{
@@ -2867,9 +3003,11 @@ func (cc *SmartContract) Message_1io2g9u_Send(ctx contractapi.TransactionContext
 				FireflyTranID:         "",
 			}
 			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+			messageJsonBytes, _ := json.Marshal(collectiveMsg.Messages[key1][key2])
+			fmt.Println(string(messageJsonBytes))
 		}
 
-		message_increasing_key := len(sendParticipant.Participants)
+		message_increasing_key := len(sendParticipant.Participants) - 1 // reduce the one increased by self
 		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
 
 		event = map[string]interface{}{
@@ -2888,7 +3026,7 @@ func (cc *SmartContract) Message_1io2g9u_Send(ctx contractapi.TransactionContext
 		key1 = "nonMulti"
 
 		participant_key := key1
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -2936,14 +3074,32 @@ func (cc *SmartContract) Message_1io2g9u_Send(ctx contractapi.TransactionContext
 	}
 
 	for _, event := range eventsToTrigger {
-		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+
+		fmt.Printf(event)
+
+		res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, event))
+
+		if err != nil {
+			fmt.Printf(err.Error())
+			return err
+		}
+
+		fmt.Printf(string(res))
+
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		fmt.Printf("State: %s\n", state)
+		fmt.Printf("Changed: %t\n", changed)
+
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
 		}
 		instance.CurrentState = state
 	}
+
+	instanceJson, _ := json.Marshal(instance)
+	fmt.Println(string(instanceJson))
 
 	for _, msg := range msgsToHandle {
 		cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID, key1, key2)
@@ -2971,22 +3127,26 @@ func (cc *SmartContract) Message_1io2g9u_Complete(ctx contractapi.TransactionCon
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_1io2g9u"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	participant_id := collectiveMsg.ReceiveParticipantID
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
-		collectiveMsgName = fmt.Sprintf("Message_1io2g9u_%d", targetTaskID)
+		if targetTaskID == 0 {
+			collectiveMsgName = "Message_1io2g9u"
+		} else {
+			collectiveMsgName = fmt.Sprintf("Message_1io2g9u_%d", targetTaskID)
+		}
 	}
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	var errorMessage string
 	var key1, key2 string
@@ -3011,7 +3171,7 @@ func (cc *SmartContract) Message_1io2g9u_Complete(ctx contractapi.TransactionCon
 		eventsToTrigger = append(eventsToTrigger, eventJsonString)
 
 		participant_key := key2
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -3026,7 +3186,7 @@ func (cc *SmartContract) Message_1io2g9u_Complete(ctx contractapi.TransactionCon
 		key2 = "nonMulti"
 
 		participant_key := key2
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -3060,7 +3220,7 @@ func (cc *SmartContract) Message_1io2g9u_Complete(ctx contractapi.TransactionCon
 			if _, ok := receiveParticipant.Participants[key2]; ok {
 				// check Participant
 				participant_key := key2
-				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+				if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 					fmt.Println(errorMessage)
 					return fmt.Errorf(errorMessage)
@@ -3075,7 +3235,7 @@ func (cc *SmartContract) Message_1io2g9u_Complete(ctx contractapi.TransactionCon
 				return fmt.Errorf(errorMessage)
 			}
 
-			if cc.check_participant(ctx, instanceID, participant_id, "") != true {
+			if cc.check_participant(ctx, instance, participant_id, "") != true {
 				errorMessage := "Not Allowed To participate as a Receiver"
 				return fmt.Errorf(errorMessage)
 			}
@@ -3124,12 +3284,22 @@ func (cc *SmartContract) Message_1io2g9u_Complete(ctx contractapi.TransactionCon
 	}
 
 	for _, event := range eventsToTrigger {
-		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+
+		fmt.Println("Event")
+		fmt.Println(event)
+
+		res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, event))
 		if err != nil {
 			return err
 		}
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		fmt.Println("State")
+		fmt.Println(state)
+
+		fmt.Println("Changed")
+		fmt.Println(changed)
 
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
@@ -3152,22 +3322,22 @@ func (cc *SmartContract) Message_1io2g9u_Advance(
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_1io2g9u"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
 		collectiveMsgName = fmt.Sprintf("Message_1io2g9u_%d", targetTaskID)
 	}
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	// Check if Multi
 	if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
@@ -3181,13 +3351,13 @@ func (cc *SmartContract) Message_1io2g9u_Advance(
 	var participantToLock *CollectiveParticipant
 	if sendParticipant.IsMulti {
 		// check if invoker in receiveParticipants
-		if cc.check_participant(ctx, instanceID, receiveParticipantID, "") == false {
+		if cc.check_participant(ctx, instance, receiveParticipantID, "") == false {
 			return fmt.Errorf("Not Allowed To Advance")
 		}
 		participantToLock = receiveParticipant
 	} else {
 		// check if invoker in senderParticipants
-		if cc.check_participant(ctx, instanceID, sendParticipantID, "") == false {
+		if cc.check_participant(ctx, instance, sendParticipantID, "") == false {
 			return fmt.Errorf("Not Allowd To Advance")
 		}
 		participantToLock = sendParticipant
@@ -3205,18 +3375,25 @@ func (cc *SmartContract) Message_1io2g9u_Advance(
 	}
 
 	event := map[string]interface{}{
-		"type": "AdvanceMessage_1io2g9u",
+		"type": "advance_Message_1io2g9u",
 	}
 	eventJsonBytes, _ := json.Marshal(event)
 
 	eventJsonString := string(eventJsonBytes)
 
-	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+	fmt.Println("Event")
+	fmt.Println(eventJsonString)
+	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
 	state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	fmt.Println("State")
+	fmt.Println(state)
+	fmt.Println("Changed")
+	fmt.Println(changed)
 
 	if !changed {
 		return fmt.Errorf("Invalid Operation")
@@ -3239,24 +3416,28 @@ func (cc *SmartContract) Message_0d2xte5_Send(ctx contractapi.TransactionContext
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_0d2xte5"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	participant_id := collectiveMsg.SendParticipantID
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
-		collectiveMsgName = fmt.Sprintf("Message_0d2xte5_%d", targetTaskID)
+		if targetTaskID == 0 {
+			collectiveMsgName = "Message_0d2xte5"
+		} else {
+			collectiveMsgName = fmt.Sprintf("Message_0d2xte5_%d", targetTaskID)
+		}
 	}
 
 	// MultiParticipant Address Located
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	var errorMessage string
 	var key1, key2 string
@@ -3283,7 +3464,7 @@ func (cc *SmartContract) Message_0d2xte5_Send(ctx contractapi.TransactionContext
 		eventsToTrigger = append(eventsToTrigger, eventJsonString)
 
 		participant_key := key1
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -3302,7 +3483,7 @@ func (cc *SmartContract) Message_0d2xte5_Send(ctx contractapi.TransactionContext
 			if _, ok := sendParticipant.Participants[key1]; ok {
 				// check X509
 				participant_key := key1
-				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+				if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 					fmt.Println(errorMessage)
 					return fmt.Errorf(errorMessage)
@@ -3317,7 +3498,7 @@ func (cc *SmartContract) Message_0d2xte5_Send(ctx contractapi.TransactionContext
 			}
 
 			// Attributes Based Access Control
-			if cc.check_participant(ctx, instanceID, participant_id, "") == false {
+			if cc.check_participant(ctx, instance, participant_id, "") == false {
 				errorMessage = fmt.Sprintf("Participant can't not register itself due to no conformance attributes")
 				return fmt.Errorf(errorMessage)
 			}
@@ -3338,7 +3519,7 @@ func (cc *SmartContract) Message_0d2xte5_Send(ctx contractapi.TransactionContext
 		// Created Message
 
 		if _, ok := collectiveMsg.Messages[key1]; ok {
-
+			fmt.Println("The number of messages sent by the participant exceeds the maximum")
 		} else {
 			collectiveMsg.Messages[key1] = make(map[string]Message)
 			newAtomicMsg := Message{
@@ -3348,9 +3529,11 @@ func (cc *SmartContract) Message_0d2xte5_Send(ctx contractapi.TransactionContext
 				FireflyTranID:         "",
 			}
 			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+			messageJsonBytes, _ := json.Marshal(collectiveMsg.Messages[key1][key2])
+			fmt.Println(string(messageJsonBytes))
 		}
 
-		message_increasing_key := len(sendParticipant.Participants)
+		message_increasing_key := len(sendParticipant.Participants) - 1 // reduce the one increased by self
 		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
 
 		event = map[string]interface{}{
@@ -3368,7 +3551,7 @@ func (cc *SmartContract) Message_0d2xte5_Send(ctx contractapi.TransactionContext
 		key1 = "nonMulti"
 
 		participant_key := key1
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -3415,14 +3598,32 @@ func (cc *SmartContract) Message_0d2xte5_Send(ctx contractapi.TransactionContext
 	}
 
 	for _, event := range eventsToTrigger {
-		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+
+		fmt.Printf(event)
+
+		res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, event))
+
+		if err != nil {
+			fmt.Printf(err.Error())
+			return err
+		}
+
+		fmt.Printf(string(res))
+
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		fmt.Printf("State: %s\n", state)
+		fmt.Printf("Changed: %t\n", changed)
+
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
 		}
 		instance.CurrentState = state
 	}
+
+	instanceJson, _ := json.Marshal(instance)
+	fmt.Println(string(instanceJson))
 
 	for _, msg := range msgsToHandle {
 		cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID, key1, key2)
@@ -3438,22 +3639,26 @@ func (cc *SmartContract) Message_0d2xte5_Complete(ctx contractapi.TransactionCon
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_0d2xte5"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	participant_id := collectiveMsg.ReceiveParticipantID
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
-		collectiveMsgName = fmt.Sprintf("Message_0d2xte5_%d", targetTaskID)
+		if targetTaskID == 0 {
+			collectiveMsgName = "Message_0d2xte5"
+		} else {
+			collectiveMsgName = fmt.Sprintf("Message_0d2xte5_%d", targetTaskID)
+		}
 	}
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	var errorMessage string
 	var key1, key2 string
@@ -3478,7 +3683,7 @@ func (cc *SmartContract) Message_0d2xte5_Complete(ctx contractapi.TransactionCon
 		eventsToTrigger = append(eventsToTrigger, eventJsonString)
 
 		participant_key := key2
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -3493,7 +3698,7 @@ func (cc *SmartContract) Message_0d2xte5_Complete(ctx contractapi.TransactionCon
 		key2 = "nonMulti"
 
 		participant_key := key2
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -3527,7 +3732,7 @@ func (cc *SmartContract) Message_0d2xte5_Complete(ctx contractapi.TransactionCon
 			if _, ok := receiveParticipant.Participants[key2]; ok {
 				// check Participant
 				participant_key := key2
-				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+				if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 					fmt.Println(errorMessage)
 					return fmt.Errorf(errorMessage)
@@ -3542,7 +3747,7 @@ func (cc *SmartContract) Message_0d2xte5_Complete(ctx contractapi.TransactionCon
 				return fmt.Errorf(errorMessage)
 			}
 
-			if cc.check_participant(ctx, instanceID, participant_id, "") != true {
+			if cc.check_participant(ctx, instance, participant_id, "") != true {
 				errorMessage := "Not Allowed To participate as a Receiver"
 				return fmt.Errorf(errorMessage)
 			}
@@ -3591,12 +3796,22 @@ func (cc *SmartContract) Message_0d2xte5_Complete(ctx contractapi.TransactionCon
 	}
 
 	for _, event := range eventsToTrigger {
-		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+
+		fmt.Println("Event")
+		fmt.Println(event)
+
+		res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, event))
 		if err != nil {
 			return err
 		}
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		fmt.Println("State")
+		fmt.Println(state)
+
+		fmt.Println("Changed")
+		fmt.Println(changed)
 
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
@@ -3619,22 +3834,22 @@ func (cc *SmartContract) Message_0d2xte5_Advance(
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_0d2xte5"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
 		collectiveMsgName = fmt.Sprintf("Message_0d2xte5_%d", targetTaskID)
 	}
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	// Check if Multi
 	if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
@@ -3648,13 +3863,13 @@ func (cc *SmartContract) Message_0d2xte5_Advance(
 	var participantToLock *CollectiveParticipant
 	if sendParticipant.IsMulti {
 		// check if invoker in receiveParticipants
-		if cc.check_participant(ctx, instanceID, receiveParticipantID, "") == false {
+		if cc.check_participant(ctx, instance, receiveParticipantID, "") == false {
 			return fmt.Errorf("Not Allowed To Advance")
 		}
 		participantToLock = receiveParticipant
 	} else {
 		// check if invoker in senderParticipants
-		if cc.check_participant(ctx, instanceID, sendParticipantID, "") == false {
+		if cc.check_participant(ctx, instance, sendParticipantID, "") == false {
 			return fmt.Errorf("Not Allowd To Advance")
 		}
 		participantToLock = sendParticipant
@@ -3672,18 +3887,25 @@ func (cc *SmartContract) Message_0d2xte5_Advance(
 	}
 
 	event := map[string]interface{}{
-		"type": "AdvanceMessage_0d2xte5",
+		"type": "advance_Message_0d2xte5",
 	}
 	eventJsonBytes, _ := json.Marshal(event)
 
 	eventJsonString := string(eventJsonBytes)
 
-	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+	fmt.Println("Event")
+	fmt.Println(eventJsonString)
+	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
 	state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	fmt.Println("State")
+	fmt.Println(state)
+	fmt.Println("Changed")
+	fmt.Println(changed)
 
 	if !changed {
 		return fmt.Errorf("Invalid Operation")
@@ -3714,13 +3936,20 @@ func (cc *SmartContract) Event_13pbqdz(ctx contractapi.TransactionContextInterfa
 	eventJsonString := string(eventJsonBytes)
 
 	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts", "default",
-		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
 
 	if err != nil {
 		return err
 	}
 
 	state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	fmt.Println("State")
+	fmt.Println(state)
+
+	fmt.Println("Changed")
+	fmt.Println(changed)
+
 	if !changed {
 		return errors.New("Invalid transition")
 	}
@@ -3739,24 +3968,28 @@ func (cc *SmartContract) Message_1oxmq1k_Send(ctx contractapi.TransactionContext
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_1oxmq1k"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	participant_id := collectiveMsg.SendParticipantID
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
-		collectiveMsgName = fmt.Sprintf("Message_1oxmq1k_%d", targetTaskID)
+		if targetTaskID == 0 {
+			collectiveMsgName = "Message_1oxmq1k"
+		} else {
+			collectiveMsgName = fmt.Sprintf("Message_1oxmq1k_%d", targetTaskID)
+		}
 	}
 
 	// MultiParticipant Address Located
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	var errorMessage string
 	var key1, key2 string
@@ -3783,7 +4016,7 @@ func (cc *SmartContract) Message_1oxmq1k_Send(ctx contractapi.TransactionContext
 		eventsToTrigger = append(eventsToTrigger, eventJsonString)
 
 		participant_key := key1
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -3802,7 +4035,7 @@ func (cc *SmartContract) Message_1oxmq1k_Send(ctx contractapi.TransactionContext
 			if _, ok := sendParticipant.Participants[key1]; ok {
 				// check X509
 				participant_key := key1
-				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+				if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 					fmt.Println(errorMessage)
 					return fmt.Errorf(errorMessage)
@@ -3817,7 +4050,7 @@ func (cc *SmartContract) Message_1oxmq1k_Send(ctx contractapi.TransactionContext
 			}
 
 			// Attributes Based Access Control
-			if cc.check_participant(ctx, instanceID, participant_id, "") == false {
+			if cc.check_participant(ctx, instance, participant_id, "") == false {
 				errorMessage = fmt.Sprintf("Participant can't not register itself due to no conformance attributes")
 				return fmt.Errorf(errorMessage)
 			}
@@ -3838,7 +4071,7 @@ func (cc *SmartContract) Message_1oxmq1k_Send(ctx contractapi.TransactionContext
 		// Created Message
 
 		if _, ok := collectiveMsg.Messages[key1]; ok {
-
+			fmt.Println("The number of messages sent by the participant exceeds the maximum")
 		} else {
 			collectiveMsg.Messages[key1] = make(map[string]Message)
 			newAtomicMsg := Message{
@@ -3848,9 +4081,11 @@ func (cc *SmartContract) Message_1oxmq1k_Send(ctx contractapi.TransactionContext
 				FireflyTranID:         "",
 			}
 			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+			messageJsonBytes, _ := json.Marshal(collectiveMsg.Messages[key1][key2])
+			fmt.Println(string(messageJsonBytes))
 		}
 
-		message_increasing_key := len(sendParticipant.Participants)
+		message_increasing_key := len(sendParticipant.Participants) - 1 // reduce the one increased by self
 		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
 
 		event = map[string]interface{}{
@@ -3868,7 +4103,7 @@ func (cc *SmartContract) Message_1oxmq1k_Send(ctx contractapi.TransactionContext
 		key1 = "nonMulti"
 
 		participant_key := key1
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -3915,14 +4150,32 @@ func (cc *SmartContract) Message_1oxmq1k_Send(ctx contractapi.TransactionContext
 	}
 
 	for _, event := range eventsToTrigger {
-		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+
+		fmt.Printf(event)
+
+		res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, event))
+
+		if err != nil {
+			fmt.Printf(err.Error())
+			return err
+		}
+
+		fmt.Printf(string(res))
+
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		fmt.Printf("State: %s\n", state)
+		fmt.Printf("Changed: %t\n", changed)
+
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
 		}
 		instance.CurrentState = state
 	}
+
+	instanceJson, _ := json.Marshal(instance)
+	fmt.Println(string(instanceJson))
 
 	for _, msg := range msgsToHandle {
 		cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID, key1, key2)
@@ -3938,22 +4191,26 @@ func (cc *SmartContract) Message_1oxmq1k_Complete(ctx contractapi.TransactionCon
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_1oxmq1k"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	participant_id := collectiveMsg.ReceiveParticipantID
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
-		collectiveMsgName = fmt.Sprintf("Message_1oxmq1k_%d", targetTaskID)
+		if targetTaskID == 0 {
+			collectiveMsgName = "Message_1oxmq1k"
+		} else {
+			collectiveMsgName = fmt.Sprintf("Message_1oxmq1k_%d", targetTaskID)
+		}
 	}
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	var errorMessage string
 	var key1, key2 string
@@ -3978,7 +4235,7 @@ func (cc *SmartContract) Message_1oxmq1k_Complete(ctx contractapi.TransactionCon
 		eventsToTrigger = append(eventsToTrigger, eventJsonString)
 
 		participant_key := key2
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -3993,7 +4250,7 @@ func (cc *SmartContract) Message_1oxmq1k_Complete(ctx contractapi.TransactionCon
 		key2 = "nonMulti"
 
 		participant_key := key2
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -4027,7 +4284,7 @@ func (cc *SmartContract) Message_1oxmq1k_Complete(ctx contractapi.TransactionCon
 			if _, ok := receiveParticipant.Participants[key2]; ok {
 				// check Participant
 				participant_key := key2
-				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+				if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 					fmt.Println(errorMessage)
 					return fmt.Errorf(errorMessage)
@@ -4042,7 +4299,7 @@ func (cc *SmartContract) Message_1oxmq1k_Complete(ctx contractapi.TransactionCon
 				return fmt.Errorf(errorMessage)
 			}
 
-			if cc.check_participant(ctx, instanceID, participant_id, "") != true {
+			if cc.check_participant(ctx, instance, participant_id, "") != true {
 				errorMessage := "Not Allowed To participate as a Receiver"
 				return fmt.Errorf(errorMessage)
 			}
@@ -4091,12 +4348,22 @@ func (cc *SmartContract) Message_1oxmq1k_Complete(ctx contractapi.TransactionCon
 	}
 
 	for _, event := range eventsToTrigger {
-		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+
+		fmt.Println("Event")
+		fmt.Println(event)
+
+		res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, event))
 		if err != nil {
 			return err
 		}
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		fmt.Println("State")
+		fmt.Println(state)
+
+		fmt.Println("Changed")
+		fmt.Println(changed)
 
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
@@ -4119,22 +4386,22 @@ func (cc *SmartContract) Message_1oxmq1k_Advance(
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_1oxmq1k"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
 		collectiveMsgName = fmt.Sprintf("Message_1oxmq1k_%d", targetTaskID)
 	}
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	// Check if Multi
 	if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
@@ -4148,13 +4415,13 @@ func (cc *SmartContract) Message_1oxmq1k_Advance(
 	var participantToLock *CollectiveParticipant
 	if sendParticipant.IsMulti {
 		// check if invoker in receiveParticipants
-		if cc.check_participant(ctx, instanceID, receiveParticipantID, "") == false {
+		if cc.check_participant(ctx, instance, receiveParticipantID, "") == false {
 			return fmt.Errorf("Not Allowed To Advance")
 		}
 		participantToLock = receiveParticipant
 	} else {
 		// check if invoker in senderParticipants
-		if cc.check_participant(ctx, instanceID, sendParticipantID, "") == false {
+		if cc.check_participant(ctx, instance, sendParticipantID, "") == false {
 			return fmt.Errorf("Not Allowd To Advance")
 		}
 		participantToLock = sendParticipant
@@ -4172,18 +4439,25 @@ func (cc *SmartContract) Message_1oxmq1k_Advance(
 	}
 
 	event := map[string]interface{}{
-		"type": "AdvanceMessage_1oxmq1k",
+		"type": "advance_Message_1oxmq1k",
 	}
 	eventJsonBytes, _ := json.Marshal(event)
 
 	eventJsonString := string(eventJsonBytes)
 
-	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+	fmt.Println("Event")
+	fmt.Println(eventJsonString)
+	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
 	state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	fmt.Println("State")
+	fmt.Println(state)
+	fmt.Println("Changed")
+	fmt.Println(changed)
 
 	if !changed {
 		return fmt.Errorf("Invalid Operation")
@@ -4217,13 +4491,19 @@ func (cc *SmartContract) Gateway_1cr0nma(ctx contractapi.TransactionContextInter
 
 	eventJsonString := string(eventJsonBytes)
 
-	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
 
 	if err != nil {
 		return err
 	}
 	new_status, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	fmt.Println("State")
+	fmt.Println(new_status)
+
+	fmt.Println("Changed")
+	fmt.Println(changed)
 
 	if !changed {
 		return errors.New("Invalid transition")
@@ -4253,13 +4533,19 @@ func (cc *SmartContract) Gateway_0ep8cuh(ctx contractapi.TransactionContextInter
 
 	eventJsonString := string(eventJsonBytes)
 
-	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
 
 	if err != nil {
 		return err
 	}
 	new_status, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	fmt.Println("State")
+	fmt.Println(new_status)
+
+	fmt.Println("Changed")
+	fmt.Println(changed)
 
 	if !changed {
 		return errors.New("Invalid transition")
@@ -4278,24 +4564,28 @@ func (cc *SmartContract) Message_0i5t589_Send(ctx contractapi.TransactionContext
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_0i5t589"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	participant_id := collectiveMsg.SendParticipantID
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
-		collectiveMsgName = fmt.Sprintf("Message_0i5t589_%d", targetTaskID)
+		if targetTaskID == 0 {
+			collectiveMsgName = "Message_0i5t589"
+		} else {
+			collectiveMsgName = fmt.Sprintf("Message_0i5t589_%d", targetTaskID)
+		}
 	}
 
 	// MultiParticipant Address Located
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	var errorMessage string
 	var key1, key2 string
@@ -4322,7 +4612,7 @@ func (cc *SmartContract) Message_0i5t589_Send(ctx contractapi.TransactionContext
 		eventsToTrigger = append(eventsToTrigger, eventJsonString)
 
 		participant_key := key1
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -4341,7 +4631,7 @@ func (cc *SmartContract) Message_0i5t589_Send(ctx contractapi.TransactionContext
 			if _, ok := sendParticipant.Participants[key1]; ok {
 				// check X509
 				participant_key := key1
-				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+				if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 					fmt.Println(errorMessage)
 					return fmt.Errorf(errorMessage)
@@ -4356,7 +4646,7 @@ func (cc *SmartContract) Message_0i5t589_Send(ctx contractapi.TransactionContext
 			}
 
 			// Attributes Based Access Control
-			if cc.check_participant(ctx, instanceID, participant_id, "") == false {
+			if cc.check_participant(ctx, instance, participant_id, "") == false {
 				errorMessage = fmt.Sprintf("Participant can't not register itself due to no conformance attributes")
 				return fmt.Errorf(errorMessage)
 			}
@@ -4377,7 +4667,7 @@ func (cc *SmartContract) Message_0i5t589_Send(ctx contractapi.TransactionContext
 		// Created Message
 
 		if _, ok := collectiveMsg.Messages[key1]; ok {
-
+			fmt.Println("The number of messages sent by the participant exceeds the maximum")
 		} else {
 			collectiveMsg.Messages[key1] = make(map[string]Message)
 			newAtomicMsg := Message{
@@ -4387,9 +4677,11 @@ func (cc *SmartContract) Message_0i5t589_Send(ctx contractapi.TransactionContext
 				FireflyTranID:         "",
 			}
 			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+			messageJsonBytes, _ := json.Marshal(collectiveMsg.Messages[key1][key2])
+			fmt.Println(string(messageJsonBytes))
 		}
 
-		message_increasing_key := len(sendParticipant.Participants)
+		message_increasing_key := len(sendParticipant.Participants) - 1 // reduce the one increased by self
 		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
 
 		event = map[string]interface{}{
@@ -4407,7 +4699,7 @@ func (cc *SmartContract) Message_0i5t589_Send(ctx contractapi.TransactionContext
 		key1 = "nonMulti"
 
 		participant_key := key1
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -4454,14 +4746,32 @@ func (cc *SmartContract) Message_0i5t589_Send(ctx contractapi.TransactionContext
 	}
 
 	for _, event := range eventsToTrigger {
-		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+
+		fmt.Printf(event)
+
+		res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, event))
+
+		if err != nil {
+			fmt.Printf(err.Error())
+			return err
+		}
+
+		fmt.Printf(string(res))
+
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		fmt.Printf("State: %s\n", state)
+		fmt.Printf("Changed: %t\n", changed)
+
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
 		}
 		instance.CurrentState = state
 	}
+
+	instanceJson, _ := json.Marshal(instance)
+	fmt.Println(string(instanceJson))
 
 	for _, msg := range msgsToHandle {
 		cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID, key1, key2)
@@ -4477,22 +4787,26 @@ func (cc *SmartContract) Message_0i5t589_Complete(ctx contractapi.TransactionCon
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_0i5t589"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	participant_id := collectiveMsg.ReceiveParticipantID
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
-		collectiveMsgName = fmt.Sprintf("Message_0i5t589_%d", targetTaskID)
+		if targetTaskID == 0 {
+			collectiveMsgName = "Message_0i5t589"
+		} else {
+			collectiveMsgName = fmt.Sprintf("Message_0i5t589_%d", targetTaskID)
+		}
 	}
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	var errorMessage string
 	var key1, key2 string
@@ -4517,7 +4831,7 @@ func (cc *SmartContract) Message_0i5t589_Complete(ctx contractapi.TransactionCon
 		eventsToTrigger = append(eventsToTrigger, eventJsonString)
 
 		participant_key := key2
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -4532,7 +4846,7 @@ func (cc *SmartContract) Message_0i5t589_Complete(ctx contractapi.TransactionCon
 		key2 = "nonMulti"
 
 		participant_key := key2
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -4566,7 +4880,7 @@ func (cc *SmartContract) Message_0i5t589_Complete(ctx contractapi.TransactionCon
 			if _, ok := receiveParticipant.Participants[key2]; ok {
 				// check Participant
 				participant_key := key2
-				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+				if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 					fmt.Println(errorMessage)
 					return fmt.Errorf(errorMessage)
@@ -4581,7 +4895,7 @@ func (cc *SmartContract) Message_0i5t589_Complete(ctx contractapi.TransactionCon
 				return fmt.Errorf(errorMessage)
 			}
 
-			if cc.check_participant(ctx, instanceID, participant_id, "") != true {
+			if cc.check_participant(ctx, instance, participant_id, "") != true {
 				errorMessage := "Not Allowed To participate as a Receiver"
 				return fmt.Errorf(errorMessage)
 			}
@@ -4630,12 +4944,22 @@ func (cc *SmartContract) Message_0i5t589_Complete(ctx contractapi.TransactionCon
 	}
 
 	for _, event := range eventsToTrigger {
-		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+
+		fmt.Println("Event")
+		fmt.Println(event)
+
+		res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, event))
 		if err != nil {
 			return err
 		}
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		fmt.Println("State")
+		fmt.Println(state)
+
+		fmt.Println("Changed")
+		fmt.Println(changed)
 
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
@@ -4658,22 +4982,22 @@ func (cc *SmartContract) Message_0i5t589_Advance(
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_0i5t589"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
 		collectiveMsgName = fmt.Sprintf("Message_0i5t589_%d", targetTaskID)
 	}
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	// Check if Multi
 	if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
@@ -4687,13 +5011,13 @@ func (cc *SmartContract) Message_0i5t589_Advance(
 	var participantToLock *CollectiveParticipant
 	if sendParticipant.IsMulti {
 		// check if invoker in receiveParticipants
-		if cc.check_participant(ctx, instanceID, receiveParticipantID, "") == false {
+		if cc.check_participant(ctx, instance, receiveParticipantID, "") == false {
 			return fmt.Errorf("Not Allowed To Advance")
 		}
 		participantToLock = receiveParticipant
 	} else {
 		// check if invoker in senderParticipants
-		if cc.check_participant(ctx, instanceID, sendParticipantID, "") == false {
+		if cc.check_participant(ctx, instance, sendParticipantID, "") == false {
 			return fmt.Errorf("Not Allowd To Advance")
 		}
 		participantToLock = sendParticipant
@@ -4711,18 +5035,25 @@ func (cc *SmartContract) Message_0i5t589_Advance(
 	}
 
 	event := map[string]interface{}{
-		"type": "AdvanceMessage_0i5t589",
+		"type": "advance_Message_0i5t589",
 	}
 	eventJsonBytes, _ := json.Marshal(event)
 
 	eventJsonString := string(eventJsonBytes)
 
-	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+	fmt.Println("Event")
+	fmt.Println(eventJsonString)
+	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
 	state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	fmt.Println("State")
+	fmt.Println(state)
+	fmt.Println("Changed")
+	fmt.Println(changed)
 
 	if !changed {
 		return fmt.Errorf("Invalid Operation")
@@ -4745,24 +5076,28 @@ func (cc *SmartContract) Message_0oi7nug_Send(ctx contractapi.TransactionContext
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_0oi7nug"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	participant_id := collectiveMsg.SendParticipantID
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
-		collectiveMsgName = fmt.Sprintf("Message_0oi7nug_%d", targetTaskID)
+		if targetTaskID == 0 {
+			collectiveMsgName = "Message_0oi7nug"
+		} else {
+			collectiveMsgName = fmt.Sprintf("Message_0oi7nug_%d", targetTaskID)
+		}
 	}
 
 	// MultiParticipant Address Located
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	var errorMessage string
 	var key1, key2 string
@@ -4789,7 +5124,7 @@ func (cc *SmartContract) Message_0oi7nug_Send(ctx contractapi.TransactionContext
 		eventsToTrigger = append(eventsToTrigger, eventJsonString)
 
 		participant_key := key1
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -4808,7 +5143,7 @@ func (cc *SmartContract) Message_0oi7nug_Send(ctx contractapi.TransactionContext
 			if _, ok := sendParticipant.Participants[key1]; ok {
 				// check X509
 				participant_key := key1
-				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+				if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 					fmt.Println(errorMessage)
 					return fmt.Errorf(errorMessage)
@@ -4823,7 +5158,7 @@ func (cc *SmartContract) Message_0oi7nug_Send(ctx contractapi.TransactionContext
 			}
 
 			// Attributes Based Access Control
-			if cc.check_participant(ctx, instanceID, participant_id, "") == false {
+			if cc.check_participant(ctx, instance, participant_id, "") == false {
 				errorMessage = fmt.Sprintf("Participant can't not register itself due to no conformance attributes")
 				return fmt.Errorf(errorMessage)
 			}
@@ -4844,7 +5179,7 @@ func (cc *SmartContract) Message_0oi7nug_Send(ctx contractapi.TransactionContext
 		// Created Message
 
 		if _, ok := collectiveMsg.Messages[key1]; ok {
-
+			fmt.Println("The number of messages sent by the participant exceeds the maximum")
 		} else {
 			collectiveMsg.Messages[key1] = make(map[string]Message)
 			newAtomicMsg := Message{
@@ -4854,9 +5189,11 @@ func (cc *SmartContract) Message_0oi7nug_Send(ctx contractapi.TransactionContext
 				FireflyTranID:         "",
 			}
 			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+			messageJsonBytes, _ := json.Marshal(collectiveMsg.Messages[key1][key2])
+			fmt.Println(string(messageJsonBytes))
 		}
 
-		message_increasing_key := len(sendParticipant.Participants)
+		message_increasing_key := len(sendParticipant.Participants) - 1 // reduce the one increased by self
 		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
 
 		event = map[string]interface{}{
@@ -4874,7 +5211,7 @@ func (cc *SmartContract) Message_0oi7nug_Send(ctx contractapi.TransactionContext
 		key1 = "nonMulti"
 
 		participant_key := key1
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -4921,14 +5258,32 @@ func (cc *SmartContract) Message_0oi7nug_Send(ctx contractapi.TransactionContext
 	}
 
 	for _, event := range eventsToTrigger {
-		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+
+		fmt.Printf(event)
+
+		res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, event))
+
+		if err != nil {
+			fmt.Printf(err.Error())
+			return err
+		}
+
+		fmt.Printf(string(res))
+
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		fmt.Printf("State: %s\n", state)
+		fmt.Printf("Changed: %t\n", changed)
+
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
 		}
 		instance.CurrentState = state
 	}
+
+	instanceJson, _ := json.Marshal(instance)
+	fmt.Println(string(instanceJson))
 
 	for _, msg := range msgsToHandle {
 		cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID, key1, key2)
@@ -4944,22 +5299,26 @@ func (cc *SmartContract) Message_0oi7nug_Complete(ctx contractapi.TransactionCon
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_0oi7nug"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	participant_id := collectiveMsg.ReceiveParticipantID
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
-		collectiveMsgName = fmt.Sprintf("Message_0oi7nug_%d", targetTaskID)
+		if targetTaskID == 0 {
+			collectiveMsgName = "Message_0oi7nug"
+		} else {
+			collectiveMsgName = fmt.Sprintf("Message_0oi7nug_%d", targetTaskID)
+		}
 	}
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	var errorMessage string
 	var key1, key2 string
@@ -4984,7 +5343,7 @@ func (cc *SmartContract) Message_0oi7nug_Complete(ctx contractapi.TransactionCon
 		eventsToTrigger = append(eventsToTrigger, eventJsonString)
 
 		participant_key := key2
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -4999,7 +5358,7 @@ func (cc *SmartContract) Message_0oi7nug_Complete(ctx contractapi.TransactionCon
 		key2 = "nonMulti"
 
 		participant_key := key2
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -5033,7 +5392,7 @@ func (cc *SmartContract) Message_0oi7nug_Complete(ctx contractapi.TransactionCon
 			if _, ok := receiveParticipant.Participants[key2]; ok {
 				// check Participant
 				participant_key := key2
-				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+				if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 					fmt.Println(errorMessage)
 					return fmt.Errorf(errorMessage)
@@ -5048,7 +5407,7 @@ func (cc *SmartContract) Message_0oi7nug_Complete(ctx contractapi.TransactionCon
 				return fmt.Errorf(errorMessage)
 			}
 
-			if cc.check_participant(ctx, instanceID, participant_id, "") != true {
+			if cc.check_participant(ctx, instance, participant_id, "") != true {
 				errorMessage := "Not Allowed To participate as a Receiver"
 				return fmt.Errorf(errorMessage)
 			}
@@ -5097,12 +5456,22 @@ func (cc *SmartContract) Message_0oi7nug_Complete(ctx contractapi.TransactionCon
 	}
 
 	for _, event := range eventsToTrigger {
-		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+
+		fmt.Println("Event")
+		fmt.Println(event)
+
+		res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, event))
 		if err != nil {
 			return err
 		}
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		fmt.Println("State")
+		fmt.Println(state)
+
+		fmt.Println("Changed")
+		fmt.Println(changed)
 
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
@@ -5125,22 +5494,22 @@ func (cc *SmartContract) Message_0oi7nug_Advance(
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_0oi7nug"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
 		collectiveMsgName = fmt.Sprintf("Message_0oi7nug_%d", targetTaskID)
 	}
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	// Check if Multi
 	if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
@@ -5154,13 +5523,13 @@ func (cc *SmartContract) Message_0oi7nug_Advance(
 	var participantToLock *CollectiveParticipant
 	if sendParticipant.IsMulti {
 		// check if invoker in receiveParticipants
-		if cc.check_participant(ctx, instanceID, receiveParticipantID, "") == false {
+		if cc.check_participant(ctx, instance, receiveParticipantID, "") == false {
 			return fmt.Errorf("Not Allowed To Advance")
 		}
 		participantToLock = receiveParticipant
 	} else {
 		// check if invoker in senderParticipants
-		if cc.check_participant(ctx, instanceID, sendParticipantID, "") == false {
+		if cc.check_participant(ctx, instance, sendParticipantID, "") == false {
 			return fmt.Errorf("Not Allowd To Advance")
 		}
 		participantToLock = sendParticipant
@@ -5178,18 +5547,25 @@ func (cc *SmartContract) Message_0oi7nug_Advance(
 	}
 
 	event := map[string]interface{}{
-		"type": "AdvanceMessage_0oi7nug",
+		"type": "advance_Message_0oi7nug",
 	}
 	eventJsonBytes, _ := json.Marshal(event)
 
 	eventJsonString := string(eventJsonBytes)
 
-	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+	fmt.Println("Event")
+	fmt.Println(eventJsonString)
+	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
 	state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	fmt.Println("State")
+	fmt.Println(state)
+	fmt.Println("Changed")
+	fmt.Println(changed)
 
 	if !changed {
 		return fmt.Errorf("Invalid Operation")
@@ -5212,24 +5588,28 @@ func (cc *SmartContract) Message_1ip9ryp_Send(ctx contractapi.TransactionContext
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_1ip9ryp"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	participant_id := collectiveMsg.SendParticipantID
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
-		collectiveMsgName = fmt.Sprintf("Message_1ip9ryp_%d", targetTaskID)
+		if targetTaskID == 0 {
+			collectiveMsgName = "Message_1ip9ryp"
+		} else {
+			collectiveMsgName = fmt.Sprintf("Message_1ip9ryp_%d", targetTaskID)
+		}
 	}
 
 	// MultiParticipant Address Located
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	var errorMessage string
 	var key1, key2 string
@@ -5256,7 +5636,7 @@ func (cc *SmartContract) Message_1ip9ryp_Send(ctx contractapi.TransactionContext
 		eventsToTrigger = append(eventsToTrigger, eventJsonString)
 
 		participant_key := key1
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -5275,7 +5655,7 @@ func (cc *SmartContract) Message_1ip9ryp_Send(ctx contractapi.TransactionContext
 			if _, ok := sendParticipant.Participants[key1]; ok {
 				// check X509
 				participant_key := key1
-				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+				if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 					fmt.Println(errorMessage)
 					return fmt.Errorf(errorMessage)
@@ -5290,7 +5670,7 @@ func (cc *SmartContract) Message_1ip9ryp_Send(ctx contractapi.TransactionContext
 			}
 
 			// Attributes Based Access Control
-			if cc.check_participant(ctx, instanceID, participant_id, "") == false {
+			if cc.check_participant(ctx, instance, participant_id, "") == false {
 				errorMessage = fmt.Sprintf("Participant can't not register itself due to no conformance attributes")
 				return fmt.Errorf(errorMessage)
 			}
@@ -5311,7 +5691,7 @@ func (cc *SmartContract) Message_1ip9ryp_Send(ctx contractapi.TransactionContext
 		// Created Message
 
 		if _, ok := collectiveMsg.Messages[key1]; ok {
-
+			fmt.Println("The number of messages sent by the participant exceeds the maximum")
 		} else {
 			collectiveMsg.Messages[key1] = make(map[string]Message)
 			newAtomicMsg := Message{
@@ -5321,9 +5701,11 @@ func (cc *SmartContract) Message_1ip9ryp_Send(ctx contractapi.TransactionContext
 				FireflyTranID:         "",
 			}
 			collectiveMsg.Messages[key1][key2] = newAtomicMsg
+			messageJsonBytes, _ := json.Marshal(collectiveMsg.Messages[key1][key2])
+			fmt.Println(string(messageJsonBytes))
 		}
 
-		message_increasing_key := len(sendParticipant.Participants)
+		message_increasing_key := len(sendParticipant.Participants) - 1 // reduce the one increased by self
 		msgsToHandle = append(msgsToHandle, collectiveMsg.Messages[key1][key2])
 
 		event = map[string]interface{}{
@@ -5341,7 +5723,7 @@ func (cc *SmartContract) Message_1ip9ryp_Send(ctx contractapi.TransactionContext
 		key1 = "nonMulti"
 
 		participant_key := key1
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -5388,14 +5770,32 @@ func (cc *SmartContract) Message_1ip9ryp_Send(ctx contractapi.TransactionContext
 	}
 
 	for _, event := range eventsToTrigger {
-		res, _ := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+
+		fmt.Printf(event)
+
+		res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, event))
+
+		if err != nil {
+			fmt.Printf(err.Error())
+			return err
+		}
+
+		fmt.Printf(string(res))
+
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		fmt.Printf("State: %s\n", state)
+		fmt.Printf("Changed: %t\n", changed)
+
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
 		}
 		instance.CurrentState = state
 	}
+
+	instanceJson, _ := json.Marshal(instance)
+	fmt.Println(string(instanceJson))
 
 	for _, msg := range msgsToHandle {
 		cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID, key1, key2)
@@ -5411,22 +5811,26 @@ func (cc *SmartContract) Message_1ip9ryp_Complete(ctx contractapi.TransactionCon
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_1ip9ryp"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	participant_id := collectiveMsg.ReceiveParticipantID
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
-		collectiveMsgName = fmt.Sprintf("Message_1ip9ryp_%d", targetTaskID)
+		if targetTaskID == 0 {
+			collectiveMsgName = "Message_1ip9ryp"
+		} else {
+			collectiveMsgName = fmt.Sprintf("Message_1ip9ryp_%d", targetTaskID)
+		}
 	}
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	var errorMessage string
 	var key1, key2 string
@@ -5451,7 +5855,7 @@ func (cc *SmartContract) Message_1ip9ryp_Complete(ctx contractapi.TransactionCon
 		eventsToTrigger = append(eventsToTrigger, eventJsonString)
 
 		participant_key := key2
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -5466,7 +5870,7 @@ func (cc *SmartContract) Message_1ip9ryp_Complete(ctx contractapi.TransactionCon
 		key2 = "nonMulti"
 
 		participant_key := key2
-		if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+		if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 			errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 			fmt.Println(errorMessage)
 			return fmt.Errorf(errorMessage)
@@ -5500,7 +5904,7 @@ func (cc *SmartContract) Message_1ip9ryp_Complete(ctx contractapi.TransactionCon
 			if _, ok := receiveParticipant.Participants[key2]; ok {
 				// check Participant
 				participant_key := key2
-				if cc.check_participant(ctx, instanceID, participant_id, participant_key) == false {
+				if cc.check_participant(ctx, instance, participant_id, participant_key) == false {
 					errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", participant_id)
 					fmt.Println(errorMessage)
 					return fmt.Errorf(errorMessage)
@@ -5515,7 +5919,7 @@ func (cc *SmartContract) Message_1ip9ryp_Complete(ctx contractapi.TransactionCon
 				return fmt.Errorf(errorMessage)
 			}
 
-			if cc.check_participant(ctx, instanceID, participant_id, "") != true {
+			if cc.check_participant(ctx, instance, participant_id, "") != true {
 				errorMessage := "Not Allowed To participate as a Receiver"
 				return fmt.Errorf(errorMessage)
 			}
@@ -5564,12 +5968,22 @@ func (cc *SmartContract) Message_1ip9ryp_Complete(ctx contractapi.TransactionCon
 	}
 
 	for _, event := range eventsToTrigger {
-		res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, event))
+
+		fmt.Println("Event")
+		fmt.Println(event)
+
+		res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+			stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, event))
 		if err != nil {
 			return err
 		}
 		state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+		fmt.Println("State")
+		fmt.Println(state)
+
+		fmt.Println("Changed")
+		fmt.Println(changed)
 
 		if !changed {
 			return fmt.Errorf("The state machine does not change")
@@ -5592,22 +6006,22 @@ func (cc *SmartContract) Message_1ip9ryp_Advance(
 	instance, _ := cc.GetInstance(ctx, instanceID)
 
 	collectiveMsgName := "Message_1ip9ryp"
-	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ := cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 
 	// MultiTask Address Located
 	choreographyTaskID := collectiveMsg.ChoreographyTaskID
 
-	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instanceID, choreographyTaskID)
+	choreographyTask, _ := cc.ReadChoreographyTask(ctx, instance, choreographyTaskID)
 	if choreographyTask.IsMulti == true {
 		collectiveMsgName = fmt.Sprintf("Message_1ip9ryp_%d", targetTaskID)
 	}
 
-	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instanceID, collectiveMsgName)
+	collectiveMsg, _ = cc.ReadCollectiveMsg(ctx, instance, collectiveMsgName)
 
 	sendParticipantID := collectiveMsg.SendParticipantID
 	receiveParticipantID := collectiveMsg.ReceiveParticipantID
-	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, sendParticipantID)
-	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instanceID, receiveParticipantID)
+	sendParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, sendParticipantID)
+	receiveParticipant, _ := cc.ReadCollectiveParticipant(ctx, instance, receiveParticipantID)
 
 	// Check if Multi
 	if sendParticipant.IsMulti == true && receiveParticipant.IsMulti == true {
@@ -5621,13 +6035,13 @@ func (cc *SmartContract) Message_1ip9ryp_Advance(
 	var participantToLock *CollectiveParticipant
 	if sendParticipant.IsMulti {
 		// check if invoker in receiveParticipants
-		if cc.check_participant(ctx, instanceID, receiveParticipantID, "") == false {
+		if cc.check_participant(ctx, instance, receiveParticipantID, "") == false {
 			return fmt.Errorf("Not Allowed To Advance")
 		}
 		participantToLock = receiveParticipant
 	} else {
 		// check if invoker in senderParticipants
-		if cc.check_participant(ctx, instanceID, sendParticipantID, "") == false {
+		if cc.check_participant(ctx, instance, sendParticipantID, "") == false {
 			return fmt.Errorf("Not Allowd To Advance")
 		}
 		participantToLock = sendParticipant
@@ -5645,18 +6059,25 @@ func (cc *SmartContract) Message_1ip9ryp_Advance(
 	}
 
 	event := map[string]interface{}{
-		"type": "AdvanceMessage_1ip9ryp",
+		"type": "advance_Message_1ip9ryp",
 	}
 	eventJsonBytes, _ := json.Marshal(event)
 
 	eventJsonString := string(eventJsonBytes)
 
-	res, err := cc.Invoke_Other_chaincode(ctx, "stateCharts:v1", "default",
-		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.CurrentState, eventJsonString))
+	fmt.Println("Event")
+	fmt.Println(eventJsonString)
+	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
+		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
 	state, changed := stateCharts.DecodeTriggerActionResult(res)
+
+	fmt.Println("State")
+	fmt.Println(state)
+	fmt.Println("Changed")
+	fmt.Println(changed)
 
 	if !changed {
 		return fmt.Errorf("Invalid Operation")

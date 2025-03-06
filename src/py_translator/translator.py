@@ -737,7 +737,7 @@ class GoChaincodeTranslator:
     def _target_task_id_param(self):
         return {
             "name": "targetTaskID",
-            "schema": {"type": "int"},
+            "schema": {"type": "integer"},
         }
 
     def _confirm_target_x509_param(self):
@@ -876,6 +876,18 @@ class GoChaincodeTranslator:
                 pathname="",
                 description="Create a new instance",
                 params=[{"name": "initParametersBytes", "schema": {"type": "string"}}],
+            )
+        )
+        # GetSnapshot
+        ffi_items.append(
+            self._generate_ffi_item(
+                name="GetCurrentState",
+                pathname="",
+                description="Get the snapshot of the chaincode",
+                params=[{
+                    "name": "instanceID",
+                    "schema": {"type": "string"},
+                }],
             )
         )
 

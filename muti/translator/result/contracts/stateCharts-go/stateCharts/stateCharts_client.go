@@ -7,10 +7,11 @@ type ExecuteStateMachineResult struct {
 	Changed  bool   `json:"changed"`
 }
 
-func EncodeGetDefaultSnapshotArgs(stateMachineDescription string) [][]byte {
-	_args := make([][]byte, 4)
+func EncodeGetDefaultSnapshotArgs(stateMachineDescription string, additionalContent string) [][]byte {
+	_args := make([][]byte, 3)
 	_args[0] = []byte("GetDefaultSnapshot")
 	_args[1] = []byte(stateMachineDescription)
+	_args[2] = []byte(additionalContent)
 	return _args
 }
 
@@ -18,12 +19,13 @@ func DecodeGetDefaultSnapshotResult(b []byte) string {
 	return string(b)
 }
 
-func EncodeExecuteStateMachineArgs(stateMachineDescription string, currentState string, event string) [][]byte {
-	_args := make([][]byte, 4)
+func EncodeExecuteStateMachineArgs(stateMachineDescription string, additionalContent string, currentState string, event string) [][]byte {
+	_args := make([][]byte, 5)
 	_args[0] = []byte("ExecuteStateMachine")
 	_args[1] = []byte(stateMachineDescription)
-	_args[2] = []byte(currentState)
-	_args[3] = []byte(event)
+	_args[2] = []byte(additionalContent)
+	_args[3] = []byte(currentState)
+	_args[4] = []byte(event)
 	return _args
 }
 

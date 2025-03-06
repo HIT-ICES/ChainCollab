@@ -305,6 +305,7 @@ export const getEnvironment = async (environmentId: string, consortiumId: string
       fireflyStatus: res.data.firefly_status,
       oracleStatus: res.data.Oracle_status,
       dmnStatus: res.data.DMN_status,
+      stateEngineStatus: res.data.StateEngine_status,
     }
   } catch (err) {
     console.error("获取env失败", err);
