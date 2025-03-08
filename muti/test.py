@@ -9,7 +9,7 @@ import re
 from datetime import datetime
 
 
-ContractName = "80-d37d45"
+ContractName = "BPMN140-7c6503"
 
 
 param_file_dir = "/home/logres/system/Experiment/BPMN"
@@ -398,7 +398,7 @@ if "__main__" == __name__:
         with open("./instance_id.json", "r") as f:
             instance_ids = json.load(f)
 
-        instance_id_start = instance_ids[ContractName]
+        instance_id_start = instance_ids[ContractName] if ContractName in instance_ids else 0
         test_batch_times = int(sys.argv[2])
         chaincode_container_id = sys.argv[3]
         test_target_id = sys.argv[4]
