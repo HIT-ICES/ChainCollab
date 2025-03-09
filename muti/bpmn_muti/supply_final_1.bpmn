@@ -6,7 +6,6 @@
   <bpmn2:message id="Message_0i0hszn" name="Product retail transactions">
     <bpmn2:documentation>{"properties":{"dfsf":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
   </bpmn2:message>
-  <bpmn2:message id="Message_0iei3r5" />
   <bpmn2:message id="Message_1gc93jt" name="confirm supplyer">
     <bpmn2:documentation>{"properties":{"confirm":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
   </bpmn2:message>
@@ -53,7 +52,6 @@
     </bpmn2:participant>
     <bpmn2:messageFlow id="MessageFlow_0sctrch" sourceRef="Participant_19j1e3o" targetRef="Participant_19mgbdn" messageRef="Message_0c6gaxa" />
     <bpmn2:messageFlow id="MessageFlow_1hdmvnh" sourceRef="Participant_19mgbdn" targetRef="Participant_0w6qkdf" messageRef="Message_0i0hszn" />
-    <bpmn2:messageFlow id="MessageFlow_1s0ekzm" sourceRef="Participant_0w6qkdf" targetRef="Participant_19mgbdn" messageRef="Message_0iei3r5" />
     <bpmn2:messageFlow id="MessageFlow_1anfal9" sourceRef="Participant_0w6qkdf" targetRef="Participant_19mgbdn" messageRef="Message_1gc93jt" />
     <bpmn2:messageFlow id="MessageFlow_1fja57i" sourceRef="Participant_09cjol2" targetRef="Participant_19mgbdn" messageRef="Message_1knv6fx" />
     <bpmn2:messageFlow id="MessageFlow_1lbg7vk" sourceRef="Participant_09cjol2" targetRef="Participant_0sa2v7d" messageRef="Message_059zq2i" />
@@ -140,9 +138,9 @@
       <bpmn2:outgoing>Flow_0p14v4s</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
     <bpmn2:sequenceFlow id="Flow_1rdmhkh" sourceRef="ChoreographyTask_0p8dcch" targetRef="Gateway_1cr0nma" />
-    <bpmn2:sequenceFlow id="Flow_0005j8y" name="speed== &#34;ordinary&#34;" sourceRef="Gateway_0ep8cuh" targetRef="ChoreographyTask_0p8dcch" />
+    <bpmn2:sequenceFlow id="Flow_0005j8y" name="speed==&#34;ordinary&#34;" sourceRef="Gateway_0ep8cuh" targetRef="ChoreographyTask_0p8dcch" />
     <bpmn2:sequenceFlow id="Flow_1c8hcn5" sourceRef="ChoreographyTask_1cceq4q" targetRef="Gateway_0ep8cuh" />
-    <bpmn2:choreographyTask id="ChoreographyTask_143abz6" name="New Activity" initiatingParticipantRef="Participant_19mgbdn">
+    <bpmn2:choreographyTask id="ChoreographyTask_143abz6" name="Supply Order Request" initiatingParticipantRef="Participant_19mgbdn">
       <bpmn2:incoming>Flow_1b1w1dn</bpmn2:incoming>
       <bpmn2:outgoing>Flow_12j2wny</bpmn2:outgoing>
       <bpmn2:participantRef>Participant_19mgbdn</bpmn2:participantRef>
@@ -206,13 +204,12 @@
     </bpmn2:choreographyTask>
     <bpmn2:sequenceFlow id="Flow_1sqaka9" sourceRef="Gateway_0v5xkff" targetRef="ChoreographyTask_07h1cp8" />
     <bpmn2:sequenceFlow id="Flow_146tjwb" sourceRef="ChoreographyTask_07h1cp8" targetRef="Gateway_1fbifca" />
-    <bpmn2:choreographyTask id="ChoreographyTask_05ad6d7" name="New Activity" initiatingParticipantRef="Participant_19mgbdn">
+    <bpmn2:choreographyTask id="ChoreographyTask_05ad6d7" name="Product retail transactions" initiatingParticipantRef="Participant_19mgbdn">
       <bpmn2:incoming>Flow_15ej2df</bpmn2:incoming>
       <bpmn2:outgoing>Flow_08l6wli</bpmn2:outgoing>
       <bpmn2:participantRef>Participant_19mgbdn</bpmn2:participantRef>
       <bpmn2:participantRef>Participant_0w6qkdf</bpmn2:participantRef>
       <bpmn2:messageFlowRef>MessageFlow_1hdmvnh</bpmn2:messageFlowRef>
-      <bpmn2:messageFlowRef>MessageFlow_1s0ekzm</bpmn2:messageFlowRef>
     </bpmn2:choreographyTask>
     <bpmn2:sequenceFlow id="Flow_15ej2df" sourceRef="Gateway_1cr0nma" targetRef="ChoreographyTask_05ad6d7" />
     <bpmn2:endEvent id="Event_02hs3zi">
@@ -340,7 +337,7 @@
         <di:waypoint x="880" y="330" />
         <di:waypoint x="796" y="330" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="808" y="302" width="48" height="27" />
+          <dc:Bounds x="796" y="306" width="87" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1c8hcn5_di" bpmnElement="Flow_1c8hcn5">
