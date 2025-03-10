@@ -26,7 +26,7 @@ Built on IBC, BlockCollab offers more granular identity management in the BaaS l
 
 ---
 
-## [Multi-BlockCollab](https://github.com/XinzheShen182/ChainCollab/tree/dev-Multi-BlockCollab)
+## [Multi-BlockCollab](https://github.com/XinzheShen182/ChainCollab/tree/release-Multi-BlockCollab)
 
 **Overview**:  
 Building upon BlockCollab, Multi-BlockCollab addresses the challenges of multi-tasking and multi-participant management in BPMN choreography. At the same time, it integrates XState as a state management engine to separate flow control from ledger operations in BPMN.
