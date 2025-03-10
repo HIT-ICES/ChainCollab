@@ -955,7 +955,7 @@ class GoChaincodeTranslator:
 if __name__ == "__main__":
     go_chaincode_translator = GoChaincodeTranslator(
         None,
-        bpmn_file="/home/logres/system/muti/bpmn_muti/supplypaper_test2.bpmn",
+        bpmn_file="/home/logres/system/muti/bpmn_muti/supplypaper_test3.bpmn",
     )
     # go_chaincode_translator.generate_chaincode(is_output=False)
     go_chaincode_translator.generate_chaincode(is_output=True, output_path="./resource/chaincode.go")

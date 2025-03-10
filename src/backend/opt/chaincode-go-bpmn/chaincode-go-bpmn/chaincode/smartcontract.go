@@ -604,9 +604,6 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 		return "", fmt.Errorf("failed to unmarshal. %s", err.Error())
 	}
 
-	fmt.Println("InitParameters: ", initParameters.StateMachineDescription)
-	fmt.Println("InitParameters: ", initParameters.AdditionalContent)
-
 	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default", stateCharts.EncodeGetDefaultSnapshotArgs(initParameters.StateMachineDescription, initParameters.AdditionalContent))
 
 	if err != nil {
@@ -640,7 +637,7 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 	cc.CreateParticipant(ctx, &instance, "Participant_19mgbdn", initParameters.Participant_19mgbdn.MSP, initParameters.Participant_19mgbdn.Attributes, initParameters.Participant_19mgbdn.X509, initParameters.Participant_19mgbdn.IsMulti, 0, 0)
 	cc.CreateParticipant(ctx, &instance, "Participant_09cjol2", initParameters.Participant_09cjol2.MSP, initParameters.Participant_09cjol2.Attributes, initParameters.Participant_09cjol2.X509, initParameters.Participant_09cjol2.IsMulti, 0, 0)
 	cc.CreateParticipant(ctx, &instance, "Participant_0sa2v7d", initParameters.Participant_0sa2v7d.MSP, initParameters.Participant_0sa2v7d.Attributes, initParameters.Participant_0sa2v7d.X509, initParameters.Participant_0sa2v7d.IsMulti, 0, 0)
-	cc.CreateParticipant(ctx, &instance, "Participant_19j1e3o", initParameters.Participant_19j1e3o.MSP, initParameters.Participant_19j1e3o.Attributes, initParameters.Participant_19j1e3o.X509, initParameters.Participant_19j1e3o.IsMulti, 250, 2)
+	cc.CreateParticipant(ctx, &instance, "Participant_19j1e3o", initParameters.Participant_19j1e3o.MSP, initParameters.Participant_19j1e3o.Attributes, initParameters.Participant_19j1e3o.X509, initParameters.Participant_19j1e3o.IsMulti, 140, 2)
 	cc.CreateMessage(ctx, &instance, "Message_1wswgqu", "Participant_19j1e3o", "Participant_19mgbdn", "", `{"properties":{"orderDetails":{"type":"string","description":"Detailed list of goods ordered"}},"required":["orderDetails"],"files":{},"file required":[]}`, true, "ChoreographyTask_0tyax7p")
 	cc.CreateMessage(ctx, &instance, "Message_0cba4t6", "Participant_09cjol2", "Participant_0sa2v7d", "", `{"properties":{"supplyOrderId":{"type":"string","description":" Identifier of the supply order being forwarded"}},"required":["supplyOrderId"],"files":{},"file required":[]}`, false, "ChoreographyTask_0i0ht39")
 	cc.CreateMessage(ctx, &instance, "Message_0pm90nx", "Participant_09cjol2", "Participant_19mgbdn", "", `{"properties":{"transportOrderId":{"type":"string","description":"Identifier of the transport order being forwarded"}},"required":["transportOrderId"],"files":{},"file required":[]}`, false, "ChoreographyTask_145bktk")
@@ -1239,13 +1236,11 @@ func (cc *SmartContract) Message_1wswgqu_Advance(
 
 	fmt.Println("Event")
 	fmt.Println(eventJsonString)
-
-	bT := time.Now() // 开始时间
+	startTime := time.Now()
 	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
 		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
-	eT := time.Since(bT) // 从开始到当前所消耗的时间
-	fmt.Println("*****Run time******: ", eT)
-
+	endTime := time.Now()
+	fmt.Println("Time Cost is %s", endTime.Sub(startTime))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
@@ -1798,8 +1793,11 @@ func (cc *SmartContract) Message_0cba4t6_Advance(
 
 	fmt.Println("Event")
 	fmt.Println(eventJsonString)
+	startTime := time.Now()
 	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
 		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
+	endTime := time.Now()
+	fmt.Println("Time Cost is %s", endTime.Sub(startTime))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
@@ -2310,8 +2308,11 @@ func (cc *SmartContract) Message_0pm90nx_Advance(
 
 	fmt.Println("Event")
 	fmt.Println(eventJsonString)
+	startTime := time.Now()
 	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
 		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
+	endTime := time.Now()
+	fmt.Println("Time Cost is %s", endTime.Sub(startTime))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
@@ -2864,8 +2865,11 @@ func (cc *SmartContract) Message_0rwz1km_Advance(
 
 	fmt.Println("Event")
 	fmt.Println(eventJsonString)
+	startTime := time.Now()
 	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
 		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
+	endTime := time.Now()
+	fmt.Println("Time Cost is %s", endTime.Sub(startTime))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
@@ -3391,8 +3395,11 @@ func (cc *SmartContract) Message_1io2g9u_Advance(
 
 	fmt.Println("Event")
 	fmt.Println(eventJsonString)
+	startTime := time.Now()
 	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
 		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
+	endTime := time.Now()
+	fmt.Println("Time Cost is %s", endTime.Sub(startTime))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
@@ -3903,8 +3910,11 @@ func (cc *SmartContract) Message_0d2xte5_Advance(
 
 	fmt.Println("Event")
 	fmt.Println(eventJsonString)
+	startTime := time.Now()
 	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
 		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
+	endTime := time.Now()
+	fmt.Println("Time Cost is %s", endTime.Sub(startTime))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
@@ -4455,8 +4465,11 @@ func (cc *SmartContract) Message_1oxmq1k_Advance(
 
 	fmt.Println("Event")
 	fmt.Println(eventJsonString)
+	startTime := time.Now()
 	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
 		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
+	endTime := time.Now()
+	fmt.Println("Time Cost is %s", endTime.Sub(startTime))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
@@ -5051,8 +5064,11 @@ func (cc *SmartContract) Message_0i5t589_Advance(
 
 	fmt.Println("Event")
 	fmt.Println(eventJsonString)
+	startTime := time.Now()
 	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
 		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
+	endTime := time.Now()
+	fmt.Println("Time Cost is %s", endTime.Sub(startTime))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
@@ -5563,8 +5579,11 @@ func (cc *SmartContract) Message_0oi7nug_Advance(
 
 	fmt.Println("Event")
 	fmt.Println(eventJsonString)
+	startTime := time.Now()
 	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
 		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
+	endTime := time.Now()
+	fmt.Println("Time Cost is %s", endTime.Sub(startTime))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
@@ -6075,8 +6094,11 @@ func (cc *SmartContract) Message_1ip9ryp_Advance(
 
 	fmt.Println("Event")
 	fmt.Println(eventJsonString)
+	startTime := time.Now()
 	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
 		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
+	endTime := time.Now()
+	fmt.Println("Time Cost is %s", endTime.Sub(startTime))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
@@ -6587,8 +6609,11 @@ func (cc *SmartContract) Message_0ftz1m5_Advance(
 
 	fmt.Println("Event")
 	fmt.Println(eventJsonString)
+	startTime := time.Now()
 	res, err := cc.Invoke_Other_chaincode(ctx, "StateChartEngine:v1", "default",
 		stateCharts.EncodeExecuteStateMachineArgs(instance.StateMachineDescription, instance.AdditionalContent, instance.CurrentState, eventJsonString))
+	endTime := time.Now()
+	fmt.Println("Time Cost is %s", endTime.Sub(startTime))
 	if err != nil {
 		return fmt.Errorf("failed to trigger stateCharts action: %v", err)
 	}
