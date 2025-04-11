@@ -22,6 +22,7 @@ from requests import get, post
 import json
 import traceback
 from api.models import (
+    EthEnvironment,
     Node,
     Port,
     FabricCAServerType,
@@ -218,23 +219,32 @@ class FireflyViewSet(viewsets.ModelViewSet):
     @action(methods=["post"], detail=False, url_path="init_eth")
     def init_eth(self, request, pk=None, *args, **kwargs):
         try:
-            datadir_command = f"""geth --datadir ./datadir account new"""
-            datadir_output = call(datadir_command, shell=True)
-            compose_file_path = "/home/rhq/workspace/projects/ICES/ChainCollab/src/backend/opt/config/ethereum/docker-compose.yml"
+            LOG.info("Starting Ethereum initialization")
+            env_id = request.parser_context["kwargs"].get("environment_id")
+            env = EthEnvironment.objects.get(id=env_id)
+            
+            # create new account
+            datadir_command = "geth --datadir ./datadir account new"
+            datadir_output = subprocess.run(datadir_command, shell=True, check=True, capture_output=True, text=True)
+            LOG.info(f"Datadir output: {datadir_output.stdout}")
+
+            # start docker container
+            compose_file_path = os.path.join(os.path.dirname(__file__), '../../../opt/config/ethereum/docker-compose.yml')
             subprocess.run(["docker-compose", "-f", compose_file_path, "up", "-d"], check=True)
             container_id = subprocess.check_output(["docker", "ps", "-q", "-f", "name=mybootnode"]).decode().strip()
             container_name = subprocess.check_output(["docker", "ps", "--format", "{{.Names}}", "-f", "name=mybootnode"]).decode().strip()
-            
+
+            # eth command
             geth_attach_command = ["docker", "exec", "-i", container_id, "geth", "attach"]
             geth_attach_process = subprocess.Popen(geth_attach_command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-            geth_attach_process.stdin.write("personal.unlockAccount(\"0x365acf78c44060caf3a4789d804df11e3b4aa17d\", \"\", 0)\n")
+            geth_attach_process.stdin.write("personal.unlockAccount(\"0x365acf78c44060caf3a4789d804df11e3b4aa17d\", \"\", 0)\n")    # 此处为一个已知钱包地址
             geth_attach_process.stdin.flush()
             output, error = geth_attach_process.communicate()
             print("Geth Attach Output:", output)
             print("Geth Attach Error:", error)
             
-            firefly_name = "eth-rpc1"  # 替换为实际的 firefly 名称
-            manifest_file_path = "/home/qkl03/workspace/ICES/files/manifest.json"  # 替换为实际的 manifest 文件路径
+            firefly_name = "cello_" + env.name 
+            manifest_file_path = os.path.join(os.path.dirname(__file__), '../../../opt/config/manifest.json')  # 替换为实际的 manifest 文件路径(注意可能需要修改一下，因为与fabric的manifest不太一样)
             remote_node_url = f"http://{container_name}:8545"
             ff_init_command = [
                 self.ff_path,
@@ -248,7 +258,7 @@ class FireflyViewSet(viewsets.ModelViewSet):
                 "--chain-id",
                 "3456",
                 "--connector-config",
-                "/home/qkl03/workspace/ICES/files/ethereum_connector_config.json",
+                os.path.join(os.path.dirname(__file__), '../../../opt/config/ethereum/evmconnect.yml'),
                 "-m",
                 manifest_file_path,
                 "--remote-node-deploy",

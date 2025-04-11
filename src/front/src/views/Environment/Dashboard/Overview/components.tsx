@@ -72,6 +72,41 @@ export const NaiveFabricStepBar = (props) => {
 
 }
 
+export const NaiveEthereumStepBar = (props) => {
+
+  const { step = 1, status = "wait" } = props.stepAndStatus;
+  // status wait process finish error
+
+  const items: Array<{
+    title: string;
+    description?: string;
+  }> = [
+      {
+        title: "Created",
+        description: "DB Record",
+      },
+      {
+        title: "Initialized",
+        description: "CA & Orderer Node",
+      },
+      {
+        title: "Started",
+        description: "Peer Nodes",
+      },
+      {
+        title: "Active",
+        description: "Channel been Setup",
+      }
+    ];
+
+  return <Steps
+    current={step}
+    status={status}
+    items={items}
+  />
+
+}
+
 
 // Function Cards
 export const CustomCard = (props) => {
