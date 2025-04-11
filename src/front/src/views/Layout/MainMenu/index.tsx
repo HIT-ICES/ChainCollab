@@ -221,6 +221,7 @@ const MainMenu: React.FC = () => {
   const currentOrgName = useAppSelector(selectOrg).currentOrgName;
   const currentConsortiumName = useAppSelector(selectConsortium).currentConsortiumName;
   const currentEnvName = useAppSelector(selectEnv).currentEnvName;
+  const currentEnvType = useAppSelector(selectEnv).currentEnvType;
 
   const [orgList, syncOrgList] = useOrgData();
   const [consortiaList, syncConsortiaList] = useConsortiaData(currentOrgId);
@@ -336,37 +337,55 @@ const MainMenu: React.FC = () => {
           >
             App
           </Menu.Item> */}
-          <Menu.Item
+          {currentEnvType === 'Fabric' && (<><Menu.Item
             key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/envdashboard`}
           >
             EnvDashboard
-          </Menu.Item>
-          <SubMenu
+          </Menu.Item><SubMenu
             key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/fabric`}
             title="Fabric"
           >
-            <Menu.Item
-              key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/fabric/chaincode`}
+              <Menu.Item
+                key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/fabric/chaincode`}
+              >
+                Chaincode
+              </Menu.Item>
+              <Menu.Item
+                key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/fabric/channel`}
+              >
+                Channel
+              </Menu.Item>
+              <Menu.Item
+                key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/fabric/node`}
+              >
+                Node
+              </Menu.Item>
+            </SubMenu><Menu.Item
+              key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/firefly`}
             >
-              Chaincode
-            </Menu.Item>
-            <Menu.Item
-              key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/fabric/channel`}
-            >
-              Channel
-            </Menu.Item>
-            <Menu.Item
-              key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/fabric/node`}
-            >
-              Node
-            </Menu.Item>
-          </SubMenu>
-          <Menu.Item
-            key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/firefly`}
-          >
-            Firefly
-          </Menu.Item>
+              Firefly
+            </Menu.Item></>)}
         </>)}
+      {currentEnvType === 'Ethereum' && (<><Menu.Item
+        key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/envdashboard`}
+      >
+        EnvDashboard
+      </Menu.Item><SubMenu
+        key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/ethereum`}
+        title="Ethereum"
+      >
+          <Menu.Item //改动存疑
+            key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/ethereum/smartcontract`}
+          >
+            Smart Contract
+          </Menu.Item>
+          <Menu.Item
+            key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/ethereum/node`}
+          >
+            Node
+          </Menu.Item>
+        </SubMenu></>
+      )}
     </SubMenu>
 
   );

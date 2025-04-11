@@ -1,4 +1,5 @@
 import socket
+import subprocess
 from flask import Flask, jsonify, request, send_file, make_response
 import docker
 import sys
@@ -442,6 +443,108 @@ def port_probe():
         res = {"code": FAIL_CODE, "data": {}, "msg": "port should be a number"}
         return jsonify({"res": res}), 400
 
+STORAGE_ETH_SERVERS_PATH = os.path.join(PWD, "eth/storage/servers")
+STORAGE_ETH_PATH = os.path.join(PWD, "eth/storage")
+TEMPLATE_ETH_PATH = os.path.join(PWD, "eth/template")
+
+@app.route("/api/v1/ethnode", methods=["POST"])
+def create_eth_node():
+    """
+    创建以太坊节点
+    输入参数:
+        - name: 节点名称
+        - port_map: 端口映射 (格式: {"8545": 18545, "30303": 30303})
+    """
+    try:
+        # 获取请求参数
+        node_name = request.form.get("name")
+        port_map = ast.literal_eval(request.form.get("port_map", '{"8545": 18545, "30303": 30303}'))
+
+        if not node_name:
+            res = {"code": FAIL_CODE, "data": {}, "msg": "Node name is required"}
+            return jsonify({"res": res}), 400
+
+        # 检查节点名称是否已存在
+        existing_containers = client.containers.list(all=True, filters={"name": node_name})
+        if existing_containers:
+            res = {"code": FAIL_CODE, "data": {}, "msg": f"Node with name '{node_name}' already exists"}
+            return jsonify({"res": res}), 400
+
+        # 创建存储目录
+        eth_node_home = os.path.join(STORAGE_ETH_SERVERS_PATH, node_name)
+        if not os.path.exists(eth_node_home):
+            os.makedirs(eth_node_home)
+
+        # 动态生成 docker-compose.yml 文件
+        compose_file_path = os.path.join(TEMPLATE_ETH_PATH, f"{node_name}_docker-compose.yml")
+        with open(compose_file_path, "w") as f:
+            f.write(f"""
+version: '3.7'
+
+services:
+  {node_name}:
+    hostname: {node_name}
+    build:
+      context: {os.path.join(TEMPLATE_ETH_PATH, "my-geth-blockchain")}
+      dockerfile: Dockerfile
+    command:
+      - --http
+      - --http.addr=0.0.0.0
+      - --http.port=8545
+      - --http.api=admin,eth,miner,web3,personal,net,txpool
+      - --networkid=3456
+      - --http.corsdomain="*"
+      - --http.vhosts=*
+      - --nodiscover
+      - --mine
+      - --miner.threads=1
+      - --miner.etherbase=0x365acf78c44060caf3a4789d804df11e3b4aa17d
+      - --allow-insecure-unlock
+    ports:
+      - "{port_map.get('8545', 8545)}:8545"
+      - "{port_map.get('30303', 30303)}:30303"
+    volumes:
+      - {eth_node_home}/keystore:/root/.ethereum/keystore
+    networks:
+      - existing_network
+
+networks:
+  existing_network:
+    external: true
+    name: new_default
+            """)
+
+        # 使用 docker-compose 启动服务
+        try:
+            subprocess.run(
+                ["docker-compose", "-f", compose_file_path, "up", "-d"],
+                check=True,
+                cwd=TEMPLATE_ETH_PATH,
+            )
+        except subprocess.CalledProcessError as e:
+            traceback.print_exc()
+            res = {"code": FAIL_CODE, "data": {}, "msg": f"Failed to start Ethereum node: {str(e)}"}
+            return jsonify({"res": res}), 500
+
+        # 返回成功响应
+        res = {
+            "code": PASS_CODE,
+            "data": {
+                "name": node_name,
+                "status": "created",
+            },
+            "msg": "Ethereum node created successfully",
+        }
+        return jsonify({"res": res}), 201
+
+    except Exception as e:
+        # 异常处理
+        traceback.print_exc()
+        res = {"code": FAIL_CODE, "data": {}, "msg": f"Unexpected error: {str(e)}"}
+        return jsonify({"res": res}), 500
+    
+    
+    
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001)

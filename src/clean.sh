@@ -55,8 +55,8 @@ do
     echo "Removing image: $image_name"
     docker rmi "$image_name"
 done
-docker container prune -f
-docker volume prune -f
+# docker container prune -f
+# docker volume prune -f
 
 # Remove DB
 echo "Remove DB"

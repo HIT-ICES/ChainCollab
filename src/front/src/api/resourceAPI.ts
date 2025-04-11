@@ -86,6 +86,13 @@ export const JoinEnv = async (envId: string, membershipId: string) => {
     return response.data;
 }
 
+export const JoinEthEnv = async (envId: string, membershipId: string) => {
+    const response = await api.post(`/eth-environments/${envId}/join`, {
+        membership_id: membershipId
+    })
+    return response.data;
+}
+
 export const StartEnv = async (envId: string) => {
     try {
         const response = await api.post(`/environments/${envId}/start`)
@@ -212,6 +219,26 @@ export const getChainCodeList = async (envId: string) => {
     } catch (error) {
         console.log(error)
         return {}
+    }
+}
+
+// ETH ENV API
+
+export const InitEthEnv = async (envId: string) => {
+    try {
+        const response = await api.post(`/eth-environments/${envId}/init`)
+        return response.data;
+    } catch (error) {
+        return error;
+    }
+}
+
+export const StartEthEnv = async (envId: string) => {
+    try {
+        const response = await api.post(`/eth-environments/${envId}/start`)
+        return response.data;
+    } catch (error) {
+        return error;
     }
 }
 

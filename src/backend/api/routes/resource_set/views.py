@@ -1,12 +1,25 @@
+import json
+import os
+import traceback
+
+from requests import post
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from api.common import ok, err
+from api.config import CURRENT_IP
+from api.utils.test_time import timeitwithname
 
 from .serializers import ResourceSetSerializer
 from rest_framework.decorators import action
 
+from api.utils.port_picker import set_ports_mapping, find_available_ports
+from django.db import transaction
+
 from api.models import (
     Consortium,
     Environment,
+    EthNode,
+    Port,
     ResourceSet,
     Agent,
     Membership,
@@ -128,3 +141,127 @@ class ResourceSetViewSet(viewsets.ViewSet):
     #         serializer.save()
     #         return Response(serializer.data)
     #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class EthereumResourceSetViewSet(viewsets.ViewSet):
+    def _set_port(self, node, agent):
+        """
+        get free port from agent,
+
+        :param node: node obj
+        :param agent: agent obj
+        :return: none
+        :rtype: none
+        """
+        ip = agent.urls.split(":")[1].strip("//")
+        ports = find_available_ports(ip, node.id, agent.id, 1)
+        set_ports_mapping(node.id, [{"internal": 7054, "external": ports[0]}], True)
+        
+    def _create_start_eth_node(self, ca_name, port_map, org_name, type, infos=None):
+        try:
+            self._node_create_agent(ca_name)
+        except Exception as e:
+            raise Exception(e)
+    
+    
+    def _node_create_agent(self, ca_name, port_map):
+        try:
+            data = {
+                "node_name": ca_name,
+                "port_map": port_map,
+            }
+            response = post(f"""http://{CURRENT_IP}:7001/api/v1/ethnode""", data=data)
+            if response.status_code == 200:
+                txt = json.loads(response.text)
+                return txt["res"]
+            else:
+                txt = json.loads(response.text)
+                print(txt)
+                raise Exception(txt["res"])
+        except Exception as e:
+            raise Exception(e)
+        
+    def _create_folders_up_to_path( current_path, path):
+    # 使用os.path.normpath来确保路径格式的一致性
+
+        normalized_path = os.path.normpath(path)
+
+        # 获取目标路径的各个部分
+        folders = normalized_path.split(os.sep)
+
+        # 逐个创建文件夹
+        for folder in folders:
+            current_path = os.path.join(current_path, folder)
+            if not os.path.exists(current_path):
+                os.makedirs(current_path)
+                print(f"Created folder: {current_path}")
+    
+    @transaction.atomic
+    @action(methods=["post"], detail=False, url_path="node_create")
+    def node_create(self, request, pk=None, *args, **kwargs):
+        print("begin eth node crate post api")
+        try:
+            resource_set_id = request.parser_context["kwargs"].get("resource_set_id")
+            resource_set = ResourceSet.objects.get(pk=resource_set_id)
+            ethereum_resource_set = resource_set.sub_resource_set.get()
+            agent = resource_set.agent
+            org_name = ethereum_resource_set.name
+            
+            node = EthNode(
+                name="ca." + org_name,
+                # JsonField
+                urls="ca." + org_name,
+                agent=agent,
+                type="ca",
+            )
+            node.save()
+            
+            self._set_port(node, agent)
+            
+            port_map = {
+                a["internal"]: a["external"]
+                for a in Port.objects.filter(node=node)
+                .values("internal", "external")
+                .all()
+            }.__repr__()
+            
+            self._create_start_eth_node(
+                ca_name=org_name,
+                port_map=port_map,
+                org_name=org_name,
+                type="ca",
+                infos=request.data,
+            )
+            return Response(
+                data=ok("ca create success"), status=status.HTTP_202_ACCEPTED
+            )
+            
+            
+        except Exception as e:
+            print("________ERRORR_________")
+            traceback.print_exc(e)
+            return Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)    
+    
+    @action(methods=["post"], detail=True, url_path="join")
+    @timeitwithname("JoinEthereum")
+    def join(self, request, pk=None, *args, **kwargs):
+        membership_id = request.data.get("membership_id", None)
+        try:
+            membership = Membership.objects.get(pk=membership_id)
+        except Membership.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        
+        
+        # try:
+        #     environment = EthEnvironment.objects.get(pk=pk)
+        # except EthEnvironment.DoesNotExist:
+        #     return Response(status=status.HTTP_404_NOT_FOUND)
+
+        # if environment.status != "INITIALIZED":
+        #     return Response(
+        #         {"message": "Ethereum Environment has not been initialized or has started"},
+        #         status=status.HTTP_400_BAD_REQUEST,
+        #     )
+
+        return Response(status=status.HTTP_201_CREATED)
+            
+    

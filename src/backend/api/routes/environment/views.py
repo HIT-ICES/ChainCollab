@@ -11,6 +11,7 @@ from api.models import (
     Consortium,
     Environment,
     EthEnvironment,
+    EthereumResourceSet,
     ResourceSet,
     Agent,
     Membership,
@@ -680,3 +681,345 @@ class EthEnvironmentViewSet(viewsets.ModelViewSet):
         queryset = EthEnvironment.objects.filter(consortium_id=consortium_id)
         serializer = EthEnvironmentSerializer(queryset, many=True)
         return Response(serializer.data)
+    
+class EthEnvironmentOperateViewSet(viewsets.ViewSet):
+
+    @action(methods=["post"], detail=True, url_path="init")
+    @timeitwithname("InitEth")
+    def init(self, request, pk=None, *args, **kwargs):
+        """
+        初始化EthEnvironment, install firefly and start firefly 融入进去了
+        """
+        try:
+            env = EthEnvironment.objects.get(pk=pk)
+        except EthEnvironment.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if env.status != "CREATED":
+            return Response(
+                {"message": "EthEnvironment has been initialized"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        consortium = env.consortium
+
+        system_org = LoleidoOrganization.objects.create(
+            name=consortium.name + env.name + "-system",
+        )
+
+        membership = Membership.objects.create(
+            name=env.name + "-system",
+            loleido_organization=system_org,
+            consortium=consortium,
+        )
+
+        agent = Agent.objects.create(   # agent需要？
+            name="system-agent",
+            type=DEFAULT_AGENT["type"],
+            urls=DEFAULT_AGENT["urls"],
+            status="active",
+        )
+
+        resource_set = ResourceSet.objects.create(
+            name=membership.name, environment=env, membership=membership, agent=agent
+        )
+        
+        ethereum_resource_set = EthereumResourceSet.objects.create(
+            resource_set=resource_set,
+            org_type=1,
+            # name=membership.name + ".org" + ".com",
+            # msp=membership.name + ".org" + ".com" + "OrdererMSP",
+        )
+        
+        # # firefly 相关操作
+        
+        # headers = request.headers
+        # post(
+        #     f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/fireflys/init_eth",
+        #     headers={"Authorization": headers["Authorization"]},
+        # )
+        
+        headers = request.headers
+        post(
+            f"http://{CURRENT_IP}:8000/api/v1/resource_sets/{resource_set.id}/eth/node_create",
+            data={},
+            headers={"Authorization": headers["Authorization"]},
+        )
+        
+    
+        env.status = "INITIALIZED"
+        env.save()
+        return Response(status=status.HTTP_201_CREATED)
+
+    @action(methods=["post"], detail=True, url_path="join")
+    @timeitwithname("JoinEthereum")
+    def join(self, request, pk=None, *args, **kwargs):
+
+        membership_id = request.data.get("membership_id", None)
+        try:
+            membership = Membership.objects.get(pk=membership_id)
+        except Membership.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            environment = EthEnvironment.objects.get(pk=pk)
+        except EthEnvironment.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if environment.status != "INITIALIZED":
+            return Response(
+                {"message": "Ethereum Environment has not been initialized or has started"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # 创建资源组
+        org = membership.loleido_organization
+        agent = Agent.objects.create(
+            name=f"{membership.name}-agent",
+            type=DEFAULT_AGENT["type"],
+            urls=DEFAULT_AGENT["urls"],
+            status="active",
+            organization=org,
+        )
+        resource_set = ResourceSet.objects.create(
+            name=membership.name,
+            environment=environment,
+            membership=membership,
+            agent=agent,
+        )
+
+        ethereum_resource_set = EthereumResourceSet.objects.create(
+            resource_set=resource_set,
+            org_type=0,  # 0 表示 UserOrg
+        )
+        
+        headers = request.headers
+        post(
+            f"http://{CURRENT_IP}:8000/api/v1/resource_sets/{resource_set.id}/eth/node_create",
+            data={},
+            headers={"Authorization": headers["Authorization"]},
+        )
+        
+    
+        environment.status = "INITIALIZED"
+        environment.save()
+
+        return Response(status=status.HTTP_201_CREATED)
+
+    @action(methods=["post"], detail=True, url_path="start")
+    @timeitwithname("StartEth")
+    def start(self, request, pk=None, *args, **kwargs):
+        """
+        启动EthEnvironment
+        """
+        try:
+            env = EthEnvironment.objects.get(pk=pk)
+        except EthEnvironment.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        headers = request.headers
+        post(
+            f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/fireflys/start_eth",
+            headers={"Authorization": headers["Authorization"]},
+        )
+        
+        env = EthEnvironment.objects.get(pk=pk)
+        env.status = "STARTED"
+        env.save()
+
+        return Response(status=status.HTTP_201_CREATED)
+
+    @action(methods=["post"], detail=True, url_path="activate")
+    @timeitwithname("ActivateEth")
+    def activate(self, request, pk=None, *args, **kwargs):
+        """
+        激活EthEnvironment
+        """
+        try:
+            env = EthEnvironment.objects.get(pk=pk)
+        except EthEnvironment.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if env.status != "STARTED":
+            return Response(
+                {"message": "EthEnvironment has not been started or has activated"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        headers = request.headers
+
+        # Activate environment logic here
+
+        env.status = "ACTIVATED"
+        env.save()
+
+        return Response(status=status.HTTP_201_CREATED)
+
+    @action(methods=["post"], detail=True, url_path="install_firefly")
+    def install_firefly(self, request, pk=None, *args, **kwargs):
+        """
+        安装Firefly
+        """
+        try:
+            env = EthEnvironment.objects.get(pk=pk)
+        except EthEnvironment.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if env.status != "ACTIVATED":
+            return Response(
+                {"message": "EthEnvironment has not been activated or has started"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        headers = request.headers
+        org_id = request.data.get("org_id")
+        chaincode_id = packageChaincodeForEnv(
+            env_id=env.id,
+            file_path=FABRIC_CONFIG + "/firefly-go.zip",
+            chaincode_name="Firefly",
+            version="1.0",
+            org_id=org_id,
+            auth=headers["Authorization"],
+        )
+
+        installChaincodeForEnv(
+            env_id=env.id,
+            chaincode_id=chaincode_id,
+            auth=headers["Authorization"],
+        )
+
+        approveChaincodeForEnv(
+            env_id=env.id,
+            channel_name=DEFAULT_CHANNEL_NAME,
+            chaincode_name="Firefly",
+            auth=headers["Authorization"],
+        )
+
+        commmitChaincodeForEnv(
+            env_id=env.id,
+            channel_name=DEFAULT_CHANNEL_NAME,
+            chaincode_name="Firefly",
+            auth=headers["Authorization"],
+        )
+
+        env.firefly_status = "CHAINCODEINSTALLED"
+        env.save()
+        return Response(status=status.HTTP_200_OK)
+
+    @action(methods=["post"], detail=True, url_path="install_oracle")
+    def install_oracle(self, request, pk=None, *args, **kwargs):
+        """
+        安装Oracle
+        """
+        try:
+            env = EthEnvironment.objects.get(pk=pk)
+        except EthEnvironment.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if env.status != "ACTIVATED":
+            return Response(
+                {"message": "EthEnvironment has not been activated or has started"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        headers = request.headers
+        org_id = request.data.get("org_id")
+        chaincode_id = packageChaincodeForEnv(
+            env_id=env.id,
+            file_path=ORACLE_CONTRACT_PATH + "/oracle-go.zip",
+            chaincode_name="Oracle",
+            version="1.0",
+            org_id=org_id,
+            auth=headers["Authorization"],
+        )
+
+        installChaincodeForEnv(
+            env_id=env.id,
+            chaincode_id=chaincode_id,
+            auth=headers["Authorization"],
+        )
+
+        approveChaincodeForEnv(
+            env_id=env.id,
+            channel_name=DEFAULT_CHANNEL_NAME,
+            chaincode_name="Oracle",
+            auth=headers["Authorization"],
+        )
+
+        commmitChaincodeForEnv(
+            env_id=env.id,
+            channel_name=DEFAULT_CHANNEL_NAME,
+            chaincode_name="Oracle",
+            auth=headers["Authorization"],
+        )
+
+        env.Oracle_status = "CHAINCODEINSTALLED"
+        env.save()
+
+        return Response(status=status.HTTP_200_OK)
+
+    @action(methods=["post"], detail=True, url_path="install_dmn_engine")
+    def install_dmn_engine(self, request, pk=None, *args, **kwargs):
+        """
+        启动DMN Engine: 部署合约
+        """
+        try:
+            env = EthEnvironment.objects.get(pk=pk)
+        except EthEnvironment.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if env.status != "ACTIVATED":
+            return Response(
+                {"message": "EthEnvironment has not been activated or has started"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        headers = request.headers
+        org_id = request.data.get("org_id")
+
+        chaincode_id = packageChaincodeForEnv(
+            env_id=env.id,
+            file_path=DMN_CONTRACT_PATH + "/dmn-engine.zip",
+            chaincode_name="DMNEngine",
+            version="1.0",
+            org_id=org_id,
+            auth=headers["Authorization"],
+            language="java",
+        )
+
+        installChaincodeForEnv(
+            env_id=env.id,
+            chaincode_id=chaincode_id,
+            auth=headers["Authorization"],
+        )
+
+        approveChaincodeForEnv(
+            env_id=env.id,
+            channel_name=DEFAULT_CHANNEL_NAME,
+            chaincode_name="DMNEngine",
+            auth=headers["Authorization"],
+        )
+
+        commmitChaincodeForEnv(
+            env_id=env.id,
+            channel_name=DEFAULT_CHANNEL_NAME,
+            chaincode_name="DMNEngine",
+            auth=headers["Authorization"],
+        )
+
+        env.DMN_status = "CHAINCODEINSTALLED"
+        env.save()
+
+        return Response(status=status.HTTP_200_OK)
+
+    @action(methods=["get"], detail=False, url_path="requestOracleFFI")
+    def requestOracleFFI(self, request, pk=None, *args, **kwargs):
+        """
+        请求Oracle FFI
+        """
+        with open(ORACLE_CONTRACT_PATH + "/oracleFFI.json", "r") as f:
+            ffiContent = f.read()
+
+        response = {"ffiContent": ffiContent}
+
+        return Response(response, status=status.HTTP_200_OK)

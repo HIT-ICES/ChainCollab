@@ -30,12 +30,15 @@ import {
   InstallOracle,
   InstallDmnEngine,
   StartFireflyForEnv,
-  requestOracleFFI
+  requestOracleFFI,
+  InitEthEnv,
+  StartEthEnv,
+  JoinEthEnv
 } from "@/api/resourceAPI";
 
 import {
-    registerInterface,
-    registerAPI
+  registerInterface,
+  registerAPI
 } from "@/api/executionAPI"
 
 const systemFireflyURL = "http://127.0.0.1:5000"
@@ -56,7 +59,8 @@ import {
   OracleComponentCard,
   DMNComponentCard,
 
-  JoinModal
+  JoinModal,
+  NaiveEthereumStepBar
 } from "./components.tsx";
 
 import {
@@ -71,6 +75,7 @@ const Overview: React.FC = () => {
   const currentOrgId = useAppSelector(state => state.org.currentOrgId)
   const currentConsortiumId = useAppSelector(state => state.consortium.currentConsortiumId)
   const currentEnvId = useAppSelector(state => state.env.currentEnvId)
+  const currentEnvType = useAppSelector(state => state.env.currentEnvType)
   const [membershipList, setSyncMembershipList] = useMembershipListData()
   const stepAndStatus = DBstatus2stepandstatus(envInfo.status)
 
@@ -78,6 +83,7 @@ const Overview: React.FC = () => {
   const setupCallBackRef = useRef(null)
 
   const [setupFabricNetWorkLoading, setSetupFabricNetWorkLoading] = useState(false)
+  const [setUpEthereumNetworkLoading, setSetUpEthereumNetworkLoading] = useState(false)
 
   const [setupComponentLoading, setSetupComponentLoading] = useState(false)
 
@@ -101,6 +107,29 @@ const Overview: React.FC = () => {
     setSync()
   }
 
+  const handleSetUpEthereumNetwork = async () => {
+    // Eth应该就简单的两个init和start流程
+    // Init
+    setSetUpEthereumNetworkLoading(true)
+    await InitEthEnv(currentEnvId)  // 创建compose文件
+    setSync()
+
+    await new Promise((resolve, reject) => {
+      setIsJoinModelOpen(true)
+      setupCallBackRef.current = resolve
+    })
+    setSync()
+
+    await StartEthEnv(currentEnvId);  // run容器
+    setSync()
+
+    // need to change
+    await ActivateEnv(currentEnvId, currentOrgId) // 
+    setSetupFabricNetWorkLoading(false)
+    setSync()
+
+  }
+
   const handleSetUpComponent = async () => {
     setSetupComponentLoading(true)
     await InstallFirefly(currentOrgId, currentEnvId)
@@ -110,7 +139,7 @@ const Overview: React.FC = () => {
     await InstallOracle(currentOrgId, currentEnvId)
     // register interface
     const oracleFFI = await requestOracleFFI()
-    const res = await registerInterface(systemFireflyURL,oracleFFI.ffiContent, "Oracle")
+    const res = await registerInterface(systemFireflyURL, oracleFFI.ffiContent, "Oracle")
     await new Promise((resolve, reject) => {
       setTimeout(resolve, 5000)
     })
@@ -145,10 +174,16 @@ const Overview: React.FC = () => {
               >
                 <LoadingButton
                   variant="outlined"
-                  onClick={() => { handleSetUpFabricNetwork() }}
+                  onClick={() => {
+                    if (currentEnvType === "Fabric") {
+                      handleSetUpFabricNetwork();
+                    } else if (currentEnvType === "Ethereum") {
+                      handleSetUpEthereumNetwork();
+                    }
+                  }}
                   loading={setupFabricNetWorkLoading}
                 >
-                  SetUp Fabric Network
+                  {currentEnvType === "Fabric" ? "SetUp Fabric Network" : "SetUp Ethereum Network"}
                 </LoadingButton>
               </Col>
             </Row>
@@ -161,9 +196,17 @@ const Overview: React.FC = () => {
                   marginTop: "10px",
                 }}
               >
-                <NaiveFabricStepBar
+                {/* <NaiveFabricStepBar
                   stepAndStatus={stepAndStatus}
-                />
+                /> */}
+                {currentEnvType === "Fabric" ?
+                  <NaiveFabricStepBar
+                    stepAndStatus={stepAndStatus}
+                  />
+                  :
+                  <NaiveEthereumStepBar
+                    stepAndStatus={stepAndStatus}
+                  />}
               </Col>
             </Row>
           </Card.Grid>
@@ -189,15 +232,15 @@ const Overview: React.FC = () => {
                 <LoadingButton
                   variant="outlined"
                   loading={setupComponentLoading}
-                  onClick={() => {handleSetUpComponent()}}>
+                  onClick={() => { handleSetUpComponent() }}>
                   SetUp Core Component
                 </LoadingButton>
               </Col>
             </Row>
             <Row style={{ display: "flex", justifyContent: "space-evenly" }}>
-              <FireflyComponentCard ChaincodeStatus={envInfo.fireflyStatus!=="NO"} ClusterStatus={envInfo.fireflyStatus==="STARTED"}  />
-              <OracleComponentCard ChaincodeStatus ={envInfo.oracleStatus==="CHAINCODEINSTALLED"}/>
-              <DMNComponentCard  ChaincodeStatus ={envInfo.dmnStatus==="CHAINCODEINSTALLED"} />
+              <FireflyComponentCard ChaincodeStatus={envInfo.fireflyStatus !== "NO"} ClusterStatus={envInfo.fireflyStatus === "STARTED"} />
+              <OracleComponentCard ChaincodeStatus={envInfo.oracleStatus === "CHAINCODEINSTALLED"} />
+              <DMNComponentCard ChaincodeStatus={envInfo.dmnStatus === "CHAINCODEINSTALLED"} />
             </Row>
           </Card.Grid>
 
@@ -310,10 +353,18 @@ const Overview: React.FC = () => {
         joinFunc={
           async (membershipSelected) => {
             let requests = []
-            membershipSelected.forEach((membership) => {
-              requests.push(JoinEnv(currentEnvId, membership))
+            if (currentEnvType === "Fabric") {
+              membershipSelected.forEach((membership) => {
+                requests.push(JoinEnv(currentEnvId, membership))
+              }
+              )
+            } else {
+              membershipSelected.forEach((membership) => {
+                requests.push(JoinEthEnv(currentEnvId, membership))
+              }
+              )
             }
-            )
+            
             try {
               await Promise.all(requests)
               message.success("Join Success")

@@ -1,0 +1,43 @@
+version: '3.7'
+
+services:
+  mybootnode:
+    hostname: mybootnode
+    env_file:
+      - .env
+    build:
+      context: .
+      # args:
+      #   - ACCOUNT_PASSWORD=${ACCOUNT_PASSWORD}
+      dockerfile: Dockerfile
+    command: 
+      - --http   # 对于较新版本的Geth，使用--http代替--rpc
+      - --http.addr=0.0.0.0
+      - --http.port=8545
+      - --http.api=admin,eth,miner,web3,personal,net,txpool
+      - --networkid=${NETWORK_ID}
+      - --http.corsdomain="*"
+      - --http.vhosts=*
+      - --nodiscover
+      # - --unlock "0x365acf78c44060caf3a4789d804df11e3b4aa17d"
+      # - --password /path/to/password/file
+      # - --genesis /genesis.json
+      - --mine
+      - --miner.threads=1
+      - --miner.etherbase=0x365acf78c44060caf3a4789d804df11e3b4aa17d
+      - --allow-insecure-unlock
+
+    ports:
+      - "8545:8545"   # RPC端口
+      - "30303:30303" # P2P网络端口
+    volumes:
+      - ./datadir/keystore:/root/.ethereum/keystore
+      # - ./genesis.json:/genesis.json
+
+    networks:
+      - existing_network
+
+networks:
+  existing_network:
+    external: true
+    name: new_default
