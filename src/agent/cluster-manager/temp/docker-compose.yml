@@ -1,0 +1,25 @@
+version: "3"
+
+services:
+  mysql:
+    image: "mysql:5.7"
+    environment:
+      MYSQL_ROOT_PASSWORD: "password"
+      MYSQL_DATABASE: "devdb"
+    ports:
+      - "3306:3306"
+    networks:
+      - backend
+
+  redis:
+    image: "redis:latest"
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+
+  
+
+networks:
+  backend:
+    driver: bridge

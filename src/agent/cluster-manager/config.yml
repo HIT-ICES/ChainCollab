@@ -1,0 +1,18 @@
+database:
+  mysql:
+    dbname: devdb
+    host: localhost
+    password: password
+    port: 3306
+    user: root
+  redis:
+    addr: localhost
+    db: 0
+    password: ''
+    port: 6379
+queue:
+  redis:
+    addr: localhost:6379
+    queue_name: ipfs-tasks
+    worker_count: 5
+  type: redis

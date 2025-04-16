@@ -1,0 +1,38 @@
+version: "3"
+
+services:
+  mysql:
+    image: "{{ mysql_image }}"
+    environment:
+      MYSQL_ROOT_PASSWORD: "{{ mysql_password }}"
+      MYSQL_DATABASE: "{{ mysql_dbname }}"
+    ports:
+      - "{{ mysql_port }}:3306"
+    networks:
+      - backend
+
+  redis:
+    image: "{{ redis_image }}"
+    ports:
+      - "{{ redis_port }}:6379"
+    networks:
+      - backend
+
+  {% if mode == "prod" %}
+  main:
+    build: .
+    command: ["./main"]
+    environment:
+      APP_ENV: "prod"
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - backend
+    ports:
+      - "8080:8080"
+  {% endif %}
+
+networks:
+  backend:
+    driver: bridge
