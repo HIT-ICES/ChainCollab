@@ -1,18 +1,22 @@
-database:
+db:
   mysql:
+    conn_max_lifetime: 300
     dbname: devdb
     host: localhost
+    max_idle_conns: 5
+    max_open_conns: 10
     password: password
     port: 3306
     user: root
-  redis:
-    addr: localhost
-    db: 0
-    password: ''
-    port: 6379
-queue:
+  type: mysql
+mq:
   redis:
     addr: localhost:6379
-    queue_name: ipfs-tasks
-    worker_count: 5
+    consumer_id: TasksConsumer
+    db: 0
+    group: TasksGroup
+    password: ''
+    stream: Tasks
   type: redis
+workers:
+  worker_count: 5

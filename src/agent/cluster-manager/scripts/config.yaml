@@ -1,23 +1,45 @@
-# python.yml
-mode: dev  # 或 prod
+# config.yaml
 
-database:
+system:
+  mode: dev  # dev | prod
+
+services:
   mysql:
     host: localhost
     port: 3306
     user: root
     password: password
     dbname: devdb
+    image: mysql:5.7 
 
   redis:
-    addr: localhost
+    host: localhost
     port: 6379
     password: ""
     db: 0
+    image: redis:latest  # 可选
 
-queue:
-  type: redis
-  redis:
-    addr: localhost:6379
-    queue_name: ipfs-tasks
+app:
+  mq:
+    redis:
+      addr: localhost:6379
+      db: 0
+      password: ""
+      stream: Tasks
+      group: TasksGroup
+      consumer_id: TasksConsumer
+    type: redis
+
+  workers:
     worker_count: 5
+  db:
+    type: mysql
+    mysql:
+      host: localhost
+      port: 3306
+      user: root
+      password: password
+      dbname: devdb
+      max_open_conns: 10
+      max_idle_conns: 5
+      conn_max_lifetime: 300

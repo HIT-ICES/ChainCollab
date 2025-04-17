@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"time"
 
 	"github.com/docker/docker/client"
@@ -11,8 +10,8 @@ import (
 
 func main() {
 	cli, err := client.NewClientWithOpts(
-		client.WithHost("http://localhost:2375"),
-		client.WithHTTPClient(&http.Client{}), // Force HTTP
+		client.WithHost("http://172.29.240.1:2375"),
+		// client.WithHTTPClient(&http.Client{}), // Force HTTP
 		client.WithAPIVersionNegotiation(),
 	)
 	if err != nil {

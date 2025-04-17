@@ -73,7 +73,7 @@ func HandleTask(raw string) error {
 		return fmt.Errorf("invalid task format: %w", err)
 	}
 
-	taskManager := &repository.TaskManager{DB: infra.DB}
+	taskManager := &repository.TaskManager{DB: infra.GetDB()}
 	taskRecord, err := taskManager.GetTaskByID(t.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get task: %w", err)
@@ -81,7 +81,7 @@ func HandleTask(raw string) error {
 
 	_ = taskManager.UpdateTaskStatus(t.ID, "running", nil, "")
 
-	providerManager := &repository.ProviderManager{DB: infra.DB}
+	providerManager := &repository.ProviderManager{DB: infra.GetDB()}
 	providerRecord, err := providerManager.GetProvider(taskRecord.ProviderID)
 	if err != nil {
 		_ = taskManager.UpdateTaskStatus(t.ID, "failed", nil, err.Error())

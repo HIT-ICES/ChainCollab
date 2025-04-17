@@ -1,20 +1,20 @@
 package task
 
 import (
+	"cluster-manager/internal/infra"
+	"cluster-manager/internal/infra/mq"
 	"context"
 	"log"
 	"time"
-
-	"cluster-manager/internal/infra"
 
 	"github.com/panjf2000/ants/v2"
 )
 
 var taskPool *ants.Pool
 
-func StartTaskWorker(ctx context.Context) {
+func StartTaskWorker(ctx context.Context, workerCount int) {
 	var err error
-	taskPool, err = ants.NewPool(10) // 设置最大并发数
+	taskPool, err = ants.NewPool(workerCount)
 	if err != nil {
 		log.Fatalf("Failed to create ants pool: %v", err)
 	}
@@ -28,23 +28,32 @@ func StartTaskWorker(ctx context.Context) {
 				log.Println("🛑 Task worker stopped")
 				return
 			default:
-				fetchAndDispatch()
+				fetchAndDispatch(infra.GetMQ())
 				time.Sleep(2 * time.Second)
 			}
 		}
 	}()
 }
 
-// 从 Redis 拉取任务并提交给 ants
-func fetchAndDispatch() {
-	taskData, err := infra.Rdb.LPop(context.Background(), "task_queue").Result()
-	if err != nil || taskData == "" {
+func fetchAndDispatch(mq mq.MQ) {
+	ctx := context.Background()
+
+	messages, err := mq.Consume(ctx)
+	if err != nil {
+		// log.Printf("⚠️ Failed to consume from MQ: %v", err)
 		return
 	}
-	// 将任务扔给 ants
-	_ = taskPool.Submit(func() {
-		if err := HandleTask(taskData); err != nil {
-			log.Printf("❌ Task failed: %v", err)
-		}
-	})
+
+	for _, msg := range messages {
+		msgCopy := msg
+		_ = taskPool.Submit(func() {
+			if err := HandleTask(string(msgCopy.Payload)); err != nil {
+				log.Printf("❌ Task failed: %v", err)
+			} else {
+				if err := mq.Ack(ctx, msgCopy.ID); err != nil {
+					log.Printf("⚠️ Failed to ack message %s: %v", msgCopy.ID, err)
+				}
+			}
+		})
+	}
 }

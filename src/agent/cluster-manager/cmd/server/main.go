@@ -14,21 +14,27 @@ import (
 	"cluster-manager/internal/task"
 
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 )
 
 func main() {
+
+	if err := InitConfig("config.yml"); err != nil {
+		log.Fatalf("❌ Config init failed: %v", err)
+	}
+
 	// 初始化基础设施(全局唯一连接：MySQL、Redis、Logger)
-	if err := infra.InitInfra("config.yml"); err != nil {
+	if err := infra.InitInfra(); err != nil {
 		log.Fatalf("❌ Infra init failed: %v", err)
 	}
 
 	// 初始化TaskHandler
 	task.InitTaskHandler()
 
-	task.StartTaskWorker(context.Background())
+	task.StartTaskWorker(context.Background(), viper.GetInt("workers.worker_count"))
 
 	r := gin.Default()
-	api.RegisterRoutes(r, infra.DB, infra.Rdb)
+	api.RegisterRoutes(r, infra.GetDB(), infra.GetMQ())
 
 	// 启动 HTTP Server
 	srv := &http.Server{
@@ -56,4 +62,15 @@ func main() {
 	}
 
 	log.Println("✅ Server exited gracefully")
+}
+
+func InitConfig(configPath string) error {
+	viper.SetConfigFile(configPath)
+	err := viper.ReadInConfig()
+	if err != nil {
+		return err
+	}
+	log.Println("✅ Config loaded from", configPath)
+	log.Println("Config:", viper.AllSettings())
+	return nil
 }

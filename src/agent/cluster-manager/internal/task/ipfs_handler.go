@@ -59,7 +59,7 @@ func handleIPFSPostCreate(taskRecord *models.Task, result any, prov provider.Pro
 		return fmt.Errorf("invalid result type for IPFS create")
 	}
 
-	clusterManager := &repository.ClusterManager{DB: infra.DB}
+	clusterManager := &repository.ClusterManager{DB: infra.GetDB()}
 	cluster := &models.Cluster{
 		ClusterID:  res.ClusterID,
 		ProviderID: taskRecord.ProviderID,
@@ -70,7 +70,7 @@ func handleIPFSPostCreate(taskRecord *models.Task, result any, prov provider.Pro
 		return fmt.Errorf("failed to create cluster in database: %w", err)
 	}
 
-	taskManager := &repository.TaskManager{DB: infra.DB}
+	taskManager := &repository.TaskManager{DB: infra.GetDB()}
 	clusterID := res.ClusterID
 	if err := taskManager.UpdateTaskStatus(taskRecord.ID, "success", &clusterID, "IPFS cluster created"); err != nil {
 		return fmt.Errorf("failed to update task status: %w", err)
@@ -85,7 +85,7 @@ func handleIPFSPostCreate(taskRecord *models.Task, result any, prov provider.Pro
 }
 
 func handleIPFSPostRemove(taskRecord *models.Task, result any, prov provider.Provider) error {
-	var taskManager = &repository.TaskManager{DB: infra.DB}
+	var taskManager = &repository.TaskManager{DB: infra.GetDB()}
 	return taskManager.UpdateTaskStatus(taskRecord.ID, "completed", nil, "IPFS cluster removed")
 }
 

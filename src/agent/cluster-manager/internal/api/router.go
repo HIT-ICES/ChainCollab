@@ -1,6 +1,7 @@
 package api
 
 import (
+	"cluster-manager/internal/infra/mq"
 	"cluster-manager/internal/models"
 	"cluster-manager/internal/provider"
 	"cluster-manager/internal/repository"
@@ -9,14 +10,13 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
-func RegisterRoutes(r *gin.Engine, db *gorm.DB, rdb *redis.Client) {
+func RegisterRoutes(r *gin.Engine, db *gorm.DB, mq mq.MQ) {
 	taskManager := &repository.TaskManager{DB: db}
 
-	r.POST("/tasks", createTaskHandler(taskManager, rdb))
+	r.POST("/tasks", createTaskHandler(taskManager, mq))
 	r.GET("/tasks/:task_id", getTaskHandler(taskManager))
 	r.GET("/tasks", listTasksHandler(taskManager))
 
@@ -32,7 +32,7 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, rdb *redis.Client) {
 	r.GET("/ping", pingHandler)
 }
 
-func createTaskHandler(taskManager *repository.TaskManager, rdb *redis.Client) gin.HandlerFunc {
+func createTaskHandler(taskManager *repository.TaskManager, mq mq.MQ) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var task models.Task
 		if err := c.ShouldBindJSON(&task); err != nil {
@@ -45,7 +45,7 @@ func createTaskHandler(taskManager *repository.TaskManager, rdb *redis.Client) g
 			return
 		}
 
-		if err := publishTaskToRedis(rdb, task); err != nil {
+		if err := PublishTaskToMQ(mq, task); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to publish task to Redis"})
 			return
 		}
@@ -54,7 +54,7 @@ func createTaskHandler(taskManager *repository.TaskManager, rdb *redis.Client) g
 	}
 }
 
-func publishTaskToRedis(rdb *redis.Client, task models.Task) error {
+func PublishTaskToMQ(mqImpl mq.MQ, task models.Task) error {
 	ctx := context.Background()
 
 	taskMessage := map[string]interface{}{
@@ -64,8 +64,7 @@ func publishTaskToRedis(rdb *redis.Client, task models.Task) error {
 	if err != nil {
 		return err
 	}
-
-	return rdb.LPush(ctx, "task_queue", data).Err()
+	return mqImpl.Publish(ctx, data)
 }
 
 func getTaskHandler(taskManager *repository.TaskManager) gin.HandlerFunc {
@@ -131,13 +130,20 @@ func getProviderHandler(providerManager *repository.ProviderManager) gin.Handler
 	return func(c *gin.Context) {
 		providerID := c.Param("provider_id")
 
-		provider, err := providerManager.GetProvider(providerID)
+		providerRecord, err := providerManager.GetProvider(providerID)
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Provider not found"})
 			return
 		}
 
-		c.JSON(http.StatusOK, provider)
+		// check provider status
+		_, err = provider.InstantiateProvider(providerRecord)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to instantiate provider"})
+			return
+		}
+
+		c.JSON(http.StatusOK, providerRecord)
 	}
 }
 

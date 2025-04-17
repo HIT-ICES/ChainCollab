@@ -31,13 +31,24 @@ func parseTime(created string) time.Time {
 }
 
 func NewDockerProvider(p models.Provider) (*DockerProvider, error) {
-	cli, err := client.NewClientWithOpts(
-		client.FromEnv,
-		client.WithAPIVersionNegotiation(),
-	)
-	if err != nil {
-		return nil, err
+	// if localhost, change to from Env
+	var cli *client.Client
+	var err error
+	if p.Host == "localhost" {
+		cli, err = client.NewClientWithOpts(
+			client.FromEnv,
+			client.WithAPIVersionNegotiation(),
+		)
+	} else {
+		cli, err = client.NewClientWithOpts(
+			client.WithHost(fmt.Sprintf("tcp://%s:%d", p.Host, p.Port)),
+			client.WithAPIVersionNegotiation(),
+		)
+		if err != nil {
+			return nil, err
+		}
 	}
+
 	// test cli
 	// 测试连接是否可用
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -117,18 +128,15 @@ func (d *DockerProvider) DeployProgram(spec ProgramSpec) (ProgramStatus, error) 
 
 	networkCfg := &network.NetworkingConfig{}
 	if spec.Network != "" {
-		// 如果需要特定的网络，可以配置
 	}
 
 	containerName := spec.Name
 
-	// 创建容器
 	resp, err := d.cli.ContainerCreate(ctx, config, hostCfg, networkCfg, nil, containerName)
 	if err != nil {
 		return ProgramStatus{}, err
 	}
 
-	// 启动容器
 	err = d.cli.ContainerStart(ctx, resp.ID, container.StartOptions{})
 	if err != nil {
 		return ProgramStatus{}, err
