@@ -95,13 +95,13 @@ class EthereumResourceSet(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     # msp = models.TextField(help_text="msp of organization", null=True)
     # tls = models.TextField(help_text="tls of organization", null=True)
-    network = models.ForeignKey(
-        "Network",
-        help_text="Network to which the organization belongs",
-        null=True,
-        related_name="ethereum_organizations",
-        on_delete=models.SET_NULL,
-    )
+    # network = models.ForeignKey(
+    #     "Network",
+    #     help_text="Network to which the organization belongs",
+    #     null=True,
+    #     related_name="ethereum_organizations",
+    #     on_delete=models.SET_NULL,
+    # )
     org_type = models.CharField(
         choices=FabricCAOrgType.to_choices(True),
         max_length=32,
@@ -641,6 +641,13 @@ class Port(models.Model):
         help_text="Internal port",
         default=0,
         validators=[MinValueValidator(MIN_PORT), MaxValueValidator(MAX_PORT)],
+    )
+    eth_node = models.ForeignKey(
+        "EthNode",
+        help_text="Node of port",
+        on_delete=models.CASCADE,
+        null=True,
+        related_name="ethport",
     )
 
     class Meta:
@@ -1611,14 +1618,14 @@ class EthNode(models.Model):
         editable=True,
     )
     name = models.CharField(help_text="Node name", max_length=64, default="")
-    type = models.CharField(
-        help_text="""
-    Node type defined for network.
-    Fabric available types: %s
-    """
-        % (FabricNodeType.names()),
-        max_length=64,
-    )
+    # type = models.CharField(
+    #     help_text="""
+    # Node type defined for network.
+    # Fabric available types: %s
+    # """
+    #     % (FabricNodeType.names()),
+    #     max_length=64,
+    # )
     urls = models.JSONField(
         help_text="URL configurations for node",
         null=True,
@@ -1631,13 +1638,13 @@ class EthNode(models.Model):
         null=True,
         on_delete=models.CASCADE,
     )
-    # fabric_resource_set = models.ForeignKey(
-    #     FabricResourceSet,
-    #     help_text="Organization of node",
-    #     null=True,
-    #     related_name="node",
-    #     on_delete=models.CASCADE,
-    # )
+    fabric_resource_set = models.ForeignKey(
+        FabricResourceSet,
+        help_text="Organization of node",
+        null=True,
+        related_name="ethnode",
+        on_delete=models.CASCADE,
+    )
     agent = models.ForeignKey(
         Agent,
         help_text="Agent of node",
@@ -1672,8 +1679,8 @@ class EthNode(models.Model):
     #     help_text="tls of node",
     #     null=True,
     # )
-    # cid = models.CharField(
-    #     help_text="id used in agent, such as container id",
-    #     max_length=256,
-    #     default="",
-    # )
+    cid = models.CharField(
+        help_text="id used in agent, such as container id",
+        max_length=256,
+        default="",
+    )

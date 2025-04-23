@@ -688,11 +688,12 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
     @timeitwithname("InitEth")
     def init(self, request, pk=None, *args, **kwargs):
         """
-        初始化EthEnvironment, install firefly and start firefly 融入进去了
+        初始化EthEnvironment
         """
+        
         try:
-            env = EthEnvironment.objects.get(pk=pk)
-        except EthEnvironment.DoesNotExist:
+            env = Environment.objects.get(pk=pk)
+        except Environment.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         if env.status != "CREATED":
@@ -727,7 +728,7 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
         ethereum_resource_set = EthereumResourceSet.objects.create(
             resource_set=resource_set,
             org_type=1,
-            # name=membership.name + ".org" + ".com",
+            name=membership.name + ".org" + ".com",
             # msp=membership.name + ".org" + ".com" + "OrdererMSP",
         )
         
@@ -740,9 +741,12 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
         # )
         
         headers = request.headers
+        node_name = "system-geth-node"
         post(
             f"http://{CURRENT_IP}:8000/api/v1/resource_sets/{resource_set.id}/eth/node_create",
-            data={},
+            data={
+                "name": node_name
+                },
             headers={"Authorization": headers["Authorization"]},
         )
         
@@ -762,8 +766,8 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         try:
-            environment = EthEnvironment.objects.get(pk=pk)
-        except EthEnvironment.DoesNotExist:
+            environment = Environment.objects.get(pk=pk)
+        except Environment.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         if environment.status != "INITIALIZED":
@@ -791,18 +795,15 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
         ethereum_resource_set = EthereumResourceSet.objects.create(
             resource_set=resource_set,
             org_type=0,  # 0 表示 UserOrg
+            name=membership.name + ".org" + ".com",
         )
         
         headers = request.headers
         post(
             f"http://{CURRENT_IP}:8000/api/v1/resource_sets/{resource_set.id}/eth/node_create",
-            data={},
+            data={"name": ethereum_resource_set.name},
             headers={"Authorization": headers["Authorization"]},
         )
-        
-    
-        environment.status = "INITIALIZED"
-        environment.save()
 
         return Response(status=status.HTTP_201_CREATED)
 

@@ -156,17 +156,17 @@ class EthereumResourceSetViewSet(viewsets.ViewSet):
         ports = find_available_ports(ip, node.id, agent.id, 1)
         set_ports_mapping(node.id, [{"internal": 7054, "external": ports[0]}], True)
         
-    def _create_start_eth_node(self, ca_name, port_map, org_name, type, infos=None):
-        try:
-            self._node_create_agent(ca_name)
-        except Exception as e:
-            raise Exception(e)
+    # def _create_start_eth_node(self, ca_name, port_map, org_name, type, infos=None):
+    #     try:
+    #         self._node_create_agent(ca_name)
+    #     except Exception as e:
+    #         raise Exception(e)
     
     
-    def _node_create_agent(self, ca_name, port_map):
+    def _node_create_agent(self, name, port_map):
         try:
             data = {
-                "node_name": ca_name,
+                "node_name": name,
                 "port_map": port_map,
             }
             response = post(f"""http://{CURRENT_IP}:7001/api/v1/ethnode""", data=data)
@@ -205,16 +205,18 @@ class EthereumResourceSetViewSet(viewsets.ViewSet):
             ethereum_resource_set = resource_set.sub_resource_set.get()
             agent = resource_set.agent
             org_name = ethereum_resource_set.name
+            node_name = request.data.get("name", None)
             
             node = EthNode(
-                name="ca." + org_name,
+                name=node_name,
                 # JsonField
-                urls="ca." + org_name,
+                # urls="ca." + org_name,
                 agent=agent,
-                type="ca",
+                # type="ca",
             )
             node.save()
             
+            # 可能需要修改
             self._set_port(node, agent)
             
             port_map = {
@@ -224,13 +226,18 @@ class EthereumResourceSetViewSet(viewsets.ViewSet):
                 .all()
             }.__repr__()
             
-            self._create_start_eth_node(
-                ca_name=org_name,
+            # self._create_start_eth_node(
+            #     ca_name=org_name,
+            #     port_map=port_map,
+            #     org_name=org_name,
+            #     type="ca",
+            #     infos=request.data,
+            # )
+            self._node_create_agent(
+                name=node_name,
                 port_map=port_map,
-                org_name=org_name,
-                type="ca",
-                infos=request.data,
             )
+            
             return Response(
                 data=ok("ca create success"), status=status.HTTP_202_ACCEPTED
             )
