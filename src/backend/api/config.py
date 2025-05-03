@@ -24,7 +24,7 @@ FABRIC_CA_CFG = os.path.join(BASE_PATH, "opt", "node", "ca.yaml.bak")
 
 FABRIC_CHAINCODE_STORE = os.path.join(BASE_PATH, "opt", "chaincode")
 BPMN_CHAINCODE_STORE = os.path.join(BASE_PATH, "opt", "chaincode-go-bpmn")
-CURRENT_IP = "192.168.1.177" if mode == "server" else "127.0.0.1"
+CURRENT_IP = "127.0.0.1" if mode == "server" else "127.0.0.1"
 AGENT_PORT = 7001
 DEFAULT_AGENT = default_agent = {
     "name": "default_agent",

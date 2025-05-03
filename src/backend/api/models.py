@@ -1639,7 +1639,7 @@ class EthNode(models.Model):
         on_delete=models.CASCADE,
     )
     fabric_resource_set = models.ForeignKey(
-        FabricResourceSet,
+        EthereumResourceSet,
         help_text="Organization of node",
         null=True,
         related_name="ethnode",

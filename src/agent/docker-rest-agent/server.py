@@ -479,7 +479,7 @@ def create_eth_node():
         try:
             image, _ = client.images.build(
                 path=dockerfile_path,
-                tag=f"{node_name}:latest",
+                tag=f"test:latest",
                 rm=True
             )
         except Exception as e:
@@ -487,6 +487,16 @@ def create_eth_node():
             res = {"code": FAIL_CODE, "data": {}, "msg": f"Failed to build Docker image: {str(e)}"}
             return jsonify({"res": res}), 500    
         
+        # Check if the specified ports are available, otherwise find a random available port
+        def get_port(port):
+            return port if _is_port_available(port) else _find_free_port()
+
+        # Assign ports, checking availability
+        ports = {
+            "8545/tcp": get_port(port_map.get("8545", 8545)),
+            "30303/tcp": get_port(port_map.get("30303", 30303)),
+        }
+
         try:
             container = client.containers.create(
                 image=f"ethereum/client-go:v1.10.1",
@@ -505,10 +515,7 @@ def create_eth_node():
                     "--allow-insecure-unlock",
                 ],
                 name=node_name,
-                ports={
-                    "8545/tcp": port_map.get("8545", 8545),
-                    "30303/tcp": port_map.get("30303", 30303),
-                },
+                ports=ports,
                 network="cello-net",
                 volumes={
                     os.path.abspath(eth_node_home): {

@@ -111,20 +111,22 @@ const Overview: React.FC = () => {
     // Eth应该就简单的两个init和start流程
     // Init
     setSetUpEthereumNetworkLoading(true)
-    await InitEthEnv(currentEnvId)  // 创建compose文件
+    // setSync()
+    await InitEthEnv(currentEnvId)  
     setSync()
 
     await new Promise((resolve, reject) => {
       setIsJoinModelOpen(true)
       setupCallBackRef.current = resolve
     })
-    setSync()
+    // setSync()
 
-    await StartEthEnv(currentEnvId);  // run容器
-    setSync()
+    // await StartEthEnv(currentEnvId);  // run容器
+    // setSync()
 
-    // need to change
-    await ActivateEnv(currentEnvId, currentOrgId) // 
+    // // need to change
+    // await ActivateEnv(currentEnvId, currentOrgId) // 
+    // setSync()
     setSetupFabricNetWorkLoading(false)
     setSync()
 
@@ -177,7 +179,7 @@ const Overview: React.FC = () => {
                   onClick={() => {
                     if (currentEnvType === "Fabric") {
                       handleSetUpFabricNetwork();
-                    } else if (currentEnvType === "Ethereum") {
+                    } else  {
                       handleSetUpEthereumNetwork();
                     }
                   }}
