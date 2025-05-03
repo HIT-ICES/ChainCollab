@@ -139,7 +139,8 @@ const AddEnvModal: React.FC<{
   isModalOpen?: boolean,
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>,
   setSync: () => void,
-}> = ({ isModalOpen = false, setIsModalOpen, setSync }) => {
+  defaultEnvType?: string,
+}> = ({ isModalOpen = false, setIsModalOpen, setSync, defaultEnvType = 'Fabric' }) => {
   type FieldType = {
     envName?: string;
     envType?: string;
@@ -148,10 +149,13 @@ const AddEnvModal: React.FC<{
   const dispatch = useAppDispatch();
   const currentConsortiumId = useAppSelector(selectConsortium).currentConsortiumId;
 
-
   const onFinish = async (values: FieldType) => {
     const Env = await createEnvironment(currentConsortiumId, values.envName);
-    dispatch(activateEnv({ currentEnvId: Env.id, currentEnvName: Env.name }))
+    dispatch(activateEnv({
+      currentEnvId: Env.id,
+      currentEnvName: Env.name,
+      currentEnvType: values.envType || 'Fabric'
+    }));
     setIsModalOpen(false);
     setSync();
   }
@@ -177,7 +181,7 @@ const AddEnvModal: React.FC<{
         onFinish={onFinish}
         autoComplete="off"
         preserve={false}
-        initialValues={{ envName: 'Environment' }}
+        initialValues={{ envName: 'Environment', envType: defaultEnvType }}
       >
         <Form.Item<FieldType>
           label="Environment Name"
@@ -196,7 +200,6 @@ const AddEnvModal: React.FC<{
           ]}
         >
           <Select
-            defaultValue="Fabric"
             options={[
               { value: 'Ethereum', label: 'Ethereum' },
               { value: 'Fabric', label: 'Fabric' },
@@ -365,8 +368,7 @@ const MainMenu: React.FC = () => {
             >
               Firefly
             </Menu.Item></>)}
-        </>)}
-      {currentEnvType === 'Ethereum' && (<><Menu.Item
+            {currentEnvType === 'Ethereum' && (<><Menu.Item
         key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/envdashboard`}
       >
         EnvDashboard
@@ -386,6 +388,8 @@ const MainMenu: React.FC = () => {
           </Menu.Item>
         </SubMenu></>
       )}
+        </>)}
+      
     </SubMenu>
 
   );

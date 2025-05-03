@@ -25,9 +25,10 @@ export const envSlice = createSlice({
             {
                 currentEnvId: string,
                 currentEnvName: string,
+                currentEnvType?: string,
             }>) => {
             return {
-                currentEnvType: "Fabric",
+                currentEnvType: action.payload.currentEnvType || "Fabric",
                 currentEnvId: action.payload.currentEnvId,
                 currentEnvName: action.payload.currentEnvName,
             }

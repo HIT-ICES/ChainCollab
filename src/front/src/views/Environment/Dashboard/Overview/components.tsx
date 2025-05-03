@@ -81,21 +81,17 @@ export const NaiveEthereumStepBar = (props) => {
     title: string;
     description?: string;
   }> = [
+    // {
+    //   title: "System Created",
+    //   description: "DB Record",
+    // },
       {
-        title: "Created",
-        description: "DB Record",
+        title: "System Node Created",
+        description: "System go-client node",
       },
       {
-        title: "Initialized",
-        description: "CA & Orderer Node",
-      },
-      {
-        title: "Started",
-        description: "Peer Nodes",
-      },
-      {
-        title: "Active",
-        description: "Channel been Setup",
+        title: "Membership Node Initialized",
+        description: "Membership go-client node",
       }
     ];
 

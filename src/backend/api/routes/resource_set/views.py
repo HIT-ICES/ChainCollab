@@ -166,11 +166,12 @@ class EthereumResourceSetViewSet(viewsets.ViewSet):
     def _node_create_agent(self, name, port_map):
         try:
             data = {
-                "node_name": name,
+                "name": name,
                 "port_map": port_map,
             }
             response = post(f"""http://{CURRENT_IP}:7001/api/v1/ethnode""", data=data)
-            if response.status_code == 200:
+            print(response.status_code)
+            if str(response.status_code).startswith('2'):
                 txt = json.loads(response.text)
                 return txt["res"]
             else:
@@ -202,7 +203,7 @@ class EthereumResourceSetViewSet(viewsets.ViewSet):
         try:
             resource_set_id = request.parser_context["kwargs"].get("resource_set_id")
             resource_set = ResourceSet.objects.get(pk=resource_set_id)
-            ethereum_resource_set = resource_set.sub_resource_set.get()
+            ethereum_resource_set = resource_set.ethereum_sub_resource_sets.get()
             agent = resource_set.agent
             org_name = ethereum_resource_set.name
             node_name = request.data.get("name", None)
@@ -221,7 +222,7 @@ class EthereumResourceSetViewSet(viewsets.ViewSet):
             
             port_map = {
                 a["internal"]: a["external"]
-                for a in Port.objects.filter(node=node)
+                for a in Port.objects.filter(eth_node=node)
                 .values("internal", "external")
                 .all()
             }.__repr__()
