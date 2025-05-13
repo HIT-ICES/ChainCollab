@@ -469,6 +469,7 @@ if __name__ == "__main__":
             paths = choreography.generate_invoke_path(start_event.id, end_event.id)
             all_paths.extend(paths)
 
-        with open(f"./resource/bpmn/{file_name.split(".")[0]}-path.json", "w") as f:
+        file_base = file_name.split(".")[0]
+        with open(f"./resource/bpmn/{file_base}-path.json", "w") as f:
             json.dump(all_paths, f)
         print(f"File {file_name} is done")
