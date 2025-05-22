@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Form, Input, Button } from "antd";
+import { Modal, Form, Input, Button, Checkbox } from "antd";
 import { useAppSelector } from "@/redux/hooks";
 import { getMembershipList } from "@/api/platformAPI";
 
@@ -7,7 +7,8 @@ interface Props {
   onSubmit: (
     orgId: string,
     consortiumId: string,
-    membershipName: string
+    membershipName: string,
+    createSSI: boolean
   ) => void;
 }
 
@@ -71,6 +72,7 @@ const CreateMembership: React.FC<Props> = ({ onSubmit }) => {
 
   type FieldType = {
     membershipName?: string;
+    createSSI?: boolean;
   };
 
   return (
@@ -98,6 +100,7 @@ const CreateMembership: React.FC<Props> = ({ onSubmit }) => {
           onFinishFailed={onFinishFailed}
           autoComplete="off"
           preserve={false} // 在Modal关闭后，销毁Field
+          initialValues={{ createSSI: false }}
         >
           <Form.Item<FieldType>
             label="Membership Name"
@@ -113,6 +116,13 @@ const CreateMembership: React.FC<Props> = ({ onSubmit }) => {
             }
           >
             <Input allowClear />
+          </Form.Item>
+          <Form.Item<FieldType>
+            name="createSSI"
+            valuePropName="checked"
+            wrapperCol={{ offset: 8, span: 16 }}
+          >
+            <Checkbox>Membership For SSI</Checkbox>
           </Form.Item>
         </Form>
       </Modal>

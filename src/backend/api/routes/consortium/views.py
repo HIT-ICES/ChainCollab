@@ -43,17 +43,28 @@ class ConsortiumViewSet(viewsets.ViewSet):
         """
         name = request.data.get("name")
         baseOrgId = request.data.get("baseOrgId")
+        createSSI = request.data.get("createSSI", False)
         user = request.user
         try:
             consortium = Consortium.objects.create(name=name)
             # create a Memebership for the baseOrg in the consortium
             baseOrg = LoleidoOrganization.objects.get(id=baseOrgId)
-            membership = Membership.objects.create(
+            if createSSI:
+                ssi_membership = Membership.objects.create(
+                    loleido_organization=baseOrg,
+                    consortium=consortium,
+                    name=f"{baseOrg.name}-{consortium.name}-SSI",
+                    primary_contact_email=user.email,
+                    membership_type='ssi',
+                )
+            else:
+                membership = Membership.objects.create(
                 loleido_organization=baseOrg,
                 consortium=consortium,
                 name=baseOrg.name + "-" + consortium.name,
                 primary_contact_email=user.email,
-            )
+                membership_type='standard',
+                )
         except Exception as e:
             return Response(
                 data={"message": e.args}, status=status.HTTP_400_BAD_REQUEST

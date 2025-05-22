@@ -6,6 +6,10 @@ import {
   Typography,
   Button as AntdButton,
   message,
+  Modal,
+  Form,
+  Input,
+  Spin
 } from "antd";
 
 import ClearAllIcon from "@mui/icons-material/ClearAll";
@@ -30,12 +34,13 @@ import {
   InstallOracle,
   InstallDmnEngine,
   StartFireflyForEnv,
-  requestOracleFFI
+  requestOracleFFI,
+  submitSSIExpansion
 } from "@/api/resourceAPI";
 
 import {
-    registerInterface,
-    registerAPI
+  registerInterface,
+  registerAPI
 } from "@/api/executionAPI"
 
 const systemFireflyURL = "http://127.0.0.1:5000"
@@ -65,6 +70,9 @@ import {
 
 
 const Overview: React.FC = () => {
+  const [isSSIModalOpen, setIsSSIModalOpen] = useState(false);
+  const [ssiForm] = Form.useForm();
+
   const navigate = useNavigate();
   const [isJoinModelOpen, setIsJoinModelOpen] = useState(false);
   const [envInfo, setSync] = useEnvInfo()
@@ -81,6 +89,23 @@ const Overview: React.FC = () => {
 
   const [setupComponentLoading, setSetupComponentLoading] = useState(false)
 
+  const handleSubmitSSIExpansion = async () => {
+    try {
+      const values = await ssiForm.validateFields();
+      const payload = membershipList.map((m) => ({
+        membership_id: m.id,
+        url: values[`url_${m.id}`],
+        public_did: values[`did_${m.id}`],
+      }));
+      await submitSSIExpansion(currentEnvId, payload);
+      message.success("Submitted successfully");
+      setIsSSIModalOpen(false);
+    } catch (err) {
+      message.error("Submission failed");
+    }
+  };
+  
+  
   const handleSetUpFabricNetwork = async () => {
     // Init
     setSetupFabricNetWorkLoading(true)
@@ -110,7 +135,7 @@ const Overview: React.FC = () => {
     await InstallOracle(currentOrgId, currentEnvId)
     // register interface
     const oracleFFI = await requestOracleFFI()
-    const res = await registerInterface(systemFireflyURL,oracleFFI.ffiContent, "Oracle")
+    const res = await registerInterface(systemFireflyURL, oracleFFI.ffiContent, "Oracle")
     await new Promise((resolve, reject) => {
       setTimeout(resolve, 5000)
     })
@@ -189,15 +214,15 @@ const Overview: React.FC = () => {
                 <LoadingButton
                   variant="outlined"
                   loading={setupComponentLoading}
-                  onClick={() => {handleSetUpComponent()}}>
+                  onClick={() => { handleSetUpComponent() }}>
                   SetUp Core Component
                 </LoadingButton>
               </Col>
             </Row>
             <Row style={{ display: "flex", justifyContent: "space-evenly" }}>
-              <FireflyComponentCard ChaincodeStatus={envInfo.fireflyStatus!=="NO"} ClusterStatus={envInfo.fireflyStatus==="STARTED"}  />
-              <OracleComponentCard ChaincodeStatus ={envInfo.oracleStatus==="CHAINCODEINSTALLED"}/>
-              <DMNComponentCard  ChaincodeStatus ={envInfo.dmnStatus==="CHAINCODEINSTALLED"} />
+              <FireflyComponentCard ChaincodeStatus={envInfo.fireflyStatus !== "NO"} ClusterStatus={envInfo.fireflyStatus === "STARTED"} />
+              <OracleComponentCard ChaincodeStatus={envInfo.oracleStatus === "CHAINCODEINSTALLED"} />
+              <DMNComponentCard ChaincodeStatus={envInfo.dmnStatus === "CHAINCODEINSTALLED"} />
             </Row>
           </Card.Grid>
 
@@ -224,10 +249,7 @@ const Overview: React.FC = () => {
           <Card.Grid
             style={{ width: "100%", height: "100%", cursor: "pointer" }}
           >
-            <Row
-              justify="space-between"
-              style={{ width: "100%", height: "100%" }}
-            >
+            <Row justify="space-between" style={{ width: "100%", height: "100%" }}>
               <Col span={2} style={customColStyle}>
                 <PeopleIcon style={{ fontSize: 24 }} />
               </Col>
@@ -254,6 +276,68 @@ const Overview: React.FC = () => {
               </Col>
             </Row>
           </Card.Grid>
+
+          {/* SSI Expansion */}
+          <Card.Grid
+            style={{ width: "100%", height: "100%", cursor: "pointer" }}
+            onClick={() => setIsSSIModalOpen(true)}
+          >
+            <Row justify="space-between" style={{ width: "100%", height: "100%" }}>
+              <Col span={2} style={customColStyle}>
+                <PeopleIcon style={{ fontSize: 24 }} />
+              </Col>
+              <Col span={6} style={customColStyle}>
+                <Text strong style={customTextStyle}>SSI Expansion</Text>
+              </Col>
+              <Col span={8} style={{ ...customTextStyle, marginLeft: "10px" }}>
+                <Text style={customTextStyle}>Configure DIDs</Text>
+              </Col>
+              <Col
+                flex="auto"
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  alignItems: "center",
+                  marginRight: "0px",
+                }}
+              >
+                <KeyboardArrowRightIcon />
+              </Col>
+            </Row>
+          </Card.Grid>
+          {/* SSI Expansion Modal */}
+          <Modal
+            title="Configure SSI Expansion"
+            open={isSSIModalOpen}
+            onCancel={() => setIsSSIModalOpen(false)}
+            onOk={handleSubmitSSIExpansion}
+            okText="Submit"
+            destroyOnClose
+          >
+            <Spin spinning={false}>
+              <Form form={ssiForm} layout="vertical">
+                {membershipList.map((m) => (
+                  <div key={m.id} style={{ marginBottom: 16, borderBottom: "1px solid #eee", paddingBottom: 8 }}>
+                    <Text strong>{m.name}</Text>
+                    <Form.Item
+                      name={`url_${m.id}`}
+                      label="Agent URL"
+                      rules={[{ required: true, message: "Please input Agent URL" }]}
+                    >
+                      <Input placeholder="https://..." />
+                    </Form.Item>
+                    <Form.Item
+                      name={`did_${m.id}`}
+                      label="Public DID"
+                      rules={[{ required: true, message: "Please input Public DID" }]}
+                    >
+                      <Input placeholder="did:example:..." />
+                    </Form.Item>
+                  </div>
+                ))}
+              </Form>
+            </Spin>
+          </Modal>
 
 
           {/* Release Version */}

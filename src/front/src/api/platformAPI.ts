@@ -101,11 +101,13 @@ export const declineUserInvitation = async (invitationId: string) => {
 
 export const createConsortium = async (
   orgId: string,
-  consortiumName: string
+  consortiumName: string,
+  createSSI: boolean
 ) => {
   const response = await api.post(`/consortiums`, {
     name: consortiumName,
     baseOrgId: orgId,
+    createSSI: createSSI
   });
   return response.data;
 };
@@ -215,12 +217,14 @@ export const rejectOrgInvitation = async (invitationId: string) => {
 export const createMembership = async (
   orgId: string,
   consortiumId: string,
-  consortiumName: string
+  consortiumName: string,
+  membershipType: string // 'standard' or 'ssi'
 ) => {
   try {
     await api.post(`/consortium/${consortiumId}/memberships`, {
       org_uuid: orgId,
       name: consortiumName,
+      membership_type: membershipType
     });
   } catch (err) {
     console.error("创建Membership时，上传失败", err);

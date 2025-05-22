@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Menu, Modal } from "antd";
+import { Form, Input, Menu, Modal, Checkbox } from "antd";
 const { SubMenu } = Menu;
 import { useLocation, useNavigate } from "react-router-dom";
 import { DesktopOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
@@ -29,6 +29,7 @@ const AddConsortiumModal: React.FC<{
 
   type FieldType = {
     consortiumName?: string;
+    createSSI?: boolean;
   };
   const [form] = Form.useForm<FieldType>();
   const dispatch = useAppDispatch();
@@ -36,7 +37,7 @@ const AddConsortiumModal: React.FC<{
   const currentOrgId = useAppSelector(selectOrg).currentOrgId;
 
   const onFinish = async (values: FieldType) => {
-    const newConsortium = await createConsortium(currentOrgId, values.consortiumName);
+    const newConsortium = await createConsortium(currentOrgId, values.consortiumName, values.createSSI);
     dispatch(activateConsortium({ currentConsortiumId: newConsortium.id, currentConsortiumName: newConsortium.name }))
     setIsModalOpen(false);
     setSync();
@@ -63,7 +64,7 @@ const AddConsortiumModal: React.FC<{
         onFinish={onFinish}
         autoComplete="off"
         preserve={false} // 在Modal关闭后，销毁Field
-        initialValues={{ consortiumName: 'Consortium' }}
+        initialValues={{ consortiumName: 'Consortium', createSSI: false }}
       >
         <Form.Item<FieldType>
           label="Consortium Name"
@@ -73,6 +74,13 @@ const AddConsortiumModal: React.FC<{
           ]}
         >
           <Input allowClear />
+        </Form.Item>
+        <Form.Item<FieldType>
+          name="createSSI"
+          valuePropName="checked"
+          wrapperCol={{ offset: 8, span: 16 }}
+        >
+          <Checkbox> Membership For SSI </Checkbox>
         </Form.Item>
       </Form>
     </Modal>

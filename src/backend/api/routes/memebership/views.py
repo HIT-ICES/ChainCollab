@@ -47,6 +47,7 @@ class MemebershipViewSet(viewsets.ViewSet):
         org_id = request.data.get("org_uuid", None)
         name = request.data.get("name")
         email = request.data.get("primary_contact_email", "org.example.com")
+        membership_type = request.data.get("membership_type", "standard")  # 默认为 standard
         try:
             consortium = Consortium.objects.get(pk=consortium_id)
         except Consortium.DoesNotExist:
@@ -61,6 +62,7 @@ class MemebershipViewSet(viewsets.ViewSet):
             consortium=consortium,
             name=name,
             primary_contact_email=email,
+            membership_type=membership_type,  # 添加此行
         )
         membership.save()
         serializer = MembershipSerializer(membership)

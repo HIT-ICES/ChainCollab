@@ -399,3 +399,23 @@ export const getFireflyDetail = async (envId: string, fireflyId: string) => {
         return {};
     }
 }
+
+export const submitSSIExpansion = async (
+    envId: string,
+    payload: {
+      membership_id: string;
+      url: string;
+      public_did: string;
+    }[]
+  ) => {
+    try {
+      const response = await api.post(`/environments/${envId}/ssi_expansion`, {
+        ssi_bindings: payload,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("提交 SSI Expansion 失败", error);
+      return error;
+    }
+  };
+  

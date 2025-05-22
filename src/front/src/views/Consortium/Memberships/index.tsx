@@ -84,9 +84,12 @@ const Memberships: React.FC = () => {
   const handleCreate = async (
     orgId: string,
     consortiumId: string,
-    membershipName: string
+    membershipName: string,
+    createSSI: boolean
   ) => {
-    await createMembership(orgId, consortiumId, membershipName);
+    const membership_type = createSSI ? "ssi" : "standard";
+
+    await createMembership(orgId, consortiumId, membershipName, membership_type);
     const data = await getMembershipList(consortiumId);
     const newMembershipList = data.map(renameMembership);
     setMembershipList(newMembershipList);

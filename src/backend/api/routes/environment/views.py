@@ -653,3 +653,40 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         response = {"ffiContent": ffiContent}
 
         return Response(response, status=status.HTTP_200_OK)
+    
+    @action(methods=["post"], detail=True, url_path="ssi_expansion")
+    def ssi_expansion(self, request, pk=None, *args, **kwargs):
+        """
+        配置 SSI Expansion：为每个 membership 设置 URL 和 Public DID
+        """
+        try:
+            env = Environment.objects.get(pk=pk)
+        except Environment.DoesNotExist:
+            return Response({"message": "Environment not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        ssi_bindings = request.data.get("ssi_bindings", [])
+
+        if not isinstance(ssi_bindings, list):
+            return Response({"message": "ssi_bindings must be a list"}, status=status.HTTP_400_BAD_REQUEST)
+
+        updated_count = 0
+        for binding in ssi_bindings:
+            membership_id = binding.get("membership_id")
+            url = binding.get("url")
+            public_did = binding.get("public_did")
+
+            if not membership_id or not url or not public_did:
+                continue  # skip invalid entries
+
+            try:
+                membership = Membership.objects.get(id=membership_id)
+            except Membership.DoesNotExist:
+                continue
+
+            membership.url = url
+            membership.public_did = public_did
+            membership.save()
+            updated_count += 1
+
+        return Response({"message": f"{updated_count} memberships updated"}, status=status.HTTP_200_OK)
+

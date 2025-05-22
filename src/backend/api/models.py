@@ -886,6 +886,10 @@ class Consortium(models.Model):
 
 
 class Membership(models.Model):
+    MEMBERSHIP_TYPE_CHOICES = [
+        ('standard', 'Standard'),
+        ('ssi', 'SSI'),
+    ]
     id = models.UUIDField(
         primary_key=True,
         help_text="ID of membership",
@@ -912,6 +916,23 @@ class Membership(models.Model):
     primary_contact_email = models.EmailField(
         help_text="primary contact email of membership",
         null=True,
+    )
+    membership_type = models.CharField(
+        max_length=20,
+        choices=MEMBERSHIP_TYPE_CHOICES,
+        default='standard',
+        help_text="Type of membership: standard or ssi"
+    )
+    url = models.URLField(
+        null=True,
+        blank=True,
+        help_text="URL endpoint for SSI"
+    )
+    public_did = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text="Public DID for SSI"
     )
 
 
