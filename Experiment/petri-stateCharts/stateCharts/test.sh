@@ -13,7 +13,7 @@ CHANNEL=mychannel
 PEER0_ORG1_CA=$CORE_PEER_TLS_ROOTCERT_FILE
 PEER0_ORG2_CA=~/code/fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
 
-for N in $(seq 105 2000 20000); do
+for N in $(seq 105 2000 14000); do
   # K=$((N / 2))
   K=30 # 固定 K 为 3
   PARTICIPANTS="["
