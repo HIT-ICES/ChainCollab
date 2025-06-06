@@ -16,11 +16,18 @@ export default function MainPage({ xmlDataMap, onSave }) {
     const handleDoubleClick = (e) => {
       e.stopPropagation();
       const data_element_id = $(e.target).closest('.djs-element.djs-shape').attr('data-element-id');
-      const ids = data_element_id.split('_');
-      const type = ids[0];
+
+      const modeler = window.bpmnjs;
+      const elementRegistry = modeler.get('elementRegistry');
+      const shape = elementRegistry.get(data_element_id);
+      // console.log('data_element_id-shape', data_element_id, shape);
+      const type = shape.type;
+      console.log('data_element_id-type', data_element_id, type);
+      // const ids = data_element_id.split('_');
+      // const type = ids[0];
       setDataElementId(data_element_id);
       setDataElementType(type);
-      if (type === 'Activity' || type === 'Message'||type==='DataObject') {
+      if (type === 'bpmn:BusinessRuleTask' || type === 'bpmn:Message' || type === 'bpmn:Task') {
         setModalOpen(true);
       }
     }
@@ -34,25 +41,25 @@ export default function MainPage({ xmlDataMap, onSave }) {
 
   return (
     <div>
-      {dataElementType === 'Message' && dataElementId ? (
+      {dataElementType === 'bpmn:Message' && dataElementId ? (
         <MessageModal
           dataElementId={dataElementId}
-          open={modalOpen && 'Message' === dataElementType}
+          open={modalOpen && 'bpmn:Message' === dataElementType}
           onClose={() => setModalOpen(false)}
         />
       ) : null}
-      {dataElementType === 'Activity' && dataElementId ? (
+      {dataElementType === 'bpmn:BusinessRuleTask' && dataElementId ? (
         <DmnModal
           dataElementId={dataElementId}
           xmlData={xmlDataMap.get(dataElementId) ? xmlDataMap.get(dataElementId).dmnContent : null}
-          open={modalOpen && 'Activity' === dataElementType}
+          open={modalOpen && 'bpmn:BusinessRuleTask' === dataElementType}
           onClose={() => setModalOpen(false)}
           onSave={onSave}
         />) : null}
-        {dataElementType === 'DataObject' && dataElementId ? (
+      {dataElementType === 'bpmn:Task' && dataElementId ? (
         <DataObjectMoadal
           dataElementId={dataElementId}
-          open={modalOpen && 'DataObject' === dataElementType}
+          open={modalOpen && 'bpmn:Task' === dataElementType}
           onClose={() => setModalOpen(false)}
         />
       ) : null}
