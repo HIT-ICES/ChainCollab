@@ -16,7 +16,7 @@ export default class DataPaletteProvider{
 
     function startCreate(event) {
       const serviceTaskShape = elementFactory.create(
-        'shape', { type: 'bpmn:DataObject' },
+        'shape', { type: 'bpmn:Task' },
       )
 
       create.start(event, serviceTaskShape)
@@ -25,7 +25,7 @@ export default class DataPaletteProvider{
     return {
       'create-test-data': {
         group: 'activity',
-        title: '创建 data元素',
+        title: '创建 NFT资产',
         imageUrl: icon,
         action: {
           dragstart: startCreate,
