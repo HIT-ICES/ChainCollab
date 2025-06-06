@@ -1,7 +1,7 @@
 import * as React from 'react';
 import $ from 'jquery';
 import { Button } from 'antd';
-
+import DataObjectMoadal from './DataObjectModal'
 import MessageModal from './MessageModal';
 import DmnModal from './DmnModal'
 import TaskModal from './TaskModal';
@@ -20,7 +20,7 @@ export default function MainPage({ xmlDataMap, onSave }) {
       const type = ids[0];
       setDataElementId(data_element_id);
       setDataElementType(type);
-      if (type === 'Activity' || type === 'Message') {
+      if (type === 'Activity' || type === 'Message'||type==='DataObject') {
         setModalOpen(true);
       }
     }
@@ -49,6 +49,13 @@ export default function MainPage({ xmlDataMap, onSave }) {
           onClose={() => setModalOpen(false)}
           onSave={onSave}
         />) : null}
+        {dataElementType === 'DataObject' && dataElementId ? (
+        <DataObjectMoadal
+          dataElementId={dataElementId}
+          open={modalOpen && 'DataObject' === dataElementType}
+          onClose={() => setModalOpen(false)}
+        />
+      ) : null}
       {/* <ParticipantModal
         dataElementId={dataElementId}
         open={modalOpen && 'Participant' === dataElementType}
