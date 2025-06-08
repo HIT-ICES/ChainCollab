@@ -20,26 +20,50 @@ type FSMData struct {
 	CurrentState FSMState `json:"current_state"`
 }
 
-var transitionTable map[string]map[string]string
+type TransitionTable map[string]map[string]string
 
-func (s *SmartContract) InitFSM(ctx contractapi.TransactionContextInterface, participantsCSV string, kStr string) error {
-	participants := strings.Split(participantsCSV, ",")
-	k, err := strconv.Atoi(kStr)
-	if err != nil {
-		return fmt.Errorf("invalid k value: %s", kStr)
+// 初始化 Task（FSM 初始化）
+func (s *SmartContract) InitProcess(ctx contractapi.TransactionContextInterface, participantsJSON string, k string) error {
+	var participants []string
+	if err := json.Unmarshal([]byte(participantsJSON), &participants); err != nil {
+		return fmt.Errorf("invalid participants input: %v", err)
 	}
 
-	_, table := GenerateFSM(participants, k)
-	transitionTable = table
+	kInt, err := strconv.Atoi(k)
+	if err != nil {
+		return fmt.Errorf("invalid k input: %v", err)
+	}
+
+	_, table := GenerateFSM(participants, kInt)
+
+	// 存储 transitionTable 到状态数据库
+	tableBytes, err := json.Marshal(table)
+	if err != nil {
+		return fmt.Errorf("failed to marshal transition table: %v", err)
+	}
+	if err := ctx.GetStub().PutState("TransitionTable", tableBytes); err != nil {
+		return fmt.Errorf("failed to put transition table to state: %v", err)
+	}
 
 	initial := &FSMData{CurrentState: FSMState("Init")}
 	return putFSMState(ctx, initial)
 }
 
-func (s *SmartContract) MarkDoneFSM(ctx contractapi.TransactionContextInterface, participant string) error {
+// 标记参与者完成
+func (s *SmartContract) MarkDone(ctx contractapi.TransactionContextInterface, participantID string) error {
 	state, err := getFSMState(ctx)
 	if err != nil {
 		return err
+	}
+
+	// 获取 transitionTable
+	tableBytes, err := ctx.GetStub().GetState("TransitionTable")
+	if err != nil || tableBytes == nil {
+		return fmt.Errorf("transition table not found")
+	}
+	var transitionTable TransitionTable
+	if err := json.Unmarshal(tableBytes, &transitionTable); err != nil {
+		return fmt.Errorf("failed to unmarshal transition table: %v", err)
 	}
 
 	current := string(state.CurrentState)
@@ -48,10 +72,10 @@ func (s *SmartContract) MarkDoneFSM(ctx contractapi.TransactionContextInterface,
 		return fmt.Errorf("invalid current state: %s", current)
 	}
 
-	next, found := nextMap[participant]
+	next, found := nextMap[participantID]
 	if !found {
 		if next, found = nextMap["any"]; !found {
-			return fmt.Errorf("no transition for participant %s in state %s", participant, current)
+			return fmt.Errorf("no transition for participant %s in state %s", participantID, current)
 		}
 	}
 
@@ -59,13 +83,18 @@ func (s *SmartContract) MarkDoneFSM(ctx contractapi.TransactionContextInterface,
 	return putFSMState(ctx, state)
 }
 
-func (s *SmartContract) QueryFSMState(ctx contractapi.TransactionContextInterface) (string, error) {
+// 查询 Task 状态
+func (s *SmartContract) QueryStatus(ctx contractapi.TransactionContextInterface) (string, error) {
 	state, err := getFSMState(ctx)
 	if err != nil {
 		return "", err
 	}
 	return string(state.CurrentState), nil
 }
+
+// ======================
+// 辅助函数
+// ======================
 
 func getFSMState(ctx contractapi.TransactionContextInterface) (*FSMData, error) {
 	data, err := ctx.GetStub().GetState("fsm_state")
@@ -90,9 +119,10 @@ func putFSMState(ctx contractapi.TransactionContextInterface, state *FSMData) er
 	return ctx.GetStub().PutState("fsm_state", data)
 }
 
-func GenerateFSM(participants []string, k int) ([]string, map[string]map[string]string) {
+// 生成 FSM 状态机
+func GenerateFSM(participants []string, k int) ([]string, TransitionTable) {
 	stateSet := make(map[string]struct{})
-	transitionTable := map[string]map[string]string{}
+	transitionTable := TransitionTable{}
 
 	stateSet["Init"] = struct{}{}
 	for _, p := range participants {
@@ -138,7 +168,6 @@ func GenerateFSM(participants []string, k int) ([]string, map[string]map[string]
 	return states, transitionTable
 }
 
-
 func combinations(elements []string, n int) [][]string {
 	var helper func(int, []string)
 	res := [][]string{}
@@ -162,8 +191,8 @@ func formatState(parts []string) string {
 	return strings.Join(parts, "_") + "_Done"
 }
 
-func contains( []string, target string) bool {
-	for _, v := range  {
+func contains(arr []string, target string) bool {
+	for _, v := range arr {
 		if v == target {
 			return true
 		}
