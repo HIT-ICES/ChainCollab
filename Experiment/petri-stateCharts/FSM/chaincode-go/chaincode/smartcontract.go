@@ -89,7 +89,15 @@ func (s *SmartContract) QueryStatus(ctx contractapi.TransactionContextInterface)
 	if err != nil {
 		return "", err
 	}
-	return string(state.CurrentState), nil
+	result := map[string]interface{}{
+		"current_state": state.CurrentState,
+		"p_done":        state.CurrentState == "Completed",
+	}
+	jsonBytes, err := json.Marshal(result)
+	if err != nil {
+		return "", err
+	}
+	return string(jsonBytes), nil
 }
 
 // ======================
