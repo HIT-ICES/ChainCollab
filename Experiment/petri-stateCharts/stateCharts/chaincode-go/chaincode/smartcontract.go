@@ -20,17 +20,20 @@ type TaskState struct {
 }
 
 // 初始化 Task
-func (s *SmartContract) InitProcess(ctx contractapi.TransactionContextInterface, participantsJSON string, k string) error {
-	var participants []string
-	if err := json.Unmarshal([]byte(participantsJSON), &participants); err != nil {
-		return fmt.Errorf("invalid participants input: %v", err)
+func (s *SmartContract) InitProcess(ctx contractapi.TransactionContextInterface, n string, k string) error {
+	nInt, err := strconv.Atoi(n)
+	if err != nil {
+		return fmt.Errorf("invalid n input: %v", err)
 	}
-
 	kInt, err := strconv.Atoi(k)
 	if err != nil {
 		return fmt.Errorf("invalid k input: %v", err)
 	}
 
+	participants := make([]string, nInt)
+	for i := 0; i < nInt; i++ {
+		participants[i] = fmt.Sprintf("P%d", i)
+	}
 	doneMap := make(map[string]bool)
 	for _, p := range participants {
 		doneMap[p] = false

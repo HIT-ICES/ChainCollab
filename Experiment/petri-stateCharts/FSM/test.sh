@@ -8,12 +8,12 @@ export CORE_PEER_MSPCONFIGPATH=~/code/fabric-samples/test-network/organizations/
 export CORE_PEER_ADDRESS=localhost:7051
 
 ORDERER_CA=~/code/fabric-samples/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
-CHAINCODE_NAME=basic
+CHAINCODE_NAME=basic3
 CHANNEL=mychannel
 PEER0_ORG1_CA=$CORE_PEER_TLS_ROOTCERT_FILE
 PEER0_ORG2_CA=~/code/fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
 
-for N in $(seq 5 50 305); do
+for N in $(seq 5 20 305); do
   # K=$((N / 2))
   K=3 # 固定 K 为 3
   PARTICIPANTS="["
@@ -25,6 +25,12 @@ for N in $(seq 5 50 305); do
   done
   PARTICIPANTS+="]"
   # echo "Participants: $PARTICIPANTS"
+
+  if [ $N -le 200 ]; then
+    sleep_time=2
+  else
+    sleep_time=$((2 + (N) / 20))
+  fi
 
   echo "Testing N=$N, K=$K"
 
@@ -39,16 +45,10 @@ for N in $(seq 5 50 305); do
     --tlsRootCertFiles "$PEER0_ORG2_CA" \
     -c "$INIT_ARGS"
 
-  sleep 3 # 给链码时间初始化
+  sleep $sleep_time # 等待链码初始化完成
 
   echo "Starting time: $start_time"
   total_invoke_duration=0
-
-  if [ $N -le 200 ]; then
-    sleep_time=2
-  else
-    sleep_time=$((2 + (N) /100))
-  fi
 
   for ((j = 0; j < K; j++)); do
     echo "Invoking MarkDone for P$j"
@@ -69,6 +69,23 @@ for N in $(seq 5 50 305); do
     sleep $sleep_time
     QUERY_RESULT=$(peer chaincode query -C $CHANNEL -n $CHAINCODE_NAME -c '{"function":"QueryStatus","Args":[]}')
     echo "Query result after invoke $j: $QUERY_RESULT"
+
+    # 查询每个 Peer 的状态
+    while true; do
+      STATUS1=$(peer chaincode query -C $CHANNEL -n $CHAINCODE_NAME -c '{"function":"QueryStatus","Args":[]}')
+      export CORE_PEER_ADDRESS=localhost:9051
+      export CORE_PEER_LOCALMSPID="Org2MSP"
+      export CORE_PEER_TLS_ROOTCERT_FILE=~/code/fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
+      export CORE_PEER_MSPCONFIGPATH=~/code/fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
+      STATUS2=$(CORE_PEER_ADDRESS=localhost:9051 peer chaincode query -C $CHANNEL -n $CHAINCODE_NAME -c '{"function":"QueryStatus","Args":[]}')
+      echo "Peer0 Org1 status: $STATUS1"
+      echo "Peer0 Org2 status: $STATUS2"
+      if [ "$STATUS1" == "$STATUS2" ]; then
+        break
+      fi
+      echo "Peers not in sync, waiting..."
+      sleep 1
+    done
   done
 
   sleep 4 # 等待所有 invoke 完成

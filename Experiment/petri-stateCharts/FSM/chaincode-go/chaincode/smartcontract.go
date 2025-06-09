@@ -18,6 +18,8 @@ type FSMState string
 
 type FSMData struct {
 	CurrentState FSMState `json:"current_state"`
+	PDone        bool     `json:"p_done"`
+	K            int      `json:"k"`
 }
 
 type TransitionTable map[string]map[string]string
@@ -45,18 +47,16 @@ func (s *SmartContract) InitProcess(ctx contractapi.TransactionContextInterface,
 		return fmt.Errorf("failed to put transition table to state: %v", err)
 	}
 
-	initial := &FSMData{CurrentState: FSMState("Init")}
+	initial := &FSMData{CurrentState: FSMState("Init"), PDone: false, K: kInt}
 	return putFSMState(ctx, initial)
 }
 
-// 标记参与者完成
 func (s *SmartContract) MarkDone(ctx contractapi.TransactionContextInterface, participantID string) error {
 	state, err := getFSMState(ctx)
 	if err != nil {
 		return err
 	}
 
-	// 获取 transitionTable
 	tableBytes, err := ctx.GetStub().GetState("TransitionTable")
 	if err != nil || tableBytes == nil {
 		return fmt.Errorf("transition table not found")
@@ -80,6 +80,23 @@ func (s *SmartContract) MarkDone(ctx contractapi.TransactionContextInterface, pa
 	}
 
 	state.CurrentState = FSMState(next)
+
+	// 判断是否为最终状态
+	if next == "Completed" || strings.HasSuffix(next, "_Done") {
+		// 统计 _Done 出现的数量
+		parts := strings.Split(next, "_")
+		doneCount := 0
+		for _, p := range parts {
+			if p != "Done" {
+				doneCount++
+			}
+		}
+		// 如果状态为 Completed 或者有 K 个 _Done，则 p_done = true
+		if next == "Completed" || doneCount >= state.K { // 你可以根据实际K值调整判断
+			state.PDone = true
+		}
+	}
+
 	return putFSMState(ctx, state)
 }
 
@@ -91,7 +108,7 @@ func (s *SmartContract) QueryStatus(ctx contractapi.TransactionContextInterface)
 	}
 	result := map[string]interface{}{
 		"current_state": state.CurrentState,
-		"p_done":        state.CurrentState == "Completed",
+		"p_done":        state.PDone,
 	}
 	jsonBytes, err := json.Marshal(result)
 	if err != nil {
