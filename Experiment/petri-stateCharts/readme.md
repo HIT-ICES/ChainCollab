@@ -3,3 +3,4 @@
  ./network.sh up
  ./network.sh createChannel
  ./network.sh deployCC -ccn basic -ccp /home/shenxz-lab/code/ChainCollab/Experiment/petri-stateCharts/petriNet/chaincode-go -ccl go
+ bash test.sh | tee result.txt
