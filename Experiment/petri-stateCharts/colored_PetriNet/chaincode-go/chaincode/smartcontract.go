@@ -1,8 +1,10 @@
-package main
+package chaincode
 
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
+
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
@@ -18,7 +20,7 @@ type SmartContract struct {
 // ============================
 type ColouredPetriNetState struct {
 	Tokens       []string `json:"tokens"`       // token 池（颜色）
-	Triggered    bool     `json:"triggered"`    // 是否激发 transition
+	PDone        bool     `json:"p_done"`       // 字段名改为 p_done
 	K            int      `json:"k"`            // 至少 K 个 token 才能触发
 	Participants []string `json:"participants"` // 合法参与者白名单
 }
@@ -26,16 +28,25 @@ type ColouredPetriNetState struct {
 // ============================
 // 初始化函数（设置 K 和参与者）
 // ============================
-func (s *SmartContract) InitProcess(ctx contractapi.TransactionContextInterface, k int, participantsJSON string) error {
-	var participants []string
-	if err := json.Unmarshal([]byte(participantsJSON), &participants); err != nil {
-		return fmt.Errorf("invalid participants JSON: %v", err)
+func (s *SmartContract) InitProcess(ctx contractapi.TransactionContextInterface, n string, k string) error {
+	nInt, err := strconv.Atoi(n)
+	if err != nil {
+		return fmt.Errorf("invalid n input: %v", err)
+	}
+	kInt, err := strconv.Atoi(k)
+	if err != nil {
+		return fmt.Errorf("invalid k input: %v", err)
+	}
+
+	participants := make([]string, nInt)
+	for i := 0; i < nInt; i++ {
+		participants[i] = fmt.Sprintf("P%d", i)
 	}
 
 	state := ColouredPetriNetState{
 		Tokens:       []string{},
-		Triggered:    false,
-		K:            k,
+		PDone:        false,
+		K:            kInt,
 		Participants: participants,
 	}
 
@@ -51,7 +62,7 @@ func (s *SmartContract) MarkDone(ctx contractapi.TransactionContextInterface, pa
 		return err
 	}
 
-	if state.Triggered {
+	if state.PDone {
 		return nil // 已激发，无需处理
 	}
 
@@ -79,7 +90,7 @@ func (s *SmartContract) MarkDone(ctx contractapi.TransactionContextInterface, pa
 
 	// 判断是否满足触发条件
 	if len(state.Tokens) >= state.K {
-		state.Triggered = true
+		state.PDone = true
 	}
 
 	return putCPNState(ctx, state)
