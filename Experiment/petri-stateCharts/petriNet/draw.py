@@ -4,7 +4,7 @@ from collections import defaultdict
 
 N_invoke_times = defaultdict(list)
 
-with open("./result.log", "r") as f:
+with open("./result.txt", "r") as f:
     current_N = None
     for line in f:
         m_N = re.search(r"Testing N=(\d+), K=(\d+)", line)

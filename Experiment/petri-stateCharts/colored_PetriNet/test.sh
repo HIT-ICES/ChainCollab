@@ -8,14 +8,14 @@ export CORE_PEER_MSPCONFIGPATH=~/code/fabric-samples/test-network/organizations/
 export CORE_PEER_ADDRESS=localhost:7051
 
 ORDERER_CA=~/code/fabric-samples/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
-CHAINCODE_NAME=basic3
+CHAINCODE_NAME=color
 CHANNEL=mychannel
 PEER0_ORG1_CA=$CORE_PEER_TLS_ROOTCERT_FILE
 PEER0_ORG2_CA=~/code/fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
 
-for N in $(seq 5 20 305); do
+for N in $(seq 15100 3000 30000); do
   # K=$((N / 2))
-  K=3 # 固定 K 为 3
+  K=30 # 固定 K 为 3
   PARTICIPANTS="["
   for ((i = 0; i < N; i++)); do
     PARTICIPANTS+="\"P$i\""
@@ -26,15 +26,9 @@ for N in $(seq 5 20 305); do
   PARTICIPANTS+="]"
   # echo "Participants: $PARTICIPANTS"
 
-  if [ $N -le 200 ]; then
-    sleep_time=2
-  else
-    sleep_time=$((2 + (N) / 20))
-  fi
-
   echo "Testing N=$N, K=$K"
 
-  INIT_ARGS=$(jq -c -n --arg p "$PARTICIPANTS" --arg k "$K" '{"function":"InitProcess","Args":[ $p, $k ]}')
+  INIT_ARGS=$(jq -c -n --arg p "$N" --arg k "$K" '{"function":"InitProcess","Args":[ $p, $k ]}')
   peer chaincode invoke -o localhost:7050 \
     --ordererTLSHostnameOverride orderer.example.com \
     --tls --cafile "$ORDERER_CA" \
@@ -46,10 +40,16 @@ for N in $(seq 5 20 305); do
     --waitForEvent=true \
     -c "$INIT_ARGS"
 
-  sleep $sleep_time # 等待链码初始化完成
+  sleep 3 # 给链码时间初始化
 
   echo "Starting time: $start_time"
   total_invoke_duration=0
+
+  if [ $N -le 200 ]; then
+    sleep_time=2
+  else
+    sleep_time=$((2 + (N) / 2000))
+  fi
 
   for ((j = 0; j < K; j++)); do
     echo "Invoking MarkDone for P$j"
@@ -71,7 +71,6 @@ for N in $(seq 5 20 305); do
     # sleep $sleep_time
     # QUERY_RESULT=$(peer chaincode query -C $CHANNEL -n $CHAINCODE_NAME -c '{"function":"QueryStatus","Args":[]}')
     # echo "Query result after invoke $j: $QUERY_RESULT"
-
     # 查询每个 Peer 的状态
     while true; do
       STATUS1=$(peer chaincode query -C $CHANNEL -n $CHAINCODE_NAME -c '{"function":"QueryStatus","Args":[]}')
@@ -93,7 +92,7 @@ for N in $(seq 5 20 305); do
   sleep 4 # 等待所有 invoke 完成
   # 查询链码状态
   QUERY_RESULT=$(peer chaincode query -C $CHANNEL -n $CHAINCODE_NAME -c '{"function":"QueryStatus","Args":[]}')
-  echo "Query result: $QUERY_RESULT"
+  # echo "Query result: $QUERY_RESULT"
   # 提取 p_done 字段
   P_DONE=$(echo "$QUERY_RESULT" | jq -r '.p_done')
 
