@@ -12,12 +12,13 @@ export default function FixedFieldsModal({
   const commandStack = modeler.get('commandStack');
   const shape = elementRegistry.get(dataElementId);
 
-  // 定义 5 个字段的状态
+  // 定义状态
   const [elementName, setElementName] = React.useState('');
   const [caller, setCaller] = React.useState('');
   const [assetType, setAssetType] = React.useState('');
   const [operation, setOperation] = React.useState('');
-  const [callee, setCallee] = React.useState([]); // 现在是字符串数组
+  const [callee, setCallee] = React.useState([]); // 字符串数组
+  const [tokenType, setTokenType] = React.useState(''); // NFT or FT
 
   // 从 BPMN 里读数据到 state
   const loadDataFromBPMN = () => {
@@ -29,7 +30,8 @@ export default function FixedFieldsModal({
       caller:    '',
       assetType: '',
       operation: '',
-      callee:    []
+      callee:    [],
+      tokenType: ''
     };
 
     if (
@@ -43,12 +45,14 @@ export default function FixedFieldsModal({
           caller:    callerVal    = defaultData.caller,
           assetType: assetTypeVal = defaultData.assetType,
           operation: operationVal = defaultData.operation,
-          callee:    calleeVal    = defaultData.callee
+          callee:    calleeVal    = defaultData.callee,
+          tokenType: tokenTypeVal = defaultData.tokenType
         } = parsed;
 
         setCaller(callerVal);
         setAssetType(assetTypeVal);
         setOperation(operationVal);
+        setTokenType(tokenTypeVal);
 
         if (Array.isArray(calleeVal)) {
           setCallee(calleeVal);
@@ -62,12 +66,14 @@ export default function FixedFieldsModal({
         setAssetType(defaultData.assetType);
         setOperation(defaultData.operation);
         setCallee(defaultData.callee);
+        setTokenType(defaultData.tokenType);
       }
     } else {
       setCaller(defaultData.caller);
       setAssetType(defaultData.assetType);
       setOperation(defaultData.operation);
       setCallee(defaultData.callee);
+      setTokenType(defaultData.tokenType);
     }
   };
 
@@ -90,7 +96,8 @@ export default function FixedFieldsModal({
       caller:    caller || '',
       assetType: assetType || '',
       operation: operation || '',
-      callee:    Array.isArray(callee) ? callee : []
+      callee:    Array.isArray(callee) ? callee : [],
+      tokenType: tokenType || ''
     };
 
     commandStack.execute('element.updateProperties', {
@@ -167,12 +174,26 @@ export default function FixedFieldsModal({
         <label style={{ display: 'block', marginBottom: 4 }}>callee：</label>
         <Select
           mode="tags"
-          open={false}              // 禁用下拉
+          open={false}
           value={callee}
           onChange={values => setCallee(values)}
           tokenSeparators={[',']}
           style={{ width: '100%' }}
         />
+      </div>
+
+      {/* 6. 资产类别：NFT or FT */}
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ display: 'block', marginBottom: 4 }}>tokenType：</label>
+        <Select
+          value={tokenType}
+          onChange={value => setTokenType(value)}
+          allowClear
+          style={{ width: '100%' }}
+        >
+          <Select.Option value="NFT">NFT</Select.Option>
+          <Select.Option value="FT">FT</Select.Option>
+        </Select>
       </div>
     </Modal>
   );
