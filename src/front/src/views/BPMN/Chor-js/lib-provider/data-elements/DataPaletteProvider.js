@@ -1,4 +1,4 @@
-import icon from '../../../../../assets/Dataobject.svg'
+import icon from '../../../../../assets/token.svg'
 
 export default class DataPaletteProvider{
   // 自定义邮件收发组件
