@@ -1,156 +1,199 @@
 import * as React from 'react';
 import { Modal, Input, Select } from 'antd';
 
+interface FixedFieldsModalProps {
+  dataElementId: string;
+  open: boolean;
+  onClose: (saved: boolean) => void;
+}
+
 export default function FixedFieldsModal({
-  dataElementId,    // BpmnJS 元素 id
+  dataElementId,
   open: isModalOpen,
-  onClose
-}) {
-  // 拿到 bpmnjs modeler 实例
+  onClose,
+}: FixedFieldsModalProps) {
   const modeler = window.bpmnjs;
   const elementRegistry = modeler.get('elementRegistry');
   const commandStack = modeler.get('commandStack');
   const shape = elementRegistry.get(dataElementId);
 
-  // 定义状态
+  // Participant 列表去重
+  const rawOptions = elementRegistry
+    .filter((el: any) => el.businessObject.$type === 'bpmn:Participant')
+    .map((el: any) => ({
+      value: el.id,
+      label: el.businessObject.name || el.id,
+    }));
+  const participantOptions = Array.from(
+    new Map(rawOptions.map(item => [item.label, item])).values()
+  );
+
+  // state
   const [elementName, setElementName] = React.useState('');
   const [caller, setCaller] = React.useState('');
   const [assetType, setAssetType] = React.useState('');
   const [operation, setOperation] = React.useState('');
-  const [callee, setCallee] = React.useState([]); // 字符串数组
-  const [tokenType, setTokenType] = React.useState(''); // NFT or FT
+  const [callee, setCallee] = React.useState<string[]>([]);
+  const [tokenType, setTokenType] = React.useState('');
+  const [tokenName, setTokenName] = React.useState('');
+  const [tokenNumber, setTokenNumber] = React.useState(''); // 新增
+  const [tokenId, setTokenId] = React.useState('');
 
-  // 从 BPMN 里读数据到 state
+  const operationOptions: Record<string, string[]> = {
+    '分发型': ['mint', 'burn', 'approve', 'remove approval', 'query'],
+    '转移型': ['mint', 'burn', 'Transfer', 'query'],
+    '增值型': ['branch', 'merge', 'query'],
+  };
+
+  // 从 BPMN 文档加载已有值
   const loadDataFromBPMN = () => {
     if (!shape) return;
-
     setElementName(shape.businessObject.name || '');
-
-    const defaultData = {
-      caller:    '',
-      assetType: '',
-      operation: '',
-      callee:    [],
-      tokenType: ''
-    };
-
-    if (
-      Array.isArray(shape.businessObject.documentation) &&
-      shape.businessObject.documentation.length > 0
-    ) {
+    const doc = shape.businessObject.documentation;
+    if (Array.isArray(doc) && doc.length) {
       try {
-        const txt = shape.businessObject.documentation[0].text;
-        const parsed = JSON.parse(txt);
-        const {
-          caller:    callerVal    = defaultData.caller,
-          assetType: assetTypeVal = defaultData.assetType,
-          operation: operationVal = defaultData.operation,
-          callee:    calleeVal    = defaultData.callee,
-          tokenType: tokenTypeVal = defaultData.tokenType
-        } = parsed;
-
-        setCaller(callerVal);
-        setAssetType(assetTypeVal);
-        setOperation(operationVal);
-        setTokenType(tokenTypeVal);
-
-        if (Array.isArray(calleeVal)) {
-          setCallee(calleeVal);
-        } else if (typeof calleeVal === 'string') {
-          setCallee(calleeVal ? [calleeVal] : []);
-        } else {
-          setCallee([]);
-        }
+        const parsed = JSON.parse(doc[0].text);
+        setCaller(parsed.caller || '');
+        setAssetType(parsed.assetType || '');
+        setOperation(parsed.operation || '');
+        setTokenType(parsed.tokenType || '');
+        setTokenName(parsed.tokenName || '');
+        setTokenNumber(parsed.tokenNumber || '');  // 加载 tokenNumber
+        setTokenId(parsed.tokenId || '');
+        const cv = parsed.callee;
+        setCallee(Array.isArray(cv) ? cv : cv ? [cv] : []);
       } catch {
-        setCaller(defaultData.caller);
-        setAssetType(defaultData.assetType);
-        setOperation(defaultData.operation);
-        setCallee(defaultData.callee);
-        setTokenType(defaultData.tokenType);
+        // ignore
       }
-    } else {
-      setCaller(defaultData.caller);
-      setAssetType(defaultData.assetType);
-      setOperation(defaultData.operation);
-      setCallee(defaultData.callee);
-      setTokenType(defaultData.tokenType);
     }
   };
 
   React.useEffect(() => {
-    loadDataFromBPMN();
-  }, [shape]);
+    if (isModalOpen) {
+      setElementName('');
+      setCaller('');
+      setAssetType('');
+      setOperation('');
+      setTokenType('');
+      setTokenName('');
+      setTokenNumber('');  // 重置
+      setCallee([]);
+      setTokenId('');
+      loadDataFromBPMN();
+    }
+  }, [shape, isModalOpen]);
 
-  // 把 state 写回 BPMN
+  // 显示条件
+  const shouldShowCallee = React.useMemo(() => {
+    return (
+      (assetType === '转移型' && operation === 'Transfer') ||
+      (assetType === '分发型' &&
+        (operation === 'approve' || operation === 'remove approval'))
+    );
+  }, [assetType, operation]);
+
+  const shouldShowTokenName = React.useMemo(() => {
+    return assetType === '转移型' && tokenType === 'FT';
+  }, [assetType, tokenType]);
+
+  // tokenNumber 也仅在 FT 时显示, 但 operation 为 query 时不显示
+  const shouldShowTokenNumber = React.useMemo(() => {
+    return shouldShowTokenName && operation !== 'query';
+  }, [shouldShowTokenName, operation]);
+
+  const shouldShowTokenId = React.useMemo(() => {
+    return !(assetType === '转移型' && tokenType === 'FT');
+  }, [assetType, tokenType]);
+
+  // 更新到 BPMN
   const updateDataToBPMN = () => {
     if (!shape) return;
 
-    // 更新 Label
     commandStack.execute('element.updateLabel', {
-      element:  shape,
-      newLabel: elementName || shape.businessObject.name
+      element: shape,
+      newLabel: elementName || shape.businessObject.name,
     });
 
-    // 构造 JSON
-    const uploadData = {
-      caller:    caller || '',
-      assetType: assetType || '',
-      operation: operation || '',
-      callee:    Array.isArray(callee) ? callee : [],
-      tokenType: tokenType || ''
+    const payload: any = {
+      assetType,
+      operation,
     };
+
+    if (caller) {
+      const o = participantOptions.find(o => o.value === caller);
+      payload.caller = o ? o.label : caller;
+    }
+
+    if (shouldShowCallee && callee.length) {
+      payload.callee = callee.map(id => {
+        const o = participantOptions.find(o => o.value === id);
+        return o ? o.label : id;
+      });
+    }
+
+    if (assetType === '转移型') {
+      if (tokenType) payload.tokenType = tokenType;
+      if (shouldShowTokenName && tokenName) payload.tokenName = tokenName;
+      if (shouldShowTokenNumber && tokenNumber) payload.tokenNumber = tokenNumber; // 包含 tokenNumber
+    }
+
+    if (shouldShowTokenId && tokenId) {
+      payload.tokenId = tokenId;
+    }
 
     commandStack.execute('element.updateProperties', {
       element: shape,
       properties: {
         documentation: [
           modeler._moddle.create('bpmn:Documentation', {
-            text: JSON.stringify(uploadData, null, 2)
-          })
-        ]
-      }
+            text: JSON.stringify(payload, null, 2),
+          }),
+        ],
+      },
     });
   };
-
-  // 点击确定/取消
-  const handleOk = () => {
-    updateDataToBPMN();
-    onClose(true);
-  };
-  const handleCancel = () => onClose(false);
 
   return (
     <Modal
       title={`编辑元素 ${dataElementId} 的固定字段`}
       open={isModalOpen}
-      onOk={handleOk}
-      onCancel={handleCancel}
+      onOk={() => { updateDataToBPMN(); onClose(true); }}
+      onCancel={() => onClose(false)}
       width={600}
     >
-      {/* 1. 元素名字 */}
+      {/* elementName */}
       <div style={{ marginBottom: 16 }}>
         <label style={{ display: 'block', marginBottom: 4 }}>elementName：</label>
-        <Input
-          value={elementName}
-          onChange={e => setElementName(e.target.value)}
-        />
+        <Input value={elementName} onChange={e => setElementName(e.target.value)} />
       </div>
 
-      {/* 2. 调用者 */}
+      {/* caller */}
       <div style={{ marginBottom: 16 }}>
         <label style={{ display: 'block', marginBottom: 4 }}>caller：</label>
-        <Input
+        <Select
           value={caller}
-          onChange={e => setCaller(e.target.value)}
+          onChange={setCaller}
+          options={participantOptions}
+          placeholder="请选择调用者"
+          allowClear
+          style={{ width: '100%' }}
         />
       </div>
 
-      {/* 3. 资产类型 */}
+      {/* assetType */}
       <div style={{ marginBottom: 16 }}>
         <label style={{ display: 'block', marginBottom: 4 }}>assetType：</label>
         <Select
           value={assetType}
-          onChange={value => setAssetType(value)}
+          onChange={value => {
+            setAssetType(value);
+            setOperation('');
+            setTokenType('');
+            setTokenName('');
+            setTokenNumber('');  // 清除旧值
+            setCallee([]);
+            setTokenId('');
+          }}
           allowClear
           style={{ width: '100%' }}
         >
@@ -160,41 +203,88 @@ export default function FixedFieldsModal({
         </Select>
       </div>
 
-      {/* 4. 操作 */}
+      {/* operation */}
       <div style={{ marginBottom: 16 }}>
         <label style={{ display: 'block', marginBottom: 4 }}>operation：</label>
-        <Input
+        <Select
           value={operation}
-          onChange={e => setOperation(e.target.value)}
-        />
-      </div>
-
-      {/* 5. 被调用者（callee），tags 模式 + 关闭下拉 */}
-      <div style={{ marginBottom: 16 }}>
-        <label style={{ display: 'block', marginBottom: 4 }}>callee：</label>
-        <Select
-          mode="tags"
-          open={false}
-          value={callee}
-          onChange={values => setCallee(values)}
-          tokenSeparators={[',']}
-          style={{ width: '100%' }}
-        />
-      </div>
-
-      {/* 6. 资产类别：NFT or FT */}
-      <div style={{ marginBottom: 16 }}>
-        <label style={{ display: 'block', marginBottom: 4 }}>tokenType：</label>
-        <Select
-          value={tokenType}
-          onChange={value => setTokenType(value)}
+          onChange={value => {
+            setOperation(value);
+            if (!shouldShowCallee) {
+              setCallee([]);
+            }
+          }}
           allowClear
           style={{ width: '100%' }}
         >
-          <Select.Option value="NFT">NFT</Select.Option>
-          <Select.Option value="FT">FT</Select.Option>
+          {operationOptions[assetType]?.map(op => (
+            <Select.Option key={op} value={op}>
+              {op}
+            </Select.Option>
+          ))}
         </Select>
       </div>
+
+      {/* tokenType */}
+      {assetType === '转移型' && (
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 4 }}>tokenType：</label>
+          <Select
+            value={tokenType}
+            onChange={value => {
+              setTokenType(value);
+              setTokenName('');
+              setTokenNumber('');
+              setTokenId('');
+            }}
+            allowClear
+            style={{ width: '100%' }}
+          >
+            <Select.Option value="NFT">NFT</Select.Option>
+            <Select.Option value="FT">FT</Select.Option>
+          </Select>
+        </div>
+      )}
+
+      {/* tokenName */}
+      {shouldShowTokenName && (
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 4 }}>tokenName：</label>
+          <Input value={tokenName} onChange={e => setTokenName(e.target.value)} />
+        </div>
+      )}
+
+      {/* tokenNumber */}
+      {shouldShowTokenNumber && (
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 4 }}>tokenNumber：</label>
+          <Input value={tokenNumber} onChange={e => setTokenNumber(e.target.value)} />
+        </div>
+      )}
+
+      {/* callee */}
+      {shouldShowCallee && (
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 4 }}>callee：</label>
+          <Select
+            mode="multiple"
+            value={callee}
+            onChange={setCallee}
+            options={participantOptions}
+            placeholder="请选择被调用者"
+            allowClear
+            style={{ width: '100%' }}
+          />
+        </div>
+      )}
+
+      {/* tokenId */}
+      {shouldShowTokenId && (
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 4 }}>tokenId：</label>
+          <Input value={tokenId} onChange={e => setTokenId(e.target.value)} />
+        </div>
+      )}
     </Modal>
   );
 }
