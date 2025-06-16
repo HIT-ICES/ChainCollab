@@ -2,8 +2,8 @@ import { createMachine, assign, createActor } from "xstate";
 import { createBrowserInspector } from "@statelyai/inspect";
 
 
-const StatechartInspect = ({ machineContent, addtionalContent, snapshot}) => {
-  const inspector  = createBrowserInspector();
+const StatechartInspect = ({ machineContent, addtionalContent, snapshot }) => {
+  const inspector = createBrowserInspector({ url: 'https://stately.ai/viz' });
   const machineContentObject = JSON.parse(machineContent);
   const actionsContent = JSON.parse(addtionalContent).actions;
   const guardsContent = JSON.parse(addtionalContent).guards
@@ -19,7 +19,7 @@ const StatechartInspect = ({ machineContent, addtionalContent, snapshot}) => {
     guards[key] = new Function(...Object.keys(assign), guardsContent[key]);
   }
 
-  const machine = createMachine(machineContentObject,{
+  const machine = createMachine(machineContentObject, {
     actions: actions,
     guards: guards
   });
@@ -32,10 +32,10 @@ const StatechartInspect = ({ machineContent, addtionalContent, snapshot}) => {
   actor.start();
   actor.stop();
 
-	return (
+  return (
     <div >
     </div>
-	);
+  );
 };
 
 export default StatechartInspect;
