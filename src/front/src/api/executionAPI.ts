@@ -309,3 +309,17 @@ export const registerAPI = async (coreUrl: string, chaincodeName:string, channel
         return [];
     }
 }
+
+export const getCurrentState = async (coreUrl: string, contractName: string, bpmnInstanceId: string) => {
+    try {
+        const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/apis/${contractName}/query/GetCurrentState`, {
+            "input": {
+                "InstanceID": `${bpmnInstanceId}`
+            }
+        });
+        return res.data;
+    } catch (error) {
+        console.error("Error occurred while making post request:", error);
+        return [];
+    }
+}
