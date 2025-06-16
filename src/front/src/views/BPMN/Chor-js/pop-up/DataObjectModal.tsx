@@ -36,13 +36,37 @@ export default function FixedFieldsModal({
   const [callee, setCallee] = React.useState<string[]>([]);
   const [tokenType, setTokenType] = React.useState('');
   const [tokenName, setTokenName] = React.useState('');
-  const [tokenNumber, setTokenNumber] = React.useState(''); // 新增
+  const [tokenNumber, setTokenNumber] = React.useState('');
   const [tokenId, setTokenId] = React.useState('');
 
   const operationOptions: Record<string, string[]> = {
     '分发型': ['mint', 'burn', 'approve', 'remove approval', 'query'],
     '转移型': ['mint', 'burn', 'Transfer', 'query'],
     '增值型': ['branch', 'merge', 'query'],
+  };
+
+  // Create a mapping for operation to caller label
+  const operationToCallerLabel: Record<string, string> = {
+    mint: '发行人',
+    burn: '销毁人',
+    approve: '授权者',
+    'remove approval': '授权者',
+    query: '查询者',
+    Transfer: '转移者',
+    branch: '分支者',
+    merge: '合并者',
+  };
+
+  // Create a mapping for operation to callee label
+  const operationToCalleeLabel: Record<string, string> = {
+    mint: '接受者',
+    burn: '目标销毁方',
+    approve: '被授权者',
+    'remove approval': '被取消授权者',
+    //query: '被查询者',
+    Transfer: '被转移者',
+    //branch: '分支目标',
+    //merge: '合并目标',
   };
 
   // 从 BPMN 文档加载已有值
@@ -58,7 +82,7 @@ export default function FixedFieldsModal({
         setOperation(parsed.operation || '');
         setTokenType(parsed.tokenType || '');
         setTokenName(parsed.tokenName || '');
-        setTokenNumber(parsed.tokenNumber || '');  // 加载 tokenNumber
+        setTokenNumber(parsed.tokenNumber || '');
         setTokenId(parsed.tokenId || '');
         const cv = parsed.callee;
         setCallee(Array.isArray(cv) ? cv : cv ? [cv] : []);
@@ -76,7 +100,7 @@ export default function FixedFieldsModal({
       setOperation('');
       setTokenType('');
       setTokenName('');
-      setTokenNumber('');  // 重置
+      setTokenNumber('');
       setCallee([]);
       setTokenId('');
       loadDataFromBPMN();
@@ -96,7 +120,6 @@ export default function FixedFieldsModal({
     return assetType === '转移型' && tokenType === 'FT';
   }, [assetType, tokenType]);
 
-  // tokenNumber 也仅在 FT 时显示, 但 operation 为 query 时不显示
   const shouldShowTokenNumber = React.useMemo(() => {
     return shouldShowTokenName && operation !== 'query';
   }, [shouldShowTokenName, operation]);
@@ -119,6 +142,7 @@ export default function FixedFieldsModal({
       operation,
     };
 
+    // 统一用 caller 字段存储调用者
     if (caller) {
       const o = participantOptions.find(o => o.value === caller);
       payload.caller = o ? o.label : caller;
@@ -134,7 +158,7 @@ export default function FixedFieldsModal({
     if (assetType === '转移型') {
       if (tokenType) payload.tokenType = tokenType;
       if (shouldShowTokenName && tokenName) payload.tokenName = tokenName;
-      if (shouldShowTokenNumber && tokenNumber) payload.tokenNumber = tokenNumber; // 包含 tokenNumber
+      if (shouldShowTokenNumber && tokenNumber) payload.tokenNumber = tokenNumber;
     }
 
     if (shouldShowTokenId && tokenId) {
@@ -157,7 +181,10 @@ export default function FixedFieldsModal({
     <Modal
       title={`编辑元素 ${dataElementId} 的固定字段`}
       open={isModalOpen}
-      onOk={() => { updateDataToBPMN(); onClose(true); }}
+      onOk={() => {
+        updateDataToBPMN();
+        onClose(true);
+      }}
       onCancel={() => onClose(false)}
       width={600}
     >
@@ -165,19 +192,6 @@ export default function FixedFieldsModal({
       <div style={{ marginBottom: 16 }}>
         <label style={{ display: 'block', marginBottom: 4 }}>elementName：</label>
         <Input value={elementName} onChange={e => setElementName(e.target.value)} />
-      </div>
-
-      {/* caller */}
-      <div style={{ marginBottom: 16 }}>
-        <label style={{ display: 'block', marginBottom: 4 }}>caller：</label>
-        <Select
-          value={caller}
-          onChange={setCaller}
-          options={participantOptions}
-          placeholder="请选择调用者"
-          allowClear
-          style={{ width: '100%' }}
-        />
       </div>
 
       {/* assetType */}
@@ -190,7 +204,7 @@ export default function FixedFieldsModal({
             setOperation('');
             setTokenType('');
             setTokenName('');
-            setTokenNumber('');  // 清除旧值
+            setTokenNumber('');
             setCallee([]);
             setTokenId('');
           }}
@@ -223,6 +237,21 @@ export default function FixedFieldsModal({
             </Select.Option>
           ))}
         </Select>
+      </div>
+
+      {/* caller */}
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ display: 'block', marginBottom: 4 }}>
+          {operationToCallerLabel[operation] || 'caller'}：
+        </label>
+        <Select
+          value={caller}
+          onChange={setCaller}
+          options={participantOptions}
+          placeholder={`请选择${operationToCallerLabel[operation] || 'caller'}`}
+          allowClear
+          style={{ width: '100%' }}
+        />
       </div>
 
       {/* tokenType */}
@@ -265,13 +294,15 @@ export default function FixedFieldsModal({
       {/* callee */}
       {shouldShowCallee && (
         <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', marginBottom: 4 }}>callee：</label>
+          <label style={{ display: 'block', marginBottom: 4 }}>
+            {operationToCalleeLabel[operation] || '被调用者'}：
+          </label>
           <Select
             mode="multiple"
             value={callee}
             onChange={setCallee}
             options={participantOptions}
-            placeholder="请选择被调用者"
+            placeholder={`请选择${operationToCalleeLabel[operation] || '被调用者'}`}
             allowClear
             style={{ width: '100%' }}
           />
