@@ -115,6 +115,7 @@ export const useFireflyData = (
 
 import {
     getAllEvents, getAllGateways, getAllMessages, getAllBusinessRules,
+    getCurrentState,
 } from '@/api/executionAPI'
 
 export const useAllFireflyData = (
@@ -218,5 +219,11 @@ export const useFireflyIdentity = (coreUrl: string, idInFirefly: string) => {
 }
 
 
-export const useStatechartsSnapshot = () => { 
+export const useStatechartsSnapshot = (coreUrl: string, contractName: string, bpmnInstanceId: string) => {
+    // getCurrentState
+    const { data, isLoading, isError, isSuccess, refetch } = useQuery(['statechartsSnapshot', coreUrl, contractName, bpmnInstanceId], async () => {
+        const res = await getCurrentState(coreUrl, contractName, bpmnInstanceId)
+        return res
+    })
+    return [data, isLoading, refetch]
 }
