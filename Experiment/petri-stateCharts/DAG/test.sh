@@ -8,12 +8,12 @@ export CORE_PEER_MSPCONFIGPATH=~/code/fabric-samples/test-network/organizations/
 export CORE_PEER_ADDRESS=localhost:7051
 
 ORDERER_CA=~/code/fabric-samples/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
-CHAINCODE_NAME=basic-statecharts1
+CHAINCODE_NAME=dag
 CHANNEL=mychannel
 PEER0_ORG1_CA=$CORE_PEER_TLS_ROOTCERT_FILE
 PEER0_ORG2_CA=~/code/fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
 
-for N in $(seq 105 3000 30000); do
+for N in $(seq 100 3000 30000); do
   # K=$((N / 2))
   K=3 # 固定 K 为 3
   PARTICIPANTS="["
@@ -37,6 +37,7 @@ for N in $(seq 105 3000 30000); do
     --tlsRootCertFiles "$PEER0_ORG1_CA" \
     --peerAddresses localhost:9051 \
     --tlsRootCertFiles "$PEER0_ORG2_CA" \
+    --waitForEvent=true \
     -c "$INIT_ARGS"
 
   sleep 3 # 给链码时间初始化
@@ -47,7 +48,7 @@ for N in $(seq 105 3000 30000); do
   if [ $N -le 200 ]; then
     sleep_time=2
   else
-    sleep_time=$((2 + (N) /2000))
+    sleep_time=$((2 + (N) / 2000))
   fi
 
   for ((j = 0; j < K; j++)); do
@@ -61,14 +62,31 @@ for N in $(seq 105 3000 30000); do
       --tlsRootCertFiles "$PEER0_ORG1_CA" \
       --peerAddresses localhost:9051 \
       --tlsRootCertFiles "$PEER0_ORG2_CA" \
+      --waitForEvent=true \
       -c "{\"function\":\"MarkDone\",\"Args\":[\"P$j\"]}"
     invoke_end=$(date +%s%3N)
     invoke_duration=$((invoke_end - invoke_start))
     total_invoke_duration=$((total_invoke_duration + invoke_duration))
     echo "Invoke $j duration: ${invoke_duration}ms"
-    sleep $sleep_time
-    QUERY_RESULT=$(peer chaincode query -C $CHANNEL -n $CHAINCODE_NAME -c '{"function":"QueryStatus","Args":[]}')
+    # sleep $sleep_time
+    # QUERY_RESULT=$(peer chaincode query -C $CHANNEL -n $CHAINCODE_NAME -c '{"function":"QueryStatus","Args":[]}')
     # echo "Query result after invoke $j: $QUERY_RESULT"
+    # 查询每个 Peer 的状态
+    while true; do
+      STATUS1=$(peer chaincode query -C $CHANNEL -n $CHAINCODE_NAME -c '{"function":"QueryStatus","Args":[]}')
+      export CORE_PEER_ADDRESS=localhost:9051
+      export CORE_PEER_LOCALMSPID="Org2MSP"
+      export CORE_PEER_TLS_ROOTCERT_FILE=~/code/fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
+      export CORE_PEER_MSPCONFIGPATH=~/code/fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
+      STATUS2=$(CORE_PEER_ADDRESS=localhost:9051 peer chaincode query -C $CHANNEL -n $CHAINCODE_NAME -c '{"function":"QueryStatus","Args":[]}')
+      # echo "Peer0 Org1 status: $STATUS1"
+      # echo "Peer0 Org2 status: $STATUS2"
+      if [ "$STATUS1" == "$STATUS2" ]; then
+        break
+      fi
+      echo "Peers not in sync, waiting..."
+      sleep 1
+    done
   done
 
   sleep 4 # 等待所有 invoke 完成
