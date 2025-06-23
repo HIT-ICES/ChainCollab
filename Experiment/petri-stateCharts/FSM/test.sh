@@ -69,8 +69,8 @@ for N in $(seq 5 20 305); do
     total_invoke_duration=$((total_invoke_duration + invoke_duration))
     echo "Invoke $j duration: ${invoke_duration}ms"
     # sleep $sleep_time
-    # QUERY_RESULT=$(peer chaincode query -C $CHANNEL -n $CHAINCODE_NAME -c '{"function":"QueryStatus","Args":[]}')
-    # echo "Query result after invoke $j: $QUERY_RESULT"
+    QUERY_RESULT=$(peer chaincode query -C $CHANNEL -n $CHAINCODE_NAME -c '{"function":"QueryStatus","Args":[]}')
+    echo "Query result after invoke $j: $QUERY_RESULT"
 
     # 查询每个 Peer 的状态
     while true; do

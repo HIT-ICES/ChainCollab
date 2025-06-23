@@ -17,17 +17,15 @@ type SmartContract struct {
 type FSMState string
 
 type FSMData struct {
-	CurrentState FSMState `json:"current_state"`
-	PDone        bool     `json:"p_done"`
-	K            int      `json:"k"`
-	Participants []string `json:"participants"`
+	CurrentState FSMState        `json:"current_state"`
+	DoneMap      map[string]bool `json:"done_map"`   // 替代 DoneList
+	DoneCount    int             `json:"done_count"` // 快速判断是否满足 K
+	KInt         int             `json:"k_int"`      // 新增：记录 k 的值
 }
 
 type TransitionTable map[string]map[string]string
 
-// =====================
-// InitProcess
-// =====================
+// 初始化 Task（FSM 初始化）
 func (s *SmartContract) InitProcess(ctx contractapi.TransactionContextInterface, participantsJSON string, k string) error {
 	var participants []string
 	if err := json.Unmarshal([]byte(participantsJSON), &participants); err != nil {
@@ -38,27 +36,47 @@ func (s *SmartContract) InitProcess(ctx contractapi.TransactionContextInterface,
 	if err != nil {
 		return fmt.Errorf("invalid k input: %v", err)
 	}
+	if kInt <= 0 {
+		return fmt.Errorf("k must be greater than 0")
+	}
+	fmt.Printf("InitProcess: participants=%v, k=%d\n", participants, kInt)
 
-	initial := &FSMData{
-		CurrentState: FSMState("Init"),
-		PDone:        false,
-		K:            kInt,
-		Participants: participants,
+	_, table := GenerateFSM(participants, kInt)
+	// 存储 transitionTable 到状态数据库
+	tableBytes, err := json.Marshal(table)
+	if err != nil {
+		return fmt.Errorf("failed to marshal transition table: %v", err)
+	}
+	if err := ctx.GetStub().PutState("TransitionTable", tableBytes); err != nil {
+		return fmt.Errorf("failed to put transition table to state: %v", err)
 	}
 
+	// 初始化 FSM 状态
+	initial := &FSMData{CurrentState: FSMState("Init"), DoneMap: make(map[string]bool), DoneCount: 0, KInt: kInt}
 	return putFSMState(ctx, initial)
 }
 
-// =====================
-// MarkDone
-// =====================
+// 标记参与者完成
 func (s *SmartContract) MarkDone(ctx contractapi.TransactionContextInterface, participantID string) error {
 	state, err := getFSMState(ctx)
 	if err != nil {
 		return err
 	}
+	fmt.Println("KInt:", state.KInt)
+	// 检查是否已完成
+	if state.DoneMap[participantID] {
+		return fmt.Errorf("participant %s already marked done", participantID)
+	}
 
-	_, transitionTable := buildTransitionTable(state.Participants, state.K)
+	// 获取 transitionTable
+	tableBytes, err := ctx.GetStub().GetState("TransitionTable")
+	if err != nil || tableBytes == nil {
+		return fmt.Errorf("transition table not found")
+	}
+	var transitionTable TransitionTable
+	if err := json.Unmarshal(tableBytes, &transitionTable); err != nil {
+		return fmt.Errorf("failed to unmarshal transition table: %v", err)
+	}
 
 	current := string(state.CurrentState)
 	nextMap, ok := transitionTable[current]
@@ -73,27 +91,20 @@ func (s *SmartContract) MarkDone(ctx contractapi.TransactionContextInterface, pa
 		}
 	}
 
+	// 记录完成
+	state.DoneMap[participantID] = true
+	state.DoneCount++
 	state.CurrentState = FSMState(next)
-
-	if next == "Completed" || strings.HasSuffix(next, "_Done") {
-		parts := strings.Split(next, "_")
-		doneCount := 0
-		for _, p := range parts {
-			if p != "Done" {
-				doneCount++
-			}
-		}
-		if next == "Completed" || doneCount >= state.K {
-			state.PDone = true
-		}
+	// 检查是否K个参与者已完成
+	k := state.KInt
+	fmt.Printf("Current DoneList: %v, k: %d\n", state.DoneMap, k)
+	if state.DoneCount >= k && state.CurrentState != "Completed" {
+		state.CurrentState = FSMState("Completed")
 	}
-
 	return putFSMState(ctx, state)
 }
 
-// =====================
-// QueryStatus
-// =====================
+// 查询 Task 状态
 func (s *SmartContract) QueryStatus(ctx contractapi.TransactionContextInterface) (string, error) {
 	state, err := getFSMState(ctx)
 	if err != nil {
@@ -101,7 +112,7 @@ func (s *SmartContract) QueryStatus(ctx contractapi.TransactionContextInterface)
 	}
 	result := map[string]interface{}{
 		"current_state": state.CurrentState,
-		"p_done":        state.PDone,
+		"p_done":        state.CurrentState == "Completed",
 	}
 	jsonBytes, err := json.Marshal(result)
 	if err != nil {
@@ -110,9 +121,9 @@ func (s *SmartContract) QueryStatus(ctx contractapi.TransactionContextInterface)
 	return string(jsonBytes), nil
 }
 
-// =====================
+// ======================
 // 辅助函数
-// =====================
+// ======================
 
 func getFSMState(ctx contractapi.TransactionContextInterface) (*FSMData, error) {
 	data, err := ctx.GetStub().GetState("fsm_state")
@@ -137,19 +148,19 @@ func putFSMState(ctx contractapi.TransactionContextInterface, state *FSMData) er
 	return ctx.GetStub().PutState("fsm_state", data)
 }
 
-// =====================
-// 动态生成状态转换表
-// =====================
-
-func buildTransitionTable(participants []string, k int) ([]string, TransitionTable) {
+// 生成 FSM 状态机
+func GenerateFSM(participants []string, k int) ([]string, TransitionTable) {
 	stateSet := make(map[string]struct{})
 	transitionTable := TransitionTable{}
 
 	stateSet["Init"] = struct{}{}
+	for _, p := range participants {
+		stateSet[p+"_Done"] = struct{}{}
+	}
+
 	transitionTable["Init"] = map[string]string{}
 	for _, p := range participants {
 		transitionTable["Init"][p] = p + "_Done"
-		stateSet[p+"_Done"] = struct{}{}
 	}
 
 	for i := 1; i < k; i++ {
@@ -186,10 +197,6 @@ func buildTransitionTable(participants []string, k int) ([]string, TransitionTab
 	return states, transitionTable
 }
 
-// =====================
-// 工具函数
-// =====================
-
 func combinations(elements []string, n int) [][]string {
 	var helper func(int, []string)
 	res := [][]string{}
@@ -221,10 +228,6 @@ func contains(arr []string, target string) bool {
 	}
 	return false
 }
-
-// =====================
-// main
-// =====================
 
 func main() {
 	chaincode, err := contractapi.NewChaincode(new(SmartContract))

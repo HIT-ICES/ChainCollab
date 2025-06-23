@@ -8,12 +8,12 @@ export CORE_PEER_MSPCONFIGPATH=~/code/fabric-samples/test-network/organizations/
 export CORE_PEER_ADDRESS=localhost:7051
 
 ORDERER_CA=~/code/fabric-samples/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
-CHAINCODE_NAME=petrinet
+CHAINCODE_NAME=petrinet1
 CHANNEL=mychannel
 PEER0_ORG1_CA=$CORE_PEER_TLS_ROOTCERT_FILE
 PEER0_ORG2_CA=~/code/fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
 
-for N in $(seq 5 50 305); do
+for N in $(seq 5 20 305); do
   # K=$((N / 2))
   K=3 # 固定 K 为 3
   PARTICIPANTS="["
@@ -46,7 +46,7 @@ for N in $(seq 5 50 305); do
   total_invoke_duration=0
 
   if [ $N -le 200 ]; then
-    sleep_time=2
+    sleep_time=3
   else
     sleep_time=$((2 + (N) / 100))
   fi
