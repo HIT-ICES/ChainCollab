@@ -62,7 +62,7 @@ plt.plot(N_list_dag, mean_invoke_dag, marker="^", label="DAG")
 
 plt.xlabel("N (Number of Participants)")
 plt.ylabel("Mean Invoke Duration (ms)")
-plt.title("N vs Mean Invoke Duration (Filtered)")
+plt.title("N vs Mean Invoke Duration For Color-PetriNet, StateCharts, and DAG")
 plt.grid(True)
 plt.legend()
 
@@ -83,11 +83,11 @@ for x in sorted(points_by_x.keys()):
     y_values = sorted(points_by_x[x], key=lambda t: t[1], reverse=True)  # 按 y 值降序排列
     for idx, (label, y) in enumerate(y_values):
         if idx == 0:
-            va, dy = "bottom", 5   # 最高的往上偏移
+            va, dy = "bottom", 3   # 最高的往上偏移
         elif idx == 1:
             va, dy = "center", 0   # 中间的居中
         else:
-            va, dy = "top", -5     # 最低的往下偏移
+            va, dy = "top", -3     # 最低的往下偏移
 
         # 水平偏移可自定义，也可以不加
         if label == "PetriNet":
