@@ -58,7 +58,7 @@ plt.plot(N_list_fsm, mean_invoke_fsm, marker="s", label="FSM")
 
 plt.xlabel("N (Number of Participants)")
 plt.ylabel("Mean Invoke Duration (ms)")
-plt.title("N vs Mean Invoke Duration (Filtered)")
+plt.title("N vs Mean Invoke Duration for PetriNet and FSM")
 plt.grid(True)
 plt.legend()
 
