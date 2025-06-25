@@ -58,11 +58,11 @@ N_list_dag, mean_invoke_dag = parse_multiple_result_files(dag_dir, file_prefix)
 # 绘图
 plt.plot(N_list_petri, mean_invoke_petri, marker="o", label="Color-PetriNet")
 plt.plot(N_list_state, mean_invoke_state, marker="s", label="StateCharts")
-plt.plot(N_list_dag, mean_invoke_dag, marker="^", label="DAG")
+plt.plot(N_list_dag, mean_invoke_dag, marker="^", label="DTM")
 
 plt.xlabel("N (Number of Participants)")
 plt.ylabel("Mean Invoke Duration (ms)")
-plt.title("N vs Mean Invoke Duration For Color-PetriNet, StateCharts, and DAG")
+plt.title("N vs Mean Invoke Duration For Color-PetriNet, StateCharts, and DTM")
 plt.grid(True)
 plt.legend()
 
@@ -76,7 +76,7 @@ for x, y in zip(N_list_petri, mean_invoke_petri):
 for x, y in zip(N_list_state, mean_invoke_state):
     points_by_x[x].append(("StateCharts", y))
 for x, y in zip(N_list_dag, mean_invoke_dag):
-    points_by_x[x].append(("DAG", y))
+    points_by_x[x].append(("DTM", y))
 
 # 标注散点值，防止重叠
 for x in sorted(points_by_x.keys()):
@@ -101,5 +101,5 @@ for x in sorted(points_by_x.keys()):
 
 
 plt.tight_layout()
-plt.savefig("compare_color_statecharts_dag_filtered.png")
+plt.savefig("compare_color_statecharts_dtm_filtered.png")
 plt.show()
