@@ -45,13 +45,13 @@ def parse_multiple_result_files(dir_path, file_prefix):
     return N_list, mean_invoke_list
 
 # 修改路径和前缀
-petri_dir = "/home/shenxz-lab/code/ChainCollab/Experiment/petri-stateCharts/colored_PetriNet/"
+color_petri_dir = "/home/shenxz-lab/code/ChainCollab/Experiment/petri-stateCharts/colored_PetriNet/"
 statecharts_dir = "/home/shenxz-lab/code/ChainCollab/Experiment/petri-stateCharts/stateCharts/"
 dag_dir = "/home/shenxz-lab/code/ChainCollab/Experiment/petri-stateCharts/DAG/"
 file_prefix = "result-06.23-k3"  # 例如 "result-06.23-k3"
 
 # 分别处理 Colored Petri Net 和 StateCharts 的数据
-N_list_petri, mean_invoke_petri = parse_multiple_result_files(petri_dir, file_prefix)
+N_list_petri, mean_invoke_petri = parse_multiple_result_files(color_petri_dir, "result-06.26-k3")
 N_list_state, mean_invoke_state = parse_multiple_result_files(statecharts_dir, file_prefix)
 N_list_dag, mean_invoke_dag = parse_multiple_result_files(dag_dir, file_prefix)
 

@@ -6,7 +6,7 @@ import numpy as np
 
 # 设置路径和前缀匹配条件
 base_path = "./"
-file_prefix = "result-06.23-k3"  # 可根据需要修改前缀匹配模式
+file_prefix = "result-06.26-k3"  # 可根据需要修改前缀匹配模式
 
 N_invoke_times = defaultdict(list)
 
@@ -54,5 +54,5 @@ for x, y in zip(N_list, mean_invoke_list):
     plt.text(x, y, f"{y:.1f}", ha="left", va="bottom", fontsize=8)
 
 plt.tight_layout()
-plt.savefig("mean_invoke_time_filtered_multi_file.png")
+plt.savefig("mean_invoke_time_foltered_k3_06.26.png")
 plt.show()

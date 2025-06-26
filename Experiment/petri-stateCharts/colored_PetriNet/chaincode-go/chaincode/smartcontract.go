@@ -36,6 +36,7 @@ type Transition struct {
 type CPNState struct {
 	Places      map[string]Place `json:"places"`
 	Transitions []Transition     `json:"transitions"`
+	K           int              `json:"k"`
 }
 
 // ============================
@@ -51,114 +52,141 @@ func (s *SmartContract) InitProcess(ctx contractapi.TransactionContextInterface,
 		return fmt.Errorf("invalid k input: %v", err)
 	}
 
-	// 构造参与方 ID：P0, P1, ..., P(n-1)
-	participants := make([]string, nInt)
+	places := map[string]Place{
+		"P_INIT":   {ID: "P_INIT", Tokens: []Token{}},
+		"P_DONE_I": {ID: "P_DONE_I", Tokens: []Token{}},
+		"P_DONE":   {ID: "P_DONE", Tokens: []Token{}},
+	}
+	transitions := []Transition{}
+
+	// P_INIT 初始 Token 是 IDList（颜色为 P0, P1, ..., Pn）
 	for i := 0; i < nInt; i++ {
-		participants[i] = fmt.Sprintf("P%d", i)
-	}
+		color := fmt.Sprintf("P%d", i)
+		pInit := places["P_INIT"]
+		pInit.Tokens = append(pInit.Tokens, Token{Color: color})
+		places["P_INIT"] = pInit
 
-	// 初始化 place
-	places := make(map[string]Place)
-	for _, p := range participants {
-		places[p] = Place{ID: p, Tokens: []Token{}}
-	}
-	places["P_DONE"] = Place{ID: "P_DONE", Tokens: []Token{}} // 最终输出 place
+		// 每个 P{i} 初始化为空
+		places[color] = Place{ID: color, Tokens: []Token{}}
 
-	// 构造 Transition，只使用前 k 个作为示例
-	inputArcs := []Arc{}
-	for i := 0; i < kInt && i < nInt; i++ {
-		inputArcs = append(inputArcs, Arc{
-			PlaceID: participants[i],
-			Color:   participants[i],
+		// T_INIT 拆解 IDList -> P{i}
+		transitions = append(transitions, Transition{
+			ID: fmt.Sprintf("T_INIT_%d", i),
+			InputArcs: []Arc{
+				{PlaceID: "P_INIT", Color: color},
+			},
+			OutputArcs: []Arc{
+				{PlaceID: color, Color: color},
+			},
+			Activated: false,
 		})
+
+		// T_i: P{i} -> P_DONE_I
+		transitions = append(transitions, Transition{
+			ID: fmt.Sprintf("T_%d", i),
+			InputArcs: []Arc{
+				{PlaceID: color, Color: color},
+			},
+			OutputArcs: []Arc{
+				{PlaceID: "P_DONE_I", Color: color},
+			},
+			Activated: false,
+		})
+
+		// 从 P_INIT 中移除 token
+		pInit.Tokens = removeTokenByColor(pInit.Tokens, color)
+		places["P_INIT"] = pInit
+
+		// 放入对应的 P{i}
+		pi := places[color]
+		pi.Tokens = append(pi.Tokens, Token{Color: color})
+		places[color] = pi
+
+		// 标记 T_INIT_i 为已激活
+		tid := fmt.Sprintf("T_INIT_%d", i)
+		for j := range transitions {
+			if transitions[j].ID == tid {
+				transitions[j].Activated = true
+				break
+			}
+		}
 	}
 
-	outputArcs := []Arc{
-		{PlaceID: "P_DONE", Color: "COMPLETE"},
-	}
-
-	transitions := []Transition{
-		{
-			ID:         "T_COMPLETE",
-			InputArcs:  inputArcs,
-			OutputArcs: outputArcs,
-			Activated:  false,
+	// T_COMPLETE：length(P_DONE_I.tokens) >= K -> P_DONE
+	transitions = append(transitions, Transition{
+		ID: "T_COMPLETE",
+		InputArcs: []Arc{
+			{PlaceID: "P_DONE_I", Color: "*"}, // 使用 "*" 作为 wildcard
 		},
-	}
+		OutputArcs: []Arc{
+			{PlaceID: "P_DONE", Color: "COMPLETE"},
+		},
+		Activated: false,
+	})
 
 	state := CPNState{
 		Places:      places,
 		Transitions: transitions,
+		K:           kInt,
 	}
 	data, _ := json.Marshal(state)
 	return ctx.GetStub().PutState("cpnState", data)
 }
 
-// ============================
-// MarkDone（添加 colored token）
-// ============================
+// ========== 参与方调用完成 ==========
 func (s *SmartContract) MarkDone(ctx contractapi.TransactionContextInterface, participantID string) error {
 	state, err := getCPNState(ctx)
 	if err != nil {
 		return err
 	}
 
-	place, ok := state.Places[participantID]
-	if !ok {
-		return fmt.Errorf("actor place not found")
-	}
-
-	// 添加 token
-	for _, token := range place.Tokens {
-		if token.Color == participantID {
-			return nil // 忽略重复
-		}
-	}
-	place.Tokens = append(place.Tokens, Token{Color: participantID})
-	state.Places[participantID] = place
-
-	// 检查是否可激发 transition
+	// 扫描所有 Transition，寻找可激发的（包含该参与方）
 	for ti, t := range state.Transitions {
 		if t.Activated {
 			continue
 		}
-		canFire := true
-		for _, arc := range t.InputArcs {
-			p, ok := state.Places[arc.PlaceID]
-			if !ok {
-				canFire = false
-				break
-			}
+
+		// T_i 类型 transition: 输入是 P{participantID}，颜色也是 participantID
+		if len(t.InputArcs) == 1 &&
+			t.InputArcs[0].PlaceID == participantID &&
+			t.InputArcs[0].Color == participantID {
+
+			// 检查是否存在匹配 token
+			p := state.Places[participantID]
 			found := false
-			for _, token := range p.Tokens {
-				if token.Color == arc.Color {
+			for _, tok := range p.Tokens {
+				if tok.Color == participantID {
 					found = true
 					break
 				}
 			}
 			if !found {
-				canFire = false
-				break
+				continue
 			}
+
+			// 激发 Transition
+			p.Tokens = removeTokenByColor(p.Tokens, participantID)
+			state.Places[participantID] = p
+
+			outP := state.Places["P_DONE_I"]
+			outP.Tokens = append(outP.Tokens, Token{Color: participantID})
+			state.Places["P_DONE_I"] = outP
+
+			state.Transitions[ti].Activated = true
 		}
-		if canFire {
-			// Fire transition
-			for _, arc := range t.InputArcs {
-				p := state.Places[arc.PlaceID]
-				newTokens := []Token{}
-				for _, token := range p.Tokens {
-					if token.Color != arc.Color {
-						newTokens = append(newTokens, token)
-					}
-				}
-				p.Tokens = newTokens
-				state.Places[arc.PlaceID] = p
-			}
-			for _, arc := range t.OutputArcs {
-				p := state.Places[arc.PlaceID]
-				p.Tokens = append(p.Tokens, Token{Color: arc.Color})
-				state.Places[arc.PlaceID] = p
-			}
+	}
+
+	// 检查是否可激发 T_COMPLETE
+	for ti, t := range state.Transitions {
+		if t.ID != "T_COMPLETE" || t.Activated {
+			continue
+		}
+		donePlace := state.Places["P_DONE_I"]
+		if len(donePlace.Tokens) >= state.K {
+			// 激发 T_COMPLETE
+			pDone := state.Places["P_DONE"]
+			pDone.Tokens = append(pDone.Tokens, Token{Color: "COMPLETE"})
+			state.Places["P_DONE"] = pDone
 			state.Transitions[ti].Activated = true
 		}
 	}
@@ -167,9 +195,7 @@ func (s *SmartContract) MarkDone(ctx contractapi.TransactionContextInterface, pa
 	return ctx.GetStub().PutState("cpnState", newData)
 }
 
-// ============================
-// 查询状态
-// ============================
+// ========== 查询状态 ==========
 type QueryResult struct {
 	State CPNState `json:"state"`
 	PDone bool     `json:"p_done"`
@@ -181,27 +207,18 @@ func (s *SmartContract) QueryStatus(ctx contractapi.TransactionContextInterface)
 		return nil, err
 	}
 
-	// 检查 P_DONE 中是否存在颜色为 "COMPLETE" 的 token
-	pDone := false
-	if place, exists := state.Places["P_DONE"]; exists {
-		for _, token := range place.Tokens {
+	done := false
+	if p, ok := state.Places["P_DONE"]; ok {
+		for _, token := range p.Tokens {
 			if token.Color == "COMPLETE" {
-				pDone = true
-				break
+				done = true
 			}
 		}
 	}
-
-	result := &QueryResult{
-		State: state,
-		PDone: pDone,
-	}
-	return result, nil
+	return &QueryResult{State: state, PDone: done}, nil
 }
 
-// ============================
-// 工具函数：读写状态
-// ============================
+// ========== 工具函数 ==========
 func getCPNState(ctx contractapi.TransactionContextInterface) (CPNState, error) {
 	var state CPNState
 	data, err := ctx.GetStub().GetState("cpnState")
@@ -214,12 +231,25 @@ func getCPNState(ctx contractapi.TransactionContextInterface) (CPNState, error) 
 	return state, nil
 }
 
-func main() {
-	chaincode, err := contractapi.NewChaincode(new(SmartContract))
-	if err != nil {
-		panic(fmt.Sprintf("Error creating chaincode: %v", err))
+func removeTokenByColor(tokens []Token, color string) []Token {
+	result := []Token{}
+	removed := false
+	for _, t := range tokens {
+		if t.Color == color && !removed {
+			removed = true
+			continue
+		}
+		result = append(result, t)
 	}
-	if err := chaincode.Start(); err != nil {
-		panic(fmt.Sprintf("Error starting chaincode: %v", err))
+	return result
+}
+
+func main() {
+	cc, err := contractapi.NewChaincode(new(SmartContract))
+	if err != nil {
+		panic(err)
+	}
+	if err := cc.Start(); err != nil {
+		panic(err)
 	}
 }
