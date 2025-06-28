@@ -12,14 +12,26 @@ type SmartContract struct {
 	contractapi.Contract
 }
 
-type TaskState struct {
-	Participants []string        `json:"participants"`
-	K            int             `json:"k"`
-	DoneMap      map[string]bool `json:"done_map"`
-	PDone        bool            `json:"p_done"` // 字段名改为 p_done
+type TaskPhase string
+
+const (
+	TaskInProgress TaskPhase = "IN_PROGRESS"
+	TaskCompleted  TaskPhase = "COMPLETED"
+)
+
+type SubState struct {
+	Status string `json:"status"` // 如：WAITING、DONE
 }
 
-// 初始化 Task
+type TaskState struct {
+	Participants []string            `json:"participants"`
+	K            int                 `json:"k"`
+	DoneMap      map[string]bool     `json:"done_map"`
+	Phase        TaskPhase           `json:"phase"`
+	SubStates    map[string]SubState `json:"substates"` // 每个参与者子状态
+}
+
+// 初始化任务
 func (s *SmartContract) InitProcess(ctx contractapi.TransactionContextInterface, n string, k string) error {
 	nInt, err := strconv.Atoi(n)
 	if err != nil {
@@ -31,19 +43,22 @@ func (s *SmartContract) InitProcess(ctx contractapi.TransactionContextInterface,
 	}
 
 	participants := make([]string, nInt)
-	for i := 0; i < nInt; i++ {
-		participants[i] = fmt.Sprintf("P%d", i)
-	}
 	doneMap := make(map[string]bool)
-	for _, p := range participants {
-		doneMap[p] = false
+	subStates := make(map[string]SubState)
+
+	for i := 0; i < nInt; i++ {
+		pid := fmt.Sprintf("P%d", i)
+		participants[i] = pid
+		doneMap[pid] = false
+		subStates[pid] = SubState{Status: "WAITING"}
 	}
 
 	task := TaskState{
 		Participants: participants,
 		K:            kInt,
 		DoneMap:      doneMap,
-		PDone:        false,
+		Phase:        TaskInProgress,
+		SubStates:    subStates,
 	}
 
 	data, err := json.Marshal(task)
@@ -54,7 +69,7 @@ func (s *SmartContract) InitProcess(ctx contractapi.TransactionContextInterface,
 	return ctx.GetStub().PutState("TaskState", data)
 }
 
-// 完成 Task 的一个参与方
+// 参与方完成任务
 func (s *SmartContract) MarkDone(ctx contractapi.TransactionContextInterface, participantID string) error {
 	taskBytes, err := ctx.GetStub().GetState("TaskState")
 	if err != nil || taskBytes == nil {
@@ -66,54 +81,65 @@ func (s *SmartContract) MarkDone(ctx contractapi.TransactionContextInterface, pa
 		return fmt.Errorf("unmarshal task state failed: %v", err)
 	}
 
-	if task.PDone {
+	if task.Phase == TaskCompleted {
 		return fmt.Errorf("task already completed")
 	}
 
-	// 检查合法参与方
-	validParticipant := false
+	// 验证参与方
+	valid := false
 	for _, p := range task.Participants {
 		if p == participantID {
-			validParticipant = true
+			valid = true
 			break
 		}
 	}
-
-	if !validParticipant {
-		return fmt.Errorf("participant %s is not part of task", participantID)
+	if !valid {
+		return fmt.Errorf("invalid participant: %s", participantID)
 	}
 
 	// 标记完成
 	task.DoneMap[participantID] = true
+	task.SubStates[participantID] = SubState{Status: "DONE"}
 
-	// 统计完成数量
+	// 判断是否完成任务（有 >= K 个 DONE）
 	count := 0
 	for _, done := range task.DoneMap {
 		if done {
 			count++
 		}
 	}
-
-	// 是否完成Task
 	if count >= task.K {
-		task.PDone = true
+		task.Phase = TaskCompleted
 	}
 
-	// 更新状态
 	updatedBytes, err := json.Marshal(task)
 	if err != nil {
-		return fmt.Errorf("marshal updated task state failed: %v", err)
+		return fmt.Errorf("marshal updated task failed: %v", err)
 	}
 
 	return ctx.GetStub().PutState("TaskState", updatedBytes)
 }
 
-// 查询 Task 状态
+// 查询任务状态
 func (s *SmartContract) QueryStatus(ctx contractapi.TransactionContextInterface) (string, error) {
 	taskBytes, err := ctx.GetStub().GetState("TaskState")
 	if err != nil || taskBytes == nil {
 		return "", fmt.Errorf("task state not found")
 	}
 
-	return string(taskBytes), nil
+	var task TaskState
+	if err := json.Unmarshal(taskBytes, &task); err != nil {
+		return "", fmt.Errorf("unmarshal task failed: %v", err)
+	}
+
+	resp := map[string]interface{}{
+		"p_done":   task.Phase == TaskCompleted,
+		"phase":    task.Phase,
+		"done_map": task.DoneMap}
+	out, err := json.Marshal(resp)
+	if err != nil {
+		return "", fmt.Errorf("marshal response failed: %v", err)
+	}
+
+	return string(out), nil
 }

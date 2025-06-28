@@ -8,7 +8,7 @@ export CORE_PEER_MSPCONFIGPATH=~/code/fabric-samples/test-network/organizations/
 export CORE_PEER_ADDRESS=localhost:7051
 
 ORDERER_CA=~/code/fabric-samples/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
-CHAINCODE_NAME=basic3
+CHAINCODE_NAME=fsm
 CHANNEL=mychannel
 PEER0_ORG1_CA=$CORE_PEER_TLS_ROOTCERT_FILE
 PEER0_ORG2_CA=~/code/fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
@@ -69,8 +69,8 @@ for N in $(seq 5 20 305); do
     total_invoke_duration=$((total_invoke_duration + invoke_duration))
     echo "Invoke $j duration: ${invoke_duration}ms"
     # sleep $sleep_time
-    # QUERY_RESULT=$(peer chaincode query -C $CHANNEL -n $CHAINCODE_NAME -c '{"function":"QueryStatus","Args":[]}')
-    # echo "Query result after invoke $j: $QUERY_RESULT"
+    QUERY_RESULT=$(peer chaincode query -C $CHANNEL -n $CHAINCODE_NAME -c '{"function":"QueryStatus","Args":[]}')
+    echo "Query result after invoke $j: $QUERY_RESULT"
 
     # 查询每个 Peer 的状态
     while true; do
