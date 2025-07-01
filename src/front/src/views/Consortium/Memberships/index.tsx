@@ -85,11 +85,13 @@ const Memberships: React.FC = () => {
     orgId: string,
     consortiumId: string,
     membershipName: string,
-    createSSI: boolean
+    createSSI: boolean,
+    url: string,
+    public_did: string
   ) => {
     const membership_type = createSSI ? "ssi" : "standard";
 
-    await createMembership(orgId, consortiumId, membershipName, membership_type);
+    await createMembership(orgId, consortiumId, membershipName, membership_type, url, public_did);
     const data = await getMembershipList(consortiumId);
     const newMembershipList = data.map(renameMembership);
     setMembershipList(newMembershipList);
@@ -133,6 +135,11 @@ const Memberships: React.FC = () => {
           <Card.Grid style={gridDetailStyle}>
             <Link strong onClick={() => navigate(`./${item.id}`)} disabled={true}>
               VIEW DETAILS
+            </Link>
+          </Card.Grid>
+          <Card.Grid style={gridDetailStyle}>
+            <Link strong onClick={() => navigate(`./${item.id}/ssiController`)} disabled={false}>
+              SSI DETAILS
             </Link>
           </Card.Grid>
           <Card.Grid style={gridDetailStyle}>

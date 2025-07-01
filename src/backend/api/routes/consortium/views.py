@@ -45,6 +45,8 @@ class ConsortiumViewSet(viewsets.ViewSet):
         baseOrgId = request.data.get("baseOrgId")
         createSSI = request.data.get("createSSI", False)
         user = request.user
+        url = request.data.get("url")
+        public_did = request.data.get("public_did")
         try:
             consortium = Consortium.objects.create(name=name)
             # create a Memebership for the baseOrg in the consortium
@@ -56,6 +58,8 @@ class ConsortiumViewSet(viewsets.ViewSet):
                     name=f"{baseOrg.name}-{consortium.name}-SSI",
                     primary_contact_email=user.email,
                     membership_type='ssi',
+                    url=url,
+                    public_did=public_did
                 )
             else:
                 membership = Membership.objects.create(

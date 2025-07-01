@@ -50,6 +50,7 @@ from api.routes.loleido_organization.views import (
 )
 from api.routes.consortium.views import ConsortiumViewSet, ConsortiumInviteViewSet
 from api.routes.memebership.views import MemebershipViewSet
+# from api.routes.ssiController.views import ConnectionManagerViewSet
 from api.routes.environment.views import EnvironmentViewSet, EnvironmentOperateViewSet
 from api.routes.resource_set.views import ResourceSetViewSet
 from api.routes.bpmn.views import (
@@ -169,6 +170,7 @@ router.register(
     ResourceSetViewSet,
     basename="environment-resource_set",
 )
+# router.register(r'ssi/invitations', ConnectionManagerViewSet, basename='connection-manager')
 
 from api.routes.search.views import SearchView
 # Speed Search Route

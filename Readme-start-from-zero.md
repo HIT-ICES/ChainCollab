@@ -96,7 +96,7 @@ go env -w GOPROXY=https://goproxy.cn,direct
 cd /IBC/src/backend/opt/chaincode-go-bpmn
 
 删除go.sum
-go mod tidy
+cd
 
 ###### 4.go下载firefly
 
@@ -134,6 +134,7 @@ docker network create cello-net（仅定义网络）
 
  export https_proxy=172.26.224.1:7890
 
+ff init cello_env --verbose (创建堆栈，输入数字3)
 ff start cello_env --verbose (拉取cello相关镜像，并start)
 
 

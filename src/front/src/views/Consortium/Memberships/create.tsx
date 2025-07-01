@@ -8,7 +8,9 @@ interface Props {
     orgId: string,
     consortiumId: string,
     membershipName: string,
-    createSSI: boolean
+    createSSI: boolean,
+    url: string,
+    public_did: string,
   ) => void;
 }
 
@@ -23,6 +25,7 @@ const CreateMembership: React.FC<Props> = ({ onSubmit }) => {
   const consortiumId = useAppSelector(
     (state) => state.consortium
   ).currentConsortiumId;
+  const [showSSIFields, setShowSSIFields] = useState(false);
 
   useEffect(() => {
     const fetchAndSetData = async (orgId: string, consortiumId: string) => {
@@ -53,13 +56,16 @@ const CreateMembership: React.FC<Props> = ({ onSubmit }) => {
   // Form相关
   const onFinish = (values: any) => {
     const membershipName = values.membershipName;
+    const createSSI = values.creatSSI;
+    const url = values.ssiUrl;
+    const public_did = values.ssiDID;
 
     // 当membershipName与任一name不重复时
     if (
       membershipList.every((membership) => membership.name !== membershipName)
     ) {
       setIsValidInput(true);
-      onSubmit(orgId, consortiumId, membershipName);
+      onSubmit(orgId, consortiumId, membershipName, createSSI, url, public_did);
       setIsModalOpen(false);
     } else {
       setIsValidInput(false);
@@ -73,6 +79,8 @@ const CreateMembership: React.FC<Props> = ({ onSubmit }) => {
   type FieldType = {
     membershipName?: string;
     createSSI?: boolean;
+    ssiUrl?: string;
+    ssiDID?: string;
   };
 
   return (
@@ -122,8 +130,28 @@ const CreateMembership: React.FC<Props> = ({ onSubmit }) => {
             valuePropName="checked"
             wrapperCol={{ offset: 8, span: 16 }}
           >
-            <Checkbox>Membership For SSI</Checkbox>
+            <Checkbox onChange={(e) => setShowSSIFields(e.target.checked)}>
+              Membership For SSI
+            </Checkbox>
           </Form.Item>
+          {showSSIFields && (
+          <>
+            <Form.Item<FieldType>
+              label="Agent URL"
+              name="ssiUrl"
+              rules={[{ required: true, message: "Please input Agent URL!" }]}
+            >
+              <Input placeholder="http://agent.example.com" />
+            </Form.Item>
+            <Form.Item<FieldType>
+              label="Public DID"
+              name="ssiDID"
+              rules={[{ required: true, message: "Please input Public DID!" }]}
+            >
+              <Input placeholder="did:example:12345" />
+            </Form.Item>
+          </>
+        )}
         </Form>
       </Modal>
     </>

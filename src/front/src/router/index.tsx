@@ -20,6 +20,7 @@ const Home = lazy(() => import("@/views/Home"));
 const NetworkDashboard = lazy(() => import("@/views/Consortium/Dashboard"));
 const Memberships = lazy(() => import("@/views/Consortium/Memberships"));
 const FabricUsers = lazy(() => import("@/views/Consortium/FabricUsers"));
+const SSIController = lazy(() => import("@/views/Consortium/SSIController"));
 const MembershipDetail = lazy(
   () => import("@/views/Consortium/Memberships/Detail")
 );
@@ -94,6 +95,13 @@ const routes: routesType[] = [
             },
           },
           {
+            path: "ssicontroller",
+            element: withLoadingComponent(<SSIController />),
+            meta: {
+              title: "SSI Controller",
+            }
+          },
+          {
             path: "settings",
             element: withLoadingComponent(<OrgSettings />),
             meta: {
@@ -134,6 +142,13 @@ const routes: routesType[] = [
                 element: withLoadingComponent(<FabricUsers />),
                 meta: {
                   title: "FabricUsers",
+                },
+              },
+              {
+                path: "/orgs/:org_id/consortia/:consortium_id/memberships/:membership_id/ssiController",
+                element: withLoadingComponent(<SSIController />),
+                meta: {
+                  title: "SSIController",
                 },
               },
               {

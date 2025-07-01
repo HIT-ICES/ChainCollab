@@ -1544,3 +1544,26 @@ class DmnEngine(models.Model):
     create_at = models.DateTimeField(
         help_text="Create time of DmnEngine", auto_now_add=True
     )
+
+
+class MemUser(models.Model):
+    id = models.UUIDField(primary_key=True, default=make_uuid, editable=False)
+    membership = models.ForeignKey("Membership", on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    url = models.URLField()
+    public_did = models.CharField(max_length=255)
+
+
+class ConnectionRequest(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
+    ]
+    id = models.UUIDField(primary_key=True, default=make_uuid, editable=False)
+    sender_id = models.CharField(max_length=255)
+    sender_label = models.CharField(max_length=50)  # Membership or MemUser
+    receiver_id = models.CharField(max_length=255)
+    receiver_label = models.CharField(max_length=50)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)

@@ -1,16 +1,18 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { userSlice } from './slices/userSlice'
-import {orgSlice} from './slices/orgSlice'
+import { orgSlice } from './slices/orgSlice'
 import { consortiumSlice } from './slices/consortiumSlice'
 import { envSlice } from './slices/envSlice'
 import { UISlice } from './slices/UISlice'
+import { MembershipSlice } from './slices/MemershipSlice'
 
 const rootReducer = {
   user: userSlice.reducer,
   org: orgSlice.reducer,
   consortium: consortiumSlice.reducer,
   env: envSlice.reducer,
-  ui: UISlice.reducer
+  ui: UISlice.reducer,
+  membership: MembershipSlice.reducer 
 }
 
 

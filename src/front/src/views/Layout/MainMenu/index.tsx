@@ -30,14 +30,16 @@ const AddConsortiumModal: React.FC<{
   type FieldType = {
     consortiumName?: string;
     createSSI?: boolean;
+    ssiUrl?: string;
+    ssiDID?: string;
   };
   const [form] = Form.useForm<FieldType>();
   const dispatch = useAppDispatch();
 
   const currentOrgId = useAppSelector(selectOrg).currentOrgId;
-
+  const [showSSIFields, setShowSSIFields] = useState(false);
   const onFinish = async (values: FieldType) => {
-    const newConsortium = await createConsortium(currentOrgId, values.consortiumName, values.createSSI);
+    const newConsortium = await createConsortium(currentOrgId, values.consortiumName, values.createSSI, values.ssiUrl, values.ssiDID);
     dispatch(activateConsortium({ currentConsortiumId: newConsortium.id, currentConsortiumName: newConsortium.name }))
     setIsModalOpen(false);
     setSync();
@@ -80,8 +82,28 @@ const AddConsortiumModal: React.FC<{
           valuePropName="checked"
           wrapperCol={{ offset: 8, span: 16 }}
         >
-          <Checkbox> Membership For SSI </Checkbox>
+          <Checkbox onChange={(e) => setShowSSIFields(e.target.checked)}>
+             Membership For SSI 
+          </Checkbox>
         </Form.Item>
+        {showSSIFields && (
+          <>
+            <Form.Item<FieldType>
+              label="Agent URL"
+              name="ssiUrl"
+              rules={[{ required: true, message: "Please input Agent URL!" }]}
+            >
+              <Input placeholder="http://agent.example.com" />
+            </Form.Item>
+            <Form.Item<FieldType>
+              label="Public DID"
+              name="ssiDID"
+              rules={[{ required: true, message: "Please input Public DID!" }]}
+            >
+              <Input placeholder="did:example:12345" />
+            </Form.Item>
+          </>
+        )}
       </Form>
     </Modal>
   )
