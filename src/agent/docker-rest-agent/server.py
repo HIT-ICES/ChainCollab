@@ -392,6 +392,114 @@ def ca_operation(ca_name):
         return jsonify({"res": res}), 200
 
 
+@app.route("/api/v1/ssi_agents", methods=["POST"])
+def create_ssi_agent():
+    """
+    Create a new SSI agent.
+    """
+    """
+
+    alice:
+        # image: acapy-test
+        build:
+            context: https://github.com/hyperledger/aries-cloudagent-python.git#tags/1.3.0
+            dockerfile: docker/Dockerfile.run
+        ports:
+        - "3001:3001"
+        environment:
+        RUST_LOG: 'aries-askar::log::target=error'
+        command: >
+        start
+            --label Alice
+            --inbound-transport http 0.0.0.0 3000
+            --outbound-transport http
+            --endpoint http://alice:3000
+            --admin 0.0.0.0 3001
+            --admin-insecure-mode
+            --tails-server-base-url http://tails:6543
+            --genesis-url http://test.bcovrin.vonx.io/genesis
+            --wallet-type askar
+            --wallet-name alice
+            --wallet-key insecure
+            --auto-provision
+            --log-level debug
+            --debug-webhooks
+        healthcheck:
+            test: curl -s -o /dev/null -w '%{http_code}' "http://localhost:3001/status/live" | grep "200" > /dev/null
+            start_period: 30s
+            interval: 7s
+            timeout: 5s
+            retries: 5
+        depends_on:
+        tails:
+            condition: service_started
+    """
+    logging.info("create ssi agent with docker api")
+    agent_name = request.form.get("name")
+    port_map = ast.literal_eval(request.form.get("port_map"))
+    env = {
+        "RUST_LOG": "aries-askar::log::target=error",
+        "AGENT_NAME": agent_name,
+    }
+    command = [
+            # "poetry", "run", "aca-py",
+            "start", "--label", agent_name,
+            "--inbound-transport", "http","0.0.0.0", str(port_map["inbound"]),
+            "--outbound-transport","http",
+            "--endpoint",f"http://{agent_name}:{port_map['inbound']}",
+            "--admin", "0.0.0.0", str(port_map["admin"]),
+            "--admin-insecure-mode",
+            "--tails-server-base-url",f"http://{agent_name}-tails:6543",
+            "--genesis-url","http://test.bcovrin.vonx.io/genesis",
+            "--wallet-type","askar",
+            "--wallet-name", agent_name,
+            "--wallet-key", "insecure",
+            "--auto-provision",
+            "--log-level",
+            "debug",
+            "--debug-webhooks"
+            ]
+    
+    # 在运行容器前调用
+    _ensure_image_built_from_git(
+        image_tag="acapy-1.3.0",
+        git_url="https://github.com/hyperledger/aries-cloudagent-python.git",
+        tag="1.3.0",
+        dockerfile_path="docker/Dockerfile.run"
+    )
+    try:
+        docker_ports = {
+            f"{port_map['inbound']}/tcp": port_map['inbound'],
+            f"{port_map['admin']}/tcp": port_map['admin']
+        }
+        container = client.containers.run(
+            "acapy-1.3.0",
+            command,
+            detach=True,
+            tty=True,
+            stdin_open=True,
+            name=agent_name,
+            network="cello-net",
+            dns_search=["."],
+            environment=env,
+            ports=docker_ports,
+        )
+    except Exception as e:
+        res["code"] = FAIL_CODE
+        res["data"] = sys.exc_info()[0]
+        res["msg"] = "creation failed: {}".format(str(e))
+        logging.debug(res)
+        traceback.print_exc()
+        return jsonify({"res": res}), 500
+    print("create ssi agent container {} success".format(agent_name))
+    res["code"] = PASS_CODE
+    res["data"] = {
+        "status": "created",
+        "id": container.id
+    }
+    return jsonify({"res": res}), 200
+
+
 # Other Method
 
 
@@ -422,6 +530,61 @@ def _find_free_port():
         s.bind(("", 0))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return s.getsockname()[1]
+
+
+import os
+import tempfile
+import subprocess
+import docker
+from docker.errors import ImageNotFound, BuildError, APIError
+
+def _ensure_image_built_from_git(image_tag: str, git_url: str, tag: str, dockerfile_path: str):
+    """
+    确保基于 Git 仓库 + Dockerfile 构建的镜像存在，不存在则自动构建。
+
+    参数:
+    - image_tag: 构建后的镜像名称（如 acapy-test）
+    - git_url: 远程 Git 仓库地址（不含 tag 参数）
+    - tag: Git 标签名（如 1.3.0）
+    - dockerfile_path: 仓库中的 Dockerfile 路径（如 docker/Dockerfile.run）
+
+    返回:
+    - Docker image 对象
+    """
+    client = docker.from_env()
+
+    # 如果镜像已经存在，就不再构建
+    try:
+        image = client.images.get(image_tag)
+        print(f"✅ Image '{image_tag}' already exists.")
+        return image
+    except ImageNotFound:
+        pass
+
+    print(f"🔍 Image '{image_tag}' not found. Cloning and building from {git_url}@{tag} ...")
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        # Clone repo
+        subprocess.run(["git", "clone", git_url, tmp_dir], check=True)
+        # Checkout tag
+        subprocess.run(["git", "checkout", f"tags/{tag}"], cwd=tmp_dir, check=True)
+
+        try:
+            image, logs = client.images.build(
+                path=tmp_dir,
+                dockerfile=dockerfile_path,
+                tag=image_tag,
+                rm=True
+            )
+            for chunk in logs:
+                if 'stream' in chunk:
+                    print(chunk['stream'].strip())
+            print(f"✅ Successfully built image: '{image_tag}'")
+            return image
+        except (BuildError, APIError) as e:
+            print(f"❌ Failed to build image '{image_tag}': {e}")
+            raise
+
 
 
 @app.route("/api/v1/ports", methods=["GET"])
