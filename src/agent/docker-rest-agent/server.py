@@ -208,7 +208,7 @@ TEMPLATE_PATH = os.path.join(PWD, "CA_related/template")
 STORAGE_CA_SERVERS_PATH = os.path.join(PWD, "CA_related/storage/fabric-ca-servers")
 
 
-def _create_folders_up_to_path( current_path, path):
+def _create_folders_up_to_path(current_path, path):
     # 使用os.path.normpath来确保路径格式的一致性
 
     normalized_path = os.path.normpath(path)
@@ -442,29 +442,43 @@ def create_ssi_agent():
         "AGENT_NAME": agent_name,
     }
     command = [
-            # "poetry", "run", "aca-py",
-            "start", "--label", agent_name,
-            "--inbound-transport", "http","0.0.0.0", "3000",
-            "--outbound-transport","http",
-            "--endpoint",f"http://{agent_name}:3000",
-            "--admin", "0.0.0.0", "3001",
-            "--admin-insecure-mode",
-            # "--tails-server-base-url",f"http://{agent_name}-tails:6543",
-            "--genesis-url","http://test.bcovrin.vonx.io/genesis",
-            "--wallet-type","askar",
-            "--wallet-name", agent_name,
-            "--wallet-key", "insecure",
-            "--auto-provision",
-            "--log-level","debug",
-            "--debug-webhooks"
-            ]
-    
+        # "poetry", "run", "aca-py",
+        "start",
+        "--label",
+        agent_name,
+        "--inbound-transport",
+        "http",
+        "0.0.0.0",
+        "3000",
+        "--outbound-transport",
+        "http",
+        "--endpoint",
+        f"http://{agent_name}:3000",
+        "--admin",
+        "0.0.0.0",
+        "3001",
+        "--admin-insecure-mode",
+        # "--tails-server-base-url",f"http://{agent_name}-tails:6543",
+        "--genesis-url",
+        "http://test.bcovrin.vonx.io/genesis",
+        "--wallet-type",
+        "askar",
+        "--wallet-name",
+        agent_name,
+        "--wallet-key",
+        "insecure",
+        "--auto-provision",
+        "--log-level",
+        "debug",
+        "--debug-webhooks",
+    ]
+
     # 在运行容器前调用
     _ensure_image_built_from_git(
         image_tag="acapy-1.3.0",
         git_url="https://github.com/hyperledger/aries-cloudagent-python.git",
         tag="1.3.0",
-        dockerfile_path="docker/Dockerfile.run"
+        dockerfile_path="docker/Dockerfile.run",
     )
     try:
         docker_ports = {
@@ -491,10 +505,7 @@ def create_ssi_agent():
         return jsonify({"res": res}), 500
     print("create ssi agent container {} success".format(agent_name))
     res["code"] = PASS_CODE
-    res["data"] = {
-        "status": "created",
-        "id": container.id
-    }
+    res["data"] = {"status": "created", "id": container.id}
     return jsonify({"res": res}), 200
 
 
@@ -536,7 +547,10 @@ import subprocess
 import docker
 from docker.errors import ImageNotFound, BuildError, APIError
 
-def _ensure_image_built_from_git(image_tag: str, git_url: str, tag: str, dockerfile_path: str):
+
+def _ensure_image_built_from_git(
+    image_tag: str, git_url: str, tag: str, dockerfile_path: str
+):
     """
     确保基于 Git 仓库 + Dockerfile 构建的镜像存在，不存在则自动构建。
 
@@ -559,7 +573,9 @@ def _ensure_image_built_from_git(image_tag: str, git_url: str, tag: str, dockerf
     except ImageNotFound:
         pass
 
-    print(f"🔍 Image '{image_tag}' not found. Cloning and building from {git_url}@{tag} ...")
+    print(
+        f"🔍 Image '{image_tag}' not found. Cloning and building from {git_url}@{tag} ..."
+    )
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         # Clone repo
@@ -569,20 +585,16 @@ def _ensure_image_built_from_git(image_tag: str, git_url: str, tag: str, dockerf
 
         try:
             image, logs = client.images.build(
-                path=tmp_dir,
-                dockerfile=dockerfile_path,
-                tag=image_tag,
-                rm=True
+                path=tmp_dir, dockerfile=dockerfile_path, tag=image_tag, rm=True
             )
             for chunk in logs:
-                if 'stream' in chunk:
-                    print(chunk['stream'].strip())
+                if "stream" in chunk:
+                    print(chunk["stream"].strip())
             print(f"✅ Successfully built image: '{image_tag}'")
             return image
         except (BuildError, APIError) as e:
             print(f"❌ Failed to build image '{image_tag}': {e}")
             raise
-
 
 
 @app.route("/api/v1/ports", methods=["GET"])
