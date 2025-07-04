@@ -444,19 +444,18 @@ def create_ssi_agent():
     command = [
             # "poetry", "run", "aca-py",
             "start", "--label", agent_name,
-            "--inbound-transport", "http","0.0.0.0", str(port_map["inbound"]),
+            "--inbound-transport", "http","0.0.0.0", "3000",
             "--outbound-transport","http",
-            "--endpoint",f"http://{agent_name}:{port_map['inbound']}",
-            "--admin", "0.0.0.0", str(port_map["admin"]),
+            "--endpoint",f"http://{agent_name}:3000",
+            "--admin", "0.0.0.0", "3001",
             "--admin-insecure-mode",
-            "--tails-server-base-url",f"http://{agent_name}-tails:6543",
+            # "--tails-server-base-url",f"http://{agent_name}-tails:6543",
             "--genesis-url","http://test.bcovrin.vonx.io/genesis",
             "--wallet-type","askar",
             "--wallet-name", agent_name,
             "--wallet-key", "insecure",
             "--auto-provision",
-            "--log-level",
-            "debug",
+            "--log-level","debug",
             "--debug-webhooks"
             ]
     
@@ -469,8 +468,7 @@ def create_ssi_agent():
     )
     try:
         docker_ports = {
-            f"{port_map['inbound']}/tcp": port_map['inbound'],
-            f"{port_map['admin']}/tcp": port_map['admin']
+            f"{3001}/tcp": str(port_map["inbound"])  # 宿主机端口映射来自请求体
         }
         container = client.containers.run(
             "acapy-1.3.0",
