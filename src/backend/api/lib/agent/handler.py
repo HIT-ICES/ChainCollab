@@ -89,6 +89,14 @@ class AgentHandler(object):
             LOG.error(e)
             return False
 
+    # SSI related
+    def ssi_create(self, agent_name, port_map):
+        try:
+            data = self._agent.ssi_create(agent_name, port_map)
+            return data
+        except Exception as e:
+            raise e
+
     # get avaliable ports
     def available_ports_get(self, port_number):
         try:

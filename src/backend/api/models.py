@@ -887,8 +887,8 @@ class Consortium(models.Model):
 
 class Membership(models.Model):
     MEMBERSHIP_TYPE_CHOICES = [
-        ('standard', 'Standard'),
-        ('ssi', 'SSI'),
+        ("standard", "Standard"),
+        ("ssi", "SSI"),
     ]
     id = models.UUIDField(
         primary_key=True,
@@ -920,19 +920,16 @@ class Membership(models.Model):
     membership_type = models.CharField(
         max_length=20,
         choices=MEMBERSHIP_TYPE_CHOICES,
-        default='standard',
-        help_text="Type of membership: standard or ssi"
+        default="standard",
+        help_text="Type of membership: standard or ssi",
     )
-    url = models.URLField(
-        null=True,
-        blank=True,
-        help_text="URL endpoint for SSI"
-    )
+    ssi_url = models.URLField(null=True, blank=True, help_text="URL endpoint for SSI")
     public_did = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True,
-        help_text="Public DID for SSI"
+        max_length=255, null=True, blank=True, help_text="Public DID for SSI"
+    )
+    is_ssi_agent = models.BooleanField(
+        default=False,
+        help_text="Indicates if this membership requires the start of SSI agent",
     )
 
 
@@ -1556,14 +1553,14 @@ class MemUser(models.Model):
 
 class ConnectionRequest(models.Model):
     STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('accepted', 'Accepted'),
-        ('rejected', 'Rejected'),
+        ("pending", "Pending"),
+        ("accepted", "Accepted"),
+        ("rejected", "Rejected"),
     ]
     id = models.UUIDField(primary_key=True, default=make_uuid, editable=False)
     sender_id = models.CharField(max_length=255)
     sender_label = models.CharField(max_length=50)  # Membership or MemUser
     receiver_id = models.CharField(max_length=255)
     receiver_label = models.CharField(max_length=50)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     created_at = models.DateTimeField(auto_now_add=True)

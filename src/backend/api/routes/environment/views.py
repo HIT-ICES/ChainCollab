@@ -653,7 +653,7 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         response = {"ffiContent": ffiContent}
 
         return Response(response, status=status.HTTP_200_OK)
-    
+
     @action(methods=["post"], detail=True, url_path="ssi_expansion")
     def ssi_expansion(self, request, pk=None, *args, **kwargs):
         """
@@ -662,12 +662,17 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         try:
             env = Environment.objects.get(pk=pk)
         except Environment.DoesNotExist:
-            return Response({"message": "Environment not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"message": "Environment not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         ssi_bindings = request.data.get("ssi_bindings", [])
 
         if not isinstance(ssi_bindings, list):
-            return Response({"message": "ssi_bindings must be a list"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"message": "ssi_bindings must be a list"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         updated_count = 0
         for binding in ssi_bindings:
@@ -688,5 +693,45 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
             membership.save()
             updated_count += 1
 
-        return Response({"message": f"{updated_count} memberships updated"}, status=status.HTTP_200_OK)
+        return Response(
+            {"message": f"{updated_count} memberships updated"},
+            status=status.HTTP_200_OK,
+        )
 
+    @action(methods=["post"], detail=True, url_path="start_ssi_agent")
+    def start_ssi_agent(self, request, pk=None, *args, **kwargs):
+        """
+        启动 SSI Agent
+        """
+        try:
+            env = Environment.objects.get(pk=pk)
+        except Environment.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if env.status != "ACTIVATED":
+            return Response(
+                {"message": "Environment has not been activated or has started"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        headers = request.headers
+
+        env.ssi_status = "STARTED"
+        env.save()
+
+        memberships = env.resource_sets.all().filter(
+            membership_type="ssi",
+            is_ssi_agent=True,
+        )
+
+        for membership in memberships:
+            resource_set = ResourceSet.objects.get(
+                membership=membership, environment=env
+            )
+            agent=resource_set.agent
+            if not agent:
+                return Response(
+                    {"message": "Agent not found for the membership"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+            

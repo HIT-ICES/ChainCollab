@@ -263,6 +263,21 @@ class DockerAgent(AgentBase):
         except Exception as e:
             raise e
 
+    # SSI Related -----------------------------------------------------------
+    def ssi_create(self, agent_name, port_map):
+        try:
+            response = post(
+                "{}/api/v1/ssi_agents".format(self._urls),
+                data={"agent_name": agent_name, "port_map": port_map},
+            )
+            if response.status_code == 200:
+                txt = json.loads(response.text)
+                return txt["data"]
+            else:
+                raise response.reason
+        except Exception as e:
+            raise e
+
     # Port related
     def ports_gets(self, port_number, *args, **kwargs):
         try:
