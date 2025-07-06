@@ -562,6 +562,36 @@ class Node(models.Model):
     #     super(Node, self).delete(using, keep_parents)
 
 
+class SSIAgentNode(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        help_text="ID of SSIAgentNode",
+        default=make_uuid,
+        editable=True,
+    )
+    name = models.CharField(
+        help_text="Name of SSIAgentNode",
+        max_length=64,
+        default=random_name("ssi_agent_node"),
+    )
+    agent = models.ForeignKey(
+        Agent,
+        help_text="Agent of node",
+        null=True,
+        related_name="node",
+        on_delete=models.CASCADE,
+    )
+    url = models.JSONField(
+        help_text="URL configurations for node",
+        null=True,
+        blank=True,
+        default=dict,
+    )
+    public_did = models.CharField(
+        max_length=255, null=True, blank=True, help_text="Public DID for SSI"
+    )
+
+
 class NodeUser(models.Model):
     name = models.CharField(help_text="User name of node", max_length=64, default="")
     secret = models.CharField(
@@ -597,6 +627,13 @@ class Port(models.Model):
         on_delete=models.CASCADE,
         null=True,
         related_name="port",
+    )
+    ssi_agent_node = models.ForeignKey(
+        SSIAgentNode,
+        help_text="SSIAgentNode of port",
+        on_delete=models.CASCADE,
+        null=True,
+        related_name="port_ssi_agent_node",
     )
     external = models.IntegerField(
         help_text="External port",
@@ -922,10 +959,6 @@ class Membership(models.Model):
         choices=MEMBERSHIP_TYPE_CHOICES,
         default="standard",
         help_text="Type of membership: standard or ssi",
-    )
-    ssi_url = models.URLField(null=True, blank=True, help_text="URL endpoint for SSI")
-    public_did = models.CharField(
-        max_length=255, null=True, blank=True, help_text="Public DID for SSI"
     )
     is_ssi_agent = models.BooleanField(
         default=False,

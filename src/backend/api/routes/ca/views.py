@@ -459,7 +459,7 @@ class FabricCAViewSet(viewsets.ViewSet):
         :rtype: none
         """
         ip = agent.urls.split(":")[1].strip("//")
-        ports = find_available_ports(ip, node.id, agent.id, 1)
+        ports = find_available_ports(ip, agent.id, 1)
         set_ports_mapping(node.id, [{"internal": 7054, "external": ports[0]}], True)
 
     def _generate_ccp(

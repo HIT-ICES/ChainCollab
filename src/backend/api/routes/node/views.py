@@ -375,7 +375,7 @@ class NodeViewSet(viewsets.ViewSet):
         ip = agent.urls.split(":")[1].strip("//")
 
         if type == "peer":
-            ports = find_available_ports(ip, node.id, agent.id, 2)
+            ports = find_available_ports(ip, agent.id, 2)
 
             set_ports_mapping(
                 node.id,
@@ -386,7 +386,7 @@ class NodeViewSet(viewsets.ViewSet):
                 True,
             )
         else:
-            ports = find_available_ports(ip, node.id, agent.id, 1)
+            ports = find_available_ports(ip, agent.id, 1)
             set_ports_mapping(node.id, [{"internal": 7050, "external": ports[0]}], True)
 
     def _conversion_msp_tls_cfg(self, type, org, node):

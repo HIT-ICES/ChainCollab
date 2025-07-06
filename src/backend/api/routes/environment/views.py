@@ -698,8 +698,8 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
             status=status.HTTP_200_OK,
         )
 
-    @action(methods=["post"], detail=True, url_path="start_ssi_agent")
-    def start_ssi_agent(self, request, pk=None, *args, **kwargs):
+    @action(methods=["post"], detail=True, url_path="create_start_ssi_agent")
+    def create_start_ssi_agent(self, request, pk=None, *args, **kwargs):
         """
         启动 SSI Agent
         """
@@ -723,15 +723,14 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
             membership_type="ssi",
             is_ssi_agent=True,
         )
-
+        headers = request.headers
         for membership in memberships:
             resource_set = ResourceSet.objects.get(
                 membership=membership, environment=env
             )
-            agent=resource_set.agent
-            if not agent:
-                return Response(
-                    {"message": "Agent not found for the membership"},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
-            
+            post(
+                f"http://{CURRENT_IP}:8000/api/v1/resource_sets/{resource_set.id}/ssi_agents/ssi_agent_create",
+                data={},
+                headers=headers,
+            )
+        return Response(status=status.HTTP_201_CREATED)

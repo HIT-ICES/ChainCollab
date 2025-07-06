@@ -29,7 +29,7 @@ class FabricNetwork(NetworkBase):
         environment = ["FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server"]
         internal_ports = [7054]
         ports = find_available_ports(
-            self._docker_host_ip, self._node_id, self._agent_id
+            self._docker_host_ip, self._agent_id
         )
         if not len(ports):
             return None

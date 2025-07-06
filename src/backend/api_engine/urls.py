@@ -60,6 +60,7 @@ from api.routes.bpmn.views import (
 )
 from api.routes.fabric_identity.views import FabricIdentityViewSet
 from api.routes.api_secret_key.views import APISecretKeyViewSet
+from api.routes.ssi.views import SSIViewSet
 
 DEBUG = getattr(settings, "DEBUG")
 API_VERSION = os.getenv("API_VERSION")
@@ -107,6 +108,12 @@ router.register(
     FabricCAViewSet,
     basename="resource_set_ca",
 )
+router.register(
+    "resource_sets/(?P<resource_set_id>[^/.]+)/ssis",
+    SSIViewSet,
+    basename="resource_set_ssi",
+)
+
 router.register(
     "environments/(?P<environment_id>[^/.]+)/channels",
     ChannelViewSet,

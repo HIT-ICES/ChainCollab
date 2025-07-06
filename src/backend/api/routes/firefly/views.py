@@ -15,14 +15,10 @@ import json
 
 from api.config import CELLO_HOME, CURRENT_IP, DEFAULT_CHANNEL_NAME, FABRIC_CONFIG
 
-from api.utils.port_picker import set_ports_mapping, find_available_ports
 from requests import get, post
 import json
 import traceback
 from api.models import (
-    Node,
-    Port,
-    FabricCAServerType,
     Environment,
     ResourceSet,
     Firefly,

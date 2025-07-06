@@ -7,6 +7,8 @@ import os
 from random import sample
 from django.core.exceptions import ObjectDoesNotExist
 from api.models import Port, Node, Agent
+from django.db.models import Q
+
 
 CLUSTER_PORT_START = int(os.getenv("CLUSTER_PORT_START", 7050))
 MAX_RETRY = 100
@@ -32,7 +34,7 @@ def port_picker(agent_id=None, request_count=1, exclude_ports=None):
         exclude_ports = []
 
     used_ports = Port.objects.values_list("external").filter(
-        node__agent__id=agent_id
+        Q(node__agent__id=agent_id) | Q(ssi_agent_node__id=agent_id)
     )
     exclude_ports += [port[0] for port in used_ports]
 
@@ -48,13 +50,12 @@ def port_picker(agent_id=None, request_count=1, exclude_ports=None):
 
 def find_available_ports(
     ip=None,
-    node_id=None,
     agent_id=None,
     request_count=1,
     exclude_ports=None,
     retry=MAX_RETRY,
 ):
-    if node_id is None or agent_id is None or retry == 0:
+    if agent_id is None or retry == 0:
         return []
     all_port_is_free = True
 
@@ -70,7 +71,7 @@ def find_available_ports(
     if not all_port_is_free:
         retry -= 1
         return find_available_ports(
-            ip, node_id, agent_id, request_count, exclude_ports, retry
+            ip, agent_id, request_count, exclude_ports, retry
         )
     # Removed these lines of code bc they can produce port objects with 0 internal port number.
     # try:

@@ -436,7 +436,7 @@ def create_ssi_agent():
     """
     logging.info("create ssi agent with docker api")
     agent_name = request.form.get("name")
-    port_map = ast.literal_eval(request.form.get("port_map"))
+    port_str = request.form.get("port")  # 获取传入的端口字符串
     env = {
         "RUST_LOG": "aries-askar::log::target=error",
         "AGENT_NAME": agent_name,
@@ -482,7 +482,7 @@ def create_ssi_agent():
     )
     try:
         docker_ports = {
-            f"{3001}/tcp": str(port_map["inbound"])  # 宿主机端口映射来自请求体
+            f"{3001}/tcp": port_str  # 宿主机端口映射来自请求体
         }
         container = client.containers.run(
             "acapy-1.3.0",
