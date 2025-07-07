@@ -40,7 +40,7 @@ export default function FixedFieldsModal({
   const [tokenNumber, setTokenNumber] = React.useState('');
   const [tokenId, setTokenId] = React.useState('');
   const [originalTokenId, setOriginalTokenId] = React.useState('');
-
+  const [tokenURL, setTokenURL] = React.useState('');
   // 新增：tokenId 和 FT tokenName 可选列表
   const [tokenIdOptions, setTokenIdOptions] = React.useState<string[]>([]);
   const [tokenNameOptions, setTokenNameOptions] = React.useState<string[]>([]);
@@ -78,7 +78,15 @@ export default function FixedFieldsModal({
     if (Array.isArray(doc) && doc.length) {
       try {
         const parsed = JSON.parse(doc[0].text);
-        setCaller(parsed.caller || '');
+        if (parsed.caller) {
+  // 在 options 中找 value 以 parsed.caller 为前缀的项（支持 choreo 结构）
+  const match = participantOptions.find(opt =>
+    opt.value.startsWith(parsed.caller)
+  );
+  setCaller(match ? match.value : parsed.caller); // 设置 value（完整 ID）
+} else {
+  setCaller('');
+}
         setAssetType(parsed.assetType || '');
         setOperation(parsed.operation || '');
         setTokenType(parsed.tokenType || '');
@@ -87,7 +95,18 @@ export default function FixedFieldsModal({
         const loadedTokenId = parsed.tokenId || '';
         setTokenId(loadedTokenId);
         setOriginalTokenId(loadedTokenId);
-        setCallee(parsed.callee || []);
+        setTokenURL(parsed.tokenURL || '');
+        if (Array.isArray(parsed.callee)) {
+  const matchedCalleeIds = parsed.callee.map(callerId => {
+    const match = participantOptions.find(opt =>
+      opt.value.startsWith(callerId)
+    );
+    return match ? match.value : callerId;
+  });
+  setCallee(matchedCalleeIds);
+} else {
+  setCallee([]);
+}
       } catch {
         // ignore parse error
       }
@@ -107,6 +126,7 @@ export default function FixedFieldsModal({
       setCallee(prev => (prev.length ? prev : []));
       setTokenId('');
       setOriginalTokenId('');
+      setTokenURL('');  
       loadDataFromBPMN();
     }
   }, [shape, isModalOpen]);
@@ -233,6 +253,7 @@ export default function FixedFieldsModal({
     if (matched) {
       setTokenName(matched.tokenName || '');
       setAssetType(matched.assetType || '');
+      setTokenURL(matched.tokenURL || ''); 
     }
   };
 
@@ -247,16 +268,13 @@ export default function FixedFieldsModal({
 
     const payload: any = { assetType, operation, tokenName };
     if (caller) {
-      const o = participantOptions.find(o => o.value === caller);
-      payload.caller = o ? o.label : caller;
+      const pureCaller = caller.split('_ChoreographyTask_')[0];
+  payload.caller = pureCaller;
     }
     if ((assetType === 'transferable' && operation === 'Transfer') ||
         (assetType === 'distributive' && ['approve','remove approval'].includes(operation))) {
       if (callee.length) {
-        payload.callee = callee.map(id => {
-          const o = participantOptions.find(o => o.value === id);
-          return o ? o.label : id;
-        });
+      payload.callee = callee.map(id => id.split('_ChoreographyTask_')[0]);
       }
     }
     if (assetType === 'transferable') {
@@ -268,6 +286,7 @@ export default function FixedFieldsModal({
     }
     if (!(assetType === 'transferable' && tokenType === 'FT') && tokenId) {
       payload.tokenId = tokenId;
+      if (tokenURL) payload.tokenURL = tokenURL;
     }
 
     commandStack.execute('element.updateProperties', {
@@ -485,6 +504,25 @@ export default function FixedFieldsModal({
       )}
     </div>
   )}
+  
+  {shouldShowTokenId && tokenId && (
+  <div style={{ marginBottom: 16 }}>
+    <label style={{ display: 'block', marginBottom: 4 }}>Token URL:</label>
+    {operation === 'mint' ? (
+      <Input
+        value={tokenURL}
+        onChange={e => setTokenURL(e.target.value)}
+        placeholder="Enter token URL"
+      />
+    ) : (
+      <Input
+        value={tokenURL}
+        disabled
+        placeholder="Auto-filled token URL"
+      />
+    )}
+  </div>
+)}
 </Modal>
   );
 }
