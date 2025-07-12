@@ -1,4 +1,4 @@
-package ERC
+package chaincode
 
 import (
 	"encoding/base64"
@@ -9,26 +9,6 @@ import (
 	"github.com/hyperledger/fabric-contract-api-go/v2/contractapi"
 )
 
-// Define structs to be used by chaincode
-type Nft struct {
-	TokenId  string `json:"tokenId"`
-	Owner    string `json:"owner"`
-	TokenURI string `json:"tokenURI"`
-	Approved string `json:"approved"`
-}
-
-type Approval struct {
-	Owner    string `json:"owner"`
-	Operator string `json:"operator"`
-	Approved bool   `json:"approved"`
-}
-
-type Transfer struct {
-	From    string `json:"from"`
-	To      string `json:"to"`
-	TokenId string `json:"tokenId"`
-}
-
 // Define objectType names for prefix
 const balancePrefix = "balance"
 const nftPrefix = "nft"
@@ -37,7 +17,7 @@ const approvalPrefix = "approval"
 // Define key names for options
 const nameKey = "name"
 const symbolKey = "symbol"
-const minterMSPsKey = "minterMSPs" 
+
 // TokenERC721Contract contract for managing CRUD operations
 type TokenERC721Contract struct {
 	contractapi.Contract
@@ -48,7 +28,7 @@ func _readNFT(ctx contractapi.TransactionContextInterface, tokenId string) (*Nft
 	if err != nil {
 		return nil, fmt.Errorf("failed to CreateCompositeKey %s: %v", tokenId, err)
 	}
-	
+
 	nftBytes, err := ctx.GetStub().GetState(nftKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to GetState %s: %v", tokenId, err)
@@ -533,13 +513,13 @@ func (c *TokenERC721Contract) TotalSupply(ctx contractapi.TransactionContextInte
 // param {String} name The name of the token
 // param {String} symbol The symbol of the token
 
-func (c *TokenERC721Contract) Initialize(ctx contractapi.TransactionContextInterface, name string, symbol string,minterMSPs []string) (bool, error) {
+func (c *TokenERC721Contract) Initialize(ctx contractapi.TransactionContextInterface, name string, symbol string) (bool, error) {
 	// Check minter authorization - this sample assumes Org1 is the issuer with privilege to set the name and symbol
 	clientMSPID, err := ctx.GetClientIdentity().GetMSPID()
 	if err != nil {
 		return false, fmt.Errorf("failed to get clientMSPID: %v", err)
 	}
-	if clientMSPID != "Environment-system.org.comMSP" {
+	if clientMSPID != "Org1MSP" {
 		return false, errors.New("client is not authorized to set the name and symbol of the token")
 	}
 
@@ -559,16 +539,6 @@ func (c *TokenERC721Contract) Initialize(ctx contractapi.TransactionContextInter
 	err = ctx.GetStub().PutState(symbolKey, []byte(symbol))
 	if err != nil {
 		return false, fmt.Errorf("failed to PutState symbolKey %s: %v", symbolKey, err)
-	}
-
-	//添加权限
-	minterMSPsBytes, err := json.Marshal(minterMSPs)
-	if err != nil {
-		return false, fmt.Errorf("failed to marshal minter MSPs: %v", err)
-	}
-	err = ctx.GetStub().PutState(minterMSPsKey, minterMSPsBytes)
-	if err != nil {
-		return false, fmt.Errorf("failed to set minter MSPs: %v", err)
 	}
 
 	return true, nil
@@ -596,30 +566,8 @@ func (c *TokenERC721Contract) MintWithTokenURI(ctx contractapi.TransactionContex
 		return nil, fmt.Errorf("failed to get clientMSPID: %v", err)
 	}
 
-	allowedMinterMSPsBytes, err := ctx.GetStub().GetState(minterMSPsKey)
-	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve allowed minter MSPs: %v", err)
-	}
-	if allowedMinterMSPsBytes == nil {
-		return nil, errors.New("allowed minter MSPs are not configured") // Should not happen if initialized correctly
-	}
-
-	var allowedMinterMSPs []string
-	err = json.Unmarshal(allowedMterMSPsBytes, &allowedMinterMSPs)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal allowed minter MSPs: %v", err)
-	}
-
-	isAuthorizedMinter := false
-	for _, mspid := range allowedMinterMSPs {
-		if clientMSPID == mspid {
-			isAuthorizedMinter = true
-			break
-		}
-	}
-
-	if !isAuthorizedMinter {
-		return nil, fmt.Errorf("client MSP %s is not authorized to mint tokens", clientMSPID)
+	if clientMSPID != "Org1MSP" {
+		return nil, errors.New("client is not authorized to set the name and symbol of the token")
 	}
 
 	// Get ID of submitting client identity

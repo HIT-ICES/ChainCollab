@@ -15,8 +15,7 @@ const nameKey = "name"
 const symbolKey = "symbol"
 const decimalsKey = "decimals"
 const totalSupplyKey = "totalSupply"
-const minterMSPsKey = "minterMSPs" //  key for allowed minter MSPs
-const burnerMSPsKey = "burnerMSPs" //  key for allowed burner MSPs
+
 // Define objectType names for prefix
 const allowancePrefix = "allowance"
 
@@ -52,31 +51,8 @@ func (s *SmartContract) Mint(ctx contractapi.TransactionContextInterface, amount
 	if err != nil {
 		return fmt.Errorf("failed to get MSPID: %v", err)
 	}
-
-	allowedMinterMSPsBytes, err := ctx.GetStub().GetState(minterMSPsKey)
-	if err != nil {
-		return fmt.Errorf("failed to retrieve allowed minter MSPs: %v", err)
-	}
-	if allowedMinterMSPsBytes == nil {
-		return errors.New("allowed minter MSPs are not configured") // Should not happen if initialized correctly
-	}
-
-	var allowedMinterMSPs []string
-	err = json.Unmarshal(allowedMinterMSPsBytes, &allowedMinterMSPs)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal allowed minter MSPs: %v", err)
-	}
-
-	isAuthorizedMinter := false
-	for _, mspid := range allowedMinterMSPs {
-		if clientMSPID == mspid {
-			isAuthorizedMinter = true
-			break
-		}
-	}
-
-	if !isAuthorizedMinter {
-		return fmt.Errorf("client MSP %s is not authorized to mint tokens", clientMSPID)
+	if clientMSPID != "Org1MSP" {
+		return errors.New("client is not authorized to mint new tokens")
 	}
 
 	// Get ID of submitting client identity
@@ -172,31 +148,8 @@ func (s *SmartContract) Burn(ctx contractapi.TransactionContextInterface, amount
 	if err != nil {
 		return fmt.Errorf("failed to get MSPID: %v", err)
 	}
-
-	allowedBurnerMSPsBytes, err := ctx.GetStub().GetState(burnerMSPsKey)
-	if err != nil {
-		return fmt.Errorf("failed to retrieve allowed burner MSPs: %v", err)
-	}
-	if allowedBurnerMSPsBytes == nil {
-		return errors.New("allowed burner MSPs are not configured") // Should not happen if initialized correctly
-	}
-
-	var allowedBurnerMSPs []string
-	err = json.Unmarshal(allowedBurnerMSPsBytes, &allowedBurnerMSPs)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal allowed burner MSPs: %v", err)
-	}
-
-	isAuthorizedBurner := false
-	for _, mspid := range allowedBurnerMSPs {
-		if clientMSPID == mspid {
-			isAuthorizedBurner = true
-			break
-		}
-	}
-
-	if !isAuthorizedBurner {
-		return fmt.Errorf("client MSP %s is not authorized to burn tokens", clientMSPID)
+	if clientMSPID != "Org1MSP" {
+		return errors.New("client is not authorized to mint new tokens")
 	}
 
 	// Get ID of submitting client identity
@@ -629,16 +582,17 @@ func (s *SmartContract) Symbol(ctx contractapi.TransactionContextInterface) (str
 // param {String} name The name of the token
 // param {String} symbol The symbol of the token
 // param {String} decimals The decimals used for the token operations
-func (s *SmartContract) Initialize(ctx contractapi.TransactionContextInterface, name string, symbol string, decimals string, minterMSPs []string, burnerMSPs []string) (bool, error) {
+func (s *SmartContract) Initialize(ctx contractapi.TransactionContextInterface, name string, symbol string, decimals string) (bool, error) {
 
 	// Check minter authorization - this sample assumes Org1 is the central banker with privilege to intitialize contract
 	clientMSPID, err := ctx.GetClientIdentity().GetMSPID()
 	if err != nil {
 		return false, fmt.Errorf("failed to get MSPID: %v", err)
 	}
-	if clientMSPID != "Environment-system.org.comMSP" {
+	if clientMSPID != "Org1MSP" {
 		return false, fmt.Errorf("client is not authorized to initialize contract")
 	}
+
 	// Check contract options are not already set, client is not authorized to change them once intitialized
 	bytes, err := ctx.GetStub().GetState(nameKey)
 	if err != nil {
@@ -662,26 +616,6 @@ func (s *SmartContract) Initialize(ctx contractapi.TransactionContextInterface, 
 	if err != nil {
 		return false, fmt.Errorf("failed to set token name: %v", err)
 	}
-
-	//添加权限msp
-	minterMSPsBytes, err := json.Marshal(minterMSPs)
-	if err != nil {
-		return false, fmt.Errorf("failed to marshal minter MSPs: %v", err)
-	}
-	err = ctx.GetStub().PutState(minterMSPsKey, minterMSPsBytes)
-	if err != nil {
-		return false, fmt.Errorf("failed to set minter MSPs: %v", err)
-	}
-
-	burnerMSPsBytes, err := json.Marshal(burnerMSPs)
-	if err != nil {
-		return false, fmt.Errorf("failed to marshal burner MSPs: %v", err)
-	}
-	err = ctx.GetStub().PutState(burnerMSPsKey, burnerMSPsBytes)
-	if err != nil {
-		return false, fmt.Errorf("failed to set burner MSPs: %v", err)
-	}
-
 
 	return true, nil
 }

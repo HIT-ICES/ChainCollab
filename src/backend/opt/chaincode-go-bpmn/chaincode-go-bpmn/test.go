@@ -92,35 +92,39 @@ type BusinessRule struct {
 	State          ElementState      `json:"State"`
 }
 
-type TokenElement struct {
-	TokenElementID string       `json:"tokenElementID"`
-	AssetType      string       `json:"assetType"`
-	Operation      string       `json:"operation"`
-	TokenName      string       `json:"tokenName"`
-	TokenID        string       `json:"tokenId"`
-	CallerID       string       `json:"caller"`
-	CalleeID       []string     `json:"callee"`
-	TokenType      string       `json:"tokenType"`
-	TokenNumber    string       `json:"tokenNumber"`
-	TokenURL       string       `json:"tokenURL"`
-	State          ElementState `json:"State"`
+type TokenElement struct{
+	TokenElementID     string           `json:"tokenElementID"`
+	AssetType          string       	`json:"assetType"`
+	Operation          string        `json:"operation"`
+	TokenName          string         `json:"tokenName"`
+	TokenID            string 			`json:"tokenId"`
+	CallerID           string			`json:"caller"`
+	CalleeID			[]string		`json:"callee"`
+	TokenType           string           `json:"tokenType"`
+	TokenNumber         string          `json:"tokenNumber"`
+	State               ElementState      `json:"State"`
 }
 
-func (cc *SmartContract) CreateTokenElement(ctx contractapi.TransactionContextInterface, instance *ContractInstance, tokenElementID string, state ElementState, Jsonstr string) (*TokenElement, error) {
-	var TokenElement TokenElement
-	err := json.Unmarshal([]byte(Jsonstr), &TokenElement)
-	if err != nil {
-		return nil, errors.New("  ") //错误信息
+func (cc *SmartContract) CreateTokenElement(ctx contractapi.TransactionContextInterface, instance *ContractInstance,tokenElementID string ,assetType string,operation string,tokenName string,tokenID string ,callerID string,calleeID []string, tokenType string,tokenNumber string, state ElementState)(*Token,error){
+	
+	instance.InstanceTokens[tokenElementID]=&TokenElement{
+		TokenElementID: tokenElementID,
+		AssetType: 	assetType,
+		Operation: 	operation,
+		TokenName: 	tokenName,
+		TokenID:   	tokenID,
+		CallerID: 	callerID,
+		CalleeID:   calleeID,
+		TokenType:  tokenType,
+		TokenNumber: tokenNumber,
+		State:         state,
 	}
-	TokenElement.TokenElementID = tokenElementID
-	TokenElement.State = state
-	instance.InstanceTokenELements[tokenElementID] = &TokenElement
 
-	returnToken, ok := instance.InstanceTokenELements[tokenElementID]
-	if !ok {
+	returnToken, ok:=instance.InstanceTokens[tokenElementID]
+	if !ok{
 		return nil, fmt.Errorf("无法将实例元素转换为Token")
 	}
-	return returnToken, nil
+	return returnToken ,nil
 }
 
 func (cc *SmartContract) CreateBusinessRule(ctx contractapi.TransactionContextInterface, instance *ContractInstance, BusinessRuleID string, DMNContent string, DecisionID string, ParamMapping map[string]string) (*BusinessRule, error) {
@@ -394,10 +398,10 @@ func (c *SmartContract) ChangeEventState(ctx contractapi.TransactionContextInter
 
 }
 
-func (cc *SmartContract) changeTokenElementState(ctx contractapi.TransactionContextInterface, instance *ContractInstance, tokenElementID string, state ElementState) error {
-	token, ok := instance.InstanceTokenELements[tokenElementID]
-	if !ok {
-		errorMessage := fmt.Sprintf("Token %s does not exist", tokenElementID)
+func (cc *SmartContract) changeTokenElementState(ctx contractapi.TransactionContextInterface,instance *ContractInstance,tokenElementID string ,state ElemnetState) error {
+	token, ok:= instance.InstanceTokens[tokenElementID]
+	if !ok{
+		errorMessage := fmt.Sprintf("Token %s does not exist", BusinessRuleID)
 		fmt.Println(errorMessage)
 		return errors.New(errorMessage)
 	}
@@ -527,27 +531,27 @@ func (cc *SmartContract) GetAllParticipants(ctx contractapi.TransactionContextIn
 	return participants, nil
 
 }
-func (cc *SmartContract) GetAllTokenElement(ctx contractapi.TransactionContextInterface, instanceID string) ([]*TokenElement, error) {
-	instanceJson, err := ctx.GetStub().GetState(instanceID)
-	if err != nil {
-		return nil, err
+func (cc *SmartContract) GetAllTokenElement(ctx contractapi.TransactionContextInterface,instanceID string)([]*TokenElement,error){
+	instancejson , err = ctx.GetStub().GetState(InstanceID)
+	if err != nil{
+		return nil ,err
 	}
-	if instanceJson == nil {
+	if instance == nil {
 		errorMessage := fmt.Sprintf("instance %s does not exist", instanceID)
 		fmt.Println(errorMessage)
-		return nil, errors.New(errorMessage)
+		return nil , errors.New(errorMessage)
 	}
 	var instance ContractInstance
 	err = json.Unmarshal(instanceJson, &instance)
-	if err != nil {
+	if err != nil{
 		fmt.Println(err.Error())
 		return nil, err
 	}
 	var TokenElements []*TokenElement
-	for _, TokenElement := range instance.InstanceTokenELements {
-		TokenElements = append(TokenElements, TokenElement)
+	for _, TokenElement := range instance.InstanceTokenELements{
+		TokenElements = append(ToeknElements,TokenElement)
 	}
-	return TokenElements, nil
+	return TokenElements,nil
 
 }
 
@@ -607,29 +611,29 @@ func (cc *SmartContract) SetGlobalVariable(ctx contractapi.TransactionContextInt
 	return nil
 }
 
-func (cc *SmartContract) ReadTokenElement(ctx contractapi.TransactionContextInterface, instanceID string, TokenElementID string) (*TokenElement, error) {
-	instanceJson, err := ctx.GetStub().GetState(instanceID)
-	if err != nil {
-		return nil, err
+func (cc *SmartContract) ReadTokenElement(ctx contractapi.TransactionContextInterface,instanceID string , TokenElementID string)(*TokenElement, error){
+	instanceJson, err := ctx.GetStub.GetState(instanceID)
+	if err !=nil{
+		return nil ,err
 	}
-	if instanceJson == nil {
-		errorMessage := fmt.Sprintf("Instance %s does not exist", instanceID)
+	if instanceJson == nil{
+		errorMessage := fmt.Sprintf("Instance %s does not exist",instanceID)
 		fmt.Println(errorMessage)
-		return nil, errors.New(errorMessage)
+		return nil , errors.New(errorMessage)
 	}
 	var instance ContractInstance
 	err = json.Unmarshal(instanceJson, &instance)
-	if err != nil {
+	if err!= nil{
 		fmt.Println(err.Error())
 		return nil, err
 	}
-	TokenElement, ok := instance.InstanceTokenELements[TokenElementID]
-	if !ok {
-		errorMessage := fmt.Sprintf("TokenElement %s does not exist", TokenElementID)
+	TokenElement , ok = instance.InstanceTokenELements[TokenElementID]
+	if !ok{
+		errorMessage := fmt.Sprinf("TokenElement %s does not exist",TokenElementID)
 		fmt.Sprintf(errorMessage)
-		return nil, errors.New(errorMessage)
+		return nil , errors.New(errorMessage)
 	}
-	return TokenElement, nil
+	return TokenElement ,nil 
 }
 
 func (cc *SmartContract) ReadBusinessRule(ctx contractapi.TransactionContextInterface, instanceID string, BusinessRuleID string) (*BusinessRule, error) {
@@ -867,82 +871,10 @@ func (cc *SmartContract) Invoke_Other_chaincode(ctx contractapi.TransactionConte
 	return response.Payload, nil
 }
 
-func (cc *SmartContract) TokenElementRun(ctx contractapi.TransactionContextInterface, TokenElement *TokenElement) error {
-	if TokenElement.AssetType == "transferable" {
-		var chaincodeName string
-		if TokenElement.TokenType == "FT" {
-			chaincodeName = "ERC20-" + TokenElement.TokenName
-		} else if TokenElement.TokenType == "NFT" {
-			chaincodeName = "ERC721-" + TokenElement.TokenName
-		}
-		switch TokenElement.Operation {
-		//所有链码名字都为协议_tokenname eg: ERC20_toeknNAme
-		//这里调用者身份会随着ctx传递下来
-		case "mint":
-			if TokenElement.TokenType == "FT" {
-				_args := make([][]byte, 2)
-				_args[0] = []byte("Mint")                   // 操作类型
-				_args[1] = []byte(TokenElement.TokenNumber) //铸造的数量
-				cc.Invoke_Other_chaincode(ctx, chaincodeName, "default", _args)
-			} else if TokenElement.TokenType == "NFT" {
-				_args := make([][]byte, 3)
-				_args[0] = []byte("MintWithTokenURI") // 操作类型
-				_args[1] = []byte(TokenElement.TokenID)
-				_args[1] = []byte(TokenElement.TokenURL) //tokenURL待补充
-				cc.Invoke_Other_chaincode(ctx, chaincodeName, "default", _args)
-			}
-		case "burn":
-			if TokenElement.TokenType == "FT" {
-				_args := make([][]byte, 2)
-				_args[0] = []byte("Burn")                   // 操作类型
-				_args[1] = []byte(TokenElement.TokenNumber) //销毁的数量
-				cc.Invoke_Other_chaincode(ctx, chaincodeName, "default", _args)
-			} else if TokenElement.TokenType == "NFT" {
-				_args := make([][]byte, 2)
-				_args[0] = []byte("Burn") // 操作类型
-				_args[1] = []byte(TokenElement.TokenID)
-				cc.Invoke_Other_chaincode(ctx, chaincodeName, "default", _args)
-			}
-		case "transfer":
-			if TokenElement.TokenType == "FT" {
-				_args := make([][]byte, 3)
-				_args[0] = []byte("Transfer")               // 操作类型
-				_args[1] = []byte(TokenElement.CalleeID[0]) //转移对象
-				cc.Invoke_Other_chaincode(ctx, chaincodeName, "default", _args)
-			} else if TokenElement.TokenType == "NFT" {
-				_args := make([][]byte, 4)
-				_args[0] = []byte("TransferFrom") // 操作类型
-				_args[1] = []byte(TokenElement.CallerID)
-				_args[2] = []byte(TokenElement.CalleeID[0])
-				_args[3] = []byte(TokenElement.TokenID)
-				cc.Invoke_Other_chaincode(ctx, chaincodeName, "default", _args)
-			}
-		case "query":
-			//查询自己的余额
-			if TokenElement.TokenType == "FT" {
-				_args := make([][]byte, 2)
-				_args[0] = []byte("BalanceOf")           // 操作类型
-				_args[1] = []byte(TokenElement.CallerID) //转移对象
-				cc.Invoke_Other_chaincode(ctx, chaincodeName, "default", _args)
-			} else if TokenElement.TokenType == "NFT" {
-				//查看nft对应的url
-				_args := make([][]byte, 2)
-				_args[0] = []byte("TokenURL") // 操作类型
-				_args[1] = []byte(TokenElement.TokenID)
-				cc.Invoke_Other_chaincode(ctx, chaincodeName, "default", _args)
-			}
-		default:
-			return errors.New("operation is wrong")
-		}
-
-	} else if TokenElement.AssetType == "distributive" {
-		//TODO
-
-	} else if TokenElement.AssetType == "value-added" {
-		//TODO
-	}
-	return nil
+func (cc *SmartContract) TokenElementRun(ctx contractapi.TransactionContextInterface,TokenElementID string) error{
+	TokenElement := cc.
 }
+
 
 func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterface, initParametersBytes string) (string, error) {
 	stub := ctx.GetStub()
@@ -988,12 +920,12 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 		InstanceGateways:      make(map[string]*Gateway),
 		InstanceParticipants:  make(map[string]*Participant),
 		InstanceBusinessRules: make(map[string]*BusinessRule),
-		InstanceTokenELements: make(map[string]*TokenElement),
+		InstanceTasks:         make(map[string]*Task),
 	}
 
 	// Update the currentInstanceID
 	/*
-		cc.Crete
+	cc.Crete
 
 	*/
 	cc.CreateParticipant(ctx, &instance, "Participant_0w6qkdf", initParameters.Participant_0w6qkdf.MSP, initParameters.Participant_0w6qkdf.Attributes, initParameters.Participant_0w6qkdf.X509, initParameters.Participant_0w6qkdf.IsMulti, 0, 0)
@@ -1021,11 +953,7 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 	cc.CreateGateway(ctx, &instance, "Gateway_0onpe6x", DISABLED)
 
 	cc.CreateGateway(ctx, &instance, "Gateway_1fbifca", DISABLED)
-	//原料创建阶段
-	cc.CreateTokenElement(ctx, &instance, "Activity_0voe68z", DISABLED, `{"assetType": "transferable","operation": "mint","tokenName": "rawMaterial","caller": "Supplier","tokenType": "NFT","tokenId": "1"}`)
-	cc.CreateTokenElement(ctx, &instance, "Activity_0l6jyqh", DISABLED, `{"assetType": "transferable","operation": "Transfer","tokenName": "rawMaterial", "caller": "Supplier","callee": ["Manufacturer"],"tokenType": "NFT","tokenId": "1"}`)
-	cc.CreateTokenElement(ctx, &instance, "Activity_0xhcefo", DISABLED, `{"assetType": "transferable","operation": "mint","tokenName": "product","caller": "Manufacturer","tokenType": "NFT","tokenId": "111"}`)
-	cc.CreateTokenElement(ctx, &instance, "Activity_1u61szh", DISABLED, `{"assetType": "transferable","operation": "Transfer","tokenName": "product","caller": "Manufacturer","callee": ["Bulk buyer"],"tokenType": "NFT","tokenId": "111"}`)
+
 	// Save the instance
 	instanceBytes, err := json.Marshal(instance)
 	if err != nil {
@@ -1214,7 +1142,13 @@ func (cc *SmartContract) Message_0cba4t6_Send(ctx contractapi.TransactionContext
 	stub.SetEvent("Message_0cba4t6", []byte("Message is waiting for confirmation"))
 	cc.SetInstance(ctx, instance)
 
-	cc.ChangeGtwState(ctx, instance, "Activity_0voe68z", ENABLED)
+	if !(func() bool {
+		msg, err := cc.ReadMsg(ctx, instanceID, "Message_0pm90nx")
+		return err == nil && msg.MsgState == COMPLETED
+	}()) {
+		return nil
+	}
+	cc.ChangeGtwState(ctx, instance, "Gateway_1fbifca", ENABLED)
 	cc.SetInstance(ctx, instance)
 	return nil
 }
@@ -1247,8 +1181,8 @@ func (cc *SmartContract) Message_0pm90nx_Send(ctx contractapi.TransactionContext
 	cc.SetInstance(ctx, instance)
 
 	if !(func() bool {
-		msg, err := cc.ReadTokenElement(ctx, instanceID, "Activity_0voe68z")
-		return err == nil && msg.State == COMPLETED
+		msg, err := cc.ReadMsg(ctx, instanceID, "Message_0cba4t6")
+		return err == nil && msg.MsgState == COMPLETED
 	}()) {
 		return nil
 	}
@@ -1434,8 +1368,8 @@ func (cc *SmartContract) Message_0d2xte5_Send(ctx contractapi.TransactionContext
 
 	stub.SetEvent("Message_0d2xte5", []byte("Message is waiting for confirmation"))
 	cc.SetInstance(ctx, instance)
-	//Activity_0l6jyqh
-	cc.ChangeMsgState(ctx, instance, "Activity_0l6jyqh", ENABLED)
+
+	cc.ChangeMsgState(ctx, instance, "Message_04wmlqe", ENABLED)
 	cc.SetInstance(ctx, instance)
 	return nil
 }
@@ -1467,7 +1401,7 @@ func (cc *SmartContract) Message_04wmlqe_Send(ctx contractapi.TransactionContext
 	stub.SetEvent("Message_04wmlqe", []byte("Message is waiting for confirmation"))
 	cc.SetInstance(ctx, instance)
 
-	cc.ChangeMsgState(ctx, instance, "Activity_0xhcefo", ENABLED)
+	cc.ChangeMsgState(ctx, instance, "Message_1yv2h4e", ENABLED)
 	cc.SetInstance(ctx, instance)
 	return nil
 }
@@ -1530,8 +1464,8 @@ func (cc *SmartContract) Message_196q1fj_Send(ctx contractapi.TransactionContext
 
 	stub.SetEvent("Message_196q1fj", []byte("Message is waiting for confirmation"))
 	cc.SetInstance(ctx, instance)
-	//Activity_1u61szh
-	cc.ChangeMsgState(ctx, instance, "Activity_1u61szh", ENABLED)
+
+	cc.ChangeMsgState(ctx, instance, "Message_1slt8tv", ENABLED)
 	cc.SetInstance(ctx, instance)
 	return nil
 }
@@ -1585,128 +1519,6 @@ func (cc *SmartContract) Event_13pbqdz(ctx contractapi.TransactionContextInterfa
 	cc.ChangeEventState(ctx, instance, event.EventID, COMPLETED)
 	stub.SetEvent("Event_13pbqdz", []byte("EndEvent has been done"))
 
-	cc.SetInstance(ctx, instance)
-	return nil
-}
-func (cc *SmartContract) Activity_0voe68z(ctx contractapi.TransactionContextInterface, instanceID string) error {
-	instance, err := cc.GetInstance(ctx, instanceID)
-	if err != nil {
-		return err
-	}
-	if instance == nil {
-		return errors.New("instanceID does not exist")
-	}
-	//得到tokenElement元素
-	tokenElement, err := cc.ReadTokenElement(ctx, instanceID, "Activity_0voe68z")
-	if err != nil {
-		return err
-	}
-	//检查
-	if tokenElement.State != ENABLED {
-		errorMessage := fmt.Sprintf("TokenElement state %s is not allowed", tokenElement.TokenElementID)
-		fmt.Sprintln(errorMessage)
-		return fmt.Errorf(errorMessage)
-	}
-	//轮到他运行，调用
-	cc.TokenElementRun(ctx, tokenElement)
-	//改状态
-	cc.changeTokenElementState(ctx, instance, "Activity_0voe68z", COMPLETED)
-	cc.SetInstance(ctx, instance)
-	//gtw判断
-	if !(func() bool {
-		msg, err := cc.ReadMsg(ctx, instanceID, "Message_0pm90nx")
-		return err == nil && msg.MsgState == COMPLETED
-	}()) {
-		return nil
-	}
-	cc.ChangeGtwState(ctx, instance, "Gateway_1fbifaca", ENABLED)
-	cc.SetInstance(ctx, instance)
-	return nil
-}
-
-func (cc *SmartContract) Activity_0l6jyqh(ctx contractapi.TransactionContextInterface, instanceID string) error {
-	instance, err := cc.GetInstance(ctx, instanceID)
-	if err != nil {
-		return err
-	}
-	if instance == nil {
-		return errors.New("instanceID does not exist")
-	}
-	//得到tokenElement元素
-	tokenElement, err := cc.ReadTokenElement(ctx, instanceID, "Activity_0l6jyqh")
-	if err != nil {
-		return err
-	}
-	//检查
-	if tokenElement.State != ENABLED {
-		errorMessage := fmt.Sprintf("TokenElement state %s is not allowed", tokenElement.TokenElementID)
-		fmt.Sprintln(errorMessage)
-		return fmt.Errorf(errorMessage)
-	}
-	//轮到他运行，调用
-	cc.TokenElementRun(ctx, tokenElement)
-	//改状态
-	cc.changeTokenElementState(ctx, instance, "Activity_0l6jyqh", COMPLETED)
-	cc.SetInstance(ctx, instance)
-	cc.ChangeGtwState(ctx, instance, "Message_04wmlqe", ENABLED)
-	cc.SetInstance(ctx, instance)
-	return nil
-}
-
-func (cc *SmartContract) Activity_0xhcefo(ctx contractapi.TransactionContextInterface, instanceID string) error {
-	instance, err := cc.GetInstance(ctx, instanceID)
-	if err != nil {
-		return err
-	}
-	if instance == nil {
-		return errors.New("instanceID does not exist")
-	}
-	//得到tokenElement元素
-	tokenElement, err := cc.ReadTokenElement(ctx, instanceID, "Activity_0xhcefo")
-	if err != nil {
-		return err
-	}
-	//检查
-	if tokenElement.State != ENABLED {
-		errorMessage := fmt.Sprintf("TokenElement state %s is not allowed", tokenElement.TokenElementID)
-		fmt.Sprintln(errorMessage)
-		return fmt.Errorf(errorMessage)
-	}
-	//轮到他运行，调用
-	cc.TokenElementRun(ctx, tokenElement)
-	//改状态
-	cc.changeTokenElementState(ctx, instance, "Activity_0xhcefo", COMPLETED)
-	cc.SetInstance(ctx, instance)
-	cc.ChangeGtwState(ctx, instance, "Message_1yv2h4e", ENABLED)
-	cc.SetInstance(ctx, instance)
-	return nil
-}
-
-func (cc *SmartContract) Activity_1u61szh(ctx contractapi.TransactionContextInterface, instanceID string) error {
-	instance, err := cc.GetInstance(ctx, instanceID)
-	if err != nil {
-		return err
-	}
-	if instance == nil {
-		return errors.New("instanceID does not exist")
-	}
-	//得到tokenElement元素
-	tokenElement, err := cc.ReadTokenElement(ctx, instanceID, "Activity_1u61szh")
-	if err != nil {
-		return err
-	}
-	//检查
-	if tokenElement.State != ENABLED {
-		errorMessage := fmt.Sprintf("TokenElement state %s is not allowed", tokenElement.TokenElementID)
-		fmt.Sprintln(errorMessage)
-		return fmt.Errorf(errorMessage)
-	}
-	//轮到他运行，调用
-	cc.TokenElementRun(ctx, tokenElement)
-	//改状态
-	cc.changeTokenElementState(ctx, instance, "Activity_1u61szh", COMPLETED)
-	cc.SetInstance(ctx, instance)
-	cc.ChangeGtwState(ctx, instance, "Message_1slt8tv", ENABLED)
 	cc.SetInstance(ctx, instance)
 	return nil
 }
