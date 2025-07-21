@@ -61,13 +61,13 @@ class ConsortiumViewSet(viewsets.ViewSet):
                     primary_contact_email=user.email,
                     is_ssi_agent=True,
                 )
-                if not url or not public_did:
-                    return Response(
-                        data={
-                            "message": "url and public_did are required for SSI consortium"
-                        },
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
+                # if not url or not public_did:
+                #     return Response(
+                #         data={
+                #             "message": "url and public_did are required for SSI consortium"
+                #         },
+                #         status=status.HTTP_400_BAD_REQUEST
+                #     )
                 # else:
                 #     ssi_agent_node = SSIAgentNode.objects.create(
                 #         url=url,

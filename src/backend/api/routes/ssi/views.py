@@ -38,7 +38,7 @@ class SSIViewSet(viewsets.ViewSet):
                 "name": ssi_agent_name,
                 "port": port_str,
             }
-            response = post(f"""http://{CURRENT_IP}:7001/api/v1/ca""", data=data)
+            response = post(f"""http://{CURRENT_IP}:7001/api/v1/ssi_agents""", data=data)
             if response.status_code == 200:
                 txt = json.loads(response.text)
                 return txt["res"]
