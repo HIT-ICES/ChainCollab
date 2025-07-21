@@ -104,7 +104,8 @@ export const createConsortium = async (
   consortiumName: string,
   createSSI: boolean,
   url?: string,
-  public_did?: string
+  public_did?: string,
+  consortium_type?: string, // 'standard' or 'ssi'
 ) => {
   const response = await api.post(`/consortiums`, {
     name: consortiumName,
@@ -112,6 +113,7 @@ export const createConsortium = async (
     createSSI,
     url,
     public_did,
+    consortium_type,
   });
   return response.data;
 };
@@ -126,9 +128,10 @@ export const getConsortiumList = async (orgId: string) => {
         org_uuid: orgId,
       },
     });
-    return res.data.map(({ id, name, ...rest }) => ({
+    return res.data.map(({ id, name, consortium_type, ...rest }) => ({
       id,
       name,
+      consortium_type,
     }));
   } catch (err) {
     console.error("获取consortiumList失败", err);
@@ -223,6 +226,7 @@ export const createMembership = async (
   consortiumId: string,
   consortiumName: string,
   membershipType: string, // 'standard' or 'ssi'
+  is_ssi_agent: boolean,
   url: string,
   public_did: string
 ) => {
@@ -231,6 +235,7 @@ export const createMembership = async (
       org_uuid: orgId,
       name: consortiumName,
       membership_type: membershipType,
+      is_ssi_agent: is_ssi_agent,
       url: url,
       public_did: public_did
     });

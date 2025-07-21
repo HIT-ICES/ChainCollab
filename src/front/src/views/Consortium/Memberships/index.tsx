@@ -51,6 +51,7 @@ interface membershipItemType {
   name: string;
   orgId: string;
   consortiumId: string;
+  status?: string;
 }
 
 const Memberships: React.FC = () => {
@@ -65,10 +66,11 @@ const Memberships: React.FC = () => {
     []
   );
 
-  const renameMembership = ({ loleido_organization, consortium, ...rest }) => ({
+  const renameMembership = ({ loleido_organization, consortium, status, ...rest }) => ({
     ...rest,
     orgId: loleido_organization,
     consortiumId: consortium,
+    status: status,
   });
 
   useEffect(() => {
@@ -86,12 +88,13 @@ const Memberships: React.FC = () => {
     consortiumId: string,
     membershipName: string,
     createSSI: boolean,
+    is_ssi_agent: boolean,
     url: string,
     public_did: string
   ) => {
     const membership_type = createSSI ? "ssi" : "standard";
 
-    await createMembership(orgId, consortiumId, membershipName, membership_type, url, public_did);
+    await createMembership(orgId, consortiumId, membershipName, membership_type, is_ssi_agent, url, public_did);
     const data = await getMembershipList(consortiumId);
     const newMembershipList = data.map(renameMembership);
     setMembershipList(newMembershipList);
@@ -138,7 +141,7 @@ const Memberships: React.FC = () => {
             </Link>
           </Card.Grid>
           <Card.Grid style={gridDetailStyle}>
-            <Link strong onClick={() => navigate(`./${item.id}/ssiController`)} disabled={false}>
+            <Link strong onClick={() => navigate(`./${item.id}/ssiController`)} disabled={item.status !== 'Running'}>
               SSI DETAILS
             </Link>
           </Card.Grid>

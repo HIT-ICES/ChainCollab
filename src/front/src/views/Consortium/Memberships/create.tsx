@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Modal, Form, Input, Button, Checkbox } from "antd";
 import { useAppSelector } from "@/redux/hooks";
 import { getMembershipList } from "@/api/platformAPI";
+import { set } from "lodash";
 
 interface Props {
   onSubmit: (
@@ -9,6 +10,7 @@ interface Props {
     consortiumId: string,
     membershipName: string,
     createSSI: boolean,
+    is_ssi_agent: boolean,
     url: string,
     public_did: string,
   ) => void;
@@ -22,10 +24,10 @@ const CreateMembership: React.FC<Props> = ({ onSubmit }) => {
   const [membershipList, setMembershipList] = useState([]);
 
   const orgId = useAppSelector((state) => state.org).currentOrgId;
-  const consortiumId = useAppSelector(
-    (state) => state.consortium
-  ).currentConsortiumId;
+  const consortiumId = useAppSelector( (state) => state.consortium ).currentConsortiumId;
+  const currentConsortiumType = useAppSelector( (state) => state.consortium.currentConsortiumType );
   const [showSSIFields, setShowSSIFields] = useState(false);
+  const [is_ssi_agent, setIsSsiAgent] = useState(true); 
 
   useEffect(() => {
     const fetchAndSetData = async (orgId: string, consortiumId: string) => {
@@ -53,19 +55,25 @@ const CreateMembership: React.FC<Props> = ({ onSubmit }) => {
     setIsValidInput(true);
   };
 
+  const handleSSICheckboxChange = (e: any) => {
+    const checked = e.target.checked;
+    setShowSSIFields(checked);
+    setIsSsiAgent(!checked); // 勾选时 is_ssi_agent = false，取消勾选时 = true
+  };
+
   // Form相关
   const onFinish = (values: any) => {
     const membershipName = values.membershipName;
     const createSSI = values.creatSSI;
     const url = values.ssiUrl;
     const public_did = values.ssiDID;
-
+    setShowSSIFields(values.createSSI);
     // 当membershipName与任一name不重复时
     if (
       membershipList.every((membership) => membership.name !== membershipName)
     ) {
       setIsValidInput(true);
-      onSubmit(orgId, consortiumId, membershipName, createSSI, url, public_did);
+      onSubmit(orgId, consortiumId, membershipName, createSSI,is_ssi_agent, url, public_did);
       setIsModalOpen(false);
     } else {
       setIsValidInput(false);
@@ -125,15 +133,17 @@ const CreateMembership: React.FC<Props> = ({ onSubmit }) => {
           >
             <Input allowClear />
           </Form.Item>
-          <Form.Item<FieldType>
-            name="createSSI"
-            valuePropName="checked"
-            wrapperCol={{ offset: 8, span: 16 }}
-          >
-            <Checkbox onChange={(e) => setShowSSIFields(e.target.checked)}>
-              Membership For SSI
-            </Checkbox>
-          </Form.Item>
+          {currentConsortiumType === "ssi" && (
+            <Form.Item<FieldType>
+              name="createSSI"
+              valuePropName="checked"
+              wrapperCol={{ offset: 8, span: 16 }}
+            >
+              <Checkbox onChange={handleSSICheckboxChange}>
+                External SSI Agent
+              </Checkbox>
+            </Form.Item>
+          )}
           {showSSIFields && (
           <>
             <Form.Item<FieldType>

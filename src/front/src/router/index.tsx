@@ -94,13 +94,13 @@ const routes: routesType[] = [
               title: "Manage Users",
             },
           },
-          {
-            path: "ssicontroller",
-            element: withLoadingComponent(<SSIController />),
-            meta: {
-              title: "SSI Controller",
-            }
-          },
+          // {
+          //   path: "ssicontroller",
+          //   element: withLoadingComponent(<SSIController />),
+          //   meta: {
+          //     title: "SSI Controller",
+          //   }
+          // },
           {
             path: "settings",
             element: withLoadingComponent(<OrgSettings />),

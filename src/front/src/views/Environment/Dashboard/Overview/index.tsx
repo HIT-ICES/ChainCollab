@@ -43,6 +43,10 @@ import {
   registerAPI
 } from "@/api/executionAPI"
 
+import {
+  createAndStartSSIAgent,
+} from "@/api/ssiAPI";
+
 const systemFireflyURL = "http://127.0.0.1:5000"
 
 
@@ -56,6 +60,7 @@ import {
   ColorButton,
 
   NaiveFabricStepBar,
+  NaiveSSIStepBar,
 
   FireflyComponentCard,
   OracleComponentCard,
@@ -65,7 +70,8 @@ import {
 } from "./components.tsx";
 
 import {
-  DBstatus2stepandstatus
+  DBstatus2stepandstatus,
+  SSIStatusStepAndStatus
 } from './utils'
 
 
@@ -81,11 +87,13 @@ const Overview: React.FC = () => {
   const currentEnvId = useAppSelector(state => state.env.currentEnvId)
   const [membershipList, setSyncMembershipList] = useMembershipListData()
   const stepAndStatus = DBstatus2stepandstatus(envInfo.status)
+  const SSIStepAndStatus = SSIStatusStepAndStatus(envInfo.ssistatus) //完善后端！！！
 
 
   const setupCallBackRef = useRef(null)
 
   const [setupFabricNetWorkLoading, setSetupFabricNetWorkLoading] = useState(false)
+  const [setupSSINetWorkLoading, setSetupSSINetWorkLoading] = useState(false)
 
   const [setupComponentLoading, setSetupComponentLoading] = useState(false)
 
@@ -123,6 +131,12 @@ const Overview: React.FC = () => {
     // Activate it
     await ActivateEnv(currentEnvId, currentOrgId)
     setSetupFabricNetWorkLoading(false)
+    setSync()
+  }
+
+  const handleSetUpSSINetwork = async () => {
+    setSetupSSINetWorkLoading(true)
+    await createAndStartSSIAgent(currentEnvId)
     setSync()
   }
 
@@ -188,6 +202,48 @@ const Overview: React.FC = () => {
               >
                 <NaiveFabricStepBar
                   stepAndStatus={stepAndStatus}
+                />
+              </Col>
+            </Row>
+          </Card.Grid>
+          {/* SSI Foundation */}
+          <Card.Grid style={{ width: "100%", height: "100%" }}>
+            <Row
+              justify="space-between"
+              style={{ width: "100%", height: "100%" }}
+            >
+              <Col span={2} style={customColStyle}>
+                <ClearAllIcon style={{ fontSize: 24 }} />
+              </Col>
+              <Col span={8} style={customColStyle}>
+                <Text strong style={customTextStyle}>
+                  SSI Foundation
+                </Text>
+              </Col>
+              <Col
+                flex="auto"
+                style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}
+              >
+                <LoadingButton
+                  variant="outlined"
+                  onClick={() => { handleSetUpSSINetwork() }}
+                  loading={setupSSINetWorkLoading}
+                >
+                  SetUp SSI Foundation
+                </LoadingButton>
+              </Col>
+            </Row>
+            <Row>
+              <Col
+                style={{
+                  ...customColStyle,
+                  marginLeft: "40px",
+                  width: "100%",
+                  marginTop: "10px",
+                }}
+              >
+                <NaiveSSIStepBar
+                  stepAndStatus={SSIStepAndStatus}
                 />
               </Col>
             </Row>
@@ -338,7 +394,6 @@ const Overview: React.FC = () => {
               </Form>
             </Spin>
           </Modal>
-
 
           {/* Release Version */}
           <Card.Grid style={{ width: "100%", height: "100%" }}>

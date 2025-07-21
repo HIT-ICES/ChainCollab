@@ -15,6 +15,7 @@ from api.models import (
     Membership,
     FabricResourceSet,
     LoleidoOrganization,
+    SSIAgentNode,
 )
 from api.config import (
     DEFAULT_AGENT,
@@ -688,9 +689,12 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
             except Membership.DoesNotExist:
                 continue
 
-            membership.url = url
-            membership.public_did = public_did
-            membership.save()
+            ssi_agent_node = SSIAgentNode.objects.create(
+                url=url,
+                public_did=public_did,
+                name=membership.name+"-ssi-agent",
+                membership=membership,
+            )
             updated_count += 1
 
         return Response(
@@ -719,18 +723,20 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         env.ssi_status = "STARTED"
         env.save()
 
-        memberships = env.resource_sets.all().filter(
-            membership_type="ssi",
-            is_ssi_agent=True,
+        resource_sets = env.resource_sets.all().filter(
+            membership__is_ssi_agent=True,
         )
         headers = request.headers
-        for membership in memberships:
-            resource_set = ResourceSet.objects.get(
-                membership=membership, environment=env
+        for resource_set in resource_sets:
+            # resource_set = ResourceSet.objects.get(
+            #     membership=membership, environment=env
+            # )
+            response = post(
+                f"http://{CURRENT_IP}:8000/api/v1/resource_sets/{resource_set.id}/ssis/ssi_agent_create",
+                data={
+                    'membership_id': str(resource_set.membership.id),
+                    'consortium_id': str(env.consortium.id),
+                },
+                headers={"Authorization": headers["Authorization"]},
             )
-            post(
-                f"http://{CURRENT_IP}:8000/api/v1/resource_sets/{resource_set.id}/ssi_agents/ssi_agent_create",
-                data={},
-                headers=headers,
-            )
-        return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_201_CREATED)  

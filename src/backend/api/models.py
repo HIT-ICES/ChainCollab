@@ -28,6 +28,7 @@ from api.common.enums import (
     FabricCAServerType,
     FabricCAUserType,
     FabricCAUserStatus,
+    ConsortiumType
 )
 from api.common.enums import (
     UserRole,
@@ -165,7 +166,7 @@ class Agent(models.Model):
     status = models.CharField(
         help_text="Status of agent",
         choices=HostStatus.to_choices(True),
-        max_length=10,
+        max_length=64,
         default=HostStatus.Active.name.lower(),
     )
     type = models.CharField(
@@ -578,7 +579,7 @@ class SSIAgentNode(models.Model):
         Agent,
         help_text="Agent of node",
         null=True,
-        related_name="node",
+        related_name="ssi_agent_node",
         on_delete=models.CASCADE,
     )
     url = models.JSONField(
@@ -590,6 +591,22 @@ class SSIAgentNode(models.Model):
     public_did = models.CharField(
         max_length=255, null=True, blank=True, help_text="Public DID for SSI"
     )
+    status = models.CharField(
+        help_text="Status of SSI Agent node",
+        choices=NodeStatus.to_choices(True),
+        max_length=64,
+        default=NodeStatus.Created.name.lower(),
+    )
+    created_at = models.DateTimeField(
+        help_text="Create time of agent", auto_now_add=True
+    )
+    membership = models.ForeignKey(
+        'Membership',
+        help_text="Membership of SSIAgentNode",
+        null=True, 
+        on_delete=models.CASCADE,
+        related_name="ssi_agent_node",
+    )     
 
 
 class NodeUser(models.Model):
@@ -920,6 +937,12 @@ class Consortium(models.Model):
     name = models.TextField(
         help_text="name of Consortium",
     )
+    consortium_type = models.CharField(
+        max_length=64,
+        choices=ConsortiumType.to_choices(),
+        default=ConsortiumType.STANDARD,
+        help_text="Type of consortium: standard or ssi",
+    )
 
 
 class Membership(models.Model):
@@ -953,12 +976,6 @@ class Membership(models.Model):
     primary_contact_email = models.EmailField(
         help_text="primary contact email of membership",
         null=True,
-    )
-    membership_type = models.CharField(
-        max_length=20,
-        choices=MEMBERSHIP_TYPE_CHOICES,
-        default="standard",
-        help_text="Type of membership: standard or ssi",
     )
     is_ssi_agent = models.BooleanField(
         default=False,
@@ -1595,5 +1612,5 @@ class ConnectionRequest(models.Model):
     sender_label = models.CharField(max_length=50)  # Membership or MemUser
     receiver_id = models.CharField(max_length=255)
     receiver_label = models.CharField(max_length=50)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    status = models.CharField(max_length=64, choices=STATUS_CHOICES, default="pending")
     created_at = models.DateTimeField(auto_now_add=True)

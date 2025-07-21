@@ -3,7 +3,7 @@ from rest_framework.response import Response
 
 from .serializers import MembershipSerializer
 
-from api.models import LoleidoOrganization, Consortium, Membership
+from api.models import LoleidoOrganization, Consortium, Membership, SSIAgentNode
 
 
 class MemebershipViewSet(viewsets.ViewSet):
@@ -47,9 +47,11 @@ class MemebershipViewSet(viewsets.ViewSet):
         org_id = request.data.get("org_uuid", None)
         name = request.data.get("name")
         email = request.data.get("primary_contact_email", "org.example.com")
-        membership_type = request.data.get("membership_type", "standard")  # 默认为 standard
-        ssiurl = request.data.get("url")
-        public_did = request.data.get("public_did")
+        membershipType = request.data.get("membership_type", "standard")
+        is_ssi_agent = request.data.get("is_ssi_agent", False)  
+        ssiurl = request.data.get("url",None)
+        public_did = request.data.get("public_did",None)
+        
         try:
             consortium = Consortium.objects.get(pk=consortium_id)
         except Consortium.DoesNotExist:
@@ -58,17 +60,32 @@ class MemebershipViewSet(viewsets.ViewSet):
             loleido_org = LoleidoOrganization.objects.get(id=org_id)
         except LoleidoOrganization.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-
+        if membershipType == "ssi" and not is_ssi_agent:
+            if not ssiurl:
+                return Response(
+                    {"message": "SSI URL should be provided for non-SSI memberships."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            elif not public_did:
+                return Response(
+                    {"message": "Public DID should be provided for non-SSI memberships."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
         membership = Membership.objects.create(
             loleido_organization=loleido_org,
             consortium=consortium,
             name=name,
             primary_contact_email=email,
-            membership_type=membership_type, 
-            url=ssiurl,
-            public_did=public_did
+            is_ssi_agent=is_ssi_agent,
         )
         membership.save()
+        if membershipType == "ssi" and not is_ssi_agent:
+            ssi_agent_node = SSIAgentNode.objects.create(
+                    url=ssiurl,
+                    public_did=public_did,
+                    name=membership.name+"-ssi-agent",
+                    membership=membership,
+                )
         serializer = MembershipSerializer(membership)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

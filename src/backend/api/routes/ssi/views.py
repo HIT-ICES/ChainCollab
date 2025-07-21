@@ -16,13 +16,14 @@ from rest_framework.permissions import IsAuthenticated
 import yaml
 
 from api.models import FabricCA as FabricCAModel, FabricResourceSet, SSIAgentNode
-from api.config import CELLO_HOME, FABRIC_CONFI
+from api.config import CELLO_HOME, FABRIC_CONFIG
 from api.utils.port_picker import set_ports_mapping, find_available_ports
 from requests import get, post
 import json
 import traceback
-from api.models import Port, Environment, ResourceSet
+from api.models import Port, Environment, ResourceSet, Membership, LoleidoOrganization
 from api.common import ok, err
+from api.common.enums import NodeStatus
 from api.utils.host import add_host
 from api.config import CURRENT_IP
 
@@ -46,7 +47,8 @@ class SSIViewSet(viewsets.ViewSet):
                 print(txt)
                 raise Exception(txt["res"])
         except Exception as e:
-            raise Exception(e)
+            # raise Exception(e)
+            return Response(str(e), status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def _ssiAgent_start(self, ca_name):
         try:
@@ -77,8 +79,10 @@ class SSIViewSet(viewsets.ViewSet):
         Create a new SSI agent.
         """
         try:
-            resource_set_id = request.parser_context["kwargs"].get("resource_set_id")
+            resource_set_id = self.kwargs.get("resource_set_id")
+            membership_id = request.data.get("membership_id", None)
             resource_set = ResourceSet.objects.get(pk=resource_set_id)
+            membership = Membership.objects.get(pk=membership_id)
             agent = resource_set.agent
             if not agent:
                 return err("Agent not found", status.HTTP_404_NOT_FOUND)
@@ -90,17 +94,18 @@ class SSIViewSet(viewsets.ViewSet):
             ssi_agent_node=SSIAgentNode(
                 name=ssi_agent_name,
                 agent=agent,
-                resource_set=resource_set,
+                membership=membership,
                 url= f"http://{CURRENT_IP}:{ports[0]}",
             )
             self._ssiAgent_create_agent(ssi_agent_name, ports[0])
+            ssi_agent_node.status = NodeStatus.Running.name.lower()
             ssi_agent_node.save()
             Port.objects.create(
                 external=ports[0],
                 internal=3001,
                 ssi_agent_node=ssi_agent_node,
             )
-            return ok(
+            return Response(
                 {
                     "ssi_agent_id": ssi_agent_node.id,
                     "ssi_agent_name": ssi_agent_node.name,
@@ -110,4 +115,4 @@ class SSIViewSet(viewsets.ViewSet):
             )
         except Exception as e:
             LOG.error(f"Error creating SSI agent: {e}")
-            return err(str(e), status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(str(e), status.HTTP_500_INTERNAL_SERVER_ERROR)

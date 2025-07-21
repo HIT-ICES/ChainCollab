@@ -72,6 +72,41 @@ export const NaiveFabricStepBar = (props) => {
 
 }
 
+export const NaiveSSIStepBar = (props) => {
+
+  const { step = 1, status = "wait" } = props.stepAndStatus;
+  // status wait process finish error
+
+  const items: Array<{
+    title: string;
+    description?: string;
+  }> = [
+      // {
+      //   title: "Initialized",
+      //   description: "Indy Network",
+      // },
+      {
+        title: "Started",
+        description: "Agent Docker",
+      },
+      // {
+      //   title: "Prepared",
+      //   description: "ACA-Py",
+      // },
+      // {
+      //   title: "Active",
+      //   description: "SSI been Setup",
+      // }
+    ];
+
+  return <Steps
+    current={step}
+    status={status}
+    items={items}
+  />
+
+}
+
 
 // Function Cards
 export const CustomCard = (props) => {

@@ -112,6 +112,10 @@ class ChannelType(ExtraEnum):
     System = 0
     Normal = 1
 
+@unique
+class ConsortiumType(ExtraEnum):
+    STANDARD = "standard"
+    SSI = "ssi"
 
 @unique
 class NetworkType(ExtraEnum):

@@ -13,6 +13,7 @@ import { selectEnv, activateEnv, deactivateEnv } from '@/redux/slices/envSlice'
 import { useOrgData, useConsortiaData, useEnvData } from "./hooks";
 
 import { createConsortium, createOrg, createEnvironment } from '@/api/platformAPI'
+import { createAndStartSSIAgent, ssiExpansion } from '@/api/ssiAPI'
 
 import {
   consumeConsortiumSelectRequest,
@@ -20,6 +21,7 @@ import {
   consumeEnvSelectRequest,
   selectUI
 } from '@/redux/slices/UISlice'
+import { set } from "lodash";
 
 const AddConsortiumModal: React.FC<{
   isModalOpen?: boolean,
@@ -37,10 +39,9 @@ const AddConsortiumModal: React.FC<{
   const dispatch = useAppDispatch();
 
   const currentOrgId = useAppSelector(selectOrg).currentOrgId;
-  const [showSSIFields, setShowSSIFields] = useState(false);
   const onFinish = async (values: FieldType) => {
-    const newConsortium = await createConsortium(currentOrgId, values.consortiumName, values.createSSI, values.ssiUrl, values.ssiDID);
-    dispatch(activateConsortium({ currentConsortiumId: newConsortium.id, currentConsortiumName: newConsortium.name }))
+    const newConsortium = await createConsortium(currentOrgId, values.consortiumName, values.createSSI, values.ssiUrl, values.ssiDID, values.createSSI ? 'ssi' : 'standard');
+    dispatch(activateConsortium({ currentConsortiumId: newConsortium.id, currentConsortiumName: newConsortium.name, currentConsortiumType: newConsortium.createSSI }))
     setIsModalOpen(false);
     setSync();
   }
@@ -82,11 +83,12 @@ const AddConsortiumModal: React.FC<{
           valuePropName="checked"
           wrapperCol={{ offset: 8, span: 16 }}
         >
-          <Checkbox onChange={(e) => setShowSSIFields(e.target.checked)}>
-             Membership For SSI 
+          {/* <Checkbox onChange={(e) => setShowSSIFields(e.target.checked)}> */}
+          <Checkbox>
+             Consortium For SSI 
           </Checkbox>
         </Form.Item>
-        {showSSIFields && (
+        {/* {showSSIFields && (
           <>
             <Form.Item<FieldType>
               label="Agent URL"
@@ -103,7 +105,7 @@ const AddConsortiumModal: React.FC<{
               <Input placeholder="did:example:12345" />
             </Form.Item>
           </>
-        )}
+        )} */}
       </Form>
     </Modal>
   )
@@ -119,7 +121,6 @@ const AddOrgModal: React.FC<{
   };
   const [form] = Form.useForm<FieldType>();
   const dispatch = useAppDispatch();
-
 
   const onFinish = async (values: FieldType) => {
     const Org = await createOrg(values.orgName);
@@ -172,15 +173,21 @@ const AddEnvModal: React.FC<{
 }> = ({ isModalOpen = false, setIsModalOpen, setSync }) => {
   type FieldType = {
     envName?: string;
+    agentUrl?: string;
+    publicDID?: string;
   };
   const [form] = Form.useForm<FieldType>();
   const dispatch = useAppDispatch();
   const currentConsortiumId = useAppSelector(selectConsortium).currentConsortiumId;
-
+  // const currentConsortiumType = useAppSelector(selectConsortium).currentConsortiumType;
 
   const onFinish = async (values: FieldType) => {
     const Env = await createEnvironment(currentConsortiumId, values.envName);
-    dispatch(activateEnv({ currentEnvId: Env.id, currentEnvName: Env.name }))
+    // 若为 SSI 模式，调用 agent API
+    // if (currentConsortiumType && values.agentUrl && values.publicDID) {
+    //   await ssiExpansion(Env.id);
+    // }
+    dispatch(activateEnv({ currentEnvId: Env.id, currentEnvName: Env.name }));
     setIsModalOpen(false);
     setSync();
   }
@@ -217,11 +224,28 @@ const AddEnvModal: React.FC<{
         >
           <Input allowClear />
         </Form.Item>
+        {/* {currentConsortiumType && (
+          <>
+            <Form.Item<FieldType>
+              label="Agent URL"
+              name="agentUrl"
+              rules={[{ required: true, message: "Please input Agent URL!" }]}
+            >
+              <Input placeholder="http://agent.example.com:5000" />
+            </Form.Item>
+            <Form.Item<FieldType>
+              label="Public DID"
+              name="publicDID"
+              rules={[{ required: true, message: "Please input Public DID!" }]}
+            >
+              <Input placeholder="did:example:12345" />
+            </Form.Item>
+          </>
+        )} */}
       </Form>
     </Modal>
   );
 }
-
 
 const MainMenu: React.FC = () => {
   const navigateTo = useNavigate();
@@ -389,7 +413,7 @@ const MainMenu: React.FC = () => {
       <SubMenu key={'ActivateConsortium'} title={currentConsortiumName !== "" ? currentConsortiumName : "Select A Consortium"}>
         {consortiaList.map((item) => (
           <Menu.Item key={item.id} onClick={
-            () => dispatch(activateConsortium({ currentConsortiumId: item.id, currentConsortiumName: item.name }))
+            () => dispatch(activateConsortium({ currentConsortiumId: item.id, currentConsortiumName: item.name, currentConsortiumType: item.consortium_type   }))
           } >{item.name}</Menu.Item>
         ))}
         <Menu.Divider

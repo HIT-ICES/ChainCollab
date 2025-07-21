@@ -31,3 +31,31 @@ export const acceptConnectionRequest = async (
   });
   return res.data;
 };
+
+
+export const createAndStartSSIAgent = async (
+  envId: string,
+) => {
+  try {
+    const response = await api.post(
+      `/environments/${envId}/create_start_ssi_agent`
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const ssiExpansion = async (
+  envId: string,
+  bindings: Array<{
+    membership_id: string;
+    url: string;
+    public_did: string;
+  }>
+) => {
+  const res = await api.post(`/environments/${envId}/ssi_expansion/`, {
+    ssi_bindings: bindings,
+  });
+  return res.data;
+};

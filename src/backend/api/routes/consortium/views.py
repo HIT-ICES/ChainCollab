@@ -13,6 +13,7 @@ from api.models import (
     LoleidoOrgJoinConsortiumInvitation,
     Membership,
     Environment,
+    SSIAgentNode,
 )
 
 
@@ -45,29 +46,41 @@ class ConsortiumViewSet(viewsets.ViewSet):
         baseOrgId = request.data.get("baseOrgId")
         createSSI = request.data.get("createSSI", False)
         user = request.user
-        url = request.data.get("url")
-        public_did = request.data.get("public_did")
+        url = request.data.get("url", None)
+        public_did = request.data.get("public_did", None)
+        consortium_type = request.data.get("consortium_type", "standard")
         try:
-            consortium = Consortium.objects.create(name=name)
+            consortium = Consortium.objects.create(name=name, consortium_type=consortium_type)
             # create a Memebership for the baseOrg in the consortium
             baseOrg = LoleidoOrganization.objects.get(id=baseOrgId)
             if createSSI:
                 ssi_membership = Membership.objects.create(
                     loleido_organization=baseOrg,
                     consortium=consortium,
-                    name=f"{baseOrg.name}-{consortium.name}-SSI",
+                    name=baseOrg.name + "-" + consortium.name+"-SSI",
                     primary_contact_email=user.email,
-                    membership_type='ssi',
-                    url=url,
-                    public_did=public_did
+                    is_ssi_agent=True,
                 )
+                if not url or not public_did:
+                    return Response(
+                        data={
+                            "message": "url and public_did are required for SSI consortium"
+                        },
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                # else:
+                #     ssi_agent_node = SSIAgentNode.objects.create(
+                #         url=url,
+                #         public_did=public_did,
+                #         name=baseOrg.name + "-" + consortium.name + "-SSI-Agent",
+                #         membership=ssi_membership,
+                #     )
             else:
                 membership = Membership.objects.create(
                 loleido_organization=baseOrg,
                 consortium=consortium,
                 name=baseOrg.name + "-" + consortium.name,
                 primary_contact_email=user.email,
-                membership_type='standard',
                 )
         except Exception as e:
             return Response(

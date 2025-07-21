@@ -4,12 +4,14 @@ import type { RootStateType, DispatchType } from '../store'
 
 interface consortiumState {
     currentConsortiumId: string,
-    currentConsortiumName: string
+    currentConsortiumName: string,
+    currentConsortiumType: string,
 }
 
 const initialState: consortiumState = {
     currentConsortiumId: "",
-    currentConsortiumName: ""
+    currentConsortiumName: "",
+    currentConsortiumType: "standard" // Default type can be 'standard' or 'ssi'
 }
 
 /**
@@ -22,11 +24,13 @@ export const consortiumSlice = createSlice({
         activateConsortium: (state, action: PayloadAction<
             {
                 currentConsortiumId: string,
-                currentConsortiumName: string
+                currentConsortiumName: string,
+                currentConsortiumType: string
             }>) => {
             return {
                 currentConsortiumId: action.payload.currentConsortiumId,
-                currentConsortiumName: action.payload.currentConsortiumName
+                currentConsortiumName: action.payload.currentConsortiumName,
+                currentConsortiumType: action.payload.currentConsortiumType
             }
         },
         deactivateConsortium: (state) => {

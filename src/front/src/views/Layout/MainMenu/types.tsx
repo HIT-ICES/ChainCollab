@@ -1,6 +1,7 @@
 export interface ConsortiumItemType {
     id: string;
     name: string;
+    consortium_type: string;
   }
 
 export interface OrgItemType {
