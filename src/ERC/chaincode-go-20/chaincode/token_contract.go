@@ -11,7 +11,7 @@ import (
 )
 
 // Define key names for options
-const nameKey = "name"
+const nameKey = "name" 
 const symbolKey = "symbol"
 const decimalsKey = "decimals"
 const totalSupplyKey = "totalSupply"
@@ -33,9 +33,33 @@ type event struct {
 	Value int    `json:"value"`
 }
 
+
+type InstanceMintAuthority struct {
+    InstanceID   string   `json:"instance_id"`
+    AllowedMSPs  []string `json:"allowed_msps"`
+}
+
+//权限相关
+func (s *SmartContract) AddMintAuthority(ctx contractapi.TransactionContextInterface, instanceID string, allowedMSPs []string) error {
+    key := "instance_auth_" + instanceID
+    authority := InstanceMintAuthority{
+        InstanceID:  instanceID,
+        AllowedMSPs: allowedMSPs,
+    }
+
+    data, err := json.Marshal(authority)
+    if err != nil {
+        return err
+    }
+	
+    return ctx.GetStub().PutState(key, data)
+}
+
+
+
 // Mint creates new tokens and adds them to minter's account balance
 // This function triggers a Transfer event
-func (s *SmartContract) Mint(ctx contractapi.TransactionContextInterface, amount int) error {
+func (s *SmartContract) Mint(ctx contractapi.TransactionContextInterface, amount int,instanceID string) error {
 
 	// Check if contract has been intilized first
 	initialized, err := checkInitialized(ctx)
@@ -46,14 +70,32 @@ func (s *SmartContract) Mint(ctx contractapi.TransactionContextInterface, amount
 		return errors.New("Contract options need to be set before calling any function, call Initialize() to initialize contract")
 	}
 
-	// Check minter authorization - this sample assumes Org1 is the central banker with privilege to mint new tokens
+	// Check minter authorization - this sample assumes Org1 is the issuer with privilege to mint a new token
 	clientMSPID, err := ctx.GetClientIdentity().GetMSPID()
 	if err != nil {
-		return fmt.Errorf("failed to get MSPID: %v", err)
+		return  fmt.Errorf("failed to get clientMSPID: %v", err)
 	}
-	if clientMSPID != "Org1MSP" {
-		return errors.New("client is not authorized to mint new tokens")
-	}
+
+	key := "instance_auth_" + instanceID
+    authJSON, err := ctx.GetStub().GetState(key)
+    if err != nil || authJSON == nil {
+        return fmt.Errorf("no mint authority found for instance %s", instanceID)
+    }
+
+    var auth InstanceMintAuthority
+    _ = json.Unmarshal(authJSON, &auth)
+
+    allowed := false
+    for _, msp := range auth.AllowedMSPs {
+        if msp == clientMSPID {
+            allowed = true
+            break
+        }
+    }
+
+    if !allowed {
+        return fmt.Errorf("MSP %s not authorized to mint for instance %s", clientMSPID, instanceID)
+    }
 
 	// Get ID of submitting client identity
 	minter, err := ctx.GetClientIdentity().GetID()
@@ -64,7 +106,7 @@ func (s *SmartContract) Mint(ctx contractapi.TransactionContextInterface, amount
 	if amount <= 0 {
 		return errors.New("mint amount must be a positive integer")
 	}
-
+	minter = minter + "_"+instanceID
 	currentBalanceBytes, err := ctx.GetStub().GetState(minter)
 	if err != nil {
 		return fmt.Errorf("failed to read minter account %s from world state: %v", minter, err)
@@ -133,7 +175,7 @@ func (s *SmartContract) Mint(ctx contractapi.TransactionContextInterface, amount
 
 // Burn redeems tokens the minter's account balance
 // This function triggers a Transfer event
-func (s *SmartContract) Burn(ctx contractapi.TransactionContextInterface, amount int) error {
+func (s *SmartContract) Burn(ctx contractapi.TransactionContextInterface, amount int,instanceID string) error {
 
 	// Check if contract has been intilized first
 	initialized, err := checkInitialized(ctx)
@@ -143,14 +185,33 @@ func (s *SmartContract) Burn(ctx contractapi.TransactionContextInterface, amount
 	if !initialized {
 		return errors.New("Contract options need to be set before calling any function, call Initialize() to initialize contract")
 	}
-	// Check minter authorization - this sample assumes Org1 is the central banker with privilege to burn new tokens
+
+	// Check minter authorization - this sample assumes Org1 is the issuer with privilege to mint a new token
 	clientMSPID, err := ctx.GetClientIdentity().GetMSPID()
 	if err != nil {
-		return fmt.Errorf("failed to get MSPID: %v", err)
+		return fmt.Errorf("failed to get clientMSPID: %v", err)
 	}
-	if clientMSPID != "Org1MSP" {
-		return errors.New("client is not authorized to mint new tokens")
-	}
+
+	key := "instance_auth_" + instanceID
+    authJSON, err := ctx.GetStub().GetState(key)
+    if err != nil || authJSON == nil {
+        return fmt.Errorf("no mint authority found for instance %s", instanceID)
+    }
+
+    var auth InstanceMintAuthority
+    _ = json.Unmarshal(authJSON, &auth)
+
+    allowed := false
+    for _, msp := range auth.AllowedMSPs {
+        if msp == clientMSPID {
+            allowed = true
+            break
+        }
+    }
+
+    if !allowed {
+        return fmt.Errorf("MSP %s not authorized to mint for instance %s", clientMSPID, instanceID)
+    }
 
 	// Get ID of submitting client identity
 	minter, err := ctx.GetClientIdentity().GetID()
@@ -162,6 +223,7 @@ func (s *SmartContract) Burn(ctx contractapi.TransactionContextInterface, amount
 		return errors.New("burn amount must be a positive integer")
 	}
 
+	minter = minter + "_"+instanceID
 	currentBalanceBytes, err := ctx.GetStub().GetState(minter)
 	if err != nil {
 		return fmt.Errorf("failed to read minter account %s from world state: %v", minter, err)
@@ -229,7 +291,7 @@ func (s *SmartContract) Burn(ctx contractapi.TransactionContextInterface, amount
 // Transfer transfers tokens from client account to recipient account
 // recipient account must be a valid clientID as returned by the ClientID() function
 // This function triggers a Transfer event
-func (s *SmartContract) Transfer(ctx contractapi.TransactionContextInterface, recipient string, amount int) error {
+func (s *SmartContract) Transfer(ctx contractapi.TransactionContextInterface, recipient string, amount int,instanceID string) error {
 
 	// Check if contract has been intilized first
 	initialized, err := checkInitialized(ctx)
@@ -244,8 +306,9 @@ func (s *SmartContract) Transfer(ctx contractapi.TransactionContextInterface, re
 	clientID, err := ctx.GetClientIdentity().GetID()
 	if err != nil {
 		return fmt.Errorf("failed to get client id: %v", err)
-	}
-
+	}	
+	clientID = clientID + "_"+instanceID
+	recipient = recipient + "_" +instanceID
 	err = transferHelper(ctx, clientID, recipient, amount)
 	if err != nil {
 		return fmt.Errorf("failed to transfer: %v", err)
@@ -266,7 +329,7 @@ func (s *SmartContract) Transfer(ctx contractapi.TransactionContextInterface, re
 }
 
 // BalanceOf returns the balance of the given account
-func (s *SmartContract) BalanceOf(ctx contractapi.TransactionContextInterface, account string) (int, error) {
+func (s *SmartContract) BalanceOf(ctx contractapi.TransactionContextInterface, account string,instanceID string) (int, error) {
 
 	// Check if contract has been intilized first
 	initialized, err := checkInitialized(ctx)
@@ -276,7 +339,8 @@ func (s *SmartContract) BalanceOf(ctx contractapi.TransactionContextInterface, a
 	if !initialized {
 		return 0, fmt.Errorf("Contract options need to be set before calling any function, call Initialize() to initialize contract")
 	}
-
+	
+	account = account+"_"+instanceID
 	balanceBytes, err := ctx.GetStub().GetState(account)
 	if err != nil {
 		return 0, fmt.Errorf("failed to read from world state: %v", err)
@@ -291,7 +355,7 @@ func (s *SmartContract) BalanceOf(ctx contractapi.TransactionContextInterface, a
 }
 
 // ClientAccountBalance returns the balance of the requesting client's account
-func (s *SmartContract) ClientAccountBalance(ctx contractapi.TransactionContextInterface) (int, error) {
+func (s *SmartContract) ClientAccountBalance(ctx contractapi.TransactionContextInterface,instanceID string) (int, error) {
 
 	// Check if contract has been intilized first
 	initialized, err := checkInitialized(ctx)
@@ -308,6 +372,7 @@ func (s *SmartContract) ClientAccountBalance(ctx contractapi.TransactionContextI
 		return 0, fmt.Errorf("failed to get client id: %v", err)
 	}
 
+	clientID = clientID +"_"+instanceID
 	balanceBytes, err := ctx.GetStub().GetState(clientID)
 	if err != nil {
 		return 0, fmt.Errorf("failed to read from world state: %v", err)
@@ -583,15 +648,6 @@ func (s *SmartContract) Symbol(ctx contractapi.TransactionContextInterface) (str
 // param {String} symbol The symbol of the token
 // param {String} decimals The decimals used for the token operations
 func (s *SmartContract) Initialize(ctx contractapi.TransactionContextInterface, name string, symbol string, decimals string) (bool, error) {
-
-	// Check minter authorization - this sample assumes Org1 is the central banker with privilege to intitialize contract
-	clientMSPID, err := ctx.GetClientIdentity().GetMSPID()
-	if err != nil {
-		return false, fmt.Errorf("failed to get MSPID: %v", err)
-	}
-	if clientMSPID != "Org1MSP" {
-		return false, fmt.Errorf("client is not authorized to initialize contract")
-	}
 
 	// Check contract options are not already set, client is not authorized to change them once intitialized
 	bytes, err := ctx.GetStub().GetState(nameKey)

@@ -18,10 +18,15 @@ const approvalPrefix = "approval"
 const nameKey = "name"
 const symbolKey = "symbol"
 
+type InstanceMintAuthority struct {
+    InstanceID   string   `json:"instance_id"`
+    AllowedMSPs  []string `json:"allowed_msps"`
+}
 // TokenERC721Contract contract for managing CRUD operations
 type TokenERC721Contract struct {
 	contractapi.Contract
 }
+ 
 
 func _readNFT(ctx contractapi.TransactionContextInterface, tokenId string) (*Nft, error) {
 	nftKey, err := ctx.GetStub().CreateCompositeKey(nftPrefix, []string{tokenId})
@@ -56,6 +61,24 @@ func _nftExists(ctx contractapi.TransactionContextInterface, tokenId string) boo
 
 	return len(nftBytes) > 0
 }
+
+
+//权限相关
+func (c *TokenERC721Contract) AddMintAuthority(ctx contractapi.TransactionContextInterface, instanceID string, allowedMSPs []string) error {
+    key := "instance_auth_" + instanceID
+    authority := InstanceMintAuthority{
+        InstanceID:  instanceID,
+        AllowedMSPs: allowedMSPs,
+    }
+
+    data, err := json.Marshal(authority)
+    if err != nil {
+        return err
+    }
+	
+    return ctx.GetStub().PutState(key, data)
+}
+
 
 // BalanceOf counts all non-fungible tokens assigned to an owner
 // param owner {String} An owner for whom to query the balance
@@ -515,13 +538,14 @@ func (c *TokenERC721Contract) TotalSupply(ctx contractapi.TransactionContextInte
 
 func (c *TokenERC721Contract) Initialize(ctx contractapi.TransactionContextInterface, name string, symbol string) (bool, error) {
 	// Check minter authorization - this sample assumes Org1 is the issuer with privilege to set the name and symbol
-	clientMSPID, err := ctx.GetClientIdentity().GetMSPID()
-	if err != nil {
-		return false, fmt.Errorf("failed to get clientMSPID: %v", err)
-	}
-	if clientMSPID != "Org1MSP" {
-		return false, errors.New("client is not authorized to set the name and symbol of the token")
-	}
+	//初始化权限暂停
+	// clientMSPID, err := ctx.GetClientIdentity().GetMSPID()
+	// if err != nil {
+	// 	return false, fmt.Errorf("failed to get clientMSPID: %v", err)
+	// }
+	// if clientMSPID != "Org1MSP" {
+	// 	return false, errors.New("client is not authorized to set the name and symbol of the token")
+	// }
 
 	bytes, err := ctx.GetStub().GetState(nameKey)
 	if err != nil {
@@ -549,7 +573,7 @@ func (c *TokenERC721Contract) Initialize(ctx contractapi.TransactionContextInter
 // param {String} tokenURI URI containing metadata of the minted non-fungible token
 // returns {Object} Return the non-fungible token object
 
-func (c *TokenERC721Contract) MintWithTokenURI(ctx contractapi.TransactionContextInterface, tokenId string, tokenURI string) (*Nft, error) {
+func (c *TokenERC721Contract) MintWithTokenURI(ctx contractapi.TransactionContextInterface, tokenId string, tokenURI string, instanceID string) (*Nft, error) {
 
 	// Check if contract has been intilized first
 	initialized, err := checkInitialized(ctx)
@@ -566,9 +590,26 @@ func (c *TokenERC721Contract) MintWithTokenURI(ctx contractapi.TransactionContex
 		return nil, fmt.Errorf("failed to get clientMSPID: %v", err)
 	}
 
-	if clientMSPID != "Org1MSP" {
-		return nil, errors.New("client is not authorized to set the name and symbol of the token")
-	}
+	key := "instance_auth_" + instanceID
+    authJSON, err := ctx.GetStub().GetState(key)
+    if err != nil || authJSON == nil {
+        return nil,fmt.Errorf("no mint authority found for instance %s", instanceID)
+    }
+
+    var auth InstanceMintAuthority
+    _ = json.Unmarshal(authJSON, &auth)
+
+    allowed := false
+    for _, msp := range auth.AllowedMSPs {
+        if msp == clientMSPID {
+            allowed = true
+            break
+        }
+    }
+
+    if !allowed {
+        return nil,fmt.Errorf("MSP %s not authorized to mint for instance %s", clientMSPID, instanceID)
+    }
 
 	// Get ID of submitting client identity
 	minter64, err := ctx.GetClientIdentity().GetID()
