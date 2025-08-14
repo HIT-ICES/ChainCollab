@@ -20,6 +20,7 @@ from .elements import (
     SequenceFlow,
     TerminalType,
     BusinessRuleTask,
+    Task ,
 )
 
 from typing import List, Optional, Tuple, Any, Protocol
@@ -105,6 +106,21 @@ class Choreography:
                     outgoing=element.findall(f"./{bpmn2prefix}outgoing")[0].text,
                     documentation=documentation if documentation is not None else "{}",
                 )
+
+            case NodeType.TASK.value:
+                documentation_list = element.findall(f"./{bpmn2prefix}documentation")
+                documentation = (
+                    documentation_list[0].text if documentation_list else None
+                )
+                return Task(
+                    self,
+                    element.attrib["id"],
+                    element.attrib.get("name", ""),
+                    incoming=element.findall(f"./{bpmn2prefix}incoming")[0].text,
+                    outgoing=element.findall(f"./{bpmn2prefix}outgoing")[0].text,
+                    documentation=documentation if documentation is not None else "{}",
+                )
+                
             case NodeType.START_EVENT.value:
                 return StartEvent(
                     self,

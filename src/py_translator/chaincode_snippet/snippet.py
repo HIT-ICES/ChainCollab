@@ -6,10 +6,13 @@ with open("chaincode_snippet/snippet.json", "r") as f:
 
 def import_code(
     if_oracle: bool = False,
+    if_Token: bool =False,
 ):
     extra_imports = ""
     if if_oracle:
         extra_imports += content["OracleImport"] + "\n"
+    if if_Token:
+        extra_imports += content["TaskImport"]+ "\n"
     return content["importFrame"].format(extra_imports=extra_imports)
 
 
@@ -40,6 +43,7 @@ def CreateInstance_code(
     gateways: list,
     participants: list,
     business_rules: list,
+    tokenelements:list,
 ):
     def InitStartEvent(event: str) -> str:
         return content["InitStartFrame"].format(start_event=event)
@@ -71,6 +75,11 @@ def CreateInstance_code(
     def InitBusinessRule(business_rule: str) -> str:
         return content["InitBusinessRuleFrame"].format(business_rule=business_rule)
 
+    def InitTokenElement(tokenelementID :str , documentation:str) -> str:
+        data = json.loads(documentation)
+        documentation = json.dumps(data, separators=(',', ':'))
+        return content["InitTokenElementFrame"].format(TokenelementId=tokenelementID,format=documentation)
+     
     return content["CreateInstanceFuncFrame"].format(
         create_elements_code="\n".join(
             [
@@ -95,6 +104,7 @@ def CreateInstance_code(
             ]
             + [InitGateway(gateway) for gateway in gateways]
             + [InitBusinessRule(business_rule) for business_rule in business_rules]
+            + [InitTokenElement(tokenelement.id,tokenelement.documentation)for tokenelement in tokenelements]
         ),
         event_content="\n".join(
             [
@@ -120,6 +130,8 @@ def ChangeGtwState_code(gtw, state: str):
 def ChangeBusinessRuleState_code(business_rule, state: str):
     return content["ChangeBusinessRuleStateFrame"].format(business_rule=business_rule, state=state)
 
+def changeTokenElementState_code(tokenelement,state:str):
+    return content["ChangeTokenElementStateFrame"].format(tokenelement=tokenelement,state = state)
 
 def StartEvent_code(
     event,
@@ -258,7 +270,8 @@ def CheckGatewayState_code(gateway, state: str):
 def CheckEventState_code(event, state: str):
     return content["CheckEventStateFrame"].format(state=state, event=event)
 
-
+def CheckTokenElement_code(activityId,state: str):
+    return content["CheckTokenElementFrame"].format(activityId=activityId,state=state)
 ##----------------
 
 
@@ -375,6 +388,50 @@ def BusinessRuleContinueFuncFrame_code(
         change_next_state_code=change_next_state_code,
     )
 
+def NFTMint_code(
+    activityId :str,
+    after_all_hook: str = "",
+):
+    return content["NFTMintFrame"].format(
+        activityId=activityId,
+        after_all_hook=after_all_hook,
+    )
+
+def NFTTransfer_code(
+    activityId :str,
+    after_all_hook: str = "",
+):
+    return content["NFTTransferFrame"].format(
+        activityId=activityId,
+        after_all_hook=after_all_hook,
+    )
+
+def NFTBurn_code(
+    activityId :str,
+    after_all_hook: str = "",
+):
+    return content["NFTBurnFrame"].format(
+        activityId=activityId,
+        after_all_hook=after_all_hook,
+    )
+
+def FTMint_code(
+    activityId :str,
+    after_all_hook: str = "",  
+):
+    return content["FTMintFrame"].format(
+        activityId=activityId,
+        after_all_hook=after_all_hook,
+    )
+
+def FTTransfer_code(
+    activityId :str,
+    after_all_hook: str = "",  
+):
+    return content["FTTransferFrame"].format(
+        activityId=activityId,
+        after_all_hook=after_all_hook,
+    )
 
 def InvokeChaincodeFunc_code():
     return content["InvokeChaincodeFunc"]

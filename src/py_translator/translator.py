@@ -14,6 +14,7 @@ from choreography_parser.elements import (
     SequenceFlow,
     Element,
     BusinessRuleTask,
+    Task,
 )
 from choreography_parser.parser import Choreography
 from chaincode_snippet import snippet
@@ -334,6 +335,8 @@ class GoChaincodeTranslator:
             for participant in participants_exist
         ]
         business_rules = [business_rule for business_rule in self._instance_initparameters["BusinessRuleTask"]]
+    
+        tokenelements : List[Task] = choreography.query_element_with_type(NodeType.TASK)
         temp_list.append(
             snippet.CreateInstance_code(
                 start_event=start_event.id,
@@ -350,6 +353,7 @@ class GoChaincodeTranslator:
                 gateways=[gateway.id for gateway in gateways],
                 participants=participant_to_be_added,
                 business_rules=business_rules,
+                tokenelements=tokenelements,
             )
         )
 
@@ -367,6 +371,8 @@ class GoChaincodeTranslator:
                 return snippet.ChangeMsgState_code(element.id, state)
             case NodeType.BUSINESS_RULE_TASK:
                 return snippet.ChangeBusinessRuleState_code(element.id, state)
+            case NodeType.TASK:
+                return snippet.changeTokenElementState_code(element.id ,state)
 
     def _generate_check_state_code(self, element: Element, state: str = "ENABLED"):
         match element.type:
@@ -376,6 +382,9 @@ class GoChaincodeTranslator:
                 return snippet.CheckGatewayState_code(element.id, state)
             case NodeType.END_EVENT:
                 return snippet.CheckEventState_code(element.id, state)
+            case NodeType.TASK:
+                return snippet.CheckTokenElement_code(element.id,state)
+
 
     def _get_message_params(self, message: Message):
         global_parameters = self._global_parameters
@@ -721,6 +730,58 @@ class GoChaincodeTranslator:
         )
 
         return temp_list
+    #留个问题 分不同情况，产生不同框架
+    def _generate_chaincode_for_tokenElement(self,task:Task):
+        temp_list =[]
+        pre_activate_next_hook =self._hook_codes[task.id]["pre_activate_next"]
+        when_triggered_code = self._hook_codes[task.id]["when_triggered"]
+        try:
+            doc_data = json.loads(task.documentation)
+        except json.JSONDecodeError:
+            # 如果 documentation 不是有效的 JSON，在这里处理错误
+            print(f"warning:the documentation of {task.id} is wrong")
+            return temp_list
+        token_type = doc_data.get("tokenType")
+        token_operation=doc_data.get("operation")
+        after_all_hook = "\n\t".join(when_triggered_code)+ "\n\t"+ "\n\t".join(pre_activate_next_hook)+ "\n\t"+ self._generate_change_state_code(task.outgoing.target)
+        if token_type=="NFT":
+            if token_operation=="mint":
+                temp_list.append(
+                    snippet.NFTMint_code(
+                        activityId=task.id,
+                        after_all_hook=after_all_hook
+                    )
+                )
+            elif token_operation=="Transfer":
+                temp_list.append(
+                    snippet.NFTTransfer_code(
+                        activityId=task.id,
+                        after_all_hook=after_all_hook
+                    )
+                )
+            elif token_operation=="burn":
+                temp_list.append(
+                    snippet.NFTBurn_code(
+                        activityId=task.id,
+                        after_all_hook=after_all_hook
+                    )
+                )
+        elif token_type=="FT":
+            if token_operation=="mint":
+                temp_list.append(
+                    snippet.FTMint_code(
+                        activityId=task.id,
+                        after_all_hook=after_all_hook
+                    )
+                )
+            elif token_operation == "Transfer":
+                temp_list.append(
+                    snippet.FTTransfer_code(
+                        activityId=task.id,
+                        after_all_hook=after_all_hook
+                    )
+                )
+        return temp_list
 
     def generate_chaincode(self, output_path: str = "resource/chaincode.go", is_output: bool = False):
         ############
@@ -739,12 +800,16 @@ class GoChaincodeTranslator:
         chaincode_list.append(snippet.package_code())
         chaincode_list.append(
             snippet.import_code(
-                if_oracle=len(self._choreography.query_element_with_type(NodeType.BUSINESS_RULE_TASK)) > 0
+                if_oracle=len(self._choreography.query_element_with_type(NodeType.BUSINESS_RULE_TASK)) > 0,
+                if_Token= len(self._choreography.query_element_with_type(NodeType.TASK))>0
             )
         )
         chaincode_list.append(snippet.contract_definition_code())
         # global variable definition
-        chaincode_list.append(snippet.StateMemoryDefinition_code(self._generate_parameters_code()))
+        fields = ""
+        if len(self._choreography.query_element_with_type(NodeType.TASK))>0:
+            fields="""ID string `json:"id,omitempty"` // 防报错\n"""
+        chaincode_list.append(snippet.StateMemoryDefinition_code(fields))
         # initParams definition
         chaincode_list.append(snippet.InitParametersTypeDefFrame_code(self._generate_instance_initparameters_code()))
         chaincode_list.append(snippet.fix_part_code())
@@ -755,7 +820,7 @@ class GoChaincodeTranslator:
         # generate InitLedger
 
         chaincode_list.extend(self._generate_create_instance_code())
-
+        
         #########
         # Hook Generate: check structure caused hook code to be inserted into the chaincode, prepare code for real generation
         #########
@@ -768,6 +833,7 @@ class GoChaincodeTranslator:
                         # generate some code to turn off other branches
                         self._event_based_gateway_hook_code(event_based_gateway, outgoing.target)
                     )
+
 
         # find all parallel to parrallel gateways, and set pre_activate_next hook to check if other branch finished
         for parallel_gateway in self._choreography.query_element_with_type(NodeType.PARALLEL_GATEWAY):
@@ -797,6 +863,9 @@ class GoChaincodeTranslator:
                 chaincode_list.extend(self._generate_chaincode_for_end_event(element))
             if element.type == NodeType.BUSINESS_RULE_TASK:
                 chaincode_list.extend(self._generate_chaincode_for_business_rule(element))
+            if element.type == NodeType.TASK:
+                #留个问题
+                chaincode_list.extend(self._generate_chaincode_for_tokenElement(element))
         go_code = "\n\n".join(chaincode_list)
 
         import subprocess
@@ -825,6 +894,23 @@ class GoChaincodeTranslator:
             "schema": {"type": "string"},
         }
 
+    def _token_allowedMSPs_param(self):
+        return{
+            "name": "allowedMSPs",
+            "schema": {"type": "array","items": {"type": "string"}}
+        }
+    
+    def _token_tokenelementname_param(self):
+        return{
+             "name": "tokenelementname",
+            "schema": {"type": "string"}
+        }
+    def _token_tokenERCname_param(self):
+        return{
+            "name": "name",
+            "schema": {"type": "string"}
+        }
+
     def _generate_ffi_item(
         self,
         name: str,
@@ -843,6 +929,7 @@ class GoChaincodeTranslator:
             "returns": returns,
         }
         return item
+    
 
     def generate_ffi_items_for_choreography_task(self, choreography_task: ChoreographyTask):
         items = []
@@ -1025,6 +1112,29 @@ class GoChaincodeTranslator:
                 ],
             )
         )
+
+        ffi_items.append(
+            self._generate_ffi_item(
+                name="GetAllTokenElement",
+                pathname="",
+                description="Get all token element",
+                params=[
+                    self._instance_id_param(),
+                ],
+            )
+        )
+        
+        ffi_items.append(
+            self._generate_ffi_item(
+                name="GetAllTokens",
+                pathname="",
+                description="Get all tokens",
+                params=[
+                    self._instance_id_param(),
+                ],
+            )
+        )
+
         ffi_items.append(
             self._generate_ffi_item(
                 name="GetAllActionEvents",
@@ -1032,6 +1142,54 @@ class GoChaincodeTranslator:
                 description="Get all action events",
                 params=[
                     self._instance_id_param(),
+                ],
+            )
+        )
+
+        ffi_items.append(
+            self._generate_ffi_item(
+                name="AddMintAuthority_nft",
+                pathname="",
+                description="add  authority of nft mint",
+                params=[
+                    self._instance_id_param(),
+                    self._token_allowedMSPs_param(),
+                    self._token_tokenelementname_param(),
+                ],
+            )
+        )
+        
+        ffi_items.append(
+            self._generate_ffi_item(
+                name="AddMintAuthority_ft",
+                pathname="",
+                description="add  authority of nft mint",
+                params=[
+                    self._instance_id_param(),
+                    self._token_allowedMSPs_param(),
+                    self._token_tokenelementname_param(),
+                ],
+            )
+        )
+
+        ffi_items.append(
+            self._generate_ffi_item(
+                name="TokenElementInitialize",
+                pathname="",
+                description="",
+                params=[
+                    self._token_tokenERCname_param(),
+                ],
+            )
+        )
+
+        ffi_items.append(
+            self._generate_ffi_item(
+                name="TokenElementInitializeFT",
+                pathname="",
+                description="",
+                params=[
+                    self._token_tokenERCname_param(),
                 ],
             )
         )
@@ -1062,6 +1220,7 @@ class GoChaincodeTranslator:
                     | NodeType.EVENT_BASED_GATEWAY
                     | NodeType.START_EVENT
                     | NodeType.END_EVENT
+                    | NodeType.TASK
                 ):
                     ffi_items.append(
                         self._generate_ffi_item(
@@ -1113,7 +1272,7 @@ class GoChaincodeTranslator:
 if __name__ == "__main__":
     go_chaincode_translator = GoChaincodeTranslator(
         None,
-        bpmn_file="/home/logres/system/src/py_translator/resource/bpmn/Blood_analysis.bpmn",
+        bpmn_file="/root/code/ChainCollab/src/py_translator/resource/bpmn/SupplyChain_NFT.bpmn",
     )
     go_chaincode_translator.generate_chaincode(is_output=True)
     go_chaincode_translator.generate_ffi(is_output=True)

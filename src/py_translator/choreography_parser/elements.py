@@ -22,7 +22,7 @@ class NodeType(Enum):
     PARALLEL_GATEWAY = "parallelGateway"
     EVENT_BASED_GATEWAY = "eventBasedGateway"
     BUSINESS_RULE_TASK = "businessRuleTask"
-
+    TASK = "task"
 
 class EdgeType(Enum):
     MESSAGE_FLOW = "messageFlow"
@@ -308,7 +308,31 @@ class BusinessRuleTask(Element):
         self._incoming: dict = initObjectProperties(incoming)
         self._outgoing: dict = initObjectProperties(outgoing)
 
+class Task(Element):
+    _type:NodeType = NodeType.TASK
+    _properties: List[str]=[
+        "id",
+        "name",
+        "type",
+        "incoming",
+        "outgoing",
+        "documentation",
+    ]
+    _object_properties:List[str]=["incoming", "outgoing"]
 
+    def __init__(
+        self,
+        graph,
+        id: str,
+        name: str = "",
+        incoming: str = "",
+        outgoing: str = "",
+        documentation: str = "",
+    ):  
+        super().__init__(graph, id, name)
+        self._documentation = documentation
+        self._incoming: dict = initObjectProperties(incoming)
+        self._outgoing: dict = initObjectProperties(outgoing)
 # Edge Types
 
 

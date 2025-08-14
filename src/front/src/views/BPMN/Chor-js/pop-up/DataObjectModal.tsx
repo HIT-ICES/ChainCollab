@@ -334,13 +334,13 @@ export default function FixedFieldsModal({
   onCancel={() => onClose(false)}
   width={600}
 >
-  {/* elementName */}
+  {/* 1.elementName */}
   <div style={{ marginBottom: 16 }}>
     <label style={{ display: 'block', marginBottom: 4 }}>Element Name:</label>
     <Input value={elementName} onChange={e => setElementName(e.target.value)} />
   </div>
 
-  {/* assetType */}
+  {/* 2.assetType */}
   <div style={{ marginBottom: 16 }}>
     <label style={{ display: 'block', marginBottom: 4 }}>Asset Type:</label>
     <Select
@@ -363,7 +363,7 @@ export default function FixedFieldsModal({
     </Select>
   </div>
 
-  {/* operation */}
+  {/* 3.operation */}
   <div style={{ marginBottom: 16 }}>
     <label style={{ display: 'block', marginBottom: 4 }}>Operation:</label>
     <Select
@@ -385,22 +385,7 @@ export default function FixedFieldsModal({
     </Select>
   </div>
 
-  {/* caller */}
-  <div style={{ marginBottom:16 }}>
-    <label style={{ display: 'block', marginBottom: 4 }}>
-      {operationToCallerLabel[operation] || 'Caller'}:
-    </label>
-    <Select
-      value={caller}
-      onChange={setCaller}
-      options={participantOptions}
-      placeholder={`Please select ${operationToCallerLabel[operation] || 'caller'}`}
-      allowClear
-      style={{ width: '100%' }}
-    />
-  </div>
-
-  {/* tokenType */}
+  {/* 4.tokenType */}
   {assetType === 'transferable' && (
     <div style={{ marginBottom: 16 }}>
       <label style={{ display: 'block', marginBottom: 4 }}>Token Type:</label>
@@ -419,9 +404,35 @@ export default function FixedFieldsModal({
         <Select.Option value="FT">FT</Select.Option>
       </Select>
     </div>
+  )}  
+
+  {/* 5.tokenId */}
+  {shouldShowTokenId && (
+    <div style={{ marginBottom: 16 }}>
+      <label style={{ display: 'block', marginBottom: 4 }}>Token ID:</label>
+      {operation === 'mint' ? (
+        <Input
+          value={tokenId}
+          onChange={e => setTokenId(e.target.value)}
+          placeholder="Enter new token ID"
+        />
+      ) : (
+        <Select
+          value={tokenId}
+          onChange={handleTokenIdChange}
+          options={tokenIdOptions.map(id => ({ label: id, value: id }))}
+          placeholder={
+            tokenIdOptions.length > 0 ? 'Select token ID' : 'No available token ID'
+          }
+          allowClear
+          style={{ width: '100%' }}
+          disabled={tokenIdOptions.length === 0}
+        />
+      )}
+    </div>
   )}
 
-  {/* tokenName */}
+  {/* 6.tokenName */}
   {shouldShowTokenName && (
     <div style={{ marginBottom: 16 }}>
       <label style={{ display: 'block', marginBottom: 4 }}>Token Name:</label>
@@ -453,13 +464,48 @@ export default function FixedFieldsModal({
     </div>
   )}
 
-  {/* tokenNumber */}
+  {/*7. tokenURI */}
+  {shouldShowTokenId && tokenId && (
+  <div style={{ marginBottom: 16 }}>
+    <label style={{ display: 'block', marginBottom: 4 }}>Token URL:</label>
+    {operation === 'mint' ? (
+      <Input
+        value={tokenURL}
+        onChange={e => setTokenURL(e.target.value)}
+        placeholder="Enter token URL"
+      />
+    ) : (
+      <Input
+        value={tokenURL}
+        disabled
+        placeholder="Auto-filled token URL"
+      />
+    )}
+  </div>
+)}
+
+  {/* 8.tokenNumber */}
   {shouldShowTokenNumber && (
     <div style={{ marginBottom: 16 }}>
       <label style={{ display: 'block', marginBottom: 4 }}>Token Number:</label>
       <Input value={tokenNumber} onChange={e => setTokenNumber(e.target.value)} />
     </div>
   )}
+
+  {/* caller */}
+  <div style={{ marginBottom:16 }}>
+    <label style={{ display: 'block', marginBottom: 4 }}>
+      {operationToCallerLabel[operation] || 'Caller'}:
+    </label>
+    <Select
+      value={caller}
+      onChange={setCaller}
+      options={participantOptions}
+      placeholder={`Please select ${operationToCallerLabel[operation] || 'caller'}`}
+      allowClear
+      style={{ width: '100%' }}
+    />
+  </div>
 
   {/* callee */}
   {shouldShowCallee && (
@@ -479,50 +525,8 @@ export default function FixedFieldsModal({
     </div>
   )}
 
-  {/* tokenId */}
-  {shouldShowTokenId && (
-    <div style={{ marginBottom: 16 }}>
-      <label style={{ display: 'block', marginBottom: 4 }}>Token ID:</label>
-      {operation === 'mint' ? (
-        <Input
-          value={tokenId}
-          onChange={e => setTokenId(e.target.value)}
-          placeholder="Enter new token ID"
-        />
-      ) : (
-        <Select
-          value={tokenId}
-          onChange={handleTokenIdChange}
-          options={tokenIdOptions.map(id => ({ label: id, value: id }))}
-          placeholder={
-            tokenIdOptions.length > 0 ? 'Select token ID' : 'No available token ID'
-          }
-          allowClear
-          style={{ width: '100%' }}
-          disabled={tokenIdOptions.length === 0}
-        />
-      )}
-    </div>
-  )}
   
-  {shouldShowTokenId && tokenId && (
-  <div style={{ marginBottom: 16 }}>
-    <label style={{ display: 'block', marginBottom: 4 }}>Token URL:</label>
-    {operation === 'mint' ? (
-      <Input
-        value={tokenURL}
-        onChange={e => setTokenURL(e.target.value)}
-        placeholder="Enter token URL"
-      />
-    ) : (
-      <Input
-        value={tokenURL}
-        disabled
-        placeholder="Auto-filled token URL"
-      />
-    )}
-  </div>
-)}
+  
 </Modal>
   );
 }
