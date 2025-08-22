@@ -18,7 +18,7 @@ from api.routes.bpmn.serializers import (
     DmnSerializer,
 )
 import yaml
-from api.config import BASE_PATH, BPMN_CHAINCODE_STORE, CURRENT_IP
+from api.config import BASE_PATH, BPMN_CHAINCODE_STORE, CURRENT_IP,ERC_PATH
 from api.common import ok, err
 from api.models import (
     BPMN,
@@ -162,7 +162,7 @@ class BPMNViewsSet(viewsets.ModelViewSet):
             self._zip_folder(
                 BPMN_CHAINCODE_STORE, BASE_PATH + "/opt/bpmn_chaincode.zip"
             )
-
+            
             headers = request.headers
             files = {
                 "file": open(file=BASE_PATH + "/opt//bpmn_chaincode.zip", mode="rb")
@@ -184,7 +184,7 @@ class BPMNViewsSet(viewsets.ModelViewSet):
             bpmn.ffiContent = ffiContent
             bpmn.chaincode_content = chaincodeContent
             bpmn.chaincode = chaincode
-            bpmn.status = "Generated"
+            bpmn.status = "Generated" 
             # consortium = consortium,
             bpmn.save()
 
@@ -194,6 +194,46 @@ class BPMNViewsSet(viewsets.ModelViewSet):
 
         except Exception as e:
             raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=["post"], detail=True, url_path="packageERC")
+    def packageERC(self, request, *args, **kwargs):
+        try:
+            orgid = request.data.get("orgId")
+            token_names = request.data.get("tokenNames", [])
+            env_id = request.data.get("envId")
+            headers=request.headers
+            results = []
+            for token_name in token_names:
+                token_type, name = token_name.split("-", 1)  # "ERC20", "USDT"
+                if token_type=="ERC20":
+                    folder_path = ERC_PATH + "/chaincode-go-20"
+                    zip_path = ERC_PATH + "/chaincode-go-20.zip"
+                elif token_type=="ERC721":
+                    folder_path=ERC_PATH + "/chaincode-go-721"
+                    zip_path = ERC_PATH + "/chaincode-go-721.zip"
+                self._zip_folder(folder_path, zip_path)
+                
+                with open(zip_path,"rb") as f:
+                    files ={"file":f}
+                    response=post(
+                        f"http://{CURRENT_IP}:8000/api/v1/environments/{env_id}/chaincodes/package",
+                        data={
+                        "name":token_name,
+                        "version": 1,
+                        "language": "golang",
+                        "org_id": orgid,
+                        },
+                        files=files,
+                        headers={"Authorization": headers["Authorization"]},
+                    )
+                chaincode_id = response.json()["data"]["id"]
+                results.append({"token": token_name, "chaincode_id": chaincode_id})
+            return Response(
+                data=ok(results), status=status.HTTP_202_ACCEPTED
+            )
+
+        except Exception as e:
+            return Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
 
 
 class BPMNInstanceViewSet(viewsets.ModelViewSet):

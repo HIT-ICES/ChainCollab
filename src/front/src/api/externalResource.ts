@@ -229,6 +229,20 @@ export const packageBpmn = async (chaincodeContent: string, ffiContent: string, 
     }
 }
 
+export const packageERC = async (tokenNames: string[], envId:string, orgId: string, bpmnId:string, consortiumId:string = '1 ')=>{
+    try {
+        const response = await api.post(`/consortiums/${consortiumId}/bpmns/${bpmnId}/packageERC`, {
+            tokenNames: tokenNames,
+            envId: envId,
+            orgId: orgId
+        })
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
 export const packageBpmnToInstance = async (chaincodeContent: string, ffiContent: string, bpmnInstanceId, orgId: string, bpmnId: string = '1') => {
     try {
         const response = await api.post(`bpmns/${bpmnId}/bpmn-instances/${bpmnInstanceId}/package`, {

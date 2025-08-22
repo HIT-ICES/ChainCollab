@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState,useMemo } from "react"
 import { Card, Row, Col, Button, Steps, Modal, Table, Select, Input } from "antd"
 import { useLocation, useNavigate } from "react-router-dom";
-import { retrieveBPMN, packageBpmn, updateBPMNStatus, updateBpmnEnv, updateBPMNFireflyUrl, updateBpmnEvents } from "@/api/externalResource"
+import { retrieveBPMN, packageBpmn,packageERC,updateBPMNStatus, updateBpmnEnv, updateBPMNFireflyUrl, updateBpmnEvents } from "@/api/externalResource"
 import { generateChaincode, getMessagesByBpmnContent } from "@/api/translator"
 import { useAvaliableEnvs, useBpmnDetailData } from "./hooks"
 import axios from "axios"
@@ -103,9 +103,37 @@ const BPMNOverview = () => {
     }
 
     const ModifyModal = () => {
+        //解析chaincode的内容，生成对应链码名字
+        const extractedTokens = useMemo(() => {
+        if (!chainCodeContentForModify) return [];
+        const regex = /`({.*?})`/gs; // 匹配反引号里的 JSON
+        const matches = [...chainCodeContentForModify.matchAll(regex)];
+        const results = new Set<string>();
+
+        matches.forEach((m) => {
+            try {
+                const obj = JSON.parse(m[1]);
+                const tokenType = obj.tokenType?.toUpperCase();
+                const tokenName = obj.tokenName;
+                if (tokenType && tokenName) {
+                    if (tokenType === "NFT") {
+                        results.add(`ERC721-${tokenName}`);
+                    } else if (tokenType === "FT") {
+                        results.add(`ERC20-${tokenName}`);
+                    }
+                }
+            } catch (err) {
+                console.error("解析失败", err);
+            }
+        });
+        return Array.from(results);
+    }, [chainCodeContentForModify]);
 
         const onModify = async () => {
             await packageBpmn(chainCodeContentForModify, ffiContentForModify, currentOrgId, bpmnId);
+            if (extractedTokens.length>0){
+                     await packageERC(extractedTokens,currentEnvId,currentOrgId,bpmnId);
+            }
             refetchBpmn()
             setButtonLoading(false);
         }
@@ -146,6 +174,18 @@ const BPMNOverview = () => {
                         height: "300px",
                     }}
                 />
+
+               {extractedTokens.length > 0 && (
+                <>
+                <h2>Extracted Tokens</h2>
+             <Input.TextArea
+                    value={extractedTokens.join("\n")}
+                    readOnly
+                    autoSize={{ minRows: 3, maxRows: 10 }}
+                    style={{ width: "100%" }}
+                    />
+                </>
+                )}
             </Modal>
         )
     }
