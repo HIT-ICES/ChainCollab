@@ -8,7 +8,8 @@ mode = os.environ.get("MODE", "local")
 
 PWD = os.path.dirname(os.path.abspath(__file__))
 BASE_PATH = os.path.dirname(PWD)
-
+SRC_PATH = os.path.dirname(BASE_PATH)
+ERC_PATH = os.path.join(SRC_PATH, "ERC")
 CELLO_HOME = os.path.join(BASE_PATH, "opt", "cello")
 FABRIC_TOOL = os.path.join(BASE_PATH, "opt", "bin")
 FABRIC_CONFIG = os.path.join(BASE_PATH, "opt", "config")
