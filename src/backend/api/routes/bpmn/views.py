@@ -141,6 +141,16 @@ class BPMNViewsSet(viewsets.ModelViewSet):
                 for file in files:
                     file_path = os.path.join(root, file)
                     zipf.write(file_path, os.path.relpath(file_path, folder_path))
+    
+    def _zip_folder_ERC(self,folder_path,output_path):
+        folder_name = os.path.basename(folder_path)  # 顶层目录名
+        with ZipFile(output_path, "w") as zipf:
+            for root, _, files in os.walk(folder_path):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    # 保留顶层目录结构
+                    rel_path = os.path.join(folder_name, os.path.relpath(file_path, folder_path))
+                    zipf.write(file_path, rel_path)
 
     @action(methods=["post"], detail=True, url_path="package")
     def package(self, request, pk, *args, **kwargs):
@@ -211,7 +221,7 @@ class BPMNViewsSet(viewsets.ModelViewSet):
                 elif token_type=="ERC721":
                     folder_path=ERC_PATH + "/chaincode-go-721"
                     zip_path = ERC_PATH + "/chaincode-go-721.zip"
-                self._zip_folder(folder_path, zip_path)
+                self._zip_folder_ERC(folder_path, zip_path)
                 
                 with open(zip_path,"rb") as f:
                     files ={"file":f}
