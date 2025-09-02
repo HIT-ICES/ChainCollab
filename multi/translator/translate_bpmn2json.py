@@ -439,6 +439,17 @@ def addMachine(currentMachine, data,xstateJSONElement):
         case _:
             print("error")
             pass
+
+def serialize_content(data):
+    if isinstance(data, dict):
+        return {key: serialize_content(value) for key, value in data.items()}
+    elif isinstance(data, list):
+        return [serialize_content(item) for item in data]
+    elif isinstance(data, Enum):
+        return data.value  # 或者 return data.name，根据需要选择
+    else:
+        return data
+
            
 
 
@@ -452,6 +463,22 @@ def translate_bpmn2json(choreography_id,file):
     ParallelGateway_pairs = tree["parallel_gateway_pairs"]
 
     dataMap = get_element_machineInfo(choreography,ParallelGateway_pairs)
+    
+    print(dataMap)
+    file_path = '/home/aoaoder/blockcollab/ChainCollab/multi/example/output.json'
+    # 将枚举值转换为字符串
+
+
+    # 将数据中的枚举转换
+    serialized_data = serialize_content(dataMap)
+
+    for key, value in serialized_data.items():
+        if isinstance(value, set):
+            serialized_data[key] = list(value)
+
+    # 将字典写入JSON文件
+    with open(file_path, 'w') as json_file:
+        json.dump(serialized_data, json_file, indent=4)  # indent=4用于美化输出（缩进）
 
     xstateJSONElement = XstateJSONElement()
     xstateJSONElement.initMainMachine(choreography_id, dataMap["start_event"][0],dataMap["start_event"][1],dataMap["end_event"])
@@ -475,7 +502,7 @@ def translate_bpmn2json(choreography_id,file):
 if __name__ == "__main__":
     # translate_bpmn2json("NewTest_paper","../bpmn_muti/supplypaper_new111.bpmn")
 
-    translate_bpmn2json("supplychain","../bpmn_muti/supply_final_1.bpmn")
+    translate_bpmn2json("supplychain","/home/aoaoder/blockcollab/ChainCollab/multi/bpmn_multi/supply_final_1.bpmn")
 
     # choreography = Choreography()
     # choreography.load_diagram_from_xml_file("../bpmn_muti/supply_final.bpmn")
