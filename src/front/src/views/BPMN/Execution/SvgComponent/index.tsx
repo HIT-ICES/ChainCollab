@@ -16,6 +16,7 @@ import {
 	useBPMNIntanceDetailData,
 	useBPMNDetailData,
 	useFireflyIdentity,
+	useStatechartsSnapshot,
 } from "./hook";
 import {
 	getFireflyIdentity,
@@ -570,7 +571,7 @@ const ControlPanel = ({
 			</div>
 		);
 
-	const onHandleBusinessRule = async (output={}) => {
+	const onHandleBusinessRule = async (output = {}) => {
 		const res = await TimeDecorator(invokeBusinessRuleAction, "BusinessRule", "invoke/Activity", output)(
 			coreURL,
 			contractName,
@@ -606,7 +607,7 @@ const ControlPanel = ({
 						const invoke_start_time = data.created;
 						output["invoke_start_time"] = invoke_start_time;
 						const events = await getEventWithTX(coreURL, txid);
-						const event_time = events[0].created; 
+						const event_time = events[0].created;
 						output["event_time"] = event_time;
 
 						output["executor_end"] = await readFromRedis("executor_end");
@@ -618,7 +619,7 @@ const ControlPanel = ({
 						const operation = await getOperationWithId("http://127.0.0.1:5000", executor_op);
 						const executor_tx = operation.tx;
 						const events2 = await getEventWithTX("http://127.0.0.1:5000", executor_tx);
-						output["event_time_2"] =  events2[0].created
+						output["event_time_2"] = events2[0].created
 						for (const key in output) {
 							output[key] = TimeStampHandler(output[key]);
 						}
@@ -648,7 +649,7 @@ const ControlPanel = ({
 								"start_time": time_obj["executor_start"],
 								"end_time": time_obj["executor_end"],
 							},
-						    {
+							{
 								"step": "IPFS",
 								"start_time": time_obj["executor_ipfsStart"],
 								"end_time": time_obj["executor_ipfsEnd"],
@@ -818,7 +819,6 @@ const ExecutionPage = (props) => {
 
 	const Machine = bpmnData.statechartMainContent;
 	const additional = bpmnData.statechartAdditionalContent
-	const snapshot = useStatechartsSnapshot();
 
 	useEffect(() => {
 		// set content to svgRef element
@@ -854,6 +854,9 @@ const ExecutionPage = (props) => {
 	].filter((msg) => {
 		return msg.state === 1 || msg.state === 2;
 	});
+
+	const snapshot = useStatechartsSnapshot(identity.core_url, contractName, bpmnInstanceId);
+
 
 	const renderSvg = () => {
 		const updatedMsgList = [
@@ -974,7 +977,7 @@ const ExecutionPage = (props) => {
 				Refresh
 			</Button>
 			<Button
-				onClick={() => {toggleStateChart();}}
+				onClick={() => { toggleStateChart(); }}
 			>
 				StateCharts Detail
 			</Button>

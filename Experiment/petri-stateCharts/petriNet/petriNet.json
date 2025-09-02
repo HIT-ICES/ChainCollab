@@ -8,9 +8,10 @@
             "posX": 350,
             "posY": 155.8125,
             "connections": [
-                "Start Arc 19"
+                "Start Arc 19",
+                "Finish Arc 24"
             ],
-            "nTokens": 1
+            "nTokens": 0
         },
         {
             "id": "place 2",
@@ -20,9 +21,10 @@
             "posX": 364,
             "posY": 273.8125,
             "connections": [
-                "Start Arc 4"
+                "Start Arc 4",
+                "Finish Arc 25"
             ],
-            "nTokens": 1
+            "nTokens": 0
         },
         {
             "id": "place 3",
@@ -32,9 +34,10 @@
             "posX": 349,
             "posY": 389.8125,
             "connections": [
-                "Start Arc 7"
+                "Start Arc 7",
+                "Finish Arc 26"
             ],
-            "nTokens": 1
+            "nTokens": 0
         },
         {
             "id": "place 4",
@@ -93,16 +96,14 @@
             "nTokens": 0
         },
         {
-            "id": "place 8",
-            "name": "P_;lock",
-            "namePositionX": 544.765625,
-            "namePositionY": 544.8125,
-            "posX": 599,
-            "posY": 581.8125,
+            "id": "place 9",
+            "name": "P_Init",
+            "namePositionX": 93.765625,
+            "namePositionY": 239.8125,
+            "posX": 118,
+            "posY": 280.8125,
             "connections": [
-                "Start Arc 20",
-                "Start Arc 21",
-                "Start Arc 22"
+                "Start Arc 23"
             ],
             "nTokens": 1
         }
@@ -153,15 +154,14 @@
         {
             "id": "transition 4",
             "name": "T_12",
-            "namePositionX": 695.6640625,
-            "namePositionY": 112.8125,
+            "namePositionX": 729.4375,
+            "namePositionY": 99.8125,
             "posX": 737.5,
             "posY": 108.8125,
             "connections": [
                 "Finish Arc 3",
                 "Finish Arc 6",
-                "Start Arc 13",
-                "Finish Arc 20"
+                "Start Arc 13"
             ],
             "isEnabled": false,
             "isEnable": false
@@ -169,15 +169,14 @@
         {
             "id": "transition 5",
             "name": "T_13",
-            "namePositionX": 734.765625,
-            "namePositionY": 228.8125,
-            "posX": 741.5,
-            "posY": 245.8125,
+            "namePositionX": 740.4375,
+            "namePositionY": 234.8125,
+            "posX": 742.5,
+            "posY": 249.8125,
             "connections": [
                 "Finish Arc 9",
                 "Finish Arc 10",
-                "Start Arc 14",
-                "Finish Arc 21"
+                "Start Arc 14"
             ],
             "isEnabled": false,
             "isEnable": false
@@ -185,15 +184,30 @@
         {
             "id": "transition 6",
             "name": "T_23",
-            "namePositionX": 725.765625,
-            "namePositionY": 363.8125,
+            "namePositionX": 750.4375,
+            "namePositionY": 357.8125,
             "posX": 754.5,
             "posY": 374.8125,
             "connections": [
                 "Finish Arc 11",
                 "Finish Arc 12",
-                "Start Arc 15",
-                "Finish Arc 22"
+                "Start Arc 15"
+            ],
+            "isEnabled": false,
+            "isEnable": false
+        },
+        {
+            "id": "transition 7",
+            "name": "T_init",
+            "namePositionX": 193,
+            "namePositionY": 243.8125,
+            "posX": 200.5,
+            "posY": 253.8125,
+            "connections": [
+                "Finish Arc 23",
+                "Start Arc 24",
+                "Start Arc 25",
+                "Start Arc 26"
             ],
             "isEnabled": false,
             "isEnable": false
@@ -402,15 +416,15 @@
             "type": "normal",
             "startingPositionArc": [
                 [
-                    610.9911123995282,
-                    161.39090934094898,
+                    610.780269887807,
+                    161.711434613484,
                     "place 4"
                 ]
             ],
             "endPositionArc": [
                 [
-                    741.5,
-                    245.8125,
+                    742.5,
+                    249.8125,
                     "transition 5"
                 ]
             ],
@@ -420,8 +434,8 @@
             "isEnable": false,
             "weight": 1,
             "weightPos": {
-                "x": 701.5511339805432,
-                "y": 243.79059402802943
+                "x": 702.5868657166726,
+                "y": 247.17778717293993
             }
         },
         {
@@ -430,15 +444,15 @@
             "type": "normal",
             "startingPositionArc": [
                 [
-                    614.3160627520355,
-                    373.7501315795608,
+                    614.6075660885765,
+                    374.23819732638026,
                     "place 6"
                 ]
             ],
             "endPositionArc": [
                 [
-                    741.5,
-                    295.8125,
+                    742.5,
+                    299.8125,
                     "transition 5"
                 ]
             ],
@@ -448,8 +462,8 @@
             "isEnable": false,
             "weight": 1,
             "weightPos": {
-                "x": 722.4134917732699,
-                "y": 330.9650988187355
+                "x": 722.6191203042423,
+                "y": 334.52201775122796
             }
         },
         {
@@ -542,7 +556,7 @@
             "type": "normal",
             "startingPositionArc": [
                 [
-                    766.5,
+                    767.5,
                     266.8125,
                     "transition 5"
                 ]
@@ -621,91 +635,119 @@
             }
         },
         {
-            "id": "Arc 20",
-            "name": "A20",
+            "id": "Arc 23",
+            "name": "A23",
             "type": "normal",
             "startingPositionArc": [
                 [
-                    606.7792049403281,
-                    558.0536285937994,
-                    "place 8"
+                    143,
+                    280.8125,
+                    "place 9"
                 ]
             ],
             "endPositionArc": [
                 [
-                    737.5,
-                    158.8125,
-                    "transition 4"
+                    200.5,
+                    280.8125,
+                    "transition 7"
                 ]
             ],
-            "start": "place 8",
-            "end": "transition 4",
+            "start": "place 9",
+            "end": "transition 7",
             "intermediatePoints": [],
             "isEnable": false,
             "weight": 1,
             "weightPos": {
-                "x": 745.7279145656494,
-                "y": 197.9571218770903
+                "x": 165.85898384862244,
+                "y": 300.8125
             }
         },
         {
-            "id": "Arc 21",
-            "name": "A21",
+            "id": "Arc 24",
+            "name": "A24",
             "type": "normal",
             "startingPositionArc": [
                 [
-                    610.1490334049881,
-                    559.4361943591115,
-                    "place 8"
+                    225.5,
+                    253.8125,
+                    "transition 7"
                 ]
             ],
             "endPositionArc": [
                 [
-                    741.5,
-                    295.8125,
-                    "transition 5"
+                    330.355737243081,
+                    171.27545381669123,
+                    "place 1"
                 ]
             ],
-            "start": "place 8",
-            "end": "transition 5",
+            "start": "transition 7",
+            "end": "place 1",
             "intermediatePoints": [],
             "isEnable": false,
             "weight": 1,
             "weightPos": {
-                "x": 743.9524906625329,
-                "y": 335.73724532855766
+                "x": 315.50621135866055,
+                "y": 208.41696133870664
             }
         },
         {
-            "id": "Arc 22",
-            "name": "A22",
+            "id": "Arc 25",
+            "name": "A25",
             "type": "normal",
             "startingPositionArc": [
                 [
-                    616.5926140501748,
-                    564.0501822773155,
-                    "place 8"
+                    225.5,
+                    273.8125,
+                    "transition 7"
                 ]
             ],
             "endPositionArc": [
                 [
-                    754.5,
-                    424.8125,
-                    "transition 6"
+                    339,
+                    273.8125,
+                    "place 2"
                 ]
             ],
-            "start": "place 8",
-            "end": "transition 6",
+            "start": "transition 7",
+            "end": "place 2",
             "intermediatePoints": [],
             "isEnable": false,
             "weight": 1,
             "weightPos": {
-                "x": 744.3328130798654,
-                "y": 463.4987806448364
+                "x": 304.3589838486225,
+                "y": 293.81250000000006
+            }
+        },
+        {
+            "id": "Arc 26",
+            "name": "A26",
+            "type": "normal",
+            "startingPositionArc": [
+                [
+                    225.5,
+                    303.8125,
+                    "transition 7"
+                ]
+            ],
+            "endPositionArc": [
+                [
+                    328.48414404658416,
+                    375.52615496361324,
+                    "place 3"
+                ]
+            ],
+            "start": "transition 7",
+            "end": "place 3",
+            "intermediatePoints": [],
+            "isEnable": false,
+            "weight": 1,
+            "weightPos": {
+                "x": 288.62746411981027,
+                "y": 372.14309936036085
             }
         }
     ],
-    "nPlaces": 8,
-    "nTransitions": 6,
-    "nArcs": 22
+    "nPlaces": 9,
+    "nTransitions": 7,
+    "nArcs": 26
 }
