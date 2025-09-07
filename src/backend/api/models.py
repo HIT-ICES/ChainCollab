@@ -1237,7 +1237,7 @@ class BPMN(models.Model):
         help_text="related environment_id",
         null=True,
         on_delete=models.CASCADE,
-    )
+    ) 
 
 
 class BPMNInstance(models.Model):
@@ -1359,6 +1359,50 @@ class DMN(models.Model):
     dmnContent = models.TextField(help_text="content of dmn file")
     svgContent = models.TextField(help_text="content of dmn`s svg file")
 
+class ERCChaincode(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        default=make_uuid,
+        editable=False,
+        unique=True,
+        help_text="unique of id of ERC chaincode"
+    )
+    name = models.CharField(
+        max_length=255,
+        help_text="Name of the token chaincode"
+    )
+    token_type = models.CharField(
+        max_length=32,
+        help_text="Token type: ERC20 or ERC721"
+    )
+    chaincode_content = models.TextField(
+        help_text="Go code content of the chaincode"
+    )
+    ffi_content = models.TextField(
+        help_text="ffi content for the chaincode"
+    )
+    chaincode = models.ForeignKey(
+        ChainCode,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        help_text="Related ChainCode object"
+    )
+    environment = models.ForeignKey(
+        Environment,
+        null=True,
+        on_delete=models.CASCADE,
+        help_text="Deployment environment"
+    ) 
+    firefly_url = models.TextField(
+        null=True,
+        blank=True,
+        help_text="Firefly URL for interacting with this ERC Chaincode"
+    )
+    installed = models.BooleanField(
+        default=False,
+        help_text="Whether this ERC chaincode has been installed"
+    )
 
 class APISecretKey(models.Model):
     id = models.UUIDField(

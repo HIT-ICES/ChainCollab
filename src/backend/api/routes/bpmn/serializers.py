@@ -6,6 +6,7 @@ from api.models import (
     Consortium,
     Environment,
     LoleidoOrganization,
+    ERCChaincode,
 )
 from rest_framework import serializers
 
@@ -126,3 +127,8 @@ class BpmnInstanceChaincodeSerializer(serializers.ModelSerializer):
         if obj.chaincode:
             return obj.chaincode.name
         return None
+
+class ERCChaincodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ERCChaincode
+        fields = "__all__"

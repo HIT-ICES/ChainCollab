@@ -229,17 +229,56 @@ export const packageBpmn = async (chaincodeContent: string, ffiContent: string, 
     }
 }
 
-export const packageERC = async (tokenNames: string[], envId:string, orgId: string, bpmnId:string, consortiumId:string = '1 ')=>{
+export const packageERC = async (
+    tokens: { name: string; type: string; chainCode: string; ffi: string; installed: boolean }[],
+    envId: string,
+    orgId: string,
+    consortiumId: string = '1'
+) => {
     try {
-        const response = await api.post(`/consortiums/${consortiumId}/bpmns/${bpmnId}/packageERC`, {
-            tokenNames: tokenNames,
-            envId: envId,
-            orgId: orgId
-        })
-        return response.data;
+        const notInstalledTokens = tokens.filter(token => !token.installed);
+
+        // 准备一个结果数组，保存每个token的执行情况
+        const results: {
+            name: string;
+            success: boolean;
+            message?: string;
+        }[] = [];
+
+        for (const token of notInstalledTokens) {
+            try {
+                const response = await api.post(
+                    `/consortiums/${consortiumId}/ercchaincodes/packageERC`,{
+                        name:token.name,
+                        ERCChaincode: token.chainCode,
+                        ERCType:token.type,
+                        ERCffi:token.ffi,
+                        envId,
+                        orgId
+                    }
+                );
+
+                results.push({
+                    name: token.name,
+                    success: true,
+                    message: response.data?.message || 'Success'
+                });
+
+                console.log(`Token ${token.name} s uccess`);
+            } catch (err: any) {
+                results.push({
+                    name: token.name,
+                    success: false,
+                    message: err?.message || 'Failed'
+                });
+            }
+        }
+
+        return results; // 前端拿到后可以显示进度
+
     } catch (error) {
         console.log(error);
-        return null;
+        return [];
     }
 }
 
@@ -273,7 +312,7 @@ export const getFireflyWithMSP = async (msp) => {
 
 import axios from 'axios'
 
-export const getFireflyIdentity = async (coreUrl:string, idInFirefly:string) =>{
+export const getFireflyIdentity = async (coreUrl: string, idInFirefly: string) => {
     const res = await axios.get(`${coreUrl}/api/v1/identities/${idInFirefly}/verifiers`)
     return res
 }
