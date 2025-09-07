@@ -1,10 +1,11 @@
-import { useEffect, useState,useMemo } from "react"
-import { Card, Row, Col, Button, Steps, Modal, Table, Select, Input } from "antd"
+import { useEffect, useState, useMemo } from "react"
+import { Card, Row, Col, Button, Steps, Modal, Table, Select, Input, Checkbox } from "antd"
 import { useLocation, useNavigate } from "react-router-dom";
-import { retrieveBPMN, packageBpmn,packageERC,updateBPMNStatus, updateBpmnEnv, updateBPMNFireflyUrl, updateBpmnEvents } from "@/api/externalResource"
+import { retrieveBPMN, packageBpmn, packageERC, updateBPMNStatus, updateBpmnEnv, updateBPMNFireflyUrl, updateBpmnEvents } from "@/api/externalResource"
 import { generateChaincode, getMessagesByBpmnContent } from "@/api/translator"
 import { useAvaliableEnvs, useBpmnDetailData } from "./hooks"
 import axios from "axios"
+
 const steps = [
     {
         title: "Initiated",
@@ -40,7 +41,8 @@ const BPMNOverview = () => {
     const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
     const [chainCodeContentForModify, setChainCodeContentForModify] = useState("");
     const [ffiContentForModify, setFFIContentForModify] = useState("");
-
+    const [defaultChainCodeERC20, setDefaultChainCodeERC20] = useState("");
+    const [defaultChainCodeERC721, setDefaultChainCodeERC721] = useState("");
 
     const navigate = useNavigate();
     const [bpmn, { isLoading, isError, isSuccess }, refetchBpmn] = useBpmnDetailData(bpmnId);
@@ -103,40 +105,116 @@ const BPMNOverview = () => {
     }
 
     const ModifyModal = () => {
-        //解析chaincode的内容，生成对应链码名字
-        const extractedTokens = useMemo(() => {
-        if (!chainCodeContentForModify) return [];
-        const regex = /`({.*?})`/gs; // 匹配反引号里的 JSON
-        const matches = [...chainCodeContentForModify.matchAll(regex)];
-        const results = new Set<string>();
 
-        matches.forEach((m) => {
-            try {
-                const obj = JSON.parse(m[1]);
-                const tokenType = obj.tokenType?.toUpperCase();
-                const tokenName = obj.tokenName;
-                if (tokenType && tokenName) {
-                    if (tokenType === "NFT") {
-                        results.add(`ERC721-${tokenName}`);
-                    } else if (tokenType === "FT") {
-                        results.add(`ERC20-${tokenName}`);
-                    }
+        const [tokens, setTokens] = useState([
+            { name: "", type: "", chainCode: "", ffi: "默认ffi", installed: false },
+        ]);
+
+        const [isChainModalOpen, setIsChainModalOpen] = useState(false);
+        const [editingChainIndex, setEditingChainIndex] = useState<number | null>(null);
+        const [editingChainContent, setEditingChainContent] = useState("");
+
+        const [editingFFIIndex, setEditingFFIIndex] = useState<number | null>(null);
+        const [editingFFIContent, setEditingFFIContent] = useState("");
+        const [isFFIModalOpen, setIsFFIModalOpen] = useState(false);
+
+        useEffect(() => {
+            const loadChainCodes = async () => {
+                try {
+                    const res20 = await fetch("/ERC/ERC20.go");
+                    const text20 = await res20.text();
+
+                    const res721 = await fetch("/ERC/ERC721.go");
+                    const text721 = await res721.text();
+
+                    setDefaultChainCodeERC20(text20);
+                    setDefaultChainCodeERC721(text721);
+
+                    // 初始化 tokens，默认一行 ERC20
+                    //setTokens([{ name: "", type: "", chainCode: "", ffi: "", installed: false }]);
+                } catch (err) {
+                    console.error("Failed to load chaincode:", err);
                 }
-            } catch (err) {
-                console.error("解析失败", err);
-            }
-        });
-        return Array.from(results);
-    }, [chainCodeContentForModify]);
+            };
+            loadChainCodes();
+        }, []);
 
         const onModify = async () => {
             await packageBpmn(chainCodeContentForModify, ffiContentForModify, currentOrgId, bpmnId);
-            if (extractedTokens.length>0){
-                     await packageERC(extractedTokens,currentEnvId,currentOrgId,bpmnId);
-            }
+            await packageERC(tokens,currentEnvId,currentOrgId);
             refetchBpmn()
             setButtonLoading(false);
         }
+
+        const handleAddToken = (index: number, type: string = "ERC20") => {
+            const defaultChainCode = type === "ERC20" ? defaultChainCodeERC20 : defaultChainCodeERC721;
+            const newToken = { name: "", type: "", chainCode: "", ffi: "默认ffi", installed: false };
+            const newTokens = [...tokens];
+            newTokens.splice(index + 1, 0, newToken);
+            setTokens(newTokens);
+        };
+
+        const handleChangeToken = (index: number, key: string, value: string) => {
+            const newTokens = [...tokens];
+            newTokens[index][key] = value;
+
+            if (key === "type") {
+                newTokens[index].chainCode =
+                    value === "ERC20" ? defaultChainCodeERC20 : defaultChainCodeERC721;
+            }
+
+            setTokens(newTokens);
+        };
+
+        const handleRemoveToken = (index: number) => {
+            const newTokens = tokens.filter((_, i) => i !== index);
+            setTokens(newTokens);
+        };
+
+        const handleViewChainCode = (index: number) => {
+            setEditingChainIndex(index);
+            setEditingChainContent(tokens[index].chainCode);
+            setIsChainModalOpen(true);
+        };
+
+        const handleViewFFI = (index: number) => {
+            setEditingFFIIndex(index);
+            setEditingFFIContent(tokens[index].ffi || ""); // 假设每个 token 有个 ffi 字段
+            setIsFFIModalOpen(true);
+        };
+
+        // 保存链码内容
+        const handleSaveChainCode = () => {
+            if (editingChainIndex === null) return;
+            const newTokens = [...tokens];
+            newTokens[editingChainIndex].chainCode = editingChainContent;
+            setTokens(newTokens);
+            setIsChainModalOpen(false);
+        };
+
+        const handleSaveFFI = () => {
+            if (editingFFIIndex === null) return;
+            const newTokens = [...tokens];
+            newTokens[editingFFIIndex].ffi = editingFFIContent;
+            setTokens(newTokens);
+            setIsFFIModalOpen(false);
+        };
+
+        //校验
+        const validateTokens = (): boolean => {
+            for (let i = 0; i < tokens.length; i++) {
+                const token = tokens[i];
+                if (!token.name || token.name.trim() === "") {
+                    alert(`Token name  cannot be empty`);
+                    return false;
+                }
+                if (!token.type || token.type.trim() === "") {
+                    alert(`Token type  cannot be empty`);
+                    return false;
+                }
+            }
+            return true;
+        };
 
         return (
             <Modal
@@ -147,6 +225,7 @@ const BPMNOverview = () => {
                     setIsModifyModalOpen(false);
                 }}
                 onOk={async () => {
+                    if (!validateTokens()) return; 
                     onModify();
                     setIsModifyModalOpen(false);
                 }}
@@ -175,17 +254,99 @@ const BPMNOverview = () => {
                     }}
                 />
 
-               {extractedTokens.length > 0 && (
-                <>
-                <h2>Extracted Tokens</h2>
-             <Input.TextArea
-                    value={extractedTokens.join("\n")}
-                    readOnly
-                    autoSize={{ minRows: 3, maxRows: 10 }}
-                    style={{ width: "100%" }}
+                {/* Token 列表 */}
+                <h2>Token ERC Chaincode</h2>
+                {tokens.map((token, index) => (
+                    <div
+                        key={index}
+                        style={{ display: "flex", gap: "10px", marginBottom: "10px", alignItems: "center" }}
+                    >
+                        {/* 已安装勾选框 */}
+                        <Checkbox
+                            checked={token.installed || false}
+                            onChange={(e) => {
+                                const newTokens = [...tokens];
+                                newTokens[index].installed = e.target.checked;
+                                setTokens(newTokens);
+                            }}
+                        >
+                            installed
+                        </Checkbox>
+
+                        {/* 名称 */}
+                        <Input
+                            placeholder="Chaincode name"
+                            value={token.name}
+                            onChange={(e) => handleChangeToken(index, "name", e.target.value)}
+                            style={{ flex: 1 }}
+                        />
+
+                        {/* 类型 */}
+                        <Select
+                            value={token.type}
+                            onChange={(value) => handleChangeToken(index, "type", value)}
+                            style={{ width: 150 }}
+                        >
+                            <Select.Option value="ERC20">ERC20</Select.Option>
+                            <Select.Option value="ERC721">ERC721</Select.Option>
+                        </Select>
+
+                        {/* 查看按钮，已安装则隐藏 */}
+                        {!token.installed && (
+                            <Button size="small" onClick={() => handleViewChainCode(index)}>
+                                code
+                            </Button>
+                        )}
+                        {/* FFI 查看按钮，已安装则隐藏 */}
+                        {!token.installed && (
+                            <Button size="small" onClick={() => handleViewFFI(index)}>
+                                ffi
+                            </Button>
+                        )}
+                        {/* 新增/删除按钮 */}
+                        <div style={{ display: "flex", gap: "5px" }}>
+                            <Button type="dashed" size="small" onClick={() => handleAddToken(index, token.type)}>+</Button>
+                            <Button size="small" onClick={() => handleRemoveToken(index)}>-</Button>
+                        </div>
+                    </div>
+                ))}
+                <Button
+                    type="dashed"
+                    block
+                    style={{ fontSize: 12 }}
+                    onClick={() => handleAddToken(tokens.length - 1, "ERC20")}
+                >
+                    + add new ERC chaincode
+                </Button>
+
+                {/* 链码内容弹窗 */}
+                <Modal
+                    title="ChainCode 内容"
+                    open={isChainModalOpen}
+                    onCancel={() => setIsChainModalOpen(false)}
+                    onOk={handleSaveChainCode}
+                    width="50%"
+                >
+                    <Input.TextArea
+                        value={editingChainContent}
+                        onChange={(e) => setEditingChainContent(e.target.value)}
+                        style={{ width: "100%", height: "300px" }}
                     />
-                </>
-                )}
+                </Modal>
+
+                <Modal
+                    title="FFI 内容"
+                    open={isFFIModalOpen}
+                    onCancel={() => setIsFFIModalOpen(false)}
+                    onOk={handleSaveFFI}
+                    width="50%"
+                >
+                    <Input.TextArea
+                        value={editingFFIContent}
+                        onChange={(e) => setEditingFFIContent(e.target.value)}
+                        style={{ width: "100%", height: "300px" }}
+                    />
+                </Modal>
             </Modal>
         )
     }

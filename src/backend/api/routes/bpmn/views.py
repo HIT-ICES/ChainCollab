@@ -16,6 +16,7 @@ from api.routes.bpmn.serializers import (
     BpmnSerializer,
     BpmnInstanceSerializer,
     DmnSerializer,
+    ERCChaincodeSerializer,
 )
 import yaml
 from api.config import BASE_PATH, BPMN_CHAINCODE_STORE, CURRENT_IP,ERC_PATH
@@ -28,6 +29,7 @@ from api.models import (
     Environment,
     LoleidoOrganization,
     Consortium,
+    ERCChaincode,
 )
 from zipfile import ZipFile
 import json
@@ -244,7 +246,14 @@ class BPMNViewsSet(viewsets.ModelViewSet):
 
         except Exception as e:
             return Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
-
+        
+    # @action(methods=["post"], detail=True, url_path="packageERC2")
+    # def packageERC2(self, request, *args, **kwargs):
+    #     try:
+    #         orgid =request.data.get("orgId")
+    #         tokenname = request.date.get("name")
+    #         tokenChaincode =request.data.get("tokenChaincode")
+    #         env_id = token
 
 class BPMNInstanceViewSet(viewsets.ModelViewSet):
 
@@ -377,3 +386,87 @@ class DmnViewSet(viewsets.ModelViewSet):
             return Response(data=ok(serializer.data), status=status.HTTP_202_ACCEPTED)
         except Exception as e:
             raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+
+
+class ERCChaincodeViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing ERCChaincode objects
+    """
+    def _zip_folder(self,folder_path,output_path):
+        folder_name = os.path.basename(folder_path)  # 顶层目录名
+        with ZipFile(output_path, "w") as zipf:
+            for root, _, files in os.walk(folder_path):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    # 保留顶层目录结构
+                    rel_path = os.path.join(folder_name, os.path.relpath(file_path, folder_path))
+                    zipf.write(file_path, rel_path)
+
+    queryset = ERCChaincode.objects.all()
+    serializer_class = ERCChaincodeSerializer
+    @action(methods=["post"],detail=False,url_path="packageERC")
+    def packageERC(self,request,*args,**kwargs):
+        try:
+            name=request.data.get("name")
+            orgid=request.data.get("orgId")
+            ercChaincode =request.data.get("ERCChaincode")
+            ercType = request.data.get("ERCType")
+            ercFFI  = request.data.get("ERCffi")
+            env_id = request.data.get("envId")
+            headers =request.headers
+            if not all([name, orgid, ercChaincode, ercType, ercFFI, env_id]):
+                return Response({"error": "Missing required parameters"}, status=status.HTTP_400_BAD_REQUEST)
+            if ercType == "ERC20":
+                with open(
+                    ERC_PATH+"/chaincode-go-20/chaincode/token_contract.go",
+                    "w",
+                    encoding="utf-8"
+                ) as file:
+                    file.write(ercChaincode)
+                folder_path =ERC_PATH +"/chaincode-go-20"
+                zip_path = ERC_PATH +"/chaincode-go-20.zip"
+                self._zip_folder(folder_path, zip_path)
+            elif ercType=="ERC721":
+                with open(
+                    ERC_PATH+"/chaincode-go-721/chaincode/erc721-contract.go",
+                    "w",
+                    encoding="utf-8"
+                ) as file:
+                    file.write(ercChaincode)
+                folder_path =ERC_PATH +"/chaincode-go-721"
+                zip_path = ERC_PATH +"/chaincode-go-721.zip"
+                self._zip_folder(folder_path, zip_path)
+            else:
+                return Response({"error": "Unknown ERC type"}, status=status.HTTP_400_BAD_REQUEST)
+            with open(zip_path,"rb") as f:
+                files ={"file":f}
+                response=post(
+                    f"http://{CURRENT_IP}:8000/api/v1/environments/{env_id}/chaincodes/package",
+                    data={
+                    "name":name,
+                    "version": 1,
+                    "language": "golang",
+                    "org_id": orgid,
+                    },
+                    files=files,
+                    headers={"Authorization": headers["Authorization"]},
+            )
+            chaincode_id =response.json()["data"]["id"]
+            chaincode = ChainCode.objects.get(id = chaincode_id)
+            erc = ERCChaincode.objects.create(
+                name = name,
+                token_type = ercType,
+                chaincode_content=ercChaincode,
+                ffi_content = ercFFI,
+                chaincode = chaincode,
+            )
+            erc.save()
+            
+            return Response(
+               {"success": True, "message": "erc Chaincode package success"}, status=202
+            )
+        except Exception as e:
+           return Response(
+                {"success": False, "message": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
