@@ -30,6 +30,17 @@ export const getParticipantsByContent = async (bpmnContent: string) => {
     }
 }
 
+export const getTasksByContent = async (bpmnContent: string) => {
+    try {
+        const response = await translatorAPI.post(`/chaincode/getTaskByBpmnC`, {
+            bpmnContent: bpmnContent
+        })
+        return response.data; 
+    } catch (error) {
+        console.log(error);
+        return [];
+    }
+}
 export const getBusinessRulesByContent = async (bpmnContent: string) => {
     try {
         const response = await translatorAPI.post('/chaincode/getBusinessRulesByBpmnC', {

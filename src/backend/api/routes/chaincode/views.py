@@ -20,6 +20,7 @@ from api.models import (
     Port,
     ResourceSet,
     LoleidoOrganization,
+    ERCChaincode,
 )
 from api.utils.common import make_uuid
 from django.core.paginator import Paginator
@@ -709,6 +710,13 @@ class ChainCodeViewSet(viewsets.ViewSet):
                         bpmn_object.save()
                 except Exception as e:
                     pass
+                try:
+                    erc_object = ERCChaincode.objects.get(chaincode_id=chaincode.id)
+                    if erc_object:
+                        erc_object.installed= True
+                        erc_object.save()
+                except Exception as e:
+                    pass       
             except Exception as e:
                 traceback.print_exc()
                 return Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)

@@ -22,6 +22,7 @@ export const retrieveBPMN = async (bpmnId: string, consortiumId: string = "1") =
 
 }
 
+
 export const addBPMN = async (consortiumId: string, name: string, orgId: string, bpmnContent: string, svgContent: string, participants: string) => {
     try {
         const response = await api.post(`/consortiums/${consortiumId}/bpmns/_upload`, {
@@ -32,6 +33,38 @@ export const addBPMN = async (consortiumId: string, name: string, orgId: string,
             svgContent: svgContent,
             participants: participants
         })
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
+export const updateERCChaincodeFireflyUrl = async (ercId: string, fireflyUrl: string, consortiumId: string = '1') => {
+    try {
+        const response = await api.put(`/consortiums/${consortiumId}/ercchaincodes/${ercId}`, { firefly_url: fireflyUrl })
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
+export const getERCList = async (consortiumId: string) => {
+    try {
+        const response = await api.get(`/consortiums/${consortiumId}/ercchaincodes`)
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        return [];
+    }
+}
+
+
+
+export const retrieveERCChaincode = async (ercId:string ,consortiumId:string ="1")=>{
+    try {
+        const response = await api.get(`/consortiums/${consortiumId}/ercchaincodes/${ercId}`)
         return response.data;
     } catch (error) {
         console.log(error);
@@ -54,6 +87,8 @@ export const addDmn = async (consortiumId: string, name: string, orgId: string, 
         return null;
     }
 }
+
+
 
 export const getDmnList = async (consortiumId: string) => {
     try {
@@ -233,11 +268,25 @@ export const packageERC = async (
     tokens: { name: string; type: string; chainCode: string; ffi: string; installed: boolean }[],
     envId: string,
     orgId: string,
-    consortiumId: string = '1'
+    consortiumId: string = '1',
+    onProgress?: (progress: {
+        index: number;
+        total: number;
+        name: string;
+        success: boolean;
+        message?: string;
+    }) => void
 ) => {
     try {
         const notInstalledTokens = tokens.filter(token => !token.installed);
-
+        const resulttokens: {
+            name: string;
+            type: string;
+            chainCode: string;
+            ffi: string;
+            installed: boolean;
+            ercId: string | null;
+        }[] = [];
         // 准备一个结果数组，保存每个token的执行情况
         const results: {
             name: string;
@@ -245,40 +294,56 @@ export const packageERC = async (
             message?: string;
         }[] = [];
 
-        for (const token of notInstalledTokens) {
+        for (let i = 0; i < notInstalledTokens.length; i++) {
+            const token = notInstalledTokens[i];
             try {
                 const response = await api.post(
-                    `/consortiums/${consortiumId}/ercchaincodes/packageERC`,{
-                        name:token.name,
+                    `/consortiums/${consortiumId}/ercchaincodes/packageERC`,
+                    {
+                        name: token.name,
                         ERCChaincode: token.chainCode,
-                        ERCType:token.type,
-                        ERCffi:token.ffi,
+                        ERCType: token.type,
+                        ERCffi: token.ffi,
                         envId,
-                        orgId
+                        orgId,
                     }
                 );
-
-                results.push({
+                const ercId = response.data?.ercId;
+                resulttokens.push({ ...token, ercId });
+                const result = {
                     name: token.name,
                     success: true,
-                    message: response.data?.message || 'Success'
+                    message: response.data?.message || 'Success',
+                };
+                results.push(result);
+
+                // 通知前端进度
+                onProgress?.({
+                    index: i + 1,
+                    total: notInstalledTokens.length,
+                    ...result,
                 });
 
-                console.log(`Token ${token.name} s uccess`);
             } catch (err: any) {
-                results.push({
+                const result = {
                     name: token.name,
                     success: false,
-                    message: err?.message || 'Failed'
+                    message: err?.message || 'Failed',
+                };
+                results.push(result);
+
+                onProgress?.({
+                    index: i + 1,
+                    total: notInstalledTokens.length,
+                    ...result,
                 });
             }
         }
 
-        return results; // 前端拿到后可以显示进度
-
+        return { results, resulttokens };
     } catch (error) {
         console.log(error);
-        return [];
+        return { results: [], resulttokens: [] };
     }
 }
 

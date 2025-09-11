@@ -1,7 +1,7 @@
-import { useEffect, useState, useMemo } from "react"
-import { Card, Row, Col, Button, Steps, Modal, Table, Select, Input, Checkbox } from "antd"
+import { useEffect, useState, useMemo, useRef } from "react"
+import { Card, Row, Col, Button, Steps, Modal, Table, Select, Input, Checkbox, Progress } from "antd"
 import { useLocation, useNavigate } from "react-router-dom";
-import { retrieveBPMN, packageBpmn, packageERC, updateBPMNStatus, updateBpmnEnv, updateBPMNFireflyUrl, updateBpmnEvents } from "@/api/externalResource"
+import { retrieveBPMN, packageBpmn, packageERC, updateBPMNStatus, updateBpmnEnv, updateBPMNFireflyUrl, updateBpmnEvents, retrieveERCChaincode, updateERCChaincodeFireflyUrl } from "@/api/externalResource"
 import { generateChaincode, getMessagesByBpmnContent } from "@/api/translator"
 import { useAvaliableEnvs, useBpmnDetailData } from "./hooks"
 import axios from "axios"
@@ -43,9 +43,35 @@ const BPMNOverview = () => {
     const [ffiContentForModify, setFFIContentForModify] = useState("");
     const [defaultChainCodeERC20, setDefaultChainCodeERC20] = useState("");
     const [defaultChainCodeERC721, setDefaultChainCodeERC721] = useState("");
-
+    const [defaultFFIERC20, setDefaultFFIERC20] = useState("");
+    const [defaultFFIERC721, setDefaultFFIERC721] = useState("");
     const navigate = useNavigate();
     const [bpmn, { isLoading, isError, isSuccess }, refetchBpmn] = useBpmnDetailData(bpmnId);
+
+    //进度条
+    const [progressList, setProgressList] = useState<
+        { name: string; index: number; total: number; success: boolean; message?: string }[]
+    >([]);
+    const [isProgressModalOpen, setIsProgressModalOpen] = useState(false);
+    //tokens
+    const [ercTokens, setErcTokens] = useState<any[]>([]);
+    const ercTokensRef = useRef(ercTokens);
+    // 页面初始化时尝试恢复
+    useEffect(() => {
+        const saved = localStorage.getItem("ercTokens");
+        if (saved) {
+            setErcTokens(JSON.parse(saved));
+        }
+    }, []);
+
+    // 每次更新时保存到 localStorage
+    useEffect(() => {
+        if (ercTokens.length > 0) {
+            ercTokensRef.current = ercTokens;
+            localStorage.setItem("ercTokens", JSON.stringify(ercTokens)); 
+        }
+        console.log("ercTokensRef updated:", ercTokens);
+    }, [ercTokens]);
 
     const status = bpmn.status;
     const currentNumber = ((status: string) => {
@@ -130,6 +156,13 @@ const BPMNOverview = () => {
                     setDefaultChainCodeERC20(text20);
                     setDefaultChainCodeERC721(text721);
 
+                    // const ffi20 = await fetch("/ERC/ERC20.json");
+                    // const ffiText20 = await ffi20.text();
+                    setDefaultFFIERC20("erc20 ffi");
+
+                    const ffi721 = await fetch("/ERC/ERC721.json");
+                    const ffiText721 = await ffi721.text();
+                    setDefaultFFIERC721(ffiText721);
                     // 初始化 tokens，默认一行 ERC20
                     //setTokens([{ name: "", type: "", chainCode: "", ffi: "", installed: false }]);
                 } catch (err) {
@@ -140,15 +173,32 @@ const BPMNOverview = () => {
         }, []);
 
         const onModify = async () => {
+            setProgressList([]); // 清空进度
+            setIsProgressModalOpen(true); // 打开进度弹窗
+            // ----------------- 打包 BPMN -----------------
+            setProgressList((prev) => [...prev, { name: "BPMN", index: 0, total: 1, success: false, message: "Packaging BPMN..." }]);
             await packageBpmn(chainCodeContentForModify, ffiContentForModify, currentOrgId, bpmnId);
-            await packageERC(tokens,currentEnvId,currentOrgId);
+            const updatedBpmn = await retrieveBPMN(bpmnId);
+            if (updatedBpmn.status == "Generated") {
+                setProgressList((prev) => prev.map(item => item.name === "BPMN" ? { ...item, index: 1, success: true, message: "BPMN packaged" } : item));
+            }
+            else {
+                setProgressList((prev) => prev.map(item => item.name === "BPMN" ? { ...item, index: 1, success: false, message: "BPMN packaging failed" } : item));
+            }
+            //打包ERC
+            const { resulttokens: updatedTokens, results } = await packageERC(tokens, currentEnvId, currentOrgId, "1", (progress) => {
+                setProgressList((prev) => [...prev, progress]);
+            });
+            setErcTokens(updatedTokens)
+            // console.log(updatedTokens)
             refetchBpmn()
             setButtonLoading(false);
         }
 
         const handleAddToken = (index: number, type: string = "ERC20") => {
             const defaultChainCode = type === "ERC20" ? defaultChainCodeERC20 : defaultChainCodeERC721;
-            const newToken = { name: "", type: "", chainCode: "", ffi: "默认ffi", installed: false };
+            const defaultFFI = type === "ERC20" ? defaultFFIERC20 : defaultFFIERC721;
+            const newToken = { name: "", type: "", chainCode: "", ffi: "", installed: false };
             const newTokens = [...tokens];
             newTokens.splice(index + 1, 0, newToken);
             setTokens(newTokens);
@@ -161,6 +211,7 @@ const BPMNOverview = () => {
             if (key === "type") {
                 newTokens[index].chainCode =
                     value === "ERC20" ? defaultChainCodeERC20 : defaultChainCodeERC721;
+                newTokens[index].ffi = value === "ERC20" ? defaultFFIERC20 : defaultFFIERC721;
             }
 
             setTokens(newTokens);
@@ -179,7 +230,7 @@ const BPMNOverview = () => {
 
         const handleViewFFI = (index: number) => {
             setEditingFFIIndex(index);
-            setEditingFFIContent(tokens[index].ffi || ""); // 假设每个 token 有个 ffi 字段
+            setEditingFFIContent(tokens[index].ffi || ""); 
             setIsFFIModalOpen(true);
         };
 
@@ -225,7 +276,7 @@ const BPMNOverview = () => {
                     setIsModifyModalOpen(false);
                 }}
                 onOk={async () => {
-                    if (!validateTokens()) return; 
+                    if (!validateTokens()) return;
                     onModify();
                     setIsModifyModalOpen(false);
                 }}
@@ -254,14 +305,13 @@ const BPMNOverview = () => {
                     }}
                 />
 
-                {/* Token 列表 */}
                 <h2>Token ERC Chaincode</h2>
                 {tokens.map((token, index) => (
                     <div
                         key={index}
                         style={{ display: "flex", gap: "10px", marginBottom: "10px", alignItems: "center" }}
                     >
-                        {/* 已安装勾选框 */}
+                        
                         <Checkbox
                             checked={token.installed || false}
                             onChange={(e) => {
@@ -273,7 +323,6 @@ const BPMNOverview = () => {
                             installed
                         </Checkbox>
 
-                        {/* 名称 */}
                         <Input
                             placeholder="Chaincode name"
                             value={token.name}
@@ -281,7 +330,7 @@ const BPMNOverview = () => {
                             style={{ flex: 1 }}
                         />
 
-                        {/* 类型 */}
+                        
                         <Select
                             value={token.type}
                             onChange={(value) => handleChangeToken(index, "type", value)}
@@ -291,19 +340,19 @@ const BPMNOverview = () => {
                             <Select.Option value="ERC721">ERC721</Select.Option>
                         </Select>
 
-                        {/* 查看按钮，已安装则隐藏 */}
+                       
                         {!token.installed && (
                             <Button size="small" onClick={() => handleViewChainCode(index)}>
                                 code
                             </Button>
                         )}
-                        {/* FFI 查看按钮，已安装则隐藏 */}
+                        
                         {!token.installed && (
                             <Button size="small" onClick={() => handleViewFFI(index)}>
                                 ffi
                             </Button>
                         )}
-                        {/* 新增/删除按钮 */}
+
                         <div style={{ display: "flex", gap: "5px" }}>
                             <Button type="dashed" size="small" onClick={() => handleAddToken(index, token.type)}>+</Button>
                             <Button size="small" onClick={() => handleRemoveToken(index)}>-</Button>
@@ -319,7 +368,7 @@ const BPMNOverview = () => {
                     + add new ERC chaincode
                 </Button>
 
-                {/* 链码内容弹窗 */}
+                
                 <Modal
                     title="ChainCode 内容"
                     open={isChainModalOpen}
@@ -349,6 +398,56 @@ const BPMNOverview = () => {
                 </Modal>
             </Modal>
         )
+    }
+    const ProgressModal = () => {
+        const total = progressList.length > 0 ? progressList[0].total : 0;
+        const done = progressList.length;
+
+        return (
+            <Modal
+                title="Packaging Progress"
+                open={isProgressModalOpen}
+                onCancel={() => {
+                    if (done < total) return; 
+                    setIsProgressModalOpen(false);
+                    refetchBpmn(); 
+                }}
+                footer={[
+                    <Button
+                        key="close"
+                        type="primary"
+                        onClick={() => {
+                            setIsProgressModalOpen(false);
+                            refetchBpmn();
+                        }}
+                        disabled={done < total}
+                    >
+                        {done < total ? "Processing..." : "Close"}
+                    </Button>
+                ]}
+                width="60%"
+            >
+                <Progress
+                    percent={total > 0 ? Math.round((done / total) * 100) : 0}
+                    status={done === total ? "success" : "active"}
+                />
+                <Table
+                    dataSource={progressList}
+                    rowKey="name"
+                    pagination={false}
+                    columns={[
+                        { title: "Token", dataIndex: "name" },
+                        { title: "Progress", render: (_, record) => `${record.index}/${record.total}` },
+                        {
+                            title: "Status",
+                            render: (_, record) => (record.success ? "✅ Success" : "❌ Failed"),
+                        },
+                        { title: "Message", dataIndex: "message" },
+                    ]}
+                    style={{ marginTop: 20 }}
+                />
+            </Modal>
+        );
     }
 
     const onGenerate = async () => {
@@ -421,10 +520,18 @@ const BPMNOverview = () => {
             // 获取 events 字段
             await _register_listeners(parsedFFIContent, fireflyUrlForRegister, chaincodeName, interfaceid);
 
-
             const res = await updateBPMNStatus(bpmnId, "Registered");
+
+            console.log("ercTokens 注册:", ercTokensRef.current);
+            if (ercTokensRef.current.length > 0) {
+                await Promise.all(
+                    ercTokensRef.current.map(token => _registerERC(token, current_ip))
+                );
+            }
+
             refetchBpmn()
             setButtonLoading(false);
+
         } catch (error) {
             console.error("Error occurred while making post request:", error);
         }
@@ -482,6 +589,60 @@ const BPMNOverview = () => {
                 }
             ) : [];
             await Promise.all(all_requests)
+        }
+        async function _registerERC(ercToken: typeof ercTokens[0], current_ip: string) {
+            if (!ercToken.ercId) {
+                console.error("ERC token has no ercId");
+                return;
+            }
+            try {
+                
+                const erc = await retrieveERCChaincode(ercToken.ercId);
+                if (!erc) {
+                    console.error("ERC not found");
+                    return;
+                }
+
+                const chaincodeName = erc.name;
+                const parsedFFIContent = JSON.parse(erc.ffi_content);
+                const chaincodeIdPrefix = chaincodeName + "-" + erc.id.substring(0, 6);
+                parsedFFIContent.name = chaincodeIdPrefix;
+                const fireflyUrlForRegister = `${current_ip}:5000`;
+                
+                const interfaceResponse = await axios.post(
+                    `${fireflyUrlForRegister}/api/v1/namespaces/default/contracts/interfaces`,
+                    parsedFFIContent
+                );
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                const interfaceId = interfaceResponse.data.id;
+    
+                const location = { channel: "default", chaincode: chaincodeName };
+                const apiData = {
+                    name: interfaceResponse.data.name,
+                    interface: { id: interfaceId },
+                    location
+                };
+                await new Promise(resolve => setTimeout(resolve, 4000)); 
+                const apiResponse = await axios.post(
+                    `${fireflyUrlForRegister}/api/v1/namespaces/default/apis`,
+                    apiData
+                );
+                const fireflyUrl = apiResponse.data.urls.ui;
+        
+                if (parsedFFIContent.events) {
+                    for (const event of parsedFFIContent.events) {
+                        const listenerRes = await invokeFireflyListeners(fireflyUrlForRegister, chaincodeName, event.name, interfaceId);
+                        await invokeFireflySubscriptions(fireflyUrlForRegister, `${event.name}-${chaincodeName}`, listenerRes.id);
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                    }
+                }
+
+                await updateERCChaincodeFireflyUrl(erc.id, fireflyUrl)
+
+                console.log(`ERC ${erc.name} registered to Firefly successfully!`);
+            } catch (error) {
+                console.error("Error registering ERC to Firefly:", error);
+            }
         }
     }
 
@@ -562,6 +723,7 @@ const BPMNOverview = () => {
             {
                 <EnvModal open={isEnvModalOpen} setOpen={setIsEnvModalOpen} />
             }
+            {ProgressModal()}
         </>
 
 
