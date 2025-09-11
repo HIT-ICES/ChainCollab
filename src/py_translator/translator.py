@@ -1268,6 +1268,15 @@ class GoChaincodeTranslator:
             for business_rule in self._choreography.query_element_with_type(NodeType.BUSINESS_RULE_TASK)
         }
 
+    #tokenElement
+    def get_task(self):
+        return {
+            task.id:{
+                "name":task.name,
+                "documentation":task.documentation,
+            }
+            for task in self._choreography.query_element_with_type(NodeType.TASK)
+        }
 
 if __name__ == "__main__":
     go_chaincode_translator = GoChaincodeTranslator(

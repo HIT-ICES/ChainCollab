@@ -463,8 +463,51 @@ class ERCChaincodeViewSet(viewsets.ModelViewSet):
             erc.save()
             
             return Response(
-               {"success": True, "message": "erc Chaincode package success"}, status=202
+               {"success": True, "message": "erc Chaincode package success","ercId":erc.id}, status=202
             )
+        except Exception as e:
+           return Response(
+                {"success": False, "message": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+    def retrieve(self, request, pk=None, *args, **kwargs):
+        try:
+            erc = ERCChaincode.objects.get(pk=pk)
+        except ERCChaincode.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = ERCChaincodeSerializer(erc)
+        return Response(serializer.data)
+    
+    def update(self, request, pk=None, *args, **kwargs):
+        """
+        更新 ERCChaincode 实例
+        """
+        try:
+            erc = ERCChaincode.objects.get(pk=pk)
+
+            if "name" in request.data:
+                erc.name = request.data.get("name")
+            if "token_type" in request.data:
+                erc.token_type = request.data.get("token_type")
+            if "chaincode_content" in request.data:
+                erc.chaincode_content = request.data.get("chaincode_content")
+            if "ffi_content" in request.data:
+                erc.ffi_content = request.data.get("ffi_content")
+            if "chaincode_id" in request.data:
+                chaincode_id = request.data.get("chaincode_id")
+                erc.chaincode = ChainCode.objects.get(pk=chaincode_id)
+            if "environment_id" in request.data:
+                env_id = request.data.get("environment_id")
+                erc.environment = Environment.objects.get(pk=env_id)
+            if "firefly_url" in request.data:
+                erc.firefly_url = request.data.get("firefly_url")
+            if "installed" in request.data:
+                erc.installed = bool(request.data.get("installed"))
+
+            erc.save()
+            serializer = ERCChaincodeSerializer(erc)
+            return Response(data=ok(serializer.data), status=status.HTTP_202_ACCEPTED)
         except Exception as e:
            return Response(
                 {"success": False, "message": str(e)},

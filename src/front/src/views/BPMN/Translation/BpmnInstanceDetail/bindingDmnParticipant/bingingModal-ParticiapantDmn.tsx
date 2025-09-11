@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Modal, Button, Alert } from "antd";
 import { BindingDmnModal } from "./bindingDmnModal";
 import { BindingParticipant } from "./bindingParticipantsModal";
@@ -9,6 +9,7 @@ import { useAppSelector } from "@/redux/hooks";
 import { useFireflyData, useParticipantsData } from "../hooks";
 import { getFireflyVerify, invokeCreateInstance } from "@/api/executionAPI";
 import { retrieveBPMN } from "@/api/externalResource";
+import { BindingTaskERC } from "./bindingERCModal";
 
 const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 	const [showBindingParticipantMap, setShowBindingParticipantMap] = useState(
@@ -21,7 +22,16 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 	const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
 	const [errorMessage, setErrorMessage] = useState("");
 	const [participants, syncParticipants] = useParticipantsData(bpmnId);
+	const consortiumId = useAppSelector(state => state.consortium.currentConsortiumId);
+	const [showTaskERCMap, setShowTaskERCMap] = useState<Record<string, any>>({});
+	useEffect(() => {
+		console.log("父组件收到的 showTaskERCMap:", showTaskERCMap);
+	}, [showTaskERCMap]);
 
+	const showTaskERCRef = useRef(showTaskERCMap);
+	useEffect(() => {
+		showTaskERCRef.current = showTaskERCMap;
+	}, [showTaskERCMap]);
 	const CreateInstance = async (onlyReturnParam = false) => {
 		const createInstanceParam = await constructParam();
 
@@ -33,11 +43,24 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 			Object.assign(singleObject, item);
 		}
 
+		if (Object.keys(showTaskERCMap).length > 0) {
+			const tokenElementsMap: Record<string, string> = {};
+			Object.entries(showTaskERCMap).forEach(([taskId, value]) => {
+				// 动态生成 ERCName 的 key
+				const ercNameKey = Object.keys(value).find(k => k.endsWith("_ERCName"));
+				tokenElementsMap[taskId] = ercNameKey ? value[ercNameKey] : "";
+			});
+
+			// 将生成的 map 加入创建参数
+			singleObject["ERCChaincodeNames"] = tokenElementsMap;
+		}
+
+
 		const bpmn = await retrieveBPMN(bpmnId);
 		const chaincode_url = bpmn.firefly_url;
 
 		if (onlyReturnParam) {
-			return { param: singleObject, url: chaincode_url.slice(0,-4), contract_name:bpmn.name.split(".")[0], };
+			return { param: singleObject, url: chaincode_url.slice(0, -4), contract_name: bpmn.name.split(".")[0], };
 		}
 
 		await invokeCreateInstance(chaincode_url, singleObject);
@@ -163,29 +186,42 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 		>
 			<div>
 				<div style={{ display: "flex", marginBottom: "20px", height: "600px" }}>
-					<div style={{ flex: "0 1 35%", paddingRight: "10px" }}>
-						<h2>Binding BPMN businessRuleTasks and DMN</h2>
-						<BindingDmnModal
-							bpmnId={bpmnId}
-							DmnBindingInfo={DmnBindingInfo}
-							setDmnBindingInfo={setDmnBindingInfo}
-						/>
+					<div style={{ flex: "0 1 35%", paddingRight: "10px", display: "flex", flexDirection: "column" }}>
+
+						<div style={{ flex: "0 1 auto", marginBottom: "10px" }}>
+							<h2>Binding BPMN businessRuleTasks and DMN</h2>
+							<BindingDmnModal
+								bpmnId={bpmnId}
+								DmnBindingInfo={DmnBindingInfo}
+								setDmnBindingInfo={setDmnBindingInfo}
+							/>
+						</div>
+
+						<div style={{ flex: "0 1 200px", overflowY: "auto" }}>
+							<h2>Binding Tasks to ERC</h2>
+							<div style={{ padding: "0 5px" }}>
+								<BindingTaskERC
+									bpmnId={bpmnId}
+									taskERCMap={showTaskERCMap}
+									setTaskERCMap={setShowTaskERCMap}
+								/>
+							</div>
+						</div>
 					</div>
-					<div
-						style={{ flex: "0 1 65%", paddingLeft: "10px", height: "600px" }}
-					>
+
+
+					<div style={{ flex: "0 1 65%", paddingLeft: "10px", height: "600px", overflow: "auto" }}>
 						<h2>Binding Participants</h2>
 						<BindingParticipant
 							participants={participants}
 							showBindingParticipantMap={showBindingParticipantMap}
 							setShowBindingParticipantMap={setShowBindingParticipantMap}
 							showBindingParticipantValueMap={showBindingParticipantValueMap}
-							setShowBindingParticipantValueMap={
-								setShowBindingParticipantValueMap
-							}
+							setShowBindingParticipantValueMap={setShowBindingParticipantValueMap}
 						/>
 					</div>
 				</div>
+
 				<Button
 					type="primary"
 					onClick={async () => {
@@ -199,7 +235,7 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 					Get CreateInstance Param
 				</Button>
 
-				<div style={{ textAlign: "center", height: "400px", marginTop:"-350px", marginBottom:"400px" }}>
+				<div style={{ textAlign: "center", height: "400px", marginTop: "-250px", marginBottom: "400px" }}>
 					<SVGDisplayComponent bpmnId={bpmnId} />
 				</div>
 				{errorMessage && (
@@ -218,7 +254,7 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 
 // TODO 调整SVG大小到固定尺寸
 const SVGDisplayComponent = ({ bpmnId }) => {
-	const [svgContent, {}, refreshSvg] = useBpmnSvg(bpmnId);
+	const [svgContent, { }, refreshSvg] = useBpmnSvg(bpmnId);
 
 	return (
 		<div

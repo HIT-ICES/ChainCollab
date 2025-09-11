@@ -67,6 +67,10 @@ async def get_businessRules_by_bpmn_content(bpmn: ChaincodePartParams):
     translator: GoChaincodeTranslator = GoChaincodeTranslator(bpmn.bpmnContent)
     return JSONResponse(content=translator.get_businessrules())
 
+@app.api_route("/api/v1/chaincode/getTaskByBpmnC", methods =["POST"])
+async def get_task_by_bpmn_content(bpmn:ChaincodePartParams):
+    translator: GoChaincodeTranslator = GoChaincodeTranslator(bpmn.bpmnContent)
+    return JSONResponse(content = translator.get_task())
 
 @app.get("/api/v1/ffi/generate")
 async def generate_ffi():

@@ -36,6 +36,7 @@ const MembershipDetailInEnv = lazy(() => import("@/views/Environment/Dashboard/O
 // const BPMNInstanceOverview = lazy(() => import("@/views/BPMN/Translation/BpmnInstanceDetail"));
 const BPMNOverview = lazy(() => import("@/views/BPMN/Translation/BpmnDetail"));
 const DmnOverview = lazy(() => import("@/views/BPMN/Dmn"));
+const ERCOverview = lazy(() => import("@/views/BPMN/ERC"))
 
 const withLoadingComponent = (Comp: JSX.Element) => (
   <React.Suspense fallback={<SkeletonLoading />}>{Comp}</React.Suspense>
@@ -261,6 +262,13 @@ const routes: routesType[] = [
             element: withLoadingComponent(<DmnOverview />),
             meta: {
               title: "Dmn",
+            }
+          },
+          {
+            path:"/bpmn/erc",
+            element:withLoadingComponent(<ERCOverview/>),
+            meta:{
+              title:"ERC Chaincode",
             }
           },
           {
