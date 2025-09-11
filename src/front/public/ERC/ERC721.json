@@ -1,0 +1,368 @@
+{
+    "namespace": "erc721",
+    "name": "TokenERC721Contract",
+    "description": "FFI for Hyperledger Fabric ERC721 contract",
+    "version": "1.0",
+    "methods": [
+        {
+            "name": "AddMintAuthority",
+            "description": "Add minting authority for an instance",
+            "params": [
+                {
+                    "name": "instanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "allowedMSPs",
+                    "schema": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "BalanceOf",
+            "description": "Return number of NFTs owned by an account",
+            "params": [
+                {
+                    "name": "owner",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": [
+                {
+                    "name": "balance",
+                    "schema": {
+                        "type": "integer"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "OwnerOf",
+            "description": "Return the owner of a given NFT",
+            "params": [
+                {
+                    "name": "tokenId",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": [
+                {
+                    "name": "owner",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Approve",
+            "description": "Approve an operator for a specific NFT",
+            "params": [
+                {
+                    "name": "operator",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "tokenId",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": [
+                {
+                    "name": "success",
+                    "schema": {
+                        "type": "boolean"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "SetApprovalForAll",
+            "description": "Approve or revoke an operator for all NFTs of the caller",
+            "params": [
+                {
+                    "name": "operator",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "approved",
+                    "schema": {
+                        "type": "boolean"
+                    }
+                }
+            ],
+            "returns": [
+                {
+                    "name": "success",
+                    "schema": {
+                        "type": "boolean"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "IsApprovedForAll",
+            "description": "Check if an operator is approved for all NFTs of an owner",
+            "params": [
+                {
+                    "name": "owner",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "operator",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": [
+                {
+                    "name": "approved",
+                    "schema": {
+                        "type": "boolean"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GetApproved",
+            "description": "Return the approved operator for a specific NFT",
+            "params": [
+                {
+                    "name": "tokenId",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": [
+                {
+                    "name": "operator",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "TransferFrom",
+            "description": "Transfer ownership of an NFT",
+            "params": [
+                {
+                    "name": "from",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "to",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "tokenId",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": [
+                {
+                    "name": "success",
+                    "schema": {
+                        "type": "boolean"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Name",
+            "description": "Return the name of the token collection",
+            "params": [],
+            "returns": [
+                {
+                    "name": "name",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Symbol",
+            "description": "Return the symbol of the token collection",
+            "params": [],
+            "returns": [
+                {
+                    "name": "symbol",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "TokenURI",
+            "description": "Return the URI for a given tokenId",
+            "params": [
+                {
+                    "name": "tokenId",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": [
+                {
+                    "name": "uri",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "TotalSupply",
+            "description": "Return the total number of NFTs",
+            "params": [],
+            "returns": [
+                {
+                    "name": "totalSupply",
+                    "schema": {
+                        "type": "integer"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Initialize",
+            "description": "Initialize contract with name and symbol",
+            "params": [
+                {
+                    "name": "name",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "symbol",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": [
+                {
+                    "name": "success",
+                    "schema": {
+                        "type": "boolean"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "MintWithTokenURI",
+            "description": "Mint a new NFT with a tokenURI",
+            "params": [
+                {
+                    "name": "tokenId",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "tokenURI",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "instanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": [
+                {
+                    "name": "nft",
+                    "schema": {
+                        "type": "object"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Burn",
+            "description": "Burn a specific NFT",
+            "params": [
+                {
+                    "name": "tokenId",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": [
+                {
+                    "name": "success",
+                    "schema": {
+                        "type": "boolean"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "ClientAccountBalance",
+            "description": "Return balance of caller's account",
+            "params": [],
+            "returns": [
+                {
+                    "name": "balance",
+                    "schema": {
+                        "type": "integer"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "ClientAccountID",
+            "description": "Return the caller's account ID",
+            "params": [],
+            "returns": [
+                {
+                    "name": "clientID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        }
+    ],
+    "events": [
+        {
+            "name": "Transfer"
+        }
+    ]
+}
