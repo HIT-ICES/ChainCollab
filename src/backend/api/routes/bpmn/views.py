@@ -504,6 +504,8 @@ class ERCChaincodeViewSet(viewsets.ModelViewSet):
                 erc.firefly_url = request.data.get("firefly_url")
             if "installed" in request.data:
                 erc.installed = bool(request.data.get("installed"))
+            if "token" in request.data:
+                erc.token = request.data.get("token")
 
             erc.save()
             serializer = ERCChaincodeSerializer(erc)

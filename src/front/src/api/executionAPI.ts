@@ -220,12 +220,79 @@ export const invokeCreateInstance = async (chaincodeUrl: string, data: any) => {
                 "initParametersBytes": JSON.stringify(data)
             }
         });
+        console.log("调用的instanceid", res.data);
         return res.data
     } catch (error) {
         console.error("Error occurred while making post request:", error);
         return [];
     }
 }
+
+export const invokeTokenInitialize = async (chaincodeUrl: string, name: string, chaincodeName: string) => {
+    console.log("chaincodeUrl", chaincodeUrl);
+    console.log("name", name);
+    console.log("chaincodeName",chaincodeName)
+
+    try {
+        const res = await fireflyAPI.post(`${chaincodeUrl.slice(0, -4)}/invoke/TokenElementInitialize`, {
+            input: {
+                initParametersBytes: JSON.stringify({ name, chaincodeName })
+            }
+        });
+        return res.data;
+    } catch (error) {
+        console.error("Error occurred while invoking TokenElementInitialize:", error);
+        return [];
+    }
+}
+
+export const invokeAddAuthority = async (
+    chaincodeUrl: string,
+    instanceId: string,
+    allowedMSPs: string[],
+    chaincodeName: string,
+) => {
+    const payload = {
+        InstanceID: instanceId,
+        allowedMSPs: allowedMSPs,
+        chaincodeName: chaincodeName
+    };
+    console.log("AddAuthority payload:", payload);
+    try {
+        const res = await fireflyAPI.post(`${chaincodeUrl.slice(0, -4)}/invoke/AddMintAuthority`,
+            {
+                input: {
+                    initParametersBytes: JSON.stringify(payload)
+                }
+            }
+        );
+        console.log("AddAuthority 返回结果:", res.data);
+        return res.data;
+    } catch (error) {
+        console.error("Error occurred while invoking AddMintAuthority_nft:", error);
+        return [];
+    }
+};
+
+
+export const invokeFTTokenInitialize = async (chaincodeUrl: string, name: string, chaincodeName: string) => {
+    console.log("chaincodeUrl", chaincodeUrl);
+    console.log("name", name);
+    console.log("chaincodeName",chaincodeName)
+
+    try {
+        const res = await fireflyAPI.post(`${chaincodeUrl.slice(0, -4)}/invoke/TokenElementInitializeFT`, {
+            input: {
+                initParametersBytes: JSON.stringify({ name, chaincodeName })
+            }
+        });
+        return res.data;
+    } catch (error) {
+        console.error("Error occurred while invoking TokenElementInitialize:", error);
+        return [];
+    }
+}
+
 export const invokeFireflyListeners = async (coreUrl: string, contractName: string, eventName: string, interfaceId: string) => {
     try {
         const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/contracts/listeners`, {
@@ -280,7 +347,7 @@ export const registerInterface = async (coreUrl: string, ffiConetnt: string, int
     try {
         let parsedData = JSON.parse(ffiConetnt);
         parsedData.name = interfaceName;
-        const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/contracts/interfaces`, 
+        const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/contracts/interfaces`,
             parsedData
         );
         return res.data;
@@ -291,7 +358,7 @@ export const registerInterface = async (coreUrl: string, ffiConetnt: string, int
 }
 
 
-export const registerAPI = async (coreUrl: string, chaincodeName:string, channel:string, apiName: string, interfaceId: string) => {
+export const registerAPI = async (coreUrl: string, chaincodeName: string, channel: string, apiName: string, interfaceId: string) => {
     try {
         const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/apis`, {
             "name": apiName,

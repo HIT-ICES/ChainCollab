@@ -1148,27 +1148,10 @@ class GoChaincodeTranslator:
 
         ffi_items.append(
             self._generate_ffi_item(
-                name="AddMintAuthority_nft",
+                name="AddMintAuthority",
                 pathname="",
                 description="add  authority of nft mint",
-                params=[
-                    self._instance_id_param(),
-                    self._token_allowedMSPs_param(),
-                    self._token_tokenelementname_param(),
-                ],
-            )
-        )
-        
-        ffi_items.append(
-            self._generate_ffi_item(
-                name="AddMintAuthority_ft",
-                pathname="",
-                description="add  authority of nft mint",
-                params=[
-                    self._instance_id_param(),
-                    self._token_allowedMSPs_param(),
-                    self._token_tokenelementname_param(),
-                ],
+               params=[{"name": "initParametersBytes", "schema": {"type": "string"}}],
             )
         )
 
@@ -1177,9 +1160,7 @@ class GoChaincodeTranslator:
                 name="TokenElementInitialize",
                 pathname="",
                 description="",
-                params=[
-                    self._token_tokenERCname_param(),
-                ],
+                params=[{"name": "initParametersBytes", "schema": {"type": "string"}}],
             )
         )
 
@@ -1188,9 +1169,7 @@ class GoChaincodeTranslator:
                 name="TokenElementInitializeFT",
                 pathname="",
                 description="",
-                params=[
-                    self._token_tokenERCname_param(),
-                ],
+                 params=[{"name": "initParametersBytes", "schema": {"type": "string"}}],
             )
         )
 

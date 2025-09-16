@@ -8,7 +8,7 @@ import { getFireflyList, getResourceSets } from "@/api/resourceAPI";
 import { useAppSelector } from "@/redux/hooks";
 import { useFireflyData, useParticipantsData } from "../hooks";
 import { getFireflyVerify, invokeCreateInstance } from "@/api/executionAPI";
-import { retrieveBPMN } from "@/api/externalResource";
+import { bindTokensToERCs, ERCAddMintAuthority, getMaxInstanceChaincodeId, retrieveBPMN } from "@/api/externalResource";
 import { BindingTaskERC } from "./bindingERCModal";
 
 const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
@@ -42,7 +42,7 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 		for (const item of createInstanceParam) {
 			Object.assign(singleObject, item);
 		}
-
+		//处理ERCbind参数
 		if (Object.keys(showTaskERCMap).length > 0) {
 			const tokenElementsMap: Record<string, string> = {};
 			Object.entries(showTaskERCMap).forEach(([taskId, value]) => {
@@ -64,6 +64,13 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 		}
 
 		await invokeCreateInstance(chaincode_url, singleObject);
+		const ercIdTokenMap = await extractErcIdTokenMap(showTaskERCMap);
+		const msps = extractMsps(singleObject);//暂时没用
+		await bindTokensToERCs(ercIdTokenMap, chaincode_url,consortiumId);
+		const instanceid = await getMaxInstanceChaincodeId(bpmnId)
+		//console.log("得到的instanceid为",instanceid) 
+		await ERCAddMintAuthority(ercIdTokenMap,chaincode_url,consortiumId,instanceid.toString(),msps)
+
 
 		async function constructParam() {
 			const createPromise = async (value, key) => {
@@ -165,6 +172,35 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 
 			return createInstanceParam;
 		}
+
+
+		function extractErcIdTokenMap(taskERCMap: Record<string, any>) {
+			const ercIdTokenMap: Record<string, string> = {};
+
+			Object.values(taskERCMap).forEach((value: any) => {
+				const ercIdKey = Object.keys(value).find(k => k.endsWith("_ERCID"));
+				if (ercIdKey) {
+					const ercId = value[ercIdKey];
+					const tokenName = value.tokenName || "";
+					if (ercId) {
+						ercIdTokenMap[ercId] = tokenName;
+					}
+				}
+			});
+
+			return ercIdTokenMap;
+		}
+
+		//token权限控制获得MSPs
+		function extractMsps(param: Record<string, any>): string[] {
+			const msps = Object.entries(param)
+				.filter(([key]) => key.startsWith("Participant_"))
+				.map(([, value]) => value.msp)
+				.filter(Boolean);
+
+			return Array.from(new Set(msps));
+		}
+
 	};
 
 	const handleOK = async () => {
