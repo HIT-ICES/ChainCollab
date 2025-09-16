@@ -50,6 +50,79 @@ export const updateERCChaincodeFireflyUrl = async (ercId: string, fireflyUrl: st
     }
 }
 
+
+export const updateERCChaincodebindToken = async (
+    ercId: string,
+    token: string,
+    consortiumId: string = "1"
+) => {
+    try {
+        const response = await api.put(
+            `/consortiums/${consortiumId}/ercchaincodes/${ercId}`,
+            { token: token }
+        );
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+};
+
+export const bindTokensToERCs = async (
+    ercIdTokenMap: Record<string, string>,
+    chaincodeUrl: string,
+    consortiumId: string,
+) => {
+    for (const [ercId, token] of Object.entries(ercIdTokenMap)) {
+        try {
+            const erc = await retrieveERCChaincode(ercId, consortiumId);
+
+            if (!erc) {
+                console.log(` 无法获取 ERC 对象: ${ercId}`);
+                continue;
+            }
+
+            if (erc.installed === true && (!erc.token || erc.token === "")) {
+                console.log(`更新 ERC ${ercId} 绑定 Token: ${token}`);
+                if (erc.token_type == "ERC721") {
+                    invokeTokenInitialize(chaincodeUrl, token, erc.name);
+                }
+                else if (erc.token_type == "ERC20") {
+                    invokeFTTokenInitialize(chaincodeUrl, token, erc.name);
+                }
+                await updateERCChaincodebindToken(ercId, token, consortiumId);
+            } else {
+                console.log(`初始化失败，链码未安装或者链码已初始化`);
+            }
+        } catch (err) {
+            console.error(` ERC ${ercId} 出错:`, err);
+        }
+    }
+}
+
+export const ERCAddMintAuthority = async (
+    ercIdTokenMap: Record<string, string>,
+    chaincodeUrl: string,
+    consortiumId: string,
+    instanceId: string,
+    msps: string[],
+) => {
+    for (const [ercId, token] of Object.entries(ercIdTokenMap)) {
+        try {
+            const erc = await retrieveERCChaincode(ercId, consortiumId);
+
+            if (!erc) {
+                console.log(` 无法获取 ERC 对象: ${ercId}`);
+                continue;
+            }
+            invokeAddAuthority(chaincodeUrl, instanceId, msps, erc.name)
+
+        } catch (err) {
+            console.error(` ERC ${ercId} 出错:`, err);
+        }
+    }
+}
+
 export const getERCList = async (consortiumId: string) => {
     try {
         const response = await api.get(`/consortiums/${consortiumId}/ercchaincodes`)
@@ -62,7 +135,7 @@ export const getERCList = async (consortiumId: string) => {
 
 
 
-export const retrieveERCChaincode = async (ercId:string ,consortiumId:string ="1")=>{
+export const retrieveERCChaincode = async (ercId: string, consortiumId: string = "1") => {
     try {
         const response = await api.get(`/consortiums/${consortiumId}/ercchaincodes/${ercId}`)
         return response.data;
@@ -143,6 +216,29 @@ export const deleteBPMNInstance = async (bpmnInstanceId: string, bpmnId: string)
     try {
         const response = await api.delete(`/bpmns/${bpmnId}/bpmn-instances/${bpmnInstanceId}`)
         return response.data;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
+
+export const getMaxInstanceChaincodeId = async (bpmnId: string) => {
+    try {
+        const response = await api.get(`/bpmns/${bpmnId}/bpmn-instances`);
+        const instances = response.data?.data || [];
+
+        if (instances.length === 0) {
+            return 0; // 没有实例
+        }
+
+        const maxId = Math.max(
+            ...instances
+                .map((item: any) => item.instance_chaincode_id)
+                .filter((id: number | null) => id !== null) // 过滤掉 null
+        );
+
+        return maxId + 1;
     } catch (error) {
         console.log(error);
         return null;
@@ -273,7 +369,7 @@ export const packageERC = async (
         index: number;
         total: number;
         name: string;
-        success: boolean;
+        status: "packaging" | "success" | "failed";
         message?: string;
     }) => void
 ) => {
@@ -290,12 +386,19 @@ export const packageERC = async (
         // 准备一个结果数组，保存每个token的执行情况
         const results: {
             name: string;
-            success: boolean;
+            status: "success" | "failed";
             message?: string;
         }[] = [];
 
         for (let i = 0; i < notInstalledTokens.length; i++) {
             const token = notInstalledTokens[i];
+            onProgress?.({
+                index: i + 1,
+                total: notInstalledTokens.length,
+                name: token.name,
+                status: "packaging",
+                message: "Packaging..."
+            });
             try {
                 const response = await api.post(
                     `/consortiums/${consortiumId}/ercchaincodes/packageERC`,
@@ -312,8 +415,8 @@ export const packageERC = async (
                 resulttokens.push({ ...token, ercId });
                 const result = {
                     name: token.name,
-                    success: true,
-                    message: response.data?.message || 'Success',
+                    status: "success" as const,
+                    message: response.data?.message || "Success",
                 };
                 results.push(result);
 
@@ -321,21 +424,24 @@ export const packageERC = async (
                 onProgress?.({
                     index: i + 1,
                     total: notInstalledTokens.length,
-                    ...result,
+                    name: token.name,
+                    status: "success",
+                    message: response.data?.message || "Success"
                 });
 
             } catch (err: any) {
                 const result = {
                     name: token.name,
-                    success: false,
-                    message: err?.message || 'Failed',
+                    status: "failed" as const,
+                    message: err?.message || "Failed",
                 };
                 results.push(result);
-
                 onProgress?.({
                     index: i + 1,
                     total: notInstalledTokens.length,
-                    ...result,
+                    name: token.name,
+                    status: "failed",
+                    message: err?.message || "Failed"
                 });
             }
         }
@@ -376,6 +482,7 @@ export const getFireflyWithMSP = async (msp) => {
 }
 
 import axios from 'axios'
+import { invokeAddAuthority, invokeFTTokenInitialize, invokeTokenInitialize } from "./executionAPI";
 
 export const getFireflyIdentity = async (coreUrl: string, idInFirefly: string) => {
     const res = await axios.get(`${coreUrl}/api/v1/identities/${idInFirefly}/verifiers`)

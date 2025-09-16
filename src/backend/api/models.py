@@ -1403,6 +1403,13 @@ class ERCChaincode(models.Model):
         default=False,
         help_text="Whether this ERC chaincode has been installed"
     )
+    token = models.CharField(
+    max_length=255,
+    null=True,
+    blank=True,
+    help_text="Token identifier string"
+    )
+    
 
 class APISecretKey(models.Model):
     id = models.UUIDField(

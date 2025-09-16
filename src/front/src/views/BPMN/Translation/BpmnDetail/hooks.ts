@@ -2,7 +2,7 @@ import api from '@/api/apiConfig';
 import { useState, useEffect } from 'react';
 import { useQuery } from 'react-query';
 
-import { retrieveBPMN, retrieveBPMNInstance } from '@/api/externalResource';
+import { getERCList, retrieveBPMN, retrieveBPMNInstance } from '@/api/externalResource';
 import { getResourceSets } from '@/api/resourceAPI';
 import { useAppSelector } from '@/redux/hooks';
 import { getEnvironmentList } from '@/api/platformAPI';
@@ -75,7 +75,6 @@ export const useAvailableMembers = (envId: string): [
     return [members, () => setSyncFlag(!syncFlag)]
 }
 
-import { retrieveBPMN } from '@/api/externalResource'
 
 export const useParticipantsData = (bpmnId: string): [
     any[], () => void
@@ -150,6 +149,7 @@ export const useBPMNBindingDataReverse = (bpmnInstanceId: string): [
 
 
 import { getFireflyList } from '@/api/resourceAPI.ts';
+import { match } from 'assert';
 export const useFireflyData = (
     envId: string,
     orgId: string,
@@ -185,3 +185,27 @@ export const useFireflyData = (
     }, [syncFlag, envId, orgId, membershipId]);
     return [firefly, () => { setSyncFlag(!syncFlag) }];
 }
+
+export const checkERCinstall = async (
+    consortiumId: string,
+    tokens: Array<{ [key: string]: any }>
+): Promise<boolean> => {
+    try {
+        const ercList = await getERCList(consortiumId);
+        console.log("erclist为",ercList)
+        for (const token of tokens) {
+            const matchedERC = ercList.find(erc => erc.name === token.name);
+            console.log("matchedERC",matchedERC);
+            console.log(matchedERC.name);
+            console.log(matchedERC.installed)
+            if (!matchedERC || !matchedERC.installed) {
+                return false;
+            }
+        }
+        return true;
+    } catch (e) {
+        console.error("checkERCinstall error:", e);
+        return false;
+    }
+};
+

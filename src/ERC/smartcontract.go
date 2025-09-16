@@ -28,6 +28,8 @@ type InitParameters struct {
 	Participant_09cjol2 Participant `json:"Participant_09cjol2"`
 	Participant_0sa2v7d Participant `json:"Participant_0sa2v7d"`
 	Participant_19j1e3o Participant `json:"Participant_19j1e3o"`
+
+	ERCChaincodeNames map[string]string `json:"ERCChaincodeNames"`
 }
 
 type ContractInstance struct {
@@ -120,6 +122,7 @@ type TokenElement struct {
 	State           ElementState `json:"State"`
 	OperationNumber string       `json:"operationNumber"`
 	TokenKey        string       `json:"TokenKey"`
+	ChaincodeName   string       `json:"chaincodeName"`
 }
 
 type Token struct {
@@ -128,7 +131,7 @@ type Token struct {
 	TokenID      string            `json:"tokenID"`
 	TokenURL     string            `json:"tokenURL"`
 	TokenName    string            `json:"tokenName"`
-	TokenBalance string            `json:  "tokenBalance"` // For FT
+	TokenBalance string            `json:"tokenBalance"` // For FT
 	FtBalance    map[string]string `json:"FtBalance"`
 }
 
@@ -156,7 +159,7 @@ func (cc *SmartContract) CreateToken(ctx contractapi.TransactionContextInterface
 	}
 	return returnToken, nil
 }
-func (cc *SmartContract) CreateTokenElement(ctx contractapi.TransactionContextInterface, instance *ContractInstance, tokenElementID string, state ElementState, Jsonstr string) (*TokenElement, error) {
+func (cc *SmartContract) CreateTokenElement(ctx contractapi.TransactionContextInterface, instance *ContractInstance, tokenElementID string, state ElementState, Jsonstr string, chaincodeName string) (*TokenElement, error) {
 	var fla FlatokenElement
 	err := json.Unmarshal([]byte(Jsonstr), &fla)
 	if err != nil {
@@ -198,6 +201,7 @@ func (cc *SmartContract) CreateTokenElement(ctx contractapi.TransactionContextIn
 		State:           fla.State,
 		OperationNumber: fla.TokenNumber,
 		TokenKey:        tokenKey,
+		ChaincodeName:   chaincodeName,
 	}
 	instance.InstanceTokenElements[tokenElementID] = &tokenElement
 
@@ -1084,11 +1088,11 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 	cc.CreateGateway(ctx, &instance, "Gateway_1fbifca", DISABLED)
 
 	//原料创建阶段
-	cc.CreateTokenElement(ctx, &instance, "Activity_0voe68z", DISABLED, `{"assetType": "transferable","operation": "mint","tokenName": "rawMaterial","caller": "Participant_0sa2v7d","tokenType": "NFT","tokenId": "1", "tokenURL":"http://www.github.com"}`)
-	cc.CreateTokenElement(ctx, &instance, "Activity_0l6jyqh", DISABLED, `{"assetType": "transferable","operation": "Transfer","tokenName": "rawMaterial","caller": "Participant_0sa2v7d","callee": ["Participant_19mgbdn"],"tokenType": "NFT","tokenId": "1","tokenURL": "http://www.github.com"}`)
-	cc.CreateTokenElement(ctx, &instance, "Activity_0xhcefo", DISABLED, `{"assetType": "transferable","operation": "mint","tokenName": "product","caller": "Participant_19mgbdn","tokenType": "NFT","tokenId": "2","tokenURL": "http://www.github.com"}`)
-	cc.CreateTokenElement(ctx, &instance, "Activity_08b7pzv", DISABLED, `{"assetType": "transferable","operation": "burn","tokenName": "product","caller": "Participant_0w6qkdf","tokenType": "NFT","tokenId": "2","tokenURL": "http://www.github.com"}`)
-	cc.CreateTokenElement(ctx, &instance, "Activity_1u61szh", DISABLED, `{"assetType": "transferable","operation": "Transfer","tokenName": "product","caller": "Participant_19mgbdn","callee": ["Participant_0w6qkdf"],"tokenType": "NFT","tokenId": "2","tokenURL": "http://www.github.com"}`)
+	cc.CreateTokenElement(ctx, &instance, "Activity_0voe68z", DISABLED, `{"assetType": "transferable","operation": "mint","tokenName": "rawMaterial","caller": "Participant_0sa2v7d","tokenType": "NFT","tokenId": "1", "tokenURL":"http://www.github.com"}`, initParameters.ERCChaincodeNames["Activity_0voe68z"])
+	cc.CreateTokenElement(ctx, &instance, "Activity_0l6jyqh", DISABLED, `{"assetType": "transferable","operation": "Transfer","tokenName": "rawMaterial","caller": "Participant_0sa2v7d","callee": ["Participant_19mgbdn"],"tokenType": "NFT","tokenId": "1","tokenURL": "http://www.github.com"}`, initParameters.ERCChaincodeNames["Activity_0l6jyqh"])
+	cc.CreateTokenElement(ctx, &instance, "Activity_0xhcefo", DISABLED, `{"assetType": "transferable","operation": "mint","tokenName": "product","caller": "Participant_19mgbdn","tokenType": "NFT","tokenId": "2","tokenURL": "http://www.github.com"}`, initParameters.ERCChaincodeNames["Activity_0xhcefo"])
+	cc.CreateTokenElement(ctx, &instance, "Activity_08b7pzv", DISABLED, `{"assetType": "transferable","operation": "burn","tokenName": "product","caller": "Participant_0w6qkdf","tokenType": "NFT","tokenId": "2","tokenURL": "http://www.github.com"}`, initParameters.ERCChaincodeNames["Activity_08b7pzv"])
+	cc.CreateTokenElement(ctx, &instance, "Activity_1u61szh", DISABLED, `{"assetType": "transferable","operation": "Transfer","tokenName": "product","caller": "Participant_19mgbdn","callee": ["Participant_0w6qkdf"],"tokenType": "NFT","tokenId": "2","tokenURL": "http://www.github.com"}`, initParameters.ERCChaincodeNames["Activity_1u61szh"])
 	// Save the instance
 	instanceBytes, err := json.Marshal(instance)
 	if err != nil {
@@ -1698,7 +1702,7 @@ func (cc *SmartContract) Activity_0voe68z(ctx contractapi.TransactionContextInte
 	}
 
 	// 轮到他运行，调用
-	chaincodeName := "ERC721-" + token.TokenName
+	chaincodeName := tokenElement.ChaincodeName
 	_args := make([][]byte, 4)
 	_args[0] = []byte("MintWithTokenURI") // 操作类型
 	_args[1] = []byte(token.TokenID)
@@ -1786,7 +1790,7 @@ func (cc *SmartContract) Activity_0l6jyqh(ctx contractapi.TransactionContextInte
 		calleeID = append(calleeID, callee11)
 	}
 
-	chaincodeName := "ERC721-" + token.TokenName
+	chaincodeName := tokenElement.ChaincodeName
 	_args := make([][]byte, 4)
 	_args[0] = []byte("TransferFrom") // 操作类型
 	_args[1] = []byte(callid)
@@ -1856,7 +1860,7 @@ func (cc *SmartContract) Activity_0xhcefo(ctx contractapi.TransactionContextInte
 	}
 
 	// 轮到他运行，调用
-	chaincodeName := "ERC721-" + token.TokenName
+	chaincodeName := tokenElement.ChaincodeName
 	_args := make([][]byte, 4)
 	_args[0] = []byte("MintWithTokenURI") // 操作类型
 	_args[1] = []byte(token.TokenID)
@@ -1935,7 +1939,7 @@ func (cc *SmartContract) Activity_1u61szh(ctx contractapi.TransactionContextInte
 		calleeID = append(calleeID, callee11)
 	}
 
-	chaincodeName := "ERC721-" + token.TokenName
+	chaincodeName := tokenElement.ChaincodeName
 	_args := make([][]byte, 4)
 	_args[0] = []byte("TransferFrom") // 操作类型
 	_args[1] = []byte(callid)
@@ -2033,19 +2037,36 @@ func (cc *SmartContract) ParticipantToidentity(ctx contractapi.TransactionContex
 	return id, nil
 }
 
-func (cc *SmartContract) AddMintAuthority_nft(ctx contractapi.TransactionContextInterface, InstanceID string, allowedMSPs []string, tokenelementname string) error {
-	allowedMSPsJson, err := json.Marshal(allowedMSPs)
+func (cc *SmartContract) AddMintAuthority(ctx contractapi.TransactionContextInterface, initParametersBytes string) error {
+	// 1. 定义一个结构体对应前端发送的 payload
+	type AddAuthorityPayload struct {
+		InstanceID    string   `json:"InstanceID"`
+		AllowedMSPs   []string `json:"allowedMSPs"`
+		ChaincodeName string   `json:"chaincodeName"`
+	}
+
+	// 2. 解析 JSON 字符串
+	var payload AddAuthorityPayload
+	if err := json.Unmarshal([]byte(initParametersBytes), &payload); err != nil {
+		return fmt.Errorf("failed to unmarshal initParametersBytes: %v", err)
+	}
+
+	// 3. 将 allowedMSPs 转为 JSON
+	allowedMSPsJson, err := json.Marshal(payload.AllowedMSPs)
 	if err != nil {
 		return fmt.Errorf("failed to marshal allowedMSPs: %v", err)
 	}
-	chaincodeName := "ERC721-" + tokenelementname
+
+	// 4. 构造调用参数
 	_args := make([][]byte, 3)
 	_args[0] = []byte("AddMintAuthority") // 调用函数
-	_args[1] = []byte(InstanceID)         //name
-	_args[2] = allowedMSPsJson            //name
+	_args[1] = []byte(payload.InstanceID) // InstanceID
+	_args[2] = allowedMSPsJson            // allowedMSPs
+
+	// 5. 调用目标链码
 	cc.Invoke_Other_chaincode(
 		ctx,
-		chaincodeName,
+		payload.ChaincodeName,
 		"default",
 		_args,
 	)
@@ -2053,35 +2074,14 @@ func (cc *SmartContract) AddMintAuthority_nft(ctx contractapi.TransactionContext
 	return nil
 }
 
-func (cc *SmartContract) AddMintAuthority_ft(ctx contractapi.TransactionContextInterface, instanceID string, allowedMSPs []string, tokenelementname string) error {
-	allowedMSPsJson, err := json.Marshal(allowedMSPs)
-	if err != nil {
-		return fmt.Errorf("failed to marshal allowedMSPs: %v", err)
-	}
-	chaincodeName := "ERC20-" + tokenelementname
-	_args := make([][]byte, 3)
-	_args[0] = []byte("AddMintAuthority") // 调用函数
-	_args[1] = []byte(instanceID)         //name
-	_args[2] = allowedMSPsJson            //name
-	cc.Invoke_Other_chaincode(
-		ctx,
-		chaincodeName,
-		"default",
-		_args,
-	)
-
-	return nil
-}
-
-func (cc *SmartContract) TokenElementInitialize(ctx contractapi.TransactionContextInterface, name string) error {
+func (cc *SmartContract) TokenElementInitialize(ctx contractapi.TransactionContextInterface, name string, chaincodeName string) error {
 	symbol := name
-	chaincodeName := "ERC721-" + name
 	// minterMSPs := []string{"Mem.org.comMSP", "Organization-consortium.org.comMSP"}
 	// minterMSPsJson, err := json.Marshal(minterMSPs)
 	// if err != nil {
 	// 	return err // 或 ctx.GetStub().SetEvent(...) 返回错误
 	// }
-	_args := make([][]byte, 4)
+	_args := make([][]byte, 3)
 	_args[0] = []byte("Initialize") // 操作类型
 	_args[1] = []byte(name)         //name
 	_args[2] = []byte(symbol)
@@ -2096,9 +2096,8 @@ func (cc *SmartContract) TokenElementInitialize(ctx contractapi.TransactionConte
 	return nil
 }
 
-func (cc *SmartContract) TokenElementInitializeFT(ctx contractapi.TransactionContextInterface, name string) error {
+func (cc *SmartContract) TokenElementInitializeFT(ctx contractapi.TransactionContextInterface, name string, chaincodeName string) error {
 	symbol := name
-	chaincodeName := "ERC20-" + name
 	// minterMSPs := []string{"Mem.org.comMSP", "Organization-consortium.org.comMSP"}
 	// minterMSPsJson, err := json.Marshal(minterMSPs)
 	// if err != nil {
@@ -2225,7 +2224,7 @@ func (cc *SmartContract) Activity_08b7pzv(ctx contractapi.TransactionContextInte
 	}
 
 	// 轮到他运行，调用
-	chaincodeName := "ERC721-" + token.TokenName
+	chaincodeName := tokenElement.ChaincodeName
 	_args := make([][]byte, 2)
 	_args[0] = []byte("Burn") // 操作类型
 	_args[1] = []byte(token.TokenID)

@@ -3,7 +3,7 @@ import { Card, Row, Col, Button, Steps, Modal, Table, Select, Input, Checkbox, P
 import { useLocation, useNavigate } from "react-router-dom";
 import { retrieveBPMN, packageBpmn, packageERC, updateBPMNStatus, updateBpmnEnv, updateBPMNFireflyUrl, updateBpmnEvents, retrieveERCChaincode, updateERCChaincodeFireflyUrl } from "@/api/externalResource"
 import { generateChaincode, getMessagesByBpmnContent } from "@/api/translator"
-import { useAvaliableEnvs, useBpmnDetailData } from "./hooks"
+import { checkERCinstall, useAvaliableEnvs, useBpmnDetailData } from "./hooks"
 import axios from "axios"
 
 const steps = [
@@ -48,10 +48,13 @@ const BPMNOverview = () => {
     const navigate = useNavigate();
     const [bpmn, { isLoading, isError, isSuccess }, refetchBpmn] = useBpmnDetailData(bpmnId);
 
+
+    const [buttonText, setButtonText] = useState<string>("");
     //进度条
     const [progressList, setProgressList] = useState<
-        { name: string; index: number; total: number; success: boolean; message?: string }[]
+        { name: string; index: number; total: number; status: "packaging" | "success" | "failed"; message?: string }[]
     >([]);
+
     const [isProgressModalOpen, setIsProgressModalOpen] = useState(false);
     //tokens
     const [ercTokens, setErcTokens] = useState<any[]>([]);
@@ -68,7 +71,7 @@ const BPMNOverview = () => {
     useEffect(() => {
         if (ercTokens.length > 0) {
             ercTokensRef.current = ercTokens;
-            localStorage.setItem("ercTokens", JSON.stringify(ercTokens)); 
+            localStorage.setItem("ercTokens", JSON.stringify(ercTokens));
         }
         console.log("ercTokensRef updated:", ercTokens);
     }, [ercTokens]);
@@ -171,24 +174,52 @@ const BPMNOverview = () => {
             };
             loadChainCodes();
         }, []);
-
+        useEffect(() => {
+            const tokenCount = countUniqueTokenNames(chainCodeContentForModify);
+            const newTokens = Array.from({ length: tokenCount }, (_, i) => {
+                return {
+                    name: "",
+                    type: "ERC721",
+                    chainCode: defaultChainCodeERC721,
+                    ffi: defaultFFIERC721,
+                    installed: false
+                };
+            });
+            setTokens(newTokens);
+        }, [chainCodeContentForModify]);
         const onModify = async () => {
             setProgressList([]); // 清空进度
             setIsProgressModalOpen(true); // 打开进度弹窗
+
             // ----------------- 打包 BPMN -----------------
-            setProgressList((prev) => [...prev, { name: "BPMN", index: 0, total: 1, success: false, message: "Packaging BPMN..." }]);
+            setProgressList((prev) => [...prev, { name: "BPMN", index: 0, total: 1, status: "packaging" as const, message: "Packaging BPMN..." }]);
             await packageBpmn(chainCodeContentForModify, ffiContentForModify, currentOrgId, bpmnId);
             const updatedBpmn = await retrieveBPMN(bpmnId);
             if (updatedBpmn.status == "Generated") {
-                setProgressList((prev) => prev.map(item => item.name === "BPMN" ? { ...item, index: 1, success: true, message: "BPMN packaged" } : item));
+                setProgressList((prev) => prev.map(item => item.name === "BPMN" ? { ...item, index: 1, status: "success" as const, message: "BPMN packaged" } : item));
             }
             else {
-                setProgressList((prev) => prev.map(item => item.name === "BPMN" ? { ...item, index: 1, success: false, message: "BPMN packaging failed" } : item));
+                setProgressList((prev) => prev.map(item => item.name === "BPMN" ? { ...item, index: 1, status: "failed" as const, message: "BPMN packaged" } : item));
             }
             //打包ERC
-            const { resulttokens: updatedTokens, results } = await packageERC(tokens, currentEnvId, currentOrgId, "1", (progress) => {
-                setProgressList((prev) => [...prev, progress]);
-            });
+            const { resulttokens: updatedTokens, results } = await packageERC(
+                tokens,
+                currentEnvId,
+                currentOrgId,
+                "1",
+                (progress) => {
+                    setProgressList((prev) => {
+                        const existsIndex = prev.findIndex(p => p.name === progress.name);
+                        if (existsIndex >= 0) {
+                            const newList = [...prev];
+                            newList[existsIndex] = progress; // 覆盖同名 token
+                            return newList;
+                        } else {
+                            return [...prev, progress]; // 新增 token
+                        }
+                    });
+                }
+            );
             setErcTokens(updatedTokens)
             // console.log(updatedTokens)
             refetchBpmn()
@@ -230,7 +261,7 @@ const BPMNOverview = () => {
 
         const handleViewFFI = (index: number) => {
             setEditingFFIIndex(index);
-            setEditingFFIContent(tokens[index].ffi || ""); 
+            setEditingFFIContent(tokens[index].ffi || "");
             setIsFFIModalOpen(true);
         };
 
@@ -267,6 +298,26 @@ const BPMNOverview = () => {
             return true;
         };
 
+        //正则匹配
+        function countUniqueTokenNames(code: string): number {
+            const regex = /cc\.CreateTokenElement\([^`]+`({.*?})`/gs;
+            const matches = code.matchAll(regex);
+
+            const tokenNames = new Set<string>();
+
+            for (const match of matches) {
+                try {
+                    const obj = JSON.parse(match[1]);
+                    if (obj.tokenName) {
+                        tokenNames.add(obj.tokenName);
+                    }
+                } catch (e) {
+                    console.warn("JSON parse error:", e);
+                }
+            }
+
+            return tokenNames.size;
+        }
         return (
             <Modal
                 title="Modify"
@@ -311,7 +362,7 @@ const BPMNOverview = () => {
                         key={index}
                         style={{ display: "flex", gap: "10px", marginBottom: "10px", alignItems: "center" }}
                     >
-                        
+
                         <Checkbox
                             checked={token.installed || false}
                             onChange={(e) => {
@@ -330,7 +381,7 @@ const BPMNOverview = () => {
                             style={{ flex: 1 }}
                         />
 
-                        
+
                         <Select
                             value={token.type}
                             onChange={(value) => handleChangeToken(index, "type", value)}
@@ -340,35 +391,35 @@ const BPMNOverview = () => {
                             <Select.Option value="ERC721">ERC721</Select.Option>
                         </Select>
 
-                       
+
                         {!token.installed && (
                             <Button size="small" onClick={() => handleViewChainCode(index)}>
                                 code
                             </Button>
                         )}
-                        
+
                         {!token.installed && (
                             <Button size="small" onClick={() => handleViewFFI(index)}>
                                 ffi
                             </Button>
                         )}
 
-                        <div style={{ display: "flex", gap: "5px" }}>
+                        {/* <div style={{ display: "flex", gap: "5px" }}>
                             <Button type="dashed" size="small" onClick={() => handleAddToken(index, token.type)}>+</Button>
                             <Button size="small" onClick={() => handleRemoveToken(index)}>-</Button>
-                        </div>
+                        </div> */}
                     </div>
                 ))}
-                <Button
+                {/* <Button
                     type="dashed"
                     block
                     style={{ fontSize: 12 }}
                     onClick={() => handleAddToken(tokens.length - 1, "ERC20")}
                 >
                     + add new ERC chaincode
-                </Button>
+                </Button> */}
 
-                
+
                 <Modal
                     title="ChainCode 内容"
                     open={isChainModalOpen}
@@ -402,15 +453,46 @@ const BPMNOverview = () => {
     const ProgressModal = () => {
         const total = progressList.length > 0 ? progressList[0].total : 0;
         const done = progressList.length;
-
+        const columns = [
+            { title: "Token", dataIndex: "name" },
+            { title: "Progress", render: (_, record) => `${record.index}/${record.total}` },
+            {
+                title: "Status",
+                render: (_, record) => {
+                    if (record.status === "packaging") return "⏳ Packaging...";
+                    if (record.status === "success") return "✅ Success";
+                    if (record.status === "failed") return "❌ Failed";
+                    return "";
+                },
+            },
+            { title: "Message", dataIndex: "message" },
+            {
+                title: "Action",
+                render: (_, record) => {
+                    if (record.status === "success") {
+                        return (
+                            <Button
+                                type="link"
+                                onClick={() => {
+                                    navigate(`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/fabric/chaincode`);
+                                }}
+                            >
+                                install
+                            </Button>
+                        );
+                    }
+                    return null;
+                },
+            },
+        ];
         return (
             <Modal
                 title="Packaging Progress"
                 open={isProgressModalOpen}
                 onCancel={() => {
-                    if (done < total) return; 
+                    if (done < total) return;
                     setIsProgressModalOpen(false);
-                    refetchBpmn(); 
+                    refetchBpmn();
                 }}
                 footer={[
                     <Button
@@ -435,15 +517,7 @@ const BPMNOverview = () => {
                     dataSource={progressList}
                     rowKey="name"
                     pagination={false}
-                    columns={[
-                        { title: "Token", dataIndex: "name" },
-                        { title: "Progress", render: (_, record) => `${record.index}/${record.total}` },
-                        {
-                            title: "Status",
-                            render: (_, record) => (record.success ? "✅ Success" : "❌ Failed"),
-                        },
-                        { title: "Message", dataIndex: "message" },
-                    ]}
+                    columns={columns}
                     style={{ marginTop: 20 }}
                 />
             </Modal>
@@ -596,7 +670,7 @@ const BPMNOverview = () => {
                 return;
             }
             try {
-                
+
                 const erc = await retrieveERCChaincode(ercToken.ercId);
                 if (!erc) {
                     console.error("ERC not found");
@@ -608,27 +682,27 @@ const BPMNOverview = () => {
                 const chaincodeIdPrefix = chaincodeName + "-" + erc.id.substring(0, 6);
                 parsedFFIContent.name = chaincodeIdPrefix;
                 const fireflyUrlForRegister = `${current_ip}:5000`;
-                
+
                 const interfaceResponse = await axios.post(
                     `${fireflyUrlForRegister}/api/v1/namespaces/default/contracts/interfaces`,
                     parsedFFIContent
                 );
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 const interfaceId = interfaceResponse.data.id;
-    
+
                 const location = { channel: "default", chaincode: chaincodeName };
                 const apiData = {
                     name: interfaceResponse.data.name,
                     interface: { id: interfaceId },
                     location
                 };
-                await new Promise(resolve => setTimeout(resolve, 4000)); 
+                await new Promise(resolve => setTimeout(resolve, 4000));
                 const apiResponse = await axios.post(
                     `${fireflyUrlForRegister}/api/v1/namespaces/default/apis`,
                     apiData
                 );
                 const fireflyUrl = apiResponse.data.urls.ui;
-        
+
                 if (parsedFFIContent.events) {
                     for (const event of parsedFFIContent.events) {
                         const listenerRes = await invokeFireflyListeners(fireflyUrlForRegister, chaincodeName, event.name, interfaceId);
@@ -649,21 +723,26 @@ const BPMNOverview = () => {
     const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
     const currentConsortiumId = useAppSelector((state) => state.consortium.currentConsortiumId);
 
-    const buttonText = (() => {
-        if (status == 'Installed') {
-            return 'Register';
-        }
-        // else if (status == 'Registered') {
-        //     return 'Execute';
-        // }
-        else if (status == 'Initiated') {
-            return 'Deploy to Env';
-        } else if (status == 'Generated') {
-            return 'Install'
-        } else if (status == 'DeployEnved') {
-            return 'Generate';
-        }
-    })()
+    useEffect(() => {
+        const getButtonText = async () => {
+            if (status === "Installed") {
+                if (ercTokensRef.current.length > 0) {
+                    const flag = await checkERCinstall(currentConsortiumId, ercTokensRef.current);
+                    setButtonText(flag ? "Register" : "Install");
+                }
+            } else if (status === "Initiated") {
+                setButtonText("Deploy to Env");
+            } else if (status === "Generated") {
+                setButtonText("Install");
+            } else if (status === "DeployEnved") {
+                setButtonText("Generate");
+            } else if (status === "Registered") {
+                setButtonText("Execute");
+            }
+        };
+
+        getButtonText();
+    }, [status, currentConsortiumId, ercTokensRef.current]);
 
     return (
         <>
@@ -687,11 +766,17 @@ const BPMNOverview = () => {
                                     <Button type="primary"
                                         // disabled={status == 'Initiated'}
                                         loading={buttonLoading}
-                                        onClick={() => {
+                                        onClick={async () => {
                                             if (status == 'Generated') {
                                                 navigate(`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/fabric/chaincode`)
                                             } else if (status == 'Installed') {
-                                                onRegister();
+                                                if (ercTokensRef.current.length > 0) {
+                                                    const flag = await checkERCinstall(currentConsortiumId, ercTokensRef.current);
+                                                    if (flag == true) {
+                                                        onRegister();
+                                                    }
+                                                    else { navigate(`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/fabric/chaincode`) }
+                                                }
                                             } else if (status == 'Initiated') {
                                                 onDeployEnv();
                                             } else if (status == 'DeployEnved') {

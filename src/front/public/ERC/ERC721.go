@@ -19,14 +19,14 @@ const nameKey = "name"
 const symbolKey = "symbol"
 
 type InstanceMintAuthority struct {
-    InstanceID   string   `json:"instance_id"`
-    AllowedMSPs  []string `json:"allowed_msps"`
+	InstanceID  string   `json:"instance_id"`
+	AllowedMSPs []string `json:"allowed_msps"`
 }
+
 // TokenERC721Contract contract for managing CRUD operations
 type TokenERC721Contract struct {
 	contractapi.Contract
 }
- 
 
 func _readNFT(ctx contractapi.TransactionContextInterface, tokenId string) (*Nft, error) {
 	nftKey, err := ctx.GetStub().CreateCompositeKey(nftPrefix, []string{tokenId})
@@ -62,23 +62,32 @@ func _nftExists(ctx contractapi.TransactionContextInterface, tokenId string) boo
 	return len(nftBytes) > 0
 }
 
-
-//权限相关
+// 权限相关
 func (c *TokenERC721Contract) AddMintAuthority(ctx contractapi.TransactionContextInterface, instanceID string, allowedMSPs []string) error {
-    key := "instance_auth_" + instanceID
-    authority := InstanceMintAuthority{
-        InstanceID:  instanceID,
-        AllowedMSPs: allowedMSPs,
-    }
+	key := "instance_auth_" + instanceID
 
-    data, err := json.Marshal(authority)
-    if err != nil {
-        return err
-    }
-	
-    return ctx.GetStub().PutState(key, data)
+	// 先检查是否已经存在
+	existing, err := ctx.GetStub().GetState(key)
+	if err != nil {
+		return err
+	}
+	if existing != nil {
+		// 已经存在，不再存储
+		return nil
+	}
+
+	authority := InstanceMintAuthority{
+		InstanceID:  instanceID,
+		AllowedMSPs: allowedMSPs,
+	}
+
+	data, err := json.Marshal(authority)
+	if err != nil {
+		return err
+	}
+
+	return ctx.GetStub().PutState(key, data)
 }
-
 
 // BalanceOf counts all non-fungible tokens assigned to an owner
 // param owner {String} An owner for whom to query the balance
@@ -591,25 +600,25 @@ func (c *TokenERC721Contract) MintWithTokenURI(ctx contractapi.TransactionContex
 	}
 
 	key := "instance_auth_" + instanceID
-    authJSON, err := ctx.GetStub().GetState(key)
-    if err != nil || authJSON == nil {
-        return nil,fmt.Errorf("no mint authority found for instance %s", instanceID)
-    }
+	authJSON, err := ctx.GetStub().GetState(key)
+	if err != nil || authJSON == nil {
+		return nil, fmt.Errorf("no mint authority found for instance %s", instanceID)
+	}
 
-    var auth InstanceMintAuthority
-    _ = json.Unmarshal(authJSON, &auth)
+	var auth InstanceMintAuthority
+	_ = json.Unmarshal(authJSON, &auth)
 
-    allowed := false
-    for _, msp := range auth.AllowedMSPs {
-        if msp == clientMSPID {
-            allowed = true
-            break
-        }
-    }
+	allowed := false
+	for _, msp := range auth.AllowedMSPs {
+		if msp == clientMSPID {
+			allowed = true
+			break
+		}
+	}
 
-    if !allowed {
-        return nil,fmt.Errorf("MSP %s not authorized to mint for instance %s", clientMSPID, instanceID)
-    }
+	if !allowed {
+		return nil, fmt.Errorf("MSP %s not authorized to mint for instance %s", clientMSPID, instanceID)
+	}
 
 	// Get ID of submitting client identity
 	minter64, err := ctx.GetClientIdentity().GetID()
