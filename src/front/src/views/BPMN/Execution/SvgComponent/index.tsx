@@ -53,6 +53,7 @@ import {
 	fireflyFileTransfer,
 	fireflyDataTransfer,
 	invokeMessageAction,
+	invokeTaskTokenAction,
 } from "@/api/executionAPI.ts";
 
 const InputComponentForMessage = ({
@@ -487,20 +488,21 @@ const ControlPanel = ({
 	const Identity = queryParams.get("identity");
 
 	const temp_map = {
-		"user1":"Participant_1080bkg",
-		"user2":"Participant_0sktaei"
+		"user1": "Participant_1080bkg",
+		"user2": "Participant_0sktaei"
 	}
 	const isYourTurn = (() => {
 		if (type === "event") return currentElement?.EventState === 1;
 		if (type === "gateway") return currentElement?.GatewayState === 1;
 		if (type === "message")
 			return (
-				currentElement?.MsgState === 1 && currentElement?.SendMspID === temp_map[identity.name] ||
-				// currentElement?.sendMspID === msp ||
-				currentElement?.MsgState === 2 
+				currentElement?.MsgState === 1 //&& currentElement?.SendMspID === temp_map[identity.name] 
+				|| currentElement?.sendMspID === msp ||
+				currentElement?.MsgState === 2
 			);
-			// currentElement?.receiveMspID === msp;
+		// currentElement?.receiveMspID === msp;
 		if (type === "businessRule") return currentElement?.State === 1;
+		if (type === "tokenTask") return currentElement?.State === 1;
 	})();
 	// debugger
 	const showTransactionId = (() => {
@@ -570,6 +572,31 @@ const ControlPanel = ({
 				</Button>
 			</div>
 		);
+
+	const onHandleTokenTask = async (output = {}) => {
+		const res = await TimeDecorator(
+			invokeTaskTokenAction,
+			"TokenTask",
+			"invoke/Activity",
+		)(coreURL, contractName, currentElement.tokenElementID, instanceId,identity.identity.data[0].value,);
+	};
+
+	if (type === "tokenTask")
+		return (<div
+			style={{
+				display: "flex",
+				flexDirection: "column",
+			}}
+		>
+			<Button
+				style={{ backgroundColor: "mediumspringgreen" }}
+				onClick={() => {
+					onHandleTokenTask();
+				}}
+			>
+				Next
+			</Button>
+		</div>);
 
 	const onHandleBusinessRule = async (output = {}) => {
 		const res = await TimeDecorator(
@@ -703,6 +730,7 @@ const ControlPanel = ({
 				) : null}
 			</div>
 		);
+
 };
 
 import { useAvailableIdentity } from "./hook.ts";
@@ -766,7 +794,8 @@ const IdentitySelector = ({ identity, setIdentity }) => {
 						"http://" + the_one.core_url,
 						value,
 					);
-
+					console.log("Selected Firefly Identity ID:", value); 
+					console.log("Full Identity Object:", identity); //  打印返回的详细身份信息
 					setIdentity({
 						name: the_one.name,
 						membership: currentMembership,
@@ -840,6 +869,7 @@ const ExecutionPage = (props) => {
 		allGateways,
 		allMessages,
 		allBusinessRules,
+		allTokenTasks,
 		fireflyDataReady,
 		syncFireflyData,
 	] = useAllFireflyData(
@@ -852,6 +882,7 @@ const ExecutionPage = (props) => {
 		...allEvents,
 		...allGateways,
 		...allBusinessRules,
+		...allTokenTasks,
 	].filter((msg) => {
 		return msg.state === 1 || msg.state === 2;
 	});
@@ -862,6 +893,7 @@ const ExecutionPage = (props) => {
 			...allEvents,
 			...allGateways,
 			...allBusinessRules,
+			...allTokenTasks,
 		].map((msg) => {
 			let color = "";
 			// msgState, gatewayState, eventState;
@@ -889,7 +921,7 @@ const ExecutionPage = (props) => {
 			let styles = { "& svg": {} };
 			for (const msg of msgList) {
 				if (msg.color === "unColored" && msg.color === "") continue;
-		
+
 				const selector = (() => {
 					console.log(msg);
 					if (msg.type === "event")
@@ -900,6 +932,9 @@ const ExecutionPage = (props) => {
 						return `& g[data-element-id="${msg.MessageID}"]`;
 					if (msg.type === "businessRule") {
 						return `& g[data-element-id="${msg.BusinessRuleID}"]`;
+					}
+					if (msg.type === "tokenTask") {
+						return `& g[data-element-id="${msg.tokenElementID}"]`;
 					}
 				})();
 				styles["& svg"][selector] = {
@@ -914,7 +949,7 @@ const ExecutionPage = (props) => {
 					},
 					// "& rect": {
 					//     fill: `${msg.color} !important`,
-					// }
+					// },
 				};
 			}
 			return styles;
