@@ -159,9 +159,9 @@ const BPMNOverview = () => {
                     setDefaultChainCodeERC20(text20);
                     setDefaultChainCodeERC721(text721);
 
-                    // const ffi20 = await fetch("/ERC/ERC20.json");
-                    // const ffiText20 = await ffi20.text();
-                    setDefaultFFIERC20("erc20 ffi");
+                     const ffi20 = await fetch("/ERC/ERC20.json");
+                     const ffiText20 = await ffi20.text();
+                    setDefaultFFIERC20(ffiText20);
 
                     const ffi721 = await fetch("/ERC/ERC721.json");
                     const ffiText721 = await ffi721.text();

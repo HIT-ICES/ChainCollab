@@ -1,0 +1,308 @@
+{
+    "namespace": "erc20",
+    "name": "TokenERC20Contract",
+    "description": "FFI for Hyperledger Fabric ERC20-style fungible token contract (Go chaincode)",
+    "version": "1.0",
+    "methods": [
+        {
+            "name": "AddMintAuthority",
+            "description": "Add minting authority for an instance",
+            "params": [
+                {
+                    "name": "instanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "allowedMSPs",
+                    "schema": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Mint",
+            "description": "Create new tokens and add them to the caller's account (requires mint authority)",
+            "params": [
+                {
+                    "name": "amount",
+                    "schema": {
+                        "type": "integer"
+                    }
+                },
+                {
+                    "name": "instanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Burn",
+            "description": "Burn tokens from the caller's account (requires burn/mint authority)",
+            "params": [
+                {
+                    "name": "amount",
+                    "schema": {
+                        "type": "integer"
+                    }
+                },
+                {
+                    "name": "instanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Transfer",
+            "description": "Transfer tokens from caller's account to recipient",
+            "params": [
+                {
+                    "name": "recipient",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "amount",
+                    "schema": {
+                        "type": "integer"
+                    }
+                },
+                {
+                    "name": "instanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "BalanceOf",
+            "description": "Return the balance of the given account",
+            "params": [
+                {
+                    "name": "account",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "instanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": [
+                {
+                    "name": "balance",
+                    "schema": {
+                        "type": "integer"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "ClientAccountBalance",
+            "description": "Return balance of caller's account",
+            "params": [
+                {
+                    "name": "instanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": [
+                {
+                    "name": "balance",
+                    "schema": {
+                        "type": "integer"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "ClientAccountID",
+            "description": "Return the caller's account ID",
+            "params": [],
+            "returns": [
+                {
+                    "name": "clientID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "TotalSupply",
+            "description": "Return the total token supply",
+            "params": [
+                {
+                    "name": "instanceID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": [
+                {
+                    "name": "totalSupply",
+                    "schema": {
+                        "type": "integer"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Approve",
+            "description": "Allow spender to withdraw up to value from caller's account (sets allowance)",
+            "params": [
+                {
+                    "name": "spender",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "value",
+                    "schema": {
+                        "type": "integer"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Allowance",
+            "description": "Return remaining allowance spender can withdraw from owner",
+            "params": [
+                {
+                    "name": "owner",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "spender",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": [
+                {
+                    "name": "allowance",
+                    "schema": {
+                        "type": "integer"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "TransferFrom",
+            "description": "Transfer tokens from one account to another using spender's allowance",
+            "params": [
+                {
+                    "name": "from",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "to",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "value",
+                    "schema": {
+                        "type": "integer"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "name": "Name",
+            "description": "Return the name of the token",
+            "params": [],
+            "returns": [
+                {
+                    "name": "name",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Symbol",
+            "description": "Return the symbol of the token",
+            "params": [],
+            "returns": [
+                {
+                    "name": "symbol",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Initialize",
+            "description": "Initialize contract with name, symbol and decimals (can only be called once)",
+            "params": [
+                {
+                    "name": "name",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "symbol",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "decimals",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": [
+                {
+                    "name": "success",
+                    "schema": {
+                        "type": "boolean"
+                    }
+                }
+            ]
+        }
+    ],
+    "events": [
+        {
+            "name": "Transfer"
+        },
+        {
+            "name": "Approval"
+        }
+    ]
+}
