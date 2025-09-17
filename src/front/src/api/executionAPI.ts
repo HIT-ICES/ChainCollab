@@ -1,3 +1,4 @@
+import { identity } from 'lodash';
 import { fireflyAPI } from './apiConfig.ts';
 import axios from 'axios';
 // Register Interface and Contract
@@ -134,7 +135,19 @@ export const getAllBusinessRules = async (coreUrl: string, contractName: string,
     }
 }
 
-
+export const getAllTokenElements = async (coreUrl: string, contractName: string, bpmnInstanceId: string) => {
+    try {
+        const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/apis/${contractName}/query/GetAllTokenElement`, {
+            "input": {
+                "InstanceID": `${bpmnInstanceId}`       //GetAllTokenElement
+            }
+        });
+        return res.data;
+    } catch (error) {
+        console.error("Error occurred while making post request:", error);
+        return [];
+    }
+}
 
 // invoke
 
@@ -172,6 +185,21 @@ export const invokeBusinessRuleAction = async (coreUrl: string, contractName: st
             "input": {
                 "InstanceID": `${instanceId}`
             }
+        });
+        return res.data;
+    } catch (error) {
+        console.error("Error occurred while making post request:", error);
+        return [];
+    }
+}
+
+export const invokeTaskTokenAction = async(coreUrl: string, contractName: string, ruleId: any, instanceId: string,identity: string)=>{
+    try {
+        const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/apis/${contractName}/invoke/${ruleId}`, {
+            "input": {
+                "InstanceID": `${instanceId}`
+            },
+            "key":identity,
         });
         return res.data;
     } catch (error) {

@@ -115,11 +115,13 @@ export const useFireflyData = (
 
 import {
     getAllEvents, getAllGateways, getAllMessages, getAllBusinessRules,
+    getAllTokenElements,
 } from '@/api/executionAPI'
 
 export const useAllFireflyData = (
     coreUrl: string, contractName: string, bpmnInstanceId: string
 ): [
+        any[],
         any[],
         any[],
         any[],
@@ -131,6 +133,7 @@ export const useAllFireflyData = (
     const [gateways, setGateways] = useState<any[]>([]);
     const [messages, setMessages] = useState<any[]>([]);
     const [businessRules, setBusinessRules] = useState<any[]>([]);
+    const [tokenTasks,setTokenTasks]=useState<any[]>([]);
     const [syncFlag, setSyncFlag] = useState(false);
     const [ready, setReady] = useState(false);
 
@@ -143,6 +146,7 @@ export const useAllFireflyData = (
             const gateways = await getAllGateways(coreUrl, contractName, bpmnInstanceId);
             const messages = await getAllMessages(coreUrl, contractName, bpmnInstanceId);
             const businessRules = await getAllBusinessRules(coreUrl, contractName, bpmnInstanceId);
+            const tokenTasks  = await getAllTokenElements(coreUrl,contractName,bpmnInstanceId);
             if (ignore) return
             if (events) {
                 setEvents(events.map((item: any) => {
@@ -187,17 +191,29 @@ export const useAllFireflyData = (
                     }
                 ));
             }
+            if (tokenTasks){
+               setTokenTasks(tokenTasks.map(
+                    (item: any) => {
+                        return {
+                            ...item,
+                            type: "tokenTask",
+                            state: item.State
+                        }
+                    }
+                ));
+            }
             setReady(true);
         }
         fetchData();
         return () => { ignore = true; }
     }, [syncFlag, coreUrl, contractName]);
-    return [events, gateways, messages, businessRules, ready, () => { setSyncFlag(syncFlag => !syncFlag) }];
+    return [events, gateways, messages, businessRules, tokenTasks,ready, () => { setSyncFlag(syncFlag => !syncFlag) }];
 }
 
 import { useQuery } from 'react-query'
 import { getFireflyIdentity } from "@/api/platformAPI"
 import axios from 'axios';
+import { token } from 'stylis';
 
 export const useAvailableIdentity = () => {
     const currenOrgId = useAppSelector((state) => state.org.currentOrgId)
