@@ -495,8 +495,9 @@ const ControlPanel = ({
 		if (type === "gateway") return currentElement?.GatewayState === 1;
 		if (type === "message")
 			return (
-				currentElement?.MsgState === 1 && currentElement?.SendMspID === temp_map[identity.name] ||
-				// currentElement?.sendMspID === msp ||
+				currentElement?.MsgState === 1 
+				// && currentElement?.SendMspID === temp_map[identity.name] 
+				|| currentElement?.sendMspID === msp ||
 				currentElement?.MsgState === 2 
 			);
 			// currentElement?.receiveMspID === msp;
