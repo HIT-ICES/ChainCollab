@@ -578,7 +578,7 @@ const ControlPanel = ({
 			invokeTaskTokenAction,
 			"TokenTask",
 			"invoke/Activity",
-		)(coreURL, contractName, currentElement.tokenElementID, instanceId,identity.identity.data[0].value,);
+		)(coreURL, contractName, currentElement.tokenElementID, instanceId, identity.identity.data[0].value,);
 	};
 
 	if (type === "tokenTask")
@@ -794,7 +794,7 @@ const IdentitySelector = ({ identity, setIdentity }) => {
 						"http://" + the_one.core_url,
 						value,
 					);
-					console.log("Selected Firefly Identity ID:", value); 
+					console.log("Selected Firefly Identity ID:", value);
 					console.log("Full Identity Object:", identity); //  打印返回的详细身份信息
 					setIdentity({
 						name: the_one.name,
@@ -948,9 +948,25 @@ const ExecutionPage = (props) => {
 						fill: `${msg.color} !important`,
 					},
 					// "& rect": {
-					//     fill: `${msg.color} !important`,
+					//     fill: `${msg.colo r} !important`,
 					// },
 				};
+				if (msg.type === "tokenTask") {
+					styles["& svg"][selector] = {
+						"& g.djs-visual > rect": {
+							fill: `${msg.color} !important`,  
+							stroke: "black !important",       
+							strokeWidth: 2,
+							rx: 10,                            
+							ry: 10,
+							fillOpacity: 0.95,                 
+						},
+						"& g.djs-visual > text": {
+							fill: "black !important",          
+							fontWeight: "bold",
+						}
+					};
+				}
 			}
 			return styles;
 		};
