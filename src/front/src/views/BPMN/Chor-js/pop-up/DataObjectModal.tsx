@@ -44,6 +44,9 @@ export default function FixedFieldsModal({
   // 新增：tokenId 和 FT tokenName 可选列表
   const [tokenIdOptions, setTokenIdOptions] = React.useState<string[]>([]);
   const [tokenNameOptions, setTokenNameOptions] = React.useState<string[]>([]);
+  //增值型valueadd
+  const [refTokenIds, setRefTokenIds] = React.useState<string[]>([]);
+  const [refTokenIdOptions, setRefTokenIdOptions] = React.useState<string[]>([]);
 
   const operationOptions: Record<string, string[]> = {
     'distributive': ['mint', 'burn', 'approve', 'remove approval', 'query'],
@@ -53,21 +56,21 @@ export default function FixedFieldsModal({
 
   const operationToCallerLabel: Record<string, string> = {
     mint: 'Issuer',              // 发行人
-  burn: 'Burner',              // 销毁人
-  approve: 'Approver',         // 授权者
-  'remove approval': 'Revoker',// 被取消授权者
-  query: 'Querier',            // 查询者
-  Transfer: 'Sender',          // 转移者
-  branch: 'Brancher',          // 分支者
-  merge: 'Merger',             // 合并者
+    burn: 'Burner',              // 销毁人
+    approve: 'Approver',         // 授权者
+    'remove approval': 'Revoker',// 被取消授权者
+    query: 'Querier',            // 查询者
+    Transfer: 'Sender',          // 转移者
+    branch: 'Brancher',          // 分支者
+    merge: 'Merger',             // 合并者
   };
 
   const operationToCalleeLabel: Record<string, string> = {
-     mint: 'Receiver',               // 接受者
-  burn: 'Burn Target',            // 目标销毁方
-  approve: 'Grantee',             // 被授权者
-  'remove approval': 'Revoked',   // 被取消授权者
-  Transfer: 'Recipient',          // 被转移者
+    mint: 'Receiver',               // 接受者
+    burn: 'Burn Target',            // 目标销毁方
+    approve: 'Grantee',             // 被授权者
+    'remove approval': 'Revoked',   // 被取消授权者
+    Transfer: 'Recipient',          // 被转移者
   };
 
   // 从 BPMN 文档加载已有值
@@ -79,14 +82,14 @@ export default function FixedFieldsModal({
       try {
         const parsed = JSON.parse(doc[0].text);
         if (parsed.caller) {
-  // 在 options 中找 value 以 parsed.caller 为前缀的项（支持 choreo 结构）
-  const match = participantOptions.find(opt =>
-    opt.value.startsWith(parsed.caller)
-  );
-  setCaller(match ? match.value : parsed.caller); // 设置 value（完整 ID）
-} else {
-  setCaller('');
-}
+          // 在 options 中找 value 以 parsed.caller 为前缀的项（支持 choreo 结构）
+          const match = participantOptions.find(opt =>
+            opt.value.startsWith(parsed.caller)
+          );
+          setCaller(match ? match.value : parsed.caller); // 设置 value（完整 ID）
+        } else {
+          setCaller('');
+        }
         setAssetType(parsed.assetType || '');
         setOperation(parsed.operation || '');
         setTokenType(parsed.tokenType || '');
@@ -97,16 +100,16 @@ export default function FixedFieldsModal({
         setOriginalTokenId(loadedTokenId);
         setTokenURL(parsed.tokenURL || '');
         if (Array.isArray(parsed.callee)) {
-  const matchedCalleeIds = parsed.callee.map(callerId => {
-    const match = participantOptions.find(opt =>
-      opt.value.startsWith(callerId)
-    );
-    return match ? match.value : callerId;
-  });
-  setCallee(matchedCalleeIds);
-} else {
-  setCallee([]);
-}
+          const matchedCalleeIds = parsed.callee.map(callerId => {
+            const match = participantOptions.find(opt =>
+              opt.value.startsWith(callerId)
+            );
+            return match ? match.value : callerId;
+          });
+          setCallee(matchedCalleeIds);
+        } else {
+          setCallee([]);
+        }
       } catch {
         // ignore parse error
       }
@@ -126,7 +129,7 @@ export default function FixedFieldsModal({
       setCallee(prev => (prev.length ? prev : []));
       setTokenId('');
       setOriginalTokenId('');
-      setTokenURL('');  
+      setTokenURL('');
       loadDataFromBPMN();
     }
   }, [shape, isModalOpen]);
@@ -162,7 +165,7 @@ export default function FixedFieldsModal({
       if (Array.isArray(docs) && docs.length) {
         try {
           const parsed = JSON.parse(docs[0].text);
-          if (parsed.operation === 'mint' && parsed.tokenId) {
+          if ((parsed.operation === 'mint' || parsed.operation === 'branch') && parsed.tokenId) {
             newTokenIdsSet.add(parsed.tokenId);
           }
         } catch {
@@ -172,6 +175,7 @@ export default function FixedFieldsModal({
     });
 
     // 更新 tokenIdOptions
+    setRefTokenIdOptions(Array.from(newTokenIdsSet));
     const newTokenIds = Array.from(newTokenIdsSet);
     setTokenIdOptions(prev => {
       const prevSet = new Set(prev);
@@ -187,7 +191,7 @@ export default function FixedFieldsModal({
       if (Array.isArray(docs) && docs.length) {
         try {
           const parsed = JSON.parse(docs[0].text);
-          if (parsed.tokenId && parsed.operation !== 'mint' && !newTokenIdsSet.has(parsed.tokenId)) {
+          if (parsed.tokenId && (parsed.operation === 'mint' || parsed.operation === 'branch') && !newTokenIdsSet.has(parsed.tokenId)) {
             const cleaned = { ...parsed };
             delete cleaned.tokenId;
             commandStack.execute('element.updateProperties', {
@@ -227,7 +231,7 @@ export default function FixedFieldsModal({
 
   // 若当前选择非 mint 操作，而 tokenId state 已经不在 options 中，清空
   React.useEffect(() => {
-    if (operation && operation !== 'mint' && tokenId && !tokenIdOptions.includes(tokenId)) {
+    if (operation && operation !== 'mint' && operation !== 'branch' && tokenId && !tokenIdOptions.includes(tokenId)) {
       setTokenId('');
     }
   }, [operation, tokenIdOptions, tokenId]);
@@ -253,7 +257,7 @@ export default function FixedFieldsModal({
     if (matched) {
       setTokenName(matched.tokenName || '');
       setAssetType(matched.assetType || '');
-      setTokenURL(matched.tokenURL || ''); 
+      setTokenURL(matched.tokenURL || '');
     }
   };
 
@@ -269,12 +273,12 @@ export default function FixedFieldsModal({
     const payload: any = { assetType, operation, tokenName };
     if (caller) {
       const pureCaller = caller.split('_ChoreographyTask_')[0];
-  payload.caller = pureCaller;
+      payload.caller = pureCaller;
     }
     if ((assetType === 'transferable' && operation === 'Transfer') ||
-        (assetType === 'distributive' && ['approve','remove approval'].includes(operation))) {
+      (assetType === 'distributive' && ['approve', 'remove approval'].includes(operation))) {
       if (callee.length) {
-      payload.callee = callee.map(id => id.split('_ChoreographyTask_')[0]);
+        payload.callee = callee.map(id => id.split('_ChoreographyTask_')[0]);
       }
     }
     if (assetType === 'transferable') {
@@ -288,7 +292,9 @@ export default function FixedFieldsModal({
       payload.tokenId = tokenId;
       if (tokenURL) payload.tokenURL = tokenURL;
     }
-
+    if (assetType === 'value-added' && operation !== 'query' && refTokenIds.length > 0) {
+      payload.refTokenIds = refTokenIds;
+    }
     commandStack.execute('element.updateProperties', {
       element: shape,
       properties: {
@@ -302,7 +308,7 @@ export default function FixedFieldsModal({
   };
 
   const handleOk = () => {
-    if (operation === 'mint' && tokenId && tokenId !== originalTokenId && tokenIdOptions.includes(tokenId)) {
+    if ((operation === 'mint' || operation === 'branch') && tokenId && tokenId !== originalTokenId && tokenIdOptions.includes(tokenId)) {
       message.warning('The tokenId already exists. Please choose a different one');
       return;
     }
@@ -314,7 +320,7 @@ export default function FixedFieldsModal({
   const shouldShowCallee = React.useMemo(() => {
     return (
       (assetType === 'transferable' && operation === 'Transfer') ||
-      (assetType === 'distributive' && ['approve','remove approval'].includes(operation))
+      (assetType === 'distributive' && ['approve', 'remove approval'].includes(operation))
     );
   }, [assetType, operation]);
 
@@ -328,205 +334,222 @@ export default function FixedFieldsModal({
 
   return (
     <Modal
-  title={`Edit fixed fields for element ${dataElementId}`}
-  open={isModalOpen}
-  onOk={handleOk}
-  onCancel={() => onClose(false)}
-  width={600}
->
-  {/* 1.elementName */}
-  <div style={{ marginBottom: 16 }}>
-    <label style={{ display: 'block', marginBottom: 4 }}>Element Name:</label>
-    <Input value={elementName} onChange={e => setElementName(e.target.value)} />
-  </div>
-
-  {/* 2.assetType */}
-  <div style={{ marginBottom: 16 }}>
-    <label style={{ display: 'block', marginBottom: 4 }}>Asset Type:</label>
-    <Select
-      value={assetType}
-      onChange={value => {
-        setAssetType(value);
-        setOperation('');
-        setTokenType('');
-        setTokenName('');
-        setTokenNumber('');
-        setCallee([]);
-        setTokenId('');
-      }}
-      allowClear
-      style={{ width: '100%' }}
+      title={`Edit fixed fields for element ${dataElementId}`}
+      open={isModalOpen}
+      onOk={handleOk}
+      onCancel={() => onClose(false)}
+      width={600}
     >
-      <Select.Option value="distributive">Distributive</Select.Option> {/* distributive */}
-      <Select.Option value="transferable">Transferable</Select.Option> {/* transferable */}
-      <Select.Option value="value-added">Value-added</Select.Option> {/* value-added */}
-    </Select>
-  </div>
+      {/* 1.elementName */}
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ display: 'block', marginBottom: 4 }}>Element Name:</label>
+        <Input value={elementName} onChange={e => setElementName(e.target.value)} />
+      </div>
 
-  {/* 3.operation */}
-  <div style={{ marginBottom: 16 }}>
-    <label style={{ display: 'block', marginBottom: 4 }}>Operation:</label>
-    <Select
-      value={operation}
-      onChange={value => {
-        setOperation(value);
-        if (!shouldShowCallee) {
-          setCallee([]);
-        }
-      }}
-      allowClear
-      style={{ width: '100%' }}
-    >
-      {operationOptions[assetType]?.map(op => (
-        <Select.Option key={op} value={op}>
-          {op}
-        </Select.Option>
-      ))}
-    </Select>
-  </div>
-
-  {/* 4.tokenType */}
-  {assetType === 'transferable' && (
-    <div style={{ marginBottom: 16 }}>
-      <label style={{ display: 'block', marginBottom: 4 }}>Token Type:</label>
-      <Select
-        value={tokenType}
-        onChange={value => {
-          setTokenType(value);
-          setTokenName('');
-          setTokenNumber('');
-          setTokenId('');
-        }}
-        allowClear
-        style={{ width: '100%' }}
-      >
-        <Select.Option value="NFT">NFT</Select.Option>
-        <Select.Option value="FT">FT</Select.Option>
-      </Select>
-    </div>
-  )}  
-
-  {/* 5.tokenId */}
-  {shouldShowTokenId && (
-    <div style={{ marginBottom: 16 }}>
-      <label style={{ display: 'block', marginBottom: 4 }}>Token ID:</label>
-      {operation === 'mint' ? (
-        <Input
-          value={tokenId}
-          onChange={e => setTokenId(e.target.value)}
-          placeholder="Enter new token ID"
-        />
-      ) : (
+      {/* 2.assetType */}
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ display: 'block', marginBottom: 4 }}>Asset Type:</label>
         <Select
-          value={tokenId}
-          onChange={handleTokenIdChange}
-          options={tokenIdOptions.map(id => ({ label: id, value: id }))}
-          placeholder={
-            tokenIdOptions.length > 0 ? 'Select token ID' : 'No available token ID'
-          }
+          value={assetType}
+          onChange={value => {
+            setAssetType(value);
+            setOperation('');
+            setTokenType('');
+            setTokenName('');
+            setTokenNumber('');
+            setCallee([]);
+            setTokenId('');
+            setRefTokenIds([]);
+          }}
           allowClear
           style={{ width: '100%' }}
-          disabled={tokenIdOptions.length === 0}
-        />
-      )}
-    </div>
-  )}
+        >
+          <Select.Option value="distributive">Distributive</Select.Option> {/* distributive */}
+          <Select.Option value="transferable">Transferable</Select.Option> {/* transferable */}
+          <Select.Option value="value-added">Value-added</Select.Option> {/* value-added */}
+        </Select>
+      </div>
 
-  {/* 6.tokenName */}
-  {shouldShowTokenName && (
-    <div style={{ marginBottom: 16 }}>
-      <label style={{ display: 'block', marginBottom: 4 }}>Token Name:</label>
-
-      {assetType === 'transferable' && tokenType === 'FT' && operation !== 'mint' ? (
-        // FT 场景（除 mint 之外）保持原下拉选择，可手动选已有名称
+      {/* 3.operation */}
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ display: 'block', marginBottom: 4 }}>Operation:</label>
         <Select
-          value={tokenName}
-          onChange={setTokenName}
-          options={tokenNameOptions.map(n => ({ label: n, value: n }))}
-          placeholder={
-            tokenNameOptions.length > 0
-              ? 'Select an existing FT token name'
-              : 'No available token name'
-          }
+          value={operation}
+          onChange={value => {
+            setOperation(value);
+            if (!shouldShowCallee) {
+              setCallee([]);
+            }
+          }}
           allowClear
           style={{ width: '100%' }}
-          disabled={tokenNameOptions.length === 0}
-        />
-      ) : (
-        // 其它场景：只有 mint 时可输入，否则禁用
-        <Input
-          value={tokenName}
-          onChange={e => setTokenName(e.target.value)}
-          placeholder="Enter token name"
-          disabled={operation !== 'mint'}
-        />
+        >
+          {operationOptions[assetType]?.map(op => (
+            <Select.Option key={op} value={op}>
+              {op}
+            </Select.Option>
+          ))}
+        </Select>
+      </div>
+
+      {/* 4.tokenType */}
+      {assetType === 'transferable' && (
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 4 }}>Token Type:</label>
+          <Select
+            value={tokenType}
+            onChange={value => {
+              setTokenType(value);
+              setTokenName('');
+              setTokenNumber('');
+              setTokenId('');
+              setRefTokenIds([]);
+            }}
+            allowClear
+            style={{ width: '100%' }}
+          >
+            <Select.Option value="NFT">NFT</Select.Option>
+            <Select.Option value="FT">FT</Select.Option>
+          </Select>
+        </div>
       )}
-    </div>
-  )}
 
-  {/*7. tokenURI */}
-  {shouldShowTokenId && tokenId && (
-  <div style={{ marginBottom: 16 }}>
-    <label style={{ display: 'block', marginBottom: 4 }}>Token URL:</label>
-    {operation === 'mint' ? (
-      <Input
-        value={tokenURL}
-        onChange={e => setTokenURL(e.target.value)}
-        placeholder="Enter token URL"
-      />
-    ) : (
-      <Input
-        value={tokenURL}
-        disabled
-        placeholder="Auto-filled token URL"
-      />
-    )}
-  </div>
-)}
+      {/* 5.tokenId */}
+      {shouldShowTokenId && (
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 4 }}>Token ID:</label>
+          {(operation === 'mint' || operation === 'branch') ? (
+            <Input
+              value={tokenId}
+              onChange={e => setTokenId(e.target.value)}
+              placeholder="Enter new token ID"
+            />
+          ) : (
+            <Select
+              value={tokenId}
+              onChange={handleTokenIdChange}
+              options={tokenIdOptions.map(id => ({ label: id, value: id }))}
+              placeholder={
+                tokenIdOptions.length > 0 ? 'Select token ID' : 'No available token ID'
+              }
+              allowClear
+              style={{ width: '100%' }}
+              disabled={tokenIdOptions.length === 0}
+            />
+          )}
+        </div>
+      )}
 
-  {/* 8.tokenNumber */}
-  {shouldShowTokenNumber && (
-    <div style={{ marginBottom: 16 }}>
-      <label style={{ display: 'block', marginBottom: 4 }}>Token Number:</label>
-      <Input value={tokenNumber} onChange={e => setTokenNumber(e.target.value)} />
-    </div>
-  )}
+      {/* 6.tokenName */}
+      {shouldShowTokenName && (
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 4 }}>Token Name:</label>
 
-  {/* caller */}
-  <div style={{ marginBottom:16 }}>
-    <label style={{ display: 'block', marginBottom: 4 }}>
-      {operationToCallerLabel[operation] || 'Caller'}:
-    </label>
-    <Select
-      value={caller}
-      onChange={setCaller}
-      options={participantOptions}
-      placeholder={`Please select ${operationToCallerLabel[operation] || 'caller'}`}
-      allowClear
-      style={{ width: '100%' }}
-    />
-  </div>
+          {assetType === 'transferable' && tokenType === 'FT' && operation !== 'mint' ? (
+            // FT 场景（除 mint 之外）保持原下拉选择，可手动选已有名称
+            <Select
+              value={tokenName}
+              onChange={setTokenName}
+              options={tokenNameOptions.map(n => ({ label: n, value: n }))}
+              placeholder={
+                tokenNameOptions.length > 0
+                  ? 'Select an existing FT token name'
+                  : 'No available token name'
+              }
+              allowClear
+              style={{ width: '100%' }}
+              disabled={tokenNameOptions.length === 0}
+            />
+          ) : (
+            // 其它场景：只有 mint 时可输入，否则禁用
+            <Input
+              value={tokenName}
+              onChange={e => setTokenName(e.target.value)}
+              placeholder="Enter token name"
+              disabled={!(operation === 'mint' || operation === 'branch')}
+            />
+          )}
+        </div>
+      )}
 
-  {/* callee */}
-  {shouldShowCallee && (
-    <div style={{ marginBottom: 16 }}>
-      <label style={{ display: 'block', marginBottom: 4 }}>
-        {operationToCalleeLabel[operation] || 'Callee'}:
-      </label>
-      <Select
-        mode="multiple"
-        value={callee}
-        onChange={setCallee}
-        options={participantOptions}
-        placeholder={`Please select ${operationToCalleeLabel[operation] || 'callee'}`}
-        allowClear
-        style={{ width: '100%' }}
-      />
-    </div>
-  )}
+      {/*7. tokenURI */}
+      {shouldShowTokenId && tokenId && (
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 4 }}>Token URL:</label>
+          {operation === 'mint' || operation === 'branch' ? (
+            <Input
+              value={tokenURL}
+              onChange={e => setTokenURL(e.target.value)}
+              placeholder="Enter token URL"
+            />
+          ) : (
+            <Input
+              value={tokenURL}
+              disabled
+              placeholder="Auto-filled token URL"
+            />
+          )}
+        </div>
+      )}
 
-  
-  
-</Modal>
+      {/* 8.tokenNumber */}
+      {shouldShowTokenNumber && (
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 4 }}>Token Number:</label>
+          <Input value={tokenNumber} onChange={e => setTokenNumber(e.target.value)} />
+        </div>
+      )}
+
+      {/* caller */}
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ display: 'block', marginBottom: 4 }}>
+          {operationToCallerLabel[operation] || 'Caller'}:
+        </label>
+        <Select
+          value={caller}
+          onChange={setCaller}
+          options={participantOptions}
+          placeholder={`Please select ${operationToCallerLabel[operation] || 'caller'}`}
+          allowClear
+          style={{ width: '100%' }}
+        />
+      </div>
+
+      {/* callee */}
+      {shouldShowCallee && (
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 4 }}>
+            {operationToCalleeLabel[operation] || 'Callee'}:
+          </label>
+          <Select
+            mode="multiple"
+            value={callee}
+            onChange={setCallee}
+            options={participantOptions}
+            placeholder={`Please select ${operationToCalleeLabel[operation] || 'callee'}`}
+            allowClear
+            style={{ width: '100%' }}
+          />
+        </div>
+      )}
+
+      {/* Reference Token */}
+      {assetType === 'value-added' && operation != 'query' && (
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 4 }}>Reference Token:</label>
+          <Select
+            mode="multiple"
+            value={refTokenIds}
+            onChange={setRefTokenIds}
+            options={refTokenIdOptions.map(id => ({ label: id, value: id }))}
+            placeholder={refTokenIdOptions.length > 0 ? 'Select reference token(s)' : 'No available token'}
+            allowClear
+            style={{ width: '100%' }}
+          />
+        </div>
+      )}
+
+
+    </Modal>
   );
 }
