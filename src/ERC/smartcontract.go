@@ -151,6 +151,8 @@ func (cc *SmartContract) CreateToken(ctx contractapi.TransactionContextInterface
 		tokenKey = "NFT_" + tokenID
 	} else if tokenType == "FT" {
 		tokenKey = "FT_" + tokenName
+	} else if tokenType == "distributive" {
+		tokenKey = "distributive_" + tokenID
 	}
 	instance.InstanceTokens[tokenKey] = &token
 	returnToken, ok := instance.InstanceTokens[tokenKey]
@@ -167,15 +169,22 @@ func (cc *SmartContract) CreateTokenElement(ctx contractapi.TransactionContextIn
 	}
 	fla.TokenElementID = tokenElementID
 	fla.State = state
-	fla.TokenID = instance.InstanceID + "-" + fla.TokenID
+	fla.TokenID = instance.InstanceID + "-" + fla.TokenID //这里就构造了tokenid，以区分实例间的id
 	//检查是否有这个元素
 	var tokenKey string
 	var token *Token
-	if fla.TokenType == "NFT" {
-		tokenKey = "NFT_" + fla.TokenID
-	} else if fla.TokenType == "FT" {
-		tokenKey = "FT_" + fla.TokenName
+	//构造tokenkey
+	if fla.AssetType == "transferable" {
+		if fla.TokenType == "NFT" {
+			tokenKey = "NFT_" + fla.TokenID
+		} else if fla.TokenType == "FT" {
+			tokenKey = "FT_" + fla.TokenName
+		}
+	} else if fla.AssetType == "distributive" {
+		tokenKey = "distributive_" + fla.TokenID //关于分发型的实施，在ERC创建时同时创建两个代币，一个nft一个ft，但对于外部，就只有一个tokenid表示所有权符合建模
+		fla.TokenType = "distributive"           //为了方便解析，对于分发型资产的tokentype和assettype均使用distributive
 	}
+
 	if _, ok := instance.InstanceTokens[tokenKey]; !ok {
 		var ftbalance map[string]string
 		// 如果是FT类型，创建一个可用的map，而不是nil

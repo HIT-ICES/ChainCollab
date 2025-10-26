@@ -433,5 +433,41 @@ def FTTransfer_code(
         after_all_hook=after_all_hook,
     )
 
+def DistributiveMint_code(
+    activityId :str,
+    after_all_hook: str = "", 
+):
+    return content["DisMintFrame"].format(
+        activityId=activityId,
+        after_all_hook=after_all_hook,
+    )
+
+def DistributiveApprove_code(
+    activityId :str,
+    after_all_hook: str = "", 
+):
+    return content["DisApproveFrame"].format(
+        activityId=activityId,
+        after_all_hook=after_all_hook,
+    )
+
+def DistributiveBurn_code(
+    activityId :str,
+    after_all_hook: str = "", 
+):
+    return content["DisBurnFrame"].format(
+        activityId=activityId,
+        after_all_hook=after_all_hook,
+    )
+
+def DistributiveDisapprove_code(
+    activityId :str,
+    after_all_hook: str = "", 
+):
+    return content["DisDisapproveFrame"].format(
+        activityId=activityId,
+        after_all_hook=after_all_hook,
+    ) 
+
 def InvokeChaincodeFunc_code():
     return content["InvokeChaincodeFunc"]

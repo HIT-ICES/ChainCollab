@@ -207,45 +207,45 @@ class BPMNViewsSet(viewsets.ModelViewSet):
         except Exception as e:
             raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
 
-    @action(methods=["post"], detail=True, url_path="packageERC")
-    def packageERC(self, request, *args, **kwargs):
-        try:
-            orgid = request.data.get("orgId")
-            token_names = request.data.get("tokenNames", [])
-            env_id = request.data.get("envId")
-            headers=request.headers
-            results = []
-            for token_name in token_names:
-                token_type, name = token_name.split("-", 1)  # "ERC20", "USDT"
-                if token_type=="ERC20":
-                    folder_path = ERC_PATH + "/chaincode-go-20"
-                    zip_path = ERC_PATH + "/chaincode-go-20.zip"
-                elif token_type=="ERC721":
-                    folder_path=ERC_PATH + "/chaincode-go-721"
-                    zip_path = ERC_PATH + "/chaincode-go-721.zip"
-                self._zip_folder_ERC(folder_path, zip_path)
+    # @action(methods=["post"], detail=True, url_path="packageERC")
+    # def packageERC(self, request, *args, **kwargs):
+    #     try:
+    #         orgid = request.data.get("orgId")
+    #         token_names = request.data.get("tokenNames", [])
+    #         env_id = request.data.get("envId")
+    #         headers=request.headers
+    #         results = []
+    #         for token_name in token_names:
+    #             token_type, name = token_name.split("-", 1)  # "ERC20", "USDT"
+    #             if token_type=="ERC20":
+    #                 folder_path = ERC_PATH + "/chaincode-go-20"
+    #                 zip_path = ERC_PATH + "/chaincode-go-20.zip"
+    #             elif token_type=="ERC721":
+    #                 folder_path=ERC_PATH + "/chaincode-go-721"
+    #                 zip_path = ERC_PATH + "/chaincode-go-721.zip"
+    #             self._zip_folder_ERC(folder_path, zip_path)
                 
-                with open(zip_path,"rb") as f:
-                    files ={"file":f}
-                    response=post(
-                        f"http://{CURRENT_IP}:8000/api/v1/environments/{env_id}/chaincodes/package",
-                        data={
-                        "name":token_name,
-                        "version": 1,
-                        "language": "golang",
-                        "org_id": orgid,
-                        },
-                        files=files,
-                        headers={"Authorization": headers["Authorization"]},
-                    )
-                chaincode_id = response.json()["data"]["id"]
-                results.append({"token": token_name, "chaincode_id": chaincode_id})
-            return Response(
-                data=ok(results), status=status.HTTP_202_ACCEPTED
-            )
+    #             with open(zip_path,"rb") as f:
+    #                 files ={"file":f}
+    #                 response=post(
+    #                     f"http://{CURRENT_IP}:8000/api/v1/environments/{env_id}/chaincodes/package",
+    #                     data={
+    #                     "name":token_name,
+    #                     "version": 1,
+    #                     "language": "golang",
+    #                     "org_id": orgid,
+    #                     },
+    #                     files=files,
+    #                     headers={"Authorization": headers["Authorization"]},
+    #                 )
+    #             chaincode_id = response.json()["data"]["id"]
+    #             results.append({"token": token_name, "chaincode_id": chaincode_id})
+    #         return Response(
+    #             data=ok(results), status=status.HTTP_202_ACCEPTED
+    #         )
 
-        except Exception as e:
-            return Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+    #     except Exception as e:
+    #         return Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
         
     # @action(methods=["post"], detail=True, url_path="packageERC2")
     # def packageERC2(self, request, *args, **kwargs):
@@ -435,6 +435,16 @@ class ERCChaincodeViewSet(viewsets.ModelViewSet):
                     file.write(ercChaincode)
                 folder_path =ERC_PATH +"/chaincode-go-721"
                 zip_path = ERC_PATH +"/chaincode-go-721.zip"
+                self._zip_folder(folder_path, zip_path)
+            elif ercType=="ERC1155":
+                with open(
+                    ERC_PATH+"/chaincode-go-1155/chaincode/contract.go",
+                    "w",
+                    encoding="utf-8"
+                ) as file:
+                    file.write(ercChaincode)
+                folder_path =ERC_PATH +"/chaincode-go-1155"
+                zip_path = ERC_PATH +"/chaincode-go-1155.zip"
                 self._zip_folder(folder_path, zip_path)
             else:
                 return Response({"error": "Unknown ERC type"}, status=status.HTTP_400_BAD_REQUEST)

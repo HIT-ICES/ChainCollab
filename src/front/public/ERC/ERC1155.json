@@ -1,0 +1,612 @@
+{
+	"namespace": "chaincode",
+	"name": "erc1155",
+	"description": "FFI for Hyperledger Fabric Multi-Token (ERC-1155 like) contract",
+	"version": "1.0",
+	"methods": [
+		{
+			"name": "AddMintAuthority",
+			"description": "Adds minting authority for a specific instance.",
+			"params": [
+				{
+					"name": "instanceID",
+					"schema": {
+						"type": "string"
+					}
+				},
+				{
+					"name": "allowedMSPs",
+					"schema": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					}
+				}
+			],
+			"returns": []
+		},
+		{
+			"name": "RegisterTokenAlias",
+			"description": "Registers a new token alias and assigns an auto-incrementing uint64 ID.",
+			"params": [
+				{
+					"name": "alias",
+					"schema": {
+						"type": "string"
+					}
+				},
+				{
+					"name": "InstanceID",
+					"schema": {
+						"type": "string"
+					}
+				}
+			],
+			"returns": [
+				{
+					"name": "newID",
+					"schema": {
+						"type": "integer"
+					}
+				}
+			]
+		},
+        {
+			"name": "Getuint64IDByString",
+			"description": "Registers a new token alias and assigns an auto-incrementing uint64 ID.",
+			"params": [
+				{
+					"name": "alias",
+					"schema": {
+						"type": "string"
+					}
+				},
+				{
+					"name": "InstanceID",
+					"schema": {
+						"type": "string"
+					}
+				}
+			],
+			"returns": [
+				{
+					"name": "id",
+					"schema": {
+						"type": "integer"
+					}
+				}
+			]
+		},
+        {
+			"name": "GetStringByuint64ID",
+			"description": "Registers a new token alias and assigns an auto-incrementing uint64 ID.",
+			"params": [
+				{
+					"name": "alias",
+					"schema": {
+						"type": "integer"
+					}
+				}
+			],
+			"returns": [
+				{
+					"name": "newID",
+					"schema": {
+						"type": "string"
+					}
+				}
+			]
+		},
+		{
+			"name": "Mint",
+			"description": "Creates amount tokens of token type id (by alias) and assigns them to account. Emits a TransferSingle event.",
+			"params": [
+				{
+					"name": "account",
+					"schema": {
+						"type": "string"
+					}
+				},
+				{
+					"name": "stringID",
+					"schema": {
+						"type": "string"
+					}
+				},
+				{
+					"name": "amount",
+					"schema": {
+						"type": "integer"
+					}
+				},
+				{
+					"name": "instanceID",
+					"schema": {
+						"type": "string"
+					}
+				}
+			],
+			"returns": []
+		},
+		{
+			"name": "MintBatch",
+			"description": "Creates amount tokens for each token type id and assigns them to account. Emits a TransferBatch event.",
+			"params": [
+				{
+					"name": "account",
+					"schema": {
+						"type": "string"
+					}
+				},
+				{
+					"name": "ids",
+					"schema": {
+						"type": "array",
+						"items": {
+							"type": "integer"
+						}
+					}
+				},
+				{
+					"name": "amounts",
+					"schema": {
+						"type": "array",
+						"items": {
+							"type": "integer"
+						}
+					}
+				},
+				{
+					"name": "instanceID",
+					"schema": {
+						"type": "string"
+					}
+				}
+			],
+			"returns": []
+		},
+		{
+			"name": "Burn",
+			"description": "Destroys amount tokens of token type id (by alias) from account. Triggers a TransferSingle event.",
+			"params": [
+				{
+					"name": "account",
+					"schema": {
+						"type": "string"
+					}
+				},
+				{
+					"name": "stringID",
+					"schema": {
+						"type": "string"
+					}
+				},
+				{
+					"name": "amount",
+					"schema": {
+						"type": "integer"
+					}
+				},
+				{
+					"name": "instanceID",
+					"schema": {
+						"type": "string"
+					}
+				}
+			],
+			"returns": []
+		},
+		{
+			"name": "BurnBatch",
+			"description": "Destroys amount tokens for each token type id from account. Emits a TransferBatch event.",
+			"params": [
+				{
+					"name": "account",
+					"schema": {
+						"type": "string"
+					}
+				},
+				{
+					"name": "ids",
+					"schema": {
+						"type": "array",
+						"items": {
+							"type": "integer"
+						}
+					}
+				},
+				{
+					"name": "amounts",
+					"schema": {
+						"type": "array",
+						"items": {
+							"type": "integer"
+						}
+					}
+				},
+				{
+					"name": "instanceID",
+					"schema": {
+						"type": "string"
+					}
+				}
+			],
+			"returns": []
+		},
+		{
+			"name": "TransferFrom",
+			"description": "Transfers tokens from sender account to recipient account (by token alias). Triggers a TransferSingle event.",
+			"params": [
+				{
+					"name": "sender",
+					"schema": {
+						"type": "string"
+					}
+				},
+				{
+					"name": "recipient",
+					"schema": {
+						"type": "string"
+					}
+				},
+				{
+					"name": "stringID",
+					"schema": {
+						"type": "string"
+					}
+				},
+				{
+					"name": "amount",
+					"schema": {
+						"type": "integer"
+					}
+				}
+			],
+			"returns": []
+		},
+		{
+			"name": "BatchTransferFrom",
+			"description": "Transfers multiple tokens from sender account to recipient account. Triggers a TransferBatch event.",
+			"params": [
+				{
+					"name": "sender",
+					"schema": {
+						"type": "string"
+					}
+				},
+				{
+					"name": "recipient",
+					"schema": {
+						"type": "string"
+					}
+				},
+				{
+					"name": "ids",
+					"schema": {
+						"type": "array",
+						"items": {
+							"type": "integer"
+						}
+					}
+				},
+				{
+					"name": "amounts",
+					"schema": {
+						"type": "array",
+						"items": {
+							"type": "integer"
+						}
+					}
+				}
+			],
+			"returns": []
+		},
+		{
+			"name": "BatchTransferFromMultiRecipient",
+			"description": "Transfers multiple tokens from sender account to multiple recipient accounts. Triggers a TransferBatchMultiRecipient event.",
+			"params": [
+				{
+					"name": "sender",
+					"schema": {
+						"type": "string"
+					}
+				},
+				{
+					"name": "recipients",
+					"schema": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					}
+				},
+				{
+					"name": "ids",
+					"schema": {
+						"type": "array",
+						"items": {
+							"type": "integer"
+						}
+					}
+				},
+				{
+					"name": "amounts",
+					"schema": {
+						"type": "array",
+						"items": {
+							"type": "integer"
+						}
+					}
+				}
+			],
+			"returns": []
+		},
+		{
+			"name": "IsApprovedForAll",
+			"description": "Returns true if operator is approved to transfer account's tokens.",
+			"params": [
+				{
+					"name": "account",
+					"schema": {
+						"type": "string"
+					}
+				},
+				{
+					"name": "operator",
+					"schema": {
+						"type": "string"
+					}
+				}
+			],
+			"returns": [
+				{
+					"name": "approved",
+					"schema": {
+						"type": "boolean"
+					}
+				}
+			]
+		},
+		{
+			"name": "SetApprovalForAll",
+			"description": "Approves or revokes an operator to manage all tokens for the caller. Emits an ApprovalForAll event.",
+			"params": [
+				{
+					"name": "operator",
+					"schema": {
+						"type": "string"
+					}
+				},
+				{
+					"name": "approved",
+					"schema": {
+						"type": "boolean"
+					}
+				}
+			],
+			"returns": []
+		},
+		{
+			"name": "BalanceOf",
+			"description": "Returns the balance of the given account for a specific token ID.",
+			"params": [
+				{
+					"name": "account",
+					"schema": {
+						"type": "string"
+					}
+				},
+				{
+					"name": "id",
+					"schema": {
+						"type": "integer"
+					}
+				}
+			],
+			"returns": [
+				{
+					"name": "balance",
+					"schema": {
+						"type": "integer"
+					}
+				}
+			]
+		},
+		{
+			"name": "BalanceOfBatch",
+			"description": "Returns the balance of multiple account/token pairs.",
+			"params": [
+				{
+					"name": "accounts",
+					"schema": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					}
+				},
+				{
+					"name": "ids",
+					"schema": {
+						"type": "array",
+						"items": {
+							"type": "integer"
+						}
+					}
+				}
+			],
+			"returns": [
+				{
+					"name": "balances",
+					"schema": {
+						"type": "array",
+						"items": {
+							"type": "integer"
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "ClientAccountBalance",
+			"description": "Returns the balance of the requesting client's account for a specific token ID.",
+			"params": [
+				{
+					"name": "id",
+					"schema": {
+						"type": "integer"
+					}
+				}
+			],
+			"returns": [
+				{
+					"name": "balance",
+					"schema": {
+						"type": "integer"
+					}
+				}
+			]
+		},
+		{
+			"name": "ClientAccountID",
+			"description": "Returns the id of the requesting client's account.",
+			"params": [],
+			"returns": [
+				{
+					"name": "clientAccountID",
+					"schema": {
+						"type": "string"
+					}
+				}
+			]
+		},
+		{
+			"name": "SetURI",
+			"description": "Sets the URI value. The URI should contain '{id}'. Triggers URI event.",
+			"params": [
+				{
+					"name": "uri",
+					"schema": {
+						"type": "string"
+					}
+				},
+				{
+					"name": "instanceID",
+					"schema": {
+						"type": "string"
+					}
+				}
+			],
+			"returns": []
+		},
+		{
+			"name": "URI",
+			"description": "Returns the URI for a token ID.",
+			"params": [
+				{
+					"name": "id",
+					"schema": {
+						"type": "integer"
+					}
+				}
+			],
+			"returns": [
+				{
+					"name": "uri",
+					"schema": {
+						"type": "string"
+					}
+				}
+			]
+		},
+		{
+			"name": "BroadcastTokenExistance",
+			"description": "Emits a TransferSingle event with zero amount to broadcast a token's existence.",
+			"params": [
+				{
+					"name": "id",
+					"schema": {
+						"type": "integer"
+					}
+				},
+				{
+					"name": "instanceID",
+					"schema": {
+						"type": "string"
+					}
+				}
+			],
+			"returns": []
+		},
+		{
+			"name": "Name",
+			"description": "Returns a descriptive name for fungible tokens in this contract.",
+			"params": [],
+			"returns": [
+				{
+					"name": "name",
+					"schema": {
+						"type": "string"
+					}
+				}
+			]
+		},
+		{
+			"name": "Symbol",
+			"description": "Returns an abbreviated name for fungible tokens in this contract.",
+			"params": [],
+			"returns": [
+				{
+					"name": "symbol",
+					"schema": {
+						"type": "string"
+					}
+				}
+			]
+		},
+		{
+			"name": "Initialize",
+			"description": "Sets the name and symbol and initializes the contract.",
+			"params": [
+				{
+					"name": "name",
+					"schema": {
+						"type": "string"
+					}
+				},
+				{
+					"name": "symbol",
+					"schema": {
+						"type": "string"
+					}
+				}
+			],
+			"returns": [
+				{
+					"name": "success",
+					"schema": {
+						"type": "boolean"
+					}
+				}
+			]
+		}
+	],
+	"events": [
+		{
+			"name": "TransferSingle"
+		},
+		{
+			"name": "TransferBatch"
+		},
+		{
+			"name": "TransferBatchMultiRecipient"
+		},
+		{
+			"name": "ApprovalForAll"
+		},
+		{
+			"name": "URI"
+		}
+	]
+}

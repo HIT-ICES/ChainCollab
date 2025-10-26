@@ -1,38 +1,34 @@
 package chaincode
 
-
 import (
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
-	"reflect"
-	"crypto/sha256"
 	"strings"
-	"encoding/hex"
+
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
-	#extra_imports#
 )
-
 
 type SmartContract struct {
 	contractapi.Contract
 }
 
-
 type StateMemory struct {
-    Result string `json:"Result"`
-	FurtherCheck bool `json:"FurtherCheck"`
+	ID string `json:"id,omitempty"` // 防报错
+
 }
 
 type InitParameters struct {
-    Participant_0ggs0ck Participant `json:"Participant_0ggs0ck"`
-	Participant_1v6wnpq Participant `json:"Participant_1v6wnpq"`
-	Participant_0tkhpj2 Participant `json:"Participant_0tkhpj2"`
-	Activity_1mj4mr7_DecisionID string `json:"Activity_1mj4mr7_DecisionID"`
-	Activity_1mj4mr7_ParamMapping map[string]string `json:"Activity_1mj4mr7_ParamMapping"`
-	Activity_1mj4mr7_Content string `json:"Activity_1mj4mr7_Content"`
+	Participant_0w6qkdf Participant `json:"Participant_0w6qkdf"`
+	Participant_19mgbdn Participant `json:"Participant_19mgbdn"`
+	Participant_09cjol2 Participant `json:"Participant_09cjol2"`
+	Participant_0sa2v7d Participant `json:"Participant_0sa2v7d"`
+	Participant_19j1e3o Participant `json:"Participant_19j1e3o"`
 }
 
 type ContractInstance struct {
@@ -46,6 +42,8 @@ type ContractInstance struct {
 	InstanceActionEvents  map[string]*ActionEvent  `json:"InstanceActionEvents"`
 	InstanceBusinessRules map[string]*BusinessRule `json:"InstanceBusinessRule"`
 	InstanceParticipants  map[string]*Participant  `json:"InstanceParticipants"`
+	InstanceTokenElements map[string]*TokenElement `json:"InstanceTokenElements"`
+	InstanceTokens        map[string]*Token        `json:"InstanceTokens"`
 	// state of the instance
 	InstanceState InstanceState `json:"InstanceState"`
 }
@@ -97,6 +95,119 @@ type BusinessRule struct {
 	DecisionID     string            `json:"DecisionID"`
 	ParamMapping   map[string]string `json:"ParamMapping"`
 	State          ElementState      `json:"State"`
+}
+
+// 方便解析的中间结构体
+type FlatokenElement struct {
+	TokenElementID string       `json:"tokenElementID"`
+	AssetType      string       `json:"assetType"`
+	Operation      string       `json:"operation"`
+	TokenName      string       `json:"tokenName"`
+	TokenID        string       `json:"tokenId"`
+	CallerID       string       `json:"caller"`
+	CalleeID       []string     `json:"callee"`
+	TokenType      string       `json:"tokenType"`
+	TokenNumber    string       `json:"tokenNumber"`
+	TokenURL       string       `json:"tokenURL"`
+	State          ElementState `json:"State"`
+}
+
+type TokenElement struct {
+	TokenElementID  string       `json:"tokenElementID"`
+	AssetType       string       `json:"assetType"`
+	Operation       string       `json:"operation"`
+	CallerID        string       `json:"caller"`
+	CalleeID        []string     `json:"callee"`
+	State           ElementState `json:"State"`
+	OperationNumber string       `json:"operationNumber"`
+	TokenKey        string       `json:"TokenKey"`
+}
+
+type Token struct {
+	TokenType    string            `json:"tokenType"`
+	OwnerID      string            `json:"tokenOwner"`
+	TokenID      string            `json:"tokenID"`
+	TokenURL     string            `json:"tokenURL"`
+	TokenName    string            `json:"tokenName"`
+	TokenBalance string            `json:  "tokenBalance"` // For FT
+	FtBalance    map[string]string `json:"FtBalance"`
+}
+
+func (cc *SmartContract) CreateToken(ctx contractapi.TransactionContextInterface, instance *ContractInstance, tokenType string, ownerID string, tokenID string, tokenURL string, tokenName string, ftbalance map[string]string) (*Token, error) {
+	var token Token
+	// 创建Token对象
+	token = Token{
+		TokenType: tokenType,
+		OwnerID:   ownerID,
+		TokenID:   tokenID,
+		TokenURL:  tokenURL,
+		TokenName: tokenName,
+		FtBalance: ftbalance,
+	}
+	var tokenKey string
+	if tokenType == "NFT" {
+		tokenKey = "NFT_" + tokenID
+	} else if tokenType == "FT" {
+		tokenKey = "FT_" + tokenName
+	}
+	instance.InstanceTokens[tokenKey] = &token
+	returnToken, ok := instance.InstanceTokens[tokenKey]
+	if !ok {
+		return nil, fmt.Errorf("无法将实例元素转换为Token")
+	}
+	return returnToken, nil
+}
+
+func (cc *SmartContract) CreateTokenElement(ctx contractapi.TransactionContextInterface, instance *ContractInstance, tokenElementID string, state ElementState, Jsonstr string) (*TokenElement, error) {
+	var fla FlatokenElement
+	err := json.Unmarshal([]byte(Jsonstr), &fla)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal FlatokenElement: %s", err.Error())
+	}
+	fla.TokenElementID = tokenElementID
+	fla.State = state
+	fla.TokenID = instance.InstanceID + "-" + fla.TokenID
+	//检查是否有这个元素
+	var tokenKey string
+	var token *Token
+	if fla.TokenType == "NFT" {
+		tokenKey = "NFT_" + fla.TokenID
+	} else if fla.TokenType == "FT" {
+		tokenKey = "FT_" + fla.TokenName
+	}
+	if _, ok := instance.InstanceTokens[tokenKey]; !ok {
+		var ftbalance map[string]string
+		// 如果是FT类型，创建一个可用的map，而不是nil
+		if fla.TokenType == "FT" {
+			ftbalance = make(map[string]string)
+		}
+		token, err = cc.CreateToken(ctx, instance, fla.TokenType, "", fla.TokenID, fla.TokenURL, fla.TokenName, ftbalance)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create token: %s", err.Error())
+		}
+	} else {
+		token = instance.InstanceTokens[tokenKey]
+	}
+	// 创建TokenElement对象
+	tokenKey, _ = cc.GetTokenKey(ctx, token)
+	var tokenElement TokenElement
+	tokenElement = TokenElement{
+		TokenElementID:  fla.TokenElementID,
+		AssetType:       fla.AssetType,
+		Operation:       fla.Operation,
+		CallerID:        fla.CallerID,
+		CalleeID:        fla.CalleeID,
+		State:           fla.State,
+		OperationNumber: fla.TokenNumber,
+		TokenKey:        tokenKey,
+	}
+	instance.InstanceTokenElements[tokenElementID] = &tokenElement
+
+	returnToken, okk := instance.InstanceTokenElements[tokenElementID]
+	if !okk {
+		return nil, fmt.Errorf("无法将实例元素转换为TokenElement")
+	}
+	return returnToken, nil
 }
 
 func (cc *SmartContract) CreateBusinessRule(ctx contractapi.TransactionContextInterface, instance *ContractInstance, BusinessRuleID string, DMNContent string, DecisionID string, ParamMapping map[string]string) (*BusinessRule, error) {
@@ -383,6 +494,17 @@ func (cc *SmartContract) ChangeBusinessRuleState(ctx contractapi.TransactionCont
 
 }
 
+func (cc *SmartContract) changeTokenElementState(ctx contractapi.TransactionContextInterface, instance *ContractInstance, tokenElementID string, state ElementState) error {
+	token, ok := instance.InstanceTokenElements[tokenElementID]
+	if !ok {
+		errorMessage := fmt.Sprintf("Token %s does not exist", tokenElementID)
+		fmt.Println(errorMessage)
+		return errors.New(errorMessage)
+	}
+	token.State = state
+	return nil
+}
+
 //get all message
 
 func (cc *SmartContract) GetAllMessages(ctx contractapi.TransactionContextInterface, instanceID string) ([]*Message, error) {
@@ -522,6 +644,53 @@ func (cc *SmartContract) GetAllBusinessRules(ctx contractapi.TransactionContextI
 
 }
 
+func (cc *SmartContract) GetAllTokenElement(ctx contractapi.TransactionContextInterface, instanceID string) ([]*TokenElement, error) {
+	instanceJson, err := ctx.GetStub().GetState(instanceID)
+	if err != nil {
+		return nil, err
+	}
+	if instanceJson == nil {
+		errorMessage := fmt.Sprintf("instance %s does not exist", instanceID)
+		fmt.Println(errorMessage)
+		return nil, errors.New(errorMessage)
+	}
+	var instance ContractInstance
+	err = json.Unmarshal(instanceJson, &instance)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+	var TokenElements []*TokenElement
+	for _, TokenElement := range instance.InstanceTokenElements {
+		TokenElements = append(TokenElements, TokenElement)
+	}
+	return TokenElements, nil
+
+}
+
+func (cc *SmartContract) GetAllTokens(ctx contractapi.TransactionContextInterface, instanceID string) ([]*Token, error) {
+	instanceJson, err := ctx.GetStub().GetState(instanceID)
+	if err != nil {
+		return nil, err
+	}
+	if instanceJson == nil {
+		errorMessage := fmt.Sprintf("instance %s does not exist", instanceID)
+		fmt.Println(errorMessage)
+		return nil, errors.New(errorMessage)
+	}
+	var instance ContractInstance
+	err = json.Unmarshal(instanceJson, &instance)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+	var tokens []*Token
+	for _, token := range instance.InstanceTokens {
+		tokens = append(tokens, token)
+	}
+	return tokens, nil
+}
+
 func (cc *SmartContract) ReadGlobalVariable(ctx contractapi.TransactionContextInterface, instanceID string) (*StateMemory, error) {
 
 	instanceJson, err := ctx.GetStub().GetState(instanceID)
@@ -548,6 +717,59 @@ func (cc *SmartContract) ReadGlobalVariable(ctx contractapi.TransactionContextIn
 func (cc *SmartContract) SetGlobalVariable(ctx contractapi.TransactionContextInterface, instance *ContractInstance, globalVariable *StateMemory) error {
 	instance.InstanceStateMemory = *globalVariable
 	return nil
+}
+
+func (cc *SmartContract) ReadTokenElement(ctx contractapi.TransactionContextInterface, instanceID string, TokenElementID string) (*TokenElement, error) {
+	instanceJson, err := ctx.GetStub().GetState(instanceID)
+	if err != nil {
+		return nil, err
+	}
+	if instanceJson == nil {
+		errorMessage := fmt.Sprintf("Instance %s does not exist", instanceID)
+		fmt.Println(errorMessage)
+		return nil, errors.New(errorMessage)
+	}
+	var instance ContractInstance
+	err = json.Unmarshal(instanceJson, &instance)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+	TokenElement, ok := instance.InstanceTokenElements[TokenElementID]
+	if !ok {
+		errorMessage := fmt.Sprintf("TokenElement %s does not exist", TokenElementID)
+		fmt.Sprintf(errorMessage)
+		return nil, errors.New(errorMessage)
+	}
+	return TokenElement, nil
+}
+
+func (cc *SmartContract) ReadToken(ctx contractapi.TransactionContextInterface, instanceID string, tokenKey string) (*Token, error) {
+	instanceJson, err := ctx.GetStub().GetState(instanceID)
+	if err != nil {
+		return nil, err
+	}
+	if instanceJson == nil {
+		errorMessage := fmt.Sprintf("Instance %s does not exist", instanceID)
+		fmt.Println(errorMessage)
+		return nil, errors.New(errorMessage)
+	}
+
+	var instance ContractInstance
+	err = json.Unmarshal(instanceJson, &instance)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+
+	token, ok := instance.InstanceTokens[tokenKey]
+	if !ok {
+		errorMessage := fmt.Sprintf("Token %s does not exist", tokenKey)
+		fmt.Println(errorMessage)
+		return nil, errors.New(errorMessage)
+	}
+
+	return token, nil
 }
 
 func (cc *SmartContract) ReadBusinessRule(ctx contractapi.TransactionContextInterface, instanceID string, BusinessRuleID string) (*BusinessRule, error) {
@@ -768,9 +990,167 @@ func (s *SmartContract) hashXML(ctx contractapi.TransactionContextInterface, xml
 // 		return fmt.Errorf("failed to update record in world state: %v", err)
 // 	}
 
-// 	return nil
-// }
+//		return nil
+//	}
+func (cc *SmartContract) GetTokenKey(ctx contractapi.TransactionContextInterface, token *Token) (string, error) {
+	var resultKey string
+	if token.TokenType == "NFT" {
+		resultKey = "NFT_" + token.TokenID
+	} else if token.TokenType == "FT" {
+		resultKey = "FT_" + token.TokenName
+	}
+	return resultKey, nil
+}
 
+func (cc *SmartContract) changeTokenOwner(ctx contractapi.TransactionContextInterface, instance *ContractInstance, tokenkey string, ownerid string) error {
+	if ownerid == "delete" {
+		// 检查 token 是否存在，如果不存在，则直接返回 nil，不报错
+		if _, ok := instance.InstanceTokens[tokenkey]; !ok {
+			fmt.Printf("Token %s does not exist, no action needed.\n", tokenkey)
+			return nil
+		}
+
+		// 使用 delete 函数删除 map 中的键值对
+		delete(instance.InstanceTokens, tokenkey)
+		fmt.Printf("Token %s has been deleted.\n", tokenkey)
+		return nil
+	}
+
+	token, ok := instance.InstanceTokens[tokenkey]
+	if !ok {
+		errorMessage := fmt.Sprintf("Token %s does not exist", tokenkey)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+	token.OwnerID = ownerid
+	//打印检查一下
+	fmt.Println("Token的拥有者变更为", token.OwnerID)
+	return nil
+}
+
+func (cc *SmartContract) changeTokenBalance(ctx contractapi.TransactionContextInterface, instance *ContractInstance, tokenkey string, owner string, balance string) error {
+	token, ok := instance.InstanceTokens[tokenkey]
+	if !ok {
+		errorMessage := fmt.Sprintf("Token %s does not exist", tokenkey)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+	token.FtBalance[owner] = balance
+	return nil
+}
+
+// 参与者id变为身份id
+func (cc *SmartContract) ParticipantToidentity(ctx contractapi.TransactionContextInterface, instanceID string, participantID string) (string, error) {
+	//获取参与者的id
+	if participantID == "" {
+		return "", fmt.Errorf("participantID cannot be empty")
+	}
+	participant, err := cc.ReadParticipant(ctx, instanceID, participantID)
+	if err != nil {
+		return "", fmt.Errorf("failed to read participant: %v", err)
+	}
+	//参与者为类，x509可能为空
+	if participant.X509 == "" {
+		return "", fmt.Errorf("participant.X509 is empty")
+	}
+	getid := participant.X509
+	atindex := strings.Index(getid, "@")
+	if atindex == -1 {
+		return "", fmt.Errorf("invalid participant identity format: %s", getid)
+	}
+	id64 := getid[:atindex]
+	idBytes, err := base64.StdEncoding.DecodeString(id64)
+	id := string(idBytes)
+
+	return id, nil
+}
+
+func (cc *SmartContract) AddMintAuthority_nft(ctx contractapi.TransactionContextInterface, InstanceID string, allowedMSPs []string, tokenelementname string) error {
+	allowedMSPsJson, err := json.Marshal(allowedMSPs)
+	if err != nil {
+		return fmt.Errorf("failed to marshal allowedMSPs: %v", err)
+	}
+	chaincodeName := "ERC721-" + tokenelementname
+	_args := make([][]byte, 3)
+	_args[0] = []byte("AddMintAuthority") // 调用函数
+	_args[1] = []byte(InstanceID)         //name
+	_args[2] = allowedMSPsJson            //name
+	cc.Invoke_Other_chaincode(
+		ctx,
+		chaincodeName,
+		"default",
+		_args,
+	)
+
+	return nil
+}
+
+func (cc *SmartContract) AddMintAuthority_ft(ctx contractapi.TransactionContextInterface, InstanceID string, allowedMSPs []string, tokenelementname string) error {
+	allowedMSPsJson, err := json.Marshal(allowedMSPs)
+	if err != nil {
+		return fmt.Errorf("failed to marshal allowedMSPs: %v", err)
+	}
+	chaincodeName := "ERC20-" + tokenelementname
+	_args := make([][]byte, 3)
+	_args[0] = []byte("AddMintAuthority") // 调用函数
+	_args[1] = []byte(InstanceID)         //name
+	_args[2] = allowedMSPsJson            //name
+	cc.Invoke_Other_chaincode(
+		ctx,
+		chaincodeName,
+		"default",
+		_args,
+	)
+
+	return nil
+}
+
+func (cc *SmartContract) TokenElementInitialize(ctx contractapi.TransactionContextInterface, name string) error {
+	symbol := name
+	chaincodeName := "ERC721-" + name
+	// minterMSPs := []string{"Mem.org.comMSP", "Organization-consortium.org.comMSP"}
+	// minterMSPsJson, err := json.Marshal(minterMSPs)
+	// if err != nil {
+	// 	return err // 或 ctx.GetStub().SetEvent(...) 返回错误
+	// }
+	_args := make([][]byte, 4)
+	_args[0] = []byte("Initialize") // 操作类型
+	_args[1] = []byte(name)         //name
+	_args[2] = []byte(symbol)
+	response, _ := cc.Invoke_Other_chaincode(
+		ctx,
+		chaincodeName,
+		"default",
+		_args,
+	)
+	fmt.Print("response:")
+	fmt.Println(string(response))
+	return nil
+}
+
+func (cc *SmartContract) TokenElementInitializeFT(ctx contractapi.TransactionContextInterface, name string) error {
+	symbol := name
+	chaincodeName := "ERC20-" + name
+	// minterMSPs := []string{"Mem.org.comMSP", "Organization-consortium.org.comMSP"}
+	// minterMSPsJson, err := json.Marshal(minterMSPs)
+	// if err != nil {
+	// 	return err // 或 ctx.GetStub().SetEvent(...) 返回错误
+	// }
+	_args := make([][]byte, 4)
+	_args[0] = []byte("Initialize") // 操作类型
+	_args[1] = []byte(name)         //name
+	_args[2] = []byte(symbol)
+	_args[3] = []byte("0")
+	response, _ := cc.Invoke_Other_chaincode(
+		ctx,
+		chaincodeName,
+		"default",
+		_args,
+	)
+	fmt.Print("response:")
+	fmt.Println(string(response))
+	return nil
+}
 
 func (cc *SmartContract) Invoke_Other_chaincode(ctx contractapi.TransactionContextInterface, chaincodeName string, channel string, _args [][]byte) ([]byte, error) {
 	stub := ctx.GetStub()
@@ -814,7 +1194,6 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 	}
 
 	instanceID := string(instanceIDBytes)
-	
 
 	// Create the instance with the data from the InitParameters
 	var initParameters InitParameters
@@ -824,37 +1203,49 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 	}
 
 	instance := ContractInstance{
-		InstanceID:          instanceID,
-		InstanceStateMemory: StateMemory{},
-		InstanceMessages:    make(map[string]*Message),
-		InstanceActionEvents: make(map[string]*ActionEvent),
-		InstanceGateways: make(map[string]*Gateway),
-		InstanceParticipants : make(map[string]*Participant),
+		InstanceID:            instanceID,
+		InstanceStateMemory:   StateMemory{},
+		InstanceMessages:      make(map[string]*Message),
+		InstanceActionEvents:  make(map[string]*ActionEvent),
+		InstanceGateways:      make(map[string]*Gateway),
+		InstanceParticipants:  make(map[string]*Participant),
 		InstanceBusinessRules: make(map[string]*BusinessRule),
+		InstanceTokenElements: make(map[string]*TokenElement),
+		InstanceTokens:        make(map[string]*Token),
 	}
 
 	// Update the currentInstanceID
 
-		cc.CreateParticipant(ctx, &instance, "Participant_0ggs0ck", initParameters.Participant_0ggs0ck.MSP, initParameters.Participant_0ggs0ck.Attributes, initParameters.Participant_0ggs0ck.X509,initParameters.Participant_0ggs0ck.IsMulti, 0, 0)
-	cc.CreateParticipant(ctx, &instance, "Participant_1v6wnpq", initParameters.Participant_1v6wnpq.MSP, initParameters.Participant_1v6wnpq.Attributes, initParameters.Participant_1v6wnpq.X509,initParameters.Participant_1v6wnpq.IsMulti, 0, 0)
-	cc.CreateParticipant(ctx, &instance, "Participant_0tkhpj2", initParameters.Participant_0tkhpj2.MSP, initParameters.Participant_0tkhpj2.Attributes, initParameters.Participant_0tkhpj2.X509,initParameters.Participant_0tkhpj2.IsMulti, 0, 0)
-	cc.CreateActionEvent(ctx, &instance, "StartEvent_0m7hz56", ENABLED)
+	cc.CreateParticipant(ctx, &instance, "Participant_0w6qkdf", initParameters.Participant_0w6qkdf.MSP, initParameters.Participant_0w6qkdf.Attributes, initParameters.Participant_0w6qkdf.X509, initParameters.Participant_0w6qkdf.IsMulti, 0, 0)
+	cc.CreateParticipant(ctx, &instance, "Participant_19mgbdn", initParameters.Participant_19mgbdn.MSP, initParameters.Participant_19mgbdn.Attributes, initParameters.Participant_19mgbdn.X509, initParameters.Participant_19mgbdn.IsMulti, 0, 0)
+	cc.CreateParticipant(ctx, &instance, "Participant_09cjol2", initParameters.Participant_09cjol2.MSP, initParameters.Participant_09cjol2.Attributes, initParameters.Participant_09cjol2.X509, initParameters.Participant_09cjol2.IsMulti, 0, 0)
+	cc.CreateParticipant(ctx, &instance, "Participant_0sa2v7d", initParameters.Participant_0sa2v7d.MSP, initParameters.Participant_0sa2v7d.Attributes, initParameters.Participant_0sa2v7d.X509, initParameters.Participant_0sa2v7d.IsMulti, 0, 0)
+	cc.CreateParticipant(ctx, &instance, "Participant_19j1e3o", initParameters.Participant_19j1e3o.MSP, initParameters.Participant_19j1e3o.Attributes, initParameters.Participant_19j1e3o.X509, initParameters.Participant_19j1e3o.IsMulti, 0, 0)
+	cc.CreateActionEvent(ctx, &instance, "Event_06sexe6", ENABLED)
 
-	cc.CreateActionEvent(ctx, &instance, "EndEvent_110myff", DISABLED)
+	cc.CreateActionEvent(ctx, &instance, "Event_13pbqdz", DISABLED)
 
-	cc.CreateMessage(ctx, &instance, "Message_13mh6mk", "Participant_0tkhpj2", "Participant_0ggs0ck", "", DISABLED, `{"properties":{"reportContent":{"type":"string","description":""}},"required":["reportContent"],"files":{},"file required":[]}`)
-	cc.CreateMessage(ctx, &instance, "Message_0gd0z61", "Participant_0tkhpj2", "Participant_0ggs0ck", "", DISABLED, `{"properties":{"furtherCheckPlace":{"type":"string","description":""},"furtherCheckDate":{"type":"string","description":""}},"required":["furtherCheckPlace","furtherCheckDate"],"files":{},"file required":[]}`)
-	cc.CreateMessage(ctx, &instance, "Message_1rqbibd", "Participant_0ggs0ck", "Participant_0tkhpj2", "", DISABLED, `{"properties":{"result":{"type":"string","description":""}},"required":["result"],"files":{},"file required":[]}`)
-	cc.CreateMessage(ctx, &instance, "Message_1vzqd37", "Participant_1v6wnpq", "Participant_0ggs0ck", "", DISABLED, `{"properties":{"result":{"type":"string","description":""}},"required":["result"],"files":{},"file required":[]}`)
-	cc.CreateMessage(ctx, &instance, "Message_0wq8mc6", "Participant_0ggs0ck", "Participant_0tkhpj2", "", DISABLED, `{"properties":{"patientData":{"type":"string","description":""}},"required":["patientData"],"files":{},"file required":[]}`)
-	cc.CreateMessage(ctx, &instance, "Message_0gswvmq", "Participant_0ggs0ck", "Participant_1v6wnpq", "", DISABLED, `{"properties":{"sample":{"type":"string","description":""}},"required":["sample"],"files":{},"file required":[]}`)
-	cc.CreateGateway(ctx, &instance, "Gateway_0o8snyv", DISABLED)
+	cc.CreateMessage(ctx, &instance, "Message_1amf6l2", "Participant_0sa2v7d", "Participant_19j1e3o", "", DISABLED, `{}`)
+	cc.CreateMessage(ctx, &instance, "Message_196q1fj", "Participant_19mgbdn", "Participant_0w6qkdf", "", DISABLED, `{"properties":{"deliver":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, &instance, "Message_04wmlqe", "Participant_19mgbdn", "Participant_0w6qkdf", "", DISABLED, `{"properties":{"report":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, &instance, "Message_1slt8tv", "Participant_0w6qkdf", "Participant_19mgbdn", "", DISABLED, `{}`)
+	cc.CreateMessage(ctx, &instance, "Message_1yv2h4e", "Participant_0w6qkdf", "Participant_19mgbdn", "", DISABLED, `{}`)
+	cc.CreateMessage(ctx, &instance, "Message_0d2xte5", "Participant_19j1e3o", "Participant_19mgbdn", "", DISABLED, `{"properties":{"del_order":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, &instance, "Message_1io2g9u", "Participant_0sa2v7d", "Participant_19j1e3o", "", DISABLED, `{"properties":{"waybill":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, &instance, "Message_0hpha6h", "Participant_0sa2v7d", "Participant_19j1e3o", "", DISABLED, `{"properties":{"pre_details":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, &instance, "Message_0rwz1km", "Participant_19j1e3o", "Participant_0sa2v7d", "", DISABLED, `{"properties":{"req_details":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, &instance, "Message_0pm90nx", "Participant_0w6qkdf", "Participant_19j1e3o", "", DISABLED, `{"properties":{"transport_order":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, &instance, "Message_0cba4t6", "Participant_0w6qkdf", "Participant_0sa2v7d", "", DISABLED, `{"properties":{"fwd_order":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, &instance, "Message_1ajdm9l", "Participant_19mgbdn", "Participant_09cjol2", "", DISABLED, `{"properties":{"placed_order":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}`)
+	cc.CreateMessage(ctx, &instance, "Message_1wswgqu", "Participant_0w6qkdf", "Participant_19mgbdn", "", DISABLED, `{"properties":{"order":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}`)
+	cc.CreateGateway(ctx, &instance, "Gateway_0onpe6x", DISABLED)
 
-	cc.CreateGateway(ctx, &instance, "ParallelGateway_1pgjqtw", DISABLED)
+	cc.CreateGateway(ctx, &instance, "Gateway_1fbifca", DISABLED)
 
-	cc.CreateGateway(ctx, &instance, "Gateway_1m6dgym", DISABLED)
-
-	cc.CreateBusinessRule(ctx, &instance, "Activity_1mj4mr7", initParameters.Activity_1mj4mr7_Content, initParameters.Activity_1mj4mr7_DecisionID, initParameters.Activity_1mj4mr7_ParamMapping)
+	cc.CreateTokenElement(ctx, &instance, "Activity_0voe68z", DISABLED, `{"assetType":"transferable","operation":"mint","tokenName":"rawMaterial","caller":"Participant_0sa2v7d","tokenType":"NFT","tokenId":"1","tokenURL":"http://www.github.com"}`)
+	cc.CreateTokenElement(ctx, &instance, "Activity_0l6jyqh", DISABLED, `{"assetType":"transferable","operation":"Transfer","tokenName":"rawMaterial","caller":"Participant_0sa2v7d","callee":["Participant_19mgbdn"],"tokenType":"NFT","tokenId":"1","tokenURL":"http://www.github.com"}`)
+	cc.CreateTokenElement(ctx, &instance, "Activity_0xhcefo", DISABLED, `{"assetType":"transferable","operation":"mint","tokenName":"product","caller":"Participant_19mgbdn","tokenType":"NFT","tokenId":"2","tokenURL":"http://www.github.com"}`)
+	cc.CreateTokenElement(ctx, &instance, "Activity_1u61szh", DISABLED, `{"assetType":"transferable","operation":"Transfer","tokenName":"product","caller":"Participant_19mgbdn","callee":["Participant_0w6qkdf"],"tokenType":"NFT","tokenId":"2","tokenURL":"http://www.github.com"}`)
 
 	// Save the instance
 	instanceBytes, err := json.Marshal(instance)
@@ -867,10 +1258,8 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 		return "", fmt.Errorf("failed to put state. %s", err.Error())
 	}
 
-
 	eventPayload := map[string]string{
-		"InstanceID": instanceID, 
-		"Activity_1mj4mr7" : initParameters.Activity_1mj4mr7_Content,
+		"InstanceID": instanceID,
 	}
 
 	eventPayloadAsBytes, err := json.Marshal(eventPayload)
@@ -882,8 +1271,6 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 	if err != nil {
 		return "", fmt.Errorf("failed to set event: %v", err)
 	}
-
-
 
 	instanceIDInt, err := strconv.Atoi(instanceID)
 	if err != nil {
@@ -907,11 +1294,11 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 
 }
 
-func (cc *SmartContract) StartEvent_0m7hz56(ctx contractapi.TransactionContextInterface, instanceID string) error {
+func (cc *SmartContract) Event_06sexe6(ctx contractapi.TransactionContextInterface, instanceID string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
 
-	actionEvent, err := cc.ReadEvent(ctx, instanceID, "StartEvent_0m7hz56")
+	actionEvent, err := cc.ReadEvent(ctx, instanceID, "Event_06sexe6")
 	if err != nil {
 		return err
 	}
@@ -922,20 +1309,84 @@ func (cc *SmartContract) StartEvent_0m7hz56(ctx contractapi.TransactionContextIn
 		return fmt.Errorf(errorMessage)
 	}
 
-	cc.ChangeEventState(ctx, instance, "StartEvent_0m7hz56", COMPLETED)
-	stub.SetEvent("StartEvent_0m7hz56", []byte("Contract has been started successfully"))
+	cc.ChangeEventState(ctx, instance, "Event_06sexe6", COMPLETED)
+	stub.SetEvent("Event_06sexe6", []byte("Contract has been started successfully"))
 	cc.SetInstance(ctx, instance)
-	
-	    cc.ChangeGtwState(ctx, instance, "ParallelGateway_1pgjqtw", ENABLED)
-	
+
+	cc.ChangeMsgState(ctx, instance, "Message_1wswgqu", ENABLED)
+
 	cc.SetInstance(ctx, instance)
 	return nil
 }
 
-func (cc *SmartContract) ParallelGateway_1pgjqtw(ctx contractapi.TransactionContextInterface, instanceID string) error {
+func (cc *SmartContract) Message_1wswgqu_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
-	gtw, err := cc.ReadGtw(ctx, instanceID, "ParallelGateway_1pgjqtw")
+	msg, err := cc.ReadMsg(ctx, instanceID, "Message_1wswgqu")
+	if err != nil {
+		return err
+	}
+
+	//
+	if cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {
+		errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", msg.SendParticipantID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	if msg.MsgState != ENABLED {
+		errorMessage := fmt.Sprintf("Message state %s is not allowed", msg.MessageID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
+	cc.ChangeMsgState(ctx, instance, "Message_1wswgqu", COMPLETED)
+
+	stub.SetEvent("Message_1wswgqu", []byte("Message is waiting for confirmation"))
+	cc.SetInstance(ctx, instance)
+
+	cc.ChangeMsgState(ctx, instance, "Message_1ajdm9l", ENABLED)
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_1ajdm9l_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
+	stub := ctx.GetStub()
+	instance, err := cc.GetInstance(ctx, instanceID)
+	msg, err := cc.ReadMsg(ctx, instanceID, "Message_1ajdm9l")
+	if err != nil {
+		return err
+	}
+
+	//
+	if cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {
+		errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", msg.SendParticipantID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	if msg.MsgState != ENABLED {
+		errorMessage := fmt.Sprintf("Message state %s is not allowed", msg.MessageID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
+	cc.ChangeMsgState(ctx, instance, "Message_1ajdm9l", COMPLETED)
+
+	stub.SetEvent("Message_1ajdm9l", []byte("Message is waiting for confirmation"))
+	cc.SetInstance(ctx, instance)
+
+	cc.ChangeGtwState(ctx, instance, "Gateway_0onpe6x", ENABLED)
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Gateway_0onpe6x(ctx contractapi.TransactionContextInterface, instanceID string) error {
+	stub := ctx.GetStub()
+	instance, err := cc.GetInstance(ctx, instanceID)
+	gtw, err := cc.ReadGtw(ctx, instanceID, "Gateway_0onpe6x")
 	if err != nil {
 		return err
 	}
@@ -947,27 +1398,26 @@ func (cc *SmartContract) ParallelGateway_1pgjqtw(ctx contractapi.TransactionCont
 	}
 
 	cc.ChangeGtwState(ctx, instance, gtw.GatewayID, COMPLETED)
-	stub.SetEvent("ParallelGateway_1pgjqtw", []byte("Gateway has been done"))
+	stub.SetEvent("Gateway_0onpe6x", []byte("Gateway has been done"))
 	cc.SetInstance(ctx, instance)
-	
 
-	    cc.ChangeMsgState(ctx, instance, "Message_0gswvmq", ENABLED)
-    cc.ChangeMsgState(ctx, instance, "Message_0wq8mc6", ENABLED)
+	cc.ChangeMsgState(ctx, instance, "Message_0cba4t6", ENABLED)
+	cc.ChangeMsgState(ctx, instance, "Message_0pm90nx", ENABLED)
 	cc.SetInstance(ctx, instance)
 
 	return nil
 }
 
-func (cc *SmartContract) Message_0gswvmq_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string ) error {
+func (cc *SmartContract) Message_0cba4t6_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
 	stub := ctx.GetStub()
-	instance,err := cc.GetInstance(ctx, instanceID)
-	msg, err := cc.ReadMsg(ctx, instanceID, "Message_0gswvmq")
+	instance, err := cc.GetInstance(ctx, instanceID)
+	msg, err := cc.ReadMsg(ctx, instanceID, "Message_0cba4t6")
 	if err != nil {
 		return err
 	}
 
 	//
-	if cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false{
+	if cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {
 		errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", msg.SendParticipantID)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
@@ -980,27 +1430,26 @@ func (cc *SmartContract) Message_0gswvmq_Send(ctx contractapi.TransactionContext
 	}
 
 	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
-	    cc.ChangeMsgState(ctx, instance, "Message_0gswvmq", COMPLETED)
-	
-	stub.SetEvent("Message_0gswvmq", []byte("Message is waiting for confirmation"))
+	cc.ChangeMsgState(ctx, instance, "Message_0cba4t6", COMPLETED)
+
+	stub.SetEvent("Message_0cba4t6", []byte("Message is waiting for confirmation"))
 	cc.SetInstance(ctx, instance)
-	
-	
-	    cc.ChangeMsgState(ctx, instance, "Message_1vzqd37", ENABLED)
+
+	cc.changeTokenElementState(ctx, instance, "Activity_0voe68z", ENABLED)
 	cc.SetInstance(ctx, instance)
 	return nil
 }
 
-func (cc *SmartContract) Message_0wq8mc6_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string ) error {
+func (cc *SmartContract) Message_0pm90nx_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
 	stub := ctx.GetStub()
-	instance,err := cc.GetInstance(ctx, instanceID)
-	msg, err := cc.ReadMsg(ctx, instanceID, "Message_0wq8mc6")
+	instance, err := cc.GetInstance(ctx, instanceID)
+	msg, err := cc.ReadMsg(ctx, instanceID, "Message_0pm90nx")
 	if err != nil {
 		return err
 	}
 
 	//
-	if cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false{
+	if cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {
 		errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", msg.SendParticipantID)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
@@ -1013,27 +1462,55 @@ func (cc *SmartContract) Message_0wq8mc6_Send(ctx contractapi.TransactionContext
 	}
 
 	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
-	    cc.ChangeMsgState(ctx, instance, "Message_0wq8mc6", COMPLETED)
-	
-	stub.SetEvent("Message_0wq8mc6", []byte("Message is waiting for confirmation"))
+	cc.ChangeMsgState(ctx, instance, "Message_0pm90nx", COMPLETED)
+
+	stub.SetEvent("Message_0pm90nx", []byte("Message is waiting for confirmation"))
 	cc.SetInstance(ctx, instance)
-	
-	
-	    cc.ChangeMsgState(ctx, instance, "Message_13mh6mk", ENABLED)
+
+	if !(func() bool {
+		msg, err := cc.ReadTokenElement(ctx, instanceID, "Activity_0voe68z")
+		return err == nil && msg.State == COMPLETED
+	}()) {
+		return nil
+	}
+	cc.ChangeGtwState(ctx, instance, "Gateway_1fbifca", ENABLED)
 	cc.SetInstance(ctx, instance)
 	return nil
 }
 
-func (cc *SmartContract) Message_1vzqd37_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string , Result string) error {
+func (cc *SmartContract) Gateway_1fbifca(ctx contractapi.TransactionContextInterface, instanceID string) error {
 	stub := ctx.GetStub()
-	instance,err := cc.GetInstance(ctx, instanceID)
-	msg, err := cc.ReadMsg(ctx, instanceID, "Message_1vzqd37")
+	instance, err := cc.GetInstance(ctx, instanceID)
+	gtw, err := cc.ReadGtw(ctx, instanceID, "Gateway_1fbifca")
+	if err != nil {
+		return err
+	}
+
+	if gtw.GatewayState != ENABLED {
+		errorMessage := fmt.Sprintf("Gateway state %s is not allowed", gtw.GatewayID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeGtwState(ctx, instance, gtw.GatewayID, COMPLETED)
+	stub.SetEvent("Gateway_1fbifca", []byte("Gateway has been done"))
+
+	cc.ChangeMsgState(ctx, instance, "Message_0rwz1km", ENABLED)
+
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_0rwz1km_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
+	stub := ctx.GetStub()
+	instance, err := cc.GetInstance(ctx, instanceID)
+	msg, err := cc.ReadMsg(ctx, instanceID, "Message_0rwz1km")
 	if err != nil {
 		return err
 	}
 
 	//
-	if cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false{
+	if cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {
 		errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", msg.SendParticipantID)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
@@ -1046,39 +1523,26 @@ func (cc *SmartContract) Message_1vzqd37_Send(ctx contractapi.TransactionContext
 	}
 
 	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
-	    cc.ChangeMsgState(ctx, instance, "Message_1vzqd37", COMPLETED)
-		globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
-	if readGloabolError != nil {
-		fmt.Println(readGloabolError.Error())
-		return readGloabolError
-	}
-		globalMemory.Result = Result
-	setGloabolErrror :=cc.SetGlobalVariable(ctx, instance, globalMemory)
-	if setGloabolErrror != nil {
-		fmt.Println(setGloabolErrror.Error())
-		return setGloabolErrror
-	}
-	stub.SetEvent("Message_1vzqd37", []byte("Message is waiting for confirmation"))
+	cc.ChangeMsgState(ctx, instance, "Message_0rwz1km", COMPLETED)
+
+	stub.SetEvent("Message_0rwz1km", []byte("Message is waiting for confirmation"))
 	cc.SetInstance(ctx, instance)
-	
-	if !(func() bool { msg, err := cc.ReadMsg(ctx, instanceID, "Message_13mh6mk"); return err == nil && msg.MsgState == COMPLETED }()) {
-	return nil
-}
-	    cc.ChangeGtwState(ctx, instance, "Gateway_1m6dgym", ENABLED)
+
+	cc.ChangeMsgState(ctx, instance, "Message_1amf6l2", ENABLED)
 	cc.SetInstance(ctx, instance)
 	return nil
 }
 
-func (cc *SmartContract) Message_1rqbibd_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string , Result string) error {
+func (cc *SmartContract) Message_1amf6l2_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
 	stub := ctx.GetStub()
-	instance,err := cc.GetInstance(ctx, instanceID)
-	msg, err := cc.ReadMsg(ctx, instanceID, "Message_1rqbibd")
+	instance, err := cc.GetInstance(ctx, instanceID)
+	msg, err := cc.ReadMsg(ctx, instanceID, "Message_1amf6l2")
 	if err != nil {
 		return err
 	}
 
 	//
-	if cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false{
+	if cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {
 		errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", msg.SendParticipantID)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
@@ -1091,31 +1555,244 @@ func (cc *SmartContract) Message_1rqbibd_Send(ctx contractapi.TransactionContext
 	}
 
 	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
-	    cc.ChangeMsgState(ctx, instance, "Message_1rqbibd", COMPLETED)
-		globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
-	if readGloabolError != nil {
-		fmt.Println(readGloabolError.Error())
-		return readGloabolError
-	}
-		globalMemory.Result = Result
-	setGloabolErrror :=cc.SetGlobalVariable(ctx, instance, globalMemory)
-	if setGloabolErrror != nil {
-		fmt.Println(setGloabolErrror.Error())
-		return setGloabolErrror
-	}
-	stub.SetEvent("Message_1rqbibd", []byte("Message is waiting for confirmation"))
+	cc.ChangeMsgState(ctx, instance, "Message_1amf6l2", COMPLETED)
+
+	stub.SetEvent("Message_1amf6l2", []byte("Message is waiting for confirmation"))
 	cc.SetInstance(ctx, instance)
-	
-	
-	cc.ChangeBusinessRuleState(ctx, instance, "Activity_1mj4mr7", ENABLED)
+
+	cc.ChangeMsgState(ctx, instance, "Message_0hpha6h", ENABLED)
 	cc.SetInstance(ctx, instance)
 	return nil
 }
 
-func (cc *SmartContract) EndEvent_110myff(ctx contractapi.TransactionContextInterface, instanceID string) error {
+func (cc *SmartContract) Message_0hpha6h_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
 	stub := ctx.GetStub()
-	instance,err:=cc.GetInstance(ctx, instanceID)
-	event, err := cc.ReadEvent(ctx, instanceID, "EndEvent_110myff")
+	instance, err := cc.GetInstance(ctx, instanceID)
+	msg, err := cc.ReadMsg(ctx, instanceID, "Message_0hpha6h")
+	if err != nil {
+		return err
+	}
+
+	//
+	if cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {
+		errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", msg.SendParticipantID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	if msg.MsgState != ENABLED {
+		errorMessage := fmt.Sprintf("Message state %s is not allowed", msg.MessageID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
+	cc.ChangeMsgState(ctx, instance, "Message_0hpha6h", COMPLETED)
+
+	stub.SetEvent("Message_0hpha6h", []byte("Message is waiting for confirmation"))
+	cc.SetInstance(ctx, instance)
+
+	cc.ChangeMsgState(ctx, instance, "Message_1io2g9u", ENABLED)
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_1io2g9u_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
+	stub := ctx.GetStub()
+	instance, err := cc.GetInstance(ctx, instanceID)
+	msg, err := cc.ReadMsg(ctx, instanceID, "Message_1io2g9u")
+	if err != nil {
+		return err
+	}
+
+	//
+	if cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {
+		errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", msg.SendParticipantID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	if msg.MsgState != ENABLED {
+		errorMessage := fmt.Sprintf("Message state %s is not allowed", msg.MessageID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
+	cc.ChangeMsgState(ctx, instance, "Message_1io2g9u", COMPLETED)
+
+	stub.SetEvent("Message_1io2g9u", []byte("Message is waiting for confirmation"))
+	cc.SetInstance(ctx, instance)
+
+	cc.ChangeMsgState(ctx, instance, "Message_0d2xte5", ENABLED)
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_0d2xte5_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
+	stub := ctx.GetStub()
+	instance, err := cc.GetInstance(ctx, instanceID)
+	msg, err := cc.ReadMsg(ctx, instanceID, "Message_0d2xte5")
+	if err != nil {
+		return err
+	}
+
+	//
+	if cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {
+		errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", msg.SendParticipantID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	if msg.MsgState != ENABLED {
+		errorMessage := fmt.Sprintf("Message state %s is not allowed", msg.MessageID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
+	cc.ChangeMsgState(ctx, instance, "Message_0d2xte5", COMPLETED)
+
+	stub.SetEvent("Message_0d2xte5", []byte("Message is waiting for confirmation"))
+	cc.SetInstance(ctx, instance)
+
+	cc.changeTokenElementState(ctx, instance, "Activity_0l6jyqh", ENABLED)
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_04wmlqe_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
+	stub := ctx.GetStub()
+	instance, err := cc.GetInstance(ctx, instanceID)
+	msg, err := cc.ReadMsg(ctx, instanceID, "Message_04wmlqe")
+	if err != nil {
+		return err
+	}
+
+	//
+	if cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {
+		errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", msg.SendParticipantID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	if msg.MsgState != ENABLED {
+		errorMessage := fmt.Sprintf("Message state %s is not allowed", msg.MessageID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
+	cc.ChangeMsgState(ctx, instance, "Message_04wmlqe", COMPLETED)
+
+	stub.SetEvent("Message_04wmlqe", []byte("Message is waiting for confirmation"))
+	cc.SetInstance(ctx, instance)
+
+	cc.ChangeMsgState(ctx, instance, "Message_1yv2h4e", ENABLED)
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_1yv2h4e_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
+	stub := ctx.GetStub()
+	instance, err := cc.GetInstance(ctx, instanceID)
+	msg, err := cc.ReadMsg(ctx, instanceID, "Message_1yv2h4e")
+	if err != nil {
+		return err
+	}
+
+	//
+	if cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {
+		errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", msg.SendParticipantID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	if msg.MsgState != ENABLED {
+		errorMessage := fmt.Sprintf("Message state %s is not allowed", msg.MessageID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
+	cc.ChangeMsgState(ctx, instance, "Message_1yv2h4e", COMPLETED)
+
+	stub.SetEvent("Message_1yv2h4e", []byte("Message is waiting for confirmation"))
+	cc.SetInstance(ctx, instance)
+
+	cc.changeTokenElementState(ctx, instance, "Activity_0xhcefo", ENABLED)
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_196q1fj_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
+	stub := ctx.GetStub()
+	instance, err := cc.GetInstance(ctx, instanceID)
+	msg, err := cc.ReadMsg(ctx, instanceID, "Message_196q1fj")
+	if err != nil {
+		return err
+	}
+
+	//
+	if cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {
+		errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", msg.SendParticipantID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	if msg.MsgState != ENABLED {
+		errorMessage := fmt.Sprintf("Message state %s is not allowed", msg.MessageID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
+	cc.ChangeMsgState(ctx, instance, "Message_196q1fj", COMPLETED)
+
+	stub.SetEvent("Message_196q1fj", []byte("Message is waiting for confirmation"))
+	cc.SetInstance(ctx, instance)
+
+	cc.ChangeMsgState(ctx, instance, "Message_1slt8tv", ENABLED)
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Message_1slt8tv_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
+	stub := ctx.GetStub()
+	instance, err := cc.GetInstance(ctx, instanceID)
+	msg, err := cc.ReadMsg(ctx, instanceID, "Message_1slt8tv")
+	if err != nil {
+		return err
+	}
+
+	//
+	if cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {
+		errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", msg.SendParticipantID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	if msg.MsgState != ENABLED {
+		errorMessage := fmt.Sprintf("Message state %s is not allowed", msg.MessageID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
+	cc.ChangeMsgState(ctx, instance, "Message_1slt8tv", COMPLETED)
+
+	stub.SetEvent("Message_1slt8tv", []byte("Message is waiting for confirmation"))
+	cc.SetInstance(ctx, instance)
+
+	cc.changeTokenElementState(ctx, instance, "Activity_1u61szh", ENABLED)
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
+func (cc *SmartContract) Event_13pbqdz(ctx contractapi.TransactionContextInterface, instanceID string) error {
+	stub := ctx.GetStub()
+	instance, err := cc.GetInstance(ctx, instanceID)
+	event, err := cc.ReadEvent(ctx, instanceID, "Event_13pbqdz")
 	if err != nil {
 		return err
 	}
@@ -1126,320 +1803,321 @@ func (cc *SmartContract) EndEvent_110myff(ctx contractapi.TransactionContextInte
 		return fmt.Errorf(errorMessage)
 	}
 
-	cc.ChangeEventState(ctx, instance, event.EventID, COMPLETED) 
-	stub.SetEvent("EndEvent_110myff", []byte("EndEvent has been done"))
-	
+	cc.ChangeEventState(ctx, instance, event.EventID, COMPLETED)
+	stub.SetEvent("Event_13pbqdz", []byte("EndEvent has been done"))
+
 	cc.SetInstance(ctx, instance)
 	return nil
 }
 
-func (cc *SmartContract) Activity_1mj4mr7(ctx contractapi.TransactionContextInterface, instanceID string) error {
-
-
+func (cc *SmartContract) Activity_0voe68z(ctx contractapi.TransactionContextInterface, instanceID string) error {
 	instance, err := cc.GetInstance(ctx, instanceID)
-	// Read Business Info
-	businessRule, err := cc.ReadBusinessRule(ctx, instanceID, "Activity_1mj4mr7")
 	if err != nil {
 		return err
 	}
-
-	// Check the BusinessRule State
-	if businessRule.State != ENABLED {
-		return fmt.Errorf("The BusinessRule is not ENABLED")
+	if instance == nil {
+		return errors.New("instanceID does not exist")
 	}
-
-	// Get the CID
-
-	res,err := cc.Invoke_Other_chaincode(ctx, "Oracle:v1", "default", oracle.EncodeGetDataItemArgs(
-		instanceID, "Activity_1mj4mr7",
-	))
-	if err != nil {
-		return  err
-	}
-
-	var dataItem *oracle.DataItem
-	dataItem, err = oracle.DecodeGetDataItemResult(res)
-	if err != nil {
-		return  err
-	}
-
-	eventPayload := map[string]string{
-		"ID":        "Activity_1mj4mr7",
-		"InstanceID": instanceID,
-		"Func":	   "Activity_1mj4mr7_Continue",
-		"CID": dataItem.Value, 
-	}
-
-	eventPayloadAsBytes, err := json.Marshal(eventPayload)
-	if err != nil {
-		return fmt.Errorf("failed to marshal event payload: %v", err)
-	}
-
-	err = ctx.GetStub().SetEvent("DMNContentRequired", eventPayloadAsBytes)
-	if err != nil {
-		return fmt.Errorf("failed to set event: %v", err)
-	}
-
-	cc.ChangeBusinessRuleState(ctx, instance, "Activity_1mj4mr7", WAITINGFORCONFIRMATION)
-	cc.SetInstance(ctx, instance)
-
-	return nil
-}
-
-func (cc *SmartContract) Activity_1mj4mr7_Continue(ctx contractapi.TransactionContextInterface, instanceID string, ContentOfDmn string) error {
-	// Read Business Info
-	instance,err:=cc.GetInstance(ctx, instanceID)
-	businessRule, err := cc.ReadBusinessRule(ctx, instanceID, "Activity_1mj4mr7")
+	//得到tokenElement元素
+	tokenElement, err := cc.ReadTokenElement(ctx, instanceID, "Activity_0voe68z")
 	if err != nil {
 		return err
 	}
-
-	// Check the BusinessRule State
-	if businessRule.State != WAITINGFORCONFIRMATION {
-		return fmt.Errorf("The BusinessRule is not Actived")
+	//得到token元素
+	token, err := cc.ReadToken(ctx, instanceID, tokenElement.TokenKey)
+	if err != nil {
+		return err
+	}
+	// //检查
+	if tokenElement.State != ENABLED {
+		errorMessage := fmt.Sprintf("TokenElement state %s is not allowed", tokenElement.TokenElementID)
+		fmt.Sprintln(errorMessage)
+		return fmt.Errorf(errorMessage)
 	}
 
-	// check the hash
-	hashString, _ := cc.hashXML(ctx, ContentOfDmn)
-	if hashString != businessRule.Hash {
-		return fmt.Errorf("The hash is not matched")
+	//比较当前ctx和callerid
+	//修改
+	nowid64, _ := ctx.GetClientIdentity().GetID()
+	nowidBytes, _ := base64.StdEncoding.DecodeString(nowid64)
+	nowid := string(nowidBytes)
+	fmt.Println("nowid:", nowid)
+
+	callid, _ := cc.ParticipantToidentity(ctx, instanceID, tokenElement.CallerID)
+	if nowid != callid {
+		errorMessage := fmt.Sprintf("Caller %s is not allowed to call this function", nowid)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
 	}
 
-	// Combine the Parameters
+	// 轮到他运行，调用
+	chaincodeName := "ERC721-" + token.TokenName
 	_args := make([][]byte, 4)
-	_args[0] = []byte("createRecord")
-	// input in json format
-	ParamMapping := businessRule.ParamMapping
-	realParamMapping := make(map[string]interface{})
-	globalVariable, _err := cc.ReadGlobalVariable(ctx, instanceID)
-	if _err != nil {
-		return _err
+	_args[0] = []byte("MintWithTokenURI") // 操作类型
+	_args[1] = []byte(token.TokenID)
+	_args[2] = []byte(token.TokenURL)
+	_args[3] = []byte(instanceID)
+	getpayload, _ := cc.Invoke_Other_chaincode(ctx, chaincodeName, "default", _args)
+	if len(getpayload) == 0 || string(getpayload) == "null" {
+		return errors.New("did not create successfully")
 	}
 
-	for key, value := range ParamMapping {
-		field := reflect.ValueOf(globalVariable).Elem().FieldByName(strings.Title(value))
-		if !field.IsValid() {
-			return fmt.Errorf("The field %s is not valid", value)
-		}
-		realParamMapping[key] = field.Interface()		
-	}
-	var inputJsonBytes []byte
-	inputJsonBytes, err= json.Marshal(realParamMapping)
+	//打印
+	var data map[string]interface{}
+	err = json.Unmarshal(getpayload, &data)
 	if err != nil {
-		return err
-	}
-	_args[1] = inputJsonBytes
-
-	// DMN Content
-	_args[2] = []byte(ContentOfDmn)
-
-	// decisionId
-	_args[3] = []byte(businessRule.DecisionID)
-
-	// Invoke DMN Engine Chaincode
-	var resJson []byte
-	resJson, err=cc.Invoke_Other_chaincode(ctx, "DMNEngine:v1","default", _args)
-
-	// Set the Result
-	var res map[string]interface{}
-	err = json.Unmarshal(resJson, &res)
-	if err != nil {
-		return err
+		return fmt.Errorf("failed to parse JSON: %v", err)
 	}
 
-	output := res["output"]
-	fmt.Println("output: ", output)  
-	if outputArr, ok := output.([]interface{}); ok {  
-		for _, item := range outputArr {  
-			itemMap := item.(map[string]interface{})  
-			for key, value := range itemMap {  
-				fmt.Printf("Key: %s, Type: %T, Value: %v\n", key,value,value)  
-				globalName , _ := ParamMapping[key]
-				field := reflect.ValueOf(globalVariable).Elem().FieldByName(strings.Title(globalName))
-				if !field.IsValid() {
-					return fmt.Errorf("The field %s is not valid", key)
-				}
-				switch field.Kind() {
-					case reflect.Int:
-						if valueFloat, ok := value.(float64); ok {
-							field.SetInt(int64(valueFloat))
-						} else {
-							return fmt.Errorf("Unable to convert %v to int", value)
-						}
-					case reflect.String:
-						if valueStr, ok := value.(string); ok {
-							field.SetString(valueStr)
-						} else {
-							return fmt.Errorf("Unable to convert %v to string", value)
-						}
-					case reflect.Bool: // 处理布尔类型
-						if valueBool, ok := value.(bool); ok {
-							field.SetBool(valueBool)
-						} else {
-							return fmt.Errorf("Unable to convert %v to bool", value)
-						}
-					// 其他类型转换可以根据需求添加
-					default:
-						return fmt.Errorf("Unsupported field type: %s", field.Type())
-                }
-				// field.Set(reflect.ValueOf(value))
-			}  
-		}  
-	}  
+	owner := data["owner"].(string) //
+	fmt.Println("payload解析出来的Owner:", owner)
+	//修改token对象的拥有者
+	cc.changeTokenOwner(ctx, instance, tokenElement.TokenKey, owner)
 
-	// Update the GlobalVariable
-	err = cc.SetGlobalVariable(ctx, instance, globalVariable)
-
-	// Change the BusinessRule State
-	cc.ChangeBusinessRuleState(ctx, instance, "Activity_1mj4mr7", COMPLETED)
-
-    
-        cc.ChangeGtwState(ctx, instance, "Gateway_0o8snyv", ENABLED)
-    
-
+	//测试一下
+	fmt.Println("TokenElement中的拥有者:", token.OwnerID)
+	//检查
+	fmt.Println("调用chaincode结束")
+	//改状态
+	cc.changeTokenElementState(ctx, instance, "Activity_0voe68z", COMPLETED)
 	cc.SetInstance(ctx, instance)
-	eventPayload := map[string]string{
-		"ID":         "Activity_0ibsbry_Continue",
-		"InstanceID": instanceID,
+	//检查
+	fmt.Println("Activity_0voe68z run end")
+	//gtw判断
+
+	if !(func() bool {
+		msg, err := cc.ReadMsg(ctx, instanceID, "Message_0pm90nx")
+		return err == nil && msg.MsgState == COMPLETED
+	}()) {
+		return nil
 	}
-
-	eventPayloadAsBytes, err := json.Marshal(eventPayload)
-	if err != nil {
-		return fmt.Errorf("failed to marshal event payload: %v", err)
-	}
-
-	err = ctx.GetStub().SetEvent("Avtivity_continueDone", eventPayloadAsBytes)
-	if err != nil {
-		return fmt.Errorf("failed to set event: %v", err)
-	}
-	return nil
-
-}
-
-func (cc *SmartContract) Gateway_0o8snyv(ctx contractapi.TransactionContextInterface, instanceID string) error {
-	stub := ctx.GetStub()
-	instance,err:=cc.GetInstance(ctx, instanceID)
-	gtw, err := cc.ReadGtw(ctx, instanceID, "Gateway_0o8snyv")
-	if err != nil {
-		return err
-	}
-
-	if gtw.GatewayState != ENABLED {
-		errorMessage := fmt.Sprintf("Gateway state %s is not allowed", gtw.GatewayID)
-		fmt.Println(errorMessage)
-		return fmt.Errorf(errorMessage)
-	}
-
-	cc.ChangeGtwState(ctx, instance, gtw.GatewayID, COMPLETED)
-	stub.SetEvent("Gateway_0o8snyv", []byte("ExclusiveGateway has been done"))
-	cc.SetInstance(ctx, instance)
-    
-    	currentMemory, err := cc.ReadGlobalVariable(ctx, instanceID)
-	if err != nil {
-		return err
-	}
-
-    FurtherCheck:=currentMemory.FurtherCheck
-
-if FurtherCheck==false {
-	    cc.ChangeEventState(ctx, instance, "EndEvent_110myff", ENABLED)
-}
-if FurtherCheck==true {
-	    cc.ChangeMsgState(ctx, instance, "Message_0gd0z61", ENABLED)
-}
-    
+	cc.ChangeGtwState(ctx, instance, "Gateway_1fbifca", ENABLED)
 	cc.SetInstance(ctx, instance)
 	return nil
 }
 
-func (cc *SmartContract) Message_0gd0z61_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string ) error {
-	stub := ctx.GetStub()
-	instance,err := cc.GetInstance(ctx, instanceID)
-	msg, err := cc.ReadMsg(ctx, instanceID, "Message_0gd0z61")
+func (cc *SmartContract) Activity_0l6jyqh(ctx contractapi.TransactionContextInterface, instanceID string) error {
+	instance, err := cc.GetInstance(ctx, instanceID)
 	if err != nil {
 		return err
 	}
+	if instance == nil {
+		return errors.New("instanceID does not exist")
+	}
+	//得到tokenElement元素
+	fmt.Println("Activity_0l6jyqh run start")
+	tokenElement, err := cc.ReadTokenElement(ctx, instanceID, "Activity_0l6jyqh")
+	if err != nil {
+		return err
+	}
+	//得到token元素
+	token, err := cc.ReadToken(ctx, instanceID, tokenElement.TokenKey)
+	if err != nil {
+		return err
+	}
+	// //检查
+	if tokenElement.State != ENABLED {
+		errorMessage := fmt.Sprintf("TokenElement state %s is not allowed", tokenElement.TokenElementID)
+		fmt.Sprintln(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+	//轮到他运行，调用
+	//先检查调用者是不是拥有者
+	nowid64, _ := ctx.GetClientIdentity().GetID()
+	nowidBytes, _ := base64.StdEncoding.DecodeString(nowid64)
+	nowrid := string(nowidBytes)
+	fmt.Println("nowid:", nowrid)
 
-	//
-	if cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false{
-		errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", msg.SendParticipantID)
+	callid, _ := cc.ParticipantToidentity(ctx, instanceID, tokenElement.CallerID)
+	if nowrid != callid {
+		errorMessage := fmt.Sprintf("Caller %s is not allowed to call this function", nowrid)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
-
-	if msg.MsgState != ENABLED {
-		errorMessage := fmt.Sprintf("Message state %s is not allowed", msg.MessageID)
-		fmt.Println(errorMessage)
-		return fmt.Errorf(errorMessage)
+	var calleeID []string
+	for _, callee := range tokenElement.CalleeID {
+		callee11, _ := cc.ParticipantToidentity(ctx, instanceID, callee)
+		calleeID = append(calleeID, callee11)
 	}
 
-	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
-	    cc.ChangeMsgState(ctx, instance, "Message_0gd0z61", COMPLETED)
-	
-	stub.SetEvent("Message_0gd0z61", []byte("Message is waiting for confirmation"))
+	chaincodeName := "ERC721-" + token.TokenName
+	_args := make([][]byte, 4)
+	_args[0] = []byte("TransferFrom") // 操作类型
+	_args[1] = []byte(callid)
+	_args[2] = []byte(calleeID[0]) // 这里假设只有一个接收者
+	_args[3] = []byte(token.TokenID)
+	getpayload, err := cc.Invoke_Other_chaincode(ctx, chaincodeName, "default", _args)
+	if err != nil {
+		return fmt.Errorf("failed to invoke chaincode %s: %v", chaincodeName, err)
+	}
+	if string(getpayload) != "true" {
+		return fmt.Errorf("failed to invoke chaincode %s: %v", chaincodeName, err)
+	}
+	//写入转移者的id
+	err = cc.changeTokenOwner(ctx, instance, tokenElement.TokenKey, calleeID[0])
+	if err != nil {
+		return fmt.Errorf("failed to change token owner: %v", err)
+	}
+
+	//测试
+
+	//改状态
+	cc.changeTokenElementState(ctx, instance, "Activity_0l6jyqh", COMPLETED)
 	cc.SetInstance(ctx, instance)
-	
-	
-	    cc.ChangeEventState(ctx, instance, "EndEvent_110myff", ENABLED)
+
+	cc.ChangeMsgState(ctx, instance, "Message_04wmlqe", ENABLED)
 	cc.SetInstance(ctx, instance)
 	return nil
 }
 
-func (cc *SmartContract) Gateway_1m6dgym(ctx contractapi.TransactionContextInterface, instanceID string) error {
-	stub := ctx.GetStub()
-	instance,err := cc.GetInstance(ctx, instanceID)
-	gtw, err := cc.ReadGtw(ctx, instanceID, "Gateway_1m6dgym")
+func (cc *SmartContract) Activity_0xhcefo(ctx contractapi.TransactionContextInterface, instanceID string) error {
+	instance, err := cc.GetInstance(ctx, instanceID)
 	if err != nil {
 		return err
 	}
+	if instance == nil {
+		return errors.New("instanceID does not exist")
+	}
+	//得到tokenElement元素
+	tokenElement, err := cc.ReadTokenElement(ctx, instanceID, "Activity_0xhcefo")
+	if err != nil {
+		return err
+	}
+	//得到token元素
+	token, err := cc.ReadToken(ctx, instanceID, tokenElement.TokenKey)
+	if err != nil {
+		return err
+	}
+	// //检查
+	if tokenElement.State != ENABLED {
+		errorMessage := fmt.Sprintf("TokenElement state %s is not allowed", tokenElement.TokenElementID)
+		fmt.Sprintln(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
 
-	if gtw.GatewayState != ENABLED {
-		errorMessage := fmt.Sprintf("Gateway state %s is not allowed", gtw.GatewayID)
+	//比较当前ctx和callerid
+	//修改
+	nowid64, _ := ctx.GetClientIdentity().GetID()
+	nowidBytes, _ := base64.StdEncoding.DecodeString(nowid64)
+	nowid := string(nowidBytes)
+	fmt.Println("nowid:", nowid)
+
+	callid, _ := cc.ParticipantToidentity(ctx, instanceID, tokenElement.CallerID)
+	if nowid != callid {
+		errorMessage := fmt.Sprintf("Caller %s is not allowed to call this function", nowid)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
-	cc.ChangeGtwState(ctx, instance, gtw.GatewayID, COMPLETED)
-	stub.SetEvent("Gateway_1m6dgym", []byte("Gateway has been done"))
+	// 轮到他运行，调用
+	chaincodeName := "ERC721-" + token.TokenName
+	_args := make([][]byte, 4)
+	_args[0] = []byte("MintWithTokenURI") // 操作类型
+	_args[1] = []byte(token.TokenID)
+	_args[2] = []byte(token.TokenURL)
+	_args[3] = []byte(instanceID)
+	getpayload, _ := cc.Invoke_Other_chaincode(ctx, chaincodeName, "default", _args)
+	if len(getpayload) == 0 || string(getpayload) == "null" {
+		return errors.New("did not create successfully")
+	}
 
-	
-	    cc.ChangeMsgState(ctx, instance, "Message_1rqbibd", ENABLED)
-	
+	//打印
+	var data map[string]interface{}
+	err = json.Unmarshal(getpayload, &data)
+	if err != nil {
+		return fmt.Errorf("failed to parse JSON: %v", err)
+	}
+
+	owner := data["owner"].(string) //
+	fmt.Println("payload解析出来的Owner:", owner)
+	//修改token对象的拥有者
+	cc.changeTokenOwner(ctx, instance, tokenElement.TokenKey, owner)
+
+	//测试一下
+	fmt.Println("TokenElement中的拥有者:", token.OwnerID)
+	//检查
+	fmt.Println("调用chaincode结束")
+	//改状态
+	cc.changeTokenElementState(ctx, instance, "Activity_0xhcefo", COMPLETED)
+	cc.SetInstance(ctx, instance)
+	//检查
+	fmt.Println("Activity_0xhcefo run end")
+	//gtw判断
+
+	cc.ChangeMsgState(ctx, instance, "Message_196q1fj", ENABLED)
 	cc.SetInstance(ctx, instance)
 	return nil
 }
 
-func (cc *SmartContract) Message_13mh6mk_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string ) error {
-	stub := ctx.GetStub()
-	instance,err := cc.GetInstance(ctx, instanceID)
-	msg, err := cc.ReadMsg(ctx, instanceID, "Message_13mh6mk")
+func (cc *SmartContract) Activity_1u61szh(ctx contractapi.TransactionContextInterface, instanceID string) error {
+	instance, err := cc.GetInstance(ctx, instanceID)
 	if err != nil {
 		return err
 	}
+	if instance == nil {
+		return errors.New("instanceID does not exist")
+	}
+	//得到tokenElement元素
+	fmt.Println("Activity_1u61szh run start")
+	tokenElement, err := cc.ReadTokenElement(ctx, instanceID, "Activity_1u61szh")
+	if err != nil {
+		return err
+	}
+	//得到token元素
+	token, err := cc.ReadToken(ctx, instanceID, tokenElement.TokenKey)
+	if err != nil {
+		return err
+	}
+	// //检查
+	if tokenElement.State != ENABLED {
+		errorMessage := fmt.Sprintf("TokenElement state %s is not allowed", tokenElement.TokenElementID)
+		fmt.Sprintln(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+	//轮到他运行，调用
+	//先检查调用者是不是拥有者
+	nowid64, _ := ctx.GetClientIdentity().GetID()
+	nowidBytes, _ := base64.StdEncoding.DecodeString(nowid64)
+	nowrid := string(nowidBytes)
+	fmt.Println("nowid:", nowrid)
 
-	//
-	if cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false{
-		errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", msg.SendParticipantID)
+	callid, _ := cc.ParticipantToidentity(ctx, instanceID, tokenElement.CallerID)
+	if nowrid != callid {
+		errorMessage := fmt.Sprintf("Caller %s is not allowed to call this function", nowrid)
 		fmt.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
-
-	if msg.MsgState != ENABLED {
-		errorMessage := fmt.Sprintf("Message state %s is not allowed", msg.MessageID)
-		fmt.Println(errorMessage)
-		return fmt.Errorf(errorMessage)
+	var calleeID []string
+	for _, callee := range tokenElement.CalleeID {
+		callee11, _ := cc.ParticipantToidentity(ctx, instanceID, callee)
+		calleeID = append(calleeID, callee11)
 	}
 
-	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
-	    cc.ChangeMsgState(ctx, instance, "Message_13mh6mk", COMPLETED)
-	
-	stub.SetEvent("Message_13mh6mk", []byte("Message is waiting for confirmation"))
+	chaincodeName := "ERC721-" + token.TokenName
+	_args := make([][]byte, 4)
+	_args[0] = []byte("TransferFrom") // 操作类型
+	_args[1] = []byte(callid)
+	_args[2] = []byte(calleeID[0]) // 这里假设只有一个接收者
+	_args[3] = []byte(token.TokenID)
+	getpayload, err := cc.Invoke_Other_chaincode(ctx, chaincodeName, "default", _args)
+	if err != nil {
+		return fmt.Errorf("failed to invoke chaincode %s: %v", chaincodeName, err)
+	}
+	if string(getpayload) != "true" {
+		return fmt.Errorf("failed to invoke chaincode %s: %v", chaincodeName, err)
+	}
+	//写入转移者的id
+	err = cc.changeTokenOwner(ctx, instance, tokenElement.TokenKey, calleeID[0])
+	if err != nil {
+		return fmt.Errorf("failed to change token owner: %v", err)
+	}
+
+	//测试
+
+	//改状态
+	cc.changeTokenElementState(ctx, instance, "Activity_1u61szh", COMPLETED)
 	cc.SetInstance(ctx, instance)
-	
-	if !(func() bool { msg, err := cc.ReadMsg(ctx, instanceID, "Message_1vzqd37"); return err == nil && msg.MsgState == COMPLETED }()) {
-	return nil
-}
-	    cc.ChangeGtwState(ctx, instance, "Gateway_1m6dgym", ENABLED)
+
+	cc.ChangeEventState(ctx, instance, "Event_13pbqdz", ENABLED)
 	cc.SetInstance(ctx, instance)
 	return nil
 }

@@ -743,6 +743,7 @@ class GoChaincodeTranslator:
             return temp_list
         token_type = doc_data.get("tokenType")
         token_operation=doc_data.get("operation")
+        token_assetType=doc_data.get("assetType")
         after_all_hook = "\n\t".join(when_triggered_code)+ "\n\t"+ "\n\t".join(pre_activate_next_hook)+ "\n\t"+ self._generate_change_state_code(task.outgoing.target)
         if token_type=="NFT":
             if token_operation=="mint":
@@ -777,6 +778,35 @@ class GoChaincodeTranslator:
             elif token_operation == "Transfer":
                 temp_list.append(
                     snippet.FTTransfer_code(
+                        activityId=task.id,
+                        after_all_hook=after_all_hook
+                    )
+                ) 
+        elif token_assetType=="distributive":
+            if token_operation=="mint":
+                temp_list.append(
+                    snippet.DistributiveMint_code(
+                        activityId=task.id,
+                        after_all_hook=after_all_hook
+                    )
+                )
+            elif token_operation=="approve":
+                temp_list.append(
+                    snippet.DistributiveApprove_code(
+                        activityId=task.id,
+                        after_all_hook=after_all_hook
+                    )
+                )
+            elif token_operation=="burn":
+                temp_list.append(
+                    snippet.DistributiveBurn_code(
+                        activityId=task.id,
+                        after_all_hook=after_all_hook
+                    )
+                )
+            elif token_operation=="remove approval":
+                temp_list.append(
+                    snippet.DistributiveDisapprove_code(
                         activityId=task.id,
                         after_all_hook=after_all_hook
                     )
