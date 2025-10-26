@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { retrieveBPMN, packageBpmn, packageERC, updateBPMNStatus, updateBpmnEnv, updateBPMNFireflyUrl, updateBpmnEvents, retrieveERCChaincode, updateERCChaincodeFireflyUrl } from "@/api/externalResource"
 import { generateChaincode, getMessagesByBpmnContent } from "@/api/translator"
 import { checkERCinstall, useAvaliableEnvs, useBpmnDetailData } from "./hooks"
-import axios from "axios"
+import axios, { isCancel } from "axios"
 
 const steps = [
     {
@@ -28,6 +28,7 @@ import { useAppSelector } from "@/redux/hooks";
 import { getAllMessages, registerDataType, initLedger, invokeFireflyListeners, invokeFireflySubscriptions } from "@/api/executionAPI"
 import { current_ip } from "@/api/apiConfig";
 import { eventNames } from "process";
+import { update } from "lodash";
 
 const BPMNOverview = () => {
 
@@ -43,11 +44,14 @@ const BPMNOverview = () => {
     const [ffiContentForModify, setFFIContentForModify] = useState("");
     const [defaultChainCodeERC20, setDefaultChainCodeERC20] = useState("");
     const [defaultChainCodeERC721, setDefaultChainCodeERC721] = useState("");
+    const [defaultChainCodeERC1155, setDefaultChainCodeERC1155] = useState("");
     const [defaultFFIERC20, setDefaultFFIERC20] = useState("");
     const [defaultFFIERC721, setDefaultFFIERC721] = useState("");
+    const [defaultFFIERC1155, setDefaultFFIERC1155] = useState("");
     const navigate = useNavigate();
     const [bpmn, { isLoading, isError, isSuccess }, refetchBpmn] = useBpmnDetailData(bpmnId);
-
+    //用来控制reftokens清空标志的
+    const [isClearing, setIsClearing] = useState(false);
 
     const [buttonText, setButtonText] = useState<string>("");
     //进度条
@@ -69,12 +73,23 @@ const BPMNOverview = () => {
 
     // 每次更新时保存到 localStorage
     useEffect(() => {
-        if (ercTokens.length > 0) {
-            ercTokensRef.current = ercTokens;
-            localStorage.setItem("ercTokens", JSON.stringify(ercTokens));
-        }
-        console.log("ercTokensRef updated:", ercTokens);
-    }, [ercTokens]);
+    if (isClearing) {
+        // 用户主动清空缓存
+        localStorage.removeItem("ercTokens");
+        ercTokensRef.current = [];
+        console.log("🧹 已清空缓存");
+
+        // 清空后自动恢复状态，防止误触发
+        setIsClearing(false);
+        return;
+    }
+
+    if (ercTokens.length > 0) {
+        ercTokensRef.current = ercTokens;
+        localStorage.setItem("ercTokens", JSON.stringify(ercTokens));
+        console.log("更新ercTokensRef.current", ercTokensRef.current);
+    }
+}, [ercTokens, isClearing]);
 
     const status = bpmn.status;
     const currentNumber = ((status: string) => {
@@ -156,9 +171,11 @@ const BPMNOverview = () => {
                     const res721 = await fetch("/ERC/ERC721.go");
                     const text721 = await res721.text();
 
+                    const res1155 = await fetch("/ERC/ERC1155.go");
+                    const text1155 = await res1155.text();
                     setDefaultChainCodeERC20(text20);
                     setDefaultChainCodeERC721(text721);
-
+                    setDefaultChainCodeERC1155(text1155);
                      const ffi20 = await fetch("/ERC/ERC20.json");
                      const ffiText20 = await ffi20.text();
                     setDefaultFFIERC20(ffiText20);
@@ -166,6 +183,10 @@ const BPMNOverview = () => {
                     const ffi721 = await fetch("/ERC/ERC721.json");
                     const ffiText721 = await ffi721.text();
                     setDefaultFFIERC721(ffiText721);
+                    
+                    const ffi1155 = await fetch("/ERC/ERC1155.json");
+                    const ffiText1155 = await ffi1155.text();
+                    setDefaultFFIERC1155(ffiText1155);
                     // 初始化 tokens，默认一行 ERC20
                     //setTokens([{ name: "", type: "", chainCode: "", ffi: "", installed: false }]);
                 } catch (err) {
@@ -220,6 +241,10 @@ const BPMNOverview = () => {
                     });
                 }
             );
+            if(updatedTokens.length==0)
+            {
+                setIsClearing(true)
+            }
             setErcTokens(updatedTokens)
             // console.log(updatedTokens)
             refetchBpmn()
@@ -227,8 +252,8 @@ const BPMNOverview = () => {
         }
 
         const handleAddToken = (index: number, type: string = "ERC20") => {
-            const defaultChainCode = type === "ERC20" ? defaultChainCodeERC20 : defaultChainCodeERC721;
-            const defaultFFI = type === "ERC20" ? defaultFFIERC20 : defaultFFIERC721;
+            const defaultChainCode = type === "ERC20" ? defaultChainCodeERC20 : type==="ERC721"? defaultChainCodeERC721:type==="ERC1155"?defaultChainCodeERC1155:null;
+            const defaultFFI = type === "ERC20" ? defaultFFIERC20 :type==="ERC721" ?defaultFFIERC721:type==="ERC1155"?defaultFFIERC1155:null;
             const newToken = { name: "", type: "", chainCode: "", ffi: "", installed: false };
             const newTokens = [...tokens];
             newTokens.splice(index + 1, 0, newToken);
@@ -241,8 +266,8 @@ const BPMNOverview = () => {
 
             if (key === "type") {
                 newTokens[index].chainCode =
-                    value === "ERC20" ? defaultChainCodeERC20 : defaultChainCodeERC721;
-                newTokens[index].ffi = value === "ERC20" ? defaultFFIERC20 : defaultFFIERC721;
+                    value === "ERC20" ? defaultChainCodeERC20 :value==="ERC721"? defaultChainCodeERC721:value==="ERC1155"?defaultChainCodeERC1155:null;
+                newTokens[index].ffi = value === "ERC20" ? defaultFFIERC20 : value==="ERC721"? defaultFFIERC721:value==="ERC1155"?defaultFFIERC1155:null;
             }
 
             setTokens(newTokens);
@@ -389,6 +414,7 @@ const BPMNOverview = () => {
                         >
                             <Select.Option value="ERC20">ERC20</Select.Option>
                             <Select.Option value="ERC721">ERC721</Select.Option>
+                            <Select.Option value="ERC1155">ERC1155</Select.Option>
                         </Select>
 
 
@@ -730,6 +756,10 @@ const BPMNOverview = () => {
                     const flag = await checkERCinstall(currentConsortiumId, ercTokensRef.current);
                     setButtonText(flag ? "Register" : "Install");
                 }
+                else if(ercTokensRef.current.length==0)
+                {
+                    setButtonText("Register");
+                }
             } else if (status === "Initiated") {
                 setButtonText("Deploy to Env");
             } else if (status === "Generated") {
@@ -777,6 +807,7 @@ const BPMNOverview = () => {
                                                     }
                                                     else { navigate(`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/fabric/chaincode`) }
                                                 }
+                                                else onRegister();
                                             } else if (status == 'Initiated') {
                                                 onDeployEnv();
                                             } else if (status == 'DeployEnved') {

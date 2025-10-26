@@ -99,6 +99,11 @@ export default function FixedFieldsModal({
         setTokenId(loadedTokenId);
         setOriginalTokenId(loadedTokenId);
         setTokenURL(parsed.tokenURL || '');
+        if (parsed.assetType === 'value-added' && Array.isArray(parsed.refTokenIds)) {
+          setRefTokenIds(parsed.refTokenIds);
+        } else {
+          setRefTokenIds([]);
+        }
         if (Array.isArray(parsed.callee)) {
           const matchedCalleeIds = parsed.callee.map(callerId => {
             const match = participantOptions.find(opt =>
@@ -246,7 +251,7 @@ export default function FixedFieldsModal({
       if (Array.isArray(docs) && docs.length) {
         try {
           const p = JSON.parse(docs[0].text);
-          if (p.tokenId === value) {
+          if (p.tokenId === value && p.assetType === assetType) {
             matched = p;
           }
         } catch {
