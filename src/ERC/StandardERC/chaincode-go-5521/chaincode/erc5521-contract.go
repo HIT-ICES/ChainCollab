@@ -7,8 +7,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/hyperledger/fabric-chaincode-go/shim"
-	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/hyperledger/fabric-contract-api-go/v2/contractapi"
 )
 
@@ -20,6 +18,7 @@ const chaincodeNameKey = "chaincodeName"
 const balancePrefix = "balance"
 const nftPrefix = "nft"
 const approvalPrefix = "approval"
+const ChaincodeOk int32 = 200
 
 type SmartContract struct {
 	contractapi.Contract
@@ -45,25 +44,6 @@ type Relationship struct {
 }
 
 // ERC721基础
-type Nft struct {
-	TokenId  string `json:"tokenId"`
-	Owner    string `json:"owner"`
-	TokenURI string `json:"tokenURI"`
-	Approved string `json:"approved"`
-}
-
-type Approval struct {
-	Owner    string `json:"owner"`
-	Operator string `json:"operator"`
-	Approved bool   `json:"approved"`
-}
-
-type Transfer struct {
-	From    string `json:"from"`
-	To      string `json:"to"`
-	TokenId string `json:"tokenId"`
-}
-
 type InstanceMintAuthority struct {
 	InstanceID  string   `json:"instance_id"`
 	AllowedMSPs []string `json:"allowed_msps"`
@@ -128,24 +108,13 @@ func (c *SmartContract) Initialize(ctx contractapi.TransactionContextInterface, 
 	if bytes != nil {
 		return false, fmt.Errorf("contract options are already set, client is not authorized to change them")
 	}
-	err = ctx.GetStub.PutState(nameKey, []byte(name))
+	err = ctx.GetStub().PutState(nameKey, []byte(name))
 	if err != nil {
 		return false, fmt.Errorf("failed to set token name: %v", err)
 	}
-	err = ctx.GetStub.PutState(symbolKey, []byte(symbol))
+	err = ctx.GetStub().PutState(symbolKey, []byte(symbol))
 	if err != nil {
 		return false, fmt.Errorf("failed to set token symbol: %v", err)
-	}
-	return true, nil
-}
-
-func (c *SmartContract) checkInitialized(ctx contractapi.TransactionContextInterface) (bool, error) {
-	bytes, err := ctx.GetStub().GetState(nameKey)
-	if err != nil {
-		return false, fmt.Errorf("failed to get token name: %v", err)
-	}
-	if bytes == nil {
-		return false, nil
 	}
 	return true, nil
 }
@@ -758,7 +727,7 @@ func (c *SmartContract) mintWithTokenURI(ctx contractapi.TransactionContextInter
 // Burn a non-fungible token
 // param {String} tokenId Unique ID of a non-fungible token
 // returns {Boolean} Return whether the burn was successful or not
-func (c *SmartContract) burn(ctx contractapi.TransactionContextInterface, tokenId string) (bool, error) {
+func (c *SmartContract) Burn(ctx contractapi.TransactionContextInterface, tokenId string) (bool, error) {
 
 	// Check if contract has been intilized first
 	initialized, err := checkInitialized(ctx)
@@ -907,7 +876,7 @@ type resultOf struct {
 	Value map[string][]string `json:"value"`
 }
 
-func (c *SmartContract) setChaincodeName(ctx contractapi.TransactionContextInterface, chaincodeName string) (bool, error) {
+func (c *SmartContract) SetChaincodeName(ctx contractapi.TransactionContextInterface, chaincodeName string) (bool, error) {
 	bytes, err := ctx.GetStub().GetState(chaincodeNameKey)
 	if err != nil {
 		return false, fmt.Errorf("fail to get chaincodeName")
@@ -944,10 +913,13 @@ func (c *SmartContract) GetRelationshipById(ctx contractapi.TransactionContextIn
 	if err != nil {
 		return nil, fmt.Errorf("fail to get compositekey to get relationship")
 	}
-	if Key == nil {
+	if Key == "" {
 		return nil, fmt.Errorf("the compositekey of relationship which you try to get is empty")
 	}
 	relationshipJson, err := ctx.GetStub().GetState(Key)
+	if err != nil {
+		return nil, fmt.Errorf("getrelationshipBYkey fail to getstate")
+	}
 	if relationshipJson == nil {
 		temp := &Relationship{
 			Reffering: make(map[string][]string),
@@ -974,7 +946,7 @@ func (c *SmartContract) SetRelationshipById(ctx contractapi.TransactionContextIn
 	if err != nil {
 		return fmt.Errorf("fail to get compositekey to get relationship")
 	}
-	if Key == nil {
+	if Key == "" {
 		return fmt.Errorf("the compositekey of relationship which you try to get is empty")
 	}
 	tempRelationship := Relationship{
@@ -996,18 +968,22 @@ func (c *SmartContract) SetRelationshipById(ctx contractapi.TransactionContextIn
 	return nil
 }
 
+// 传入时必须一一对应
 // 参数分析_tokenIds 为被引用id，二维数组，一维表示对应和chaincodeName，chaincodeName 二维表示tokenID（实现跨合约调用）
 // 这里要求chaincodeName和_tokenid[]一一对应
-func (c *SmartContract) SafeMint(ctx contractapi.TransactionContextInterface, tokenid string, tokenURI string, instanceID string, chaincodeName []string, _tokenIds [][]string) error {
+func (c *SmartContract) SafeMint(ctx contractapi.TransactionContextInterface, tokenid string, tokenURI string, instanceID string, chaincodeName []string, _tokenIds [][]string) (*Nft, error) {
 	err := c.authorizationHelper(ctx, instanceID)
 	if err != nil {
-		return fmt.Errorf("caller is not allowed")
+		return nil, fmt.Errorf("caller is not allowed")
 	}
-	c.mintWithTokenURI(ctx, tokenid, tokenURI, instanceID)
+	getnft, err := c.mintWithTokenURI(ctx, tokenid, tokenURI, instanceID)
+	if err != nil {
+		return nil, fmt.Errorf("safemint fail to execute mintwithtokenURI")
+	}
 	if err := c.setNode(ctx, tokenid, chaincodeName, _tokenIds); err != nil {
-		return fmt.Errorf("setNode failed: %w", err)
+		return nil, fmt.Errorf("setNode failed: %w", err)
 	}
-	return nil
+	return getnft, nil
 }
 
 func (c *SmartContract) setNode(ctx contractapi.TransactionContextInterface, tokenid string, chaincodeName []string, _tokenIds [][]string) error {
@@ -1060,6 +1036,9 @@ func (c *SmartContract) setNodeReferred(ctx contractapi.TransactionContextInterf
 		if chaincodeName[i] == thischaincodeName {
 			for j := 0; j < len(_tokenId[i]); j++ {
 				tempRelationship, err = c.GetRelationshipById(ctx, _tokenId[i][j])
+				if err != nil {
+					return fmt.Errorf("setNoadeReferred fail to execute getrelationshipById")
+				}
 				if len(tempRelationship.Reffered[chaincodeName[i]]) == 0 {
 					tempRelationship.RefferedKeys = append(tempRelationship.RefferedKeys, chaincodeName[i])
 				}
@@ -1087,11 +1066,11 @@ func (c *SmartContract) setNodeReferred(ctx contractapi.TransactionContextInterf
 			//todo invoke_ohterchaincode
 			_tokenIdBytes, err := json.Marshal(_tokenId[i])
 			if err != nil {
-				fmt.Errorf("cannot marshal tokenidbytes")
+				return fmt.Errorf("cannot marshal tokenidbytes")
 			}
 			tempchaincode := chaincodeName[i]
 			_args := make([][]byte, 4)
-			_args[0] = []byte("setNodeRefferedExternal")
+			_args[0] = []byte("setNodeReferredExternal")
 			_args[1] = []byte(thischaincodeName)
 			_args[2] = []byte(tokenId)
 			_args[3] = _tokenIdBytes
@@ -1107,17 +1086,20 @@ func (c *SmartContract) setNodeReferred(ctx contractapi.TransactionContextInterf
 func (c *SmartContract) Invoke_Other_chaincode(ctx contractapi.TransactionContextInterface, chaincodeName string, channel string, _args [][]byte) ([]byte, error) {
 	stub := ctx.GetStub()
 	response := stub.InvokeChaincode(chaincodeName, _args, channel)
-	if response.Status != shim.OK {
+	if response.Status != ChaincodeOk {
 		return []byte(""), fmt.Errorf("failed to invoke chaincode. Response status: %d. Response message: %s", response.Status, response.Message)
 	}
 	return response.Payload, nil
 }
 
-func (c *SmartContract) setNodeRefferedExternal(ctx contractapi.TransactionContextInterface, chaincodeName string, tokenId string, _tokenIds []string) error {
+func (c *SmartContract) setNodeReferredExternal(ctx contractapi.TransactionContextInterface, chaincodeName string, tokenId string, _tokenIds []string) error {
 	var tempRelationship *Relationship
 	for i := 0; i < len(_tokenIds); i++ {
 		var err error
 		tempRelationship, err = c.GetRelationshipById(ctx, _tokenIds[i])
+		if err != nil {
+			return fmt.Errorf("setNodeReferredExternal fail to execute getrelationshipbyid")
+		}
 		if len(tempRelationship.Reffered[chaincodeName]) == 0 {
 			tempRelationship.RefferedKeys = append(tempRelationship.RefferedKeys, chaincodeName)
 		}
@@ -1145,7 +1127,7 @@ func (c *SmartContract) setNodeRefferedExternal(ctx contractapi.TransactionConte
 	return nil
 }
 
-func (c *SmartContract) referringOf(ctx contractapi.TransactionContextInterface, chaincodeName string, tokenId string) (*resultOf, error) {
+func (c *SmartContract) ReferringOf(ctx contractapi.TransactionContextInterface, chaincodeName string, tokenId string) (*resultOf, error) {
 
 	thischaincodeName, err := c.getChaincodeName(ctx)
 	if err != nil {
@@ -1180,7 +1162,7 @@ func (c *SmartContract) referringOf(ctx contractapi.TransactionContextInterface,
 	}
 }
 
-func (c *SmartContract) referredOf(ctx contractapi.TransactionContextInterface, chaincodeName string, tokenId string) (*resultOf, error) {
+func (c *SmartContract) ReferredOf(ctx contractapi.TransactionContextInterface, chaincodeName string, tokenId string) (*resultOf, error) {
 	thischaincodeName, err := c.getChaincodeName(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("fail to get chaincodeName")
@@ -1215,7 +1197,7 @@ func (c *SmartContract) referredOf(ctx contractapi.TransactionContextInterface, 
 
 }
 
-func (c *SmartContract) createdTimestampOf(ctx contractapi.TransactionContextInterface, chaincodeName string, tokenId string) (uint64, error) {
+func (c *SmartContract) CreatedTimestampOf(ctx contractapi.TransactionContextInterface, chaincodeName string, tokenId string) (uint64, error) {
 	thischaincodeName, err := c.getChaincodeName(ctx)
 	if err != nil {
 		return 0, fmt.Errorf("fail to get chaincodeName")
@@ -1247,5 +1229,26 @@ func (c *SmartContract) createdTimestampOf(ctx contractapi.TransactionContextInt
 			return 0, fmt.Errorf("unexpected payload format: %w", err)
 		}
 		return timestamp, nil
+	}
+}
+
+// bpmn调用接口
+func (c *SmartContract) Branchmint(ctx contractapi.TransactionContextInterface, tokenid string, tokenURI string, instanceID string, chaincodeName string, _tokenIds []string) (*Nft, error) {
+	if len(_tokenIds) == 0 {
+		getnft, err := c.mintWithTokenURI(ctx, tokenid, tokenURI, instanceID)
+		if err != nil {
+			return nil, fmt.Errorf("branchmint fail to invoke mintwithtokenURI")
+		}
+		return getnft, nil
+	} else {
+		var tempchaincodeName []string
+		tempchaincodeName = append(tempchaincodeName, chaincodeName)
+		var temp_tokenids [][]string
+		temp_tokenids = append(temp_tokenids, _tokenIds)
+		getnft, err := c.SafeMint(ctx, tokenid, tokenURI, instanceID, tempchaincodeName, temp_tokenids)
+		if err != nil {
+			return nil, fmt.Errorf("saft mint do not execute")
+		}
+		return getnft, nil
 	}
 }
