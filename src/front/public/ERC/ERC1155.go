@@ -1078,7 +1078,7 @@ func addBalance(ctx contractapi.TransactionContextInterface, sender string, reci
 	if err != nil {
 		return err
 	}
-	fmt.Printf("LOG: addBalance new balance  %s set to %d.\n", base64decoding(recipient)+"--"+idString, balance)
+	fmt.Printf("LOG: addBalance new balance  %s set to %d.\n", base64decoding(recipient), balance)
 	return nil
 }
 
