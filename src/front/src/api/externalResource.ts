@@ -93,6 +93,9 @@ export const bindTokensToERCs = async (
                 else if(erc.token_type == "ERC1155"){
                     invokeTokenInitialize(chaincodeUrl, token, erc.name);
                 }
+                else if (erc.token_type=="ERC5521"){
+                    invokeTokenInitialize(chaincodeUrl, token, erc.name,"true")
+                }
                 await updateERCChaincodebindToken(ercId, token, consortiumId);
             } else {
                 console.log(`初始化失败，链码未安装或者链码已初始化`);

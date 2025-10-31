@@ -446,6 +446,16 @@ class ERCChaincodeViewSet(viewsets.ModelViewSet):
                 folder_path =ERC_PATH +"/chaincode-go-1155"
                 zip_path = ERC_PATH +"/chaincode-go-1155.zip"
                 self._zip_folder(folder_path, zip_path)
+            elif ercType=="ERC5521":
+                with open(
+                    ERC_PATH+"/chaincode-go-5521/chaincode/erc5521-contract.go",
+                    "w",
+                    encoding="utf-8"
+                ) as file:
+                    file.write(ercChaincode)
+                folder_path =ERC_PATH +"/chaincode-go-5521"
+                zip_path = ERC_PATH +"/chaincode-go-5521.zip"
+                self._zip_folder(folder_path, zip_path)
             else:
                 return Response({"error": "Unknown ERC type"}, status=status.HTTP_400_BAD_REQUEST)
             with open(zip_path,"rb") as f:

@@ -467,7 +467,16 @@ def DistributiveDisapprove_code(
     return content["DisDisapproveFrame"].format(
         activityId=activityId,
         after_all_hook=after_all_hook,
-    ) 
+    )
+
+def AddValueMint_code(
+    activityId :str,
+    after_all_hook: str = "", 
+):
+   return content["AddValueMintFrame"].format(
+        activityId=activityId,
+        after_all_hook=after_all_hook,
+    )  
 
 def InvokeChaincodeFunc_code():
     return content["InvokeChaincodeFunc"]

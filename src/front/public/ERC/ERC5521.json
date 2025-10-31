@@ -1,0 +1,440 @@
+{
+  "namespace": "erc5521",
+  "name": "erc5521",
+  "description": "",
+  "version": "1.0.0",
+  "methods": [{
+      "name": "Initialize",
+      "description": "",
+      "params": [{
+          "name": "name",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "returns": []
+    },
+    {
+      "name": "AddMintAuthority",
+      "description": "",
+      "params": [{
+          "name": "instanceID",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "allowedMSPs",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      ],
+      "returns": []
+    },
+    {
+      "name": "setChaincodeName",
+      "description": "",
+      "params": [{
+        "name": "chaincodeName",
+        "schema": {
+          "type": "string"
+        }
+      }],
+      "returns": []
+    },
+    {
+      "name": "BalanceOf",
+      "description": "",
+      "params": [{
+        "name": "owner",
+        "schema": {
+          "type": "string"
+        }
+      }],
+      "returns": [{
+        "name": "balance",
+        "schema": {
+          "type": "integer"
+        }
+      }]
+    },
+    {
+      "name": "OwnerOf",
+      "description": "",
+      "params": [{
+        "name": "tokenId",
+        "schema": {
+          "type": "string"
+        }
+      }],
+      "returns": [{
+        "name": "owner",
+        "schema": {
+          "type": "string"
+        }
+      }]
+    },
+    {
+      "name": "Approve",
+      "description": "",
+      "params": [{
+          "name": "operator",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "tokenId",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "returns": []
+    },
+    {
+      "name": "SetApprovalForAll",
+      "description": "",
+      "params": [{
+          "name": "operator",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "approved",
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      ],
+      "returns": []
+    },
+    {
+      "name": "IsApprovedForAll",
+      "description": "",
+      "params": [{
+          "name": "owner",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "operator",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "returns": [{
+        "name": "approved",
+        "schema": {
+          "type": "boolean"
+        }
+      }]
+    },
+    {
+      "name": "GetApproved",
+      "description": "",
+      "params": [{
+        "name": "tokenId",
+        "schema": {
+          "type": "string"
+        }
+      }],
+      "returns": [{
+        "name": "operator",
+        "schema": {
+          "type": "string"
+        }
+      }]
+    },
+    {
+      "name": "TransferFrom",
+      "description": "",
+      "params": [{
+          "name": "from",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "to",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "tokenId",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "returns": []
+    },
+    {
+      "name": "Name",
+      "description": "",
+      "params": [],
+      "returns": [{
+        "name": "name",
+        "schema": {
+          "type": "string"
+        }
+      }]
+    },
+    {
+      "name": "Symbol",
+      "description": "",
+      "params": [],
+      "returns": [{
+        "name": "symbol",
+        "schema": {
+          "type": "string"
+        }
+      }]
+    },
+    {
+      "name": "TokenURI",
+      "description": "",
+      "params": [{
+        "name": "tokenId",
+        "schema": {
+          "type": "string"
+        }
+      }],
+      "returns": [{
+        "name": "uri",
+        "schema": {
+          "type": "string"
+        }
+      }]
+    },
+    {
+      "name": "TotalSupply",
+      "description": "",
+      "params": [],
+      "returns": [{
+        "name": "totalSupply",
+        "schema": {
+          "type": "integer"
+        }
+      }]
+    },
+    {
+      "name": "ClientAccountBalance",
+      "description": "",
+      "params": [],
+      "returns": [{
+        "name": "balance",
+        "schema": {
+          "type": "integer"
+        }
+      }]
+    },
+    {
+      "name": "ClientAccountID",
+      "description": "",
+      "params": [],
+      "returns": [{
+        "name": "clientID",
+        "schema": {
+          "type": "string"
+        }
+      }]
+    },
+    {
+      "name": "SafeMint",
+      "description": "",
+      "params": [{
+          "name": "tokenid",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "tokenURI",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "instanceID",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "chaincodeName",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "name": "_tokenIds",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ],
+      "returns": [{
+        "name": "nft",
+        "schema": {
+          "type": "object"
+        }
+      }]
+    },
+    {
+      "name": "referringOf",
+      "description": "",
+      "params": [{
+          "name": "chaincodeName",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "tokenId",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "returns": [{
+        "name": "result",
+        "schema": {
+          "type": "object"
+        }
+      }]
+    },
+    {
+      "name": "referredOf",
+      "description": "",
+      "params": [{
+          "name": "chaincodeName",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "tokenId",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "returns": [{
+        "name": "result",
+        "schema": {
+          "type": "object"
+        }
+      }]
+    },
+    {
+      "name": "createdTimestampOf",
+      "description": "",
+      "params": [{
+          "name": "chaincodeName",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "tokenId",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "returns": [{
+        "name": "timestamp",
+        "schema": {
+          "type": "integer",
+          "format": "uint64"
+        }
+      }]
+    },
+    {
+      "name": "branchmint",
+      "description": "",
+      "params": [{
+          "name": "tokenid",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "tokenURI",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "instanceID",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "chaincodeName",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "_tokenIds",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      ],
+      "returns": [{
+        "name": "nft",
+        "schema": {
+          "type": "object"
+        }
+      }]
+    }
+  ],
+  "events": [{
+      "name": "Transfer",
+      "description": ""
+    },
+    {
+      "name": "Approval",
+      "description": ""
+    },
+    {
+      "name": "ApprovalForAll",
+      "description": ""
+    },
+    {
+      "name": "UpdataNode",
+      "description": ""
+    }
+  ]
+}

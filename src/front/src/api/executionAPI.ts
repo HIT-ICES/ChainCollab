@@ -256,7 +256,7 @@ export const invokeCreateInstance = async (chaincodeUrl: string, data: any) => {
     }
 }
 
-export const invokeTokenInitialize = async (chaincodeUrl: string, name: string, chaincodeName: string) => {
+export const invokeTokenInitialize = async (chaincodeUrl: string, name: string, chaincodeName: string,erc5521flag:string="false") => {
     console.log("chaincodeUrl", chaincodeUrl);
     console.log("name", name);
     console.log("chaincodeName",chaincodeName)
@@ -264,7 +264,7 @@ export const invokeTokenInitialize = async (chaincodeUrl: string, name: string, 
     try {
         const res = await fireflyAPI.post(`${chaincodeUrl.slice(0, -4)}/invoke/TokenElementInitialize`, {
             input: {
-                initParametersBytes: JSON.stringify({ name, chaincodeName })
+                initParametersBytes: JSON.stringify({ name, chaincodeName,erc5521flag})
             }
         });
         return res.data;
