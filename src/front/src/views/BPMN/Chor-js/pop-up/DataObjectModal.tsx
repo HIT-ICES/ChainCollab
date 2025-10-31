@@ -170,7 +170,7 @@ export default function FixedFieldsModal({
       if (Array.isArray(docs) && docs.length) {
         try {
           const parsed = JSON.parse(docs[0].text);
-          if ((parsed.operation === 'mint' || parsed.operation === 'branch') && parsed.tokenId) {
+          if ((parsed.operation === 'mint' || parsed.operation === 'branch'||parsed.operation === 'merge') && parsed.tokenId) {
             newTokenIdsSet.add(parsed.tokenId);
           }
         } catch {
@@ -196,7 +196,7 @@ export default function FixedFieldsModal({
       if (Array.isArray(docs) && docs.length) {
         try {
           const parsed = JSON.parse(docs[0].text);
-          if (parsed.tokenId && (parsed.operation === 'mint' || parsed.operation === 'branch') && !newTokenIdsSet.has(parsed.tokenId)) {
+          if (parsed.tokenId && (parsed.operation === 'mint' || parsed.operation === 'branch'||parsed.operation === 'merge') && !newTokenIdsSet.has(parsed.tokenId)) {
             const cleaned = { ...parsed };
             delete cleaned.tokenId;
             commandStack.execute('element.updateProperties', {
@@ -236,7 +236,7 @@ export default function FixedFieldsModal({
 
   // 若当前选择非 mint 操作，而 tokenId state 已经不在 options 中，清空
   React.useEffect(() => {
-    if (operation && operation !== 'mint' && operation !== 'branch' && tokenId && !tokenIdOptions.includes(tokenId)) {
+    if (operation && operation !== 'mint' && operation !== 'branch'&& operation !== 'merge' && tokenId && !tokenIdOptions.includes(tokenId)) {
       setTokenId('');
     }
   }, [operation, tokenIdOptions, tokenId]);
@@ -313,7 +313,7 @@ export default function FixedFieldsModal({
   };
 
   const handleOk = () => {
-    if ((operation === 'mint' || operation === 'branch') && tokenId && tokenId !== originalTokenId && tokenIdOptions.includes(tokenId)) {
+    if ((operation === 'mint' || operation === 'branch'||operation === 'merge') && tokenId && tokenId !== originalTokenId && tokenIdOptions.includes(tokenId)) {
       message.warning('The tokenId already exists. Please choose a different one');
       return;
     }
@@ -423,7 +423,7 @@ export default function FixedFieldsModal({
       {shouldShowTokenId && (
         <div style={{ marginBottom: 16 }}>
           <label style={{ display: 'block', marginBottom: 4 }}>Token ID:</label>
-          {(operation === 'mint' || operation === 'branch') ? (
+          {(operation === 'mint' || operation === 'branch'||operation ==='merge') ? (
             <Input
               value={tokenId}
               onChange={e => setTokenId(e.target.value)}
@@ -471,7 +471,7 @@ export default function FixedFieldsModal({
               value={tokenName}
               onChange={e => setTokenName(e.target.value)}
               placeholder="Enter token name"
-              disabled={!(operation === 'mint' || operation === 'branch')}
+              disabled={!(operation === 'mint' || operation === 'branch'||operation==='merge')}
             />
           )}
         </div>
@@ -481,7 +481,7 @@ export default function FixedFieldsModal({
       {shouldShowTokenId && tokenId && (
         <div style={{ marginBottom: 16 }}>
           <label style={{ display: 'block', marginBottom: 4 }}>Token URL:</label>
-          {operation === 'mint' || operation === 'branch' ? (
+          {operation === 'mint' || operation === 'branch'||operation==='merge' ? (
             <Input
               value={tokenURL}
               onChange={e => setTokenURL(e.target.value)}

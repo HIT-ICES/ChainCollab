@@ -45,9 +45,11 @@ const BPMNOverview = () => {
     const [defaultChainCodeERC20, setDefaultChainCodeERC20] = useState("");
     const [defaultChainCodeERC721, setDefaultChainCodeERC721] = useState("");
     const [defaultChainCodeERC1155, setDefaultChainCodeERC1155] = useState("");
+    const [defaultChainCodeERC5521,setDefaultChainCodeERC5521] =useState("");
     const [defaultFFIERC20, setDefaultFFIERC20] = useState("");
     const [defaultFFIERC721, setDefaultFFIERC721] = useState("");
     const [defaultFFIERC1155, setDefaultFFIERC1155] = useState("");
+    const [defaultFFIERC5521, setDefaultFFIERC5521] = useState("");
     const navigate = useNavigate();
     const [bpmn, { isLoading, isError, isSuccess }, refetchBpmn] = useBpmnDetailData(bpmnId);
     //用来控制reftokens清空标志的
@@ -173,9 +175,13 @@ const BPMNOverview = () => {
 
                     const res1155 = await fetch("/ERC/ERC1155.go");
                     const text1155 = await res1155.text();
+
+                    const res5521 = await fetch("/ERC/ERC5521.go");
+                    const text5521 = await res5521.text();
                     setDefaultChainCodeERC20(text20);
                     setDefaultChainCodeERC721(text721);
                     setDefaultChainCodeERC1155(text1155);
+                    setDefaultChainCodeERC5521(text5521);
                      const ffi20 = await fetch("/ERC/ERC20.json");
                      const ffiText20 = await ffi20.text();
                     setDefaultFFIERC20(ffiText20);
@@ -187,6 +193,10 @@ const BPMNOverview = () => {
                     const ffi1155 = await fetch("/ERC/ERC1155.json");
                     const ffiText1155 = await ffi1155.text();
                     setDefaultFFIERC1155(ffiText1155);
+
+                    const ffi5521 = await fetch("/ERC/ERC5521.json");
+                    const ffiText5521 = await ffi5521.text();
+                    setDefaultFFIERC5521(ffiText5521);
                     // 初始化 tokens，默认一行 ERC20
                     //setTokens([{ name: "", type: "", chainCode: "", ffi: "", installed: false }]);
                 } catch (err) {
@@ -252,8 +262,8 @@ const BPMNOverview = () => {
         }
 
         const handleAddToken = (index: number, type: string = "ERC20") => {
-            const defaultChainCode = type === "ERC20" ? defaultChainCodeERC20 : type==="ERC721"? defaultChainCodeERC721:type==="ERC1155"?defaultChainCodeERC1155:null;
-            const defaultFFI = type === "ERC20" ? defaultFFIERC20 :type==="ERC721" ?defaultFFIERC721:type==="ERC1155"?defaultFFIERC1155:null;
+            const defaultChainCode = type === "ERC20" ? defaultChainCodeERC20 : type==="ERC721"? defaultChainCodeERC721:type==="ERC1155"?defaultChainCodeERC1155:type==="ERC5521"?defaultChainCodeERC5521:null;
+            const defaultFFI = type === "ERC20" ? defaultFFIERC20 :type==="ERC721" ?defaultFFIERC721:type==="ERC1155"?defaultFFIERC1155:type==="ERC5521"?defaultFFIERC5521:null;
             const newToken = { name: "", type: "", chainCode: "", ffi: "", installed: false };
             const newTokens = [...tokens];
             newTokens.splice(index + 1, 0, newToken);
@@ -266,8 +276,8 @@ const BPMNOverview = () => {
 
             if (key === "type") {
                 newTokens[index].chainCode =
-                    value === "ERC20" ? defaultChainCodeERC20 :value==="ERC721"? defaultChainCodeERC721:value==="ERC1155"?defaultChainCodeERC1155:null;
-                newTokens[index].ffi = value === "ERC20" ? defaultFFIERC20 : value==="ERC721"? defaultFFIERC721:value==="ERC1155"?defaultFFIERC1155:null;
+                    value === "ERC20" ? defaultChainCodeERC20 :value==="ERC721"? defaultChainCodeERC721:value==="ERC1155"?defaultChainCodeERC1155:value==="ERC5521"?defaultChainCodeERC5521:null;
+                newTokens[index].ffi = value === "ERC20" ? defaultFFIERC20 : value==="ERC721"? defaultFFIERC721:value==="ERC1155"?defaultFFIERC1155:value==="ERC5521"?defaultFFIERC5521:null;
             }
 
             setTokens(newTokens);
@@ -415,6 +425,7 @@ const BPMNOverview = () => {
                             <Select.Option value="ERC20">ERC20</Select.Option>
                             <Select.Option value="ERC721">ERC721</Select.Option>
                             <Select.Option value="ERC1155">ERC1155</Select.Option>
+                            <Select.Option value="ERC5521">ERC5521</Select.Option>
                         </Select>
 
 

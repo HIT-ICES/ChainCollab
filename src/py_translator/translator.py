@@ -811,6 +811,21 @@ class GoChaincodeTranslator:
                         after_all_hook=after_all_hook
                     )
                 )
+        elif token_assetType=="value-added":
+            if token_operation=="branch":
+                temp_list.append(
+                    snippet.AddValueMint_code(
+                      activityId=task.id,
+                        after_all_hook=after_all_hook   
+                    )
+                )
+            elif token_operation=="merge":
+                temp_list.append(
+                    snippet.AddValueMint_code(
+                      activityId=task.id,
+                        after_all_hook=after_all_hook   
+                    )
+                )
         return temp_list
 
     def generate_chaincode(self, output_path: str = "resource/chaincode.go", is_output: bool = False):
