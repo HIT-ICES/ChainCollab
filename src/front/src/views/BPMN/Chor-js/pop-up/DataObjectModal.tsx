@@ -190,7 +190,7 @@ export default function FixedFieldsModal({
       return same ? prev : newTokenIds;
     });
 
-    // 对所有非 mint 操作且 tokenId 不在新列表中的元素，清理 tokenId
+    // 对所有非 mint 等操作且 tokenId 不在新列表中的元素，清理 tokenId
     allElements.forEach((el: any) => {
       const docs = el.businessObject.documentation;
       if (Array.isArray(docs) && docs.length) {

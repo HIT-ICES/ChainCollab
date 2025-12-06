@@ -60,7 +60,7 @@ from api.routes.bpmn.views import (
 )
 from api.routes.fabric_identity.views import FabricIdentityViewSet
 from api.routes.api_secret_key.views import APISecretKeyViewSet
-
+from api.routes.assetTask.views import upload_asset
 DEBUG = getattr(settings, "DEBUG")
 API_VERSION = os.getenv("API_VERSION")
 WEBROOT = os.getenv("WEBROOT")
@@ -189,6 +189,7 @@ urlpatterns += [
     path("token-verify", LoleidoTokenVerifyView.as_view(), name="token_verify"),
     path("docs/", SchemaView.with_ui("swagger", cache_timeout=0), name="docs"),
     path("redoc/", SchemaView.with_ui("redoc", cache_timeout=0), name="redoc"),
+    path("asset-upload/", upload_asset, name="asset_upload"),
 ]
 
 if DEBUG:

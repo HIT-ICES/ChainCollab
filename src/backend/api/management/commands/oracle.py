@@ -3,6 +3,9 @@ from api.management.commands.listeners.dmn_create_listener import InstanceCreate
 from api.management.commands.listeners.dmn_execute_listener import (
     DMNContentRequiredAction,
 )
+from api.management.commands.listeners.asset_upload_listener import (  
+    AssetUploadRequiredAction,
+)
 from api.models import BPMN
 import websockets
 import asyncio
@@ -58,6 +61,15 @@ async def listener_task(chaincode_url, event_type, subscription_name, bpmn_id):
                             ).handle_upload_dmn(message)
                         except Exception as e:
                             print(e)
+                    case "AssetUploadRequired":
+                        try:
+                            AssetUploadRequiredAction(
+                                core_url="http://127.0.0.1:5000/",
+                                chaincode_url=chaincode_url,
+                            ).handle_asset_upload(message)
+                        except Exception:
+                            traceback.print_exc()
+
             except websockets.ConnectionClosed:
                 print("Connection closed")
                 break
