@@ -8,27 +8,12 @@ from api.management.commands.listeners.asset_upload_listener import (
 )
 from api.models import BPMN
 
-# 和你 DMN 那边保持一致的 FireFly Core 地址
 CORE_URL = "http://127.0.0.1:5000/"
 
 
 @csrf_exempt
 def upload_asset(request):
-    """
-    前端 / Agent 上传资产内容的接口。
-
-    请求方式：POST（multipart/form-data）
-
-    必需字段（FormData）：
-      - instance_id : 当前流程实例 ID
-      - activity_id : 资产任务对应的 BPMN 节点 ID（如 "Activity_0i3c0p3"）
-      - func_name   : Continue 函数名（如 "Activity_0i3c0p3_Continue"）
-      - bpmn_id     : 当前实例所属的 BPMN 的数据库 id
-
-    资产内容两种方式二选一：
-      - file    : 文件（推荐）
-      - content : 文本内容（如果没有文件）
-    """
+    
     if request.method != "POST":
         return JsonResponse({"error": "only POST allowed"}, status=405)
 
@@ -54,15 +39,15 @@ def upload_asset(request):
             status=400,
         )
 
-    # -------- 2. 根据 bpmn_id 计算 chaincode_url（和 listener 一致） --------
+    # -------- 2. 根据 bpmn_id 计算 chaincode_url --------
     try:
         bpmn = BPMN.objects.get(id=bpmn_id)
     except BPMN.DoesNotExist:
         return JsonResponse({"error": f"bpmn {bpmn_id} not found"}, status=404)
 
-    firefly_url = bpmn.firefly_url  # 例如 .../apis/YourBPMN/api
+    firefly_url = bpmn.firefly_url  
     if firefly_url.endswith("/api"):
-        chaincode_url = firefly_url[:-4]  # 去掉最后的 "/api"
+        chaincode_url = firefly_url[:-4]  
     else:
         chaincode_url = firefly_url
 
@@ -76,7 +61,7 @@ def upload_asset(request):
     else:
         return JsonResponse({"error": "missing file or content"}, status=400)
 
-    # -------- 4. 调用 AssetUploadRequiredAction，完成 IPFS + Oracle + Continue --------
+    # 4. 调用 AssetUploadRequiredAction-------
     try:
         action = AssetUploadRequiredAction(
             core_url=CORE_URL,
