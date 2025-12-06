@@ -438,6 +438,147 @@ const InputComponentForMessage = ({
 		</div>
 	);
 };
+// 等待 currentElement.State 刷新为目标值
+const waitForCurrentElementState = (
+  getCurrentElement,
+  targetState = 2,
+  timeoutMs = 8000
+) => {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+
+    const timer = setInterval(() => {
+      const elem = getCurrentElement();
+
+      if (elem && elem.State === targetState) {
+        clearInterval(timer);
+        resolve(true);
+        return;
+      }
+
+      if (Date.now() - start > timeoutMs) {
+        clearInterval(timer);
+        reject(new Error("TokenTask state did not reach targetState within timeout"));
+      }
+    }, 300);
+  });
+};
+
+const AssetInputComponentForTokenTask = ({
+  currentElement,
+  contractName,
+  coreURL,
+  instanceId,
+  identity,
+  bpmnId,
+}) => {
+  const [submitting, setSubmitting] = useState(false);
+
+  // 使用 useRef 得到最新 currentElement，
+  const currentRef = useRef(currentElement);
+  useEffect(() => {
+    currentRef.current = currentElement;
+  }, [currentElement]);
+
+  // 后端 URL
+  const backendBaseUrl = "http://localhost:8000/api/v1";
+
+  //表单提交
+  const onFinish = async (values) => {
+    setSubmitting(true);
+
+    try {
+      //链码调用
+      await invokeTaskTokenAction(
+        coreURL,
+        contractName,
+        currentRef.current.tokenElementID,
+        instanceId,
+        identity.identity.data[0].value
+      );
+
+	//等待元素变为state=2
+      await waitForCurrentElementState(
+        () => currentRef.current, 
+        2,
+        8000
+      );
+
+      //上传文件
+      const formData = new FormData();
+      formData.append("instance_id", instanceId);
+      formData.append("activity_id", currentRef.current.tokenElementID);
+      formData.append(
+        "func_name",
+        currentRef.current.tokenElementID + "_Continue"
+      );
+      formData.append("bpmn_id", bpmnId);
+	  formData.append("identity", identity.identity.data[0].value);
+	  const correctURL = `${coreURL}/api/v1/namespaces/default/apis/${contractName}/invoke/${currentRef.current.tokenElementID}_Continue`;
+	  formData.append("correct_url",correctURL);
+      const fileList = values.assetFile;
+      const textValue = values.assetText;
+
+      if (fileList && fileList.length > 0) {
+        formData.append("file", fileList[0].originFileObj);
+      } else if (textValue) {
+        formData.append("content", textValue);
+      } else {
+        alert("请上传文件或填写文本内容！");
+        setSubmitting(false);
+        return;
+      }
+
+      //后端调用
+      await axios.post(`${backendBaseUrl}/asset-upload/`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+    } catch (err) {
+      console.error("TokenTask 执行出错:", err);
+
+      if (err.message.includes("state did not reach targetState")) {
+        console.log("Start 已执行，但状态未刷新，请重试或检查身份是否正确。");
+      } else {
+        console.log("Start 调用失败或上传流程异常，请重新尝试。");
+      }
+
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  
+  return (
+    <Form layout="vertical" onFinish={onFinish}>
+      <Form.Item
+        name="assetFile"
+        label="上传文件（可选）"
+        valuePropName="fileList"
+        getValueFromEvent={(e) => e.fileList}
+      >
+        <Upload beforeUpload={() => false} multiple={false}>
+          <Button>选择文件</Button>
+        </Upload>
+      </Form.Item>
+
+      <Form.Item name="assetText" label="或填写资产文本内容">
+        <Input.TextArea rows={4} placeholder="请输入文本..." />
+      </Form.Item>
+
+      <Button
+        type="primary"
+        htmlType="submit"
+        loading={submitting}
+        style={{ marginTop: 10,backgroundColor: "mediumspringgreen" }}
+      >
+       Next
+      </Button>
+    </Form>
+  );
+};
+
+
 
 const TimeDecorator = (func, label, url_pattern, output_obj = {}) => {
 	return async (...args) => {
@@ -485,6 +626,8 @@ const ControlPanel = ({
 	const queryParams = new URLSearchParams(location.search);
 	const msp = queryParams.get("msp");
 	const type = currentElement?.type;
+	const operation = (currentElement?.operation || "").toLowerCase();//判断tokenTask是不是mint操作
+	const isMintTokenTask = type === "tokenTask" && operation === "mint";
 	const Identity = queryParams.get("identity");
 
 	const temp_map = {
@@ -502,7 +645,7 @@ const ControlPanel = ({
 			);
 		// currentElement?.receiveMspID === msp;
 		if (type === "businessRule") return currentElement?.State === 1;
-		if (type === "tokenTask") return currentElement?.State === 1;
+		if (type === "tokenTask") return currentElement?.State === 1 || currentElement?.State === 2;
 	})();
 	// debugger
 	const showTransactionId = (() => {
@@ -578,25 +721,54 @@ const ControlPanel = ({
 			invokeTaskTokenAction,
 			"TokenTask",
 			"invoke/Activity",
-		)(coreURL, contractName, currentElement.tokenElementID, instanceId, identity.identity.data[0].value,);
+		)(
+			coreURL,
+			contractName,
+			currentElement.tokenElementID,
+			instanceId,
+			identity.identity.data[0].value,
+		);
 	};
-
-	if (type === "tokenTask")
-		return (<div
-			style={{
-				display: "flex",
-				flexDirection: "column",
-			}}
-		>
-			<Button
-				style={{ backgroundColor: "mediumspringgreen" }}
-				onClick={() => {
-					onHandleTokenTask();
+	if (isMintTokenTask)
+		return (
+			<div
+				style={{
+					display: "flex",
+					flexDirection: "column",
+					maxWidth: 400,
 				}}
 			>
-				Next
-			</Button>
-		</div>);
+				<AssetInputComponentForTokenTask
+					currentElement={currentElement}
+					contractName={contractName}
+					coreURL={coreURL}
+					instanceId={instanceId}
+					identity={identity}
+					bpmnId={bpmn.id}
+				/>
+			</div>
+		);
+	if (type === "tokenTask")
+		return (
+			<div
+				style={{
+					display: "flex",
+					flexDirection: "column",
+				}}
+			>
+				<Button
+					style={{ backgroundColor: "mediumspringgreen" }}
+					onClick={() => {
+						onHandleTokenTask();
+					}}
+				>
+					Next
+				</Button>
+			</div>
+		);
+
+
+
 
 	const onHandleBusinessRule = async (output = {}) => {
 		const res = await TimeDecorator(
@@ -954,15 +1126,15 @@ const ExecutionPage = (props) => {
 				if (msg.type === "tokenTask") {
 					styles["& svg"][selector] = {
 						"& g.djs-visual > rect": {
-							fill: `${msg.color} !important`,  
-							stroke: "black !important",       
+							fill: `${msg.color} !important`,
+							stroke: "black !important",
 							strokeWidth: 2,
-							rx: 10,                            
+							rx: 10,
 							ry: 10,
-							fillOpacity: 0.95,                 
+							fillOpacity: 0.95,
 						},
 						"& g.djs-visual > text": {
-							fill: "black !important",          
+							fill: "black !important",
 							fontWeight: "bold",
 						}
 					};
