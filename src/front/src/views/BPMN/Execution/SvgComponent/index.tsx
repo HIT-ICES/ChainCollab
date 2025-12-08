@@ -627,7 +627,10 @@ const ControlPanel = ({
 	const msp = queryParams.get("msp");
 	const type = currentElement?.type;
 	const operation = (currentElement?.operation || "").toLowerCase();//判断tokenTask是不是mint操作
-	const isMintTokenTask = type === "tokenTask" && operation === "mint";
+	const assetType = (currentElement?.assetType || "").toLowerCase();
+	const tokenKey = currentElement?.tokenKey || "";   // e.g. "NFT_0-2"
+	const tokenType = tokenKey.split("_")[0].toLowerCase(); // => "nft"
+	const isMintTokenTask = type === "tokenTask" && (operation === "mint"&&tokenType === "nft") || (operation ==="mint"&& assetType ==="distributive") || ((operation ==="branch"||operation==="merge")&& assetType ==="value-added");
 	const Identity = queryParams.get("identity");
 
 	const temp_map = {

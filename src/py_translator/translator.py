@@ -781,7 +781,14 @@ class GoChaincodeTranslator:
                         activityId=task.id,
                         after_all_hook=after_all_hook
                     )
-                ) 
+                )
+            elif token_operation =="burn":
+                temp_list.append(
+                    snippet.FTBurn_code(
+                        activityId=task.id,
+                        after_all_hook=after_all_hook 
+                    )
+                )  
         elif token_assetType=="distributive":
             if token_operation=="mint":
                 temp_list.append(
@@ -790,7 +797,7 @@ class GoChaincodeTranslator:
                         after_all_hook=after_all_hook
                     )
                 )
-            elif token_operation=="approve":
+            elif token_operation=="grant usage rights":
                 temp_list.append(
                     snippet.DistributiveApprove_code(
                         activityId=task.id,
@@ -804,9 +811,16 @@ class GoChaincodeTranslator:
                         after_all_hook=after_all_hook
                     )
                 )
-            elif token_operation=="remove approval":
+            elif token_operation=="revoke usage rights":
                 temp_list.append(
                     snippet.DistributiveDisapprove_code(
+                        activityId=task.id,
+                        after_all_hook=after_all_hook
+                    )
+                )
+            elif token_operation=="transfer":
+                temp_list.append(
+                    snippet.DistributiveTransfer_code(
                         activityId=task.id,
                         after_all_hook=after_all_hook
                     )
@@ -1081,7 +1095,45 @@ class GoChaincodeTranslator:
                 ],
             ),
         ]
-
+    def _generate_ffi_items_for_tokenTask(self,task:NodeType.TASK) ->list:
+        try:
+            doc_data = json.loads(task.documentation)
+        except:
+            doc_data = {}
+        token_operation = doc_data.get("operation")
+        token_Type =doc_data.get("tokenType")
+        token_assetType = doc_data.get("assetType")
+        first_name= task.id
+        continue_method = task.id + "_Continue"
+        
+        items = [
+             self._generate_ffi_item(
+                name=first_name,
+                pathname=first_name,
+                description="",
+                params=[
+                    {
+                        "name": "InstanceID",
+                        "schema": {"type": "string"},
+                    }
+                ],
+            )
+        ]
+        if (token_operation == "mint" and token_Type=="NFT") or (token_assetType == "distributive"and token_operation=="mint") or (token_assetType =="value-added" and (token_operation =="branch" or token_operation == "merge")):
+            items.append(
+                self._generate_ffi_item(
+                    name=continue_method,
+                    pathname=continue_method,
+                    description="",
+                    params=[
+                        {
+                        "name": "InstanceID",
+                        "schema": {"type": "string"},
+                        }
+                    ],
+                )
+            )
+        return items
     def _generate_ffi_events(self) -> list:
         return [{"name": "DMNContentRequired"}, {"name": "InstanceCreated"}]
 
@@ -1217,6 +1269,14 @@ class GoChaincodeTranslator:
                  params=[{"name": "initParametersBytes", "schema": {"type": "string"}}],
             )
         )
+        ffi_items.append(
+            self._generate_ffi_item(
+                name="SetURLData",
+                pathname="",
+                description="",
+                params=[{"name": "InstanceID","schema": {"type": "string"}},{"name": "key","schema": {"type": "string"}},{"name": "value","schema": {"type": "string"}}],
+            )
+        )
 
         # ffi_items.append(
         #     self._generate_ffi_item(
@@ -1238,13 +1298,14 @@ class GoChaincodeTranslator:
                 case NodeType.BUSINESS_RULE_TASK:
                     ffi_items.extend(self._generate_ffi_items_for_business_rule_task(element))
                     pass
+                case NodeType.TASK:
+                    ffi_items.extend(self._generate_ffi_items_for_tokenTask(element))
                 case (
                     NodeType.EXCLUSIVE_GATEWAY
                     | NodeType.PARALLEL_GATEWAY
                     | NodeType.EVENT_BASED_GATEWAY
                     | NodeType.START_EVENT
                     | NodeType.END_EVENT
-                    | NodeType.TASK
                 ):
                     ffi_items.append(
                         self._generate_ffi_item(
