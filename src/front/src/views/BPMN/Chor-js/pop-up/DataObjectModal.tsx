@@ -49,7 +49,7 @@ export default function FixedFieldsModal({
   const [refTokenIdOptions, setRefTokenIdOptions] = React.useState<string[]>([]);
 
   const operationOptions: Record<string, string[]> = {
-    'distributive': ['mint', 'burn', 'approve', 'remove approval', 'query'],
+    'distributive': ['mint', 'burn', 'grant usage rights', 'revoke usage rights','transfer', 'query'],
     'transferable': ['mint', 'burn', 'Transfer', 'query'],
     'value-added': ['branch', 'merge', 'query'],
   };
@@ -57,8 +57,8 @@ export default function FixedFieldsModal({
   const operationToCallerLabel: Record<string, string> = {
     mint: 'Issuer',              // 发行人
     burn: 'Burner',              // 销毁人
-    approve: 'Approver',         // 授权者
-    'remove approval': 'Revoker',// 被取消授权者
+    'grant usage rithts': 'Approver',         // 授权者
+    'revoke usage rights': 'Revoker',// 被取消授权者
     query: 'Querier',            // 查询者
     Transfer: 'Sender',          // 转移者
     branch: 'Brancher',          // 分支者
@@ -68,8 +68,8 @@ export default function FixedFieldsModal({
   const operationToCalleeLabel: Record<string, string> = {
     mint: 'Receiver',               // 接受者
     burn: 'Burn Target',            // 目标销毁方
-    approve: 'Grantee',             // 被授权者
-    'remove approval': 'Revoked',   // 被取消授权者
+    'grant usage rithts': 'Grantee',             // 被授权者
+    'revoke usage rights': 'Revoked',   // 被取消授权者
     Transfer: 'Recipient',          // 被转移者
   };
 
@@ -98,7 +98,7 @@ export default function FixedFieldsModal({
         const loadedTokenId = parsed.tokenId || '';
         setTokenId(loadedTokenId);
         setOriginalTokenId(loadedTokenId);
-        setTokenURL(parsed.tokenURL || '');
+        // setTokenURL(parsed.tokenURL || '');
         if (parsed.assetType === 'value-added' && Array.isArray(parsed.refTokenIds)) {
           setRefTokenIds(parsed.refTokenIds);
         } else {
@@ -281,7 +281,7 @@ export default function FixedFieldsModal({
       payload.caller = pureCaller;
     }
     if ((assetType === 'transferable' && operation === 'Transfer') ||
-      (assetType === 'distributive' && ['approve', 'remove approval'].includes(operation))) {
+      (assetType === 'distributive' && ['grant usage rights', 'revoke usage rights','transfer'].includes(operation))) {
       if (callee.length) {
         payload.callee = callee.map(id => id.split('_ChoreographyTask_')[0]);
       }
@@ -295,7 +295,7 @@ export default function FixedFieldsModal({
     }
     if (!(assetType === 'transferable' && tokenType === 'FT') && tokenId) {
       payload.tokenId = tokenId;
-      if (tokenURL) payload.tokenURL = tokenURL;
+      // if (tokenURL) payload.tokenURL = tokenURL;
     }
     if (assetType === 'value-added' && operation !== 'query' && refTokenIds.length > 0) {
       payload.refTokenIds = refTokenIds;
@@ -325,9 +325,9 @@ export default function FixedFieldsModal({
   const shouldShowCallee = React.useMemo(() => {
     return (
       (assetType === 'transferable' && operation === 'Transfer') ||
-      (assetType === 'distributive' && ['approve', 'remove approval'].includes(operation))
+      (assetType === 'distributive' && ['grant usage rights', 'revoke usage rights','transfer'].includes(operation))
     );
-  }, [assetType, operation]);
+  }, [assetType, operation]); 
 
   const shouldShowTokenName = true;
   const shouldShowTokenNumber = React.useMemo(() => {
@@ -478,7 +478,7 @@ export default function FixedFieldsModal({
       )}
 
       {/*7. tokenURI */}
-      {shouldShowTokenId && tokenId && (
+     {/*  {shouldShowTokenId && tokenId && (
         <div style={{ marginBottom: 16 }}>
           <label style={{ display: 'block', marginBottom: 4 }}>Token URL:</label>
           {operation === 'mint' || operation === 'branch'||operation==='merge' ? (
@@ -495,7 +495,7 @@ export default function FixedFieldsModal({
             />
           )}
         </div>
-      )}
+      )} */}
 
       {/* 8.tokenNumber */}
       {shouldShowTokenNumber && (

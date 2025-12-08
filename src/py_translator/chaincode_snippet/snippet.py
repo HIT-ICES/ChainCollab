@@ -432,6 +432,15 @@ def FTTransfer_code(
         activityId=activityId,
         after_all_hook=after_all_hook,
     )
+def FTBurn_code(
+    activityId :str,
+    after_all_hook: str = "",  
+):
+    return content["FTBurnFrame"].format(
+        activityId=activityId,
+        after_all_hook=after_all_hook,
+    )
+
 
 def DistributiveMint_code(
     activityId :str,
@@ -469,6 +478,15 @@ def DistributiveDisapprove_code(
         after_all_hook=after_all_hook,
     )
 
+def DistributiveTransfer_code(
+    activityId :str,
+    after_all_hook: str = "", 
+):
+    return content["DisTransferFrame"].format(
+        activityId=activityId,
+        after_all_hook=after_all_hook,
+    )
+ 
 def AddValueMint_code(
     activityId :str,
     after_all_hook: str = "", 
