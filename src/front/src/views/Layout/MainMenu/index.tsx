@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Menu, Modal } from "antd";
+import { Form, Input, Menu, Modal, Select } from "antd";
 const { SubMenu } = Menu;
 import { useLocation, useNavigate } from "react-router-dom";
 import { DesktopOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
@@ -139,18 +139,23 @@ const AddEnvModal: React.FC<{
   isModalOpen?: boolean,
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>,
   setSync: () => void,
-}> = ({ isModalOpen = false, setIsModalOpen, setSync }) => {
+  defaultEnvType?: string,
+}> = ({ isModalOpen = false, setIsModalOpen, setSync, defaultEnvType = 'Fabric' }) => {
   type FieldType = {
     envName?: string;
+    envType?: string;
   };
   const [form] = Form.useForm<FieldType>();
   const dispatch = useAppDispatch();
   const currentConsortiumId = useAppSelector(selectConsortium).currentConsortiumId;
 
-
   const onFinish = async (values: FieldType) => {
     const Env = await createEnvironment(currentConsortiumId, values.envName);
-    dispatch(activateEnv({ currentEnvId: Env.id, currentEnvName: Env.name }))
+    dispatch(activateEnv({
+      currentEnvId: Env.id,
+      currentEnvName: Env.name,
+      currentEnvType: values.envType || 'Fabric'
+    }));
     setIsModalOpen(false);
     setSync();
   }
@@ -176,7 +181,7 @@ const AddEnvModal: React.FC<{
         onFinish={onFinish}
         autoComplete="off"
         preserve={false}
-        initialValues={{ envName: 'Environment' }}
+        initialValues={{ envName: 'Environment', envType: defaultEnvType }}
       >
         <Form.Item<FieldType>
           label="Environment Name"
@@ -186,6 +191,21 @@ const AddEnvModal: React.FC<{
           ]}
         >
           <Input allowClear />
+        </Form.Item>
+        <Form.Item<FieldType>
+          label="Environment Type"
+          name="envType"
+          rules={[
+            { required: false, message: "Please choose environment type!" },
+          ]}
+        >
+          <Select
+            options={[
+              { value: 'Ethereum', label: 'Ethereum' },
+              { value: 'Fabric', label: 'Fabric' },
+              { value: 'Quorum', label: 'Quorum', disabled: true },
+            ]}
+          />
         </Form.Item>
       </Form>
     </Modal>
@@ -204,6 +224,7 @@ const MainMenu: React.FC = () => {
   const currentOrgName = useAppSelector(selectOrg).currentOrgName;
   const currentConsortiumName = useAppSelector(selectConsortium).currentConsortiumName;
   const currentEnvName = useAppSelector(selectEnv).currentEnvName;
+  const currentEnvType = useAppSelector(selectEnv).currentEnvType;
 
   const [orgList, syncOrgList] = useOrgData();
   const [consortiaList, syncConsortiaList] = useConsortiaData(currentOrgId);
@@ -319,37 +340,56 @@ const MainMenu: React.FC = () => {
           >
             App
           </Menu.Item> */}
-          <Menu.Item
+          {currentEnvType === 'Fabric' && (<><Menu.Item
             key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/envdashboard`}
           >
             EnvDashboard
-          </Menu.Item>
-          <SubMenu
+          </Menu.Item><SubMenu
             key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/fabric`}
             title="Fabric"
           >
-            <Menu.Item
-              key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/fabric/chaincode`}
+              <Menu.Item
+                key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/fabric/chaincode`}
+              >
+                Chaincode
+              </Menu.Item>
+              <Menu.Item
+                key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/fabric/channel`}
+              >
+                Channel
+              </Menu.Item>
+              <Menu.Item
+                key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/fabric/node`}
+              >
+                Node
+              </Menu.Item>
+            </SubMenu><Menu.Item
+              key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/firefly`}
             >
-              Chaincode
-            </Menu.Item>
-            <Menu.Item
-              key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/fabric/channel`}
-            >
-              Channel
-            </Menu.Item>
-            <Menu.Item
-              key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/fabric/node`}
-            >
-              Node
-            </Menu.Item>
-          </SubMenu>
-          <Menu.Item
-            key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/firefly`}
+              Firefly
+            </Menu.Item></>)}
+            {currentEnvType === 'Ethereum' && (<><Menu.Item
+        key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/envdashboard`}
+      >
+        EnvDashboard
+      </Menu.Item><SubMenu
+        key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/ethereum`}
+        title="Ethereum"
+      >
+          <Menu.Item //改动存疑
+            key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/ethereum/smartcontract`}
           >
-            Firefly
+            Smart Contract
           </Menu.Item>
+          <Menu.Item
+            key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/ethereum/node`}
+          >
+            Node
+          </Menu.Item>
+        </SubMenu></>
+      )}
         </>)}
+      
     </SubMenu>
 
   );

@@ -60,7 +60,38 @@ export const NaiveFabricStepBar = (props) => {
       },
       {
         title: "Active",
-        description: "Chennel been Setup",
+        description: "Channel been Setup",
+      }
+    ];
+
+  return <Steps
+    current={step}
+    status={status}
+    items={items}
+  />
+
+}
+
+export const NaiveEthereumStepBar = (props) => {
+
+  const { step = 1, status = "wait" } = props.stepAndStatus;
+  // status wait process finish error
+
+  const items: Array<{
+    title: string;
+    description?: string;
+  }> = [
+    // {
+    //   title: "System Created",
+    //   description: "DB Record",
+    // },
+      {
+        title: "System Node Created",
+        description: "System go-client node",
+      },
+      {
+        title: "Membership Node Initialized",
+        description: "Membership go-client node",
       }
     ];
 
