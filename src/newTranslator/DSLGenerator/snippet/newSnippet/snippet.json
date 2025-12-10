@@ -1,0 +1,58 @@
+{
+  "DSLContractFrame": "contract {contract_name} {\n\n{participants}\n\n{globals}\n\n{messages}\n\n{gateways}\n\n{events}\n\n{businessrules}\n\n{flows}\n}\n",
+
+  "DSLParticipantsFrame": "    participants {\n{items}\n    }\n\n",
+
+  "DSLParticipantItem": "        participant {id} {\n            msp \"{msp}\"\n            x509 \"{x509}\"\n            isMulti {is_multi}\n            multiMin {multi_min}\n            multiMax {multi_max}\n            attributes {\n{attributes}\n            }\n        }\n",
+
+  "DSLParticipantAttributeItem": "                {key} = \"{value}\"\n",
+
+  "DSLGlobalsFrame": "    globals {\n{items}\n    }\n\n",
+
+  "DSLGlobalItem": "        {name}: {type}\n",
+
+  "DSLMessagesFrame": "    messages {\n{items}\n    }\n\n",
+
+  "DSLMessageItem": "        message {id} from {sender} to {receiver} {\n            initial state {state}\n            schema \"{schema}\"\n        }\n",
+
+  "DSLGatewaysFrame": "    gateways {\n{items}\n    }\n\n",
+
+  "DSLGatewayItem": "        gateway {id} {\n            type {type}\n            initial state {state}\n        }\n",
+
+  "DSLEventsFrame": "    events {\n{items}\n    }\n\n",
+
+  "DSLEventItem": "        event {id} {\n            initial state {state}\n        }\n",
+
+  "DSLBusinessRulesFrame": "    businessrules {\n{items}\n    }\n\n",
+
+  "DSLBusinessRuleItem": "        businessrule {id} {\n            dmn \"{dmn}\"\n            decision \"{decision}\"\n            input mapping {\n{input_mappings}\n            }\n{output_block}\n            initial state {state}\n        }\n",
+
+  "DSLBusinessRuleInputMappingItem": "                {dmn_param} -> {global_name}\n",
+
+  "DSLBusinessRuleOutputMappingItem": "                {dmn_param} -> {global_name}\n",
+
+  "DSLBusinessRuleOutputBlockFrame": "            output mapping {\n{output_mappings}\n            }\n",
+
+  "DSLFlowsFrame": "    flows {\n{items}\n    }\n",
+
+  "DSLStartEventEnables": "        start event {event} enables {target};\n",
+
+  "DSLWhenMessageSentEnable": "        when message {message} sent\n        then enable {targets};\n",
+
+  "DSLWhenMessageSentDisableEnable": "        when message {message} sent\n        then disable {disabled}, enable {enabled};\n",
+
+  "DSLWhenGatewayCompletedEnable": "        when gateway {gateway} completed\n        then enable {targets};\n",
+
+  "DSLWhenBusinessRuleDoneEnable": "        when businessrule {rule} done\n        then enable {targets};\n",
+
+  "DSLWhenEventCompletedSetGlobal": "        when event {event} completed\n        then set {global_name} = {value};\n",
+
+  "DSLEmptyLine": "\n",
+
+  "ElementStateMapping": {
+    "DISABLED": "INACTIVE",
+    "ENABLED": "READY",
+    "WAITINGFORCONFIRMATION": "PENDING_CONFIRMATION",
+    "COMPLETED": "DONE"
+  }
+}

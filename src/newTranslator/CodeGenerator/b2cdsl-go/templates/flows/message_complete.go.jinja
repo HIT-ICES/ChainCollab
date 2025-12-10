@@ -1,0 +1,36 @@
+func (cc *SmartContract) {{ message_name }}_Complete(ctx contractapi.TransactionContextInterface, instanceID string) error {
+	stub := ctx.GetStub()
+	instance, err := cc.GetInstance(ctx, instanceID)
+	msg, err := cc.ReadMsg(ctx, instanceID, "{{ message_name }}")
+	if err != nil {
+		return err
+	}
+
+	if cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false {
+		errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", msg.SendParticipantID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	if msg.MsgState != WAITINGFORCONFIRMATION {
+		errorMessage := fmt.Sprintf("Event state %s is not allowed", msg.MessageID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeMsgState(ctx, instance, msg.MessageID, COMPLETED)
+	stub.SetEvent("{{ message_name }}", []byte("Message has been done"))
+	cc.SetInstance(ctx, instance)
+{% if pre_activate_hooks %}
+{{ pre_activate_hooks }}
+{% endif %}
+{% if next_state_block %}
+{{ next_state_block }}
+{% endif %}
+{% if after_hooks %}
+{{ after_hooks }}
+{% endif %}
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
