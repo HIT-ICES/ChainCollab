@@ -275,6 +275,18 @@ export const createEnvironment = async (consortiumId: string, name: string) => {
   }
 };
 
+export const createEthEnvironment = async (consortiumId: string, name: string) => {
+  try {
+    const res = await api.post(`/consortium/${consortiumId}/environments`, {
+      name: name,
+      type: "eth",
+    });
+    return res.data;
+  } catch (err) {
+    console.error("创建eth env失败", err);
+  }
+};
+
 export const getEnvironmentList = async (consortiumId: string) => {
   if (consortiumId === '') {
     return [];

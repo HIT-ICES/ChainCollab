@@ -36,7 +36,7 @@ class Firefly_cli:
             print("Command Output:")
             # print(output)
             if output != 0:
-                raise Exception("ff iniy command execute fail")
+                raise Exception("ff init command execute fail")
             firefly_stack_path = self.firefly_config_path + firefly_name
             # 读取YAML文件
             with open(firefly_stack_path + "/docker-compose.override.yml", "r") as file:

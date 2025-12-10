@@ -5,11 +5,13 @@ import type { RootStateType, DispatchType } from '../store'
 interface envState {
     currentEnvId: string,
     currentEnvName: string,
+    currentEnvType: string,
 }
 
 const initialState: envState = {
     currentEnvId: "",
     currentEnvName: "",
+    currentEnvType: "",
 }
 
 /**
@@ -23,8 +25,10 @@ export const envSlice = createSlice({
             {
                 currentEnvId: string,
                 currentEnvName: string,
+                currentEnvType?: string,
             }>) => {
             return {
+                currentEnvType: action.payload.currentEnvType || "Fabric",
                 currentEnvId: action.payload.currentEnvId,
                 currentEnvName: action.payload.currentEnvName,
             }
@@ -32,11 +36,22 @@ export const envSlice = createSlice({
         deactivateEnv: (state) => {
             return initialState;
         },
+        activeEthEnv: (state, action: PayloadAction<
+            {
+                currentEnvId: string,
+                currentEnvName: string,
+            }>) => {
+            return {
+                currentEnvId: action.payload.currentEnvId,
+                currentEnvName: action.payload.currentEnvName,
+                currentEnvType: "Ethereum",
+            }
+        },
     }
 })
 
 export const {
-    activateEnv, deactivateEnv
+    activateEnv, deactivateEnv, activeEthEnv
 } = envSlice.actions;
 
 

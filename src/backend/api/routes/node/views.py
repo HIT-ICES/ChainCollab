@@ -1021,3 +1021,6 @@ class NodeViewSet(viewsets.ViewSet):
         #     """
         #         generate ccp file for node
         #     """
+
+class EthNodeViewSet(viewsets.ViewSet):
+    pass

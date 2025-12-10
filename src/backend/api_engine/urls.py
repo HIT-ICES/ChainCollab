@@ -50,8 +50,8 @@ from api.routes.loleido_organization.views import (
 )
 from api.routes.consortium.views import ConsortiumViewSet, ConsortiumInviteViewSet
 from api.routes.memebership.views import MemebershipViewSet
-from api.routes.environment.views import EnvironmentViewSet, EnvironmentOperateViewSet
-from api.routes.resource_set.views import ResourceSetViewSet
+from api.routes.environment.views import EnvironmentViewSet, EnvironmentOperateViewSet, EthEnvironmentOperateViewSet, EthEnvironmentViewSet
+from api.routes.resource_set.views import EthereumResourceSetViewSet, ResourceSetViewSet
 from api.routes.bpmn.views import (
     BPMNViewsSet,
     BPMNInstanceViewSet,
@@ -104,6 +104,11 @@ router.register(
 router.register(
     "resource_sets/(?P<resource_set_id>[^/.]+)/cas",
     FabricCAViewSet,
+    basename="resource_set_ca",
+)
+router.register(
+    "resource_sets/(?P<resource_set_id>[^/.]+)/eth",
+    EthereumResourceSetViewSet,
     basename="resource_set_ca",
 )
 router.register(
@@ -163,6 +168,16 @@ router.register(
 )
 router.register(
     "environments", EnvironmentOperateViewSet, basename="environment-operate"
+)
+router.register(
+    "consortium/(?P<consortium_id>[^/.]+)/eth-environments",
+    EthEnvironmentViewSet,
+    basename="eth-environment",
+)
+router.register(
+    "eth-environments",
+    EthEnvironmentOperateViewSet,
+    basename="eth-environment-operate",
 )
 router.register(
     "environments/(?P<environment_id>[^/.]+)/resource_sets",
