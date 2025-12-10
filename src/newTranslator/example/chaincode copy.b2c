@@ -1,0 +1,178 @@
+contract ServiceIncidentDecision {
+
+    participants {
+        participant Participant_1p9owwo {
+            msp "Org1MSP"
+            x509 "User1@Org1MSP"
+            isMulti false
+            multiMin 0
+            multiMax 1
+            attributes {
+                role = "requester"
+            }
+        }
+
+        participant Participant_12df78t {
+            msp "Org2MSP"
+            x509 "User2@Org2MSP"
+            isMulti false
+            multiMin 0
+            multiMax 1
+            attributes {
+                role = "provider"
+            }
+        }
+    }
+
+    globals {
+        Type: string
+        Duration: int
+        Confirm: bool
+    }
+
+    messages {
+        // 对应链码中初始 DISABLED → INACTIVE
+        message Message_09krt7c from Participant_1p9owwo to Participant_12df78t {
+            initial state INACTIVE
+            schema "question name + description"
+        }
+
+        message Message_01jq2zl from Participant_1p9owwo to Participant_12df78t {
+            initial state INACTIVE
+            schema "amount"
+        }
+
+        message Message_1b1qlzd from Participant_12df78t to Participant_1p9owwo {
+            initial state INACTIVE
+            schema "reason + result"
+        }
+
+        message Message_12n6jjk from Participant_12df78t to Participant_1p9owwo {
+            initial state INACTIVE
+            schema "type + duration"
+        }
+
+        message Message_076ulzs from Participant_12df78t to Participant_1p9owwo {
+            initial state INACTIVE
+            schema "time + description + EC2 resource ID + logs + other information"
+        }
+
+        message Message_068kmzv from Participant_12df78t to Participant_1p9owwo {
+            initial state INACTIVE
+            schema "time + instance ID + logs"
+        }
+
+        message Message_1bhhp1n from Participant_12df78t to Participant_1p9owwo {
+            initial state INACTIVE
+            schema "serviceType"
+        }
+
+        message Message_0ywghlt from Participant_12df78t to Participant_1p9owwo {
+            initial state INACTIVE
+            schema "serviceType"
+        }
+    }
+
+    gateways {
+        // 链码中初始化为 DISABLED → INACTIVE
+        gateway Gateway_0jgq0a6 {
+            type event
+            initial state INACTIVE
+        }
+
+        gateway Gateway_0auc3he {
+            type exclusive
+            initial state INACTIVE
+        }
+
+        gateway Gateway_0ivv4vg {
+            type exclusive
+            initial state INACTIVE
+        }
+    }
+
+    events {
+        // 链码中 Event_0ojehz6 初始化为 ENABLED → READY
+        event Event_0ojehz6 {
+            initial state READY
+        }
+
+        // 另外两个结束事件初始 DISABLED → INACTIVE
+        event Event_0ci2gl8 {
+            initial state INACTIVE
+        }
+
+        event Event_0dyp0ut {
+            initial state INACTIVE
+        }
+    }
+
+    businessrules {
+        // 链码中 BusinessRule 初始 DISABLED → INACTIVE
+        businessrule Activity_0tya4bp {
+            dmn "Activity_0tya4bp.dmn"
+            decision "Activity_0tya4bp_DecisionID"
+
+            input mapping {
+                type     -> Type
+                duration -> Duration
+            }
+
+            output mapping {
+                confirm  -> Confirm
+            }
+
+            initial state INACTIVE
+        }
+    }
+
+    flows {
+
+        start event Event_0ojehz6 enables Message_09krt7c;
+
+        when message Message_09krt7c sent
+        then enable Gateway_0jgq0a6;
+
+        when gateway Gateway_0jgq0a6 completed
+        then enable Message_0ywghlt, enable Message_1bhhp1n;
+
+        when message Message_0ywghlt sent
+        then disable Message_1bhhp1n, enable Message_068kmzv;
+
+        when message Message_1bhhp1n sent
+        then disable Message_0ywghlt, enable Message_076ulzs;
+
+        when message Message_068kmzv sent
+        then enable Gateway_0auc3he;
+
+        when message Message_076ulzs sent
+        then enable Gateway_0auc3he;
+
+        when gateway Gateway_0auc3he completed
+        then enable Message_12n6jjk;
+
+        when message Message_12n6jjk sent
+        then enable Activity_0tya4bp;
+
+        when businessrule Activity_0tya4bp done
+        then enable Gateway_0ivv4vg;
+
+        when gateway Gateway_0ivv4vg completed
+        then enable Message_1b1qlzd;
+
+        when gateway Gateway_0ivv4vg completed
+        then enable Message_01jq2zl;
+
+        when message Message_1b1qlzd sent
+        then enable Event_0dyp0ut;
+
+        when message Message_01jq2zl sent
+        then enable Event_0ci2gl8;
+
+        when event Event_0dyp0ut completed
+        then set Confirm = false;
+
+        when event Event_0ci2gl8 completed
+        then set Confirm = true;
+    }
+}

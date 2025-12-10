@@ -1,0 +1,29 @@
+{
+    "name": "task1",  # 一次实验的名称     
+    "steps": [    # 具体的每个步骤调用相关的参数与检查        
+        {
+            "element_name": "{路径中的元素}",
+            "element_type": "{Event|Gateway|Message}",
+            "metaInfo": "{元素的documentation中的内容}",
+            "parameters": [parameter1,parameter2,...],
+            "invoker": "message对应的participantRef",
+            "state_change": [                  #这一个步骤涉及的所有元素{Event|Gateway|Message
+                }的状态改变                 {
+                    "element_name": "从enable到done的元素",
+                    "element_type": "element_type1",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                },
+                {
+                    "element_name": "从disable到enable的元素",
+                    "element_type": "element_type1",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        }
+    ],
+    "invoke_path": [   # 路径         "Event_asdasdas",
+        "Message_sadasdas"，         ……
+    ]
+}

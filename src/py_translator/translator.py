@@ -1113,7 +1113,7 @@ class GoChaincodeTranslator:
 if __name__ == "__main__":
     go_chaincode_translator = GoChaincodeTranslator(
         None,
-        bpmn_file="/home/logres/system/src/py_translator/resource/bpmn/Blood_analysis.bpmn",
+        bpmn_file="/home/logres/system/src/py_translator/resource/bpmn/amazon.bpmn",
     )
     go_chaincode_translator.generate_chaincode(is_output=True)
     go_chaincode_translator.generate_ffi(is_output=True)

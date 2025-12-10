@@ -1,0 +1,369 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+interface IOracle {
+    function getDataItem(
+        uint256 instanceId,
+        string calldata activityId
+    ) external view returns (string memory value);
+}
+
+contract WorkflowContract {
+    // ------------------------------------------------------------------
+    // Enums
+    // ------------------------------------------------------------------
+
+    enum ElementState {
+        DISABLED,
+        ENABLED,
+        WAITING_FOR_CONFIRMATION,
+        COMPLETED
+    }
+
+    enum ParticipantKey {
+    {% if participants %}
+        {{ participants | map(attribute='enum_name') | join(',\n        ') }}
+    {% else %}
+        PlaceholderParticipant
+    {% endif %}
+    }
+
+    enum MessageKey {
+    {% if messages %}
+        {{ messages | map(attribute='enum_name') | join(',\n        ') }}
+    {% else %}
+        PlaceholderMessage
+    {% endif %}
+    }
+
+    enum GatewayKey {
+    {% if gateways %}
+        {{ gateways | map(attribute='enum_name') | join(',\n        ') }}
+    {% else %}
+        PlaceholderGateway
+    {% endif %}
+    }
+
+    enum EventKey {
+    {% if events %}
+        {{ events | map(attribute='enum_name') | join(',\n        ') }}
+    {% else %}
+        PlaceholderEvent
+    {% endif %}
+    }
+
+    // ------------------------------------------------------------------
+    // Structs
+    // ------------------------------------------------------------------
+
+    struct StateMemory {
+    {% if globals %}
+    {% for item in globals %}
+        {{ item.type }} {{ item.name }};
+    {% endfor %}
+    {% else %}
+        // no global variables defined
+    {% endif %}
+    }
+
+    struct Participant {
+        bool exists;
+        address account;
+        bool isMulti;
+        uint8 multiMaximum;
+        uint8 multiMinimum;
+    }
+
+    struct Message {
+        bool exists;
+        ParticipantKey sendParticipant;
+        ParticipantKey receiveParticipant;
+        string fireflyTranId;
+        ElementState state;
+        string formatJson;
+    }
+
+    struct Gateway {
+        bool exists;
+        ElementState state;
+    }
+
+    struct ActionEvent {
+        bool exists;
+        ElementState state;
+    }
+
+    struct BusinessRule {
+        bool exists;
+        bytes32 hashOfDmn;
+        string decisionId;
+        ElementState state;
+    }
+
+    struct Instance {
+        bool exists;
+        uint256 instanceId;
+        StateMemory stateMemory;
+        mapping(MessageKey => Message) messages;
+        mapping(GatewayKey => Gateway) gateways;
+        mapping(EventKey => ActionEvent) events;
+        mapping(ParticipantKey => Participant) participants;
+        mapping(bytes32 => BusinessRule) businessRules;
+    }
+
+    // ------------------------------------------------------------------
+    // Storage
+    // ------------------------------------------------------------------
+
+    address public owner;
+    bool public isInited;
+    uint256 public currentInstanceId;
+    IOracle public oracle;
+
+    mapping(uint256 => Instance) private instances;
+
+    // ------------------------------------------------------------------
+    // Events
+    // ------------------------------------------------------------------
+
+    event MessageSent(uint256 instanceId, MessageKey messageKey, string fireflyTranId);
+    event GatewayDone(uint256 instanceId, GatewayKey gatewayKey);
+    event ActionEventDone(uint256 instanceId, EventKey eventKey);
+
+    // ------------------------------------------------------------------
+    // Modifiers
+    // ------------------------------------------------------------------
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "not owner");
+        _;
+    }
+
+    modifier onlyInitialized() {
+        require(isInited, "contract not initialized");
+        _;
+    }
+
+    constructor(address oracleAddress) {
+        owner = msg.sender;
+        oracle = IOracle(oracleAddress);
+    }
+
+    function setOracle(address oracleAddress) external onlyOwner {
+        oracle = IOracle(oracleAddress);
+    }
+
+    // ------------------------------------------------------------------
+    // Initialization
+    // ------------------------------------------------------------------
+
+    function initLedger() external onlyOwner {
+        require(!isInited, "already initialized");
+        isInited = true;
+        currentInstanceId = 0;
+    }
+
+    // ------------------------------------------------------------------
+    // Internal helpers
+    // ------------------------------------------------------------------
+
+    function _getInstance(
+        uint256 instanceId
+    ) internal view returns (Instance storage inst) {
+        inst = instances[instanceId];
+        require(inst.exists, "instance not found");
+    }
+
+    function _checkParticipant(
+        Instance storage inst,
+        ParticipantKey key
+    ) internal view {
+        Participant storage participant = inst.participants[key];
+        require(participant.exists, "participant not set");
+        require(msg.sender == participant.account, "participant not allowed");
+    }
+
+    function _createParticipant(
+        Instance storage inst,
+        ParticipantKey key,
+        address account,
+        bool isMulti,
+        uint8 maxMulti,
+        uint8 minMulti
+    ) internal {
+        inst.participants[key] = Participant({
+            exists: true,
+            account: account,
+            isMulti: isMulti,
+            multiMaximum: maxMulti,
+            multiMinimum: minMulti
+        });
+    }
+
+    function _createMessage(
+        Instance storage inst,
+        MessageKey key,
+        ParticipantKey sendKey,
+        ParticipantKey recvKey,
+        ElementState state,
+        string memory formatJson
+    ) internal {
+        inst.messages[key] = Message({
+            exists: true,
+            sendParticipant: sendKey,
+            receiveParticipant: recvKey,
+            fireflyTranId: "",
+            state: state,
+            formatJson: formatJson
+        });
+    }
+
+    function _createGateway(
+        Instance storage inst,
+        GatewayKey key,
+        ElementState state
+    ) internal {
+        inst.gateways[key] = Gateway({exists: true, state: state});
+    }
+
+    function _createActionEvent(
+        Instance storage inst,
+        EventKey key,
+        ElementState state
+    ) internal {
+        inst.events[key] = ActionEvent({exists: true, state: state});
+    }
+
+    function _createBusinessRule(
+        Instance storage inst,
+        bytes32 key,
+        string memory dmnContent,
+        string memory decisionId
+    ) internal {
+        inst.businessRules[key] = BusinessRule({
+            exists: true,
+            hashOfDmn: keccak256(bytes(dmnContent)),
+            decisionId: decisionId,
+            state: ElementState.DISABLED
+        });
+    }
+
+    // ------------------------------------------------------------------
+    // Instance creation
+    // ------------------------------------------------------------------
+
+    struct InitParameters {
+    {% if participants %}
+    {% for participant in participants %}
+        address {{ participant.param_name }};
+    {% endfor %}
+    {% else %}
+        address placeholder;
+    {% endif %}
+    {% for rule in business_rules %}
+        string {{ rule.content_param }};
+        string {{ rule.decision_param }};
+    {% endfor %}
+    }
+
+    function createInstance(
+        InitParameters calldata params
+    ) external onlyOwner onlyInitialized returns (uint256 instanceId) {
+        instanceId = currentInstanceId;
+        Instance storage inst = instances[instanceId];
+        require(!inst.exists, "instance already exists");
+
+        inst.exists = true;
+        inst.instanceId = instanceId;
+
+        {% for participant in participants %}
+        _createParticipant(
+            inst,
+            ParticipantKey.{{ participant.enum_name }},
+            params.{{ participant.param_name }},
+            {{ participant.is_multi }},
+            {{ participant.multi_maximum }},
+            {{ participant.multi_minimum }}
+        );
+        {% endfor %}
+
+        {% for event in events %}
+        _createActionEvent(
+            inst,
+            EventKey.{{ event.enum_name }},
+            ElementState.{{ event.initial_state }}
+        );
+        {% endfor %}
+
+        {% for message in messages %}
+        _createMessage(
+            inst,
+            MessageKey.{{ message.enum_name }},
+            ParticipantKey.{{ message.sender }},
+            ParticipantKey.{{ message.receiver }},
+            ElementState.{{ message.initial_state }},
+            {{ message.schema }}
+        );
+        {% endfor %}
+
+        {% for gateway in gateways %}
+        _createGateway(
+            inst,
+            GatewayKey.{{ gateway.enum_name }},
+            ElementState.{{ gateway.initial_state }}
+        );
+        {% endfor %}
+
+        {% for rule in business_rules %}
+        _createBusinessRule(
+            inst,
+            keccak256(bytes("{{ rule.name }}")),
+            params.{{ rule.content_param }},
+            params.{{ rule.decision_param }}
+        );
+        {% endfor %}
+
+        currentInstanceId += 1;
+    }
+
+    // ------------------------------------------------------------------
+    // Business rule handlers
+    // ------------------------------------------------------------------
+
+{% if business_rules %}
+{% for rule in business_rules %}
+    function {{ rule.enum_name }}(uint256 instanceId) external onlyInitialized {
+        Instance storage inst = _getInstance(instanceId);
+        bytes32 ruleKey = keccak256(bytes("{{ rule.name }}"));
+        BusinessRule storage br = inst.businessRules[ruleKey];
+        require(br.exists, "business rule not set");
+        require(br.state == ElementState.ENABLED, "business rule not enabled");
+
+        br.state = ElementState.WAITING_FOR_CONFIRMATION;
+    }
+
+    function {{ rule.enum_name }}_Continue(uint256 instanceId) external onlyInitialized {
+        Instance storage inst = _getInstance(instanceId);
+        bytes32 ruleKey = keccak256(bytes("{{ rule.name }}"));
+        BusinessRule storage br = inst.businessRules[ruleKey];
+        require(br.state == ElementState.WAITING_FOR_CONFIRMATION, "business rule not waiting");
+
+        br.state = ElementState.COMPLETED;
+{% if rule.done_actions %}
+{{ rule.done_actions }}
+{% endif %}
+    }
+
+{% endfor %}
+{% endif %}
+
+    // ------------------------------------------------------------------
+    // Workflow logic generated from DSL flows
+    // ------------------------------------------------------------------
+
+{% if flow_functions %}
+{{ flow_functions | join('\n\n') }}
+{% else %}
+    // TODO: define flows in DSL to generate handlers.
+{% endif %}
+}

@@ -1,0 +1,247 @@
+Model:
+    contracts+=Contract
+;
+
+Contract:
+    'contract' name=ID '{'
+        sections+=ContractSection*
+    '}'
+;
+
+ContractSection:
+      ParticipantSection
+    | GlobalSection
+    | MessageSection
+    | GatewaySection
+    | EventSection
+    | BusinessRuleSection
+    | FlowSection
+;
+
+/* participants */
+
+ParticipantSection:
+    'participants' '{'
+        participants+=Participant*
+    '}'
+;
+
+Participant:
+    'participant' name=ID '{'
+        ('msp' msp=STRING)?
+        ('x509' x509=STRING)?
+        ('isMulti' isMulti=BOOL)?
+        ('multiMin' multiMin=INT)?
+        ('multiMax' multiMax=INT)?
+        ('attributes' '{' attributes+=Attribute* '}')?
+    '}'
+;
+
+Attribute:
+    key=ID '=' value=STRING
+;
+
+/* globals */
+
+GlobalSection:
+    'globals' '{'
+        globals+=GlobalVar*
+    '}'
+;
+
+GlobalVar:
+    name=ID ':' type=ScalarType
+;
+
+ScalarType:
+      'string'
+    | 'int'
+    | 'bool'
+    | 'float'
+;
+
+/* element states */
+
+ElementState:
+      'INACTIVE'
+    | 'READY'
+    | 'PENDING_CONFIRMATION'
+    | 'DONE'
+;
+
+/* messages */
+
+MessageSection:
+    'messages' '{'
+        messages+=Message*
+    '}'
+;
+
+Message:
+    'message' name=ID 'from' sender=[Participant] 'to' receiver=[Participant] '{'
+        ('initial' 'state' initialState=ElementState)?
+        ('schema' schema=STRING)?
+    '}'
+;
+
+/* gateways */
+
+GatewaySection:
+    'gateways' '{'
+        gateways+=Gateway*
+    '}'
+;
+
+Gateway:
+    'gateway' name=ID '{'
+        ('type' gatewayType=GatewayType)?
+        ('initial' 'state' initialState=ElementState)?
+    '}'
+;
+
+GatewayType:
+      'exclusive'
+    | 'event'
+;
+
+/* events */
+
+EventSection:
+    'events' '{'
+        events+=Event*
+    '}'
+;
+
+Event:
+    'event' name=ID '{'
+        ('initial' 'state' initialState=ElementState)?
+    '}'
+;
+
+/* business rules (DMN) */
+
+BusinessRuleSection:
+    'businessrules' '{'
+        rules+=BusinessRule*
+    '}'
+;
+
+BusinessRule:
+    'businessrule' name=ID '{'
+        'dmn' dmnResource=STRING
+        'decision' decisionID=STRING
+        'input' 'mapping' '{'
+            inputMappings+=ParamMapping*
+        '}'
+        ('output' 'mapping' '{'
+            outputMappings+=ParamMapping*
+        '}')?
+        ('initial' 'state' initialState=ElementState)?
+    '}'
+;
+
+ParamMapping:
+    dmnParam=ID '->' globalRef=[GlobalVar]
+;
+
+/* common super type for flow targets */
+
+FlowElement:
+      Message
+    | Gateway
+    | Event
+    | BusinessRule
+;
+
+/* flows */
+
+FlowSection:
+    'flows' '{'
+        flowItems+=FlowItem*
+    '}'
+;
+
+FlowItem:
+      StartFlow
+    | MessageFlow
+    | GatewayFlow
+    | RuleFlow
+    | EventFlow
+;
+
+/* start event drives first step */
+
+StartFlow:
+    'start' 'event' start=[Event] 'enables' target=FlowTarget ';'
+;
+
+FlowTarget:
+    target=[FlowElement]
+;
+
+/* message-driven flow */
+
+MessageFlow:
+    'when' 'message' msg=[Message] msgCond=MessageCondition
+    'then' actions+=FlowAction (',' actions+=FlowAction)* ';'
+;
+
+MessageCondition:
+      'sent'
+    | 'completed'
+;
+
+/* gateway-driven flow */
+
+GatewayFlow:
+    'when' 'gateway' gtw=[Gateway] 'completed'
+    'then' actions+=FlowAction (',' actions+=FlowAction)* ';'
+;
+
+/* rule-driven flow */
+
+RuleFlow:
+    'when' 'businessrule' rule=[BusinessRule] ruleCond=RuleCondition
+    'then' actions+=FlowAction (',' actions+=FlowAction)* ';'
+;
+
+RuleCondition:
+      'ready'
+    | 'waiting'
+    | 'done'
+;
+
+/* event-driven flow */
+
+EventFlow:
+    'when' 'event' ev=[Event] 'completed'
+    'then' actions+=FlowAction (',' actions+=FlowAction)* ';'
+;
+
+/* actions: enable / disable elements, set globals */
+
+FlowAction:
+      EnableAction
+    | DisableAction
+    | SetGlobalAction
+;
+
+EnableAction:
+    'enable' target=[FlowElement]
+;
+
+DisableAction:
+    'disable' target=[FlowElement]
+;
+
+SetGlobalAction:
+    'set' var=[GlobalVar] '=' expr=LiteralExpr
+;
+
+/* literals */
+
+LiteralExpr:
+      stringValue=STRING
+    | intValue=INT
+    | boolValue=BOOL
+;
