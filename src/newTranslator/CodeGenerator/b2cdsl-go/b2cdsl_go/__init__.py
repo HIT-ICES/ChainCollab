@@ -121,6 +121,8 @@ class FlowRenderer:
         self.start_event_actions: dict[str, List[str]] = {}
         self.message_actions: dict[tuple[str, str], List[str]] = {}
         self.gateway_actions: dict[str, List[str]] = {}
+        self.gateway_branch_blocks: dict[str, str] = {}
+        self.parallel_requirements: dict[str, dict[str, Any]] = {}
         self.event_actions: dict[str, List[str]] = {}
         self.rule_actions: dict[tuple[str, str], List[str]] = {}
         self._collect_flow_actions()
@@ -154,8 +156,21 @@ class FlowRenderer:
                 condition = getattr(flow, "msgCond", "sent")
                 self._append_action(self.message_actions, (flow.msg.name, condition), actions)
             elif cls_name == "GatewayFlow":
+                branches = getattr(flow, "branches", None)
+                if branches:
+                    branch_block = self._render_gateway_branches(flow.gtw.name, branches)
+                    if branch_block:
+                        self.gateway_branch_blocks[flow.gtw.name] = branch_block
+                else:
+                    actions = self._join_actions(getattr(flow, "actions", []))
+                    self._append_action(self.gateway_actions, flow.gtw.name, actions)
+            elif cls_name == "ParallelJoin":
                 actions = self._join_actions(getattr(flow, "actions", []))
-                self._append_action(self.gateway_actions, flow.gtw.name, actions)
+                sources = getattr(flow, "sources", [])
+                self.parallel_requirements[flow.gtw.name] = {
+                    "sources": sources,
+                    "actions": actions,
+                }
             elif cls_name == "RuleFlow":
                 actions = self._join_actions(getattr(flow, "actions", []))
                 condition = getattr(flow, "ruleCond", "done")
@@ -208,12 +223,21 @@ class FlowRenderer:
     def _render_gateways(self) -> List[str]:
         blocks: List[str] = []
         for gateway in self.adapter.gateways:
-            actions = "".join(self.gateway_actions.get(gateway.name, []))
+            normal_actions = "".join(self.gateway_actions.get(gateway.name, []))
+            conditional_block = self.gateway_branch_blocks.get(gateway.name, "")
+            join_info = self.parallel_requirements.get(gateway.name)
+            join_guard = ""
+            if join_info:
+                join_guard = self._parallel_guard_block(join_info.get("sources", []))
+                normal_actions = join_info.get("actions", "") + normal_actions
+            action_block = conditional_block or normal_actions
             blocks.append(
                 self._render_template(
                     "flows/gateway.go.jinja",
                     gateway_name=gateway.name,
-                    action_block=actions,
+                    action_block=action_block,
+                    conditional_block=conditional_block,
+                    parallel_guard=join_guard,
                 )
             )
         return blocks
@@ -266,6 +290,78 @@ class FlowRenderer:
             }
             return self._render_template(SET_GLOBAL_TEMPLATE, assignments=[assignment])
         return None
+
+    def _render_gateway_branches(self, gateway_name: str, branches: List[Any]) -> str:
+        rendered_blocks: List[str] = []
+        prepared: List[tuple[Optional[str], bool, str]] = []
+        for branch in branches:
+            actions = self._join_actions(getattr(branch, "actions", []))
+            if not actions.strip():
+                continue
+            condition, is_else = self._gateway_branch_condition(branch)
+            if condition is None and not is_else:
+                continue
+            prepared.append((condition, is_else, actions))
+
+        for index, (condition, is_else, actions) in enumerate(prepared):
+            if index == 0:
+                clause = f" {condition}" if condition else ""
+                header = "\tif true {\n" if is_else else f"\tif{clause} {{\n"
+            else:
+                if is_else:
+                    header = "\t} else {\n"
+                else:
+                    clause = f" {condition}" if condition else ""
+                    header = f"\t}} else if{clause} {{\n"
+            rendered_blocks.append(header)
+            rendered_blocks.append(self._indent(actions, 1))
+        if rendered_blocks:
+            rendered_blocks.append("\t}\n")
+        return "".join(rendered_blocks)
+
+    def _gateway_branch_condition(self, branch: Any) -> tuple[Optional[str], bool]:
+        cls_name = branch.__class__.__name__
+        if cls_name == "GatewayCompareBranch":
+            var_name = getattr(branch.var, "name", "")
+            field = f"instance.InstanceStateMemory.{public_the_name(var_name)}"
+            literal = self._literal_value(branch.value, self.global_type_map.get(var_name))
+            return f"{field} {branch.relation} {literal}", False
+        if cls_name == "GatewayElseBranch":
+            return None, True
+        return None, False
+
+    def _parallel_guard_block(self, sources: List[Any]) -> str:
+        checks = [self._element_ready_check(source) for source in sources]
+        checks = [check for check in checks if check]
+        if not checks:
+            return ""
+        condition = " && ".join(checks)
+        block = "\tif !(" + condition + ") {\n"
+        block += '\t\treturn fmt.Errorf("Parallel gateway prerequisite not met")\n'
+        block += "\t}\n"
+        return block
+
+    def _element_ready_check(self, element: Any) -> Optional[str]:
+        cls_name = element.__class__.__name__
+        name = getattr(element, "name", "")
+        if not name:
+            return None
+        if cls_name == "Message":
+            return f'instance.InstanceMessages["{name}"].MsgState == COMPLETED'
+        if cls_name == "Gateway":
+            return f'instance.InstanceGateways["{name}"].GatewayState == COMPLETED'
+        if cls_name == "Event":
+            return f'instance.InstanceActionEvents["{name}"].EventState == COMPLETED'
+        if cls_name == "BusinessRule":
+            return f'instance.InstanceBusinessRules["{name}"].State == COMPLETED'
+        return None
+
+    def _indent(self, code: str, depth: int = 1) -> str:
+        prefix = "\t" * depth
+        stripped = code.strip("\n")
+        if not stripped:
+            return ""
+        return "".join(f"{prefix}{line}\n" for line in stripped.splitlines())
 
     def _literal_value(self, expr: Any, target_type: Optional[str] = None) -> str:
         def pick_attr(names: List[str]) -> Any:

@@ -335,7 +335,7 @@ class MessageFlow(Element):
 class SequenceFlow(Element):
     _type: EdgeType = EdgeType.SEQUENCE_FLOW
     _object_properties: List[str] = ["source", "target"]
-    _properties: List[str] = ["id", "name", "type", "source", "target"]
+    _properties: List[str] = ["id", "name", "type", "source", "target", "condition_expression"]
 
     def __init__(
         self,
@@ -344,7 +344,9 @@ class SequenceFlow(Element):
         name: str = "",
         source: str = "",
         target: str = "",
+        condition_expression: str = "",
     ):
         super().__init__(graph, id, name)
         self._source: dict = initObjectProperties(source)
         self._target: dict = initObjectProperties(target)
+        self._condition_expression = condition_expression

@@ -195,12 +195,19 @@ class Choreography:
                 )
 
             case EdgeType.SEQUENCE_FLOW.value:
+                condition = ""
+                condition_element = element.find(f"./{bpmn2prefix}conditionExpression")
+                if condition_element is not None and condition_element.text:
+                    condition = condition_element.text.strip()
+                elif "name" in element.attrib:
+                    condition = element.attrib.get("name", "")
                 return SequenceFlow(
                     self,
                     element.attrib["id"],
                     element.attrib.get("name", ""),
                     element.attrib["sourceRef"],
                     element.attrib["targetRef"],
+                    condition_expression=condition,
                 )
 
     def _parse_element(self, element):

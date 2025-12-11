@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from parser.choreography_parser.elements import Element, Message, MessageFlow, NodeType, EdgeType, Participant
+from parser.choreography_parser.elements import Element, Message, MessageFlow, NodeType, EdgeType, Participant, SequenceFlow
 from parser.choreography_parser.parser import Choreography
 
 
@@ -127,9 +127,10 @@ class MessageCatalog:
 
 
 class FlowPlanner:
-    def __init__(self, choreography: Choreography):
+    def __init__(self, choreography: Choreography, judge_parameters: Dict[str, dict]):
         """Pre-compute successor relationships so flows can be emitted declaratively."""
         self._choreography = choreography
+        self._judge_parameters = judge_parameters
         self._message_successors = self._build_message_successors()
         self._event_branch_blocks = self._build_event_branch_map()
 
@@ -142,9 +143,13 @@ class FlowPlanner:
             flows.append(dsl_snippet.DSL_EmptyLine())
         flows.extend(message_flows)
         gateway_flows = self._gateway_flows()
+        parallel_flows = self._parallel_join_flows()
         if flows and gateway_flows:
             flows.append(dsl_snippet.DSL_EmptyLine())
         flows.extend(gateway_flows)
+        if flows and parallel_flows:
+            flows.append(dsl_snippet.DSL_EmptyLine())
+        flows.extend(parallel_flows)
         business_flows = self._business_rule_flows()
         if flows and business_flows:
             flows.append(dsl_snippet.DSL_EmptyLine())
@@ -188,9 +193,25 @@ class FlowPlanner:
     def _gateway_flows(self) -> List[str]:
         """Emit generic gateway completion flows that enable downstream nodes."""
         flows = []
-        for gateway in self._choreography.query_element_with_type(NodeType.EXCLUSIVE_GATEWAY) + self._choreography.query_element_with_type(NodeType.PARALLEL_GATEWAY) + self._choreography.query_element_with_type(NodeType.EVENT_BASED_GATEWAY):
+        gateway_iterable = (
+            self._choreography.query_element_with_type(NodeType.EXCLUSIVE_GATEWAY)
+            + self._choreography.query_element_with_type(NodeType.PARALLEL_GATEWAY)
+            + self._choreography.query_element_with_type(NodeType.EVENT_BASED_GATEWAY)
+        )
+        for gateway in gateway_iterable:
+            if gateway.type == NodeType.PARALLEL_GATEWAY and len(gateway.incomings or []) > 1:
+                continue
             targets = self._successor_targets(gateway)
             if not targets:
+                continue
+            conditional_branches = self._gateway_condition_branches(gateway)
+            if conditional_branches:
+                flows.append(
+                    dsl_snippet.DSL_WhenGatewayConditional(
+                        gateway=gateway.id,
+                        branches="".join(conditional_branches),
+                    )
+                )
                 continue
             flows.append(
                 dsl_snippet.DSL_WhenGatewayCompletedEnable(
@@ -214,6 +235,80 @@ class FlowPlanner:
                     )
                 )
         return flows
+
+    def _parallel_join_flows(self) -> List[str]:
+        """Emit parallel gateway join semantics requiring multiple prerequisites."""
+        flows: List[str] = []
+        for gateway in self._choreography.query_element_with_type(NodeType.PARALLEL_GATEWAY):
+            incomings = gateway.incomings or []
+            if len(incomings) <= 1:
+                continue
+            sources = []
+            for incoming in incomings:
+                source_name = self._activation_target(incoming.source)
+                if source_name:
+                    sources.append(source_name)
+            sources = [source for source in sources if source]
+            if len(sources) <= 1:
+                continue
+            targets = self._successor_targets(gateway)
+            if not targets:
+                continue
+            flows.append(
+                dsl_snippet.DSL_ParallelGatewayAwait(
+                    gateway=gateway.id,
+                    sources=", ".join(sources),
+                    actions=self._format_prefixed_actions("enable", targets),
+                )
+            )
+        return flows
+
+    def _gateway_condition_branches(self, gateway: Element) -> List[str]:
+        """Render conditional branches for gateways with sequence conditions."""
+        branches: List[str] = []
+        conditional_found = False
+        fallback_targets: List[str] = []
+        for outgoing in gateway.outgoings or []:
+            target = self._activation_target(outgoing.target)
+            if not target:
+                continue
+            branch = self._build_condition_branch(outgoing, target)
+            if branch:
+                conditional_found = True
+                branches.append(branch)
+            else:
+                fallback_targets.append(target)
+        if conditional_found and fallback_targets:
+            branches.append(
+                dsl_snippet.DSL_GatewayBranchElse(
+                    actions=self._format_prefixed_actions("enable", fallback_targets)
+                )
+            )
+        return branches
+
+    def _build_condition_branch(self, sequence_flow: SequenceFlow, target: str) -> Optional[str]:
+        """Build a conditional DSL clause for a sequence flow if judge metadata exists."""
+        judge = self._judge_parameters.get(sequence_flow.id)
+        if not judge:
+            return None
+        literal = self._format_condition_literal(judge)
+        condition = f"{public_the_name(judge['name'])} {judge['relation']} {literal}"
+        return dsl_snippet.DSL_GatewayBranchIf(
+            condition=condition,
+            actions=self._format_prefixed_actions("enable", [target]),
+        )
+
+    def _format_condition_literal(self, judge: dict) -> str:
+        """Return the DSL literal for a conditional comparison."""
+        value = judge.get("value", "")
+        value_type = map_bpmn_type(judge.get("type", "string"))
+        if value_type == "bool":
+            lowered = value.lower()
+            return "true" if lowered == "true" else "false"
+        if value_type in ("int", "float64", "float"):
+            return value
+        escaped = escape_quotes(value)
+        return f'"{escaped}"'
 
     def _activation_target(self, element: Optional[Element]) -> Optional[str]:
         """Map any BPMN element to the DSL identifier that becomes active."""
@@ -266,6 +361,12 @@ class FlowPlanner:
         suffix = "".join(f", {prefix} {target}" for target in tail)
         return f"{head}{suffix}"
 
+    @staticmethod
+    def _format_prefixed_actions(prefix: str, targets: List[str]) -> str:
+        """Return all targets with the prefix applied, separated by commas."""
+        items = [target for target in targets if target]
+        return ", ".join(f"{prefix} {target}" for target in items)
+
     def _targets_from_element(self, element: Optional[Element]) -> List[str]:
         """Return a list wrapper around _activation_target for uniform consumers."""
         target = self._activation_target(element)
@@ -288,13 +389,18 @@ class FlowPlanner:
 
 
 class DSLContractBuilder:
-    def __init__(self, choreography: Choreography, global_parameters: Dict[str, dict]):
+    def __init__(
+        self,
+        choreography: Choreography,
+        global_parameters: Dict[str, dict],
+        judge_parameters: Optional[Dict[str, dict]] = None,
+    ):
         """Bundle together helpers that transform BPMN metadata into DSL sections."""
         self._choreography = choreography
         self._global_parameters = global_parameters
         self._participant_metadata = ParticipantMetadataResolver()
         self._message_catalog = MessageCatalog(choreography)
-        self._flow_planner = FlowPlanner(choreography)
+        self._flow_planner = FlowPlanner(choreography, judge_parameters or {})
 
     def build(self, contract_name: str) -> str:
         """Render the full DSL contract with all sections filled."""
@@ -524,7 +630,8 @@ class ParameterExtractor:
         """Parse exclusive-gateway conditions into structured judge metadata."""
         judge_parameters = {}
         for sequence_flow in self._choreography.query_element_with_type(EdgeType.SEQUENCE_FLOW):
-            condition = self._parse_sequence_condition(sequence_flow.name)
+            raw_expression = sequence_flow.condition_expression or sequence_flow.name
+            condition = self._parse_sequence_condition(raw_expression)
             if condition is None:
                 continue
             prop, relation, value = condition
@@ -577,7 +684,7 @@ class GoChaincodeTranslator:
 
     def generate_chaincode(self, output_path: str = "resource/contract.b2c", is_output: bool = False, contract_name: Optional[str] = None) -> str:
         """Render the DSL contract and optionally persist it to disk."""
-        builder = DSLContractBuilder(self._choreography, self._global_parameters)
+        builder = DSLContractBuilder(self._choreography, self._global_parameters, self._judge_parameters)
         dsl_code = builder.build(contract_name or self._default_contract_name())
         if is_output:
             Path(output_path).write_text(dsl_code, encoding="utf8")

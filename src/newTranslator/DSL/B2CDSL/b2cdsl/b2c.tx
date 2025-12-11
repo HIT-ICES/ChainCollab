@@ -102,6 +102,7 @@ Gateway:
 GatewayType:
       'exclusive'
     | 'event'
+    | 'parallel'
 ;
 
 /* events */
@@ -167,6 +168,7 @@ FlowItem:
     | GatewayFlow
     | RuleFlow
     | EventFlow
+    | ParallelJoin
 ;
 
 /* start event drives first step */
@@ -195,7 +197,42 @@ MessageCondition:
 
 GatewayFlow:
     'when' 'gateway' gtw=[Gateway] 'completed'
+    (
+        'then' actions+=FlowAction (',' actions+=FlowAction)* ';'
+      | 'choose' '{'
+            branches+=GatewayBranch+
+        '}'
+    )
+;
+
+GatewayBranch:
+      GatewayCompareBranch
+    | GatewayExpressionBranch
+    | GatewayElseBranch
+;
+
+GatewayCompareBranch:
+    'if' var=[GlobalVar] relation=RelationOperator value=LiteralExpr
     'then' actions+=FlowAction (',' actions+=FlowAction)* ';'
+;
+
+GatewayExpressionBranch:
+    'if' expr=STRING
+    'then' actions+=FlowAction (',' actions+=FlowAction)* ';'
+;
+
+GatewayElseBranch:
+    'else'
+    'then' actions+=FlowAction (',' actions+=FlowAction)* ';'
+;
+
+RelationOperator:
+      '=='
+    | '!='
+    | '>='
+    | '<='
+    | '>'
+    | '<'
 ;
 
 /* rule-driven flow */
@@ -215,6 +252,12 @@ RuleCondition:
 
 EventFlow:
     'when' 'event' ev=[Event] 'completed'
+    'then' actions+=FlowAction (',' actions+=FlowAction)* ';'
+;
+
+ParallelJoin:
+    'parallel' 'gateway' gtw=[Gateway] 'await'
+    sources+=[FlowElement][',']
     'then' actions+=FlowAction (',' actions+=FlowAction)* ';'
 ;
 

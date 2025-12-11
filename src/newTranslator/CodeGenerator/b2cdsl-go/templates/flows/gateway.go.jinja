@@ -12,14 +12,19 @@ func (cc *SmartContract) {{ gateway_name }}(ctx contractapi.TransactionContextIn
 		return fmt.Errorf(errorMessage)
 	}
 
+{% if parallel_guard %}
+{{ parallel_guard }}
+{% endif %}
+
 	cc.ChangeGtwState(ctx, instance, gtw.GatewayID, COMPLETED)
 	stub.SetEvent("{{ gateway_name }}", []byte("Gateway has been completed"))
 	cc.SetInstance(ctx, instance)
-{% if action_block %}
+{% if conditional_block %}
+{{ conditional_block }}
+{% elif action_block %}
 {{ action_block }}
 {% endif %}
 	cc.SetInstance(ctx, instance)
 
 	return nil
 }
-

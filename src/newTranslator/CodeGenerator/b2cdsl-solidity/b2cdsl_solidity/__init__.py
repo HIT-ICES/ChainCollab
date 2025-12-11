@@ -198,6 +198,8 @@ class SolidityFlowRenderer:
         self.start_event_actions: dict[str, List[str]] = {}
         self.message_actions: dict[tuple[str, str], List[str]] = {}
         self.gateway_actions: dict[str, List[str]] = {}
+        self.gateway_branch_blocks: dict[str, str] = {}
+        self.parallel_requirements: dict[str, dict[str, Any]] = {}
         self.event_actions: dict[str, List[str]] = {}
         self.rule_actions: dict[tuple[str, str], List[str]] = {}
         self._collect_flow_actions()
@@ -231,8 +233,21 @@ class SolidityFlowRenderer:
                 condition = getattr(flow, "msgCond", "sent")
                 self._append_action(self.message_actions, (flow.msg.name, condition), actions)
             elif cls_name == "GatewayFlow":
+                branches = getattr(flow, "branches", None)
+                if branches:
+                    branch_block = self._render_gateway_branches(flow.gtw.name, branches)
+                    if branch_block:
+                        self.gateway_branch_blocks[flow.gtw.name] = branch_block
+                else:
+                    actions = self._join_actions(getattr(flow, "actions", []))
+                    self._append_action(self.gateway_actions, flow.gtw.name, actions)
+            elif cls_name == "ParallelJoin":
                 actions = self._join_actions(getattr(flow, "actions", []))
-                self._append_action(self.gateway_actions, flow.gtw.name, actions)
+                sources = getattr(flow, "sources", [])
+                self.parallel_requirements[flow.gtw.name] = {
+                    "sources": sources,
+                    "actions": actions,
+                }
             elif cls_name == "RuleFlow":
                 actions = self._join_actions(getattr(flow, "actions", []))
                 condition = getattr(flow, "ruleCond", "done")
@@ -282,7 +297,16 @@ class SolidityFlowRenderer:
         functions: List[str] = []
         for gateway in self.adapter.gateways:
             enum_name = self.enum_maps["gateway"].get(gateway.name, sanitize_identifier(gateway.name))
-            actions = self._indent("".join(self.gateway_actions.get(gateway.name, [])), 2)
+            raw_actions = "".join(self.gateway_actions.get(gateway.name, []))
+            join_info = self.parallel_requirements.get(gateway.name)
+            guard_block = ""
+            if join_info:
+                guard_block = self._indent(self._parallel_guard_block(join_info.get("sources", [])), 2)
+                raw_actions = join_info.get("actions", "") + raw_actions
+            normal_actions = self._indent(raw_actions, 2)
+            conditional_raw = self.gateway_branch_blocks.get(gateway.name, "")
+            conditional_block = self._indent(conditional_raw, 2) if conditional_raw else ""
+            action_block = guard_block + (conditional_block or normal_actions)
             body = f"""function {enum_name}(uint256 instanceId) external onlyInitialized {{
         Instance storage inst = _getInstance(instanceId);
         Gateway storage g = inst.gateways[GatewayKey.{enum_name}];
@@ -291,7 +315,7 @@ class SolidityFlowRenderer:
 
         g.state = ElementState.COMPLETED;
         emit GatewayDone(instanceId, GatewayKey.{enum_name});
-{actions}
+{action_block}
     }}"""
             functions.append(body)
         return functions
@@ -377,6 +401,67 @@ class SolidityFlowRenderer:
         if target_type in ("int", "float"):
             return "0"
         return json.dumps("")
+
+    def _render_gateway_branches(self, gateway_name: str, branches: List[Any]) -> str:
+        blocks: List[str] = []
+        branch_index = 0
+        for branch in branches:
+            actions = self._join_actions(getattr(branch, "actions", []))
+            if not actions.strip():
+                continue
+            condition, is_else = self._gateway_branch_condition(branch)
+            if condition is None and not is_else:
+                continue
+            if branch_index == 0:
+                prefix = "if" if not is_else else "if (true)"
+            else:
+                prefix = "else" if is_else else "else if"
+            clause = ""
+            if condition and prefix != "else":
+                clause = f" ({condition})"
+            block = f"{prefix}{clause} {{\n"
+            block += self._indent(actions, 1)
+            block += "}\n"
+            blocks.append(block)
+            branch_index += 1
+        return "".join(blocks)
+
+    def _gateway_branch_condition(self, branch: Any) -> tuple[Optional[str], bool]:
+        cls_name = branch.__class__.__name__
+        if cls_name == "GatewayCompareBranch":
+            var_name = getattr(branch.var, "name", "")
+            field = sanitize_identifier(public_the_name(var_name))
+            literal = self._literal_value(branch.value, self.global_type_map.get(var_name, "string"))
+            return f"inst.stateMemory.{field} {branch.relation} {literal}", False
+        if cls_name == "GatewayElseBranch":
+            return None, True
+        return None, False
+
+    def _parallel_guard_block(self, sources: List[Any]) -> str:
+        checks = [self._element_ready_check(source) for source in sources]
+        checks = [check for check in checks if check]
+        if not checks:
+            return ""
+        condition = " && ".join(checks)
+        return f"if (!({condition})) {{\n            revert(\"Parallel gateway prerequisites not met\");\n        }}\n"
+
+    def _element_ready_check(self, element: Any) -> Optional[str]:
+        cls_name = element.__class__.__name__
+        name = getattr(element, "name", "")
+        if not name:
+            return None
+        if cls_name == "Message":
+            enum_name = self.enum_maps["message"].get(name, sanitize_identifier(name))
+            return f"inst.messages[MessageKey.{enum_name}].state == ElementState.COMPLETED"
+        if cls_name == "Gateway":
+            enum_name = self.enum_maps["gateway"].get(name, sanitize_identifier(name))
+            return f"inst.gateways[GatewayKey.{enum_name}].state == ElementState.COMPLETED"
+        if cls_name == "Event":
+            enum_name = self.enum_maps["event"].get(name, sanitize_identifier(name))
+            return f"inst.events[EventKey.{enum_name}].state == ElementState.COMPLETED"
+        if cls_name == "BusinessRule":
+            return f"inst.businessRules[keccak256(bytes(\"{name}\"))].state == ElementState.COMPLETED"
+        return None
 
     def _change_state_code(self, element: Any, state: str) -> str:
         cls_name = element.__class__.__name__

@@ -37,11 +37,19 @@
 
   "DSLStartEventEnables": "        start event {event} enables {target};\n",
 
-  "DSLWhenMessageSentEnable": "        when message {message} sent\n        then enable {targets};\n",
+  "DSLWhenMessageSentEnable": "        when message {message} completed\n        then enable {targets};\n",
 
-  "DSLWhenMessageSentDisableEnable": "        when message {message} sent\n        then disable {disabled}, enable {enabled};\n",
+  "DSLWhenMessageSentDisableEnable": "        when message {message} completed\n        then disable {disabled}, enable {enabled};\n",
 
   "DSLWhenGatewayCompletedEnable": "        when gateway {gateway} completed\n        then enable {targets};\n",
+
+  "DSLWhenGatewayConditional": "        when gateway {gateway} completed\n        choose {\n{branches}\n        }\n",
+
+  "DSLGatewayBranchIf": "            if {condition}\n            then {actions};\n",
+
+  "DSLGatewayBranchElse": "            else\n            then {actions};\n",
+
+  "DSLParallelGatewayAwait": "        parallel gateway {gateway} await {sources}\n        then {actions};\n",
 
   "DSLWhenBusinessRuleDoneEnable": "        when businessrule {rule} done\n        then enable {targets};\n",
 

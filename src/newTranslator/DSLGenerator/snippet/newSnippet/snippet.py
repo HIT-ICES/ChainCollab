@@ -99,6 +99,18 @@ def DSL_GatewaysFrame(items: str) -> str:
 def DSL_GatewayItem(id: str, type_: str, state: str) -> str:
     return _render(DSL["DSLGatewayItem"], id=id, type=type_, state=state)
 
+def DSL_WhenGatewayConditional(gateway: str, branches: str) -> str:
+    return _render(DSL["DSLWhenGatewayConditional"], gateway=gateway, branches=branches)
+
+def DSL_GatewayBranchIf(condition: str, actions: str) -> str:
+    return _render(DSL["DSLGatewayBranchIf"], condition=condition, actions=actions)
+
+def DSL_GatewayBranchElse(actions: str) -> str:
+    return _render(DSL["DSLGatewayBranchElse"], actions=actions)
+
+def DSL_ParallelGatewayAwait(gateway: str, sources: str, actions: str) -> str:
+    return _render(DSL["DSLParallelGatewayAwait"], gateway=gateway, sources=sources, actions=actions)
+
 
 # ========== Events ==========
 
