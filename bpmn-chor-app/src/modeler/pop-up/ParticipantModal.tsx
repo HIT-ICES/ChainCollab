@@ -46,10 +46,11 @@ export default function ParticipantModal({dataElementId, open: isModalOpen, onCl
   };
 
   return (<Modal
-    visible={isModalOpen}
+    open={isModalOpen}
     title={title}
     onOk={handleOk}
     onCancel={handleCancel}
+    rootClassName="chor-modal"
     footer={[
       <Button key="back" onClick={handleCancel}>
         Return

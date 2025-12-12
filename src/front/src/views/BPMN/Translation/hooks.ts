@@ -51,6 +51,9 @@ export const useBPMNInstanceListData = (
             setBPMNInstanceList(res)
         }
         fetchData()
+        return () => {
+            ignore = true
+        }
     }, [syncFlag, BPMNId])
 
     return [BPMNInstanceList, () => setSyncFlag(!syncFlag)]
@@ -59,4 +62,3 @@ export const useBPMNInstanceListData = (
 export const useBPMNInstanceDetailData = () => {
 
 }
-

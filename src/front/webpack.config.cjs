@@ -9,7 +9,12 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /\.tsx?$/,
+        exclude: /node_modules/,
+        use: 'ts-loader',
+      },
+      {
+        test: /\.jsx?$/,
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
@@ -33,6 +38,7 @@ module.exports = {
     port: 3000,
   },
   resolve: {
+    extensions: ['.tsx', '.ts', '.js', '.jsx'],
     alias: {
       "@": path.resolve(__dirname, "./src"),
       '~': path.resolve(__dirname, './'),

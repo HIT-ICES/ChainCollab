@@ -10,3 +10,67 @@ body {
   justify-content: center;
   align-items: center;
 }
+
+:root {
+  --modal-surface: #ffffff;
+  --modal-bg: #f8fafc;
+  --modal-border: #dbe4ff;
+  --modal-text: #0f172a;
+  --modal-muted: #64748b;
+  --modal-shadow: 0 24px 60px rgba(15, 23, 42, 0.2);
+}
+
+.ant-modal-root {
+  .ant-modal-content {
+    border-radius: 20px;
+    border: 1px solid var(--modal-border);
+    box-shadow: var(--modal-shadow);
+    overflow: hidden;
+  }
+
+  .ant-modal-header {
+    border-bottom: 1px solid var(--modal-border);
+    border-radius: 20px 20px 0 0;
+    background: linear-gradient(120deg, #fff, #f3f6ff);
+    padding: 16px 24px;
+  }
+
+  .ant-modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--modal-text);
+  }
+
+  .ant-modal-body {
+    padding: 20px 24px 28px;
+    background: var(--modal-bg);
+    color: var(--modal-text);
+  }
+
+  .ant-modal-footer {
+    border-top: 1px solid var(--modal-border);
+    background: var(--modal-surface);
+    padding: 16px 24px;
+  }
+
+  .ant-btn-primary {
+    background: #2563eb;
+    border-color: #2563eb;
+
+    &:hover,
+    &:focus {
+      background: #1d4ed8;
+      border-color: #1d4ed8;
+    }
+  }
+
+  .ant-btn-default {
+    border-color: var(--modal-border);
+    color: var(--modal-muted);
+
+    &:hover {
+      border-color: #2563eb;
+      color: #2563eb;
+    }
+  }
+}

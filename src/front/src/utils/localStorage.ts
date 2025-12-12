@@ -20,8 +20,15 @@ export const localStorageSetItem = <Input>(name: string, object: Input) => {
  * @param {String} name
  * @returns any
  */
-export const localStorageGetItem = (name: string) =>
-  JSON.parse(localStorage.getItem(name)!);
+export const localStorageGetItem = (name: string) => {
+  const value = localStorage.getItem(name);
+  if (value === null) return null;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+};
 
 /**
  * 判断本地缓存是否有
@@ -29,7 +36,7 @@ export const localStorageGetItem = (name: string) =>
  * @returns Boolean
  */
 export const isLocalStorageGetItem = (name: string) =>
-  !(localStorageGetItem(name) === null);
+  localStorage.getItem(name) !== null;
 
 /**
  * 清空缓存

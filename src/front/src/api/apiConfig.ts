@@ -3,6 +3,8 @@ import axios from "axios";
 const backendUrl = import.meta.env.MODE === "local_mode" ? "http://127.0.0.1:8000" : "http://192.168.1.177:8000";
 const translatorUrl = import.meta.env.MODE === "local_mode" ? "http://127.0.0.1:9999" : "http://192.168.1.177:9999";
 export const current_ip = import.meta.env.MODE === "local_mode" ? "http://127.0.0.1" : "http://192.168.1.177"
+export const backendBaseUrl = backendUrl;
+export const translatorBaseUrl = translatorUrl;
 export const translatorAPI = axios.create({
   baseURL: `${translatorUrl}/api/v1`,
   headers: {
@@ -44,15 +46,10 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
-    // if not authorized or token expired
-    console.log("HANDLE")
-    console.log(error.response)
-
-    if (error.response.status === 401) {
+    if (error?.response?.status === 401) {
       localStorage.removeItem("token");
-      window.location.href = "/login";
     }
-    //else
+    return Promise.reject(error);
   }
 );
 
@@ -62,5 +59,3 @@ api.interceptors.response.use((response) => {
 });
 
 export default api;
-
-

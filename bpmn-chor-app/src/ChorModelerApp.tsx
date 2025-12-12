@@ -372,46 +372,39 @@ const ChorModelerApp: React.FC<ChorModelerProps> = ({
     <div
       className={className}
       style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
         width: '100%',
-        height: '100vh',
-        background: '#f5f6f8',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        background: '#eef2ff',
         ...(style ?? {})
       }}
     >
-      <div
-        style={{
-          width: '80vw',
-          height: '80vh',
-          background: '#fff',
-          borderRadius: 16,
-          overflow: 'hidden',
-          boxShadow: '0 12px 32px rgba(15, 23, 42, 0.15)',
-          display: 'flex'
-        }}
-      >
-        <div className="content" style={{ width: '100%', height: '100%' }}>
+      <div className="modeler-shell">
+        <div className="modeler-header">
+          <div className="modeler-header__info">
+            <p className="eyebrow">CHOREOGRAPHY STUDIO</p>
+            <h2>Cross-Org Process Designer</h2>
+            <span>Design, validate and orchestrate choreography models across organizations.</span>
+          </div>
+          <div className="modeler-actions djs-container">
+            <button id="js-new-diagram" className="icon-doc-new" title="Create new empty diagram" />
+            <button id="js-open-file" className="icon-folder" title="Select BPMN XML file" />
+            <a id="js-download-diagram" className="icon-file-code" title="Download BPMN XML file" />
+            <a id="js-download-svg" className="icon-file-image" title="Download as SVG image" />
+            <button id="js-validate" className="icon-bug" title="Check diagram for problems" />
+            <button id="js-upload" className="icon-file-upload" title="Upload BPMN file" />
+            <button id="js-upload-dmn" className="icon-file-upload" title="Upload Dmn file" />
+            <input id="file-input" name="name" type="file" accept=".bpmn, .xml" style={{ display: 'none' }} />
+          </div>
+        </div>
+        <div className="content">
         <div id="canvas" style={{ height: '100%', width: '100%' }} />
         <div id="panel-toggle">
           <div data-toggle-panel="properties-panel" title="Toggle properties panel"><span>Properties</span></div>
         </div>
         <div id="properties-panel" className="side-panel hidden" />
-        <div className="buttons djs-container">
-          <button id="js-new-diagram" className="icon-doc-new" title="Create new empty diagram" />
-          <button id="js-open-file" className="icon-folder" title="Select BPMN XML file" />
-          <div className="divider" />
-          <a id="js-download-diagram" className="icon-file-code" title="Download BPMN XML file" />
-          <a id="js-download-svg" className="icon-file-image" title="Download as SVG image" />
-          <div className="divider" />
-          <button id="js-validate" className="icon-bug" title="Check diagram for problems" />
-          <div className="divider" />
-          <button id="js-upload" className="icon-file-upload" title="Upload BPMN file" />
-          <button id="js-upload-dmn" className="icon-file-upload" title="Upload Dmn file" />
-          <input id="file-input" name="name" type="file" accept=".bpmn, .xml" style={{ display: 'none' }} />
         </div>
-      </div>
       </div>
       <MainPage
         xmlDataMap={dmnIdXmlMap}

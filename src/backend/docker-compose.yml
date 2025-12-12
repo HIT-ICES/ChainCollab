@@ -1,17 +1,29 @@
-version: '3'
+version: '3.8'
+
 services:
-  Dev:
-    image: postgres:11.1
+  postgres:
+    image: postgres:14
     container_name: cello-postgres
-    restart: always
+    restart: unless-stopped
+    env_file:
+      - .env
     environment:
-      - POSTGRES_DB=api_engine
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=${POSTGRES_DB:-api_engine}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
     ports:
       - "5432:5432"
     volumes:
       - ./pgdata:/var/lib/postgresql/data
+    networks:
+      - cello-network
+
+  redis:
+    image: redis:7
+    container_name: cello-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
     networks:
       - cello-network
 

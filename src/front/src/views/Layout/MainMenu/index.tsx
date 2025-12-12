@@ -1,7 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Menu, Modal, Select } from "antd";
+import { Menu } from "antd";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button as MUIButton,
+  Stack,
+  Typography,
+  FormControl,
+  InputLabel,
+  Select as MUISelect,
+  MenuItem as MUIMenuItem,
+  SelectChangeEvent
+} from "@mui/material";
 const { SubMenu } = Menu;
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { DesktopOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
 
 // Redux Relate
@@ -27,55 +42,65 @@ const AddConsortiumModal: React.FC<{
   setSync: () => void,
 }> = ({ isModalOpen = false, setIsModalOpen, setSync }) => {
 
-  type FieldType = {
-    consortiumName?: string;
-  };
-  const [form] = Form.useForm<FieldType>();
+  const [consortiumName, setConsortiumName] = useState("Consortium");
+  const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
 
   const currentOrgId = useAppSelector(selectOrg).currentOrgId;
 
-  const onFinish = async (values: FieldType) => {
-    const newConsortium = await createConsortium(currentOrgId, values.consortiumName);
-    dispatch(activateConsortium({ currentConsortiumId: newConsortium.id, currentConsortiumName: newConsortium.name }))
+  const handleClose = () => {
+    if (loading) return;
     setIsModalOpen(false);
-    setSync();
+    setConsortiumName("Consortium");
+  };
+
+  const handleConfirm = async () => {
+    if (!consortiumName.trim()) return;
+    try {
+      setLoading(true);
+      const newConsortium = await createConsortium(currentOrgId, consortiumName.trim());
+      dispatch(activateConsortium({ currentConsortiumId: newConsortium.id, currentConsortiumName: newConsortium.name }));
+      setConsortiumName("Consortium");
+      setIsModalOpen(false);
+      setSync();
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
-    <Modal
-      title="Add Consortium"
+    <Dialog
       open={isModalOpen}
-      onOk={() => setIsModalOpen(false)}
-      onCancel={() => setIsModalOpen(false)}
-      destroyOnClose
-      okButtonProps={{
-        htmlType: "submit",
-        form: "basic",
-      }}
+      onClose={handleClose}
+      fullWidth
+      maxWidth="xs"
     >
-      <Form
-        form={form}
-        name="basic"
-        labelCol={{ span: 8 }}
-        wrapperCol={{ span: 16 }}
-        style={{ maxWidth: 600 }}
-        onFinish={onFinish}
-        autoComplete="off"
-        preserve={false} // 在Modal关闭后，销毁Field
-        initialValues={{ consortiumName: 'Consortium' }}
-      >
-        <Form.Item<FieldType>
-          label="Consortium Name"
-          name="consortiumName"
-          rules={[
-            { required: true, message: "Please input consortium name!" },
-          ]}
+      <DialogTitle sx={{ fontWeight: 600 }}>Add Consortium</DialogTitle>
+      <DialogContent dividers>
+        <Stack spacing={2}>
+          <TextField
+            label="Consortium Name"
+            value={consortiumName}
+            onChange={(e) => setConsortiumName(e.target.value)}
+            autoFocus
+            fullWidth
+          />
+          <Typography variant="body2" color="text.secondary">
+            创建一个新的联盟以管理多组织协作环境。
+          </Typography>
+        </Stack>
+      </DialogContent>
+      <DialogActions sx={{ px: 3, py: 2 }}>
+        <MUIButton onClick={handleClose}>Cancel</MUIButton>
+        <MUIButton
+          variant="contained"
+          onClick={handleConfirm}
+          disabled={!consortiumName.trim() || loading}
         >
-          <Input allowClear />
-        </Form.Item>
-      </Form>
-    </Modal>
+          {loading ? "Creating..." : "Create"}
+        </MUIButton>
+      </DialogActions>
+    </Dialog>
   )
 }
 
@@ -84,54 +109,64 @@ const AddOrgModal: React.FC<{
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>,
   setSync: () => void,
 }> = ({ isModalOpen = false, setIsModalOpen, setSync }) => {
-  type FieldType = {
-    orgName?: string;
-  };
-  const [form] = Form.useForm<FieldType>();
+  const [orgName, setOrgName] = useState("Organization");
+  const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
 
 
-  const onFinish = async (values: FieldType) => {
-    const Org = await createOrg(values.orgName);
-    dispatch(activateOrg({ currentOrgId: Org.id, currentOrgName: Org.name }))
+  const handleClose = () => {
+    if (loading) return;
     setIsModalOpen(false);
-    setSync();
+    setOrgName("Organization");
+  };
+
+  const handleConfirm = async () => {
+    if (!orgName.trim()) return;
+    try {
+      setLoading(true);
+      const Org = await createOrg(orgName.trim());
+      dispatch(activateOrg({ currentOrgId: Org.id, currentOrgName: Org.name }));
+      setOrgName("Organization");
+      setIsModalOpen(false);
+      setSync();
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <Modal
-      title="Add Organization"
+    <Dialog
       open={isModalOpen}
-      onOk={() => setIsModalOpen(false)}
-      onCancel={() => setIsModalOpen(false)}
-      destroyOnClose
-      okButtonProps={{
-        htmlType: "submit",
-        form: "basic",
-      }}
+      onClose={handleClose}
+      fullWidth
+      maxWidth="xs"
     >
-      <Form
-        form={form}
-        name="basic"
-        labelCol={{ span: 8 }}
-        wrapperCol={{ span: 16 }}
-        style={{ maxWidth: 600 }}
-        onFinish={onFinish}
-        autoComplete="off"
-        preserve={false} // 在Modal关闭后，销毁Field
-        initialValues={{ orgName: 'Organization' }}
-      >
-        <Form.Item<FieldType>
-          label="Organization Name"
-          name="orgName"
-          rules={[
-            { required: true, message: "Please input organization name!" },
-          ]}
+      <DialogTitle sx={{ fontWeight: 600 }}>Add Organization</DialogTitle>
+      <DialogContent dividers>
+        <Stack spacing={2}>
+          <TextField
+            label="Organization Name"
+            value={orgName}
+            onChange={(e) => setOrgName(e.target.value)}
+            autoFocus
+            fullWidth
+          />
+          <Typography variant="body2" color="text.secondary">
+            创建一个新的组织以便在控制平面中管理资源。
+          </Typography>
+        </Stack>
+      </DialogContent>
+      <DialogActions sx={{ px: 3, py: 2 }}>
+        <MUIButton onClick={handleClose}>Cancel</MUIButton>
+        <MUIButton
+          variant="contained"
+          onClick={handleConfirm}
+          disabled={!orgName.trim() || loading}
         >
-          <Input allowClear />
-        </Form.Item>
-      </Form>
-    </Modal>
+          {loading ? "Creating..." : "Create"}
+        </MUIButton>
+      </DialogActions>
+    </Dialog>
   );
 };
 
@@ -141,74 +176,89 @@ const AddEnvModal: React.FC<{
   setSync: () => void,
   defaultEnvType?: string,
 }> = ({ isModalOpen = false, setIsModalOpen, setSync, defaultEnvType = 'Fabric' }) => {
-  type FieldType = {
-    envName?: string;
-    envType?: string;
-  };
-  const [form] = Form.useForm<FieldType>();
+  const [envName, setEnvName] = useState("Environment");
+  const [envType, setEnvType] = useState(defaultEnvType);
+  const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
   const currentConsortiumId = useAppSelector(selectConsortium).currentConsortiumId;
 
-  const onFinish = async (values: FieldType) => {
-    const Env = await createEnvironment(currentConsortiumId, values.envName);
-    dispatch(activateEnv({
-      currentEnvId: Env.id,
-      currentEnvName: Env.name,
-      currentEnvType: values.envType || 'Fabric'
-    }));
+  useEffect(() => {
+    if (isModalOpen) {
+      setEnvName("Environment");
+      setEnvType(defaultEnvType);
+    }
+  }, [isModalOpen, defaultEnvType]);
+
+  const handleClose = () => {
+    if (loading) return;
     setIsModalOpen(false);
-    setSync();
-  }
+    setEnvName("Environment");
+    setEnvType(defaultEnvType);
+  };
+
+  const handleConfirm = async () => {
+    if (!envName.trim()) return;
+    try {
+      setLoading(true);
+      const Env = await createEnvironment(currentConsortiumId, envName.trim());
+      dispatch(activateEnv({
+        currentEnvId: Env.id,
+        currentEnvName: Env.name,
+        currentEnvType: envType || 'Fabric'
+      }));
+      setIsModalOpen(false);
+      setSync();
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <Modal
-      title="Add Environment"
+    <Dialog
       open={isModalOpen}
-      onOk={() => setIsModalOpen(false)}
-      onCancel={() => setIsModalOpen(false)}
-      destroyOnClose
-      okButtonProps={{
-        htmlType: "submit",
-        form: "basic",
-      }}
+      onClose={handleClose}
+      fullWidth
+      maxWidth="xs"
     >
-      <Form
-        form={form}
-        name="basic"
-        labelCol={{ span: 8 }}
-        wrapperCol={{ span: 16 }}
-        style={{ maxWidth: 600 }}
-        onFinish={onFinish}
-        autoComplete="off"
-        preserve={false}
-        initialValues={{ envName: 'Environment', envType: defaultEnvType }}
-      >
-        <Form.Item<FieldType>
-          label="Environment Name"
-          name="envName"
-          rules={[
-            { required: true, message: "Please input environment name!" },
-          ]}
-        >
-          <Input allowClear />
-        </Form.Item>
-        <Form.Item<FieldType>
-          label="Environment Type"
-          name="envType"
-          rules={[
-            { required: false, message: "Please choose environment type!" },
-          ]}
-        >
-          <Select
-            options={[
-              { value: 'Ethereum', label: 'Ethereum' },
-              { value: 'Fabric', label: 'Fabric' },
-              { value: 'Quorum', label: 'Quorum', disabled: true },
-            ]}
+      <DialogTitle sx={{ fontWeight: 600 }}>Add Environment</DialogTitle>
+      <DialogContent dividers>
+        <Stack spacing={2}>
+          <TextField
+            label="Environment Name"
+            value={envName}
+            onChange={(e) => setEnvName(e.target.value)}
+            autoFocus
+            fullWidth
           />
-        </Form.Item>
-      </Form>
-    </Modal>
+          <FormControl fullWidth>
+            <InputLabel id="env-type-label">Environment Type</InputLabel>
+            <MUISelect
+              labelId="env-type-label"
+              value={envType}
+              label="Environment Type"
+              onChange={(e: SelectChangeEvent<string>) => setEnvType(e.target.value as string)}
+            >
+              <MUIMenuItem value="Ethereum">Ethereum</MUIMenuItem>
+              <MUIMenuItem value="Fabric">Fabric</MUIMenuItem>
+              <MUIMenuItem value="Quorum" disabled>Quorum (coming soon)</MUIMenuItem>
+            </MUISelect>
+          </FormControl>
+          <Typography variant="body2" color="text.secondary">
+            为当前联盟创建一个新的运行环境，系统将自动完成资源准备。
+          </Typography>
+        </Stack>
+      </DialogContent>
+      <DialogActions sx={{ px: 3, py: 2 }}>
+        <MUIButton onClick={handleClose}>Cancel</MUIButton>
+        <MUIButton
+          variant="contained"
+          onClick={handleConfirm}
+          disabled={!envName.trim() || loading}
+        >
+          {loading ? "Creating..." : "Create"}
+        </MUIButton>
+      </DialogActions>
+    </Dialog>
   );
 }
 
@@ -216,6 +266,7 @@ const AddEnvModal: React.FC<{
 const MainMenu: React.FC = () => {
   const navigateTo = useNavigate();
   const currentRoute = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useAppDispatch();
 
   const currentOrgId = useAppSelector(selectOrg).currentOrgId;
@@ -290,6 +341,67 @@ const MainMenu: React.FC = () => {
 
   console.log(envList)
 
+  // 将 URL 中的查询参数回填到 Redux
+  useEffect(() => {
+    const queryOrgId = searchParams.get("orgId");
+    if (queryOrgId && queryOrgId !== currentOrgId) {
+      const matchedOrg = orgList.find((item) => item.id === queryOrgId);
+      if (matchedOrg) {
+        dispatch(activateOrg({ currentOrgId: matchedOrg.id, currentOrgName: matchedOrg.name }));
+      }
+    }
+  }, [searchParams, orgList, currentOrgId, dispatch]);
+
+  useEffect(() => {
+    const queryConsortiumId = searchParams.get("consortiumId");
+    if (queryConsortiumId && queryConsortiumId !== currentConsortiumId) {
+      const matchedConsortium = consortiaList.find((item) => item.id === queryConsortiumId);
+      if (matchedConsortium) {
+        dispatch(activateConsortium({
+          currentConsortiumId: matchedConsortium.id,
+          currentConsortiumName: matchedConsortium.name
+        }));
+      }
+    }
+  }, [searchParams, consortiaList, currentConsortiumId, dispatch]);
+
+  useEffect(() => {
+    if (!envListReady) return;
+    const queryEnvId = searchParams.get("envId");
+    if (queryEnvId && queryEnvId !== currentEnvId) {
+      const matchedEnv = envList.find((item) => item.id === queryEnvId);
+      if (matchedEnv) {
+        dispatch(activateEnv({
+          currentEnvId: matchedEnv.id,
+          currentEnvName: matchedEnv.name
+        }));
+      }
+    }
+  }, [searchParams, envList, envListReady, currentEnvId, dispatch]);
+
+  // 将 Redux 选择写回 URL
+  useEffect(() => {
+    const nextSearch = new URLSearchParams(searchParams);
+    let changed = false;
+    const syncParam = (key: string, value: string) => {
+      const existing = nextSearch.get(key);
+      if (value && existing !== value) {
+        nextSearch.set(key, value);
+        changed = true;
+      }
+      if (!value && existing) {
+        nextSearch.delete(key);
+        changed = true;
+      }
+    };
+    syncParam("orgId", currentOrgId);
+    syncParam("consortiumId", currentConsortiumId);
+    syncParam("envId", currentEnvId);
+    if (changed) {
+      setSearchParams(nextSearch, { replace: true });
+    }
+  }, [currentOrgId, currentConsortiumId, currentEnvId, searchParams, setSearchParams]);
+
 
   const orgItem = (
     <SubMenu key="/organization" icon={<TeamOutlined />} title="Organization">
@@ -300,7 +412,7 @@ const MainMenu: React.FC = () => {
           } >{item.name}</Menu.Item>
         ))}
         <Menu.Divider
-          style={{ backgroundColor: "rgba(255, 255, 255, 0.2)" }} // 使分割线在dark主题下可见
+          style={{ backgroundColor: "rgba(15, 23, 42, 0.08)" }}
         />
         <Menu.Item key="addOrganization" onClick={() => setIsAddOrgModalOpen(true)}>
           Add Organization
@@ -327,7 +439,7 @@ const MainMenu: React.FC = () => {
             )) : null
         }
         <Menu.Divider
-          style={{ backgroundColor: "rgba(255, 255, 255, 0.2)" }} // 使分割线在dark主题下可见
+          style={{ backgroundColor: "rgba(15, 23, 42, 0.08)" }}
         />
         <Menu.Item key="addEnvironment" onClick={() => setIsAddEnvModalOpen(true)}>
           Add Environment
@@ -403,7 +515,7 @@ const MainMenu: React.FC = () => {
           } >{item.name}</Menu.Item>
         ))}
         <Menu.Divider
-          style={{ backgroundColor: "rgba(255, 255, 255, 0.2)" }} // 使分割线在dark主题下可见
+          style={{ backgroundColor: "rgba(15, 23, 42, 0.08)" }}
         />
         <Menu.Item key="addConsortium" onClick={() => setIsAddConsortiumModalOpen(true)}>
           Add Consortium
@@ -435,13 +547,14 @@ const MainMenu: React.FC = () => {
   return (
     <>
       <Menu
-        theme="dark"
+        theme="light"
         defaultSelectedKeys={[currentRoute.pathname]}
         selectedKeys={[current]}
         mode="inline"
         onClick={menuClick}
         openKeys={openKeys}
         onOpenChange={onOpenChange}
+        className="portal-menu-list"
       >
         {orgItem}
         {consortiumItem}

@@ -28,7 +28,7 @@ const NetworkSettings = lazy(() => import("@/views/Consortium/Settings"));
 const Execution = lazy(() => import("@/views/BPMN/Execution"));
 const Translation = lazy(() => import("@/views/BPMN/Translation"));
 const SvgComponent = lazy(() => import("@/views/BPMN/Execution/SvgComponent"));
-const ChorJs = lazy(() => import("@/views/BPMN/Chor-js"));
+const ChorModeler = lazy(() => import("@/views/BPMN/ChorModeler"));
 const ResourceSet = lazy(() => import("@/views/Environment/ResourceSet"));
 const EnvDashboard = lazy(() => import("@/views/Environment/Dashboard"));
 const MembershipDetailInEnv = lazy(() => import("@/views/Environment/Dashboard/Overview/MembershipDetail"));
@@ -45,7 +45,7 @@ const MembershipCardInEnv = lazy(() => import("@/views/Environment/Dashboard/Ove
 const routes: routesType[] = [
   {
     path: "/",
-    element: <Navigate to="/login" />,
+    element: <Navigate to="/home" />,
   },
   {
     path: "*",
@@ -244,7 +244,7 @@ const routes: routesType[] = [
           // },
           {
             path: "/bpmn/drawing",
-            element: withLoadingComponent(<ChorJs />),
+            element: withLoadingComponent(<ChorModeler />),
             meta: {
               title: "Drawing",
             },

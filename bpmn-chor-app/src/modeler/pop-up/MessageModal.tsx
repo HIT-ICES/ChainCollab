@@ -268,6 +268,7 @@ export default function MessageModal({ dataElementId, open: isModalOpen, onClose
 
 
   return (<Modal title={`message id: ${dataElementId}`} open={isModalOpen} onOk={handleOk} onCancel={handleCancel}
+    rootClassName="chor-modal"
     width={800}
   >
     Message Name<br />

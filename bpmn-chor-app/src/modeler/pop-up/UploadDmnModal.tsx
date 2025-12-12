@@ -1,10 +1,23 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { ChangeEvent } from 'react';
-import { Modal, Table, Input } from 'antd';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  TextField,
+  Paper,
+  IconButton
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import type { DmnDefinition, UploadableDmn } from '@/types/modeler';
-import type { ColumnsType } from 'antd/es/table';
-import Draggable from 'react-draggable';
-import type { DraggableEvent, DraggableData } from 'react-draggable';
 
 interface UploadDmnModalProps {
   dmnData: Map<string, DmnDefinition>;
@@ -21,9 +34,6 @@ const UploadDmnModal: React.FC<UploadDmnModalProps> = ({
 }) => {
 
   const [data, setData] = useState<UploadableDmn[]>([]);
-  const draggleRef = useRef<HTMLDivElement | null>(null);
-  const [dragDisabled, setDragDisabled] = useState(true);
-  const [bounds, setBounds] = useState({ left: 0, top: 0, bottom: 0, right: 0 });
 
   useEffect(() => {
     if (!dmnData) {
@@ -48,20 +58,6 @@ const UploadDmnModal: React.FC<UploadDmnModalProps> = ({
     setOpen(false);
   };
 
-  const onStart = (_event: DraggableEvent, uiData: DraggableData) => {
-    const { clientWidth, clientHeight } = document.documentElement;
-    const targetRect = draggleRef.current?.getBoundingClientRect();
-    if (!targetRect) {
-      return;
-    }
-    setBounds({
-      left: -targetRect.left + uiData.x,
-      right: clientWidth - (targetRect.right - uiData.x),
-      top: -targetRect.top + uiData.y,
-      bottom: clientHeight - (targetRect.bottom - uiData.y),
-    });
-  };
-
   const handleCancel = () => setOpen(false);
 
   const handleInputChange = (index: number, event: ChangeEvent<HTMLInputElement>) => {
@@ -73,101 +69,54 @@ const UploadDmnModal: React.FC<UploadDmnModalProps> = ({
     setData(newData);
   };
 
-  const columns: ColumnsType<UploadableDmn> = [
-    {
-      title: 'ID',
-      dataIndex: 'id',
-      key: 'id'
-    },
-    {
-      title: 'Name',
-      dataIndex: 'name',
-      key: 'name'
-    },
-    {
-      title: 'Upload Name',
-      dataIndex: 'uploadName',
-      key: 'uploadName',
-      render: (_text: string, _record: UploadableDmn, index: number) => (
-        <Input
-          value={data[index]?.uploadName}
-          onChange={(event) => handleInputChange(index, event)}
-        />
-      )
-    }
-  ];
-
   return (
-    <Modal
-      title="Upload Dmns"
-      open={open}
-      onOk={handleOk}
-      okButtonProps={{ disabled: !data.length }}
-      onCancel={handleCancel}
-      destroyOnClose
-      centered
-      width={720}
-      styles={{
-        header: {
-          borderBottom: 'none',
-          padding: '24px 32px',
-          fontSize: 18,
-          fontWeight: 600
-        },
-        body: {
-          padding: '0 32px 24px',
-          background: '#f8fafc'
-        },
-        footer: {
-          borderTop: 'none',
-          padding: '16px 32px 32px'
-        }
-      }}
-      centered
-      width={640}
-      styles={{
-        header: {
-          borderBottom: '1px solid #e2e8f0',
-          padding: '16px 24px'
-        },
-        body: {
-          padding: '0 24px 24px',
-          background: '#f8fafc',
-          maxHeight: '60vh',
-          overflowY: 'auto'
-        },
-        footer: {
-          borderTop: 'none',
-          padding: '16px 24px 24px'
-        }
-      }}
-      modalRender={(modal) => (
-        <Draggable
-          nodeRef={draggleRef}
-          disabled={dragDisabled}
-          bounds={bounds}
-          onStart={onStart}
-        >
-          <div
-            ref={draggleRef}
-            onMouseOver={() => dragDisabled && setDragDisabled(false)}
-            onMouseOut={() => setDragDisabled(true)}
-          >
-            {modal}
-          </div>
-        </Draggable>
-      )}
-    >
-      <Table<UploadableDmn>
-        dataSource={data}
-        columns={columns}
-        rowKey="id"
-        pagination={false}
-        size="small"
-        bordered
-        style={{ background: '#fff', borderRadius: 12, overflow: 'hidden' }}
-      />
-    </Modal>
+    <Dialog open={open} onClose={handleCancel} fullWidth maxWidth="md">
+      <DialogTitle
+        sx={{ fontWeight: 600, display: "flex", justifyContent: "space-between", alignItems: "center" }}
+      >
+        Upload Dmns
+        <IconButton onClick={handleCancel} size="small">
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent dividers sx={{ background: "#f8fafc" }}>
+        <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 2 }}>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>ID</TableCell>
+                <TableCell>Name</TableCell>
+                <TableCell>Upload Name</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data.map((item, index) => (
+                <TableRow key={item.id}>
+                  <TableCell>{item.id}</TableCell>
+                  <TableCell>{item.name}</TableCell>
+                  <TableCell>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      value={item.uploadName}
+                      onChange={(event) => handleInputChange(index, event as ChangeEvent<HTMLInputElement>)}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </DialogContent>
+      <DialogActions
+        sx={{ borderTop: "1px solid #e2e8f0", background: "#fff" }}
+      >
+        <Button onClick={handleCancel}>Cancel</Button>
+        <Button onClick={handleOk} variant="contained" disabled={!data.length}>
+          Upload
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

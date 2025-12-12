@@ -330,6 +330,7 @@ const DmnModal = ({ dataElementId, xmlData, open: isModalOpen, onClose, onSave }
                         padding: '16px 24px 24px'
                     }
                 }}
+                rootClassName="chor-modal"
                 centered
                 maskStyle={{ backdropFilter: 'blur(1px)' }}
                 modalRender={(modal) => (

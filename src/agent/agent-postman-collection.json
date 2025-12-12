@@ -1,0 +1,312 @@
+{
+  "info": {
+    "name": "IBC Agent API",
+    "description": "基础 Docker Agent 接口集合，覆盖网络/节点/CA/IPFS/Ethereum/端口管理场景。",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "c7c1d088-1d12-41c3-9e76-ibc-agent"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:5001/api/v1" },
+    { "key": "port_probe_count", "value": "5" },
+    { "key": "fabric_peer_name", "value": "peer0.org1.example.com" },
+    { "key": "fabric_peer_image", "value": "hyperledger/fabric-peer:2.5" },
+    { "key": "fabric_peer_cmd", "value": "peer node start" },
+    { "key": "fabric_orderer_name", "value": "orderer.example.com" },
+    { "key": "fabric_orderer_image", "value": "hyperledger/fabric-orderer:2.5" },
+    { "key": "fabric_orderer_cmd", "value": "orderer" },
+    { "key": "fabric_ca_name", "value": "ca.org1.example.com" },
+    { "key": "eth_node_name", "value": "eth-dev" },
+    { "key": "ipfs_node_name", "value": "ipfs-dev" },
+    { "key": "managed_node_id", "value": "<set-after-create>" },
+    { "key": "log_tail", "value": "200" }
+  ],
+  "item": [
+    {
+      "name": "Network",
+      "item": [
+        {
+          "name": "List Containers",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/network/networks",
+              "host": ["{{base_url}}"],
+              "path": ["network", "networks"]
+            },
+            "description": "返回当前 Docker 中全部容器的基础信息。"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Port Management",
+      "item": [
+        {
+          "name": "Probe Available Ports",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/ports?port_number={{port_probe_count}}",
+              "host": ["{{base_url}}"],
+              "path": ["ports"],
+              "query": [
+                { "key": "port_number", "value": "{{port_probe_count}}" }
+              ]
+            },
+            "description": "获取指定数量的可用本地端口。"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Nodes",
+      "description": "Fabric peer/orderer 以及通用节点生命周期接口。",
+      "item": [
+        {
+          "name": "Create Fabric Peer",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "node_type", "value": "fabric-peer" },
+                { "key": "name", "value": "{{fabric_peer_name}}" },
+                { "key": "img", "value": "{{fabric_peer_image}}" },
+                { "key": "cmd", "value": "{{fabric_peer_cmd}}" },
+                { "key": "msp", "value": "Org1MSP" },
+                { "key": "tls", "value": "/data/crypto/tls" },
+                { "key": "bootstrap_block", "value": "/data/genesis.block" },
+                { "key": "peer_config_file", "value": "/data/core.yaml" },
+                { "key": "port_map", "value": "{\"7051/tcp\":7051,\"7052/tcp\":7052,\"17051/tcp\":17051}" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/nodes",
+              "host": ["{{base_url}}"],
+              "path": ["nodes"]
+            },
+            "description": "使用模板化参数创建 Fabric Peer 容器。"
+          }
+        },
+        {
+          "name": "Create Fabric Orderer",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "node_type", "value": "fabric-orderer" },
+                { "key": "name", "value": "{{fabric_orderer_name}}" },
+                { "key": "img", "value": "{{fabric_orderer_image}}" },
+                { "key": "cmd", "value": "{{fabric_orderer_cmd}}" },
+                { "key": "msp", "value": "OrdererMSP" },
+                { "key": "tls", "value": "/data/orderer/tls" },
+                { "key": "bootstrap_block", "value": "/data/genesis.block" },
+                { "key": "orderer_config_file", "value": "/data/orderer.yaml" },
+                { "key": "port_map", "value": "{\"7050/tcp\":7050,\"17050/tcp\":17050}" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/nodes",
+              "host": ["{{base_url}}"],
+              "path": ["nodes"]
+            },
+            "description": "创建 Fabric Orderer 节点。"
+          }
+        },
+        {
+          "name": "Get Node Detail",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/nodes/{{managed_node_id}}?node_type=fabric-peer",
+              "host": ["{{base_url}}"],
+              "path": ["nodes", "{{managed_node_id}}"],
+              "query": [{ "key": "node_type", "value": "fabric-peer" }]
+            },
+            "description": "根据容器 ID 获取节点状态，可带 node_type 以附加模板特定信息。"
+          }
+        },
+        {
+          "name": "Operate Node (start/stop/restart/delete/update)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "action", "value": "start" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/nodes/{{managed_node_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["nodes", "{{managed_node_id}}"]
+            },
+            "description": "向指定节点发送 start/stop/restart/delete/update 操作，请将 action 替换成目标指令，并在 update 时附带 cmd/msp/tls 等字段。"
+          }
+        },
+        {
+          "name": "Tail Node Logs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/nodes/{{managed_node_id}}/logs?tail={{log_tail}}",
+              "host": ["{{base_url}}"],
+              "path": ["nodes", "{{managed_node_id}}", "logs"],
+              "query": [{ "key": "tail", "value": "{{log_tail}}" }]
+            },
+            "description": "读取节点最新日志，tail 默认为 200 行。"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Fabric CA",
+      "item": [
+        {
+          "name": "Create CA",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "ca_name", "value": "{{fabric_ca_name}}" },
+                { "key": "port_map", "value": "{\"7054/tcp\":7054,\"17054/tcp\":17054}" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/ca",
+              "host": ["{{base_url}}"],
+              "path": ["ca"]
+            },
+            "description": "创建 Fabric CA 节点，会自动生成配置与证书目录。"
+          }
+        },
+        {
+          "name": "Start CA & fetch cert",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [{ "key": "action", "value": "start" }]
+            },
+            "url": {
+              "raw": "{{base_url}}/ca/{{fabric_ca_name}}/operation",
+              "host": ["{{base_url}}"],
+              "path": ["ca", "{{fabric_ca_name}}", "operation"]
+            },
+            "description": "启动 CA 容器并在成功时下载 ca-cert.pem。"
+          }
+        },
+        {
+          "name": "Stop CA",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [{ "key": "action", "value": "stop" }]
+            },
+            "url": {
+              "raw": "{{base_url}}/ca/{{fabric_ca_name}}/operation",
+              "host": ["{{base_url}}"],
+              "path": ["ca", "{{fabric_ca_name}}", "operation"]
+            },
+            "description": "停止 CA。"
+          }
+        },
+        {
+          "name": "CA Detail",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/ca/{{fabric_ca_name}}",
+              "host": ["{{base_url}}"],
+              "path": ["ca", "{{fabric_ca_name}}"]
+            },
+            "description": "查看 CA 容器运行状态与挂载信息。"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ethereum",
+      "item": [
+        {
+          "name": "Create Ethereum Node",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "name", "value": "{{eth_node_name}}" },
+                { "key": "port_map", "value": "{\"8545\":8545,\"30303\":30303}" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/ethnode",
+              "host": ["{{base_url}}"],
+              "path": ["ethnode"]
+            },
+            "description": "构建并运行 geth 节点。"
+          }
+        },
+        {
+          "name": "Ethereum Node Detail",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/ethnode/{{eth_node_name}}",
+              "host": ["{{base_url}}"],
+              "path": ["ethnode", "{{eth_node_name}}"]
+            },
+            "description": "查询指定 Ethereum 容器信息。"
+          }
+        }
+      ]
+    },
+    {
+      "name": "IPFS",
+      "item": [
+        {
+          "name": "Create IPFS Node",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "name", "value": "{{ipfs_node_name}}" },
+                { "key": "port_map", "value": "{\"5001\":5001,\"4001\":4001,\"8080\":8080}" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/ipfs/nodes",
+              "host": ["{{base_url}}"],
+              "path": ["ipfs", "nodes"]
+            },
+            "description": "创建 IPFS 节点，必要时可修改端口映射。"
+          }
+        },
+        {
+          "name": "IPFS Node Detail",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/ipfs/nodes/{{ipfs_node_name}}",
+              "host": ["{{base_url}}"],
+              "path": ["ipfs", "nodes", "{{ipfs_node_name}}"]
+            },
+            "description": "查询 IPFS 容器的运行信息。"
+          }
+        }
+      ]
+    }
+  ]
+}

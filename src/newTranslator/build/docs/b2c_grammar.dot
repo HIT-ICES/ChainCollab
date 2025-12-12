@@ -1,0 +1,172 @@
+
+    digraph textX {
+    fontname = "Bitstream Vera Sans"
+    fontsize = 8
+    node[
+        shape=record,
+        style=filled,
+        fillcolor=aliceblue
+    ]
+    nodesep = 0.3
+    edge[dir=black,arrowtail=empty]
+
+
+125329679287344[ label="{Model|}"]
+
+125329679287728[ label="{Contract|name: ID\l}"]
+
+125329679287248[ label="{*ContractSection|}"]
+
+125329679287152[ label="{ParticipantSection|}"]
+
+125329679286912[ label="{Participant|name: ID\lmsp: STRING\lx509: STRING\lisMulti: BOOL\lmultiMin: INT\lmultiMax: INT\l}"]
+
+125329679286960[ label="{Attribute|key: ID\lvalue: STRING\l}"]
+
+125329679286816[ label="{GlobalSection|}"]
+
+125329679286864[ label="{GlobalVar|name: ID\ltype: ScalarType\l}"]
+
+125329679286624[ label="{MessageSection|}"]
+
+125329679286672[ label="{Message|name: ID\linitialState: ElementState\lschema: STRING\l}"]
+
+125329679286576[ label="{GatewaySection|}"]
+
+125329679286432[ label="{Gateway|name: ID\lgatewayType: GatewayType\linitialState: ElementState\l}"]
+
+125329679286336[ label="{EventSection|}"]
+
+125329679286384[ label="{Event|name: ID\linitialState: ElementState\l}"]
+
+125329680775488[ label="{BusinessRuleSection|}"]
+
+125329680765840[ label="{BusinessRule|name: ID\ldmnResource: STRING\ldecisionID: STRING\linitialState: ElementState\l}"]
+
+125329680777024[ label="{ParamMapping|dmnParam: ID\l}"]
+
+125329680776880[ label="{*FlowElement|}"]
+
+125329680776928[ label="{FlowSection|}"]
+
+125329680776688[ label="{*FlowItem|}"]
+
+125329680776736[ label="{StartFlow|}"]
+
+125329680776352[ label="{FlowTarget|}"]
+
+125329680776400[ label="{MessageFlow|msgCond: MessageCondition\l}"]
+
+125329680775248[ label="{GatewayFlow|}"]
+
+125329680769728[ label="{*GatewayBranch|}"]
+
+125329680769680[ label="{GatewayCompareBranch|relation: RelationOperator\l}"]
+
+125329680770112[ label="{GatewayExpressionBranch|expr: STRING\l}"]
+
+125329680777120[ label="{GatewayElseBranch|}"]
+
+125329679416960[ label="{RuleFlow|ruleCond: RuleCondition\l}"]
+
+125329679416576[ label="{EventFlow|}"]
+
+125329679416624[ label="{ParallelJoin|}"]
+
+125329679415760[ label="{*FlowAction|}"]
+
+125329679415808[ label="{EnableAction|}"]
+
+125329679415424[ label="{DisableAction|}"]
+
+125329679415472[ label="{SetGlobalAction|}"]
+
+125329679415136[ label="{LiteralExpr|stringValue: STRING\lintValue: INT\lboolValue: BOOL\l}"]
+
+
+
+125329679287344 -> 125329679287728[arrowtail=diamond, dir=both, headlabel="contracts 1..*"]
+125329679287728 -> 125329679287248[arrowtail=diamond, dir=both, headlabel="sections 1..*"]
+125329679287248 -> 125329679287152 [dir=back]
+125329679287248 -> 125329679286816 [dir=back]
+125329679287248 -> 125329679286624 [dir=back]
+125329679287248 -> 125329679286576 [dir=back]
+125329679287248 -> 125329679286336 [dir=back]
+125329679287248 -> 125329680775488 [dir=back]
+125329679287248 -> 125329680776928 [dir=back]
+125329679287152 -> 125329679286912[arrowtail=diamond, dir=both, headlabel="participants 1..*"]
+125329679286912 -> 125329679286960[arrowtail=diamond, dir=both, headlabel="attributes 1..*"]
+125329679286816 -> 125329679286864[arrowtail=diamond, dir=both, headlabel="globals 1..*"]
+125329679286624 -> 125329679286672[arrowtail=diamond, dir=both, headlabel="messages 1..*"]
+125329679286672 -> 125329679286912[headlabel="sender "]
+125329679286672 -> 125329679286912[headlabel="receiver "]
+125329679286576 -> 125329679286432[arrowtail=diamond, dir=both, headlabel="gateways 1..*"]
+125329679286336 -> 125329679286384[arrowtail=diamond, dir=both, headlabel="events 1..*"]
+125329680775488 -> 125329680765840[arrowtail=diamond, dir=both, headlabel="rules 1..*"]
+125329680765840 -> 125329680777024[arrowtail=diamond, dir=both, headlabel="inputMappings 1..*"]
+125329680765840 -> 125329680777024[arrowtail=diamond, dir=both, headlabel="outputMappings 1..*"]
+125329680777024 -> 125329679286864[headlabel="globalRef "]
+125329680776880 -> 125329679286672 [dir=back]
+125329680776880 -> 125329679286432 [dir=back]
+125329680776880 -> 125329679286384 [dir=back]
+125329680776880 -> 125329680765840 [dir=back]
+125329680776928 -> 125329680776688[arrowtail=diamond, dir=both, headlabel="flowItems 1..*"]
+125329680776688 -> 125329680776736 [dir=back]
+125329680776688 -> 125329680776400 [dir=back]
+125329680776688 -> 125329680775248 [dir=back]
+125329680776688 -> 125329679416960 [dir=back]
+125329680776688 -> 125329679416576 [dir=back]
+125329680776688 -> 125329679416624 [dir=back]
+125329680776736 -> 125329679286384[headlabel="start "]
+125329680776736 -> 125329680776352[arrowtail=diamond, dir=both, headlabel="target "]
+125329680776352 -> 125329680776880[headlabel="target "]
+125329680776400 -> 125329679286672[headlabel="msg "]
+125329680776400 -> 125329679415760[arrowtail=diamond, dir=both, headlabel="actions 1..*"]
+125329680775248 -> 125329679286432[headlabel="gtw "]
+125329680775248 -> 125329679415760[arrowtail=diamond, dir=both, headlabel="actions 1..*"]
+125329680775248 -> 125329680769728[arrowtail=diamond, dir=both, headlabel="branches 1..*"]
+125329680769728 -> 125329680769680 [dir=back]
+125329680769728 -> 125329680770112 [dir=back]
+125329680769728 -> 125329680777120 [dir=back]
+125329680769680 -> 125329679286864[headlabel="var "]
+125329680769680 -> 125329679415136[arrowtail=diamond, dir=both, headlabel="value "]
+125329680769680 -> 125329679415760[arrowtail=diamond, dir=both, headlabel="actions 1..*"]
+125329680770112 -> 125329679415760[arrowtail=diamond, dir=both, headlabel="actions 1..*"]
+125329680777120 -> 125329679415760[arrowtail=diamond, dir=both, headlabel="actions 1..*"]
+125329679416960 -> 125329680765840[headlabel="rule "]
+125329679416960 -> 125329679415760[arrowtail=diamond, dir=both, headlabel="actions 1..*"]
+125329679416576 -> 125329679286384[headlabel="ev "]
+125329679416576 -> 125329679415760[arrowtail=diamond, dir=both, headlabel="actions 1..*"]
+125329679416624 -> 125329679286432[headlabel="gtw "]
+125329679416624 -> 125329680776880[headlabel="sources 1..*"]
+125329679416624 -> 125329679415760[arrowtail=diamond, dir=both, headlabel="actions 1..*"]
+125329679415760 -> 125329679415808 [dir=back]
+125329679415760 -> 125329679415424 [dir=back]
+125329679415760 -> 125329679415472 [dir=back]
+125329679415808 -> 125329680776880[headlabel="target "]
+125329679415424 -> 125329680776880[headlabel="target "]
+125329679415472 -> 125329679286864[headlabel="var "]
+125329679415472 -> 125329679415136[arrowtail=diamond, dir=both, headlabel="expr "]
+match_rules [ shape=plaintext, label=< <table>
+	<tr>
+		<td><b>ElementState</b></td><td>INACTIVE|READY|PENDING_CONFIRMATION|DONE</td>
+	</tr>
+	<tr>
+		<td><b>GatewayType</b></td><td>exclusive|event|parallel</td>
+	</tr>
+	<tr>
+		<td><b>MessageCondition</b></td><td>sent|completed</td>
+	</tr>
+	<tr>
+		<td><b>RelationOperator</b></td><td>==|!=|&gt;=|&lt;=|&gt;|&lt;</td>
+	</tr>
+	<tr>
+		<td><b>RuleCondition</b></td><td>ready|waiting|done</td>
+	</tr>
+	<tr>
+		<td><b>ScalarType</b></td><td>string|int|bool|float</td>
+	</tr>
+</table> >]
+
+
+}

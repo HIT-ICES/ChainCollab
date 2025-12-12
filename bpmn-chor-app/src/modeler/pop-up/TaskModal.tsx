@@ -30,7 +30,7 @@ export default function TaskModal({dataElementId, open: isModalOpen, onClose}) {
     setTaskDescription(taskDescriptionInputRef.current.input.value)
   };
 
-  return (<Modal title={title} visible={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+  return (<Modal title={title} open={isModalOpen} onOk={handleOk} onCancel={handleCancel} rootClassName="chor-modal">
 
     Task Name<br />
     <Input ref={taskNameInputRef} placeholder="ChangetaskName" style={{ width: '50%', }} onPressEnter={handleTaskNameInputOk}></Input>

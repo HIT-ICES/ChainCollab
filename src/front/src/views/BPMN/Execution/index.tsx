@@ -48,7 +48,7 @@ interface BpmnInstanceDataType {
 const Execution: React.FC = () => {
       const navigate = useNavigate();
       const [bpmnData, setBpmnData] = useState<DataType[]>([]);
-        const currentOrgId = useAppSelector((state) => state.org).currentOrgId;
+        const currentConsortiumId = useAppSelector((state) => state.consortium).currentConsortiumId;
     const [selectedDataTypeId, setSelectedDataTypeId] = useState<string | null>(null);      //改为instanceid
     const [visible, setVisible] = useState(false);
     const [instanceDataList, setInstanceDataList] = useState<BpmnInstanceDataType[]>([]);
@@ -58,46 +58,37 @@ const Execution: React.FC = () => {
         const fetchData = async () => {
       // 获取bpmnData
     //   const res = await fetch("http://localhost:8000/api/v1/bpmns/1/_list");
-    const res = await getBPMNList(currentOrgId);        //先不写
-    console.log(res);
-    // const res = await getBPMNInstanceList(bpmnData.id)
-      let data = res.data;
+    const data = await getBPMNList(currentConsortiumId);
 
       // 使用 filter 只保存 status 为 Deployed 的数据
     //   data = data.filter((item: DataType) => item.status === "executing");
       setBpmnData(data);
     };
-    fetchData();
-  }, [currentOrgId]);
+    if (currentConsortiumId) {
+      fetchData();
+    } else {
+      setBpmnData([]);
+    }
+  }, [currentConsortiumId]);
 
   useEffect(() => {
-    if (bpmnData) {
+    if (!bpmnData.length) {
+        setInstanceDataList([]);
+        return;
+    }
         const ids = bpmnData.map(item => item.id);
-        console.log(ids); 
 
         const fetchInstanceData = async () => {
             const instanceDataPromises = ids.map(id => getBPMNInstanceList(id));
             const instanceDataArray = await Promise.all(instanceDataPromises);
-            console.log(instanceDataArray); 
 
-            const instanceDataResult = instanceDataArray.map(item => item.data);
-            console.log(instanceDataResult);
-
-            const instanceDataList = [];
-            instanceDataArray.forEach(item => {
-                instanceDataList.push(...item.data);
-            });
-            console.log(instanceDataList);
-
-            console.log("---------------------")
-            console.log(bpmnData)
+            const instanceDataList = instanceDataArray.flat();
 
             setInstanceDataList(instanceDataList);
         };
 
         fetchInstanceData();
 
-    }
 }, [bpmnData]);
 
 
@@ -201,11 +192,11 @@ const Execution: React.FC = () => {
         />
           <Modal
               title="Select Firefly"
-              visible={visible}
+              open={visible}
               onCancel={() => setVisible(false)}
               footer={null}
           >
-              <FireflyTable onSelect={handleSelectFirefly} />
+              <FireflyTable data={fireflyData} onSelect={handleSelectFirefly} />
           </Modal>
       </div>
   );
@@ -213,10 +204,11 @@ const Execution: React.FC = () => {
 
 interface FireflyTableProps {
     onSelect: (coreUrl: string, membershipId: string) => void;
+    data: FireflyDataType[];
 }
 
-const FireflyTable: React.FC<FireflyTableProps> = ({ onSelect }) => {
-    const fireflyData: FireflyDataType[] = []; // Assuming you have FireflyDataType data
+const FireflyTable: React.FC<FireflyTableProps> = ({ onSelect, data }) => {
+    const fireflyData: FireflyDataType[] = data;
 
     const columns: TableProps<FireflyDataType>["columns"] = [
         {

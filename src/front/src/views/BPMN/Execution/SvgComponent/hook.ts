@@ -95,7 +95,10 @@ export const useFireflyData = (
         const fetchData = async () => {
             try {
                 if (!envId ||
-                    !membershipId) return;
+                    !membershipId) {
+                    setFirefly({ coreUrl: "" });
+                    return;
+                }
 
                 const data = await getFireflyList(envId, null);
                 if (ignore) return [[], () => { }];
@@ -107,7 +110,7 @@ export const useFireflyData = (
         }
         fetchData();
         return () => { ignore = true; }
-    }, [syncFlag, envId]);
+    }, [syncFlag, envId, membershipId]);
     return [firefly, () => { setSyncFlag(!syncFlag) }];
 }
 
