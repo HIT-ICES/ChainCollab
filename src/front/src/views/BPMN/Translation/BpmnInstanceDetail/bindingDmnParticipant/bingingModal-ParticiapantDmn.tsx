@@ -53,6 +53,7 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 
 			// 将生成的 map 加入创建参数
 			singleObject["ERCChaincodeNames"] = tokenElementsMap;
+			singleObject["BpmnId"] =bpmnId;
 		}
 
 

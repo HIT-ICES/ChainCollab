@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Modal, Input, Select, message } from 'antd';
+import { Modal, Input, Select, message, Button, Table } from 'antd';
 
 interface FixedFieldsModalProps {
   dataElementId: string;
@@ -47,9 +47,9 @@ export default function FixedFieldsModal({
   //增值型valueadd
   const [refTokenIds, setRefTokenIds] = React.useState<string[]>([]);
   const [refTokenIdOptions, setRefTokenIdOptions] = React.useState<string[]>([]);
-
+  const [outputList, setOutputList] = React.useState([]);
   const operationOptions: Record<string, string[]> = {
-    'distributive': ['mint', 'burn', 'grant usage rights', 'revoke usage rights','transfer', 'query'],
+    'distributive': ['mint', 'burn', 'grant usage rights', 'revoke usage rights', 'transfer', 'query'],
     'transferable': ['mint', 'burn', 'Transfer', 'query'],
     'value-added': ['branch', 'merge', 'query'],
   };
@@ -71,6 +71,45 @@ export default function FixedFieldsModal({
     'grant usage rithts': 'Grantee',             // 被授权者
     'revoke usage rights': 'Revoked',   // 被取消授权者
     Transfer: 'Recipient',          // 被转移者
+  };
+
+
+  // 动态决定输出字段类型
+  const getOutputTypes = () => {
+
+    // FT（同质化代币）查询
+    if (assetType === "transferable" && tokenType === "FT") {
+      return [
+        { value: "balance", label: "Balance", dataType: "number" },
+      ];
+    }
+
+    // NFT 转让型
+    if (assetType === "transferable" && tokenType === "NFT") {
+      return [
+        { value: "URI", label: "URI", dataType: "string" },
+        { value: "owner", label: "Owner", dataType: "string" },
+      ];
+    }
+
+    // 增值型（value-added）
+    if (assetType === "value-added") {
+      return [
+        { value: "URI", label: "URI", dataType: "string" },
+        { value: "owner", label: "Owner", dataType: "string" },
+        { value: "tokenURL", label: "Token URL", dataType: "string" },
+      ];
+    }
+
+    // 分发型 distributive
+    if (assetType === "distributive") {
+      return [
+        { value: "owner", label: "Owner", dataType: "string" },
+        { value: "balance", label: "Balance", dataType: "number" },
+      ];
+    }
+
+    return [];
   };
 
   // 从 BPMN 文档加载已有值
@@ -114,6 +153,17 @@ export default function FixedFieldsModal({
           setCallee(matchedCalleeIds);
         } else {
           setCallee([]);
+        }
+        if (parsed.outputs) {
+          const list = Object.keys(parsed.outputs).map((key, index) => ({
+            key: index,
+            name: key,
+            type: parsed.outputs[key].type,
+            dataType: parsed.outputs[key].dataType,
+          }));
+          setOutputList(list);
+        } else {
+          setOutputList([]);
         }
       } catch {
         // ignore parse error
@@ -170,7 +220,7 @@ export default function FixedFieldsModal({
       if (Array.isArray(docs) && docs.length) {
         try {
           const parsed = JSON.parse(docs[0].text);
-          if ((parsed.operation === 'mint' || parsed.operation === 'branch'||parsed.operation === 'merge') && parsed.tokenId) {
+          if ((parsed.operation === 'mint' || parsed.operation === 'branch' || parsed.operation === 'merge') && parsed.tokenId) {
             newTokenIdsSet.add(parsed.tokenId);
           }
         } catch {
@@ -196,7 +246,7 @@ export default function FixedFieldsModal({
       if (Array.isArray(docs) && docs.length) {
         try {
           const parsed = JSON.parse(docs[0].text);
-          if (parsed.tokenId && (parsed.operation === 'mint' || parsed.operation === 'branch'||parsed.operation === 'merge') && !newTokenIdsSet.has(parsed.tokenId)) {
+          if (parsed.tokenId && (parsed.operation === 'mint' || parsed.operation === 'branch' || parsed.operation === 'merge') && !newTokenIdsSet.has(parsed.tokenId)) {
             const cleaned = { ...parsed };
             delete cleaned.tokenId;
             commandStack.execute('element.updateProperties', {
@@ -236,7 +286,7 @@ export default function FixedFieldsModal({
 
   // 若当前选择非 mint 操作，而 tokenId state 已经不在 options 中，清空
   React.useEffect(() => {
-    if (operation && operation !== 'mint' && operation !== 'branch'&& operation !== 'merge' && tokenId && !tokenIdOptions.includes(tokenId)) {
+    if (operation && operation !== 'mint' && operation !== 'branch' && operation !== 'merge' && tokenId && !tokenIdOptions.includes(tokenId)) {
       setTokenId('');
     }
   }, [operation, tokenIdOptions, tokenId]);
@@ -281,7 +331,7 @@ export default function FixedFieldsModal({
       payload.caller = pureCaller;
     }
     if ((assetType === 'transferable' && operation === 'Transfer') ||
-      (assetType === 'distributive' && ['grant usage rights', 'revoke usage rights','transfer'].includes(operation))) {
+      (assetType === 'distributive' && ['grant usage rights', 'revoke usage rights', 'transfer'].includes(operation))) {
       if (callee.length) {
         payload.callee = callee.map(id => id.split('_ChoreographyTask_')[0]);
       }
@@ -300,6 +350,21 @@ export default function FixedFieldsModal({
     if (assetType === 'value-added' && operation !== 'query' && refTokenIds.length > 0) {
       payload.refTokenIds = refTokenIds;
     }
+
+    // Only query operation supports outputs
+    if (operation === "query") {
+      const outputs = {};
+      outputList.forEach(item => {
+        outputs[item.name] = {
+          type: item.type,
+          dataType: item.dataType,
+        };
+      });
+      payload.outputs = outputs;
+    }
+
+
+
     commandStack.execute('element.updateProperties', {
       element: shape,
       properties: {
@@ -313,7 +378,7 @@ export default function FixedFieldsModal({
   };
 
   const handleOk = () => {
-    if ((operation === 'mint' || operation === 'branch'||operation === 'merge') && tokenId && tokenId !== originalTokenId && tokenIdOptions.includes(tokenId)) {
+    if ((operation === 'mint' || operation === 'branch' || operation === 'merge') && tokenId && tokenId !== originalTokenId && tokenIdOptions.includes(tokenId)) {
       message.warning('The tokenId already exists. Please choose a different one');
       return;
     }
@@ -325,9 +390,9 @@ export default function FixedFieldsModal({
   const shouldShowCallee = React.useMemo(() => {
     return (
       (assetType === 'transferable' && operation === 'Transfer') ||
-      (assetType === 'distributive' && ['grant usage rights', 'revoke usage rights','transfer'].includes(operation))
+      (assetType === 'distributive' && ['grant usage rights', 'revoke usage rights', 'transfer'].includes(operation))
     );
-  }, [assetType, operation]); 
+  }, [assetType, operation]);
 
   const shouldShowTokenName = true;
   const shouldShowTokenNumber = React.useMemo(() => {
@@ -423,7 +488,7 @@ export default function FixedFieldsModal({
       {shouldShowTokenId && (
         <div style={{ marginBottom: 16 }}>
           <label style={{ display: 'block', marginBottom: 4 }}>Token ID:</label>
-          {(operation === 'mint' || operation === 'branch'||operation ==='merge') ? (
+          {(operation === 'mint' || operation === 'branch' || operation === 'merge') ? (
             <Input
               value={tokenId}
               onChange={e => setTokenId(e.target.value)}
@@ -471,14 +536,14 @@ export default function FixedFieldsModal({
               value={tokenName}
               onChange={e => setTokenName(e.target.value)}
               placeholder="Enter token name"
-              disabled={!(operation === 'mint' || operation === 'branch'||operation==='merge')}
+              disabled={!(operation === 'mint' || operation === 'branch' || operation === 'merge')}
             />
           )}
         </div>
       )}
 
       {/*7. tokenURI */}
-     {/*  {shouldShowTokenId && tokenId && (
+      {/*  {shouldShowTokenId && tokenId && (
         <div style={{ marginBottom: 16 }}>
           <label style={{ display: 'block', marginBottom: 4 }}>Token URL:</label>
           {operation === 'mint' || operation === 'branch'||operation==='merge' ? (
@@ -553,6 +618,111 @@ export default function FixedFieldsModal({
           />
         </div>
       )}
+      {operation === "query" && (
+        <div style={{ marginBottom: 20 }}>
+          <label style={{ display: "block", marginBottom: 4 }}>Output Fields:</label>
+
+          {/* 无数据不显示表格 */}
+          {outputList.length > 0 ? (
+            <Table
+              dataSource={outputList}
+              pagination={false}
+              rowKey="key"
+              columns={[
+                {
+                  title: "Type",
+                  dataIndex: "type",
+                  render: (_, record) => (
+                    <Select
+                      value={record.type}
+                      style={{ width: 140 }}
+                      onChange={(v) => {
+                        const copy = [...outputList];
+                        const t = getOutputTypes().find(o => o.value === v);
+                        copy[record.key].type = v;
+                        copy[record.key].dataType = t?.dataType || "string";
+                        setOutputList(copy);
+                      }}
+                    >
+                      {getOutputTypes().map(o => (
+                        <Select.Option key={o.value} value={o.value}>
+                          {o.label}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  )
+                },
+
+                {
+                  title: "Name",
+                  dataIndex: "name",
+                  render: (_, record) => (
+                    <Input
+                      value={record.name}
+                      onChange={(e) => {
+                        const copy = [...outputList];
+                        copy[record.key].name = e.target.value;
+                        setOutputList(copy);
+                      }}
+                    />
+                  )
+                },
+
+                {
+                  title: "DataType",
+                  dataIndex: "dataType",
+                  render: (_, record) => (
+                    <Input
+                      disabled
+                      value={record.dataType}
+                      style={{ width: 120 }}
+                    />
+                  )
+                },
+
+                {
+                  title: "Action",
+                  render: (_, record) => (
+                    <a
+                      onClick={() => {
+                        const kept = outputList.filter(x => x.key !== record.key);
+                        setOutputList(kept.map((x, i) => ({ ...x, key: i })));
+                      }}
+                    >
+                      Delete
+                    </a>
+                  )
+                }
+              ]}
+            />
+          ) : (
+            <div style={{ margin: "8px 0 12px 0", color: "#999" }}>
+              No output fields. Click "Add" to create one.
+            </div>
+          )}
+
+          {/* Add 按钮 */}
+          <Button
+            type="primary"
+            style={{ marginTop: 10 }}
+            onClick={() => {
+              const opts = getOutputTypes();
+              const copy = [...outputList];
+              copy.push({
+                key: copy.length,
+                name: "",
+                type: opts[0]?.value || "",
+                dataType: opts[0]?.dataType || "string",
+              });
+              setOutputList(copy);
+            }}
+          >
+            Add
+          </Button>
+        </div>
+      )}
+
+
 
 
     </Modal>
