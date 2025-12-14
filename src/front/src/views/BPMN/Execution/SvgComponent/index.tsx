@@ -626,16 +626,15 @@ const ControlPanel = ({
 	const queryParams = new URLSearchParams(location.search);
 	const msp = queryParams.get("msp");
 	const type = currentElement?.type;
-	const operation = (currentElement?.operation || "").toLowerCase();//判断tokenTask是不是mint操作
-	const assetType = (currentElement?.assetType || "").toLowerCase();
-	const tokenKey = currentElement?.tokenKey || "";   // e.g. "NFT_0-2"
-	const tokenType = tokenKey.split("_")[0].toLowerCase(); // => "nft"
-	const isMintTokenTask = type === "tokenTask" && (operation === "mint"&&tokenType === "nft") || (operation ==="mint"&& assetType ==="distributive") || ((operation ==="branch"||operation==="merge")&& assetType ==="value-added");
+	const operation = (currentElement?.operation || "").trim().toLowerCase();//判断tokenTask是不是mint操作
+	const assetType = (currentElement?.assetType || "").trim().toLowerCase();
+	const tokenKey = currentElement?.TokenKey || "";   // e.g. "NFT_0-2"
+	const tokenType = tokenKey.split("_")[0].trim().toLowerCase(); // => "nft"
+	const isMintTokenTask = type === "tokenTask"&&( (operation === "mint"&&tokenType === "nft") || (operation ==="mint"&& assetType ==="distributive") || ((operation ==="branch"||operation==="merge")&& assetType ==="value-added"));
 	const Identity = queryParams.get("identity");
-
 	const temp_map = {
 		"user1": "Participant_1080bkg",
-		"user2": "Participant_0sktaei"
+		"user2": "Participant_0sktaei" 
 	}
 	const isYourTurn = (() => {
 		if (type === "event") return currentElement?.EventState === 1;
