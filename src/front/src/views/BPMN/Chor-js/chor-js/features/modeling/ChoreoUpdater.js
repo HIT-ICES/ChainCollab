@@ -55,11 +55,13 @@ ChoreoUpdater.prototype.updateSemanticParent = function (businessObject, newPare
       console.log('  targetRef:', targetRef?.$type);
 
       // Check if either source or target is ChoreographyActivity
+      // CRITICAL: Also check newParent because sourceRef/targetRef may not be set yet when this is called
       const involvesChoreography =
         (sourceRef && is(sourceRef, 'bpmn:ChoreographyActivity')) ||
         (targetRef && is(targetRef, 'bpmn:ChoreographyActivity')) ||
         (visualParent?.source && is(visualParent.source, 'bpmn:ChoreographyActivity')) ||
-        (visualParent?.target && is(visualParent.target, 'bpmn:ChoreographyActivity'));
+        (visualParent?.target && is(visualParent.target, 'bpmn:ChoreographyActivity')) ||
+        is(newParent, 'bpmn:ChoreographyActivity');
 
       console.log('  involvesChoreography:', involvesChoreography);
 
@@ -77,7 +79,30 @@ ChoreoUpdater.prototype.updateSemanticParent = function (businessObject, newPare
           }
         }
 
-        // Add to source's dataOutputAssociations if applicable
+        // CRITICAL: Prepare arrays on ChoreographyActivity BEFORE bpmn-js tries to use them
+        if (is(newParent, 'bpmn:ChoreographyActivity')) {
+          // For DataInputAssociation: ChoreographyActivity is the target
+          if (is(businessObject, 'bpmn:DataInputAssociation')) {
+            if (!newParent.dataInputAssociations) {
+              newParent.dataInputAssociations = [];
+            }
+            if (!newParent.dataInputAssociations.includes(businessObject)) {
+              newParent.dataInputAssociations.push(businessObject);
+            }
+          }
+
+          // For DataOutputAssociation: ChoreographyActivity is the source
+          if (is(businessObject, 'bpmn:DataOutputAssociation')) {
+            if (!newParent.dataOutputAssociations) {
+              newParent.dataOutputAssociations = [];
+            }
+            if (!newParent.dataOutputAssociations.includes(businessObject)) {
+              newParent.dataOutputAssociations.push(businessObject);
+            }
+          }
+        }
+
+        // Add to source's dataOutputAssociations if applicable (when sourceRef is already set)
         if (is(businessObject, 'bpmn:DataOutputAssociation') && sourceRef && is(sourceRef, 'bpmn:ChoreographyActivity')) {
           if (!sourceRef.dataOutputAssociations) {
             sourceRef.dataOutputAssociations = [];
@@ -87,7 +112,7 @@ ChoreoUpdater.prototype.updateSemanticParent = function (businessObject, newPare
           }
         }
 
-        // Add to target's dataInputAssociations if applicable
+        // Add to target's dataInputAssociations if applicable (when targetRef is already set)
         if (is(businessObject, 'bpmn:DataInputAssociation') && targetRef && is(targetRef, 'bpmn:ChoreographyActivity')) {
           if (!targetRef.dataInputAssociations) {
             targetRef.dataInputAssociations = [];
