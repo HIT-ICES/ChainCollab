@@ -812,6 +812,18 @@ entryFactory.checkbox({
 - ✅ 导出 XML 符合 BPMN 2.0 标准
 - ✅ 重新导入 XML 正确恢复 DataObject 和关联
 
+---
+
+## 本次修复总结（导入/导出稳定性）
+
+本次修复聚焦 DataObject / DataAssociation 的导入导出一致性，解决了下载报错、导入不显示、关联线丢失等问题：
+
+- **导出丢关联**：连接后将 `DataInputAssociation` / `DataOutputAssociation` 挂载到 `ChoreographyActivity`，并设置 `$parent`，确保多条关联都被序列化。
+- **DI 排序补全**：DI 排序遍历纳入 `dataInputAssociations` / `dataOutputAssociations`，防止导出时遗漏关联边。
+- **导入缺语义**：当 XML 只有 `BPMNEdge` 时，导入阶段可根据边端点反推并创建 `DataInputAssociation` / `DataOutputAssociation` 语义对象。
+- **端点解析容错**：允许端点轻微偏移，提高关联边的恢复成功率。
+- **缺失 DI 容错**：对缺 DI 元素/边给出警告并跳过，避免导入中断。
+
 ### 边界情况
 - ✅ 删除 Activity 时关联的 DataAssociation 自动删除
 - ✅ 删除 DataObject 时关联自动删除

@@ -68,62 +68,46 @@ ChoreoUpdater.prototype.updateSemanticParent = function (businessObject, newPare
       if (involvesChoreography) {
         console.log('[ChoreoUpdater.updateSemanticParent] Handling manually, NOT calling BpmnUpdater');
 
-        // Handle DataAssociation manually for ChoreographyActivity
-        // Add to parent container's flowElements if it exists
-        if (newParent) {
-          if (!newParent.flowElements) {
-            newParent.flowElements = [];
-          }
-          if (!newParent.flowElements.includes(businessObject)) {
-            newParent.flowElements.push(businessObject);
-          }
+        let activityBo = null;
+        if (sourceRef && is(sourceRef, 'bpmn:ChoreographyActivity')) {
+          activityBo = sourceRef;
+        } else if (targetRef && is(targetRef, 'bpmn:ChoreographyActivity')) {
+          activityBo = targetRef;
+        } else if (visualParent?.source && is(visualParent.source, 'bpmn:ChoreographyActivity')) {
+          activityBo = visualParent.source.businessObject;
+        } else if (visualParent?.target && is(visualParent.target, 'bpmn:ChoreographyActivity')) {
+          activityBo = visualParent.target.businessObject;
+        } else if (is(newParent, 'bpmn:ChoreographyActivity')) {
+          activityBo = newParent;
         }
 
-        // CRITICAL: Prepare arrays on ChoreographyActivity BEFORE bpmn-js tries to use them
-        if (is(newParent, 'bpmn:ChoreographyActivity')) {
-          // For DataInputAssociation: ChoreographyActivity is the target
+        if (activityBo) {
+          businessObject.$parent = activityBo;
           if (is(businessObject, 'bpmn:DataInputAssociation')) {
-            if (!newParent.dataInputAssociations) {
-              newParent.dataInputAssociations = [];
+            if (!activityBo.dataInputAssociations) {
+              activityBo.dataInputAssociations = [];
             }
-            if (!newParent.dataInputAssociations.includes(businessObject)) {
-              newParent.dataInputAssociations.push(businessObject);
+            if (!activityBo.dataInputAssociations.includes(businessObject)) {
+              activityBo.dataInputAssociations.push(businessObject);
+            }
+          } else if (is(businessObject, 'bpmn:DataOutputAssociation')) {
+            if (!activityBo.dataOutputAssociations) {
+              activityBo.dataOutputAssociations = [];
+            }
+            if (!activityBo.dataOutputAssociations.includes(businessObject)) {
+              activityBo.dataOutputAssociations.push(businessObject);
             }
           }
 
-          // For DataOutputAssociation: ChoreographyActivity is the source
-          if (is(businessObject, 'bpmn:DataOutputAssociation')) {
-            if (!newParent.dataOutputAssociations) {
-              newParent.dataOutputAssociations = [];
-            }
-            if (!newParent.dataOutputAssociations.includes(businessObject)) {
-              newParent.dataOutputAssociations.push(businessObject);
+          if (activityBo.$parent && activityBo.$parent.flowElements) {
+            const idx = activityBo.$parent.flowElements.indexOf(businessObject);
+            if (idx !== -1) {
+              activityBo.$parent.flowElements.splice(idx, 1);
             }
           }
+        } else {
+          businessObject.$parent = newParent;
         }
-
-        // Add to source's dataOutputAssociations if applicable (when sourceRef is already set)
-        if (is(businessObject, 'bpmn:DataOutputAssociation') && sourceRef && is(sourceRef, 'bpmn:ChoreographyActivity')) {
-          if (!sourceRef.dataOutputAssociations) {
-            sourceRef.dataOutputAssociations = [];
-          }
-          if (!sourceRef.dataOutputAssociations.includes(businessObject)) {
-            sourceRef.dataOutputAssociations.push(businessObject);
-          }
-        }
-
-        // Add to target's dataInputAssociations if applicable (when targetRef is already set)
-        if (is(businessObject, 'bpmn:DataInputAssociation') && targetRef && is(targetRef, 'bpmn:ChoreographyActivity')) {
-          if (!targetRef.dataInputAssociations) {
-            targetRef.dataInputAssociations = [];
-          }
-          if (!targetRef.dataInputAssociations.includes(businessObject)) {
-            targetRef.dataInputAssociations.push(businessObject);
-          }
-        }
-
-        // Set the parent reference
-        businessObject.$parent = newParent;
 
         console.log('[ChoreoUpdater.updateSemanticParent] Manual handling complete, returning');
         // Don't call BpmnUpdater for ChoreographyActivity DataAssociation

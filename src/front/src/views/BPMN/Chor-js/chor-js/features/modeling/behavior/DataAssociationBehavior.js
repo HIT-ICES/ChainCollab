@@ -24,6 +24,40 @@ export default function DataAssociationBehavior(injector) {
       console.log('[DataAssociationBehavior] postExecuted connection.create:');
       console.log('  Connection type:', connection.businessObject.$type);
 
+      const connectionBo = connection.businessObject;
+      const activityBo = getChoreographyActivity(source, target);
+      if (activityBo) {
+        connectionBo.$parent = activityBo;
+        if (is(connectionBo, 'bpmn:DataInputAssociation')) {
+          if (!connectionBo.sourceRef && source) {
+            connectionBo.sourceRef = [source.businessObject];
+          }
+          if (!activityBo.dataInputAssociations) {
+            activityBo.dataInputAssociations = [];
+          }
+          if (!activityBo.dataInputAssociations.includes(connectionBo)) {
+            activityBo.dataInputAssociations.push(connectionBo);
+          }
+        } else if (is(connectionBo, 'bpmn:DataOutputAssociation')) {
+          if (!connectionBo.targetRef && target) {
+            connectionBo.targetRef = target.businessObject;
+          }
+          if (!activityBo.dataOutputAssociations) {
+            activityBo.dataOutputAssociations = [];
+          }
+          if (!activityBo.dataOutputAssociations.includes(connectionBo)) {
+            activityBo.dataOutputAssociations.push(connectionBo);
+          }
+        }
+
+        if (activityBo.$parent && activityBo.$parent.flowElements) {
+          const idx = activityBo.$parent.flowElements.indexOf(connectionBo);
+          if (idx !== -1) {
+            activityBo.$parent.flowElements.splice(idx, 1);
+          }
+        }
+      }
+
       if (is(source, 'bpmn:ChoreographyActivity')) {
         console.log('  Source BEFORE ensure:', source.type, source.businessObject.$type);
         console.log('  Source bandShapes BEFORE:', source.bandShapes?.length);
@@ -74,6 +108,16 @@ function ensureChoreographyActivity(shape) {
       shape.bandShapes = [];
     }
   }
+}
+
+function getChoreographyActivity(source, target) {
+  if (is(source, 'bpmn:ChoreographyActivity')) {
+    return source.businessObject;
+  }
+  if (is(target, 'bpmn:ChoreographyActivity')) {
+    return target.businessObject;
+  }
+  return null;
 }
 
 DataAssociationBehavior.$inject = ['injector'];
