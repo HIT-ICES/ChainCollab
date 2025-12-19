@@ -6,17 +6,46 @@ certificateAuthorities:
       enrollId: admin
       enrollSecret: adminpw
     tlsCACerts:
-      path: ./test1/1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/msp/tlscacerts/ca.crt
+      path: ./1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/msp/tlscacerts/ca.crt
     url: https://ca.mem.org.com:7054
+  ca.Organization-Consortium.org.com:
+    grpcOptions:
+      ssl-target-name-override: ca.Organization-Consortium.org.com
+    registrar:
+      enrollId: admin
+      enrollSecret: adminpw
+    tlsCACerts:
+      path: ./2_msp/Organization-Consortium.org.com/crypto-config/peerOrganizations/Organization-Consortium.org.com/msp/tlscacerts/ca.crt
+    url: https://ca.Organization-Consortium.org.com:7054
+  ca.Environment-system.org.com:
+    grpcOptions:
+      ssl-target-name-override: ca.Environment-system.org.com
+    registrar:
+      enrollId: admin
+      enrollSecret: adminpw
+    tlsCACerts:
+      path: ./0_msp/Environment-system.org.com/crypto-config/peerOrganizations/Environment-system.org.com/msp/tlscacerts/ca.crt
+    url: https://ca.Environment-system.org.com:7054
+  
 channels:
   default:
     orderers:
     - fabric_orderer
     peers:
-      fabric_peer:
+      fabric_peer0:
         chaincodeQuery: true
         endorsingPeer: true
         eventSource: true
+        ledgerQuery: true
+      fabric_peer1:
+        chaincodeQuery: true
+        endorsingPeer: true
+        eventSource: false
+        ledgerQuery: true
+      fabric_peer2:
+        chaincodeQuery: true
+        endorsingPeer: true
+        eventSource: false
         ledgerQuery: true
 client:
   BCCSP:
@@ -29,23 +58,23 @@ client:
       softVerify: true
   credentialStore:
     cryptoStore:
-      path: ./test1/1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/msp
-    path: ./test1/1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/msp
+      path: ./1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/msp
+    path: ./1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/msp
   cryptoconfig:
-    path: ./test1/1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/msp
+    path: ./1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/msp
   logging:
     level: info
   organization: mem.org.com
   tlsCerts:
     client:
       cert:
-        path: ./test1/1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/users/Admin@mem.org.com/msp/signcerts/cert.pem
+        path: ./1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/users/Admin@mem.org.com/msp/signcerts/cert.pem
       key:
-        path: ./test1/1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/users/Admin@mem.org.com/msp/keystore/a86dbf71fbcc5d7a5a51f36c953a924151e29bc479ba953c001303fc26e2f07b_sk
+        path: ./1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/users/Admin@mem.org.com/msp/keystore/a86dbf71fbcc5d7a5a51f36c953a924151e29bc479ba953c001303fc26e2f07b_sk
 orderers:
   fabric_orderer:
     tlsCACerts:
-      path: ./test1/1_msp/Environment-system.org.com/crypto-config/ordererOrganizations/org.com/orderers/orderer10.org.com/tls/tlscacerts/tls-ca-Environment-system-org-com-23521-ca-Environment-system-org-com.pem
+      path: ./1_msp/Environment-system.org.com/crypto-config/ordererOrganizations/org.com/orderers/orderer10.org.com/tls/tlscacerts/tls-ca-Environment-system-org-com-23521-ca-Environment-system-org-com.pem
     url: grpcs://orderer10.org.com:7050
 organizations:
   mem.org.com:
@@ -54,10 +83,34 @@ organizations:
     cryptoPath: /tmp/msp
     mspid: Mem.org.comMSP
     peers:
-    - fabric_peer
+    - fabric_peer1
+  
+  Environment-system.org.com:
+    certificateAuthorities:
+    - ca.Environment-system.org.com
+    cryptoPath: /tmp/msp
+    mspid: Environment-system.org.comMSP
+    peers:
+    - fabric_peer0
+
+  Organization-Consortium.org.com:
+    certificateAuthorities:
+    - ca.Organization-Consortium.org.com
+    cryptoPath: /tmp/msp
+    mspid: Organization-consortium.org.comMSP
+    peers:
+    - fabric_peer2
 peers:
-  fabric_peer:
+  fabric_peer1:
     tlsCACerts:
-      path: ./test1/1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/peers/peer10.mem.org.com/tls/tlscacerts/tls-ca-mem-org-com-14067-ca-mem-org-com.pem
+      path: ./1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/peers/peer10.mem.org.com/tls/tlscacerts/tls-ca-mem-org-com-14067-ca-mem-org-com.pem
     url: grpcs://peer10.mem.org.com:7051
+  fabric_peer0:
+    tlsCACerts:
+      path: ./0_msp/Environment-system.org.com/crypto-config/peerOrganizations/Environment-system.org.com/peers/peer10.Environment-system.org.com/tls/tlscacerts/tls-ca-Environment-system-org-com-23521-ca-Environment-system-org-com.pem
+    url: grpcs://peer10.Environment-system.org.com:7051
+  fabric_peer2:
+    tlsCACerts:
+      path: ./2_msp/Organization-Consortium.org.com/crypto-config/peerOrganizations/Organization-Consortium.org.com/peers/peer10.Organization-Consortium.org.com/tls/tlscacerts/tls-ca-Organization-Consortium-org-com-15938-ca-Organization-Consortium-org-com.pem
+    url: grpcs://peer10.Organization-Consortium.org.com:7051
 version: 1.1.0%F
