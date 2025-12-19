@@ -95,17 +95,19 @@ export default function FixedFieldsModal({
     // 增值型（value-added）
     if (assetType === "value-added") {
       return [
-        { value: "URI", label: "URI", dataType: "string" },
+         { value: "URI", label: "URI", dataType: "string" },
         { value: "owner", label: "Owner", dataType: "string" },
-        { value: "tokenURL", label: "Token URL", dataType: "string" },
+        { value: "referring", label: "Referring", dataType: "string" },
+        { value: "referred", label: "referred", dataType: "string" },
       ];
     }
 
     // 分发型 distributive
     if (assetType === "distributive") {
       return [
-        { value: "owner", label: "Owner", dataType: "string" },
-        { value: "balance", label: "Balance", dataType: "number" },
+        { value: "isowner", label: "isOwner", dataType: "boolean" },
+        { value: "isuser", label: "isUser", dataType: "boolean" },
+        { value: "URI", label: "URI", dataType: "string" }
       ];
     }
 
@@ -378,6 +380,12 @@ export default function FixedFieldsModal({
   };
 
   const handleOk = () => {
+    if (shouldShowCallee && (!callee || callee.length === 0)) {
+      message.warning(
+        `Please select ${operationToCalleeLabel[operation] || 'callee'}`
+      );
+      return;
+    }
     if ((operation === 'mint' || operation === 'branch' || operation === 'merge') && tokenId && tokenId !== originalTokenId && tokenIdOptions.includes(tokenId)) {
       message.warning('The tokenId already exists. Please choose a different one');
       return;

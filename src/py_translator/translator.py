@@ -728,8 +728,34 @@ class GoChaincodeTranslator:
                 change_next_state_code=self._generate_change_state_code(business_rule.outgoing.target),
             )
         )
-
+    
         return temp_list
+    def _generate_query_output_filed(self, outputs: dict,data_type:str) -> str:
+        """
+        switch name { ... } 写入 StateMemory 片段
+        """
+
+        if not outputs:
+            return ""
+
+        lines = []
+        lines.append("switch name {")
+
+        for name,spec in outputs.items():
+            field_name = public_the_name(name)
+            datatype=spec.get("dataType") 
+             # sd -> Sd
+            if data_type==datatype:
+                lines.append(f'\tcase "{name}":')
+                lines.append(f'\t\tfmt.Println("query value:", value)')
+                lines.append(f'\t\tinstance.InstanceStateMemory.{field_name} = value')
+
+        lines.append('\tdefault:')
+        lines.append('\t\treturn fmt.Errorf("unsupported output name: %s", name)')
+        lines.append("}")
+
+        return "\n".join(lines)
+
     #留个问题 分不同情况，产生不同框架
     def _generate_chaincode_for_tokenElement(self,task:Task):
         temp_list =[]
@@ -767,6 +793,19 @@ class GoChaincodeTranslator:
                         after_all_hook=after_all_hook
                     )
                 )
+            elif token_operation =="query":
+                doc = {}
+                if task.documentation and task.documentation != "{}":
+                    doc = json.loads(task.documentation)
+                outputs = doc.get("outputs", {})
+                filed = self._generate_query_output_filed(outputs,"string")
+                temp_list.append(
+                    snippet.NFTQuery_code(
+                        activityId=task.id,
+                        after_all_hook=after_all_hook,
+                        filed = filed 
+                    )
+                ) 
         elif token_type=="FT":
             if token_operation=="mint":
                 temp_list.append(
@@ -787,6 +826,19 @@ class GoChaincodeTranslator:
                     snippet.FTBurn_code(
                         activityId=task.id,
                         after_all_hook=after_all_hook 
+                    )
+                )
+            elif token_operation =="query":
+                doc = {}
+                if task.documentation and task.documentation != "{}":
+                    doc = json.loads(task.documentation)
+                outputs = doc.get("outputs", {})
+                filed = self._generate_query_output_filed(outputs,"number")
+                temp_list.append(
+                    snippet.FTQuery_code(
+                        activityId=task.id,
+                        after_all_hook=after_all_hook,
+                        filed = filed 
                     )
                 )  
         elif token_assetType=="distributive":
@@ -825,6 +877,21 @@ class GoChaincodeTranslator:
                         after_all_hook=after_all_hook
                     )
                 )
+            elif token_operation=="query":
+                doc = {}
+                if task.documentation and task.documentation != "{}":
+                    doc = json.loads(task.documentation)
+                outputs = doc.get("outputs", {})
+                filed1 = self._generate_query_output_filed(outputs,"string")
+                filed2 = self._generate_query_output_filed(outputs,"boolean")
+                temp_list.append(
+                    snippet.DisQuery_code(
+                        activityId=task.id,
+                        after_all_hook=after_all_hook,
+                        filed1 = filed1,
+                        filed2 = filed2,
+                    )
+                )
         elif token_assetType=="value-added":
             if token_operation=="branch":
                 temp_list.append(
@@ -838,6 +905,19 @@ class GoChaincodeTranslator:
                     snippet.AddValueMint_code(
                       activityId=task.id,
                         after_all_hook=after_all_hook   
+                    )
+                )
+            elif token_operation=="query":
+                doc = {}
+                if task.documentation and task.documentation != "{}":
+                    doc = json.loads(task.documentation)
+                outputs = doc.get("outputs", {})
+                filed = self._generate_query_output_filed(outputs,"string")
+                temp_list.append(
+                    snippet.AddValueQuery_code(
+                        activityId=task.id,
+                        after_all_hook=after_all_hook,
+                        filed = filed 
                     )
                 )
         return temp_list
@@ -866,8 +946,36 @@ class GoChaincodeTranslator:
         chaincode_list.append(snippet.contract_definition_code())
         # global variable definition
         fields = ""
-        if len(self._choreography.query_element_with_type(NodeType.TASK))>0:
-            fields="""ID string `json:"id,omitempty"` // 防报错\n"""
+        output_fields = {}
+        for task in self._choreography.query_element_with_type(NodeType.TASK):
+            if not task.documentation or task.documentation == "{}":
+                continue
+            try:
+                doc = json.loads(task.documentation)
+            except json.JSONDecodeError:
+                continue
+            
+            outputs = doc.get("outputs", {})
+            if not isinstance(outputs, dict):
+                continue
+            
+            for name, info in outputs.items():
+                data_type = info.get("dataType")
+                if not data_type:
+                    continue
+                field_name = public_the_name(name)
+                go_type = type_change_from_bpmn_to_go(data_type)
+
+                output_fields[field_name] = (
+                    f'{field_name} {go_type} `json:"{field_name}"`'
+                )
+        if output_fields:
+            for line in output_fields.values():
+                fields += line + "\n"
+        else:
+            fields += 'ID string `json:"id,omitempty"` // 防报错\n'
+        # if len(self._choreography.query_element_with_type(NodeType.TASK))>0:
+        #     fields="""ID string `json:"id,omitempty"` // 防报错\n"""
         chaincode_list.append(snippet.StateMemoryDefinition_code(fields))
         # initParams definition
         chaincode_list.append(snippet.InitParametersTypeDefFrame_code(self._generate_instance_initparameters_code()))

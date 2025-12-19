@@ -415,6 +415,17 @@ def NFTBurn_code(
         after_all_hook=after_all_hook,
     )
 
+def NFTQuery_code(
+  activityId:str,
+  after_all_hook:str = "",
+  filed:str="",      
+):
+    return content["NFTQueryFrame"].format(
+        activityId=activityId,
+        after_all_hook=after_all_hook,
+        filed = filed,
+    )
+
 def FTMint_code(
     activityId :str,
     after_all_hook: str = "",  
@@ -432,6 +443,7 @@ def FTTransfer_code(
         activityId=activityId,
         after_all_hook=after_all_hook,
     )
+
 def FTBurn_code(
     activityId :str,
     after_all_hook: str = "",  
@@ -441,6 +453,16 @@ def FTBurn_code(
         after_all_hook=after_all_hook,
     )
 
+def FTQuery_code(
+  activityId:str,
+  after_all_hook:str = "",
+  filed:str="",      
+):
+    return content["FTQueryFrame"].format(
+        activityId=activityId,
+        after_all_hook=after_all_hook,
+        filed = filed,
+    )
 
 def DistributiveMint_code(
     activityId :str,
@@ -486,6 +508,20 @@ def DistributiveTransfer_code(
         activityId=activityId,
         after_all_hook=after_all_hook,
     )
+
+def DisQuery_code(
+  activityId:str,
+  after_all_hook:str = "",
+  filed1:str="",      
+  filed2:str="",      
+):
+    return content["DisQueryFrame"].format(
+        activityId=activityId,
+        after_all_hook=after_all_hook,
+        filed1 = filed1,
+        filed2 = filed2,
+    )
+
  
 def AddValueMint_code(
     activityId :str,
@@ -494,7 +530,18 @@ def AddValueMint_code(
    return content["AddValueMintFrame"].format(
         activityId=activityId,
         after_all_hook=after_all_hook,
-    )  
+    )
+
+def AddValueQuery_code(
+  activityId:str,
+  after_all_hook:str = "",
+  filed:str="",      
+):
+    return content["AddValueQueryFrame"].format(
+        activityId=activityId,
+        after_all_hook=after_all_hook,
+        filed = filed,
+    )
 
 def InvokeChaincodeFunc_code():
     return content["InvokeChaincodeFunc"]
