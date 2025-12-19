@@ -9,6 +9,7 @@ import Reporter from './lib-provider/validator/Validator.js';
 import MainPage from './pop-up/MainPage.js'
 import UploadDmnModal from './pop-up/UploadDmnModal';
 import TestPaletteProvider from './lib-provider/external-elements'
+import DataElementsModule from './lib-provider/data-elements'
 import { getParticipantsByContent } from '@/api/translator.ts'
 import { addBPMN } from '@/api/externalResource.js'
 import { useAppSelector } from "@/redux/hooks.ts";
@@ -289,7 +290,8 @@ const ChorJs = () => {
         additionalModules: [
           PropertiesPanelModule,
           PropertiesProviderModule,
-          TestPaletteProvider
+          TestPaletteProvider,
+          DataElementsModule
         ],
         keyboard: {
           bindTo: document

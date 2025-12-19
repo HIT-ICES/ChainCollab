@@ -30,6 +30,10 @@ export default function ChorPropertiesProvider(injector, bpmnFactory) {
     if (is(element, 'bpmn:Message')) {
       messageDefinition(detailsGroup, element, bpmnFactory, element.businessObject);
     }
+    // Add DataObject state property
+    if (is(element, 'bpmn:DataObjectReference')) {
+      this.dataObjectProperties(detailsGroup, element);
+    }
     return generalTab;
   };
 
@@ -54,6 +58,33 @@ export default function ChorPropertiesProvider(injector, bpmnFactory) {
       id: 'condition',
       label: 'Condition Expression',
       modelProperty: 'condition',
+
+      get: getValue,
+      set: setValue
+    }));
+  };
+
+  ChorPropertiesProvider.prototype.dataObjectProperties = function(group, element) {
+    const getValue = function(element) {
+      const dataObject = element.businessObject.dataObjectRef;
+      return {
+        state: dataObject ? (dataObject.state || '') : ''
+      };
+    };
+
+    const setValue = function(element, values) {
+      const dataObject = element.businessObject.dataObjectRef;
+      if (dataObject) {
+        return cmdHelper.updateBusinessObject(element, dataObject, {
+          state: values.state || ''
+        });
+      }
+    };
+
+    group.entries.push(entryFactory.textField({
+      id: 'data-object-state',
+      label: 'State',
+      modelProperty: 'state',
 
       get: getValue,
       set: setValue
