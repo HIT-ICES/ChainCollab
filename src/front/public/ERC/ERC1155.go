@@ -768,6 +768,21 @@ func (s *SmartContract) BalanceOf(ctx contractapi.TransactionContextInterface, a
 	return balanceOfHelper(ctx, account, id)
 }
 
+func (s *SmartContract) QueryBalance(ctx contractapi.TransactionContextInterface, account string, stringID string, instanceID string) (uint64, error) {
+
+	// Check if contract has been intilized first
+	initialized, err := checkInitialized(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("failed to check if contract is already initialized: %v", err)
+	}
+	if !initialized {
+		return 0, fmt.Errorf("Contract options need to be set before calling any function, call Initialize() to initialize contract")
+	}
+
+	id, err := s.Getuint64IDByString(ctx, stringID, instanceID)
+	return s.BalanceOf(ctx, account, id)
+}
+
 // BalanceOfBatch returns the balance of multiple account/token pairs
 func (s *SmartContract) BalanceOfBatch(ctx contractapi.TransactionContextInterface, accounts []string, ids []uint64) ([]uint64, error) {
 

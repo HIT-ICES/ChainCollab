@@ -322,7 +322,7 @@ func (s *SmartContract) Transfer(ctx contractapi.TransactionContextInterface, re
 }
 
 // BalanceOf returns the balance of the given account
-func (s *SmartContract) BalanceOf(ctx contractapi.TransactionContextInterface, account string, instanceID string) (int, error) {
+func (s *SmartContract) BalanceOf(ctx contractapi.TransactionContextInterface, account string) (int, error) {
 
 	// Check if contract has been intilized first
 	initialized, err := checkInitialized(ctx)
