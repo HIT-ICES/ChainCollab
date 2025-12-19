@@ -8,16 +8,16 @@ test:
     type: local
     number: 5     # 并发流程实例数
 
-rounds:
-  - label: full-flow
-    txNumber: 10 # 一共执行 200 个流程实例
-    rateControl:
-      type: fixed-rate
-      opts:
-        tps: 1   # 每秒启动 10 个流程实例
-    workload:
-      module: ./test1/workload/flow.js
-      arguments:
-        channel: default
-        contractId: test1
-        instancePrefix: inst
+  rounds:
+    - label: full-flow
+      txNumber: 10 # 一共执行 200 个流程实例
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 1   # 每秒启动 10 个流程实例
+      workload:
+        module: ./workload/flow.js
+        arguments:
+          channel: default
+          contractId: test1
+          instancePrefix: inst
