@@ -370,20 +370,48 @@ class SolidityFlowRenderer:
         return None
 
     def _literal_value(self, expr: Any, target_type: str) -> str:
-        if getattr(expr, "stringValue", None) is not None:
-            value = expr.stringValue
-            if target_type == "bool":
+        normalized_type = (target_type or "").lower()
+
+        def bool_literal() -> Optional[str]:
+            if getattr(expr, "boolValue", None) is not None:
+                return "true" if expr.boolValue else "false"
+            value = getattr(expr, "value", None)
+            if isinstance(value, bool):
+                return "true" if value else "false"
+            if isinstance(value, str):
                 lowered = value.lower()
                 if lowered in ("true", "false"):
                     return lowered
-                return "false"
-            if target_type in ("int", "float"):
+            return None
+
+        def int_literal() -> Optional[str]:
+            if getattr(expr, "intValue", None) is not None:
+                return str(expr.intValue)
+            value = getattr(expr, "value", None)
+            if isinstance(value, (int, float)):
+                return str(value)
+            if isinstance(value, str):
                 return value or "0"
-            return json.dumps(value)
-        if getattr(expr, "intValue", None) is not None:
-            return str(expr.intValue)
-        if getattr(expr, "boolValue", None) is not None:
-            return "true" if expr.boolValue else "false"
+            return None
+
+        def string_literal() -> Optional[str]:
+            if getattr(expr, "stringValue", None) is not None:
+                return json.dumps(expr.stringValue)
+            value = getattr(expr, "value", None)
+            if isinstance(value, str):
+                return json.dumps(value)
+            return None
+
+        if normalized_type == "bool":
+            literal = bool_literal()
+            if literal is not None:
+                return literal
+
+        if normalized_type in ("int", "float"):
+            literal = int_literal()
+            if literal is not None:
+                return literal
+
         value = getattr(expr, "value", None)
         if isinstance(value, bool):
             return "true" if value else "false"
@@ -391,14 +419,27 @@ class SolidityFlowRenderer:
             return str(value)
         if isinstance(value, str):
             lowered = value.lower()
-            if target_type == "bool" and lowered in ("true", "false"):
+            if normalized_type == "bool" and lowered in ("true", "false"):
                 return lowered
-            if target_type in ("int", "float"):
+            if normalized_type in ("int", "float"):
                 return value
             return json.dumps(value)
-        if target_type == "bool":
+
+        literal = bool_literal()
+        if literal is not None:
+            return literal
+
+        literal = int_literal()
+        if literal is not None:
+            return literal
+
+        literal = string_literal()
+        if literal is not None:
+            return literal
+
+        if normalized_type == "bool":
             return "false"
-        if target_type in ("int", "float"):
+        if normalized_type in ("int", "float"):
             return "0"
         return json.dumps("")
 

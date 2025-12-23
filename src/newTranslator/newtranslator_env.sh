@@ -77,17 +77,36 @@ nt-sol-build() {
 }
 
 nt-bpmn-to-b2c() {
-  local bpmn_file=${1:-"$NT_BPMN_DIR/amazon.bpmn"}
-  local output_file=${2:-"$NT_B2C_DIR/chaincode.b2c"}
+  local bpmn_file="$1"
+  local output_file="${2:-"$NT_B2C_DIR/chaincode.b2c"}"
+
+  if [ -z "$bpmn_file" ]; then
+    local candidates=("$NT_BPMN_DIR"/*.bpmn)
+    if [ ${#candidates[@]} -eq 0 ]; then
+      echo "No BPMN files found under $NT_BPMN_DIR. Provide a BPMN file path."
+      return 1
+    fi
+    echo "Select a BPMN source:"
+    select choice in "${candidates[@]}" "Cancel"; do
+      if [ "$choice" = "Cancel" ] || [ -z "$choice" ]; then
+        echo "Cancelled."
+        return 1
+      fi
+      bpmn_file="$choice"
+      break
+    done
+  fi
+
   if [ ! -f "$bpmn_file" ]; then
-    echo "BPMN file '$bpmn_file' not found. Provide a BPMN file path."
+    echo "BPMN file '$bpmn_file' not found. Provide a valid path."
     return 1
   fi
+
   mkdir -p "$(dirname "$output_file")"
   if command -v python3 >/dev/null 2>&1; then
-    python3 "$NEWTRANS_ROOT/DSLGenerator/bpmn_to_dsl.py" "$bpmn_file" -o "$output_file"
+    python3 -m generator.bpmn_to_dsl "$bpmn_file" -o "$output_file"
   else
-    python "$NEWTRANS_ROOT/DSLGenerator/bpmn_to_dsl.py" "$bpmn_file" -o "$output_file"
+    python -m generator.bpmn_to_dsl "$bpmn_file" -o "$output_file"
   fi
 }
 

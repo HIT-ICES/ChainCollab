@@ -21,31 +21,46 @@ contract WorkflowContract {
     }
 
     enum ParticipantKey {
-        Participant_1p9owwo,
-        Participant_12df78t
+        Participant_1jz106x,
+        Participant_0jcddbb,
+        Participant_0c1qh31
     }
 
     enum MessageKey {
-        Message_01jq2zl,
-        Message_068kmzv,
-        Message_076ulzs,
-        Message_09krt7c,
-        Message_0ywghlt,
-        Message_12n6jjk,
-        Message_1b1qlzd,
-        Message_1bhhp1n
+        Message_009a0bz,
+        Message_02ckm6k,
+        Message_06bv1qa,
+        Message_0b1e9t1,
+        Message_0cq2w1g,
+        Message_0g4xpdf,
+        Message_0hzpgno,
+        Message_0is10sh,
+        Message_0l75vce,
+        Message_0lvlunm,
+        Message_0nkjynd,
+        Message_0psi2ab,
+        Message_0to30q0,
+        Message_1989eur,
+        Message_1dp5xa4,
+        Message_1ufjjj2
     }
 
     enum GatewayKey {
-        Gateway_0auc3he,
-        Gateway_0ivv4vg,
-        Gateway_0jgq0a6
+        ExclusiveGateway_0uhgcse,
+        ExclusiveGateway_1e98v4d,
+        ExclusiveGateway_04bkb0l,
+        ExclusiveGateway_0cfvdeh,
+        ExclusiveGateway_1ksw1j2,
+        ExclusiveGateway_05xdg8u,
+        ExclusiveGateway_0wc677m,
+        ParallelGateway_0yw95j2,
+        ParallelGateway_0himv1h,
+        EventBasedGateway_1nphygh
     }
 
     enum EventKey {
-        Event_0ojehz6,
-        Event_0ci2gl8,
-        Event_0dyp0ut
+        StartEvent_0gb8jks,
+        EndEvent_11pwcmo
     }
 
     // ------------------------------------------------------------------
@@ -53,9 +68,9 @@ contract WorkflowContract {
     // ------------------------------------------------------------------
 
     struct StateMemory {
-        bool Confirm;
-        int256 Duration;
-        string Type;
+        bool Ask;
+        bool InsuranceReq;
+        bool IsAvailable;
     }
 
     struct Participant {
@@ -245,10 +260,9 @@ contract WorkflowContract {
     // ------------------------------------------------------------------
 
     struct InitParameters {
-        address Participant_1p9owwo_account;
-        address Participant_12df78t_account;
-        string Activity_0tya4bp_content;
-        string Activity_0tya4bp_decision;
+        address Participant_1jz106x_account;
+        address Participant_0jcddbb_account;
+        address Participant_0c1qh31_account;
     }
 
     function createInstance(
@@ -263,16 +277,24 @@ contract WorkflowContract {
 
         _createParticipant(
             inst,
-            ParticipantKey.Participant_1p9owwo,
-            params.Participant_1p9owwo_account,
+            ParticipantKey.Participant_1jz106x,
+            params.Participant_1jz106x_account,
             false,
             0,
             0
         );
         _createParticipant(
             inst,
-            ParticipantKey.Participant_12df78t,
-            params.Participant_12df78t_account,
+            ParticipantKey.Participant_0jcddbb,
+            params.Participant_0jcddbb_account,
+            false,
+            0,
+            0
+        );
+        _createParticipant(
+            inst,
+            ParticipantKey.Participant_0c1qh31,
+            params.Participant_0c1qh31_account,
             false,
             0,
             0
@@ -280,107 +302,195 @@ contract WorkflowContract {
 
         _createActionEvent(
             inst,
-            EventKey.Event_0ojehz6,
+            EventKey.StartEvent_0gb8jks,
             ElementState.ENABLED
         );
         _createActionEvent(
             inst,
-            EventKey.Event_0ci2gl8,
-            ElementState.DISABLED
-        );
-        _createActionEvent(
-            inst,
-            EventKey.Event_0dyp0ut,
+            EventKey.EndEvent_11pwcmo,
             ElementState.DISABLED
         );
 
         _createMessage(
             inst,
-            MessageKey.Message_01jq2zl,
-            ParticipantKey.Participant_1p9owwo,
-            ParticipantKey.Participant_12df78t,
+            MessageKey.Message_009a0bz,
+            ParticipantKey.Participant_1jz106x,
+            ParticipantKey.Participant_0jcddbb,
             ElementState.DISABLED,
-            "amount"
+            "{}"
         );
         _createMessage(
             inst,
-            MessageKey.Message_068kmzv,
-            ParticipantKey.Participant_12df78t,
-            ParticipantKey.Participant_1p9owwo,
+            MessageKey.Message_02ckm6k,
+            ParticipantKey.Participant_0jcddbb,
+            ParticipantKey.Participant_1jz106x,
             ElementState.DISABLED,
-            "time + instance ID + logs"
+            "{}"
         );
         _createMessage(
             inst,
-            MessageKey.Message_076ulzs,
-            ParticipantKey.Participant_12df78t,
-            ParticipantKey.Participant_1p9owwo,
+            MessageKey.Message_06bv1qa,
+            ParticipantKey.Participant_1jz106x,
+            ParticipantKey.Participant_0jcddbb,
             ElementState.DISABLED,
-            "time + description + EC2 resource ID + logs + other information"
+            "{}"
         );
         _createMessage(
             inst,
-            MessageKey.Message_09krt7c,
-            ParticipantKey.Participant_12df78t,
-            ParticipantKey.Participant_1p9owwo,
+            MessageKey.Message_0b1e9t1,
+            ParticipantKey.Participant_1jz106x,
+            ParticipantKey.Participant_0jcddbb,
             ElementState.DISABLED,
-            "question name + description"
+            "{}"
         );
         _createMessage(
             inst,
-            MessageKey.Message_0ywghlt,
-            ParticipantKey.Participant_12df78t,
-            ParticipantKey.Participant_1p9owwo,
+            MessageKey.Message_0cq2w1g,
+            ParticipantKey.Participant_0jcddbb,
+            ParticipantKey.Participant_1jz106x,
             ElementState.DISABLED,
-            "serviceType"
+            "{}"
         );
         _createMessage(
             inst,
-            MessageKey.Message_12n6jjk,
-            ParticipantKey.Participant_12df78t,
-            ParticipantKey.Participant_1p9owwo,
+            MessageKey.Message_0g4xpdf,
+            ParticipantKey.Participant_1jz106x,
+            ParticipantKey.Participant_0jcddbb,
             ElementState.DISABLED,
-            "type + duration"
+            "{}"
         );
         _createMessage(
             inst,
-            MessageKey.Message_1b1qlzd,
-            ParticipantKey.Participant_1p9owwo,
-            ParticipantKey.Participant_12df78t,
+            MessageKey.Message_0hzpgno,
+            ParticipantKey.Participant_1jz106x,
+            ParticipantKey.Participant_0jcddbb,
             ElementState.DISABLED,
-            "reason + result"
+            "{}"
         );
         _createMessage(
             inst,
-            MessageKey.Message_1bhhp1n,
-            ParticipantKey.Participant_12df78t,
-            ParticipantKey.Participant_1p9owwo,
+            MessageKey.Message_0is10sh,
+            ParticipantKey.Participant_1jz106x,
+            ParticipantKey.Participant_0jcddbb,
             ElementState.DISABLED,
-            "serviceType"
+            "{}"
+        );
+        _createMessage(
+            inst,
+            MessageKey.Message_0l75vce,
+            ParticipantKey.Participant_0jcddbb,
+            ParticipantKey.Participant_1jz106x,
+            ElementState.DISABLED,
+            "{}"
+        );
+        _createMessage(
+            inst,
+            MessageKey.Message_0lvlunm,
+            ParticipantKey.Participant_0c1qh31,
+            ParticipantKey.Participant_0jcddbb,
+            ElementState.DISABLED,
+            "{}"
+        );
+        _createMessage(
+            inst,
+            MessageKey.Message_0nkjynd,
+            ParticipantKey.Participant_0jcddbb,
+            ParticipantKey.Participant_1jz106x,
+            ElementState.DISABLED,
+            "{}"
+        );
+        _createMessage(
+            inst,
+            MessageKey.Message_0psi2ab,
+            ParticipantKey.Participant_0jcddbb,
+            ParticipantKey.Participant_0c1qh31,
+            ElementState.DISABLED,
+            "{}"
+        );
+        _createMessage(
+            inst,
+            MessageKey.Message_0to30q0,
+            ParticipantKey.Participant_0jcddbb,
+            ParticipantKey.Participant_1jz106x,
+            ElementState.DISABLED,
+            "{}"
+        );
+        _createMessage(
+            inst,
+            MessageKey.Message_1989eur,
+            ParticipantKey.Participant_0jcddbb,
+            ParticipantKey.Participant_1jz106x,
+            ElementState.DISABLED,
+            "{}"
+        );
+        _createMessage(
+            inst,
+            MessageKey.Message_1dp5xa4,
+            ParticipantKey.Participant_0jcddbb,
+            ParticipantKey.Participant_1jz106x,
+            ElementState.DISABLED,
+            "{}"
+        );
+        _createMessage(
+            inst,
+            MessageKey.Message_1ufjjj2,
+            ParticipantKey.Participant_1jz106x,
+            ParticipantKey.Participant_0jcddbb,
+            ElementState.DISABLED,
+            "{}"
         );
 
         _createGateway(
             inst,
-            GatewayKey.Gateway_0auc3he,
+            GatewayKey.ExclusiveGateway_0uhgcse,
             ElementState.DISABLED
         );
         _createGateway(
             inst,
-            GatewayKey.Gateway_0ivv4vg,
+            GatewayKey.ExclusiveGateway_1e98v4d,
             ElementState.DISABLED
         );
         _createGateway(
             inst,
-            GatewayKey.Gateway_0jgq0a6,
+            GatewayKey.ExclusiveGateway_04bkb0l,
+            ElementState.DISABLED
+        );
+        _createGateway(
+            inst,
+            GatewayKey.ExclusiveGateway_0cfvdeh,
+            ElementState.DISABLED
+        );
+        _createGateway(
+            inst,
+            GatewayKey.ExclusiveGateway_1ksw1j2,
+            ElementState.DISABLED
+        );
+        _createGateway(
+            inst,
+            GatewayKey.ExclusiveGateway_05xdg8u,
+            ElementState.DISABLED
+        );
+        _createGateway(
+            inst,
+            GatewayKey.ExclusiveGateway_0wc677m,
+            ElementState.DISABLED
+        );
+        _createGateway(
+            inst,
+            GatewayKey.ParallelGateway_0yw95j2,
+            ElementState.DISABLED
+        );
+        _createGateway(
+            inst,
+            GatewayKey.ParallelGateway_0himv1h,
+            ElementState.DISABLED
+        );
+        _createGateway(
+            inst,
+            GatewayKey.EventBasedGateway_1nphygh,
             ElementState.DISABLED
         );
 
-        _createBusinessRule(
-            inst,
-            keccak256(bytes("Activity_0tya4bp")),
-            params.Activity_0tya4bp_content,
-            params.Activity_0tya4bp_decision
-        );
 
         currentInstanceId += 1;
     }
@@ -389,216 +499,379 @@ contract WorkflowContract {
     // Business rule handlers
     // ------------------------------------------------------------------
 
-    function Activity_0tya4bp(uint256 instanceId) external onlyInitialized {
-        Instance storage inst = _getInstance(instanceId);
-        bytes32 ruleKey = keccak256(bytes("Activity_0tya4bp"));
-        BusinessRule storage br = inst.businessRules[ruleKey];
-        require(br.exists, "business rule not set");
-        require(br.state == ElementState.ENABLED, "business rule not enabled");
-
-        br.state = ElementState.WAITING_FOR_CONFIRMATION;
-    }
-
-    function Activity_0tya4bp_Continue(uint256 instanceId) external onlyInitialized {
-        Instance storage inst = _getInstance(instanceId);
-        bytes32 ruleKey = keccak256(bytes("Activity_0tya4bp"));
-        BusinessRule storage br = inst.businessRules[ruleKey];
-        require(br.state == ElementState.WAITING_FOR_CONFIRMATION, "business rule not waiting");
-
-        br.state = ElementState.COMPLETED;
-        inst.gateways[GatewayKey.Gateway_0ivv4vg].state = ElementState.ENABLED;
-
-    }
-
 
     // ------------------------------------------------------------------
     // Workflow logic generated from DSL flows
     // ------------------------------------------------------------------
 
-function Event_0ojehz6(uint256 instanceId) external onlyInitialized {
+function StartEvent_0gb8jks(uint256 instanceId) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
-        ActionEvent storage ev = inst.events[EventKey.Event_0ojehz6];
+        ActionEvent storage ev = inst.events[EventKey.StartEvent_0gb8jks];
         require(ev.exists, "event not set");
         require(ev.state == ElementState.ENABLED, "event state not allowed");
 
         ev.state = ElementState.COMPLETED;
-        emit ActionEventDone(instanceId, EventKey.Event_0ojehz6);
-        inst.messages[MessageKey.Message_09krt7c].state = ElementState.ENABLED;
+        emit ActionEventDone(instanceId, EventKey.StartEvent_0gb8jks);
+        inst.gateways[GatewayKey.ExclusiveGateway_0uhgcse].state = ElementState.ENABLED;
 
     }
 
-function Message_01jq2zl_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+function Message_009a0bz_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
-        Message storage m = inst.messages[MessageKey.Message_01jq2zl];
+        Message storage m = inst.messages[MessageKey.Message_009a0bz];
         require(m.exists, "message not set");
         _checkParticipant(inst, m.sendParticipant);
         require(m.state == ElementState.ENABLED, "message state not allowed");
 
         m.fireflyTranId = fireflyTranId;
         m.state = ElementState.COMPLETED;
-        emit MessageSent(instanceId, MessageKey.Message_01jq2zl, fireflyTranId);
-        inst.events[EventKey.Event_0ci2gl8].state = ElementState.ENABLED;
+        emit MessageSent(instanceId, MessageKey.Message_009a0bz, fireflyTranId);
 
     }
 
-function Message_068kmzv_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+function Message_02ckm6k_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
-        Message storage m = inst.messages[MessageKey.Message_068kmzv];
+        Message storage m = inst.messages[MessageKey.Message_02ckm6k];
         require(m.exists, "message not set");
         _checkParticipant(inst, m.sendParticipant);
         require(m.state == ElementState.ENABLED, "message state not allowed");
 
         m.fireflyTranId = fireflyTranId;
         m.state = ElementState.COMPLETED;
-        emit MessageSent(instanceId, MessageKey.Message_068kmzv, fireflyTranId);
-        inst.gateways[GatewayKey.Gateway_0auc3he].state = ElementState.ENABLED;
+        emit MessageSent(instanceId, MessageKey.Message_02ckm6k, fireflyTranId);
 
     }
 
-function Message_076ulzs_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+function Message_06bv1qa_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
-        Message storage m = inst.messages[MessageKey.Message_076ulzs];
+        Message storage m = inst.messages[MessageKey.Message_06bv1qa];
         require(m.exists, "message not set");
         _checkParticipant(inst, m.sendParticipant);
         require(m.state == ElementState.ENABLED, "message state not allowed");
 
         m.fireflyTranId = fireflyTranId;
         m.state = ElementState.COMPLETED;
-        emit MessageSent(instanceId, MessageKey.Message_076ulzs, fireflyTranId);
-        inst.gateways[GatewayKey.Gateway_0auc3he].state = ElementState.ENABLED;
+        emit MessageSent(instanceId, MessageKey.Message_06bv1qa, fireflyTranId);
 
     }
 
-function Message_09krt7c_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+function Message_0b1e9t1_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
-        Message storage m = inst.messages[MessageKey.Message_09krt7c];
+        Message storage m = inst.messages[MessageKey.Message_0b1e9t1];
         require(m.exists, "message not set");
         _checkParticipant(inst, m.sendParticipant);
         require(m.state == ElementState.ENABLED, "message state not allowed");
 
         m.fireflyTranId = fireflyTranId;
         m.state = ElementState.COMPLETED;
-        emit MessageSent(instanceId, MessageKey.Message_09krt7c, fireflyTranId);
-        inst.gateways[GatewayKey.Gateway_0jgq0a6].state = ElementState.ENABLED;
+        emit MessageSent(instanceId, MessageKey.Message_0b1e9t1, fireflyTranId);
 
     }
 
-function Message_0ywghlt_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+function Message_0cq2w1g_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
-        Message storage m = inst.messages[MessageKey.Message_0ywghlt];
+        Message storage m = inst.messages[MessageKey.Message_0cq2w1g];
         require(m.exists, "message not set");
         _checkParticipant(inst, m.sendParticipant);
         require(m.state == ElementState.ENABLED, "message state not allowed");
 
         m.fireflyTranId = fireflyTranId;
         m.state = ElementState.COMPLETED;
-        emit MessageSent(instanceId, MessageKey.Message_0ywghlt, fireflyTranId);
-        inst.messages[MessageKey.Message_1bhhp1n].state = ElementState.DISABLED;
-        inst.messages[MessageKey.Message_068kmzv].state = ElementState.ENABLED;
+        emit MessageSent(instanceId, MessageKey.Message_0cq2w1g, fireflyTranId);
 
     }
 
-function Message_12n6jjk_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+function Message_0g4xpdf_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
-        Message storage m = inst.messages[MessageKey.Message_12n6jjk];
+        Message storage m = inst.messages[MessageKey.Message_0g4xpdf];
         require(m.exists, "message not set");
         _checkParticipant(inst, m.sendParticipant);
         require(m.state == ElementState.ENABLED, "message state not allowed");
 
         m.fireflyTranId = fireflyTranId;
         m.state = ElementState.COMPLETED;
-        emit MessageSent(instanceId, MessageKey.Message_12n6jjk, fireflyTranId);
-        bytes32 brKey_Activity_0tya4bp = keccak256(bytes("Activity_0tya4bp"));
-        inst.businessRules[brKey_Activity_0tya4bp].state = ElementState.ENABLED;
+        emit MessageSent(instanceId, MessageKey.Message_0g4xpdf, fireflyTranId);
 
     }
 
-function Message_1b1qlzd_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+function Message_0hzpgno_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
-        Message storage m = inst.messages[MessageKey.Message_1b1qlzd];
+        Message storage m = inst.messages[MessageKey.Message_0hzpgno];
         require(m.exists, "message not set");
         _checkParticipant(inst, m.sendParticipant);
         require(m.state == ElementState.ENABLED, "message state not allowed");
 
         m.fireflyTranId = fireflyTranId;
         m.state = ElementState.COMPLETED;
-        emit MessageSent(instanceId, MessageKey.Message_1b1qlzd, fireflyTranId);
-        inst.events[EventKey.Event_0dyp0ut].state = ElementState.ENABLED;
+        emit MessageSent(instanceId, MessageKey.Message_0hzpgno, fireflyTranId);
 
     }
 
-function Message_1bhhp1n_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+function Message_0is10sh_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
-        Message storage m = inst.messages[MessageKey.Message_1bhhp1n];
+        Message storage m = inst.messages[MessageKey.Message_0is10sh];
         require(m.exists, "message not set");
         _checkParticipant(inst, m.sendParticipant);
         require(m.state == ElementState.ENABLED, "message state not allowed");
 
         m.fireflyTranId = fireflyTranId;
         m.state = ElementState.COMPLETED;
-        emit MessageSent(instanceId, MessageKey.Message_1bhhp1n, fireflyTranId);
-        inst.messages[MessageKey.Message_0ywghlt].state = ElementState.DISABLED;
-        inst.messages[MessageKey.Message_076ulzs].state = ElementState.ENABLED;
+        emit MessageSent(instanceId, MessageKey.Message_0is10sh, fireflyTranId);
 
     }
 
-function Gateway_0auc3he(uint256 instanceId) external onlyInitialized {
+function Message_0l75vce_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
-        Gateway storage g = inst.gateways[GatewayKey.Gateway_0auc3he];
+        Message storage m = inst.messages[MessageKey.Message_0l75vce];
+        require(m.exists, "message not set");
+        _checkParticipant(inst, m.sendParticipant);
+        require(m.state == ElementState.ENABLED, "message state not allowed");
+
+        m.fireflyTranId = fireflyTranId;
+        m.state = ElementState.COMPLETED;
+        emit MessageSent(instanceId, MessageKey.Message_0l75vce, fireflyTranId);
+
+    }
+
+function Message_0lvlunm_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+        Instance storage inst = _getInstance(instanceId);
+        Message storage m = inst.messages[MessageKey.Message_0lvlunm];
+        require(m.exists, "message not set");
+        _checkParticipant(inst, m.sendParticipant);
+        require(m.state == ElementState.ENABLED, "message state not allowed");
+
+        m.fireflyTranId = fireflyTranId;
+        m.state = ElementState.COMPLETED;
+        emit MessageSent(instanceId, MessageKey.Message_0lvlunm, fireflyTranId);
+
+    }
+
+function Message_0nkjynd_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+        Instance storage inst = _getInstance(instanceId);
+        Message storage m = inst.messages[MessageKey.Message_0nkjynd];
+        require(m.exists, "message not set");
+        _checkParticipant(inst, m.sendParticipant);
+        require(m.state == ElementState.ENABLED, "message state not allowed");
+
+        m.fireflyTranId = fireflyTranId;
+        m.state = ElementState.COMPLETED;
+        emit MessageSent(instanceId, MessageKey.Message_0nkjynd, fireflyTranId);
+
+    }
+
+function Message_0psi2ab_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+        Instance storage inst = _getInstance(instanceId);
+        Message storage m = inst.messages[MessageKey.Message_0psi2ab];
+        require(m.exists, "message not set");
+        _checkParticipant(inst, m.sendParticipant);
+        require(m.state == ElementState.ENABLED, "message state not allowed");
+
+        m.fireflyTranId = fireflyTranId;
+        m.state = ElementState.COMPLETED;
+        emit MessageSent(instanceId, MessageKey.Message_0psi2ab, fireflyTranId);
+
+    }
+
+function Message_0to30q0_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+        Instance storage inst = _getInstance(instanceId);
+        Message storage m = inst.messages[MessageKey.Message_0to30q0];
+        require(m.exists, "message not set");
+        _checkParticipant(inst, m.sendParticipant);
+        require(m.state == ElementState.ENABLED, "message state not allowed");
+
+        m.fireflyTranId = fireflyTranId;
+        m.state = ElementState.COMPLETED;
+        emit MessageSent(instanceId, MessageKey.Message_0to30q0, fireflyTranId);
+
+    }
+
+function Message_1989eur_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+        Instance storage inst = _getInstance(instanceId);
+        Message storage m = inst.messages[MessageKey.Message_1989eur];
+        require(m.exists, "message not set");
+        _checkParticipant(inst, m.sendParticipant);
+        require(m.state == ElementState.ENABLED, "message state not allowed");
+
+        m.fireflyTranId = fireflyTranId;
+        m.state = ElementState.COMPLETED;
+        emit MessageSent(instanceId, MessageKey.Message_1989eur, fireflyTranId);
+
+    }
+
+function Message_1dp5xa4_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+        Instance storage inst = _getInstance(instanceId);
+        Message storage m = inst.messages[MessageKey.Message_1dp5xa4];
+        require(m.exists, "message not set");
+        _checkParticipant(inst, m.sendParticipant);
+        require(m.state == ElementState.ENABLED, "message state not allowed");
+
+        m.fireflyTranId = fireflyTranId;
+        m.state = ElementState.COMPLETED;
+        emit MessageSent(instanceId, MessageKey.Message_1dp5xa4, fireflyTranId);
+
+    }
+
+function Message_1ufjjj2_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+        Instance storage inst = _getInstance(instanceId);
+        Message storage m = inst.messages[MessageKey.Message_1ufjjj2];
+        require(m.exists, "message not set");
+        _checkParticipant(inst, m.sendParticipant);
+        require(m.state == ElementState.ENABLED, "message state not allowed");
+
+        m.fireflyTranId = fireflyTranId;
+        m.state = ElementState.COMPLETED;
+        emit MessageSent(instanceId, MessageKey.Message_1ufjjj2, fireflyTranId);
+
+    }
+
+function ExclusiveGateway_0uhgcse(uint256 instanceId) external onlyInitialized {
+        Instance storage inst = _getInstance(instanceId);
+        Gateway storage g = inst.gateways[GatewayKey.ExclusiveGateway_0uhgcse];
         require(g.exists, "gateway not set");
         require(g.state == ElementState.ENABLED, "gateway state not allowed");
 
         g.state = ElementState.COMPLETED;
-        emit GatewayDone(instanceId, GatewayKey.Gateway_0auc3he);
-        inst.messages[MessageKey.Message_12n6jjk].state = ElementState.ENABLED;
+        emit GatewayDone(instanceId, GatewayKey.ExclusiveGateway_0uhgcse);
+        inst.messages[MessageKey.Message_02ckm6k].state = ElementState.ENABLED;
 
     }
 
-function Gateway_0ivv4vg(uint256 instanceId) external onlyInitialized {
+function ExclusiveGateway_1e98v4d(uint256 instanceId) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
-        Gateway storage g = inst.gateways[GatewayKey.Gateway_0ivv4vg];
+        Gateway storage g = inst.gateways[GatewayKey.ExclusiveGateway_1e98v4d];
         require(g.exists, "gateway not set");
         require(g.state == ElementState.ENABLED, "gateway state not allowed");
 
         g.state = ElementState.COMPLETED;
-        emit GatewayDone(instanceId, GatewayKey.Gateway_0ivv4vg);
-        inst.messages[MessageKey.Message_1b1qlzd].state = ElementState.ENABLED;
-        inst.messages[MessageKey.Message_01jq2zl].state = ElementState.ENABLED;
+        emit GatewayDone(instanceId, GatewayKey.ExclusiveGateway_1e98v4d);
+        if (inst.stateMemory.IsAvailable == false) {
+            inst.gateways[GatewayKey.ExclusiveGateway_0uhgcse].state = ElementState.ENABLED;
+        }
+        else if (inst.stateMemory.IsAvailable == true) {
+            inst.messages[MessageKey.Message_0l75vce].state = ElementState.ENABLED;
+        }
 
     }
 
-function Gateway_0jgq0a6(uint256 instanceId) external onlyInitialized {
+function ExclusiveGateway_04bkb0l(uint256 instanceId) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
-        Gateway storage g = inst.gateways[GatewayKey.Gateway_0jgq0a6];
+        Gateway storage g = inst.gateways[GatewayKey.ExclusiveGateway_04bkb0l];
         require(g.exists, "gateway not set");
         require(g.state == ElementState.ENABLED, "gateway state not allowed");
 
         g.state = ElementState.COMPLETED;
-        emit GatewayDone(instanceId, GatewayKey.Gateway_0jgq0a6);
-        inst.messages[MessageKey.Message_0ywghlt].state = ElementState.ENABLED;
-        inst.messages[MessageKey.Message_1bhhp1n].state = ElementState.ENABLED;
+        emit GatewayDone(instanceId, GatewayKey.ExclusiveGateway_04bkb0l);
+        if (inst.stateMemory.Ask == true) {
+            inst.messages[MessageKey.Message_0to30q0].state = ElementState.ENABLED;
+        }
+        else if (inst.stateMemory.Ask == false) {
+            inst.gateways[GatewayKey.ExclusiveGateway_0cfvdeh].state = ElementState.ENABLED;
+        }
 
     }
 
-function Event_0ci2gl8(uint256 instanceId) external onlyInitialized {
+function ExclusiveGateway_0cfvdeh(uint256 instanceId) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
-        ActionEvent storage ev = inst.events[EventKey.Event_0ci2gl8];
+        Gateway storage g = inst.gateways[GatewayKey.ExclusiveGateway_0cfvdeh];
+        require(g.exists, "gateway not set");
+        require(g.state == ElementState.ENABLED, "gateway state not allowed");
+
+        g.state = ElementState.COMPLETED;
+        emit GatewayDone(instanceId, GatewayKey.ExclusiveGateway_0cfvdeh);
+        inst.gateways[GatewayKey.ExclusiveGateway_1ksw1j2].state = ElementState.ENABLED;
+
+    }
+
+function ExclusiveGateway_1ksw1j2(uint256 instanceId) external onlyInitialized {
+        Instance storage inst = _getInstance(instanceId);
+        Gateway storage g = inst.gateways[GatewayKey.ExclusiveGateway_1ksw1j2];
+        require(g.exists, "gateway not set");
+        require(g.state == ElementState.ENABLED, "gateway state not allowed");
+
+        g.state = ElementState.COMPLETED;
+        emit GatewayDone(instanceId, GatewayKey.ExclusiveGateway_1ksw1j2);
+        inst.messages[MessageKey.Message_1dp5xa4].state = ElementState.ENABLED;
+
+    }
+
+function ExclusiveGateway_05xdg8u(uint256 instanceId) external onlyInitialized {
+        Instance storage inst = _getInstance(instanceId);
+        Gateway storage g = inst.gateways[GatewayKey.ExclusiveGateway_05xdg8u];
+        require(g.exists, "gateway not set");
+        require(g.state == ElementState.ENABLED, "gateway state not allowed");
+
+        g.state = ElementState.COMPLETED;
+        emit GatewayDone(instanceId, GatewayKey.ExclusiveGateway_05xdg8u);
+        if (inst.stateMemory.InsuranceReq == false) {
+            inst.gateways[GatewayKey.ExclusiveGateway_0wc677m].state = ElementState.ENABLED;
+        }
+        else if (inst.stateMemory.InsuranceReq == true) {
+            inst.messages[MessageKey.Message_009a0bz].state = ElementState.ENABLED;
+        }
+
+    }
+
+function ExclusiveGateway_0wc677m(uint256 instanceId) external onlyInitialized {
+        Instance storage inst = _getInstance(instanceId);
+        Gateway storage g = inst.gateways[GatewayKey.ExclusiveGateway_0wc677m];
+        require(g.exists, "gateway not set");
+        require(g.state == ElementState.ENABLED, "gateway state not allowed");
+
+        g.state = ElementState.COMPLETED;
+        emit GatewayDone(instanceId, GatewayKey.ExclusiveGateway_0wc677m);
+        inst.messages[MessageKey.Message_0nkjynd].state = ElementState.ENABLED;
+
+    }
+
+function ParallelGateway_0yw95j2(uint256 instanceId) external onlyInitialized {
+        Instance storage inst = _getInstance(instanceId);
+        Gateway storage g = inst.gateways[GatewayKey.ParallelGateway_0yw95j2];
+        require(g.exists, "gateway not set");
+        require(g.state == ElementState.ENABLED, "gateway state not allowed");
+
+        g.state = ElementState.COMPLETED;
+        emit GatewayDone(instanceId, GatewayKey.ParallelGateway_0yw95j2);
+        inst.messages[MessageKey.Message_0g4xpdf].state = ElementState.ENABLED;
+        inst.messages[MessageKey.Message_0is10sh].state = ElementState.ENABLED;
+
+    }
+
+function ParallelGateway_0himv1h(uint256 instanceId) external onlyInitialized {
+        Instance storage inst = _getInstance(instanceId);
+        Gateway storage g = inst.gateways[GatewayKey.ParallelGateway_0himv1h];
+        require(g.exists, "gateway not set");
+        require(g.state == ElementState.ENABLED, "gateway state not allowed");
+
+        g.state = ElementState.COMPLETED;
+        emit GatewayDone(instanceId, GatewayKey.ParallelGateway_0himv1h);
+        if (!(inst.messages[MessageKey.Message_0is10sh].state == ElementState.COMPLETED && inst.messages[MessageKey.Message_0g4xpdf].state == ElementState.COMPLETED)) {
+                    revert("Parallel gateway prerequisites not met");
+                }
+        inst.events[EventKey.EndEvent_11pwcmo].state = ElementState.ENABLED;
+
+    }
+
+function EventBasedGateway_1nphygh(uint256 instanceId) external onlyInitialized {
+        Instance storage inst = _getInstance(instanceId);
+        Gateway storage g = inst.gateways[GatewayKey.EventBasedGateway_1nphygh];
+        require(g.exists, "gateway not set");
+        require(g.state == ElementState.ENABLED, "gateway state not allowed");
+
+        g.state = ElementState.COMPLETED;
+        emit GatewayDone(instanceId, GatewayKey.EventBasedGateway_1nphygh);
+        inst.messages[MessageKey.Message_0cq2w1g].state = ElementState.ENABLED;
+        inst.messages[MessageKey.Message_1989eur].state = ElementState.ENABLED;
+
+    }
+
+function EndEvent_11pwcmo(uint256 instanceId) external onlyInitialized {
+        Instance storage inst = _getInstance(instanceId);
+        ActionEvent storage ev = inst.events[EventKey.EndEvent_11pwcmo];
         require(ev.exists, "event not set");
         require(ev.state == ElementState.ENABLED, "event state not allowed");
 
         ev.state = ElementState.COMPLETED;
-        emit ActionEventDone(instanceId, EventKey.Event_0ci2gl8);
-
-    }
-
-function Event_0dyp0ut(uint256 instanceId) external onlyInitialized {
-        Instance storage inst = _getInstance(instanceId);
-        ActionEvent storage ev = inst.events[EventKey.Event_0dyp0ut];
-        require(ev.exists, "event not set");
-        require(ev.state == ElementState.ENABLED, "event state not allowed");
-
-        ev.state = ElementState.COMPLETED;
-        emit ActionEventDone(instanceId, EventKey.Event_0dyp0ut);
+        emit ActionEventDone(instanceId, EventKey.EndEvent_11pwcmo);
 
     }
 }

@@ -2,15 +2,28 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 from datetime import datetime
 import asyncio
+import json
+import sys
+from pathlib import Path
 import uvicorn
-from translator import GoChaincodeTranslator
 from pydantic import BaseModel
 from typing import Dict, Any
-import json
 from fastapi.middleware.cors import CORSMiddleware
-from dmn_parser.parser import DMNParser
-from choreography_parser.parser import Choreography
-from choreography_parser.elements import NodeType
+
+if __package__ in (None, ""):
+    _CURRENT_DIR = Path(__file__).resolve().parent
+    _PACKAGE_ROOT = _CURRENT_DIR.parent
+    if str(_PACKAGE_ROOT) not in sys.path:
+        sys.path.insert(0, str(_PACKAGE_ROOT))
+    from generator.translator import GoChaincodeTranslator  # type: ignore
+    from generator.parser.dmn_parser.parser import DMNParser  # type: ignore
+    from generator.parser.choreography_parser.parser import Choreography  # type: ignore
+    from generator.parser.choreography_parser.elements import NodeType  # type: ignore
+else:
+    from ..generator.translator import GoChaincodeTranslator
+    from ..generator.parser.dmn_parser.parser import DMNParser
+    from ..generator.parser.choreography_parser.parser import Choreography
+    from ..generator.parser.choreography_parser.elements import NodeType
 
 app = FastAPI()
 app.add_middleware(

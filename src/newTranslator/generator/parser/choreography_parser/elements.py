@@ -4,7 +4,10 @@
 
 from enum import Enum
 from typing import List, Optional, Tuple, Any, Protocol
-from .protocals import ElementProtocol, GraphProtocol
+from generator.parser.choreography_parser.protocals import (
+    ElementProtocol,
+    GraphProtocol,
+)
 
 
 class RootType(Enum):

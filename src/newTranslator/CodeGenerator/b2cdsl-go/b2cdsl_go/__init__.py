@@ -19,7 +19,7 @@ def _template_env() -> Environment:
 
 
 TEMPLATE_ENV = _template_env()
-RESOURCE_ROOT = Path(__file__).resolve().parents[3] / "DSLGenerator" / "resource"
+RESOURCE_ROOT = Path(__file__).resolve().parents[3] / "generator" / "resource"
 CONTRACT_TEMPLATE = "contract.go.jinja"
 START_EVENT_TEMPLATE = "flows/start_event.go.jinja"
 MESSAGE_SEND_TEMPLATE = "flows/message_send.go.jinja"
@@ -48,7 +48,6 @@ BASE_IMPORTS = [
     "strconv",
     "reflect",
     "crypto/sha256",
-    "strings",
     "encoding/hex",
     "github.com/hyperledger/fabric-chaincode-go/shim",
     "github.com/hyperledger/fabric-contract-api-go/contractapi",
@@ -371,21 +370,39 @@ class FlowRenderer:
                     return value
             return None
 
-        string_value = pick_attr(["stringValue", "stringvalue"])
-        if string_value is not None:
-            return json.dumps(string_value)
+        normalized_type = (target_type or "").lower()
 
-        int_value = pick_attr(["intValue", "intvalue"])
-        if int_value is not None:
-            return str(int_value)
-
-        bool_value = pick_attr(["boolValue", "boolvalue"])
-        if bool_value is not None:
+        def bool_literal() -> Optional[str]:
+            bool_value = pick_attr(["boolValue", "boolvalue"])
+            if bool_value is None:
+                return None
             if isinstance(bool_value, str):
                 lowered = bool_value.lower()
                 if lowered in ("true", "false"):
                     return lowered
             return "true" if bool_value else "false"
+
+        def int_literal() -> Optional[str]:
+            int_value = pick_attr(["intValue", "intvalue"])
+            if int_value is None:
+                return None
+            return str(int_value)
+
+        def string_literal() -> Optional[str]:
+            string_value = pick_attr(["stringValue", "stringvalue"])
+            if string_value is None:
+                return None
+            return json.dumps(string_value)
+
+        if normalized_type == "bool":
+            literal = bool_literal()
+            if literal is not None:
+                return literal
+
+        if normalized_type in ("int", "float"):
+            literal = int_literal()
+            if literal is not None:
+                return literal
 
         generic_value = pick_attr(["value"])
         if generic_value is not None:
@@ -401,9 +418,21 @@ class FlowRenderer:
                     return generic_value
                 return json.dumps(generic_value)
 
-        if target_type and target_type.lower() == "bool":
+        literal = bool_literal()
+        if literal is not None:
+            return literal
+
+        literal = int_literal()
+        if literal is not None:
+            return literal
+
+        literal = string_literal()
+        if literal is not None:
+            return literal
+
+        if normalized_type == "bool":
             return "false"
-        if target_type and target_type.lower() in ("int", "float"):
+        if normalized_type in ("int", "float"):
             return "0"
         return json.dumps("")
 
@@ -449,6 +478,7 @@ class GoChaincodeRenderer:
     def _imports(self) -> List[str]:
         imports = list(BASE_IMPORTS)
         if self.adapter.business_rules:
+            imports.append("strings")
             imports.append(ORACLE_IMPORT)
         return imports
 

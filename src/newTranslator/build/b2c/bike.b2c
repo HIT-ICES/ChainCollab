@@ -40,9 +40,6 @@ contract GeneratedContract {
 
 
     globals {
-        Ask: bool
-        InsuranceReq: bool
-        IsAvailable: bool
 
     }
 
@@ -221,33 +218,15 @@ contract GeneratedContract {
         when gateway ExclusiveGateway_0uhgcse completed
         then enable Message_02ckm6k;
         when gateway ExclusiveGateway_1e98v4d completed
-        choose {
-            if IsAvailable == false
-            then enable ExclusiveGateway_0uhgcse;
-            if IsAvailable == true
-            then enable Message_0l75vce;
-
-        }
+        then enable ExclusiveGateway_0uhgcse, enable Message_0l75vce;
         when gateway ExclusiveGateway_04bkb0l completed
-        choose {
-            if Ask == true
-            then enable Message_0to30q0;
-            if Ask == false
-            then enable ExclusiveGateway_0cfvdeh;
-
-        }
+        then enable Message_0to30q0, enable ExclusiveGateway_0cfvdeh;
         when gateway ExclusiveGateway_0cfvdeh completed
         then enable ExclusiveGateway_1ksw1j2;
         when gateway ExclusiveGateway_1ksw1j2 completed
         then enable Message_1dp5xa4;
         when gateway ExclusiveGateway_05xdg8u completed
-        choose {
-            if InsuranceReq == false
-            then enable ExclusiveGateway_0wc677m;
-            if InsuranceReq == true
-            then enable Message_009a0bz;
-
-        }
+        then enable ExclusiveGateway_0wc677m, enable Message_009a0bz;
         when gateway ExclusiveGateway_0wc677m completed
         then enable Message_0nkjynd;
         when gateway ParallelGateway_0yw95j2 completed

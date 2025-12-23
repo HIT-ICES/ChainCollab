@@ -6,7 +6,13 @@ import argparse
 import sys
 from pathlib import Path
 
-from translator import GoChaincodeTranslator
+if not __package__:
+    CURRENT_DIR = Path(__file__).resolve().parent
+    PACKAGE_ROOT = CURRENT_DIR.parent
+    if str(PACKAGE_ROOT) not in sys.path:
+        sys.path.insert(0, str(PACKAGE_ROOT))
+
+from generator.translator import GoChaincodeTranslator  # type: ignore
 
 
 def parse_args() -> argparse.Namespace:

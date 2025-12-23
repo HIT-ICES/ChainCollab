@@ -3,7 +3,7 @@ import json
 
 
 # 载入 DSL 模板库
-SNIPPET_JSON = Path(__file__).resolve().with_name("snippet.json")
+SNIPPET_JSON = Path(__file__).resolve().with_name("snippets.json")
 with SNIPPET_JSON.open("r", encoding="utf8") as f:
     DSL = json.load(f)
 

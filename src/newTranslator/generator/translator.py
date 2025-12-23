@@ -1,16 +1,28 @@
 from __future__ import annotations
 
 import json
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from parser.choreography_parser.elements import Element, Message, MessageFlow, NodeType, EdgeType, Participant, SequenceFlow
-from parser.choreography_parser.parser import Choreography
+if not __package__:
+    CURRENT_DIR = Path(__file__).resolve().parent
+    PACKAGE_ROOT = CURRENT_DIR.parent
+    if str(PACKAGE_ROOT) not in sys.path:
+        sys.path.insert(0, str(PACKAGE_ROOT))
 
-
-
-from snippet.newSnippet import snippet as dsl_snippet
+from generator.parser.choreography_parser.elements import (
+    Element,
+    Message,
+    MessageFlow,
+    NodeType,
+    EdgeType,
+    Participant,
+    SequenceFlow,
+)
+from generator.parser.choreography_parser.parser import Choreography
+from generator.snippet.newSnippet import snippet as dsl_snippet
 
 
 BPMN_TYPE_TO_DSL = {
@@ -563,14 +575,31 @@ class ParameterExtractor:
         self._choreography = choreography
 
     def extract(self) -> tuple[dict, dict]:
-        """Return global parameter definitions plus sequence-flow judge metadata."""
+        """
+        Produce two artifacts used downstream by the translator:
+
+        * global_parameters: canonical definition of every inferred global variable.
+        * judge_parameters: structured metadata for exclusive-gateway conditions.
+
+        The workflow follows the same order that will later appear in a Latex/algorithm
+        description: (1) harvest message schemas, (2) inspect business rule I/O,
+        (3) merge everything into a parameter catalogue, and (4) analyse sequence
+        flow conditions.
+        """
+
         message_properties = self._collect_message_properties()
-        business_rule_data = list(self._business_rule_docs())
-        global_parameters = self._collect_business_rule_inputs(message_properties, business_rule_data)
-        business_rule_outputs = self._collect_business_rule_outputs(business_rule_data)
-        global_parameters.update({name: {"definition": definition} for name, definition in business_rule_outputs.items()})
+        business_rule_docs = list(self._business_rule_docs())
+
+        global_parameters = self._build_global_parameter_map(
+            message_properties,
+            business_rule_docs,
+        )
+
+        available_definitions = {
+            name: data["definition"] for name, data in global_parameters.items()
+        }
         judge_parameters = self._collect_sequence_flow_conditions(
-            {**message_properties, **business_rule_outputs},
+            available_definitions,
             global_parameters,
         )
         return global_parameters, judge_parameters
@@ -584,6 +613,38 @@ class ParameterExtractor:
                 yield business_rule, json.loads(business_rule.documentation)
             except json.JSONDecodeError:
                 continue
+
+    def _build_global_parameter_map(
+        self,
+        message_properties: dict,
+        business_rule_data: list,
+    ) -> dict:
+        """
+        Merge all potential parameter sources into the global catalogue.
+
+        Priority order:
+            1. Message schemas (fields declared in BPMN documentation).
+            2. Business rule inputs (may reuse message fields or introduce new ones).
+            3. Business rule outputs (always registered as fresh globals).
+        """
+
+        global_parameters = {
+            name: {"definition": definition}
+            for name, definition in sorted(message_properties.items())
+        }
+
+        business_rule_inputs = self._collect_business_rule_inputs(
+            message_properties,
+            business_rule_data,
+        )
+        for name, definition in business_rule_inputs.items():
+            self._ensure_global_definition(global_parameters, name, definition)
+
+        business_rule_outputs = self._collect_business_rule_outputs(business_rule_data)
+        for name, definition in business_rule_outputs.items():
+            self._ensure_global_definition(global_parameters, name, definition)
+
+        return global_parameters
 
     def _collect_message_properties(self) -> dict:
         """Collect message property definitions keyed by property name."""
@@ -601,17 +662,26 @@ class ParameterExtractor:
         return message_properties
 
     def _collect_business_rule_inputs(self, message_properties: dict, business_rule_data: list) -> dict:
-        """Determine which message properties are consumed by business rules."""
-        global_parameters = {}
-        for _business_rule, definition in business_rule_data:
+        """Determine which message or DMN-defined properties are consumed by business rules."""
+        referenced_parameters = {}
+        for business_rule, definition in business_rule_data:
             for input_def in definition.get("inputs", []):
-                prop_definition = message_properties.get(input_def["name"])
-                if prop_definition is None:
+                name = input_def.get("name")
+                if not name:
                     continue
-                global_parameters[input_def["name"]] = {
+                prop_definition = message_properties.get(name)
+                if prop_definition is None:
+                    inferred_type = input_def.get("type", "string")
+                    prop_definition = {
+                        "type": inferred_type,
+                        "description": input_def.get("description"),
+                        "source_type": "business_rule_input",
+                        "business_rule_id": [business_rule.id],
+                    }
+                referenced_parameters[name] = {
                     "definition": prop_definition,
                 }
-        return global_parameters
+        return referenced_parameters
 
     def _collect_business_rule_outputs(self, business_rule_data: list) -> dict:
         """Identify business rule outputs and expose them as globals."""
@@ -637,8 +707,16 @@ class ParameterExtractor:
             prop, relation, value = condition
             prop_definition = available_definitions.get(prop)
             if prop_definition is None:
-                continue
-            global_parameters.setdefault(prop, {"definition": prop_definition})
+                inferred_definition = {
+                    "type": self._infer_literal_type(value),
+                    "source_type": "condition",
+                    "condition_sequence_ids": [sequence_flow.id],
+                }
+                available_definitions[prop] = inferred_definition
+                self._ensure_global_definition(global_parameters, prop, inferred_definition)
+                prop_definition = inferred_definition
+            else:
+                self._ensure_global_definition(global_parameters, prop, prop_definition)
             judge_parameters[sequence_flow.id] = {
                 "name": prop,
                 "value": value,
@@ -657,6 +735,30 @@ class ParameterExtractor:
                 prop, value = raw_condition.split(relation, 1)
                 return prop.strip(), relation, value.strip()
         return None
+
+    @staticmethod
+    def _infer_literal_type(value: str) -> str:
+        """Guess a DSL type from a literal string in a condition expression."""
+        candidate = value.strip().strip('"').strip("'")
+        lowered = candidate.lower()
+        if lowered in {"true", "false"}:
+            return "bool"
+        try:
+            int(candidate)
+            return "int"
+        except ValueError:
+            pass
+        try:
+            float(candidate)
+            return "float"
+        except ValueError:
+            pass
+        return "string"
+
+    @staticmethod
+    def _ensure_global_definition(target: dict, name: str, definition: dict) -> None:
+        """Populate the global_parameters map if the variable is not already declared."""
+        target.setdefault(name, {"definition": definition})
 
 
 class GoChaincodeTranslator:
@@ -723,7 +825,7 @@ class GoChaincodeTranslator:
 
 
 if __name__ == "__main__":
-    demo_file = Path(__file__).with_name("resource").joinpath("bpmn", "amazon.bpmn")
+    demo_file = Path(__file__).with_name("resource").joinpath("bpmn", "BokeRental.bpmn")
     if demo_file.exists():
         translator = GoChaincodeTranslator(bpmn_file=str(demo_file))
         print(translator.generate_chaincode())

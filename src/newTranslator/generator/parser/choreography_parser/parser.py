@@ -4,7 +4,7 @@ import networkx as nx
 import xml.etree.ElementTree as ET
 import json
 
-from .elements import (
+from generator.parser.choreography_parser.elements import (
     NodeType,
     EdgeType,
     RootType,
@@ -23,7 +23,10 @@ from .elements import (
 )
 
 from typing import List, Optional, Tuple, Any, Protocol
-from .protocals import ElementProtocol, GraphProtocol
+from generator.parser.choreography_parser.protocals import (
+    ElementProtocol,
+    GraphProtocol,
+)
 
 
 class Choreography:
