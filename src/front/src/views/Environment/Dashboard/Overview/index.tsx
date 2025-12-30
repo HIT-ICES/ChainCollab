@@ -79,6 +79,18 @@ const Overview: React.FC = () => {
   const [membershipList, setSyncMembershipList] = useMembershipListData()
   const stepAndStatus = DBstatus2stepandstatus(envInfo.status)
 
+  const createdAtLabel = (() => {
+    if (!envInfo.createdAt) {
+      return "";
+    }
+    const date = new Date(envInfo.createdAt);
+    if (Number.isNaN(date.getTime())) {
+      return envInfo.createdAt;
+    }
+    return date.toLocaleString();
+  })();
+
+  const membershipCount = Array.isArray(membershipList) ? membershipList.length : 0;
 
   const setupCallBackRef = useRef(null)
 
@@ -155,7 +167,18 @@ const Overview: React.FC = () => {
   return (
     <>
       <Col span={16}>
-        <Card title="Overview" style={{ width: "100%" }}>
+        <Card
+          title="Environment Overview"
+          style={{
+            width: "100%",
+            background: "linear-gradient(180deg, #ffffff, #f8fbff)",
+            borderRadius: 18,
+            border: "1px solid #e2e8f0",
+            boxShadow: "0 16px 40px rgba(15,23,42,0.12)"
+          }}
+          headStyle={{ borderBottom: "1px solid #e2e8f0", fontWeight: 600 }}
+          bodyStyle={{ padding: "16px 18px 8px" }}
+        >
           {/* Naive Network */}
           <Card.Grid style={{ width: "100%", height: "100%" }}>
             <Row
@@ -163,7 +186,7 @@ const Overview: React.FC = () => {
               style={{ width: "100%", height: "100%" }}
             >
               <Col span={2} style={customColStyle}>
-                <ClearAllIcon style={{ fontSize: 24 }} />
+                <ClearAllIcon style={{ fontSize: 24, color: "#2563eb" }} />
               </Col>
               <Col span={8} style={customColStyle}>
                 <Text strong style={customTextStyle}>
@@ -175,7 +198,8 @@ const Overview: React.FC = () => {
                 style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}
               >
                 <LoadingButton
-                  variant="outlined"
+                  variant="contained"
+                  color="primary"
                   onClick={() => {
                     if (currentEnvType === "Fabric") {
                       handleSetUpFabricNetwork();
@@ -220,7 +244,7 @@ const Overview: React.FC = () => {
               style={{ width: "100%", height: "100%" }}
             >
               <Col span={2} style={customColStyle}>
-                <ClearAllIcon style={{ fontSize: 24 }} />
+                <ClearAllIcon style={{ fontSize: 24, color: "#2563eb" }} />
               </Col>
               <Col span={8} style={customColStyle}>
                 <Text strong style={customTextStyle}>
@@ -241,64 +265,68 @@ const Overview: React.FC = () => {
             </Row>
             <Row style={{ display: "flex", justifyContent: "space-evenly" }}>
               <FireflyComponentCard ChaincodeStatus={envInfo.fireflyStatus !== "NO"} ClusterStatus={envInfo.fireflyStatus === "STARTED"} />
-              <OracleComponentCard ChaincodeStatus={envInfo.oracleStatus === "CHAINCODEINSTALLED"} />
-              <DMNComponentCard ChaincodeStatus={envInfo.dmnStatus === "CHAINCODEINSTALLED"} />
+              <OracleComponentCard ChaincodeStatus />
+              <DMNComponentCard ChaincodeStatus />
             </Row>
           </Card.Grid>
 
           {/* Creation Time */}
-          <Card.Grid style={{ width: "100%", height: "100%" }}>
-            <Row style={{ width: "100%", height: "100%" }}>
-              <Col span={2} style={customColStyle}>
-                <CalendarMonthIcon style={{ fontSize: 24 }} />
-              </Col>
-              <Col span={4} style={customColStyle}>
-                <Text strong style={customTextStyle}>
-                  Creation Date
-                </Text>
-              </Col>
-              <Col span={8} style={{ ...customTextStyle, marginLeft: "10px" }}>
-                <Text style={customTextStyle}>
-                  {envInfo.createdAt}
-                </Text>
-              </Col>
-            </Row>
-          </Card.Grid>
+          {createdAtLabel ? (
+            <Card.Grid style={{ width: "100%", height: "100%" }}>
+              <Row style={{ width: "100%", height: "100%" }}>
+                <Col span={2} style={customColStyle}>
+                  <CalendarMonthIcon style={{ fontSize: 24 }} />
+                </Col>
+                <Col span={4} style={customColStyle}>
+                  <Text strong style={customTextStyle}>
+                    Creation Date
+                  </Text>
+                </Col>
+                <Col span={8} style={{ ...customTextStyle, marginLeft: "10px" }}>
+                  <Text style={customTextStyle}>
+                    {createdAtLabel}
+                  </Text>
+                </Col>
+              </Row>
+            </Card.Grid>
+          ) : null}
 
           {/* Memberships */}
-          <Card.Grid
-            style={{ width: "100%", height: "100%", cursor: "pointer" }}
-          >
-            <Row
-              justify="space-between"
-              style={{ width: "100%", height: "100%" }}
+          {membershipCount > 0 ? (
+            <Card.Grid
+              style={{ width: "100%", height: "100%", cursor: "pointer" }}
             >
-              <Col span={2} style={customColStyle}>
-                <PeopleIcon style={{ fontSize: 24 }} />
-              </Col>
-              <Col span={4} style={customColStyle}>
-                <Text strong style={customTextStyle}>
-                  Memberships
-                </Text>
-              </Col>
-              <Col span={8} style={{ ...customTextStyle, marginLeft: "10px" }}>
-                <Text style={customTextStyle}>
-                  1
-                </Text>
-              </Col>
-              <Col
-                flex="auto"
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  alignItems: "center",
-                  marginRight: "0px",
-                }}
+              <Row
+                justify="space-between"
+                style={{ width: "100%", height: "100%" }}
               >
-                <KeyboardArrowRightIcon />
-              </Col>
-            </Row>
-          </Card.Grid>
+                <Col span={2} style={customColStyle}>
+                  <PeopleIcon style={{ fontSize: 24 }} />
+                </Col>
+                <Col span={4} style={customColStyle}>
+                  <Text strong style={customTextStyle}>
+                    Memberships
+                  </Text>
+                </Col>
+                <Col span={8} style={{ ...customTextStyle, marginLeft: "10px" }}>
+                  <Text style={customTextStyle}>
+                    {membershipCount}
+                  </Text>
+                </Col>
+                <Col
+                  flex="auto"
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    alignItems: "center",
+                    marginRight: "0px",
+                  }}
+                >
+                  <KeyboardArrowRightIcon />
+                </Col>
+              </Row>
+            </Card.Grid>
+          ) : null}
 
 
           {/* Release Version */}

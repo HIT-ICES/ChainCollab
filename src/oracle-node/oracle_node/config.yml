@@ -1,0 +1,47 @@
+oracle:
+  id: oracle-node-1
+  poll_interval_seconds: 5
+  # 以下字段供 aggregator_node.py 使用
+  # private_key: "0x..."
+  # rpc_url: "http://127.0.0.1:8545"
+  # contract_address: "0x..."
+
+evm:
+  rpc_url: "http://127.0.0.1:8545"
+  private_key: "0x..."
+  oracle_contract_address: "0xOracleContract"
+
+fabric:
+  enabled: false
+  connection_profile: "./connection.json"
+  wallet_path: "./wallet"
+  identity: "appUser"
+  channel_name: "mychannel"
+  chaincode_name: "oracle"
+
+data_sources:
+  price_feed:
+    type: mock
+    value: 1200
+  file_feed:
+    type: file
+    path: "./data/value.txt"
+
+chain_identities:
+  - name: local-evm-1
+    chain_type: evm
+    rpc_url: "http://127.0.0.1:8545"
+    private_key: "0x..."
+    address: "0x..."
+    notes: "本地测试身份"
+
+compute_watchers:
+  - name: local-evm-compute
+    chain_type: evm
+    contract_address: "0x..."
+    identity_name: "local-evm-1"
+    poll_interval: 5
+    enabled: false
+    compute_profiles:
+      default:
+        mode: hash_payload

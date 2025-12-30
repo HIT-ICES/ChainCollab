@@ -37,30 +37,35 @@ find ./backend/api/migrations -type f -name '*_auto_*.py' -exec rm -f {} \;
 
 # Remove Firefly
 echo "Remove Firefly"
-ff list | grep 'cello_' | xargs -I{} sh -c "echo 'y' | ff remove {}"
+if command -v ff >/dev/null 2>&1; then
+  ff list | grep 'cello_' | xargs -r -I{} sh -c "echo 'y' | ff remove {}" || true
+else
+  echo "ff not found, skip Firefly cleanup"
+fi
 
 # Remove Docker Container
 #!/bin/bash
 
 # 停止和删除以cello.com、edu.cn或tech.cn结尾的Docker容器
-docker ps -a --format "{{.Names}}" | grep -E 'com$|edu.cn$|tech.cn$|org.com$' | while read -r container_name
-do
+while read -r container_name; do
+    [ -n "$container_name" ] || continue
     echo "Stopping and removing container: $container_name"
-    docker stop "$container_name" && docker rm "$container_name"
-done
+    docker stop "$container_name" >/dev/null 2>&1 || true
+    docker rm "$container_name" >/dev/null 2>&1 || true
+done < <(docker ps -a --format "{{.Names}}" | grep -E 'com$|edu.cn$|tech.cn$|org.com$' || true)
 
 # 移除 dev开头的image
-docker images --format "{{.Repository}}" | grep '^dev' | while read -r image_name
-do
+while read -r image_name; do
+    [ -n "$image_name" ] || continue
     echo "Removing image: $image_name"
-    docker rmi "$image_name"
-done
+    docker rmi "$image_name" >/dev/null 2>&1 || true
+done < <(docker images --format "{{.Repository}}" | grep '^dev' || true)
 # docker container prune -f
 # docker volume prune -f
 
 # Remove DB
 echo "Remove DB"
-docker stop cello-postgres
-docker rm cello-postgres
+docker stop cello-postgres >/dev/null 2>&1 || true
+docker rm cello-postgres >/dev/null 2>&1 || true
 
 echo "Finished cleaning"

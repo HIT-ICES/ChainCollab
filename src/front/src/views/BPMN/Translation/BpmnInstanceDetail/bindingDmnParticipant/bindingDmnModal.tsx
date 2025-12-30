@@ -1,12 +1,28 @@
-import { Modal, Table, Select, Button, Typography, Flex } from "antd"
-const { Text } = Typography
 import { useState, useEffect } from "react"
+import {
+    Box,
+    Button,
+    Typography,
+    Stack,
+    FormControl,
+    InputLabel,
+    Select as MUISelect,
+    MenuItem,
+    Table as MUITable,
+    TableHead,
+    TableBody,
+    TableCell,
+    TableRow,
+    TableContainer,
+    Paper,
+    SelectChangeEvent,
+    Divider
+} from "@mui/material"
 import { Binding, retrieveBPMN } from "@/api/externalResource"
 import { useBusinessRulesDataByBpmn } from "./hooks"
 import { useDmnListData } from "../../../Dmn/hooks"
 import { useAppSelector } from "@/redux/hooks"
 import { useDecisions } from "./hooks"
-import { Tab } from "@mui/material"
 
 
 
@@ -107,110 +123,6 @@ const DmnBindingBlock = (
         unSetActivity(businessRuleToFullfill.businessRuleId)
     }
 
-    const inputColumns = [
-        // activity slot
-
-        {
-            title: "Activity Slot",
-            dataIndex: "activitySlot",
-            key: "activitySlot",
-            render: (text, record) => {
-                return (
-                    <>
-                        <Text>{record.activitySlot.name}</Text>
-                        <br />
-                        <Text>{"type: " + record.activitySlot.type}</Text>
-                    </>
-                )
-            }
-        },
-        // available input choice in Select
-        {
-            title: "Available Input",
-            dataIndex: "availableInput",
-            key: "availableInput",
-            render: (text, record) => {
-                return (
-                    <Select
-                        style={{ width: "200px" }}
-                        value={
-                            currentParamMapping[record.activitySlot.name]
-                        }
-                        onChange={
-                            (value) => {
-                                setCurrentParamMapping({
-                                    ...currentParamMapping,
-                                    [record.activitySlot.name]: value
-                                })
-                            }
-                        }
-                    >
-                        {
-                            record.availableInput.map((input) => {
-                                return (
-                                    <Select.Option value={input.text}>{input.text + " type: " + input.typeRef}</Select.Option>
-                                )
-                            })
-                        }
-                    </Select>
-                )
-            }
-        },
-    ]
-
-    const outPutColumns = [
-        // activity slot
-
-        {
-            title: "Activity Slot",
-            dataIndex: "activitySlot",
-            key: "activitySlot",
-            render: (text, record) => {
-                return (
-                    <>
-                        <Text>{record.activitySlot.name}</Text>
-                        <br />
-                        <Text>{"type: " + record.activitySlot.type}</Text>
-                    </>
-                )
-            }
-        },
-        // available input choice in Select
-        {
-            title: "Available Output",
-            dataIndex: "availableInput",
-            key: "availableInput",
-            render: (text, record) => {
-                return (
-                    <Select
-                        style={{ width: "200px" }}
-                        value={
-                            currentParamMapping[record.activitySlot.name]
-                        }
-                        onChange={
-                            (value) => {
-                                setCurrentParamMapping({
-                                    ...currentParamMapping,
-                                    [record.activitySlot.name]: value
-                                })
-                            }
-                        }
-                    >
-                        {
-                            record.availableInput.map((input) => {
-                                return (
-                                    <Select.Option value={input.name}>{input.name + " type:" + input.type}</Select.Option>
-                                )
-                            })
-                        }
-                    </Select>
-                )
-            }
-        },
-    ]
-
-
-
     const content = businessRuleToFullfill ? JSON.parse(businessRuleToFullfill.documentation) : {
         inputs: [], outputs: []
     }
@@ -230,49 +142,144 @@ const DmnBindingBlock = (
     })
 
 
+    const renderActivityCell = (slot) => (
+        <Box>
+            <Typography fontWeight={600}>{slot.name}</Typography>
+            <Typography variant="caption" color="text.secondary">
+                type: {slot.type}
+            </Typography>
+        </Box>
+    )
+
+    const renderSelectCell = (row, label) => (
+        <FormControl size="small" fullWidth>
+            <InputLabel>{label}</InputLabel>
+            <MUISelect
+                label={label}
+                value={currentParamMapping[row.activitySlot.name] || ""}
+                onChange={(event: SelectChangeEvent<string>) => {
+                    setCurrentParamMapping({
+                        ...currentParamMapping,
+                        [row.activitySlot.name]: event.target.value as string
+                    })
+                }}
+            >
+                {row.availableInput.map((input, index) => {
+                    const value = input.text || input.name || `${label}-${index}`
+                    const displayLabel = input.text
+                        ? `${input.text} type: ${input.typeRef ?? "unknown"}`
+                        : `${input.name} type: ${input.type ?? "unknown"}`
+                    return (
+                        <MenuItem key={`${row.activitySlot.name}-${value}`} value={value}>
+                            {displayLabel}
+                        </MenuItem>
+                    )
+                })}
+            </MUISelect>
+        </FormControl>
+    )
+
+
     return (
-        <div style={{ width: "100%", display: isHandle ? "block" : "none" }}>
-            {/* Dmn File Choose File */}
-            <div style={{ display: 'flex', gap: '20px', alignContent: "center", justifyContent: "flex-start" }}>
-                <Text style={{ width: '200px', display: 'inline-block' }} type="secondary" strong>Field Name</Text>
-                <Select
-                    style={{ width: '200px' }}
-                    onChange={(value) => {
-                        setDmnId(value)
-                    }}
-                >
-                    {
-                        dmns.map((dmn) => {
-                            return (
-                                <Select.Option value={dmn.id}>{dmn.name}</Select.Option>
-                            )
-                        })
-                    }
-                </Select>
+        <Box sx={{ width: "100%", display: isHandle ? "block" : "none" }}>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="center" sx={{ mb: 3 }}>
+                <Typography variant="subtitle2" sx={{ minWidth: 160 }} color="text.secondary" fontWeight={600}>
+                    Field Name
+                </Typography>
+                <FormControl fullWidth size="small">
+                    <InputLabel id="dmn-select-label">Select DMN</InputLabel>
+                    <MUISelect
+                        labelId="dmn-select-label"
+                        label="Select DMN"
+                        value={dmnId}
+                        onChange={(event: SelectChangeEvent<string>) => {
+                            setDmnId(event.target.value as string)
+                        }}
+                    >
+                        {dmns.map((dmn) => (
+                            <MenuItem key={dmn.id} value={dmn.id}>
+                                {dmn.name}
+                            </MenuItem>
+                        ))}
+                    </MUISelect>
+                </FormControl>
+            </Stack>
 
-            </div>
-            {/* input and output; outer and inner */}
-            {/*  */}
-            <Text style={{ width: '200px', display: 'inline-block' }} type="secondary" strong>Input</Text>
-            <Table columns={inputColumns} dataSource={
-                inputDataSource
-            }
-                pagination={false}
-            />
-            <Table columns={outPutColumns} dataSource={
-                outputDataSource
-            }
-                pagination={false}
-            />
+            <Stack spacing={2}>
+                <Box>
+                    <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                        Input
+                    </Typography>
+                    <TableContainer component={Paper} variant="outlined">
+                        <MUITable size="small">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell width="40%">Activity Slot</TableCell>
+                                    <TableCell>Available Input</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {inputDataSource.map((row) => (
+                                    <TableRow key={row.activitySlot.name}>
+                                        <TableCell>{renderActivityCell(row.activitySlot)}</TableCell>
+                                        <TableCell>{renderSelectCell(row, "Available Input")}</TableCell>
+                                    </TableRow>
+                                ))}
+                                {inputDataSource.length === 0 && (
+                                    <TableRow>
+                                        <TableCell colSpan={2}>
+                                            <Typography variant="body2" color="text.secondary">
+                                                No input slots defined for this BusinessRuleTask.
+                                            </Typography>
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </MUITable>
+                    </TableContainer>
+                </Box>
 
-            {/* Ok Button And Cancel Button */}
-            <div style={{ width: "100%", display: "flex", justifyContent: "flex-end", gap: "10px" }}>
-                <Button type="primary" onClick={handleOk}>Ok</Button>
+                <Box>
+                    <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                        Output
+                    </Typography>
+                    <TableContainer component={Paper} variant="outlined">
+                        <MUITable size="small">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell width="40%">Activity Slot</TableCell>
+                                    <TableCell>Available Output</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {outputDataSource.map((row) => (
+                                    <TableRow key={row.activitySlot.name}>
+                                        <TableCell>{renderActivityCell(row.activitySlot)}</TableCell>
+                                        <TableCell>{renderSelectCell(row, "Available Output")}</TableCell>
+                                    </TableRow>
+                                ))}
+                                {outputDataSource.length === 0 && (
+                                    <TableRow>
+                                        <TableCell colSpan={2}>
+                                            <Typography variant="body2" color="text.secondary">
+                                                No output slots defined for this BusinessRuleTask.
+                                            </Typography>
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </MUITable>
+                    </TableContainer>
+                </Box>
+            </Stack>
+
+            <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ mt: 3 }}>
                 <Button onClick={handleCancel}>Cancel</Button>
-                <Button onClick={handleReset}>Reset</Button>
-            </div>
+                <Button color="warning" onClick={handleReset}>Reset</Button>
+                <Button variant="contained" onClick={handleOk}>Ok</Button>
+            </Stack>
 
-        </div>
+        </Box>
     )
 
     function swapMappingKeyValue(originMapping) {
@@ -371,49 +378,49 @@ export const BindingDmnModal = ({
         }
     })
 
-    const colums = [
-        {
-            title: "BusinessRuleTask Name",
-            dataIndex: "businessRuleName",
-            key: "businessRuleName",
-            render: (text, record) => {
-                if (record.businessRuleId === currentBusinessRuleId) {
-                    return (
-                        <Text type="success">{text}</Text>
-                    )
-                }
-
-                return (
-                    <Text>{text}</Text>
-                )
-            }
-        },
-        {
-            title: "dmnName",
-            dataIndex: "dmn",
-            key: "dmn",
-            render: (text, record) => {
-                return (
-                    <Button onClick={() => {
-                        setCurrentBusinessRuleId(
-                            record.businessRuleId
-                        )
-                    }} >绑定</Button>
-                )
-            }
-        }
-    ]
     const itemToHandle = data.find((item) => item.businessRuleId === currentBusinessRuleId)
 
     const isHandle = itemToHandle ? true : false
     console.log(DmnBindingInfo)
     return (
         <>
-            <Table
-                columns={colums}
-                dataSource={data}
-                pagination={false}
-            />
+            <TableContainer component={Paper} variant="outlined" sx={{ mb: 3 }}>
+                <MUITable size="small">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>BusinessRuleTask Name</TableCell>
+                            <TableCell width={160} align="right">DMN</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {data.map((record) => {
+                            const isSelected = record.businessRuleId === currentBusinessRuleId
+                            return (
+                                <TableRow
+                                    key={record.businessRuleId}
+                                    selected={isSelected}
+                                    hover
+                                >
+                                    <TableCell>
+                                        <Typography color={isSelected ? "primary" : "text.primary"} fontWeight={isSelected ? 600 : 500}>
+                                            {record.businessRuleName}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell align="right">
+                                        <Button
+                                            variant={isSelected ? "contained" : "outlined"}
+                                            size="small"
+                                            onClick={() => setCurrentBusinessRuleId(record.businessRuleId)}
+                                        >
+                                            绑定
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            )
+                        })}
+                    </TableBody>
+                </MUITable>
+            </TableContainer>
             <DmnBindingBlock
                 businessRuleToFullfill={itemToHandle}
                 isHandle={isHandle}

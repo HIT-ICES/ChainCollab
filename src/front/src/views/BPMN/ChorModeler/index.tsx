@@ -58,16 +58,34 @@ const ChorModelerView: React.FC = () => {
     };
   }, [contextMissing]);
 
+  const controlsWrapperStyle: React.CSSProperties = {
+    display: "flex",
+    gap: "16px",
+    flexWrap: "wrap",
+    marginBottom: "16px",
+    alignItems: "flex-end",
+  };
+
+  const hostSurfaceStyle: React.CSSProperties = {
+    width: "100%",
+    flex: 1,
+    minHeight: 0,
+    display: "flex",
+    borderRadius: "clamp(16px, 2vw, 26px)",
+  };
+
+  const embeddedStyle: React.CSSProperties = {
+    width: "100%",
+    height: "100%",
+    background: "transparent",
+    boxShadow: "none",
+    borderRadius: "inherit",
+  };
+
   return (
     <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
       <div
-        style={{
-          display: "flex",
-          gap: "16px",
-          flexWrap: "wrap",
-          marginBottom: "16px",
-          alignItems: "flex-end",
-        }}
+        style={controlsWrapperStyle}
       >
         <label style={{ display: "flex", flexDirection: "column", fontSize: 12, color: "#475569" }}>
           Organization ID
@@ -103,7 +121,7 @@ const ChorModelerView: React.FC = () => {
           </div>
         )}
       </div>
-      <div style={{ width: "100%", flex: 1, minHeight: 0 }}>
+      <div style={hostSurfaceStyle}>
         <ChorModelerApp
           consortiumId={effectiveConsortiumId || "preview-consortium"}
           orgId={effectiveOrgId || "preview-org"}
@@ -111,6 +129,7 @@ const ChorModelerView: React.FC = () => {
           translatorBaseUrl={`${translatorBaseUrl}/api/v1`}
           authToken={token}
           serviceOverrides={serviceOverrides}
+          style={embeddedStyle}
           embedded
         />
       </div>

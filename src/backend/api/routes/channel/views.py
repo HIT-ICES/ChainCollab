@@ -505,7 +505,7 @@ class ChannelViewSet(viewsets.ViewSet):
             anchor_peers = serializer.validated_data.get("anchor_peers")
             resource_set_id = serializer.validated_data.get("resource_set_id")
             resource_set = ResourceSet.objects.get(id=resource_set_id)
-            fabric_resource_set = resource_set.sub_resource_set.get()
+            fabric_resource_set = resource_set.sub_resource_set
             path = channel.get_channel_artifacts_path(CONFIGBLOCK_PB)
             anchor_peer_nodes = Node.objects.filter(
                 fabric_resource_set=fabric_resource_set,

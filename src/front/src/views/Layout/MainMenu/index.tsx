@@ -1,20 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Menu } from "antd";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Button as MUIButton,
-  Stack,
-  Typography,
-  FormControl,
-  InputLabel,
-  Select as MUISelect,
-  MenuItem as MUIMenuItem,
-  SelectChangeEvent
-} from "@mui/material";
 const { SubMenu } = Menu;
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { DesktopOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
@@ -27,241 +12,12 @@ import { selectEnv, activateEnv, deactivateEnv } from '@/redux/slices/envSlice'
 
 import { useOrgData, useConsortiaData, useEnvData } from "./hooks";
 
-import { createConsortium, createOrg, createEnvironment } from '@/api/platformAPI'
-
 import {
   consumeConsortiumSelectRequest,
   consumeOrgSelectRequest,
   consumeEnvSelectRequest,
   selectUI
 } from '@/redux/slices/UISlice'
-
-const AddConsortiumModal: React.FC<{
-  isModalOpen?: boolean,
-  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>,
-  setSync: () => void,
-}> = ({ isModalOpen = false, setIsModalOpen, setSync }) => {
-
-  const [consortiumName, setConsortiumName] = useState("Consortium");
-  const [loading, setLoading] = useState(false);
-  const dispatch = useAppDispatch();
-
-  const currentOrgId = useAppSelector(selectOrg).currentOrgId;
-
-  const handleClose = () => {
-    if (loading) return;
-    setIsModalOpen(false);
-    setConsortiumName("Consortium");
-  };
-
-  const handleConfirm = async () => {
-    if (!consortiumName.trim()) return;
-    try {
-      setLoading(true);
-      const newConsortium = await createConsortium(currentOrgId, consortiumName.trim());
-      dispatch(activateConsortium({ currentConsortiumId: newConsortium.id, currentConsortiumName: newConsortium.name }));
-      setConsortiumName("Consortium");
-      setIsModalOpen(false);
-      setSync();
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <Dialog
-      open={isModalOpen}
-      onClose={handleClose}
-      fullWidth
-      maxWidth="xs"
-    >
-      <DialogTitle sx={{ fontWeight: 600 }}>Add Consortium</DialogTitle>
-      <DialogContent dividers>
-        <Stack spacing={2}>
-          <TextField
-            label="Consortium Name"
-            value={consortiumName}
-            onChange={(e) => setConsortiumName(e.target.value)}
-            autoFocus
-            fullWidth
-          />
-          <Typography variant="body2" color="text.secondary">
-            创建一个新的联盟以管理多组织协作环境。
-          </Typography>
-        </Stack>
-      </DialogContent>
-      <DialogActions sx={{ px: 3, py: 2 }}>
-        <MUIButton onClick={handleClose}>Cancel</MUIButton>
-        <MUIButton
-          variant="contained"
-          onClick={handleConfirm}
-          disabled={!consortiumName.trim() || loading}
-        >
-          {loading ? "Creating..." : "Create"}
-        </MUIButton>
-      </DialogActions>
-    </Dialog>
-  )
-}
-
-const AddOrgModal: React.FC<{
-  isModalOpen?: boolean,
-  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>,
-  setSync: () => void,
-}> = ({ isModalOpen = false, setIsModalOpen, setSync }) => {
-  const [orgName, setOrgName] = useState("Organization");
-  const [loading, setLoading] = useState(false);
-  const dispatch = useAppDispatch();
-
-
-  const handleClose = () => {
-    if (loading) return;
-    setIsModalOpen(false);
-    setOrgName("Organization");
-  };
-
-  const handleConfirm = async () => {
-    if (!orgName.trim()) return;
-    try {
-      setLoading(true);
-      const Org = await createOrg(orgName.trim());
-      dispatch(activateOrg({ currentOrgId: Org.id, currentOrgName: Org.name }));
-      setOrgName("Organization");
-      setIsModalOpen(false);
-      setSync();
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <Dialog
-      open={isModalOpen}
-      onClose={handleClose}
-      fullWidth
-      maxWidth="xs"
-    >
-      <DialogTitle sx={{ fontWeight: 600 }}>Add Organization</DialogTitle>
-      <DialogContent dividers>
-        <Stack spacing={2}>
-          <TextField
-            label="Organization Name"
-            value={orgName}
-            onChange={(e) => setOrgName(e.target.value)}
-            autoFocus
-            fullWidth
-          />
-          <Typography variant="body2" color="text.secondary">
-            创建一个新的组织以便在控制平面中管理资源。
-          </Typography>
-        </Stack>
-      </DialogContent>
-      <DialogActions sx={{ px: 3, py: 2 }}>
-        <MUIButton onClick={handleClose}>Cancel</MUIButton>
-        <MUIButton
-          variant="contained"
-          onClick={handleConfirm}
-          disabled={!orgName.trim() || loading}
-        >
-          {loading ? "Creating..." : "Create"}
-        </MUIButton>
-      </DialogActions>
-    </Dialog>
-  );
-};
-
-const AddEnvModal: React.FC<{
-  isModalOpen?: boolean,
-  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>,
-  setSync: () => void,
-  defaultEnvType?: string,
-}> = ({ isModalOpen = false, setIsModalOpen, setSync, defaultEnvType = 'Fabric' }) => {
-  const [envName, setEnvName] = useState("Environment");
-  const [envType, setEnvType] = useState(defaultEnvType);
-  const [loading, setLoading] = useState(false);
-  const dispatch = useAppDispatch();
-  const currentConsortiumId = useAppSelector(selectConsortium).currentConsortiumId;
-
-  useEffect(() => {
-    if (isModalOpen) {
-      setEnvName("Environment");
-      setEnvType(defaultEnvType);
-    }
-  }, [isModalOpen, defaultEnvType]);
-
-  const handleClose = () => {
-    if (loading) return;
-    setIsModalOpen(false);
-    setEnvName("Environment");
-    setEnvType(defaultEnvType);
-  };
-
-  const handleConfirm = async () => {
-    if (!envName.trim()) return;
-    try {
-      setLoading(true);
-      const Env = await createEnvironment(currentConsortiumId, envName.trim());
-      dispatch(activateEnv({
-        currentEnvId: Env.id,
-        currentEnvName: Env.name,
-        currentEnvType: envType || 'Fabric'
-      }));
-      setIsModalOpen(false);
-      setSync();
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <Dialog
-      open={isModalOpen}
-      onClose={handleClose}
-      fullWidth
-      maxWidth="xs"
-    >
-      <DialogTitle sx={{ fontWeight: 600 }}>Add Environment</DialogTitle>
-      <DialogContent dividers>
-        <Stack spacing={2}>
-          <TextField
-            label="Environment Name"
-            value={envName}
-            onChange={(e) => setEnvName(e.target.value)}
-            autoFocus
-            fullWidth
-          />
-          <FormControl fullWidth>
-            <InputLabel id="env-type-label">Environment Type</InputLabel>
-            <MUISelect
-              labelId="env-type-label"
-              value={envType}
-              label="Environment Type"
-              onChange={(e: SelectChangeEvent<string>) => setEnvType(e.target.value as string)}
-            >
-              <MUIMenuItem value="Ethereum">Ethereum</MUIMenuItem>
-              <MUIMenuItem value="Fabric">Fabric</MUIMenuItem>
-              <MUIMenuItem value="Quorum" disabled>Quorum (coming soon)</MUIMenuItem>
-            </MUISelect>
-          </FormControl>
-          <Typography variant="body2" color="text.secondary">
-            为当前联盟创建一个新的运行环境，系统将自动完成资源准备。
-          </Typography>
-        </Stack>
-      </DialogContent>
-      <DialogActions sx={{ px: 3, py: 2 }}>
-        <MUIButton onClick={handleClose}>Cancel</MUIButton>
-        <MUIButton
-          variant="contained"
-          onClick={handleConfirm}
-          disabled={!envName.trim() || loading}
-        >
-          {loading ? "Creating..." : "Create"}
-        </MUIButton>
-      </DialogActions>
-    </Dialog>
-  );
-}
-
 
 const MainMenu: React.FC = () => {
   const navigateTo = useNavigate();
@@ -315,10 +71,6 @@ const MainMenu: React.FC = () => {
     }
   };
 
-  const [isAddConsortiumModalOpen, setIsAddConsortiumModalOpen] = useState(false);
-  const [isAddOrgModalOpen, setIsAddOrgModalOpen] = useState(false);
-  const [isAddEnvModalOpen, setIsAddEnvModalOpen] = useState(false);
-
   const {
     orgSelectOpenRequest
     , consortiumSelectOpenRequest
@@ -326,18 +78,18 @@ const MainMenu: React.FC = () => {
   } = useAppSelector(selectUI);
   useEffect(() => {
     if (orgSelectOpenRequest) {
-      setIsAddOrgModalOpen(true);
+      navigateTo("/orgs/create");
       dispatch(consumeOrgSelectRequest());
     }
     if (consortiumSelectOpenRequest) {
-      setIsAddConsortiumModalOpen(true);
+      navigateTo(`/orgs/${currentOrgId || 'none'}/consortia/create`);
       dispatch(consumeConsortiumSelectRequest());
     }
     if (envSelectOpenRequest) {
-      setIsAddEnvModalOpen(true);
+      navigateTo(`/orgs/${currentOrgId || 'none'}/consortia/${currentConsortiumId || 'none'}/envs/create`);
       dispatch(consumeEnvSelectRequest());
     }
-  }, [orgSelectOpenRequest, consortiumSelectOpenRequest, envSelectOpenRequest])
+  }, [orgSelectOpenRequest, consortiumSelectOpenRequest, envSelectOpenRequest, navigateTo, currentOrgId, currentConsortiumId, dispatch])
 
   console.log(envList)
 
@@ -408,22 +160,29 @@ const MainMenu: React.FC = () => {
       <SubMenu key={"ActivateOrg"} title={currentOrgName !== "" ? currentOrgName : "Select An Organization"}>
         {orgList.map((item) => (
           <Menu.Item key={item.id} onClick={
-            () => dispatch(activateOrg({ currentOrgId: item.id, currentOrgName: item.name }))
+            () => {
+              dispatch(activateOrg({ currentOrgId: item.id, currentOrgName: item.name }));
+              navigateTo(`/orgs/${item.id}/dashboard`);
+            }
           } >{item.name}</Menu.Item>
         ))}
         <Menu.Divider
           style={{ backgroundColor: "rgba(15, 23, 42, 0.08)" }}
         />
-        <Menu.Item key="addOrganization" onClick={() => setIsAddOrgModalOpen(true)}>
+        <Menu.Item key="addOrganization" onClick={() => navigateTo("/orgs/create")}>
           Add Organization
         </Menu.Item>
       </SubMenu>
-      <Menu.Item key={`/orgs/${currentOrgId ? currentOrgId : 'none'}/dashboard`}>Dashboard</Menu.Item>
-      {currentOrgId === '' ? null : (
+      {currentOrgId && (
         <>
-          <Menu.Item key={`/orgs/${currentOrgId}/usersmanage`}>Manage Users</Menu.Item>
-          <Menu.Item key={`/orgs/${currentOrgId}/settings`}>Settings</Menu.Item>
-        </>)}
+          <Menu.Divider style={{ backgroundColor: "rgba(15, 23, 42, 0.08)" }} />
+          <Menu.ItemGroup key="OrgActions">
+            <Menu.Item key={`/orgs/${currentOrgId}/dashboard`}>Dashboard</Menu.Item>
+            <Menu.Item key={`/orgs/${currentOrgId}/usersmanage`}>Manage Users</Menu.Item>
+            <Menu.Item key={`/orgs/${currentOrgId}/settings`}>Settings</Menu.Item>
+          </Menu.ItemGroup>
+        </>
+      )}
     </SubMenu>
   );
 
@@ -434,14 +193,17 @@ const MainMenu: React.FC = () => {
           envListReady ?
             envList.map((item) => (
               <Menu.Item key={item.id} onClick={
-                () => dispatch(activateEnv({ currentEnvId: item.id, currentEnvName: item.name }))
+                () => {
+                  dispatch(activateEnv({ currentEnvId: item.id, currentEnvName: item.name }));
+                  navigateTo(`/orgs/${currentOrgId || 'none'}/consortia/${currentConsortiumId || 'none'}/envs/${item.id}/envdashboard`);
+                }
               } >{item.name}</Menu.Item>
             )) : null
         }
         <Menu.Divider
           style={{ backgroundColor: "rgba(15, 23, 42, 0.08)" }}
         />
-        <Menu.Item key="addEnvironment" onClick={() => setIsAddEnvModalOpen(true)}>
+        <Menu.Item key="addEnvironment" onClick={() => navigateTo(`/orgs/${currentOrgId || 'none'}/consortia/${currentConsortiumId || 'none'}/envs/create`)}>
           Add Environment
         </Menu.Item>
       </SubMenu>
@@ -511,13 +273,16 @@ const MainMenu: React.FC = () => {
       <SubMenu key={'ActivateConsortium'} title={currentConsortiumName !== "" ? currentConsortiumName : "Select A Consortium"}>
         {consortiaList.map((item) => (
           <Menu.Item key={item.id} onClick={
-            () => dispatch(activateConsortium({ currentConsortiumId: item.id, currentConsortiumName: item.name }))
+            () => {
+              dispatch(activateConsortium({ currentConsortiumId: item.id, currentConsortiumName: item.name }));
+              navigateTo(`/orgs/${currentOrgId || 'none'}/consortia/${item.id}/dashboard`);
+            }
           } >{item.name}</Menu.Item>
         ))}
         <Menu.Divider
           style={{ backgroundColor: "rgba(15, 23, 42, 0.08)" }}
         />
-        <Menu.Item key="addConsortium" onClick={() => setIsAddConsortiumModalOpen(true)}>
+        <Menu.Item key="addConsortium" onClick={() => navigateTo(`/orgs/${currentOrgId || 'none'}/consortia/create`)}>
           Add Consortium
         </Menu.Item>
       </SubMenu>
@@ -562,21 +327,6 @@ const MainMenu: React.FC = () => {
         {bpmnItem}
       </Menu>
 
-      <AddConsortiumModal
-        isModalOpen={isAddConsortiumModalOpen}
-        setIsModalOpen={setIsAddConsortiumModalOpen}
-        setSync={syncAll}
-      />
-      <AddOrgModal
-        isModalOpen={isAddOrgModalOpen}
-        setIsModalOpen={setIsAddOrgModalOpen}
-        setSync={syncAll}
-      />
-      <AddEnvModal
-        isModalOpen={isAddEnvModalOpen}
-        setIsModalOpen={setIsAddEnvModalOpen}
-        setSync={syncAll}
-      />
     </>
   );
 };

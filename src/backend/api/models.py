@@ -72,12 +72,12 @@ class FabricResourceSet(models.Model):
         max_length=32,
         help_text="Organization type",
     )
-    resource_set = models.ForeignKey(
+    resource_set = models.OneToOneField(
         "ResourceSet",
         help_text="Resource set to which the fabric resourceset belongs",
-        null=True,
+        null=False,
         related_name="sub_resource_set",
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
     )
 
     class Meta:
@@ -194,7 +194,7 @@ class Agent(models.Model):
         help_text="Organization of agent",
         null=True,
         related_name="agents",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
     )
     status = models.CharField(
         help_text="Status of agent",
@@ -295,7 +295,7 @@ class KubernetesConfig(models.Model):
     agent = models.ForeignKey(
         Agent,
         help_text="Agent of kubernetes config",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         null=True,
     )
 
@@ -522,7 +522,7 @@ class Node(models.Model):
         help_text="Agent of node",
         null=True,
         related_name="node",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
     )
     # network = models.ForeignKey(
     #     Network,
@@ -652,6 +652,16 @@ class Port(models.Model):
 
     class Meta:
         ordering = ("external",)
+        constraints = [
+            models.UniqueConstraint(
+                fields=("node", "internal"),
+                name="unique_node_internal_port",
+            ),
+            models.UniqueConstraint(
+                fields=("node", "external"),
+                name="unique_node_external_port",
+            ),
+        ]
 
 
 def get_file_path(instance, file):
@@ -1034,6 +1044,9 @@ class ResourceSet(models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
+
+    class Meta:
+        unique_together = ("membership", "environment")
 
 
 class Firefly(models.Model):

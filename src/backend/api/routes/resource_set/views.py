@@ -167,7 +167,7 @@ class EthereumResourceSetViewSet(viewsets.ViewSet):
         try:
             data = {
                 "name": name,
-                "port_map": port_map,
+                "port_map": json.dumps(port_map),
             }
             response = post(f"""http://{CURRENT_IP}:7001/api/v1/ethnode""", data=data)
             print(response.status_code)
@@ -221,29 +221,21 @@ class EthereumResourceSetViewSet(viewsets.ViewSet):
             self._set_port(node, agent)
             
             port_map = {
-                a["internal"]: a["external"]
+                str(a["internal"]): int(a["external"])
                 for a in Port.objects.filter(eth_node=node)
                 .values("internal", "external")
                 .all()
-            }.__repr__()
-            
-            # self._create_start_eth_node(
-            #     ca_name=org_name,
-            #     port_map=port_map,
-            #     org_name=org_name,
-            #     type="ca",
-            #     infos=request.data,
-            # )
+            }
+
             self._node_create_agent(
                 name=node_name,
                 port_map=port_map,
             )
-            
+
             return Response(
                 data=ok("ca create success"), status=status.HTTP_202_ACCEPTED
             )
-            
-            
+
         except Exception as e:
             print("________ERRORR_________")
             traceback.print_exc(e)

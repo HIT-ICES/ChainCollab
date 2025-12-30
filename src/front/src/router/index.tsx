@@ -16,6 +16,9 @@ const Files = lazy(() => import("@/views/Files"));
 const UsersManage = lazy(() => import("@/views/Organization/UsersManage"));
 const OrgSettings = lazy(() => import("@/views/Organization/Settings"));
 const OrgDashboard = lazy(() => import("@/views/Organization/Dashboard"));
+const OrgCreate = lazy(() => import("@/views/Organization/Create"));
+const ConsortiumCreate = lazy(() => import("@/views/Consortium/Create"));
+const EnvCreate = lazy(() => import("@/views/Environment/Create"));
 const Home = lazy(() => import("@/views/Home"));
 const NetworkDashboard = lazy(() => import("@/views/Consortium/Dashboard"));
 const Memberships = lazy(() => import("@/views/Consortium/Memberships"));
@@ -73,6 +76,13 @@ const routes: routesType[] = [
         },
       },
       {
+        path: "/orgs/create",
+        element: withLoadingComponent(<OrgCreate />),
+        meta: {
+          title: "Create Organization",
+        },
+      },
+      {
         path: "/orgs/:org_id",
         meta: {
           title: "Organization",
@@ -100,6 +110,13 @@ const routes: routesType[] = [
               title: "Settings",
             },
           },
+          {
+            path: "consortia/create",
+            element: withLoadingComponent(<ConsortiumCreate />),
+            meta: {
+              title: "Create Consortium",
+            },
+          },
 
           // Consortia
           {
@@ -108,6 +125,13 @@ const routes: routesType[] = [
               title: "Consortium",
             },
             children: [
+              {
+                path: "/orgs/:org_id/consortia/:consortium_id/envs/create",
+                element: withLoadingComponent(<EnvCreate />),
+                meta: {
+                  title: "Create Environment",
+                },
+              },
               {
                 path: "/orgs/:org_id/consortia/:consortium_id/dashboard",
                 element: withLoadingComponent(<NetworkDashboard />),
@@ -228,6 +252,13 @@ const routes: routesType[] = [
             ],
           },
         ],
+      },
+      {
+        path: "/orgs/create",
+        element: withLoadingComponent(<OrgCreate />),
+        meta: {
+          title: "Create Organization",
+        },
       },
       {
         path: "/bpmn",

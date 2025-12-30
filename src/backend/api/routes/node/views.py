@@ -61,6 +61,7 @@ from api.utils.port_picker import set_ports_mapping, find_available_ports
 from api.common import ok, err
 from api.routes.channel.views import init_env_vars, join_peers
 from api.utils.host import add_host
+from api.services.nodes import NodeProvisioner, NodeProvisioningError
 
 
 LOG = logging.getLogger(__name__)
@@ -113,7 +114,7 @@ class NodeViewSet(viewsets.ViewSet):
                     "resource_set_id"
                 )
                 resource_set = ResourceSet.objects.get(pk=resource_set_id)
-                fabric_resource_set = resource_set.sub_resource_set.get()
+                fabric_resource_set = resource_set.sub_resource_set
 
                 # if agent_id is not None and not request.user.is_operator:
                 #     raise PermissionDenied
@@ -137,6 +138,8 @@ class NodeViewSet(viewsets.ViewSet):
                         "type": node.type,
                         "owner": resource_set.name,
                         "org_id": resource_set.membership.loleido_organization.id,
+                        "status": node.status,
+                        "created_at": node.created_at.isoformat() if node.created_at else None,
                     }
                     for node in nodes
                 ]
@@ -293,7 +296,7 @@ class NodeViewSet(viewsets.ViewSet):
                     return Response(
                         err("ResourceSet not found"), status=status.HTTP_400_BAD_REQUEST
                     )
-                fabric_resource_set = resource_set.sub_resource_set.get()
+                fabric_resource_set = resource_set.sub_resource_set
                 agent = resource_set.agent
                 if agent:
                     nodes = Node.objects.filter(
@@ -469,43 +472,14 @@ class NodeViewSet(viewsets.ViewSet):
 
     def _agent_params(self, pk):
         """
-        get node's params from db
-        :param node: node id
-        :return: info
+        Build node payload for downstream agent operations.
         """
         try:
-            node = Node.objects.get(id=pk)
-            org = node.fabric_resource_set
-            if org is None:
-                raise ResourceNotFound
-            network = org.network
-            if network is None:
-                raise ResourceNotFound
-            agent = org.agent.get()
-            if agent is None:
-                raise ResourceNotFound
-            ports = Port.objects.filter(node=node)
-            if ports is None:
-                raise ResourceNotFound
-
-            info = {}
-            org_name = org.name if node.type == "peer" else org.name.split(".", 1)[1]
-            # get info of node, e.g, tls, msp, config.
-            info["status"] = node.status
-            info["msp"] = node.msp
-            info["tls"] = node.tls
-            info["config_file"] = node.config_file
-            info["type"] = node.type
-            info["name"] = "{}.{}".format(node.name, org_name)
-            info["bootstrap_block"] = network.genesisblock
-            info["urls"] = agent.urls
-            info["network_type"] = network.type
-            info["agent_type"] = agent.type
-            info["container_name"] = "{}.{}".format(node.name, org_name)
-            info["ports"] = ports
-            return info
-        except Exception as e:
-            raise e
+            payload = NodeProvisioner.build_agent_payload(pk)
+            return payload.as_dict()
+        except NodeProvisioningError as exc:
+            LOG.error("Failed to build agent payload for node %s: %s", pk, exc)
+            raise ResourceNotFound
 
     def _start_node(self, pk):
         """
@@ -514,16 +488,10 @@ class NodeViewSet(viewsets.ViewSet):
         :return: null
         """
         try:
-            node_qs = Node.objects.filter(id=pk)
-            infos = self._agent_params(pk)
-            agent = AgentHandler(infos)
-            cid = agent.create(infos)
-            if cid:
-                node_qs.update(cid=cid, status="running")
-            else:
-                raise ResourceNotFound
-        except Exception as e:
-            raise e
+            NodeProvisioner.start_node(pk)
+        except NodeProvisioningError as exc:
+            LOG.error("Failed to start node %s: %s", pk, exc)
+            raise ResourceNotFound
 
     @swagger_auto_schema(
         methods=["post"],

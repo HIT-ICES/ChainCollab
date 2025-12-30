@@ -123,6 +123,8 @@ class ChainCodeViewSet(viewsets.ViewSet):
         env_resource_set = (
             env.resource_sets.all().filter(sub_resource_set__org_type=0).first()
         )
+        if not env_resource_set:
+            raise ResourceNotFound("No system resource_set found for environment")
         org_id = serializer.validated_data.get("org_id")
 
         id = make_uuid()
@@ -184,12 +186,12 @@ class ChainCodeViewSet(viewsets.ViewSet):
 
             # find a resource_set.sub_resource_set in env
             # fabric_resource_set = request.user.organization
-            fabric_resource_set = env_resource_set.sub_resource_set.get()
+            fabric_resource_set = env_resource_set.sub_resource_set
             qs = Node.objects.filter(
                 type="peer", fabric_resource_set=fabric_resource_set
             )
             if not qs.exists():
-                raise ResourceNotFound
+                raise ResourceNotFound("No peer node found for chaincode packaging")
             peer_node = qs.first()
             envs = init_env_vars(peer_node, fabric_resource_set)
             peer_channel_cli = PeerChainCode("v2.2.0", **envs)
@@ -347,7 +349,7 @@ class ChainCodeViewSet(viewsets.ViewSet):
             # fabric_resource_set = request.user.organization
             resource_set_id = request.query_params.get("resource_set_id", None)
             resource_set = ResourceSet.objects.get(pk=resource_set_id)
-            fabric_resource_set = resource_set.sub_resource_set.get()
+            fabric_resource_set = resource_set.sub_resource_set
 
             qs = Node.objects.filter(
                 type="peer", fabric_resource_set=fabric_resource_set
@@ -392,13 +394,13 @@ class ChainCodeViewSet(viewsets.ViewSet):
                 resource_set_id = request.data.get("resource_set_id", None)
                 resource_set = ResourceSet.objects.get(pk=resource_set_id)
                 env = resource_set.environment
-                fabric_resource_set = resource_set.sub_resource_set.get()
+                fabric_resource_set = resource_set.sub_resource_set
                 orderer_resource_set = (
                     env.resource_sets.all().filter(sub_resource_set__org_type=1).first()
                 )  # 0: UserOrg 1: SystemOrg
 
                 orderer_node = (
-                    orderer_resource_set.sub_resource_set.get()
+                    orderer_resource_set.sub_resource_set
                     .node.all()
                     .filter(type="orderer")
                     .first()
@@ -474,7 +476,7 @@ class ChainCodeViewSet(viewsets.ViewSet):
                 resource_set = ResourceSet.objects.get(pk=resource_set_id)
             except ResourceSet.DoesNotExist:
                 raise ResourceNotFound
-            fabric_resource_set = resource_set.sub_resource_set.get()
+            fabric_resource_set = resource_set.sub_resource_set
             qs = Node.objects.filter(
                 type="peer", fabric_resource_set=fabric_resource_set
             )
@@ -529,7 +531,7 @@ class ChainCodeViewSet(viewsets.ViewSet):
                 )  # 0: UserOrg 1: SystemOrg
 
                 orderer_node = (
-                    orderer_resource_set.sub_resource_set.get()
+                    orderer_resource_set.sub_resource_set
                     .node.all()
                     .filter(type="orderer")
                     .first()
@@ -558,7 +560,7 @@ class ChainCodeViewSet(viewsets.ViewSet):
                 peer_resource_set = (
                     env.resource_sets.all().filter(sub_resource_set__org_type=0).first()
                 )  # 0: UserOrg 1: SystemOrg
-                peer_fabric_resource_set = peer_resource_set.sub_resource_set.get()
+                peer_fabric_resource_set = peer_resource_set.sub_resource_set
                 qs = Node.objects.filter(
                     type="peer", fabric_resource_set=peer_fabric_resource_set
                 )
@@ -625,7 +627,7 @@ class ChainCodeViewSet(viewsets.ViewSet):
                     [
                         [
                             node.id
-                            for node in peer_resource_set.sub_resource_set.get().node.all()
+                            for node in peer_resource_set.sub_resource_set.node.all()
                             if node.type != "ca"
                         ]
                         for peer_resource_set in peer_resource_sets
@@ -636,7 +638,7 @@ class ChainCodeViewSet(viewsets.ViewSet):
                 )  # 0: UserOrg 1: SystemOrg
 
                 orderer_node = (
-                    orderer_resource_set.sub_resource_set.get()
+                    orderer_resource_set.sub_resource_set
                     .node.all()
                     .filter(type="orderer")
                     .first()
@@ -665,7 +667,7 @@ class ChainCodeViewSet(viewsets.ViewSet):
                     orderer_tls_root_cert = orderer_tls_dir + "/" + files[0]
                     break
 
-                commit_fabric_resource_set = commit_resource_set.sub_resource_set.get()
+                commit_fabric_resource_set = commit_resource_set.sub_resource_set
                 qs = Node.objects.filter(
                     type="peer", fabric_resource_set=commit_fabric_resource_set
                 )
@@ -749,7 +751,7 @@ class ChainCodeViewSet(viewsets.ViewSet):
             peer_resource_set = (
                 env.resource_sets.all().filter(sub_resource_set__org_type=0).first()
             )  # 0: UserOrg 1: SystemOrg
-            peer_fabric_resource_set = peer_resource_set.sub_resource_set.get()
+            peer_fabric_resource_set = peer_resource_set.sub_resource_set
             qs = Node.objects.filter(
                 type="peer", fabric_resource_set=peer_fabric_resource_set
             )

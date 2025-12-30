@@ -1,3 +1,4 @@
+import logging
 from requests import post
 from rest_framework import viewsets, status
 from rest_framework.response import Response
@@ -33,6 +34,8 @@ from .utils import (
     approveChaincodeForEnv,
     commmitChaincodeForEnv,
 )
+
+LOG = logging.getLogger(__name__)
 
 
 class EnvironmentViewSet(viewsets.ViewSet):
@@ -157,11 +160,21 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
             data={},
             headers={"Authorization": headers["Authorization"]},
         )
+        LOG.info(
+            "Init env %s -> ca_create resource_set %s",
+            env.id,
+            resource_set.id,
+        )
 
         post(
             f"http://{CURRENT_IP}:8000/api/v1/resource_sets/{resource_set.id}/cas/enroll_org_ca_admin",
             data={},
             headers={"Authorization": headers["Authorization"]},
+        )
+        LOG.info(
+            "Init env %s -> enroll_org_ca_admin resource_set %s",
+            env.id,
+            resource_set.id,
         )
 
         # Register Org Admin
@@ -169,6 +182,11 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
             f"http://{CURRENT_IP}:8000/api/v1/resource_sets/{resource_set.id}/cas/org_user_admin/register_enroll",
             data={},
             headers={"Authorization": headers["Authorization"]},
+        )
+        LOG.info(
+            "Init env %s -> org_user_admin/register_enroll resource_set %s",
+            env.id,
+            resource_set.id,
         )
 
         node_name = "orderer1"
@@ -185,6 +203,12 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
             },
             headers={"Authorization": headers["Authorization"]},
         )
+        LOG.info(
+            "Init env %s -> register_enroll orderer %s (resource_set %s)",
+            env.id,
+            orderer_domain_name,
+            resource_set.id,
+        )
 
         # 创建节点
         post(
@@ -195,6 +219,12 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
                 "name": node_name,
             },
             headers={"Authorization": headers["Authorization"]},
+        )
+        LOG.info(
+            "Init env %s -> create orderer node %s (resource_set %s)",
+            env.id,
+            node_name,
+            resource_set.id,
         )
 
         # Register System peer node
@@ -209,12 +239,24 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
             },
             headers={"Authorization": headers["Authorization"]},
         )
+        LOG.info(
+            "Init env %s -> register_enroll peer %s (resource_set %s)",
+            env.id,
+            peer_domain_name,
+            resource_set.id,
+        )
 
         # 创建节点
         post(
             f"http://{CURRENT_IP}:8000/api/v1/resource_sets/{resource_set.id}/nodes",
             data={"num": 1, "type": "peer", "name": node_name},
             headers={"Authorization": headers["Authorization"]},
+        )
+        LOG.info(
+            "Init env %s -> create peer node %s (resource_set %s)",
+            env.id,
+            node_name,
+            resource_set.id,
         )
 
         env.status = "INITIALIZED"
@@ -369,8 +411,8 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         orderer_ids = flatten(
             [
                 [
-                    node.id
-                    for node in orderer_resource_set.sub_resource_set.get().node.all()
+                    str(node.id)
+                    for node in orderer_resource_set.sub_resource_set.node.all()
                     if node.type != "ca" and node.type != "peer"
                 ]
                 for orderer_resource_set in orderer_resource_sets
@@ -382,8 +424,8 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         peer_ids = flatten(
             [
                 [
-                    node.id
-                    for node in peer_resource_set.sub_resource_set.get().node.all()
+                    str(node.id)
+                    for node in peer_resource_set.sub_resource_set.node.all()
                     if node.type != "ca"
                 ]
                 for peer_resource_set in peer_resource_sets
@@ -391,43 +433,71 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         )
 
         # append orderer resource peers
-        peer_ids.append(
+        peer_ids.extend(
             flatten(
                 [
                     [
-                        node.id
-                        for node in orderer_resource_set.sub_resource_set.get().node.all()
+                        str(node.id)
+                        for node in orderer_resource_set.sub_resource_set.node.all()
                         if node.type != "ca" and node.type != "orderer"
                     ]
                     for orderer_resource_set in orderer_resource_sets
                 ]
             )
         )
+
+        if not orderer_ids or not peer_ids:
+            return Response(
+                {
+                    "message": "No orderers or peers found to create channel",
+                    "orderers": orderer_ids,
+                    "peers": peer_ids,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         channel_name = DEFAULT_CHANNEL_NAME
         response = post(
             f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/channels",
-            data={
+            json={
                 "orderers": orderer_ids,
                 "peers": peer_ids,
                 "name": channel_name,
-                "environment_id": env.id,
+                "environment_id": str(env.id),
             },
             headers={"Authorization": headers["Authorization"]},
         )
 
-        # print(response.json())
+        if not str(response.status_code).startswith("2"):
+            raise Exception(
+                f"Create channel failed: {response.status_code} {response.text}"
+            )
+        try:
+            payload = response.json()
+        except Exception:
+            raise Exception(f"Create channel failed: invalid JSON {response.text}")
+
+        channel_id = (
+            payload.get("data", {}).get("id") if isinstance(payload, dict) else None
+        ) or (payload.get("id") if isinstance(payload, dict) else None)
+        if not channel_id:
+            raise Exception(f"Channel ID missing in response: {payload}")
+
         def _generateAnchorPeers(peer_resource_set):
+            peer_nodes = [
+                str(node.id)
+                for node in peer_resource_set.sub_resource_set.node.all()
+                if node.type != "ca" and node.type != "orderer"
+            ]
+            if not peer_nodes:
+                LOG.warning(
+                    "Skip anchor peer generation: no peer nodes found for resource_set=%s",
+                    peer_resource_set.id,
+                )
+                return
             post(
-                f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/channels/{response.json()['data']['id']}/anchors",
+                f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/channels/{channel_id}/anchors",
                 data={
-                    "anchor_peers": [
-                        [
-                            node.id
-                            for node in peer_resource_set.sub_resource_set.get().node.all()
-                            if node.type != "ca" and node.type != "orderer"
-                        ][0]
-                        # peer_resource_set.sub_resource_set.get().node.all()[0].id
-                    ],
+                    "anchor_peers": [peer_nodes[0]],
                     "orderers": orderer_ids,
                     "resource_set_id": peer_resource_set.id,
                 },
@@ -437,11 +507,7 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
                 f"http://{CURRENT_IP}:8000/api/v1/resource_sets/{peer_resource_set.id}/cas/ccp/generate",
                 data={
                     "channel_name": channel_name,
-                    "peer_id": [
-                        node.id
-                        for node in peer_resource_set.sub_resource_set.get().node.all()
-                        if node.type != "ca" and node.type != "orderer"
-                    ][0],
+                    "peer_id": peer_nodes[0],
                 },
                 headers={"Authorization": headers["Authorization"]},
             )

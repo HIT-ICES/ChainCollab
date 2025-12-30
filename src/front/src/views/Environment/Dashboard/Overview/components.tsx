@@ -109,26 +109,45 @@ export const CustomCard = (props) => {
 
   const { color = "#4e4d4a", logo, title, status } = props
   return (
-    <div style={{
-      width: 200, height: 200, backgroundColor: color, border: "2px solid #E5E5E5", borderRadius: 10, margin: "10px", padding: 16, display: "flex", flexDirection: "column"
-    }}>
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }
-      } >
+    <div
+      style={{
+        width: 220,
+        minHeight: 220,
+        background: `linear-gradient(145deg, ${color} 0%, #ffffff 80%)`,
+        border: "1px solid #e2e8f0",
+        borderRadius: 16,
+        margin: "10px",
+        padding: 16,
+        display: "flex",
+        flexDirection: "column",
+        boxShadow: "0 12px 30px rgba(15,23,42,0.12)",
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
         {logo}
-      </div >
-      <Title level={4} style={{ textAlign: "center" }}>
+      </div>
+      <Title level={4} style={{ textAlign: "center", marginTop: 12, marginBottom: 8 }}>
         {title}
       </Title>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }} >
-        {
-          status.map((item) => {
-            return (
-              <Text>
-                {item.key}: {item.value ? <div style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: 'green', display: 'inline-block' }}></div> : <div style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: 'red', display: 'inline-block' }}></div>}
-              </Text>
-            )
-          })
-        }
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }} >
+        {status.map((item) => {
+          const active = item.value;
+          return (
+            <div key={item.key} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span
+                style={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: "50%",
+                  backgroundColor: active ? "#22c55e" : "#f43f5e",
+                  boxShadow: active ? "0 0 0 4px rgba(34,197,94,0.15)" : "0 0 0 4px rgba(244,63,94,0.12)"
+                }}
+              />
+              <Text strong style={{ color: "#0f172a" }}>{item.key}</Text>
+              <Text type="secondary">{active ? "Running" : "Pending"}</Text>
+            </div>
+          );
+        })}
       </div>
     </div >)
 }
@@ -165,7 +184,7 @@ export const DMNComponentCard = ({
   return (
     <CustomCard
       color="#ffaa00"
-      logo={<img src={DmnIcon} alt="firefly" style={{ width: 100, height: 100 }} />} title="DMN" status={[
+      logo={<img src={DmnIcon} alt="relayer" style={{ width: 100, height: 100 }} />} title="Relayer" status={[
         { key: "ChainCode", value: ChaincodeStatus }
       ]} />
   );

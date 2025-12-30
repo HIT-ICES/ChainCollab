@@ -1,0 +1,712 @@
+[
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "taskId",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "oracle",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes32",
+				"name": "result",
+				"type": "bytes32"
+			}
+		],
+		"name": "ComputeSubmitted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "taskId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes32",
+				"name": "finalResult",
+				"type": "bytes32"
+			}
+		],
+		"name": "ComputeTaskFinalized",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "taskId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes32",
+				"name": "computeType",
+				"type": "bytes32"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes32",
+				"name": "payloadHash",
+				"type": "bytes32"
+			}
+		],
+		"name": "ComputeTaskRegistered",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "taskId",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "oracle",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "value",
+				"type": "uint256"
+			}
+		],
+		"name": "DataSubmitted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "taskId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "finalValue",
+				"type": "uint256"
+			}
+		],
+		"name": "DataTaskFinalized",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "taskId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes32",
+				"name": "sourceHash",
+				"type": "bytes32"
+			},
+			{
+				"indexed": false,
+				"internalType": "enum UnifiedOracle.AggregationMode",
+				"name": "mode",
+				"type": "uint8"
+			}
+		],
+		"name": "DataTaskRegistered",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "oracle",
+				"type": "address"
+			}
+		],
+		"name": "OracleRegistered",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "oracle",
+				"type": "address"
+			}
+		],
+		"name": "OracleRemoved",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "getAllComputeTaskIds",
+		"outputs": [
+			{
+				"internalType": "uint256[]",
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getAllDataTaskIds",
+		"outputs": [
+			{
+				"internalType": "uint256[]",
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "taskId",
+				"type": "uint256"
+			}
+		],
+		"name": "getComputeTask",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "requester",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "computeType",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "payloadHash",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "uint256",
+				"name": "threshold",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "finished",
+				"type": "bool"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "finalResult",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "taskId",
+				"type": "uint256"
+			}
+		],
+		"name": "getDataSourceConfig",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "taskId",
+				"type": "uint256"
+			}
+		],
+		"name": "getComputeTaskSummary",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "computeType",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "payloadHash",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "bool",
+				"name": "finished",
+				"type": "bool"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "finalResult",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "uint256",
+				"name": "threshold",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "responseCount",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getCounts",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "dataTasks",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "computeTasks",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "activeOracles",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "taskId",
+				"type": "uint256"
+			}
+		],
+		"name": "getDataTask",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "requester",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "sourceHash",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "enum UnifiedOracle.AggregationMode",
+				"name": "mode",
+				"type": "uint8"
+			},
+			{
+				"internalType": "uint256",
+				"name": "minResponses",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "finished",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "finalValue",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "submissionCount",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "taskId",
+				"type": "uint256"
+			}
+		],
+		"name": "getDataTaskSummary",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "sourceHash",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "enum UnifiedOracle.AggregationMode",
+				"name": "mode",
+				"type": "uint8"
+			},
+			{
+				"internalType": "bool",
+				"name": "finished",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "finalValue",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "submissionCount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "minResponses",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getHealth",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "ownerAddr",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "dataTasks",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "computeTasks",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "activeOracles",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "blockNumber",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "taskId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "oracle",
+				"type": "address"
+			}
+		],
+		"name": "isComputeOracleAllowed",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "oracle",
+				"type": "address"
+			}
+		],
+		"name": "isOracleActive",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "nextComputeTaskId",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "nextDataTaskId",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "oracleCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "oracleRegistry",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "active",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "computeType",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "payloadHash",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "address[]",
+				"name": "allowedOracles",
+				"type": "address[]"
+			},
+			{
+				"internalType": "uint256",
+				"name": "threshold",
+				"type": "uint256"
+			}
+		],
+		"name": "registerComputeTask",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "sourceConfig",
+				"type": "string"
+			},
+			{
+				"internalType": "enum UnifiedOracle.AggregationMode",
+				"name": "mode",
+				"type": "uint8"
+			},
+			{
+				"internalType": "address[]",
+				"name": "allowedOracles",
+				"type": "address[]"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "weights",
+				"type": "uint256[]"
+			},
+			{
+				"internalType": "uint256",
+				"name": "minResponses",
+				"type": "uint256"
+			}
+		],
+		"name": "registerDataTask",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "oracle",
+				"type": "address"
+			}
+		],
+		"name": "registerOracle",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "oracle",
+				"type": "address"
+			}
+		],
+		"name": "removeOracle",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "taskId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "result",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "bytes",
+				"name": "signature",
+				"type": "bytes"
+			}
+		],
+		"name": "submitComputeResult",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "taskId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "value",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bytes",
+				"name": "signature",
+				"type": "bytes"
+			}
+		],
+		"name": "submitData",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+]

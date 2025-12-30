@@ -247,7 +247,12 @@ export const StartEthEnv = async (envId: string) => {
 
 export const getPeerList = async (resId: string) => {
     try {
-        const response = await api.get(`resource_sets/${resId}/nodes`)
+        const response = await api.get(`resource_sets/${resId}/nodes`, {
+            params: {
+                page: 1,
+                per_page: 100,
+            }
+        })
         return response.data.filter(
             (item: any) => { return item.type === "peer" })
             .map((item: any) => {
@@ -260,6 +265,30 @@ export const getPeerList = async (resId: string) => {
             })
     } catch (error) {
         console.log(error);
+    }
+}
+
+export const getNodeList = async (resId: string, type?: string) => {
+    try {
+        const response = await api.get(`resource_sets/${resId}/nodes`, {
+            params: {
+                page: 1,
+                per_page: 100,
+                ...(type ? { type } : {}),
+            }
+        })
+        return response.data.map((item: any) => ({
+            id: item.id,
+            name: item.name,
+            type: item.type,
+            owner: item.owner,
+            orgId: item.org_id,
+            status: item.status,
+            createdAt: item.created_at,
+        }))
+    } catch (error) {
+        console.log(error);
+        return [];
     }
 }
 

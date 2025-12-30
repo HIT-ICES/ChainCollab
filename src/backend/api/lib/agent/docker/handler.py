@@ -37,6 +37,7 @@ class DockerAgent(AgentBase):
             port_map = {
                 str(port.internal): str(port.external) for port in info.get("ports")
             }
+            port_map_json = json.dumps(port_map)
 
             data = {
                 "msp": info.get("msp")[2:-1],
@@ -52,18 +53,40 @@ class DockerAgent(AgentBase):
                 ),
                 "name": info.get("name"),
                 "type": info.get("type"),
-                "port_map": port_map.__repr__(),
+                "port_map": port_map_json,
                 "action": "create",
             }
 
+            LOG.info("Agent node create -> %s payload=%s", f"{self._urls}/api/v1/nodes", data)
             response = post("{}/api/v1/nodes".format(self._urls), data=data)
 
-            if response.status_code == 200:
-                txt = json.loads(response.text)
-                return txt["data"]["id"]
-            else:
+            try:
+                txt = response.json()
+            except Exception:
+                LOG.error("Agent node create invalid JSON: %s", response.text)
                 return None
+
+            res_block = {}
+            if isinstance(txt, dict):
+                if "data" in txt:
+                    res_block = txt
+                elif "res" in txt:
+                    res_block = txt.get("res") or {}
+            node_id = (
+                res_block.get("data", {}).get("id")
+                if isinstance(res_block, dict)
+                else None
+            )
+
+            if 200 <= response.status_code < 300 and node_id:
+                return node_id
+
+            LOG.error(
+                "Agent node create failed status=%s body=%s", response.status_code, txt
+            )
+            return None
         except Exception as e:
+            LOG.error("Agent node create exception: %s", e)
             raise e
 
     def delete(self, *args, **kwargs):
@@ -154,6 +177,7 @@ class DockerAgent(AgentBase):
             port_map = {
                 str(port.internal): str(port.external) for port in info.get("ports")
             }
+            port_map_json = json.dumps(port_map)
             data = {
                 "msp": info.get("msp")[2:-1],
                 "tls": info.get("tls")[2:-1],
@@ -162,8 +186,7 @@ class DockerAgent(AgentBase):
                 "cmd": 'bash /tmp/init.sh "fabric-ca-server start"',
                 "name": info.get("name"),
                 "type": info.get("type"),
-                # "port_map": {"7054": "7054"}.__repr__(),
-                "port_map": port_map.__repr__(),
+                "port_map": port_map_json,
                 "action": "create",
             }
 

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react"
-import { Card, Row, Col, Button, Steps, Modal, Table, Select, Input } from "antd"
+import { useState } from "react"
+import { Card, Row, Col, Button, Steps, Modal, Select, Tag, Collapse, Typography, Tabs } from "antd"
 import { useLocation, useNavigate } from "react-router-dom";
 import { retrieveBPMN, packageBpmn, updateBPMNStatus, updateBpmnEnv, updateBPMNFireflyUrl, updateBpmnEvents } from "@/api/externalResource"
 import { generateChaincode, getMessagesByBpmnContent } from "@/api/translator"
@@ -24,9 +24,8 @@ const steps = [
 ];
 
 import { useAppSelector } from "@/redux/hooks";
-import { getAllMessages, registerDataType, initLedger, invokeFireflyListeners, invokeFireflySubscriptions } from "@/api/executionAPI"
+import { registerDataType, initLedger, invokeFireflyListeners, invokeFireflySubscriptions } from "@/api/executionAPI"
 import { current_ip } from "@/api/apiConfig";
-import { eventNames } from "process";
 
 const BPMNOverview = () => {
 
@@ -37,9 +36,13 @@ const BPMNOverview = () => {
     const [isEnvModalOpen, setIsEnvModalOpen] = useState(false);
     const currentOrgId = useAppSelector((state) => state.org.currentOrgId);
     const [buttonLoading, setButtonLoading] = useState(false);
-    const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
+    const [dslContentForModify, setDslContentForModify] = useState("");
     const [chainCodeContentForModify, setChainCodeContentForModify] = useState("");
     const [ffiContentForModify, setFFIContentForModify] = useState("");
+    const [showArtifacts, setShowArtifacts] = useState(false);
+    const [editorOpen, setEditorOpen] = useState(false);
+    const [editorKey, setEditorKey] = useState<"dsl" | "chaincode" | "ffi">("dsl");
+    const [activeTabKey, setActiveTabKey] = useState<"dsl" | "chaincode">("dsl");
 
 
     const navigate = useNavigate();
@@ -102,53 +105,14 @@ const BPMNOverview = () => {
         )
     }
 
-    const ModifyModal = () => {
-
-        const onModify = async () => {
-            await packageBpmn(chainCodeContentForModify, ffiContentForModify, currentOrgId, bpmnId);
-            refetchBpmn()
-            setButtonLoading(false);
-        }
-
-        return (
-            <Modal
-                title="Modify"
-                open={isModifyModalOpen}
-                onCancel={async () => {
-                    setButtonLoading(false);
-                    setIsModifyModalOpen(false);
-                }}
-                onOk={async () => {
-                    onModify();
-                    setIsModifyModalOpen(false);
-                }}
-                width={'40%'}
-            >
-                <h1>ChainCode</h1>
-                <Input.TextArea
-                    value={chainCodeContentForModify}
-                    onChange={(e) => {
-                        setChainCodeContentForModify(e.target.value);
-                    }}
-                    style={{
-                        width: "1000px",
-                        height: "300px",
-                    }}
-                />
-                <h2>FFI</h2>
-                <Input.TextArea
-                    value={ffiContentForModify}
-                    onChange={(e) => {
-                        setFFIContentForModify(e.target.value);
-                    }}
-                    style={{
-                        width: "1000px",
-                        height: "300px",
-                    }}
-                />
-            </Modal>
-        )
-    }
+    const { Title, Text } = Typography;
+    const statusColorMap: Record<string, string> = {
+        Initiated: "blue",
+        DeployEnved: "gold",
+        Generated: "cyan",
+        Installed: "purple",
+        Registered: "green",
+    };
 
     const onGenerate = async () => {
         try {
@@ -157,14 +121,17 @@ const BPMNOverview = () => {
             const res = await generateChaincode(bpmn.bpmnContent);
             const chaincode_content = res.bpmnContent;
             const ffi_content = res.ffiContent;
+            setDslContentForModify(res.dslContent || "");
             setChainCodeContentForModify(chaincode_content);
             setFFIContentForModify(ffi_content);
-            setIsModifyModalOpen(true);
+            setShowArtifacts(true);
+            setButtonLoading(false);
             // await packageBPMN(chaincode_content, ffi_content, bpmnInstanceId, currentOrgId);
             // syncInstance()
             // setButtonLoading(false);
         } catch (e) {
             console.log(e);
+            setButtonLoading(false);
         }
     }
 
@@ -303,13 +270,145 @@ const BPMNOverview = () => {
         }
     })()
 
+    const handlePackage = async () => {
+        setButtonLoading(true);
+        await packageBpmn(
+            chainCodeContentForModify,
+            ffiContentForModify,
+            currentOrgId,
+            bpmnId,
+            currentConsortiumId || "1"
+        );
+        refetchBpmn();
+        setButtonLoading(false);
+    };
+
+    const CodeEditor = ({
+        value,
+        onChange,
+        minRows = 8,
+    }: {
+        value: string;
+        onChange: (next: string) => void;
+        minRows?: number;
+    }) => {
+        const lines = Math.max(value.split("\n").length, minRows);
+        return (
+            <div
+                style={{
+                    display: "flex",
+                    borderRadius: 12,
+                    border: "1px solid #e2e8f0",
+                    background: "linear-gradient(145deg, #0f172a, #111827)",
+                    color: "#e2e8f0",
+                    overflow: "hidden",
+                }}
+            >
+                <div
+                    style={{
+                        padding: "12px 10px",
+                        background: "rgba(15,23,42,0.8)",
+                        borderRight: "1px solid rgba(148,163,184,0.2)",
+                        textAlign: "right",
+                        fontFamily: "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+                        fontSize: 12,
+                        lineHeight: 1.6,
+                        color: "#94a3b8",
+                        userSelect: "none",
+                        minWidth: 44,
+                    }}
+                >
+                    {Array.from({ length: lines }).map((_, index) => (
+                        <div key={`line-${index + 1}`}>{index + 1}</div>
+                    ))}
+                </div>
+                <textarea
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    rows={lines}
+                    style={{
+                        flex: 1,
+                        border: "none",
+                        outline: "none",
+                        padding: "12px 14px",
+                        background: "transparent",
+                        color: "#e2e8f0",
+                        fontFamily: "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+                        fontSize: 13,
+                        lineHeight: 1.6,
+                        resize: "vertical",
+                    }}
+                />
+            </div>
+        );
+    };
+
+    const PreviewBlock = ({
+        value,
+        onClick,
+    }: {
+        value: string;
+        onClick: () => void;
+    }) => {
+        const lines = value.split("\n").slice(0, 10).join("\n");
+        return (
+            <div>
+                <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={onClick}
+                    onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                            onClick();
+                        }
+                    }}
+                    style={{
+                        position: "relative",
+                        borderRadius: 12,
+                        border: "1px solid #e2e8f0",
+                        background: "linear-gradient(145deg, #0f172a, #111827)",
+                        color: "#e2e8f0",
+                        padding: "12px 14px",
+                        fontFamily:
+                            "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+                        fontSize: 12,
+                        lineHeight: 1.6,
+                        cursor: "pointer",
+                        maxHeight: 220,
+                        overflow: "hidden",
+                    }}
+                >
+                    <pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>{lines || "// empty"}</pre>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <>
-            <Card title="Overview" style={{ width: "100%" }}>
+            <Card
+                title="BPMN Deploy Overview"
+                style={{ width: "100%" }}
+                headStyle={{ borderBottom: "1px solid #e2e8f0", fontWeight: 600 }}
+                bodyStyle={{ padding: 20 }}
+            >
                 <Card.Grid style={{ width: "100%", height: "100%" }}>
+                    <Row justify="space-between" align="middle">
+                        <Col>
+                            <Title level={4} style={{ margin: 0 }}>
+                                {bpmn?.name || "BPMN"}
+                            </Title>
+                            <Text type="secondary">
+                                部署流程状态与生成结果会在这里展示。
+                            </Text>
+                        </Col>
+                        <Col>
+                            <Tag color={statusColorMap[status] || "default"}>{status}</Tag>
+                        </Col>
+                    </Row>
                     <Row
                         justify="end"
-                        style={{ width: "100%", height: "100%" }}
+                        style={{ width: "100%", height: "100%", marginTop: 16 }}
                     >
                         <Col
                             flex="auto"
@@ -342,9 +441,8 @@ const BPMNOverview = () => {
                     <Row>
                         <Col
                             style={{
-                                marginLeft: "40px",
                                 width: "100%",
-                                marginTop: "10px",
+                                marginTop: "16px",
                             }}
                         >
                             <Steps
@@ -355,9 +453,110 @@ const BPMNOverview = () => {
                     </Row>
                 </Card.Grid>
             </Card>
-            {
-                ModifyModal()
-            }
+            {showArtifacts ? (
+                <Card
+                    title="Generated Artifacts"
+                    style={{ width: "100%", marginTop: 16 }}
+                    headStyle={{ borderBottom: "1px solid #e2e8f0", fontWeight: 600 }}
+                    bodyStyle={{ padding: 20 }}
+                    extra={
+                        <Button type="primary" onClick={handlePackage} loading={buttonLoading}>
+                            Package
+                        </Button>
+                    }
+                >
+                    <Tabs
+                        defaultActiveKey="dsl"
+                        onChange={(key) => setActiveTabKey(key as "dsl" | "chaincode")}
+                        tabBarExtraContent={
+                            <Button
+                                type="primary"
+                                size="small"
+                                onClick={() => {
+                                    setEditorKey(activeTabKey);
+                                    setEditorOpen(true);
+                                }}
+                            >
+                                Edit
+                            </Button>
+                        }
+                        items={[
+                            {
+                                key: "dsl",
+                                label: "DSL",
+                                children: (
+                                    <PreviewBlock
+                                        value={dslContentForModify}
+                                        onClick={() => {
+                                            setEditorKey("dsl");
+                                            setEditorOpen(true);
+                                        }}
+                                    />
+                                ),
+                            },
+                            {
+                                key: "chaincode",
+                                label: "Chaincode",
+                                children: (
+                                    <PreviewBlock
+                                        value={chainCodeContentForModify}
+                                        onClick={() => {
+                                            setEditorKey("chaincode");
+                                            setEditorOpen(true);
+                                        }}
+                                    />
+                                ),
+                            },
+                        ]}
+                    />
+                    <Collapse
+                        style={{ marginTop: 16 }}
+                        items={[
+                            {
+                                key: "ffi",
+                                label: "FFI",
+                                children: (
+                                    <PreviewBlock
+                                        value={ffiContentForModify}
+                                        onClick={() => {
+                                            setEditorKey("ffi");
+                                            setEditorOpen(true);
+                                        }}
+                                    />
+                                ),
+                            },
+                        ]}
+                    />
+                </Card>
+            ) : null}
+            <Modal
+                open={editorOpen}
+                onCancel={() => setEditorOpen(false)}
+                onOk={() => setEditorOpen(false)}
+                width={980}
+                bodyStyle={{ maxHeight: "70vh", overflowY: "auto" }}
+                title={
+                    editorKey === "dsl"
+                        ? "Edit DSL"
+                        : editorKey === "chaincode"
+                          ? "Edit Chaincode"
+                          : "Edit FFI"
+                }
+            >
+                {editorKey === "dsl" ? (
+                    <CodeEditor value={dslContentForModify} onChange={setDslContentForModify} minRows={16} />
+                ) : null}
+                {editorKey === "chaincode" ? (
+                    <CodeEditor
+                        value={chainCodeContentForModify}
+                        onChange={setChainCodeContentForModify}
+                        minRows={18}
+                    />
+                ) : null}
+                {editorKey === "ffi" ? (
+                    <CodeEditor value={ffiContentForModify} onChange={setFFIContentForModify} minRows={16} />
+                ) : null}
+            </Modal>
             {
                 <EnvModal open={isEnvModalOpen} setOpen={setIsEnvModalOpen} />
             }

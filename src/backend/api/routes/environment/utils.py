@@ -82,7 +82,16 @@ def packageChaincodeForEnv(
         files=files,
         headers={"Authorization": auth},
     )
-    return res.json()["data"]["id"]
+    if not str(res.status_code).startswith("2"):
+        raise Exception(f"Package chaincode failed: {res.status_code} {res.text}")
+    try:
+        payload = res.json()
+    except Exception:
+        raise Exception(f"Package chaincode failed: invalid JSON {res.text}")
+    chaincode_id = payload.get("data", {}).get("id") if isinstance(payload, dict) else None
+    if not chaincode_id:
+        raise Exception(f"Package chaincode failed: missing id in response {payload}")
+    return chaincode_id
 
 
 def installChaincodeForEnv(env_id: str, chaincode_id: str, auth: str):

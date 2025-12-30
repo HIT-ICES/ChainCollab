@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { Card, Row, Col, Button, Typography, Steps, Modal, TableProps, Table, Select, Input, Tag } from "antd"
 import { useLocation, useNavigate } from "react-router-dom";
 import { BindingModal } from "./bindingModel"
-import { getMapInfoofBPMNInstance, retrieveBPMN, packageBPMN, updateBPMNInstanceStatus, updateBPMNInstanceFireflyUrl } from "@/api/externalResource"
+import { retrieveBPMN, packageBPMN, updateBPMNInstanceStatus, updateBPMNInstanceFireflyUrl } from "@/api/externalResource"
 import { generateChaincode } from "@/api/translator"
 import { useAvailableMembers } from "./hooks"
 import axios from "axios"
@@ -120,6 +120,7 @@ const BPMNInstanceOverview = () => {
         setIsExecuteModalOpen(true);
     }
     const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
+    const [dslContentForModify, setDslContentForModify] = useState("");
     const [chainCodeContentForModify, setChainCodeContentForModify] = useState("");
     const [ffiContentForModify, setFFIContentForModify] = useState("");
     const ModifyModal = () => {
@@ -144,6 +145,17 @@ const BPMNInstanceOverview = () => {
                 }}
                 width={'40%'}
             >
+                <h1>DSL</h1>
+                <Input.TextArea
+                    value={dslContentForModify}
+                    onChange={(e) => {
+                        setDslContentForModify(e.target.value);
+                    }}
+                    style={{
+                        width: "1000px",
+                        height: "220px",
+                    }}
+                />
                 <h1>ChainCode</h1>
                 <Input.TextArea
                     value={chainCodeContentForModify}
@@ -173,12 +185,11 @@ const BPMNInstanceOverview = () => {
     const onGenerate = async () => {
         try {
             setButtonLoading(true);
-            const mapInfo = await getMapInfoofBPMNInstance(bpmnInstanceId);
-            const mapInfoString = JSON.stringify(mapInfo);
             const bpmn = await retrieveBPMN(instance.bpmn);
-            const res = await generateChaincode(bpmn.bpmnContent, mapInfoString);
+            const res = await generateChaincode(bpmn.bpmnContent);
             const chaincode_content = res.bpmnContent;
             const ffi_content = res.ffiContent;
+            setDslContentForModify(res.dslContent || "");
             setChainCodeContentForModify(chaincode_content);
             setFFIContentForModify(ffi_content);
             setIsModifyModalOpen(true);
@@ -191,14 +202,12 @@ const BPMNInstanceOverview = () => {
     }
 
     const onTestGenerate = async () => {
-        const mapInfo = await getMapInfoofBPMNInstance(bpmnInstanceId);
-        const mapInfoString = JSON.stringify(mapInfo);
         const bpmn = await retrieveBPMN(instance.bpmn);
 
         const record = []
         for (let i = 0; i < 50; i++) {
             // var start = performance.now();
-            const res = await generateChaincode(bpmn.bpmnContent, mapInfoString);
+            const res = await generateChaincode(bpmn.bpmnContent);
             // var end = performance.now();
             // var timeCost = end - start;
             record.push({ index: i + 1, timeCost: res.timeCost });

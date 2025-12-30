@@ -192,7 +192,7 @@ class NetworkViewSet(viewsets.ViewSet):
                         detail="Network exists for the environment")
 
                 resource_sets = list(ResourceSet.objects.filter(environment=env).all())
-                org_names = [resource_set.sub_resource_set.get().name for resource_set in resource_sets]
+                org_names = [resource_set.sub_resource_set.name for resource_set in resource_sets]
                 nodes = Node.objects.filter(fabric_resource_set__name__in=org_names).exclude(type="ca")
 
                 orderers = []
@@ -229,7 +229,7 @@ class NetworkViewSet(viewsets.ViewSet):
                 env.save()
 
                 for resource_set in resource_sets:
-                    fabric_resource_set = resource_set.sub_resource_set.get()
+                    fabric_resource_set = resource_set.sub_resource_set
                     fabric_resource_set.network = network
                     fabric_resource_set.save()
 

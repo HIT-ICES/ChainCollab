@@ -120,7 +120,7 @@ class FireflyViewSet(viewsets.ModelViewSet):
             peer_resource_sets = env.resource_sets.all()
             ccp_file_paths = []
             for peer_resource_set in peer_resource_sets:
-                org_name = peer_resource_set.sub_resource_set.get().name
+                org_name = peer_resource_set.sub_resource_set.name
                 ccp_file_paths.append(
                     "{}/{}/crypto-config/peerOrganizations/{}/{}_ccp.yaml".format(
                         CELLO_HOME, org_name, org_name, org_name

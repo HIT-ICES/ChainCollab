@@ -23,6 +23,8 @@ def build_response(
     code: str = PASS_CODE,
     status: int = 200,
 ):
+    # simple console trace for debugging
+    print(f"[agent] response code={code} status={status} msg={msg} data_keys={list((data or {}).keys())}")
     return jsonify({"res": {"code": code, "data": data or {}, "msg": msg}}), status
 
 
@@ -44,6 +46,7 @@ def parse_port_map(raw: Optional[str]) -> Dict[str, int]:
     if not raw:
         return {}
     try:
+        print(f"[agent] parse_port_map raw={raw}")
         if raw.strip().startswith("{"):
             return {str(k): int(v) for k, v in json.loads(raw).items()}
         return {str(k): int(v) for k, v in ast.literal_eval(raw).items()}

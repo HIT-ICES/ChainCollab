@@ -12,10 +12,12 @@ import {
   Stack,
   Toolbar,
   Typography,
+  Button as MUIButton,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
+import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
 import { Outlet, useNavigate } from "react-router-dom";
 import MainMenu from "@/views/Layout/MainMenu";
 import MainBreadcrumbs from "@/views/Layout/MainBreadcrumbs";
@@ -24,13 +26,21 @@ import logo from "@/assets/react.svg";
 import NotificationCenter from "../NotificationCenter";
 import "./style.css";
 import { useTranslation } from "react-i18next";
+import { message } from "antd";
+import { createOrg, createConsortium, createEnvironment, createMembership } from "@/api/platformAPI";
+import { useAppDispatch } from "@/redux/hooks";
+import { activateOrg } from "@/redux/slices/orgSlice";
+import { activateConsortium } from "@/redux/slices/consortiumSlice";
+import { activateEnv } from "@/redux/slices/envSlice";
 
 const drawerWidth = 264;
 
 const View: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [themeMode, setThemeMode] = useState<"light" | "dark">("light");
+  const [autoLoading, setAutoLoading] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const { t, i18n } = useTranslation();
 
   const handleDrawerToggle = () => {
@@ -43,6 +53,69 @@ const View: React.FC = () => {
 
   const toggleLanguage = (value: string) => {
     i18n.changeLanguage(value);
+  };
+
+  const handleOneClickSetup = async () => {
+    try {
+      setAutoLoading(true);
+      const suffix = Math.random().toString(36).slice(2, 5).toUpperCase();
+      const orgSpecs = [
+        {
+          name: `Atlas`,
+          memberships: ["Core", "Ops", "Labs"],
+        },
+        {
+          name: `Nimbus`,
+          memberships: ["Edge", "Data"],
+        },
+      ];
+      const consortiumName = `Aegis-${suffix}`;
+      const envName = `Forge-${suffix}`;
+
+      const [orgA, orgB] = await Promise.all([
+        createOrg(`${orgSpecs[0].name}-${suffix}`),
+        createOrg(`${orgSpecs[1].name}-${suffix}`),
+      ]);
+
+      dispatch(activateOrg({ currentOrgId: orgA.id, currentOrgName: orgA.name }));
+
+      const consortium = await createConsortium(orgA.id, consortiumName);
+      dispatch(
+        activateConsortium({
+          currentConsortiumId: consortium.id,
+          currentConsortiumName: consortium.name,
+        })
+      );
+
+      const membershipTasks: Promise<void>[] = [];
+      orgSpecs[0].memberships.forEach((label) => {
+        membershipTasks.push(
+          createMembership(orgA.id, consortium.id, `${orgSpecs[0].name} ${label}`)
+        );
+      });
+      orgSpecs[1].memberships.forEach((label) => {
+        membershipTasks.push(
+          createMembership(orgB.id, consortium.id, `${orgSpecs[1].name} ${label}`)
+        );
+      });
+      await Promise.all(membershipTasks);
+
+      const env = await createEnvironment(consortium.id, envName);
+      dispatch(
+        activateEnv({
+          currentEnvId: env.id,
+          currentEnvName: env.name,
+          currentEnvType: env.type || "Fabric",
+        })
+      );
+
+      message.success("One-click setup completed");
+      navigate(`/orgs/${orgA.id}/consortia/${consortium.id}/envs/${env.id}/envdashboard`);
+    } catch (error: any) {
+      message.error(error?.message || "One-click setup failed");
+    } finally {
+      setAutoLoading(false);
+    }
   };
 
   const appBarStyles = useMemo(
@@ -140,6 +213,17 @@ const View: React.FC = () => {
             <MainBreadcrumbs />
           </Box>
           <Stack direction="row" spacing={2} alignItems="center">
+            <MUIButton
+              size="small"
+              variant="contained"
+              color="primary"
+              startIcon={<RocketLaunchIcon />}
+              onClick={handleOneClickSetup}
+              disabled={autoLoading}
+              sx={{ textTransform: "none" }}
+            >
+              {autoLoading ? "Creating..." : "One-click Setup"}
+            </MUIButton>
             <Select
               size="small"
               value={i18n.language}
@@ -209,7 +293,7 @@ const View: React.FC = () => {
           p: { xs: 2, md: 4 },
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           mt: { xs: 8, sm: 10 },
-          overflow: "hidden",
+          overflow: "auto",
         }}
       >
         <Box className="portal-main-surface">

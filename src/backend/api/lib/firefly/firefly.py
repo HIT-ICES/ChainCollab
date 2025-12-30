@@ -16,27 +16,20 @@ class Firefly_cli:
         try:
             # proxy_command = "export http_proxy=172.24.128.1:7890;export https_proxy=172.24.128.1:7890"
             # proxy_command = "export http_proxy=172.29.240.1:7890;export https_proxy=172.29.240.1:7890"
-            manifest_file_path=FABRIC_CONFIG+"/manifest.json"
+            manifest_file_path = FABRIC_CONFIG + "/manifest.json"
             command = [
                 self.ff_path,
-                "init fabric",
+                "init",
+                "fabric",
                 firefly_name,
                 "-m",
-                manifest_file_path
+                manifest_file_path,
             ]
             for ccp_path in ccp_files_path:
-                command.append(f"""--ccp {ccp_path}""")
-                command.append(f"""--msp {CELLO_HOME}""")
-            command.append(f"""--channel {channel_name}""")
-            command.append(f"""--chaincode {firefly_chaincode_name}""")
-            command = " ".join(command)
-            print(command)
-            # output = call(proxy_command + ";" + command, shell=True)
-            output = call(command, shell=True)
-            print("Command Output:")
-            # print(output)
-            if output != 0:
-                raise Exception("ff init command execute fail")
+                command.extend(["--ccp", ccp_path, "--msp", CELLO_HOME])
+            command.extend(["--channel", channel_name, "--chaincode", firefly_chaincode_name])
+            print(" ".join(command))
+            subprocess.run(command, check=True)
             firefly_stack_path = self.firefly_config_path + firefly_name
             # 读取YAML文件
             with open(firefly_stack_path + "/docker-compose.override.yml", "r") as file:
@@ -47,7 +40,7 @@ class Firefly_cli:
             with open(firefly_stack_path + "/docker-compose.override.yml", "w") as file:
                 yaml.dump(data, file)
         except Exception as e:
-            traceback.print_exc(e)
+            traceback.print_exc()
             err_msg = "firefly init fail for {}!".format(e)
             raise Exception(err_msg)
 

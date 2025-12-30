@@ -297,6 +297,12 @@ export const getEnvironmentList = async (consortiumId: string) => {
     return res.data.map((env: any) => ({
       id: env.id,
       name: env.name,
+      status: env.status,
+      createdAt: env.create_at,
+      fireflyStatus: env.firefly_status,
+      oracleStatus: env.Oracle_status,
+      dmnStatus: env.DMN_status,
+      type: env.type,
     }));
   } catch (err) {
     console.error("获取envList失败", err);

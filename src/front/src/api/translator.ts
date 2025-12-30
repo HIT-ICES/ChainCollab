@@ -1,17 +1,25 @@
-import api from './apiConfig.ts';
-import axios from 'axios';
 import { translatorAPI } from './apiConfig.ts';
 
 export const generateChaincode = async (bpmnContent: string) => {
     try {
-        const res = await translatorAPI.post(`/chaincode/generate`, {
+        const dslRes = await translatorAPI.post(`/chaincode/generate`, {
             bpmnContent: bpmnContent,
-            // participantMspMap: mapInfo
         })
+        const dslContent = dslRes.data.bpmnContent;
+        const timeCost = dslRes.data.timeCost || dslRes.data.timecost;
+        const compileRes = await translatorAPI.post(`/chaincode/compile`, {
+            dslContent,
+            target: "go"
+        })
+        const compileFFI = compileRes.data.ffiContent;
+        const fallbackFFI = dslRes.data.ffiContent;
+        const ffiContent =
+            compileFFI && compileFFI !== "{}" ? compileFFI : fallbackFFI;
         return {
-            bpmnContent: res.data.bpmnContent,
-            ffiContent: res.data.ffiContent,
-            timeCost: res.data.timeCost
+            bpmnContent: compileRes.data.chaincodeContent,
+            dslContent: dslContent,
+            ffiContent: ffiContent,
+            timeCost: timeCost
         }
     } catch (error) {
         console.log(error);

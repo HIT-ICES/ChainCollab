@@ -1,182 +1,293 @@
-// The module 'vscode' contains the VS Code extensibility API
-
-// Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
 const path = require('path');
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+const { TextEncoder } = require('util');
 
+const DOCUMENT_SELECTOR = [
+	{ language: 'jsonc', scheme: '*', pattern: '**/snippet.json' }
+];
+
+class JsonCodeLensProvider {
+	provideCodeLenses(document) {
+		const parsed = safeParse(document);
+		if (!parsed) {
+			return [];
+		}
+
+		const lenses = [];
+		const regex = /"([^"\n]+)"\s*:/g;
+		const text = document.getText();
+		let match;
+		while ((match = regex.exec(text)) !== null) {
+			const key = match[1];
+			const start = document.positionAt(match.index + 1);
+			const range = new vscode.Range(start, start.translate(0, key.length));
+			lenses.push(new vscode.CodeLens(range, {
+				title: 'Edit | Delete',
+				command: 'extension.keyActions',
+				arguments: [document.uri, key],
+			}));
+		}
+
+		return lenses;
+	}
+}
+
+class JsonTreeDataProvider {
+	constructor() {
+		this._onDidChangeTreeData = new vscode.EventEmitter();
+		this.onDidChangeTreeData = this._onDidChangeTreeData.event;
+	}
+
+	refresh() {
+		this._onDidChangeTreeData.fire();
+	}
+
+	getChildren() {
+		const document = getActiveSnippetDocument();
+		const parsed = document ? safeParse(document) : null;
+		return parsed ? Object.keys(parsed) : [];
+	}
+
+	getTreeItem(element) {
+		const treeItem = new vscode.TreeItem(element);
+		const document = getActiveSnippetDocument();
+		if (document) {
+			treeItem.command = {
+				command: 'extension.editKey',
+				title: 'Edit',
+				arguments: [document.uri, element],
+			};
+		}
+		treeItem.contextValue = 'jsonEntry';
+		return treeItem;
+	}
+}
+
+class SnippetEditorManager {
+	constructor() {
+		this.activeEditor = null;
+	}
+
+	async open(uri, key) {
+		const document = await vscode.workspace.openTextDocument(uri);
+		const jsonObject = safeParse(document);
+		if (!jsonObject) {
+			return;
+		}
+		if (!(key in jsonObject)) {
+			vscode.window.showWarningMessage(`Key "${key}" does not exist in snippet.`);
+			return;
+		}
+
+		await this.disposeActiveEditor();
+		const isFrame = key.endsWith('Frame');
+		const prepared = prepareValueForEditing(jsonObject[key] ?? '', isFrame);
+		const tempPath = path.join(path.dirname(uri.fsPath), `${key}.tmp`);
+		const tempUri = vscode.Uri.file(tempPath);
+		await writeTextFile(tempUri, prepared);
+		const doc = await vscode.workspace.openTextDocument(tempUri);
+		await vscode.window.showTextDocument(doc, vscode.ViewColumn.Beside);
+
+		const saveDisposable = vscode.workspace.onDidSaveTextDocument(async savedDoc => {
+			if (savedDoc.uri.fsPath !== tempPath) {
+				return;
+			}
+			const updatedDoc = await vscode.workspace.openTextDocument(uri);
+			const currentObject = safeParse(updatedDoc);
+			if (!currentObject) {
+				return;
+			}
+			currentObject[key] = prepareValueForSave(savedDoc.getText(), isFrame);
+			await writeJson(uri, currentObject);
+		});
+
+		const closeDisposable = vscode.workspace.onDidCloseTextDocument(closedDoc => {
+			if (closedDoc.uri.fsPath === tempPath) {
+				this.disposeActiveEditor();
+			}
+		});
+
+		this.activeEditor = {
+			tempUri,
+			disposables: [saveDisposable, closeDisposable],
+		};
+	}
+
+	async disposeActiveEditor() {
+		if (!this.activeEditor) {
+			return;
+		}
+		this.activeEditor.disposables.forEach(d => d.dispose());
+		try {
+			await vscode.workspace.fs.delete(this.activeEditor.tempUri);
+		} catch {
+			// Ignore deletion errors (file might already be gone)
+		}
+		this.activeEditor = null;
+	}
+
+	dispose() {
+		return this.disposeActiveEditor();
+	}
+}
+
+function getActiveSnippetDocument() {
+	const editor = vscode.window.activeTextEditor;
+	if (!editor) {
+		return null;
+	}
+	return isSnippetDocument(editor.document) ? editor.document : null;
+}
+
+function isSnippetDocument(document) {
+	return document.fileName.endsWith('snippet.json');
+}
+
+function safeParse(document) {
+	try {
+		return JSON.parse(document.getText());
+	} catch (error) {
+		vscode.window.showErrorMessage(`SnippetSmith: Unable to parse ${path.basename(document.fileName)}. ${error.message}`);
+		return null;
+	}
+}
+
+function prepareValueForEditing(value, isFrame) {
+	if (!isFrame) {
+		return value ?? '';
+	}
+	return (value ?? '')
+		.replace(/(?<!{){([^{}]+)}/g, '#$1#')
+		.replace(/{{/g, '{')
+		.replace(/}}/g, '}');
+}
+
+function prepareValueForSave(value, isFrame) {
+	if (!isFrame) {
+		return value;
+	}
+	return value
+		.replace(/{/g, '{{')
+		.replace(/}/g, '}}')
+		.replace(/#([^#]+)#/g, '{$1}');
+}
+
+async function writeTextFile(uri, content) {
+	const encoder = new TextEncoder();
+	await vscode.workspace.fs.writeFile(uri, encoder.encode(content));
+}
+
+async function writeJson(uri, jsonObject) {
+	await writeTextFile(uri, JSON.stringify(jsonObject, null, 2));
+}
+
+async function deleteKey(uri, key) {
+	const document = await vscode.workspace.openTextDocument(uri);
+	const jsonObject = safeParse(document);
+	if (!jsonObject) {
+		return;
+	}
+	if (!(key in jsonObject)) {
+		vscode.window.showWarningMessage(`Key "${key}" does not exist.`);
+		return;
+	}
+	delete jsonObject[key];
+	await writeJson(uri, jsonObject);
+}
+
+async function addKey(uri) {
+	let targetUri = uri;
+	if (!targetUri) {
+		const activeDoc = getActiveSnippetDocument();
+		targetUri = activeDoc?.uri;
+	}
+	if (!targetUri) {
+		vscode.window.showWarningMessage('No snippet.json document is active.');
+		return;
+	}
+	const document = await vscode.workspace.openTextDocument(targetUri);
+	const jsonObject = safeParse(document);
+	if (!jsonObject) {
+		return;
+	}
+	const key = await vscode.window.showInputBox({ prompt: 'Enter a new key for snippet.json' });
+	if (!key) {
+		return;
+	}
+	if (key in jsonObject) {
+		vscode.window.showWarningMessage(`Key "${key}" already exists.`);
+		return;
+	}
+	jsonObject[key] = '';
+	await writeJson(targetUri, jsonObject);
+}
 
 /**
  * @param {vscode.ExtensionContext} context
  */
-
 function activate(context) {
-	console.log('Congratulations, your extension "jsoncodeeditor" is now active!');
-	const fabricDocumentSelector = [
-		{ language: 'jsonc', scheme: '*', pattern: "**/snippet.json" }
-	];
-	context.subscriptions.push(vscode.languages.registerCodeLensProvider(fabricDocumentSelector, {
-		provideCodeLenses(document, token) {
-			const codeLenses = [];
-			const text = document.getText();
-			const jsonObject = JSON.parse(text);
-			const regex = /"([^"]+)":/g;
-			let match;
-			while ((match = regex.exec(text)) !== null) {
-				const key = match[1];
-				const startPosition = document.positionAt(match.index);
-				const range = new vscode.Range(startPosition, startPosition.translate(0, key.length + 1));
-				const editCommand = {
-					title: "Edit",
-					command: "extension.editKey",
-					arguments: [key, jsonObject, document.uri],
-				};
-				codeLenses.push(new vscode.CodeLens(range, editCommand));
+	const editorManager = new SnippetEditorManager();
+	context.subscriptions.push(editorManager);
 
-				// Delete command
-				const deleteCommand = {
-					title: "Delete",
-					command: "extension.deleteKey",
-					arguments: [key, jsonObject, document.uri],
-				};
-				codeLenses.push(new vscode.CodeLens(range, deleteCommand));
-			}
-			return codeLenses;
-		},
-
-		resolveCodeLens(codeLens, token) {
-			return codeLens;
-		}
-	}));
-
-	context.subscriptions.push(vscode.commands.registerCommand("extension.TreeView", () => {
-		// Add a sub Tree View
-		const treeDataProvider = {
-			getChildren: () => {
-				const text = vscode.window.activeTextEditor.document.getText();
-				const jsonObject = JSON.parse(text);
-				return Object.keys(jsonObject);
-			},
-			getTreeItem: (element) => {
-				const treeItem = new vscode.TreeItem(element);
-				// tree item with button
-				treeItem.command = {
-					command: "extension.editKey",
-					title: "Edit",
-					arguments: [element, JSON.parse(vscode.window.activeTextEditor.document.getText()), vscode.window.activeTextEditor.document.uri]
-				};
-				treeItem.tooltip = "Click to edit";
-
-				// Additional Delete Button 
-				treeItem.contextValue = "delete";
-
-
-				return treeItem;
-			}
-		};
-
-		vscode.window.createTreeView("JsonCodeEditor", { treeDataProvider });
-
-	}));
-
-
-	let listeners = []
-	let fileToDelete = null
-
-	context.subscriptions.push(vscode.commands.registerCommand("extension.editKey", async (key, jsonObject, uri) => {
-		// release old listener
-		listeners.forEach(
-			(listener) => listener.dispose()
-		)
-		listeners = []
-		if (fileToDelete) {
-			vscode.workspace.fs.delete(fileToDelete)
-			fileToDelete = null
-		}
-
-		// key end with Frame?
-		isEndWithFrame = key.endsWith("Frame")
-		// read {xxx} as $xxx^(dont change {{xxx}}),  {{ as {, }} as }, differentiate { and {{ , don't confuse with it
-
-		// open a titled document
-		value = isEndWithFrame? jsonObject[key].replace(/(?<!{){([^{}]+)}/g, "#$1#").replace(/{{/g, "{").replace(/}}/g, "}"):jsonObject[key]
-		doc_path = path.join(path.dirname(uri.fsPath), key + ".go");
-		const encoder = new TextEncoder();
-		await vscode.workspace.fs.writeFile(vscode.Uri.file(doc_path), encoder.encode(value));
-		const doc = await vscode.workspace.openTextDocument(doc_path)
-		const editor = await vscode.window.showTextDocument(doc, vscode.ViewColumn.Beside);
-
-		// on save, update the uri document. need listener for save. and uri is a json, not a go
-		const saveListener = vscode.workspace.onDidSaveTextDocument((e) => {
-			// update the jsonObject and save it to the uri
-			if (e.fileName !== doc_path) {
-				return;
-			}
-
-			// match { to {{, } to }} , then #
-			value = isEndWithFrame? e.getText().replace(/{/g, "{{").replace(/}/g, "}}").replace(/#([^#]+)#/g, "{$1}"):e.getText()
-			console.log(isEndWithFrame)
-			console.log(e.getText())
-			console.log(value)
-			jsonObject[key] = value
-			const encoder = new TextEncoder();
-			vscode.workspace.fs.writeFile(uri, encoder.encode(JSON.stringify(jsonObject, null, 2)));
-		});
-
-		// close the listener when the editor is closed, and delete the file
-
-		const closeListener = vscode.window.tabGroups.onDidChangeTabs(() => {
-			groups = vscode.window.tabGroups.all
-			var flag = false
-			groups.forEach((group) => {
-				group.tabs.forEach(element => {
-					if (flag) return
-					if (element.label === key + ".go") {
-						flag = true
-						return
-					}
-				})
-			})
-			if (flag) return
-			listeners.forEach(
-				(listener) => listener.dispose()
-			)
-			listeners = []
-			if (fileToDelete) {
-				vscode.workspace.fs.delete(fileToDelete)
-				fileToDelete = null
-			}
-		})
-		listeners.push(
-			saveListener,
-			closeListener
-		)
-		fileToDelete = vscode.Uri.file(doc_path)
-
-	}));
-
-	context.subscriptions.push(vscode.commands.registerCommand("extension.deleteKey", async (key, jsonObject, uri) => {
-		delete jsonObject[key];
-		const encoder = new TextEncoder();
-		await vscode.workspace.fs.writeFile(uri, encoder.encode(JSON.stringify(jsonObject, null, 2)));
-	})
+	context.subscriptions.push(
+		vscode.languages.registerCodeLensProvider(DOCUMENT_SELECTOR, new JsonCodeLensProvider())
 	);
 
-	// add key command
-	context.subscriptions.push(vscode.commands.registerCommand("extension.addKey", async (key, jsonObject, uri) => {
-		jsonObject[key] = "";
-		const encoder = new TextEncoder();
-		await vscode.workspace.fs.writeFile(uri, encoder.encode(JSON.stringify(jsonObject, null, 2)));
-	}
-	));
+	const treeProvider = new JsonTreeDataProvider();
+	const treeView = vscode.window.createTreeView('SnippetSmithView', { treeDataProvider: treeProvider });
+	context.subscriptions.push(treeView);
 
+	context.subscriptions.push(
+		vscode.commands.registerCommand('extension.TreeView', () => treeProvider.refresh())
+	);
+
+	context.subscriptions.push(
+		vscode.workspace.onDidChangeTextDocument(event => {
+			if (isSnippetDocument(event.document)) {
+				treeProvider.refresh();
+			}
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.window.onDidChangeActiveTextEditor(editor => {
+			if (!editor || isSnippetDocument(editor.document)) {
+				treeProvider.refresh();
+			}
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('extension.editKey', (uri, key) => editorManager.open(uri, key))
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('extension.deleteKey', (uri, key) => deleteKey(uri, key))
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('extension.addKey', uri => addKey(uri))
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('extension.keyActions', async (uri, key) => {
+			const action = await vscode.window.showQuickPick(['Edit', 'Delete'], {
+				placeHolder: `Choose action for "${key}"`,
+			});
+			if (!action) {
+				return;
+			}
+			if (action === 'Edit') {
+				return vscode.commands.executeCommand('extension.editKey', uri, key);
+			}
+			return vscode.commands.executeCommand('extension.deleteKey', uri, key);
+		})
+	);
 }
 
-// This method is called when your extension is deactivated
 function deactivate() { }
 
 module.exports = {
 	activate,
-	deactivate
-}
+	deactivate,
+};

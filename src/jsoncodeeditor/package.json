@@ -1,6 +1,6 @@
 {
-  "name": "jsoncodeeditor",
-  "displayName": "JsonCodeEditor",
+  "name": "snippetsmith",
+  "displayName": "SnippetSmith",
   "description": "nothing",
   "version": "0.0.1",
   "engines": {
@@ -15,17 +15,17 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "JsonCodeEditorContainer",
-          "title": "JsonCodeEditorContainer",
+          "id": "SnippetSmithContainer",
+          "title": "SnippetSmith",
           "icon": "assets/json.svg"
         }
       ]
     },
     "views": {
-      "JsonCodeEditorContainer": [
+      "SnippetSmithContainer": [
         {
-          "id": "JsonCodeEditor",
-          "name": "JsonCodeEditor"
+          "id": "SnippetSmithView",
+          "name": "SnippetSmith"
         }
       ]
     },
@@ -45,20 +45,24 @@
       {
         "title": "editKey",
         "command": "extension.editKey"
+      },
+      {
+        "title": "keyActions",
+        "command": "extension.keyActions"
       }
     ],
     "menus":{
       "view/item/context": [
         {
           "command": "extension.deleteKey",
-          "when": "view == JsonCodeEditor",
+          "when": "view == SnippetSmithView",
           "group": "inline"
         }
       ],
       "view/title": [
         {
           "command": "extension.addKey",
-          "when": "view == JsonCodeEditor",
+          "when": "view == SnippetSmithView",
           "group": "inline",
           "parameters": [
             {

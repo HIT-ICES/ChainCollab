@@ -48,18 +48,25 @@ class FabricCAViewSet(viewsets.ViewSet):
 
     def _ca_create_agent(self, ca_name, port_map):
         try:
-            data = {
+            payload = {
                 "ca_name": ca_name,
-                "port_map": port_map,
+                "port_map": json.dumps(port_map),
             }
-            response = post(f"""http://{CURRENT_IP}:7001/api/v1/ca""", data=data)
-            if response.status_code == 200:
+            LOG.info(
+                "CA create request to agent: %s with payload %s",
+                f"http://{CURRENT_IP}:7001/api/v1/ca",
+                payload,
+            )
+            response = post(
+                f"http://{CURRENT_IP}:7001/api/v1/ca",
+                data=payload,
+            )
+            if 200 <= response.status_code < 300:
                 txt = json.loads(response.text)
-                return txt["res"]
-            else:
-                txt = json.loads(response.text)
-                print(txt)
-                raise Exception(txt["res"])
+                return txt.get("res", {})
+            txt = json.loads(response.text)
+            print(txt)
+            raise Exception(txt.get("res", txt))
         except Exception as e:
             raise Exception(e)
 
@@ -68,6 +75,11 @@ class FabricCAViewSet(viewsets.ViewSet):
             data = {
                 "action": "start",
             }
+            LOG.info(
+                "CA start request to agent: %s with payload %s",
+                f"http://{CURRENT_IP}:7001/api/v1/ca/{ca_name}/operation",
+                data,
+            )
             response = post(
                 f"""http://{CURRENT_IP}:7001/api/v1/ca/{ca_name}/operation""",
                 data=data,
@@ -575,7 +587,7 @@ class FabricCAViewSet(viewsets.ViewSet):
         try:
             resource_set_id = request.parser_context["kwargs"].get("resource_set_id")
             resource_set = ResourceSet.objects.get(pk=resource_set_id)
-            fabric_resource_set = resource_set.sub_resource_set.get()
+            fabric_resource_set = resource_set.sub_resource_set
             agent = resource_set.agent
             org_name = fabric_resource_set.name
 
@@ -605,11 +617,11 @@ class FabricCAViewSet(viewsets.ViewSet):
             self._set_port(node, resource_set.agent)
 
             port_map = {
-                a["internal"]: a["external"]
+                str(a["internal"]): int(a["external"])
                 for a in Port.objects.filter(node=node)
                 .values("internal", "external")
                 .all()
-            }.__repr__()
+            }
             self._create_start_CA_server(
                 ca_name="ca." + org_name,
                 port_map=port_map,
@@ -630,7 +642,7 @@ class FabricCAViewSet(viewsets.ViewSet):
         try:
             resource_set_id = request.parser_context["kwargs"].get("resource_set_id")
             resource_set = ResourceSet.objects.get(pk=resource_set_id)
-            fabric_resource_set = resource_set.sub_resource_set.get()
+            fabric_resource_set = resource_set.sub_resource_set
             org_name = fabric_resource_set.name
 
             ca = FabricCAModel.objects.get(
@@ -656,7 +668,7 @@ class FabricCAViewSet(viewsets.ViewSet):
         try:
             resource_set_id = request.parser_context["kwargs"].get("resource_set_id")
             resource_set = ResourceSet.objects.get(pk=resource_set_id)
-            fabric_resource_set = resource_set.sub_resource_set.get()
+            fabric_resource_set = resource_set.sub_resource_set
             org_name = fabric_resource_set.name
 
             ca = FabricCAModel.objects.get(
@@ -681,7 +693,7 @@ class FabricCAViewSet(viewsets.ViewSet):
             node_type = int(request.data["node_type"])
             resource_set_id = request.parser_context["kwargs"].get("resource_set_id")
             resource_set = ResourceSet.objects.get(pk=resource_set_id)
-            fabric_resource_set = resource_set.sub_resource_set.get()
+            fabric_resource_set = resource_set.sub_resource_set
             org_name = fabric_resource_set.name
             # port_map = [{"internal": 7054, "external": 17054}].__repr__()
             ca = FabricCAModel.objects.get(
@@ -720,7 +732,7 @@ class FabricCAViewSet(viewsets.ViewSet):
             # resource_set_id = request.data['resource_set_id']
             resource_set_id = request.parser_context["kwargs"].get("resource_set_id")
             resource_set = ResourceSet.objects.get(pk=resource_set_id)
-            fabric_resource_set = resource_set.sub_resource_set.get()
+            fabric_resource_set = resource_set.sub_resource_set
 
             # fabric_resource_set = request.user.organization
             org_name = fabric_resource_set.name
@@ -734,7 +746,7 @@ class FabricCAViewSet(viewsets.ViewSet):
             orderer_resource_set = ResourceSet.objects.get(
                 sub_resource_set__org_type=1, environment=env
             )
-            orderer_fabric_resource_set = orderer_resource_set.sub_resource_set.get()
+            orderer_fabric_resource_set = orderer_resource_set.sub_resource_set
 
             # orderer0.sys.edu.com
             orderer = Node.objects.get(
