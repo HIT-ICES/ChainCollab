@@ -1,4 +1,4 @@
-export NEWTRANS_ROOT="/home/logres/system/src/newTranslator"
+export NEWTRANS_ROOT="/home/shenxz-lab/code/ChainCollab/src/newTranslator"
 cd "$NEWTRANS_ROOT" || return
 
 export NT_B2C_DIR="$NEWTRANS_ROOT/build/b2c"
