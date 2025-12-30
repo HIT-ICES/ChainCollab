@@ -265,8 +265,8 @@ const Overview: React.FC = () => {
             </Row>
             <Row style={{ display: "flex", justifyContent: "space-evenly" }}>
               <FireflyComponentCard ChaincodeStatus={envInfo.fireflyStatus !== "NO"} ClusterStatus={envInfo.fireflyStatus === "STARTED"} />
-              <OracleComponentCard ChaincodeStatus />
-              <DMNComponentCard ChaincodeStatus />
+              <OracleComponentCard ChaincodeStatus={envInfo.oracleStatus === "CHAINCODEINSTALLED"} />
+              <DMNComponentCard ChaincodeStatus={envInfo.dmnStatus === "CHAINCODEINSTALLED"} />
             </Row>
           </Card.Grid>
 

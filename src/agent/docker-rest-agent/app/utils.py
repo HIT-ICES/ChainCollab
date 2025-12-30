@@ -46,11 +46,25 @@ def parse_port_map(raw: Optional[str]) -> Dict[str, int]:
     if not raw:
         return {}
     try:
-        print(f"[agent] parse_port_map raw={raw}")
-        if raw.strip().startswith("{"):
-            return {str(k): int(v) for k, v in json.loads(raw).items()}
-        return {str(k): int(v) for k, v in ast.literal_eval(raw).items()}
-    except (ValueError, SyntaxError, AttributeError):
+        parsed = None
+        try:
+            parsed = json.loads(raw)
+        except json.JSONDecodeError:
+            parsed = ast.literal_eval(raw)
+        if isinstance(parsed, dict):
+            return {str(k): int(v) for k, v in parsed.items()}
+        if isinstance(parsed, list):
+            normalized = {}
+            for item in parsed:
+                if isinstance(item, dict) and "internal" in item and "external" in item:
+                    normalized[str(item["internal"])] = int(item["external"])
+                elif isinstance(item, (list, tuple)) and len(item) == 2:
+                    normalized[str(item[0])] = int(item[1])
+                else:
+                    raise ValueError("port_map list item must be mapping or pair")
+            return normalized
+        raise ValueError("port_map must be a mapping")
+    except (ValueError, SyntaxError, AttributeError, TypeError):
         raise ValidationError("port_map must be a valid JSON/object literal")
 
 
