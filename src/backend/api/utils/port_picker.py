@@ -6,7 +6,7 @@ import socket
 import os
 from random import sample
 from django.core.exceptions import ObjectDoesNotExist
-from api.models import Port, Node, Agent
+from api.models import Port, Node, Agent, EthNode
 
 CLUSTER_PORT_START = int(os.getenv("CLUSTER_PORT_START", 7050))
 MAX_RETRY = 100
@@ -89,11 +89,21 @@ def set_ports_mapping(node_id=None, mapping=None, new=False):
         mapping = []
 
     if new:
+        # Try to find Node first, then EthNode
+        node = None
+        eth_node = None
+
         try:
             node = Node.objects.get(id=node_id)
         except ObjectDoesNotExist:
-            LOG.error("Node not found")
-        else:
+            try:
+                eth_node = EthNode.objects.get(id=node_id)
+            except ObjectDoesNotExist:
+                LOG.error("Node or EthNode not found with id: %s", node_id)
+                return
+
+        if node:
+            # Fabric Node
             port_objects = [
                 Port(
                     external=port.get("external"),
@@ -102,12 +112,33 @@ def set_ports_mapping(node_id=None, mapping=None, new=False):
                 )
                 for port in mapping
             ]
-            Port.objects.bulk_create(port_objects)
+        elif eth_node:
+            # Ethereum Node
+            port_objects = [
+                Port(
+                    external=port.get("external"),
+                    internal=port.get("internal"),
+                    eth_node=eth_node,
+                )
+                for port in mapping
+            ]
+        else:
+            return
+
+        Port.objects.bulk_create(port_objects)
     else:
+        # Try updating both types
         for port in mapping:
-            Port.objects.filter(
+            # Try Node first
+            updated = Port.objects.filter(
                 node__id=node_id, external=port.get("external")
             ).update(internal=port.get("internal"))
+
+            # If no Node found, try EthNode
+            if updated == 0:
+                Port.objects.filter(
+                    eth_node__id=node_id, external=port.get("external")
+                ).update(internal=port.get("internal"))
 
 
 def get_available_ports(

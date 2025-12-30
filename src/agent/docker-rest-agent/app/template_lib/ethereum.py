@@ -32,12 +32,10 @@ class EthereumNodeTemplate:
             logging.exception("Failed to build Docker image for eth node %s", node_name)
             raise RuntimeError(f"Failed to build Docker image: {exc}")
 
-        def get_port(port):
-            return port if is_port_available(port) else find_free_port()
-
+        # Use the ports from backend directly (backend has already allocated available ports)
         ports = {
-            "8545/tcp": get_port(port_map.get("8545", 8545)),
-            "30303/tcp": get_port(port_map.get("30303", 30303)),
+            "8545/tcp": port_map.get("8545", 8545),
+            "30303/tcp": port_map.get("30303", 30303),
         }
 
         spec = ContainerSpec(

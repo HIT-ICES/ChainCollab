@@ -13,6 +13,11 @@ echo "Remove Fabric CA storage"
 sudo chmod -R 777 ./agent/docker-rest-agent/CA_related/storage/fabric-ca-servers
 rm -rf ./agent/docker-rest-agent/CA_related/storage/fabric-ca-servers/*
 
+echo "Remove Ethereum storage"
+
+sudo chmod -R 777 ./agent/docker-rest-agent/eth/storage/servers
+rm -rf ./agent/docker-rest-agent/eth/storage/servers/*
+
 # Remove opt/cello
 
 echo "Remove opt/cello"
@@ -46,13 +51,13 @@ fi
 # Remove Docker Container
 #!/bin/bash
 
-# 停止和删除以cello.com、edu.cn或tech.cn结尾的Docker容器
+# 停止和删除以cello.com、edu.cn、tech.cn或org.com结尾的Docker容器，以及以太坊节点容器
 while read -r container_name; do
     [ -n "$container_name" ] || continue
     echo "Stopping and removing container: $container_name"
     docker stop "$container_name" >/dev/null 2>&1 || true
     docker rm "$container_name" >/dev/null 2>&1 || true
-done < <(docker ps -a --format "{{.Names}}" | grep -E 'com$|edu.cn$|tech.cn$|org.com$' || true)
+done < <(docker ps -a --format "{{.Names}}" | grep -E 'com$|edu.cn$|tech.cn$|org.com$|geth|ethereum' || true)
 
 # 移除 dev开头的image
 while read -r image_name; do

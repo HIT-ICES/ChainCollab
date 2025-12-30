@@ -153,8 +153,16 @@ class EthereumResourceSetViewSet(viewsets.ViewSet):
         :rtype: none
         """
         ip = agent.urls.split(":")[1].strip("//")
-        ports = find_available_ports(ip, node.id, agent.id, 1)
-        set_ports_mapping(node.id, [{"internal": 7054, "external": ports[0]}], True)
+        # Ethereum nodes need 2 ports: 8545 (HTTP RPC) and 30303 (P2P)
+        ports = find_available_ports(ip, node.id, agent.id, 2)
+        set_ports_mapping(
+            node.id,
+            [
+                {"internal": 8545, "external": ports[0]},
+                {"internal": 30303, "external": ports[1]},
+            ],
+            new=True
+        )
         
     # def _create_start_eth_node(self, ca_name, port_map, org_name, type, infos=None):
     #     try:
@@ -165,19 +173,20 @@ class EthereumResourceSetViewSet(viewsets.ViewSet):
     
     def _node_create_agent(self, name, port_map):
         try:
-            data = {
+            payload = {
                 "name": name,
                 "port_map": json.dumps(port_map),
             }
-            response = post(f"""http://{CURRENT_IP}:7001/api/v1/ethnode""", data=data)
-            print(response.status_code)
-            if str(response.status_code).startswith('2'):
+            response = post(
+                f"http://{CURRENT_IP}:7001/api/v1/ethnode",
+                data=payload,
+            )
+            if 200 <= response.status_code < 300:
                 txt = json.loads(response.text)
-                return txt["res"]
-            else:
-                txt = json.loads(response.text)
-                print(txt)
-                raise Exception(txt["res"])
+                return txt.get("res", {})
+            txt = json.loads(response.text)
+            print(txt)
+            raise Exception(txt.get("res", txt))
         except Exception as e:
             raise Exception(e)
         
@@ -238,7 +247,7 @@ class EthereumResourceSetViewSet(viewsets.ViewSet):
 
         except Exception as e:
             print("________ERRORR_________")
-            traceback.print_exc(e)
+            traceback.print_exc()
             return Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)    
     
     @action(methods=["post"], detail=True, url_path="join")
