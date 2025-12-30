@@ -792,9 +792,177 @@ class GoChaincodeTranslator:
             Path(output_path).write_text(dsl_code, encoding="utf8")
         return dsl_code
 
-    def generate_ffi(self, *_, **__):
-        """Placeholder for legacy API compatibility until DSL FFI is defined."""
-        return json.dumps({})
+    def _fireflytran_ffi_param(self) -> Dict[str, object]:
+        return {"name": "FireFlyTran", "schema": {"type": "string"}}
+
+    def _instance_id_param(self) -> Dict[str, object]:
+        return {"name": "InstanceID", "schema": {"type": "string"}}
+
+    def _get_message_params(self, message: Message) -> List[tuple[str, str]]:
+        params_to_add = []
+        for name, payload in self._global_parameters.items():
+            definition = payload.get("definition", {})
+            if definition.get("source_type") != "message":
+                continue
+            if message.id not in definition.get("message_id", []):
+                continue
+            params_to_add.append((name, definition.get("type", "string")))
+        return params_to_add
+
+    def _generate_ffi_item(
+        self,
+        name: str,
+        pathname: str = "",
+        description: str = "",
+        params: Optional[List[Dict[str, object]]] = None,
+        returns: Optional[List[str]] = None,
+    ) -> Dict[str, object]:
+        return {
+            "name": name,
+            "pathname": pathname,
+            "description": description,
+            "params": params or [],
+            "returns": returns or [],
+        }
+
+    def _generate_ffi_items_for_choreography_task(self, task) -> List[Dict[str, object]]:
+        items: List[Dict[str, object]] = []
+        init_message_flow = task.init_message_flow
+        return_message_flow = task.return_message_flow
+
+        if not init_message_flow:
+            return items
+
+        def _message_items(message: Message) -> List[Dict[str, object]]:
+            params = [
+                {"name": param[0], "schema": {"type": param[1]}}
+                for param in self._get_message_params(message)
+            ]
+            send = self._generate_ffi_item(
+                name=f"{message.id}_Send",
+                params=[self._instance_id_param(), self._fireflytran_ffi_param(), *params],
+            )
+            complete = self._generate_ffi_item(
+                name=f"{message.id}_Complete",
+                params=[self._instance_id_param()],
+            )
+            return [send, complete]
+
+        items.extend(_message_items(init_message_flow.message))
+        if return_message_flow:
+            items.extend(_message_items(return_message_flow.message))
+        return items
+
+    def _generate_ffi_items_for_business_rule_task(self, task) -> List[Dict[str, object]]:
+        first_name = task.id
+        continue_method = f"{task.id}_Continue"
+        return [
+            self._generate_ffi_item(
+                name=first_name,
+                pathname=first_name,
+                params=[self._instance_id_param()],
+            ),
+            self._generate_ffi_item(
+                name=continue_method,
+                pathname=continue_method,
+                params=[
+                    self._instance_id_param(),
+                    {"name": "ContentOfDmn", "schema": {"type": "string"}},
+                ],
+            ),
+        ]
+
+    def _generate_ffi_events(self) -> List[Dict[str, object]]:
+        return [{"name": "DMNContentRequired"}, {"name": "InstanceCreated"}]
+
+    def generate_ffi(self, is_output: bool = False, output_path: str = "resource/ffi.json") -> str:
+        """Generate FFI metadata for the choreography."""
+        ffi_items: List[Dict[str, object]] = []
+        ffi_items.append(
+            self._generate_ffi_item(
+                name="InitLedger",
+                description="Init the chaincode",
+            )
+        )
+        ffi_items.append(
+            self._generate_ffi_item(
+                name="CreateInstance",
+                description="Create a new instance",
+                params=[{"name": "initParametersBytes", "schema": {"type": "string"}}],
+            )
+        )
+        ffi_items.append(
+            self._generate_ffi_item(
+                name="GetMethod",
+                description="Get all methods",
+                params=[self._instance_id_param()],
+            )
+        )
+        ffi_items.append(
+            self._generate_ffi_item(
+                name="GetAllMessages",
+                description="Get all messages",
+                params=[self._instance_id_param()],
+            )
+        )
+        ffi_items.append(
+            self._generate_ffi_item(
+                name="GetAllGateways",
+                description="Get all gateways",
+                params=[self._instance_id_param()],
+            )
+        )
+        ffi_items.append(
+            self._generate_ffi_item(
+                name="GetAllParticipants",
+                description="Get all participants",
+                params=[self._instance_id_param()],
+            )
+        )
+        ffi_items.append(
+            self._generate_ffi_item(
+                name="GetAllBusinessRules",
+                description="Get all business rules",
+                params=[self._instance_id_param()],
+            )
+        )
+        ffi_items.append(
+            self._generate_ffi_item(
+                name="GetAllActionEvents",
+                description="Get all action events",
+                params=[self._instance_id_param()],
+            )
+        )
+
+        for element in self._choreography.nodes:
+            match element.type:
+                case NodeType.CHOREOGRAPHY_TASK:
+                    ffi_items.extend(self._generate_ffi_items_for_choreography_task(element))
+                case NodeType.BUSINESS_RULE_TASK:
+                    ffi_items.extend(self._generate_ffi_items_for_business_rule_task(element))
+                case (
+                    NodeType.EXCLUSIVE_GATEWAY
+                    | NodeType.PARALLEL_GATEWAY
+                    | NodeType.EVENT_BASED_GATEWAY
+                    | NodeType.START_EVENT
+                    | NodeType.END_EVENT
+                ):
+                    ffi_items.append(
+                        self._generate_ffi_item(
+                            name=element.id,
+                            params=[self._instance_id_param()],
+                        )
+                    )
+
+        ffi_events = self._generate_ffi_events()
+        frame_path = Path(__file__).resolve().parent / "snippet" / "chaincode_snippet" / "ffiframe.json"
+        frame = json.loads(frame_path.read_text(encoding="utf8"))
+        frame["methods"].extend(ffi_items)
+        frame["events"].extend(ffi_events)
+        ffi_json = json.dumps(frame, ensure_ascii=False)
+        if is_output:
+            Path(output_path).write_text(ffi_json, encoding="utf8")
+        return ffi_json
 
     def get_participants(self):
         """Expose participant IDs and names for API consumers."""

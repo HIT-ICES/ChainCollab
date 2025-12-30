@@ -1,4 +1,11 @@
-export NEWTRANS_ROOT="/home/logres/system/src/newTranslator"
+if [ -n "${BASH_SOURCE[0]}" ]; then
+  NEWTRANS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+elif [ -n "${ZSH_VERSION:-}" ]; then
+  NEWTRANS_ROOT="$(cd "$(dirname "${(%):-%N}")" && pwd)"
+else
+  NEWTRANS_ROOT="$(cd "$(dirname "$0")" && pwd)"
+fi
+export NEWTRANS_ROOT
 cd "$NEWTRANS_ROOT" || return
 
 export NT_B2C_DIR="$NEWTRANS_ROOT/build/b2c"
@@ -7,9 +14,22 @@ export NT_BUILD_DIR="$NEWTRANS_ROOT/build/chaincode"
 export NT_SOL_DIR="$NEWTRANS_ROOT/build/solidity"
 export NT_EXAMPLE="$NT_B2C_DIR/chaincode.b2c"
 
+nt-activate() {
+  if [ -f "$NEWTRANS_ROOT/.venv/bin/activate" ]; then
+    source "$NEWTRANS_ROOT/.venv/bin/activate"
+  fi
+}
+
 nt-go-gen() {
+  nt-activate
+  local b2c_file="${1:-$NT_EXAMPLE}"
+  shift || true
+  if [ ! -f "$b2c_file" ]; then
+    echo "B2C file '$b2c_file' not found. Provide a .b2c file."
+    return 1
+  fi
   mkdir -p "$NT_B2C_DIR" "$NT_BUILD_DIR"
-  textx generate "$NT_EXAMPLE" --target go --overwrite -o "$NT_BUILD_DIR" "$@"
+  textx generate "$b2c_file" --target go --overwrite -o "$NT_BUILD_DIR" "$@"
 }
 
 nt-go-fmt() {
@@ -25,9 +45,15 @@ nt-go-clean() {
 }
 
 nt-sol-gen() {
+  nt-activate
+  local b2c_file="${1:-$NT_EXAMPLE}"
+  shift || true
+  if [ ! -f "$b2c_file" ]; then
+    echo "B2C file '$b2c_file' not found. Provide a .b2c file."
+    return 1
+  fi
   mkdir -p "$NT_B2C_DIR" "$NT_SOL_DIR"
-  mkdir -p "$NT_SOL_DIR"
-  textx generate "$NT_EXAMPLE" --target solidity --overwrite -o "$NT_SOL_DIR" "$@"
+  textx generate "$b2c_file" --target solidity --overwrite -o "$NT_SOL_DIR" "$@"
 }
 
 nt-sol-fmt() {
@@ -77,6 +103,7 @@ nt-sol-build() {
 }
 
 nt-bpmn-to-b2c() {
+  nt-activate
   local bpmn_file="$1"
   local output_file="${2:-"$NT_B2C_DIR/chaincode.b2c"}"
 
@@ -111,6 +138,7 @@ nt-bpmn-to-b2c() {
 }
 
 nt-b2c-view() {
+  nt-activate
   local b2c_file=${1:-"$NT_B2C_DIR/chaincode.b2c"}
   local dot_file=${2:-"$NT_B2C_DIR/chaincode.dot"}
   local png_file="${dot_file%.dot}.png"
@@ -119,7 +147,7 @@ nt-b2c-view() {
     return 1
   fi
   mkdir -p "$(dirname "$dot_file")"
-  /usr/bin/python3.12 - "$b2c_file" "$dot_file" <<'PY'
+  python3 - "$b2c_file" "$dot_file" <<'PY'
 import sys
 from textx import metamodel_from_file
 from textx.export import model_export
@@ -138,5 +166,30 @@ PY
   fi
 }
 
+nt-bootstrap() {
+  if [ -f "$NEWTRANS_ROOT/.venv/bin/activate" ]; then
+    source "$NEWTRANS_ROOT/.venv/bin/activate"
+  else
+    python3 -m venv "$NEWTRANS_ROOT/.venv"
+    source "$NEWTRANS_ROOT/.venv/bin/activate"
+  fi
+  python3 -m pip install --upgrade pip
+  python3 -m pip install -r "$NEWTRANS_ROOT/requirements.txt"
+  python3 -m pip install -e "$NEWTRANS_ROOT/DSL/B2CDSL"
+  python3 -m pip install -e "$NEWTRANS_ROOT/CodeGenerator/b2cdsl-go"
+  python3 -m pip install -e "$NEWTRANS_ROOT/CodeGenerator/b2cdsl-solidity"
+  echo "Bootstrap complete."
+}
+
+nt-clean-env() {
+  if [ -d "$NEWTRANS_ROOT/.venv" ]; then
+    rm -rf "$NEWTRANS_ROOT/.venv"
+    echo "Removed $NEWTRANS_ROOT/.venv"
+  else
+    echo "No .venv found under $NEWTRANS_ROOT"
+  fi
+}
+
 echo "NewTranslator environment loaded."
-echo "Commands: nt-go-gen, nt-go-fmt, nt-go-build, nt-go-clean, nt-sol-gen, nt-sol-fmt, nt-sol-build, nt-sol-clean, nt-bpmn-to-b2c, nt-b2c-view"
+echo "Commands: nt-bootstrap, nt-clean-env, nt-go-gen, nt-go-fmt, nt-go-build, nt-go-clean, nt-sol-gen, nt-sol-fmt, nt-sol-build, nt-sol-clean, nt-bpmn-to-b2c, nt-b2c-view"
+echo "Example: nt-bpmn-to-b2c ./build/bpmn/YourFlow.bpmn"

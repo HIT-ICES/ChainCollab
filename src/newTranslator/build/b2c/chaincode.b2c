@@ -1,36 +1,58 @@
 contract GeneratedContract {
 
     participants {
-        participant Participant_1jz106x {
-            msp "Bike centerMSP"
+        participant Participant_0w6qkdf {
+            msp "Bulk buyerMSP"
             x509 ""
             isMulti false
             multiMin 0
             multiMax 0
             attributes {
-                role = "Bike center"
+                role = "Bulk buyer"
 
             }
         }
-        participant Participant_0jcddbb {
-            msp "CustomerMSP"
+        participant Participant_19mgbdn {
+            msp "ManufacturerMSP"
             x509 ""
             isMulti false
             multiMin 0
             multiMax 0
             attributes {
-                role = "Customer"
+                role = "Manufacturer"
 
             }
         }
-        participant Participant_0c1qh31 {
-            msp "InsurerMSP"
+        participant Participant_09cjol2 {
+            msp "MiddlemanMSP"
             x509 ""
             isMulti false
             multiMin 0
             multiMax 0
             attributes {
-                role = "Insurer"
+                role = "Middleman"
+
+            }
+        }
+        participant Participant_0sa2v7d {
+            msp "SupplierMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Supplier"
+
+            }
+        }
+        participant Participant_19j1e3o {
+            msp "Special carrierMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Special carrier"
 
             }
         }
@@ -40,78 +62,67 @@ contract GeneratedContract {
 
 
     globals {
-        Ask: bool
-        InsuranceReq: bool
-        IsAvailable: bool
+        Self_pickup: bool
+        Amount: int
+        Del_order: string
+        Deliver: string
+        Fwd_order: string
+        Order: string
+        Placed_order: string
+        Pre_details: string
+        Report: string
+        Req_details: string
+        Transport_order: string
+        Waybill: string
 
     }
 
 
 
     messages {
-        message Message_009a0bz from Participant_1jz106x to Participant_0jcddbb {
+        message Message_04wmlqe from Participant_19mgbdn to Participant_0w6qkdf {
             initial state INACTIVE
-            schema "{}"
+            schema "report"
         }
-        message Message_02ckm6k from Participant_0jcddbb to Participant_1jz106x {
+        message Message_0cba4t6 from Participant_0w6qkdf to Participant_0sa2v7d {
             initial state INACTIVE
-            schema "{}"
+            schema "fwd_order"
         }
-        message Message_06bv1qa from Participant_1jz106x to Participant_0jcddbb {
+        message Message_0d2xte5 from Participant_19j1e3o to Participant_19mgbdn {
             initial state INACTIVE
-            schema "{}"
+            schema "del_order"
         }
-        message Message_0b1e9t1 from Participant_1jz106x to Participant_0jcddbb {
+        message Message_0hpha6h from Participant_0sa2v7d to Participant_19j1e3o {
             initial state INACTIVE
-            schema "{}"
+            schema "pre_details"
         }
-        message Message_0cq2w1g from Participant_0jcddbb to Participant_1jz106x {
+        message Message_0pm90nx from Participant_0w6qkdf to Participant_19j1e3o {
             initial state INACTIVE
-            schema "{}"
+            schema "transport_order"
         }
-        message Message_0g4xpdf from Participant_1jz106x to Participant_0jcddbb {
+        message Message_0ps2yzo from Participant_0w6qkdf to Participant_19mgbdn {
             initial state INACTIVE
-            schema "{}"
+            schema "Self_pickup"
         }
-        message Message_0hzpgno from Participant_1jz106x to Participant_0jcddbb {
+        message Message_0rwz1km from Participant_19j1e3o to Participant_0sa2v7d {
             initial state INACTIVE
-            schema "{}"
+            schema "req_details"
         }
-        message Message_0is10sh from Participant_1jz106x to Participant_0jcddbb {
+        message Message_196q1fj from Participant_19mgbdn to Participant_0w6qkdf {
             initial state INACTIVE
-            schema "{}"
+            schema "deliver"
         }
-        message Message_0l75vce from Participant_0jcddbb to Participant_1jz106x {
+        message Message_1ajdm9l from Participant_19mgbdn to Participant_09cjol2 {
             initial state INACTIVE
-            schema "{}"
+            schema "placed_order"
         }
-        message Message_0lvlunm from Participant_0c1qh31 to Participant_0jcddbb {
+        message Message_1io2g9u from Participant_0sa2v7d to Participant_19j1e3o {
             initial state INACTIVE
-            schema "{}"
+            schema "waybill"
         }
-        message Message_0nkjynd from Participant_0jcddbb to Participant_1jz106x {
+        message Message_1wswgqu from Participant_0w6qkdf to Participant_19mgbdn {
             initial state INACTIVE
-            schema "{}"
-        }
-        message Message_0psi2ab from Participant_0jcddbb to Participant_0c1qh31 {
-            initial state INACTIVE
-            schema "{}"
-        }
-        message Message_0to30q0 from Participant_0jcddbb to Participant_1jz106x {
-            initial state INACTIVE
-            schema "{}"
-        }
-        message Message_1989eur from Participant_0jcddbb to Participant_1jz106x {
-            initial state INACTIVE
-            schema "{}"
-        }
-        message Message_1dp5xa4 from Participant_0jcddbb to Participant_1jz106x {
-            initial state INACTIVE
-            schema "{}"
-        }
-        message Message_1ufjjj2 from Participant_1jz106x to Participant_0jcddbb {
-            initial state INACTIVE
-            schema "{}"
+            schema "order + amount"
         }
 
     }
@@ -119,44 +130,16 @@ contract GeneratedContract {
 
 
     gateways {
-        gateway ExclusiveGateway_0uhgcse {
+        gateway Gateway_11hmo2k {
             type exclusive
             initial state INACTIVE
         }
-        gateway ExclusiveGateway_1e98v4d {
-            type exclusive
-            initial state INACTIVE
-        }
-        gateway ExclusiveGateway_04bkb0l {
-            type exclusive
-            initial state INACTIVE
-        }
-        gateway ExclusiveGateway_0cfvdeh {
-            type exclusive
-            initial state INACTIVE
-        }
-        gateway ExclusiveGateway_1ksw1j2 {
-            type exclusive
-            initial state INACTIVE
-        }
-        gateway ExclusiveGateway_05xdg8u {
-            type exclusive
-            initial state INACTIVE
-        }
-        gateway ExclusiveGateway_0wc677m {
-            type exclusive
-            initial state INACTIVE
-        }
-        gateway ParallelGateway_0yw95j2 {
+        gateway Gateway_0onpe6x {
             type parallel
             initial state INACTIVE
         }
-        gateway ParallelGateway_0himv1h {
+        gateway Gateway_1fbifca {
             type parallel
-            initial state INACTIVE
-        }
-        gateway EventBasedGateway_1nphygh {
-            type event
             initial state INACTIVE
         }
 
@@ -165,10 +148,13 @@ contract GeneratedContract {
 
 
     events {
-        event StartEvent_0gb8jks {
+        event Event_06sexe6 {
             initial state READY
         }
-        event EndEvent_11pwcmo {
+        event Event_13pbqdz {
+            initial state INACTIVE
+        }
+        event Event_0eoqvir {
             initial state INACTIVE
         }
 
@@ -177,86 +163,68 @@ contract GeneratedContract {
 
 
     businessrules {
+        businessrule Activity_0fbi09z {
+            dmn "Activity_0fbi09z.dmn"
+            decision "Activity_0fbi09z_DecisionID"
+            input mapping {
+                amount -> Amount
+                Self_pickup -> Self_pickup
+
+            }
+            output mapping {
+                deliver -> Deliver
+
+            }
+
+            initial state INACTIVE
+        }
 
     }
 
 
 
     flows {
-        start event StartEvent_0gb8jks enables ExclusiveGateway_0uhgcse;
+        start event Event_06sexe6 enables Message_1wswgqu;
 
-        when message Message_06bv1qa completed
-        then enable ExclusiveGateway_1e98v4d;
-        when message Message_0nkjynd completed
-        then enable Message_0b1e9t1;
-        when message Message_0b1e9t1 completed
-        then enable Message_0hzpgno;
-        when message Message_0hzpgno completed
-        then enable EventBasedGateway_1nphygh;
-        when message Message_0cq2w1g completed
-        then disable Message_1989eur, enable Message_1ufjjj2;
-        when message Message_1ufjjj2 completed
-        then enable ExclusiveGateway_04bkb0l;
-        when message Message_0to30q0 completed
-        then enable ExclusiveGateway_0cfvdeh;
-        when message Message_0g4xpdf completed
-        then enable ParallelGateway_0himv1h;
-        when message Message_0is10sh completed
-        then enable ParallelGateway_0himv1h;
-        when message Message_1989eur completed
-        then disable Message_0cq2w1g, enable ExclusiveGateway_1ksw1j2;
-        when message Message_1dp5xa4 completed
-        then enable ParallelGateway_0yw95j2;
-        when message Message_02ckm6k completed
-        then enable Message_06bv1qa;
-        when message Message_0psi2ab completed
-        then enable Message_0lvlunm;
-        when message Message_0lvlunm completed
-        then enable ExclusiveGateway_0wc677m;
-        when message Message_0l75vce completed
-        then enable ExclusiveGateway_05xdg8u;
-        when message Message_009a0bz completed
-        then enable Message_0psi2ab;
+        when message Message_1wswgqu completed
+        then enable Message_1ajdm9l;
+        when message Message_1ajdm9l completed
+        then enable Gateway_0onpe6x;
+        when message Message_0cba4t6 completed
+        then enable Gateway_1fbifca;
+        when message Message_0pm90nx completed
+        then enable Gateway_1fbifca;
+        when message Message_0rwz1km completed
+        then enable Message_0hpha6h;
+        when message Message_0hpha6h completed
+        then enable Message_1io2g9u;
+        when message Message_1io2g9u completed
+        then enable Message_0d2xte5;
+        when message Message_0d2xte5 completed
+        then enable Message_04wmlqe;
+        when message Message_04wmlqe completed
+        then enable Message_0ps2yzo;
+        when message Message_196q1fj completed
+        then enable Event_13pbqdz;
+        when message Message_0ps2yzo completed
+        then enable Activity_0fbi09z;
 
-        when gateway ExclusiveGateway_0uhgcse completed
-        then enable Message_02ckm6k;
-        when gateway ExclusiveGateway_1e98v4d completed
+        when gateway Gateway_11hmo2k completed
         choose {
-            if IsAvailable == false
-            then enable ExclusiveGateway_0uhgcse;
-            if IsAvailable == true
-            then enable Message_0l75vce;
+            if Deliver == "true"
+            then enable Message_196q1fj;
+            if Deliver == "false"
+            then enable Event_0eoqvir;
 
         }
-        when gateway ExclusiveGateway_04bkb0l completed
-        choose {
-            if Ask == true
-            then enable Message_0to30q0;
-            if Ask == false
-            then enable ExclusiveGateway_0cfvdeh;
+        when gateway Gateway_0onpe6x completed
+        then enable Message_0cba4t6, enable Message_0pm90nx;
 
-        }
-        when gateway ExclusiveGateway_0cfvdeh completed
-        then enable ExclusiveGateway_1ksw1j2;
-        when gateway ExclusiveGateway_1ksw1j2 completed
-        then enable Message_1dp5xa4;
-        when gateway ExclusiveGateway_05xdg8u completed
-        choose {
-            if InsuranceReq == false
-            then enable ExclusiveGateway_0wc677m;
-            if InsuranceReq == true
-            then enable Message_009a0bz;
+        parallel gateway Gateway_1fbifca await Message_0cba4t6, Message_0pm90nx
+        then enable Message_0rwz1km;
 
-        }
-        when gateway ExclusiveGateway_0wc677m completed
-        then enable Message_0nkjynd;
-        when gateway ParallelGateway_0yw95j2 completed
-        then enable Message_0g4xpdf, enable Message_0is10sh;
-        when gateway EventBasedGateway_1nphygh completed
-        then enable Message_0cq2w1g, enable Message_1989eur;
-
-        parallel gateway ParallelGateway_0himv1h await Message_0is10sh, Message_0g4xpdf
-        then enable EndEvent_11pwcmo;
+        when businessrule Activity_0fbi09z done
+        then enable Gateway_11hmo2k;
 
     }
 
