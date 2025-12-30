@@ -184,7 +184,7 @@ export const DMNComponentCard = ({
   return (
     <CustomCard
       color="#ffaa00"
-      logo={<img src={DmnIcon} alt="relayer" style={{ width: 100, height: 100 }} />} title="Relayer" status={[
+      logo={<img src={DmnIcon} alt="dmn" style={{ width: 100, height: 100 }} />} title="DMN" status={[
         { key: "ChainCode", value: ChaincodeStatus }
       ]} />
   );
