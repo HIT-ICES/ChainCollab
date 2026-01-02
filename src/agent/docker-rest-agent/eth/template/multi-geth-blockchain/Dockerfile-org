@@ -1,0 +1,7 @@
+FROM ethereum/client-go:v1.10.1
+
+COPY genesis.json /genesis.json
+COPY docker-prep-etherbase.sh /usr/local/bin/docker-prep-etherbase.sh
+RUN chmod +x /usr/local/bin/docker-prep-etherbase.sh
+
+ENTRYPOINT ["geth"]

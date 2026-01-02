@@ -1,0 +1,35 @@
+version: '3.7'
+
+services:
+  org1_geth:
+    container_name: org1_geth
+    hostname: org1_geth
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - SYS_ENODE=${SYS_ENODE}
+    command:
+      - --netrestrict=172.20.0.0/16
+      - --datadir=/root/.ethereum
+      - --networkid=3456
+      - --syncmode=full
+
+      - --port=30303
+      - --bootnodes=${SYS_ENODE}
+
+      # PoW mining
+      - --mine
+      - --miner.threads=1
+      - --miner.gasprice=0
+      - --miner.etherbase=0x1111111111111111111111111111111111111111
+
+      - --verbosity=3
+    volumes:
+      - ../../storage/servers/org1/datadir:/root/.ethereum
+    networks:
+      - existing_network
+networks:
+  existing_network:
+    external: true
+    name: cello-net

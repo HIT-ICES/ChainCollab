@@ -1,0 +1,29 @@
+version: '3.7'
+
+services:
+  org1_geth:
+    container_name: org1_geth
+    hostname: org1_geth
+    build:
+      context: .
+      dockerfile: Dockerfile-org
+    environment:
+      - SYS_ENODE=${SYS_ENODE}
+      - NETWORK_ID=3456
+    volumes:
+      - ../../storage/servers/org1/datadir:/root/.ethereum
+      - ../../storage/servers/org1:/out
+      - ./password.txt:/root/password.txt
+    ports:
+      - "8546:8545"
+      - "30304:30303"
+    networks:
+      - existing_network
+    entrypoint: [ "/bin/sh", "-lc" ]
+    command: >
+      /usr/local/bin/docker-prep-etherbase.sh && . /out/env && exec geth --datadir=/root/.ethereum --networkid=3456 --syncmode=full --port=30303 --bootnodes="${SYS_ENODE}" --mine --miner.threads=1 --miner.gasprice 0 --miner.etherbase="${ETHERBASE}" --verbosity 3
+
+networks:
+  existing_network:
+    external: true
+    name: cello-net
