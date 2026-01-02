@@ -112,7 +112,7 @@ class EthereumResourceSet(models.Model):
         help_text="Resource set to which the ethereum resourceset belongs",
         null=True,
         related_name="ethereum_sub_resource_sets",
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
     )
 
     class Meta:
@@ -1044,6 +1044,19 @@ class ResourceSet(models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
+
+    def get_sub_resource_set(self):
+        """
+        Get the sub resource set (either FabricResourceSet or EthereumResourceSet)
+        """
+        try:
+            return self.sub_resource_set
+        except Exception:
+            try:
+                # For ForeignKey, use .first() to get the first related object
+                return self.ethereum_sub_resource_sets.first()
+            except Exception:
+                return None
 
     class Meta:
         unique_together = ("membership", "environment")

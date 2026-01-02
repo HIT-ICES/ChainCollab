@@ -14,13 +14,14 @@ class ResourceSetSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def get_org_type(self, obj):
-        sub_resource_set = obj.sub_resource_set
-        return "system_type" if  sub_resource_set.org_type == '1' else "user_type"
+        sub_resource_set = obj.get_sub_resource_set()
+        if sub_resource_set:
+            return "system_type" if sub_resource_set.org_type == '1' else "user_type"
+        return "unknown"
 
     def get_msp(self, obj):
-        try:
-            sub_resource_set = obj.sub_resource_set
+        sub_resource_set = obj.get_sub_resource_set()
+        if sub_resource_set and hasattr(sub_resource_set, 'msp'):
             return sub_resource_set.msp
-        except:
-            return None
+        return None
 
