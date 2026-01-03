@@ -33,6 +33,7 @@ from api.common.enums import (
     UserRole,
     NetworkType,
     FabricNodeType,
+    EthNodeType,
     FabricVersions,
 )
 from api.utils.common import make_uuid, random_name, hash_file
@@ -1693,9 +1694,20 @@ class EthNode(models.Model):
         max_length=64,
         default=NodeStatus.Created.name.lower(),
     )
-    config_file = models.TextField(
-        help_text="Config file of node",
+    type = models.CharField(
+        help_text="""
+    Node type defined for network.
+    Ethereum available types: %s
+    """
+        % (EthNodeType.names()),
+        max_length=64,
         null=True,
+        blank=True,
+    )
+    sys_enode = models.TextField(
+        help_text="System node enode URL (stored in system node) or bootnode enode (for org nodes)",
+        null=True,
+        blank=True,
     )
     # msp = models.TextField(
     #     help_text="msp of node",
@@ -1710,3 +1722,6 @@ class EthNode(models.Model):
         max_length=256,
         default="",
     )
+
+    class Meta:
+        ordering = ("-created_at",)

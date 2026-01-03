@@ -171,12 +171,21 @@ class EthereumResourceSetViewSet(viewsets.ViewSet):
     #         raise Exception(e)
     
     
-    def _node_create_agent(self, name, port_map):
+    def _node_create_agent(self, name, port_map, type=None, sys_enode=None):
         try:
             payload = {
                 "name": name,
                 "port_map": json.dumps(port_map),
             }
+
+            # Add type if provided
+            if type:
+                payload["type"] = type
+
+            # Add sys_enode if provided
+            if sys_enode:
+                payload["sys_enode"] = sys_enode
+
             response = post(
                 f"http://{CURRENT_IP}:7001/api/v1/ethnode",
                 data=payload,
@@ -216,19 +225,26 @@ class EthereumResourceSetViewSet(viewsets.ViewSet):
             agent = resource_set.agent
             org_name = ethereum_resource_set.name
             node_name = request.data.get("name", None)
-            
+            type = request.data.get("type", None)
+            sys_enode_input = request.data.get("sys_enode", None)
+
+            # Create EthNode and save all information
             node = EthNode(
                 name=node_name,
-                # JsonField
-                # urls="ca." + org_name,
                 agent=agent,
-                # type="ca",
+                fabric_resource_set=ethereum_resource_set,
+                type=type,  # Store type in the model
             )
+
+            # For organization nodes, store the input bootnode enode
+            if sys_enode_input:
+                node.sys_enode = sys_enode_input
+
             node.save()
-            
+
             # 可能需要修改
             self._set_port(node, agent)
-            
+
             port_map = {
                 str(a["internal"]): int(a["external"])
                 for a in Port.objects.filter(eth_node=node)
@@ -236,13 +252,46 @@ class EthereumResourceSetViewSet(viewsets.ViewSet):
                 .all()
             }
 
-            self._node_create_agent(
-                name=node_name,
-                port_map=port_map,
-            )
+            # Prepare data for agent - send type and sys_enode for provisioning
+            agent_data = {
+                "name": node_name,
+                "port_map": port_map,
+            }
+
+            if type:
+                agent_data["type"] = type
+            if sys_enode_input:
+                agent_data["sys_enode"] = sys_enode_input
+
+            result = self._node_create_agent(**agent_data)
+
+            # Log the result for debugging
+            print(f"Agent result: {result}")
+            print(f"Node type: {type}")
+
+            # If this is a system node, update sys_enode with the actual enode from the container
+            if type == "system":
+                print(f"This is a system node, checking for enode in result...")
+                if result:
+                    print(f"Result keys: {result.keys() if isinstance(result, dict) else 'not a dict'}")
+                    # Check in result['data']['enode']
+                    if isinstance(result, dict) and "data" in result and isinstance(result["data"], dict):
+                        if "enode" in result["data"]:
+                            enode = result["data"]["enode"]
+                            print(f"Found enode in data: {enode}")
+                            node.sys_enode = enode
+                            node.save()
+                            print(f"Saved enode to node {node.id}")
+                        else:
+                            print("WARNING: enode not found in result['data']!")
+                    else:
+                        print("WARNING: result structure is not as expected!")
+                else:
+                    print("WARNING: result is None or empty!")
 
             return Response(
-                data=ok("ca create success"), status=status.HTTP_202_ACCEPTED
+                data=ok({"message": "node created successfully", "result": result}),
+                status=status.HTTP_202_ACCEPTED
             )
 
         except Exception as e:
