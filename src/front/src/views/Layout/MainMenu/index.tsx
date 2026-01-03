@@ -125,7 +125,8 @@ const MainMenu: React.FC = () => {
       if (matchedEnv) {
         dispatch(activateEnv({
           currentEnvId: matchedEnv.id,
-          currentEnvName: matchedEnv.name
+          currentEnvName: matchedEnv.name,
+          currentEnvType: matchedEnv.type
         }));
       }
     }
@@ -194,7 +195,7 @@ const MainMenu: React.FC = () => {
             envList.map((item) => (
               <Menu.Item key={item.id} onClick={
                 () => {
-                  dispatch(activateEnv({ currentEnvId: item.id, currentEnvName: item.name }));
+                  dispatch(activateEnv({ currentEnvId: item.id, currentEnvName: item.name, currentEnvType: item.type }));
                   navigateTo(`/orgs/${currentOrgId || 'none'}/consortia/${currentConsortiumId || 'none'}/envs/${item.id}/envdashboard`);
                 }
               } >{item.name}</Menu.Item>

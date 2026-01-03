@@ -6,8 +6,9 @@ import { getEnvironment } from '@/api/platformAPI'
 export const useEnvInfo = () => {
     const currentConsortiumId = useAppSelector(state => state.consortium.currentConsortiumId)
     const currentEnvId = useAppSelector(state => state.env.currentEnvId)
-    const { data: envInfo = {}, isLoading, isError, isSuccess, refetch } = useQuery(['envInfo', currentEnvId, currentConsortiumId], async () => {
-        return await getEnvironment(currentEnvId, currentConsortiumId)
+    const currentEnvType = useAppSelector(state => state.env.currentEnvType)
+    const { data: envInfo = {}, isLoading, isError, isSuccess, refetch } = useQuery(['envInfo', currentEnvId, currentConsortiumId, currentEnvType], async () => {
+        return await getEnvironment(currentEnvId, currentConsortiumId, currentEnvType)
     }
     );
     return [envInfo, refetch]

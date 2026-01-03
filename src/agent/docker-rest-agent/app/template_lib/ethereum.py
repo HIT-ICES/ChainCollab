@@ -150,6 +150,7 @@ class EthereumNodeTemplate:
             ports=ports,
             network=CONFIG.fabric_network,
             dns_search=["."],
+            cpu_limit=0.5,
         )
 
         context = ProvisionContext(
@@ -224,6 +225,7 @@ class EthereumNodeTemplate:
             ports=ports,
             network=CONFIG.fabric_network,
             dns_search=["."],
+            # cpu_limit=0.8,
         )
 
         context = ProvisionContext(

@@ -5,6 +5,7 @@ import traceback
 from requests import post
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from api.common import ok, err
 from api.config import CURRENT_IP
 from api.utils.test_time import timeitwithname
@@ -32,6 +33,7 @@ class ResourceSetViewSet(viewsets.ViewSet):
     """
     ResourceSet管理
     """
+    permission_classes = [IsAuthenticated]
 
     def list(self, request, *args, **kwargs):
         """
@@ -143,6 +145,8 @@ class ResourceSetViewSet(viewsets.ViewSet):
     #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class EthereumResourceSetViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
+
     def _set_port(self, node, agent):
         """
         get free port from agent,

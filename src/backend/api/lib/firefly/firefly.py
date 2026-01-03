@@ -4,6 +4,7 @@ import traceback
 from api.config import CELLO_HOME, FABRIC_CONFIG, FABRIC_TOOL
 import yaml
 import os
+import json
 
 
 class Firefly_cli:
@@ -84,4 +85,83 @@ class Firefly_cli:
         except Exception as e:
             traceback.print_exc(e)
             err_msg = "firefly start fail for {}!".format(e)
+            raise Exception(err_msg)
+
+    def init_eth(self, firefly_name, system_node_url, system_node_name, connector_config_path, member_count, manifest_file_path=None):
+        """
+        Initialize Firefly for Ethereum environment
+
+        Args:
+            firefly_name: Name of the Firefly stack
+            system_node_url: URL of the system Ethereum node (e.g., http://system-geth-node:8545)
+            system_node_name: Name of the system node container
+            connector_config_path: Path to the evmconnect.yml config file
+            member_count: Total number of members (system nodes + organization nodes)
+            manifest_file_path: Optional path to manifest.json (defaults to FABRIC_CONFIG/manifest.json)
+
+        Returns:
+            network_name: The detected Docker network name
+        """
+        try:
+            if manifest_file_path is None:
+                manifest_file_path = os.path.join(FABRIC_CONFIG, "manifest.json")
+
+            # Build ff init command
+            ff_init_command = [
+                self.ff_path,
+                "init",
+                "ethereum",
+                firefly_name,
+                str(member_count),  # Add member count parameter
+                "-n",
+                "remote-rpc",
+                "--remote-node-url",
+                system_node_url,
+                "--chain-id",
+                "3456",
+                "--connector-config",
+                connector_config_path,
+                "-m",
+                manifest_file_path,
+                "--remote-node-deploy",
+            ]
+
+            print("Running Firefly init command: " + " ".join(ff_init_command))
+            result = subprocess.run(ff_init_command, check=True, capture_output=True, text=True)
+            print(f"Firefly init output: {result.stdout}")
+
+            # Get container network information
+            inspect_command = ["docker", "inspect", system_node_name]
+            inspect_output = subprocess.check_output(inspect_command).decode().strip()
+            container_info = json.loads(inspect_output)[0]
+            network_name = list(container_info["NetworkSettings"]["Networks"].keys())[0]
+
+            print(f"Detected docker network: {network_name}")
+
+            # Update Firefly docker-compose configuration
+            firefly_stack_path = self.firefly_config_path + firefly_name
+            override_file_path = os.path.join(firefly_stack_path, "docker-compose.override.yml")
+
+            # Read YAML file
+            with open(override_file_path, "r") as file:
+                data = yaml.safe_load(file)
+
+            # Add network configuration
+            data["networks"] = {"default": {"name": network_name, "external": True}}
+
+            # Write back to file
+            with open(override_file_path, "w") as file:
+                yaml.dump(data, file)
+
+            print(f"Updated Firefly docker-compose with network: {network_name}")
+
+            return network_name
+
+        except subprocess.CalledProcessError as e:
+            traceback.print_exc()
+            err_msg = f"Firefly init ethereum command failed: {e.stderr}"
+            raise Exception(err_msg)
+        except Exception as e:
+            traceback.print_exc()
+            err_msg = f"Firefly init ethereum fail: {e}"
             raise Exception(err_msg)

@@ -277,9 +277,8 @@ export const createEnvironment = async (consortiumId: string, name: string) => {
 
 export const createEthEnvironment = async (consortiumId: string, name: string) => {
   try {
-    const res = await api.post(`/consortium/${consortiumId}/environments`, {
+    const res = await api.post(`/consortium/${consortiumId}/eth-environments`, {
       name: name,
-      type: "eth",
     });
     return res.data;
   } catch (err) {
@@ -293,8 +292,9 @@ export const getEnvironmentList = async (consortiumId: string) => {
   }
 
   try {
-    const res = await api.get(`/consortium/${consortiumId}/environments`);
-    return res.data.map((env: any) => ({
+    // 获取 Fabric 环境
+    const fabricRes = await api.get(`/consortium/${consortiumId}/environments`);
+    const fabricEnvs = fabricRes.data.map((env: any) => ({
       id: env.id,
       name: env.name,
       status: env.status,
@@ -302,19 +302,45 @@ export const getEnvironmentList = async (consortiumId: string) => {
       fireflyStatus: env.firefly_status,
       oracleStatus: env.Oracle_status,
       dmnStatus: env.DMN_status,
-      type: env.type,
+      type: "Fabric",
     }));
+
+    // 获取以太坊环境
+    let ethEnvs = [];
+    try {
+      const ethRes = await api.get(`/consortium/${consortiumId}/eth-environments`);
+      ethEnvs = ethRes.data.map((env: any) => ({
+        id: env.id,
+        name: env.name,
+        status: env.status,
+        createdAt: env.create_at,
+        fireflyStatus: env.firefly_status,
+        oracleStatus: env.Oracle_status,
+        dmnStatus: env.DMN_status,
+        type: "Ethereum",
+      }));
+    } catch (err) {
+      console.log("No Ethereum environments or endpoint not available");
+    }
+
+    // 合并两种环境
+    return [...fabricEnvs, ...ethEnvs];
   } catch (err) {
     console.error("获取envList失败", err);
+    return [];
   }
 };
 
-export const getEnvironment = async (environmentId: string, consortiumId: string) => {
+export const getEnvironment = async (environmentId: string, consortiumId: string, envType: string = "Fabric") => {
   if (environmentId === '') {
     return {};
   }
   try {
-    const res = await api.get(`/consortium/${consortiumId}/environments/${environmentId}`);
+    const endpoint = envType === "Ethereum"
+      ? `/consortium/${consortiumId}/eth-environments/${environmentId}`
+      : `/consortium/${consortiumId}/environments/${environmentId}`;
+
+    const res = await api.get(endpoint);
     return {
       name: res.data.name,
       id: res.data.id,
@@ -323,9 +349,11 @@ export const getEnvironment = async (environmentId: string, consortiumId: string
       fireflyStatus: res.data.firefly_status,
       oracleStatus: res.data.Oracle_status,
       dmnStatus: res.data.DMN_status,
+      type: envType,
     }
   } catch (err) {
     console.error("获取env失败", err);
+    return {};
   }
 };
 

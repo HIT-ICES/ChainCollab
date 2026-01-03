@@ -2,6 +2,7 @@ import logging
 from requests import post
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 from api.common.enums import EthNodeType, FabricNodeType
 
@@ -43,6 +44,7 @@ class EnvironmentViewSet(viewsets.ViewSet):
     """
     Environment管理
     """
+    permission_classes = [IsAuthenticated]
 
     def list(self, request, *args, **kwargs):
         """
@@ -106,6 +108,7 @@ class EnvironmentViewSet(viewsets.ViewSet):
 
 
 class EnvironmentOperateViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
 
     @action(methods=["post"], detail=True, url_path="init")
     @timeitwithname("Init")
@@ -724,6 +727,15 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         return Response(response, status=status.HTTP_200_OK)
 
 class EthEnvironmentViewSet(viewsets.ModelViewSet):
+    serializer_class = EthEnvironmentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        consortium_id = self.kwargs.get("consortium_id")
+        if consortium_id:
+            return EthEnvironment.objects.filter(consortium_id=consortium_id)
+        return EthEnvironment.objects.all()
+
     def create(self, request, *args, **kwargs):
         """
         创建EthEnvironment
@@ -739,7 +751,7 @@ class EthEnvironmentViewSet(viewsets.ModelViewSet):
         environment.save()
         serializer = EthEnvironmentSerializer(environment)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
+
     def list(self, request, *args, **kwargs):
         """
         获取EthEnvironment列表
@@ -748,8 +760,9 @@ class EthEnvironmentViewSet(viewsets.ModelViewSet):
         queryset = EthEnvironment.objects.filter(consortium_id=consortium_id)
         serializer = EthEnvironmentSerializer(queryset, many=True)
         return Response(serializer.data)
-    
+
 class EthEnvironmentOperateViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
 
     @action(methods=["post"], detail=True, url_path="init")
     @timeitwithname("InitEth")
@@ -757,10 +770,10 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
         """
         初始化EthEnvironment
         """
-        
+
         try:
-            env = Environment.objects.get(pk=pk)
-        except Environment.DoesNotExist:
+            env = EthEnvironment.objects.get(pk=pk)
+        except EthEnvironment.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         if env.status != "CREATED":
@@ -789,7 +802,7 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
         )
 
         resource_set = ResourceSet.objects.create(
-            name=membership.name, environment=env, membership=membership, agent=agent
+            name=membership.name, eth_environment=env, membership=membership, agent=agent
         )
         
         ethereum_resource_set = EthereumResourceSet.objects.create(
@@ -798,14 +811,6 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
             name=membership.name + ".org" + ".com",
             # msp=membership.name + ".org" + ".com" + "OrdererMSP",
         )
-        
-        # # firefly 相关操作
-        
-        # headers = request.headers
-        # post(
-        #     f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/fireflys/init_eth",
-        #     headers={"Authorization": headers["Authorization"]},
-        # )
         
         headers = request.headers
         node_name = "system-geth-node"
@@ -852,8 +857,8 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
                 )
 
             try:
-                environment = Environment.objects.get(pk=pk)
-            except Environment.DoesNotExist:
+                environment = EthEnvironment.objects.get(pk=pk)
+            except EthEnvironment.DoesNotExist:
                 LOG.error(f"Environment {pk} not found")
                 return Response(
                     {"message": "Environment not found"},
@@ -880,7 +885,7 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
 
             resource_set = ResourceSet.objects.create(
                 name=membership.name,
-                environment=environment,
+                eth_environment=environment,
                 membership=membership,
                 agent=agent,
             )
@@ -964,50 +969,47 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
     @timeitwithname("StartEth")
     def start(self, request, pk=None, *args, **kwargs):
         """
-        启动EthEnvironment
+        启动EthEnvironment - Only changes environment status
+        Firefly operations should be called separately from frontend
         """
         try:
             env = EthEnvironment.objects.get(pk=pk)
         except EthEnvironment.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        headers = request.headers
-        post(
-            f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/fireflys/start_eth",
-            headers={"Authorization": headers["Authorization"]},
-        )
-        
-        env = EthEnvironment.objects.get(pk=pk)
         env.status = "STARTED"
         env.save()
 
-        return Response(status=status.HTTP_201_CREATED)
+        return Response(
+            {"message": "Environment started successfully"},
+            status=status.HTTP_201_CREATED
+        )
 
     @action(methods=["post"], detail=True, url_path="activate")
     @timeitwithname("ActivateEth")
     def activate(self, request, pk=None, *args, **kwargs):
         """
-        激活EthEnvironment
+        激活EthEnvironment - Only changes environment status
+        Firefly operations should be called separately from frontend
         """
         try:
             env = EthEnvironment.objects.get(pk=pk)
         except EthEnvironment.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        if env.status != "STARTED":
+        if env.status != "INITIALIZED":
             return Response(
-                {"message": "EthEnvironment has not been started or has activated"},
+                {"message": "EthEnvironment has not been initialized"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
-        headers = request.headers
-
-        # Activate environment logic here
 
         env.status = "ACTIVATED"
         env.save()
 
-        return Response(status=status.HTTP_201_CREATED)
+        return Response(
+            {"message": "Environment activated successfully"},
+            status=status.HTTP_201_CREATED
+        )
 
     @action(methods=["post"], detail=True, url_path="install_firefly")
     def install_firefly(self, request, pk=None, *args, **kwargs):

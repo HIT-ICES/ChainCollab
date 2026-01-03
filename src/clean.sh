@@ -73,4 +73,9 @@ echo "Remove DB"
 docker stop cello-postgres >/dev/null 2>&1 || true
 docker rm cello-postgres >/dev/null 2>&1 || true
 
+# Remove Redis
+echo "Remove Redis"
+docker stop cello-redis >/dev/null 2>&1 || true
+docker rm cello-redis >/dev/null 2>&1 || true
+
 echo "Finished cleaning"

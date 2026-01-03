@@ -1035,7 +1035,16 @@ class ResourceSet(models.Model):
     environment = models.ForeignKey(
         Environment,
         help_text="related environment_Id",
-        null=False,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="resource_sets",
+    )
+    eth_environment = models.ForeignKey(
+        'EthEnvironment',
+        help_text="related eth_environment_Id",
+        null=True,
+        blank=True,
         on_delete=models.CASCADE,
         related_name="resource_sets",
     )
@@ -1045,6 +1054,10 @@ class ResourceSet(models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
+
+    def get_environment(self):
+        """Get the environment (either Environment or EthEnvironment)"""
+        return self.environment or self.eth_environment
 
     def get_sub_resource_set(self):
         """
