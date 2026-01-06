@@ -140,6 +140,13 @@ class FabricNodeType(ExtraEnum):
 
 
 @unique
+class EthNodeType(ExtraEnum):
+    System = "system"
+    Organization = "organization"
+    Default = "default"
+
+
+@unique
 class NodeStatus(ExtraEnum):
     Created = 0
     Restarting = 1

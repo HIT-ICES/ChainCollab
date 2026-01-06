@@ -242,6 +242,34 @@ export const StartEthEnv = async (envId: string) => {
     }
 }
 
+export const ActivateEthEnv = async (envId: string) => {
+    try {
+        const response = await api.post(`/eth-environments/${envId}/activate`)
+        return response.data;
+    } catch (error) {
+        return error;
+    }
+}
+
+// Firefly for Ethereum
+export const InitFireflyForEthEnv = async (envId: string) => {
+    try {
+        const response = await api.post(`/eth-environments/${envId}/fireflys/init_eth`)
+        return response.data;
+    } catch (error) {
+        return error;
+    }
+}
+
+export const StartFireflyForEthEnv = async (envId: string) => {
+    try {
+        const response = await api.post(`/eth-environments/${envId}/fireflys/start_eth`)
+        return response.data;
+    } catch (error) {
+        return error;
+    }
+}
+
 
 // Node Related
 

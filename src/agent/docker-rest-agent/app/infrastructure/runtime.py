@@ -5,18 +5,26 @@ from ..docker_client import docker_client
 
 class ContainerRuntime:
     def run(self, spec) -> Any:
+        kwargs = {
+            "detach": spec.detach,
+            "tty": spec.tty,
+            "stdin_open": spec.stdin_open,
+            "name": spec.name,
+            "network": spec.network,
+            "dns_search": spec.dns_search,
+            "volumes": spec.volumes,
+            "environment": spec.environment,
+            "ports": spec.ports,
+        }
+
+        # Add CPU limit if specified
+        if spec.cpu_limit is not None:
+            kwargs["nano_cpus"] = int(spec.cpu_limit * 1e9)
+
         return docker_client.containers.run(
             spec.image,
             spec.command,
-            detach=spec.detach,
-            tty=spec.tty,
-            stdin_open=spec.stdin_open,
-            name=spec.name,
-            network=spec.network,
-            dns_search=spec.dns_search,
-            volumes=spec.volumes,
-            environment=spec.environment,
-            ports=spec.ports,
+            **kwargs,
         )
 
     def get(self, identifier: str):

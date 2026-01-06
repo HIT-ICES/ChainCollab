@@ -22,6 +22,7 @@ class ContainerSpec:
     tty: bool = True
     stdin_open: bool = True
     dns_search: Optional[List[str]] = None
+    cpu_limit: Optional[float] = None
 
 
 @dataclass

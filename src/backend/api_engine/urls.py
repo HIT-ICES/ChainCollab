@@ -50,7 +50,7 @@ from api.routes.loleido_organization.views import (
 )
 from api.routes.consortium.views import ConsortiumViewSet, ConsortiumInviteViewSet
 from api.routes.memebership.views import MemebershipViewSet
-from api.routes.environment.views import EnvironmentViewSet, EnvironmentOperateViewSet, EthEnvironmentOperateViewSet, EthEnvironmentViewSet
+from api.routes.environment.views import EnvironmentViewSet, EnvironmentOperateViewSet, EthEnvironmentViewSet, EthEnvironmentOperateViewSet
 from api.routes.resource_set.views import EthereumResourceSetViewSet, ResourceSetViewSet
 from api.routes.bpmn.views import (
     BPMNViewsSet,
@@ -132,6 +132,12 @@ router.register(
     "environments/(?P<environment_id>[^/.]+)/fireflys",
     FireflyViewSet,
     basename="firefly",
+)
+# Firefly routes for Ethereum environments
+router.register(
+    "eth-environments/(?P<environment_id>[^/.]+)/fireflys",
+    FireflyViewSet,
+    basename="eth-firefly",
 )
 # TODO MODIFY URL FOR FIREFLY
 # router.register("fireflys", FireflyViewSet, basename="firefly")

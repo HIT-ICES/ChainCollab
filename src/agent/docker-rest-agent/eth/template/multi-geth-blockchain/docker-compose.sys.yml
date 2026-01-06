@@ -1,0 +1,56 @@
+version: '3.7'
+
+services:
+  sys_geth:
+    container_name: sys_geth
+    cpus: "0.25"
+    hostname: sys_geth
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command:
+      - --datadir=/root/.ethereum
+      - --networkid=3456
+      - --syncmode=full
+
+      # P2P: 作为 bootnode 必须开启 discover（不要 --nodiscover）
+      - --port=30303
+      - --maxpeers=50
+      - --netrestrict=172.20.0.0/16
+      
+      # HTTP RPC 给 FireFly
+      - --http
+      - --http.addr=0.0.0.0
+      - --http.port=8545
+      - --http.api=eth,net,web3,txpool
+      - --http.corsdomain=*
+      - --http.vhosts=*
+
+      # 解锁固定账户（仅建议内网/开发）
+      - --unlock=0x365acf78c44060caf3a4789d804df11e3b4aa17d
+      - --password=/root/password.txt
+      - --allow-insecure-unlock
+
+      - --verbosity=4
+
+    ports:
+      - "8545:8545"
+      - "30303:30303"
+
+    volumes:
+      # system 节点 datadir：固定 nodekey & 链数据
+      - ../../storage/servers/sys/datadir:/root/.ethereum
+
+      # 固定 keystore（你给的那个目录）
+      - ./keystore:/root/.ethereum/keystore
+
+      # 解锁密码文件（你自己准备）
+      - ./password.txt:/root/password.txt:ro
+
+    networks:
+      - existing_network
+
+networks:
+  existing_network:
+    external: true
+    name: cello-net

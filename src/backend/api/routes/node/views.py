@@ -114,7 +114,7 @@ class NodeViewSet(viewsets.ViewSet):
                     "resource_set_id"
                 )
                 resource_set = ResourceSet.objects.get(pk=resource_set_id)
-                fabric_resource_set = resource_set.sub_resource_set
+                sub_resource_set = resource_set.get_sub_resource_set()
 
                 # if agent_id is not None and not request.user.is_operator:
                 #     raise PermissionDenied
@@ -126,11 +126,23 @@ class NodeViewSet(viewsets.ViewSet):
                     query_filter.update({"name__icontains": name})
                 if agent_id:
                     query_filter.update({"agent__id": agent_id})
-                if resource_set_id:
-                    query_filter.update({"fabric_resource_set": fabric_resource_set})
-                nodes = Node.objects.filter(**query_filter)
+
+                # Check if this is an Ethereum resource set or Fabric resource set
+                from api.models import EthereumResourceSet, EthNode
+                if isinstance(sub_resource_set, EthereumResourceSet):
+                    # Query EthNode instead of Node
+                    if resource_set_id:
+                        query_filter.update({"fabric_resource_set": sub_resource_set})
+                    nodes = EthNode.objects.filter(**query_filter)
+                else:
+                    # Query regular Node (Fabric)
+                    if resource_set_id:
+                        query_filter.update({"fabric_resource_set": sub_resource_set})
+                    nodes = Node.objects.filter(**query_filter)
                 p = Paginator(nodes, per_page)
                 nodes = p.page(page)
+
+                # Build unified return list for both Fabric and Ethereum nodes
                 return_node_list = [
                     {
                         "id": node.id,

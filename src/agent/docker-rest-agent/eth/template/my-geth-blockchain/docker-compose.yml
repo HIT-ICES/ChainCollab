@@ -3,8 +3,8 @@ version: '3.7'
 services:
   mybootnode:
     hostname: mybootnode
-    env_file:
-      - .env
+    # env_file:
+      # - .env
     build:
       context: .
       # args:
@@ -15,7 +15,7 @@ services:
       - --http.addr=0.0.0.0
       - --http.port=8545
       - --http.api=admin,eth,miner,web3,personal,net,txpool
-      - --networkid=${NETWORK_ID}
+      - --networkid=3456
       - --http.corsdomain="*"
       - --http.vhosts=*
       - --nodiscover
@@ -25,6 +25,7 @@ services:
       - --mine
       - --miner.threads=1
       - --miner.etherbase=0x365acf78c44060caf3a4789d804df11e3b4aa17d
+      - --miner.gasprice=0
       - --allow-insecure-unlock
 
     ports:
@@ -40,4 +41,4 @@ services:
 networks:
   existing_network:
     external: true
-    name: new_default
+    name: cello-net

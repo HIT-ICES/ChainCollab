@@ -33,7 +33,10 @@ import {
   requestOracleFFI,
   InitEthEnv,
   StartEthEnv,
-  JoinEthEnv
+  JoinEthEnv,
+  ActivateEthEnv,
+  InitFireflyForEthEnv,
+  StartFireflyForEthEnv
 } from "@/api/resourceAPI";
 
 import {
@@ -120,31 +123,30 @@ const Overview: React.FC = () => {
   }
 
   const handleSetUpEthereumNetwork = async () => {
-    // Eth应该就简单的两个init和start流程
     // Init
     setSetUpEthereumNetworkLoading(true)
-    // setSync()
-    await InitEthEnv(currentEnvId)  
+    await InitEthEnv(currentEnvId)
     setSync()
 
+    // Wait for join
     await new Promise((resolve, reject) => {
       setIsJoinModelOpen(true)
       setupCallBackRef.current = resolve
     })
-    // setSync()
-
-    // await StartEthEnv(currentEnvId);  // run容器
-    // setSync()
-
-    // // need to change
-    // await ActivateEnv(currentEnvId, currentOrgId) // 
-    // setSync()
-    setSetupFabricNetWorkLoading(false)
     setSync()
 
+    // Activate the environment (only changes status, no Firefly operations)
+    await ActivateEthEnv(currentEnvId)
+    setSync()
+
+    // Start the environment (only changes status, no Firefly operations)
+    await StartEthEnv(currentEnvId)
+    setSync()
+
+    setSetUpEthereumNetworkLoading(false)
   }
 
-  const handleSetUpComponent = async () => {
+  const handleSetUpFabricComponent = async () => {
     setSetupComponentLoading(true)
     await InstallFirefly(currentOrgId, currentEnvId)
     setSync()
@@ -160,6 +162,15 @@ const Overview: React.FC = () => {
     const res2 = await registerAPI(systemFireflyURL, "Oracle", "default", "Oracle", res.id)
     setSync()
     await InstallDmnEngine(currentOrgId, currentEnvId)
+    setSync()
+    setSetupComponentLoading(false)
+  }
+
+  const handleSetUpEthereumComponent = async () => {
+    setSetupComponentLoading(true)
+    await InitFireflyForEthEnv(currentEnvId)
+    setSync()
+    await StartFireflyForEthEnv(currentEnvId)
     setSync()
     setSetupComponentLoading(false)
   }
@@ -207,7 +218,8 @@ const Overview: React.FC = () => {
                       handleSetUpEthereumNetwork();
                     }
                   }}
-                  loading={setupFabricNetWorkLoading}
+                  loading={currentEnvType === "Fabric" ? setupFabricNetWorkLoading : setUpEthereumNetworkLoading}
+                  disabled={envInfo.status === "STARTED" || envInfo.status === "ACTIVATED"}
                 >
                   {currentEnvType === "Fabric" ? "SetUp Fabric Network" : "SetUp Ethereum Network"}
                 </LoadingButton>
@@ -258,7 +270,13 @@ const Overview: React.FC = () => {
                 <LoadingButton
                   variant="outlined"
                   loading={setupComponentLoading}
-                  onClick={() => { handleSetUpComponent() }}>
+                  onClick={() => {
+                    if (currentEnvType === "Fabric") {
+                      handleSetUpFabricComponent();
+                    } else {
+                      handleSetUpEthereumComponent();
+                    }
+                  }}>
                   SetUp Core Component
                 </LoadingButton>
               </Col>
@@ -394,7 +412,7 @@ const Overview: React.FC = () => {
               }
               )
             }
-            
+
             try {
               await Promise.all(requests)
               message.success("Join Success")

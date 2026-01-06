@@ -33,6 +33,7 @@ from api.common.enums import (
     UserRole,
     NetworkType,
     FabricNodeType,
+    EthNodeType,
     FabricVersions,
 )
 from api.utils.common import make_uuid, random_name, hash_file
@@ -112,7 +113,7 @@ class EthereumResourceSet(models.Model):
         help_text="Resource set to which the ethereum resourceset belongs",
         null=True,
         related_name="ethereum_sub_resource_sets",
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
     )
 
     class Meta:
@@ -1034,7 +1035,16 @@ class ResourceSet(models.Model):
     environment = models.ForeignKey(
         Environment,
         help_text="related environment_Id",
-        null=False,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="resource_sets",
+    )
+    eth_environment = models.ForeignKey(
+        'EthEnvironment',
+        help_text="related eth_environment_Id",
+        null=True,
+        blank=True,
         on_delete=models.CASCADE,
         related_name="resource_sets",
     )
@@ -1044,6 +1054,23 @@ class ResourceSet(models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
+
+    def get_environment(self):
+        """Get the environment (either Environment or EthEnvironment)"""
+        return self.environment or self.eth_environment
+
+    def get_sub_resource_set(self):
+        """
+        Get the sub resource set (either FabricResourceSet or EthereumResourceSet)
+        """
+        try:
+            return self.sub_resource_set
+        except Exception:
+            try:
+                # For ForeignKey, use .first() to get the first related object
+                return self.ethereum_sub_resource_sets.first()
+            except Exception:
+                return None
 
     class Meta:
         unique_together = ("membership", "environment")
@@ -1680,9 +1707,20 @@ class EthNode(models.Model):
         max_length=64,
         default=NodeStatus.Created.name.lower(),
     )
-    config_file = models.TextField(
-        help_text="Config file of node",
+    type = models.CharField(
+        help_text="""
+    Node type defined for network.
+    Ethereum available types: %s
+    """
+        % (EthNodeType.names()),
+        max_length=64,
         null=True,
+        blank=True,
+    )
+    sys_enode = models.TextField(
+        help_text="System node enode URL (stored in system node) or bootnode enode (for org nodes)",
+        null=True,
+        blank=True,
     )
     # msp = models.TextField(
     #     help_text="msp of node",
@@ -1697,3 +1735,6 @@ class EthNode(models.Model):
         max_length=256,
         default="",
     )
+
+    class Meta:
+        ordering = ("-created_at",)

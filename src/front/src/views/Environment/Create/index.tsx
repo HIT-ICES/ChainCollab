@@ -15,7 +15,7 @@ import {
 import { CloudServerOutlined, FileTextOutlined } from "@ant-design/icons";
 import { useAppDispatch } from "@/redux/hooks";
 import { activateEnv } from "@/redux/slices/envSlice";
-import { createEnvironment } from "@/api/platformAPI";
+import { createEnvironment, createEthEnvironment } from "@/api/platformAPI";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -33,7 +33,11 @@ const CreateEnvironment: React.FC = () => {
     }
     try {
       setLoading(true);
-      const env = await createEnvironment(consortium_id, values.name.trim());
+      // 根据环境类型调用不同的 API
+      const env = values.envType === "Ethereum"
+        ? await createEthEnvironment(consortium_id, values.name.trim())
+        : await createEnvironment(consortium_id, values.name.trim());
+
       dispatch(activateEnv({ currentEnvId: env.id, currentEnvName: env.name, currentEnvType: values.envType || "Fabric" }));
       message.success("Environment created");
       navigate(`/orgs/${org_id}/consortia/${consortium_id}/envs/${env.id}/envdashboard`);
