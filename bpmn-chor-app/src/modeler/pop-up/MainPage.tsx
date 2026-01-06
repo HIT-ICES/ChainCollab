@@ -2,6 +2,7 @@ import React from 'react';
 import $ from 'jquery';
 import MessageModal from './MessageModal';
 import DmnModal from './DmnModal';
+import OracleTaskModal from './OracleTaskModal';
 import type { DmnDefinition } from '@/types/modeler';
 
 interface MainPageProps {
@@ -21,13 +22,21 @@ const MainPage: React.FC<MainPageProps> = ({ xmlDataMap, onSave }) => {
       if (!elementId) {
         return;
       }
-      const ids = elementId.split('_');
-      const type = ids[0];
-      setDataElementId(elementId);
-      setDataElementType(type);
-      if (type === 'Activity' || type === 'Message') {
-        setModalOpen(true);
+      const modeler = window.bpmnjs;
+      const elementRegistry = modeler?.get?.('elementRegistry');
+      const element = elementRegistry?.get?.(elementId);
+      const elementType = element?.type || element?.businessObject?.$type || '';
+      const isMessage = elementType === 'bpmn:Message';
+      const isActivity = elementType === 'bpmn:ChoreographyTask' ||
+        elementType === 'oracle:DataTask' ||
+        elementType === 'bpmn:BusinessRuleTask';
+      const isOracleTask = elementType === 'bpmn:ReceiveTask' || elementType === 'bpmn:ScriptTask';
+      if (!isMessage && !isActivity && !isOracleTask) {
+        return;
       }
+      setDataElementId(elementId);
+      setDataElementType(isMessage ? 'Message' : (isOracleTask ? 'OracleTask' : 'Activity'));
+      setModalOpen(true);
     };
 
     if (!modalOpen) {
@@ -47,6 +56,13 @@ const MainPage: React.FC<MainPageProps> = ({ xmlDataMap, onSave }) => {
         <MessageModal
           dataElementId={dataElementId}
           open={modalOpen && dataElementType === 'Message'}
+          onClose={() => setModalOpen(false)}
+        />
+      ) : null}
+      {dataElementType === 'OracleTask' && dataElementId ? (
+        <OracleTaskModal
+          dataElementId={dataElementId}
+          open={modalOpen && dataElementType === 'OracleTask'}
           onClose={() => setModalOpen(false)}
         />
       ) : null}

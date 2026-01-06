@@ -2,57 +2,57 @@ contract GeneratedContract {
 
     participants {
         participant Participant_0w6qkdf {
-            msp "Bulk buyerMSP"
+            msp "大宗买家MSP"
             x509 ""
             isMulti false
             multiMin 0
             multiMax 0
             attributes {
-                role = "Bulk buyer"
+                role = "大宗买家"
 
             }
         }
         participant Participant_19mgbdn {
-            msp "ManufacturerMSP"
+            msp "制造商MSP"
             x509 ""
             isMulti false
             multiMin 0
             multiMax 0
             attributes {
-                role = "Manufacturer"
+                role = "制造商"
 
             }
         }
         participant Participant_09cjol2 {
-            msp "MiddlemanMSP"
+            msp "中间商MSP"
             x509 ""
             isMulti false
             multiMin 0
             multiMax 0
             attributes {
-                role = "Middleman"
+                role = "中间商"
 
             }
         }
         participant Participant_0sa2v7d {
-            msp "SupplierMSP"
+            msp "供应商MSP"
             x509 ""
             isMulti false
             multiMin 0
             multiMax 0
             attributes {
-                role = "Supplier"
+                role = "供应商"
 
             }
         }
         participant Participant_19j1e3o {
-            msp "Special carrierMSP"
+            msp "特殊承运方MSP"
             x509 ""
             isMulti false
             multiMin 0
             multiMax 0
             attributes {
-                role = "Special carrier"
+                role = "特殊承运方"
 
             }
         }
@@ -62,18 +62,17 @@ contract GeneratedContract {
 
 
     globals {
-        Self_pickup: bool
-        Amount: int
-        Del_order: string
-        Deliver: string
-        Fwd_order: string
-        Order: string
-        Placed_order: string
-        Pre_details: string
-        Report: string
-        Req_details: string
-        Transport_order: string
-        Waybill: string
+        DeliveryConfirmation: bool
+        FinalPriority: string
+        NumberOfUnits: int
+        OrderDetails: string
+        ProductionStart: string
+        RequestId: int
+        SupplierReputation: int
+        SupplyOrderDetails: string
+        SupplyOrderId: string
+        TransportOrderId: string
+        Urgent: bool
 
     }
 
@@ -82,47 +81,55 @@ contract GeneratedContract {
     messages {
         message Message_04wmlqe from Participant_19mgbdn to Participant_0w6qkdf {
             initial state INACTIVE
-            schema "report"
+            schema "productionStart"
         }
-        message Message_0cba4t6 from Participant_0w6qkdf to Participant_0sa2v7d {
+        message Message_0cba4t6 from Participant_09cjol2 to Participant_0sa2v7d {
             initial state INACTIVE
-            schema "fwd_order"
+            schema "supplyOrderId"
         }
         message Message_0d2xte5 from Participant_19j1e3o to Participant_19mgbdn {
             initial state INACTIVE
-            schema "del_order"
+            schema "deliveryConfirmation"
         }
         message Message_0hpha6h from Participant_0sa2v7d to Participant_19j1e3o {
             initial state INACTIVE
-            schema "pre_details"
+            schema "requestId + supplierReputation"
         }
-        message Message_0pm90nx from Participant_0w6qkdf to Participant_19j1e3o {
+        message Message_0pm90nx from Participant_09cjol2 to Participant_19j1e3o {
             initial state INACTIVE
-            schema "transport_order"
-        }
-        message Message_0ps2yzo from Participant_0w6qkdf to Participant_19mgbdn {
-            initial state INACTIVE
-            schema "Self_pickup"
+            schema "transportOrderId"
         }
         message Message_0rwz1km from Participant_19j1e3o to Participant_0sa2v7d {
             initial state INACTIVE
-            schema "req_details"
+            schema "requestId + numberOfUnits + urgent"
         }
         message Message_196q1fj from Participant_19mgbdn to Participant_0w6qkdf {
             initial state INACTIVE
-            schema "deliver"
+            schema "{\"properties\":{},\"required\":[],\"files\":{\"deliveryNote\":{\"type\":\"file\",\"description\":\"A document confirming the delivery of goods\"}},\"file required\":[\"deliveryNote\"]}"
         }
         message Message_1ajdm9l from Participant_19mgbdn to Participant_09cjol2 {
             initial state INACTIVE
-            schema "placed_order"
+            schema "supplyOrderDetails"
+        }
+        message Message_1dmeexg from Participant_19j1e3o to Participant_19mgbdn {
+            initial state INACTIVE
+            schema "{}"
+        }
+        message Message_1dzkcn0 from Participant_19j1e3o to Participant_19mgbdn {
+            initial state INACTIVE
+            schema "{}"
         }
         message Message_1io2g9u from Participant_0sa2v7d to Participant_19j1e3o {
             initial state INACTIVE
-            schema "waybill"
+            schema "{\"properties\":{},\"required\":[],\"files\":{\"waybill\":{\"type\":\"file\",\"description\":\"Digital or physical waybill document，detailing the shipment contents and destination.\"}},\"file required\":[\"waybill\"]}"
+        }
+        message Message_1oxmq1k from Participant_19j1e3o to Participant_19mgbdn {
+            initial state INACTIVE
+            schema "{}"
         }
         message Message_1wswgqu from Participant_0w6qkdf to Participant_19mgbdn {
             initial state INACTIVE
-            schema "order + amount"
+            schema "orderDetails"
         }
 
     }
@@ -130,7 +137,11 @@ contract GeneratedContract {
 
 
     gateways {
-        gateway Gateway_11hmo2k {
+        gateway Gateway_1cr0nma {
+            type exclusive
+            initial state INACTIVE
+        }
+        gateway Gateway_0ep8cuh {
             type exclusive
             initial state INACTIVE
         }
@@ -154,25 +165,23 @@ contract GeneratedContract {
         event Event_13pbqdz {
             initial state INACTIVE
         }
-        event Event_0eoqvir {
-            initial state INACTIVE
-        }
 
     }
 
 
 
     businessrules {
-        businessrule Activity_0fbi09z {
-            dmn "Activity_0fbi09z.dmn"
-            decision "Activity_0fbi09z_DecisionID"
+        businessrule Activity_0rm8bkp {
+            dmn "Activity_0rm8bkp.dmn"
+            decision "Activity_0rm8bkp_DecisionID"
             input mapping {
-                amount -> Amount
-                Self_pickup -> Self_pickup
+                numberOfUnits -> NumberOfUnits
+                urgent -> Urgent
+                supplierReputation -> SupplierReputation
 
             }
             output mapping {
-                deliver -> Deliver
+                finalPriority -> FinalPriority
 
             }
 
@@ -199,22 +208,32 @@ contract GeneratedContract {
         when message Message_0hpha6h completed
         then enable Message_1io2g9u;
         when message Message_1io2g9u completed
-        then enable Message_0d2xte5;
+        then enable Activity_0rm8bkp;
         when message Message_0d2xte5 completed
-        then enable Message_04wmlqe;
+        then enable Gateway_1cr0nma;
         when message Message_04wmlqe completed
-        then enable Message_0ps2yzo;
+        then enable Message_196q1fj;
         when message Message_196q1fj completed
         then enable Event_13pbqdz;
-        when message Message_0ps2yzo completed
-        then enable Activity_0fbi09z;
+        when message Message_1oxmq1k completed
+        then enable Gateway_1cr0nma;
+        when message Message_1dzkcn0 completed
+        then enable Gateway_1cr0nma;
+        when message Message_1dmeexg completed
+        then enable Gateway_1cr0nma;
 
-        when gateway Gateway_11hmo2k completed
+        when gateway Gateway_1cr0nma completed
+        then enable Message_04wmlqe;
+        when gateway Gateway_0ep8cuh completed
         choose {
-            if Deliver == "true"
-            then enable Message_196q1fj;
-            if Deliver == "false"
-            then enable Event_0eoqvir;
+            if FinalPriority == "\"Low\""
+            then enable Message_1oxmq1k;
+            if FinalPriority == "\"High\""
+            then enable Message_1dmeexg;
+            if FinalPriority == "\"Medium\""
+            then enable Message_1dzkcn0;
+            if FinalPriority == "\"VeryLow\""
+            then enable Message_0d2xte5;
 
         }
         when gateway Gateway_0onpe6x completed
@@ -223,8 +242,8 @@ contract GeneratedContract {
         parallel gateway Gateway_1fbifca await Message_0cba4t6, Message_0pm90nx
         then enable Message_0rwz1km;
 
-        when businessrule Activity_0fbi09z done
-        then enable Gateway_11hmo2k;
+        when businessrule Activity_0rm8bkp done
+        then enable Gateway_0ep8cuh;
 
     }
 

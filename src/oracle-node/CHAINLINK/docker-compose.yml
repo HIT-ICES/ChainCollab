@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: chainlink-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: chainlink
+      POSTGRES_PASSWORD: ChainlinkPostgresPass123!
+      POSTGRES_DB: chainlink
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  chainlink:
+    image: smartcontract/chainlink:2.12.0
+    container_name: chainlink-node
+    depends_on:
+      - postgres
+      - anvil
+    restart: unless-stopped
+    ports:
+      - "6688:6688"
+    volumes:
+      - ./chainlink:/chainlink
+    command: >
+      node
+      --config /chainlink/config.toml
+      --secrets /chainlink/secrets.toml
+      start
+      --api /chainlink/.api
+      --password /chainlink/.password
+
+  anvil:
+    image: ghcr.io/foundry-rs/foundry:latest
+    container_name: chainlink-anvil
+    restart: unless-stopped
+    ports:
+      - "8545:8545"
+    entrypoint:
+      - anvil
+    command:
+      - --host
+      - 0.0.0.0
+      - --ws
+      - --chain-id
+      - "31337"
+      - --mnemonic
+      - test test test test test test test test test test test junk
+
+volumes:
+  pgdata:

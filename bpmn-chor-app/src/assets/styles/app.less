@@ -12,6 +12,18 @@
   --accent: #2563eb;
   --accent-weak: rgba(37, 99, 235, 0.08);
   --danger: #f43f5e;
+
+  --modeler-shell-radius: 20px;
+  --modeler-header-padding-block: 18px;
+  --modeler-header-padding-inline: 28px;
+}
+
+@media (max-height: 900px) {
+  :root {
+    --modeler-shell-radius: 16px;
+    --modeler-header-padding-block: 12px;
+    --modeler-header-padding-inline: 20px;
+  }
 }
 
 * {
@@ -33,7 +45,7 @@ body {
   display: flex;
   flex-direction: column;
   background: var(--surface);
-  border-radius: 24px;
+  border-radius: clamp(12px, 3vw, var(--modeler-shell-radius));
   box-shadow: 0 30px 70px rgba(15, 23, 42, 0.15);
   overflow: hidden;
 }
@@ -41,10 +53,12 @@ body {
 .modeler-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 24px 32px 16px;
+  align-items: flex-start;
+  padding: var(--modeler-header-padding-block) var(--modeler-header-padding-inline)
+    calc(var(--modeler-header-padding-block) - 6px);
   border-bottom: 1px solid var(--border-subtle);
   background: linear-gradient(120deg, #fff, #f6f8ff);
+  min-height: clamp(72px, 12vh, 140px);
 }
 
 .modeler-header__info {
@@ -61,13 +75,13 @@ body {
 
   h2 {
     margin: 0;
-    font-size: 21px;
+    font-size: clamp(18px, 2vw, 24px);
     font-weight: 600;
     color: var(--text-strong);
   }
 
   span {
-    font-size: 13px;
+    font-size: clamp(11px, 1.7vw, 13px);
     color: var(--text-muted);
   }
 }
@@ -80,9 +94,9 @@ body {
 
   button,
   a {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
+    width: clamp(38px, 5vw, 44px);
+    height: clamp(38px, 5vw, 44px);
+    border-radius: 10px;
     border: 1px solid var(--border-subtle);
     background: var(--surface);
     color: var(--text-muted);

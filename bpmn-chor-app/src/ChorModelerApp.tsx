@@ -14,9 +14,23 @@ import Reporter from './modeler/lib-provider/validator/Validator.js';
 import MainPage from './modeler/pop-up/MainPage';
 import UploadDmnModal from './modeler/pop-up/UploadDmnModal';
 import TestPaletteProvider from './modeler/lib-provider/external-elements';
+import oracleModdle from './modeler/moddle/oracle.json';
+import customRendererModule from './custom/customerRenderer.js'
+import qaExtension from './custom/qa.json'
+import CustomPalette from './custom/customerPalette.js';
 import type { DmnDefinition, UploadableDmn } from './types/modeler';
 import type { ChorApiClient } from './services/api';
 import { createDefaultChorApiClient } from './services/api';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Typography,
+  Stack,
+  Button as MUIButton
+} from '@mui/material';
 
 export interface ChorModelerProps {
   consortiumId: string;
@@ -57,7 +71,19 @@ const ChorModelerApp: React.FC<ChorModelerProps> = ({
   const isValidatingRef = useRef(false);
 
   const [dmnUploadModalOpen, setDmnUploadModalOpen] = useState(false);
+  const [bpmnUploadDialogOpen, setBpmnUploadDialogOpen] = useState(false);
+  const [bpmnNameInput, setBpmnNameInput] = useState('');
+  const [bpmnUploading, setBpmnUploading] = useState(false);
+  const [bpmnUploadError, setBpmnUploadError] = useState<string | null>(null);
   const [dmnIdXmlMap, setDmnIdXmlMap] = useState<Map<string, DmnDefinition>>(new Map());
+
+  const closeBpmnUploadDialog = useCallback(() => {
+    if (bpmnUploading) {
+      return;
+    }
+    setBpmnUploadDialogOpen(false);
+    setBpmnUploadError(null);
+  }, [bpmnUploading]);
 
   const apiClient = useMemo<ChorApiClient>(() => {
     const baseClient = createDefaultChorApiClient({
@@ -106,6 +132,34 @@ const ChorModelerApp: React.FC<ChorModelerProps> = ({
       })
     ));
   }, [apiClient, consortiumId, orgId]);
+
+  const handleConfirmBpmnUpload = useCallback(async () => {
+    if (!bpmnNameInput.trim() || !modeler.current) {
+      setBpmnUploadError('请输入 BPMN 文件名称');
+      return;
+    }
+    try {
+      setBpmnUploading(true);
+      setBpmnUploadError(null);
+      const result = await modeler.current.saveXML({ format: true });
+      const svgResult = await modeler.current.saveSVG();
+      const participants = await apiClient.getParticipantsByContent(result.xml);
+      const response = await apiClient.addBpmn({
+        consortiumId,
+        orgId,
+        name: `${bpmnNameInput.trim()}.bpmn`,
+        bpmnContent: result.xml,
+        svgContent: svgResult.svg,
+        participants
+      });
+      onBpmnUpload?.(response);
+      setBpmnUploadDialogOpen(false);
+    } catch (error: any) {
+      setBpmnUploadError(error?.message ?? '上传失败，请稍后重试');
+    } finally {
+      setBpmnUploading(false);
+    }
+  }, [apiClient, consortiumId, orgId, bpmnNameInput, onBpmnUpload]);
 
   useEffect(() => {
     const beforeUnload = (e: BeforeUnloadEvent) => {
@@ -164,10 +218,16 @@ const ChorModelerApp: React.FC<ChorModelerProps> = ({
         propertiesPanel: {
           parent: '#properties-panel'
         },
+        moddleExtensions: {
+          qa:qaExtension,
+          oracle: oracleModdle
+        },
         additionalModules: [
           PropertiesPanelModule,
           PropertiesProviderModule,
-          TestPaletteProvider
+          TestPaletteProvider,
+          CustomPalette,
+          customRendererModule
         ],
         keyboard: {
           bindTo: document
@@ -297,27 +357,12 @@ const ChorModelerApp: React.FC<ChorModelerProps> = ({
       }
     };
 
-    const uploadHandler = async () => {
-      const bpmnName = window.prompt('请输入BPMN文件的名字：');
-      if (!bpmnName) {
-        return;
-      }
-      const confirmUpload = window.confirm('是否上传该bpmn文件？');
-      if (!confirmUpload) {
-        return;
-      }
-      const result = await modeler.current.saveXML({ format: true });
-      const svgResult = await modeler.current.saveSVG();
-      const participants = await apiClient.getParticipantsByContent(result.xml);
-      const response = await apiClient.addBpmn({
-        consortiumId,
-        orgId,
-        name: `${bpmnName}.bpmn`,
-        bpmnContent: result.xml,
-        svgContent: svgResult.svg,
-        participants
-      });
-      onBpmnUpload?.(response);
+    const uploadHandler = () => {
+      const suggestedName =
+        (lastFileRef.current?.name ?? diagramName()).replace(/\.(bpmn|xml)$/i, '') || 'diagram';
+      setBpmnNameInput(suggestedName);
+      setBpmnUploadError(null);
+      setBpmnUploadDialogOpen(true);
     };
 
     const uploadDmnHandler = () => {
@@ -416,6 +461,41 @@ const ChorModelerApp: React.FC<ChorModelerProps> = ({
         setOpen={setDmnUploadModalOpen}
         onUpload={handleBulkDmnUpload}
       />
+      <Dialog
+        open={bpmnUploadDialogOpen}
+        onClose={closeBpmnUploadDialog}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle sx={{ fontWeight: 600 }}>Upload BPMN File</DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={2}>
+            <TextField
+              label="BPMN File Name"
+              value={bpmnNameInput}
+              onChange={(event) => setBpmnNameInput(event.target.value)}
+              helperText="请输入文件名，系统会自动添加 .bpmn 后缀"
+              autoFocus
+              fullWidth
+            />
+            {bpmnUploadError && (
+              <Typography variant="body2" color="error">
+                {bpmnUploadError}
+              </Typography>
+            )}
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <MUIButton onClick={closeBpmnUploadDialog} disabled={bpmnUploading}>Cancel</MUIButton>
+          <MUIButton
+            variant="contained"
+            onClick={handleConfirmBpmnUpload}
+            disabled={!bpmnNameInput.trim() || bpmnUploading}
+          >
+            {bpmnUploading ? 'Uploading...' : 'Upload'}
+          </MUIButton>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

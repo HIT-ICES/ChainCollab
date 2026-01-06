@@ -1,4 +1,7 @@
-import icon from '../../../assets/email.svg'
+import emailIcon from '../../../assets/email.svg'
+import dataIcon from '../../../assets/icons/external-data.svg'
+import computeTaskIcon from '../../../assets/icons/compute-task.svg'
+import groupIcon from '../../../assets/icons/group.svg'
 
 export default class TestPaletteProvider{
   // 自定义邮件收发组件
@@ -15,11 +18,42 @@ export default class TestPaletteProvider{
     const create = this.create
 
     function startCreate(event) {
-      const serviceTaskShape = elementFactory.create(
-        'shape', { type: 'bpmn:BusinessRuleTask' },
+      const taskShape = elementFactory.create(
+        'shape',
+        { type: 'bpmn:BusinessRuleTask' }
       )
+      create.start(event, taskShape)
+    }
+    function startExternalData(event) {
+      const taskShape = elementFactory.create(
+        'shape',
+        {
+          type: 'bpmn:ReceiveTask',
+        }
+      )
+      taskShape.businessObject.name = '外部数据元素'
+      create.start(event, taskShape)
+    }
 
-      create.start(event, serviceTaskShape)
+    function startComputeTask(event) {
+      const taskShape = elementFactory.create(
+        'shape',
+        {
+          type: 'bpmn:DataObject',
+        }
+      )
+      taskShape.businessObject.name = '计算任务元素'
+      create.start(event, taskShape)
+    }
+
+    function startCreateGroup(event) {
+      const groupShape = elementFactory.create(
+        'shape',
+        {
+          type: 'bpmn:Group',
+        }
+      )
+      create.start(event, groupShape)
     }
 
     return {
@@ -27,10 +61,37 @@ export default class TestPaletteProvider{
         group: 'activity',
         title: '创建 businessRule元素',
 
-        imageUrl: icon,
+        imageUrl: emailIcon,
         action: {
           dragstart: startCreate,
           click: startCreate,
+        },
+      },
+      'create-external-data-task': {
+        group: 'activity',
+        title: '外部数据元素',
+        imageUrl: dataIcon,
+        action: {
+          dragstart: startExternalData,
+          click: startExternalData,
+        },
+      },
+      'create-compute-task': {
+        group: 'activity',
+        title: '计算任务元素',
+        imageUrl: computeTaskIcon,
+        action: {
+          dragstart: startComputeTask,
+          click: startComputeTask,
+        },
+      },
+      'create-group': {
+        group: 'activity',
+        title: '创建分组',
+        imageUrl: groupIcon,
+        action: {
+          dragstart: startCreateGroup,
+          click: startCreateGroup,
         },
       },
     }
