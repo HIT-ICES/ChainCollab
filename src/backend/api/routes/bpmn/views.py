@@ -26,6 +26,7 @@ from api.models import (
     BPMNInstance,
     ChainCode,
     Environment,
+    EthEnvironment,
     LoleidoOrganization,
     Consortium,
 )
@@ -73,7 +74,7 @@ class BPMNViewsSet(viewsets.ModelViewSet):
             )
 
         except Exception as e:
-            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
     @action(methods=["get"], detail=False, url_path="_list")
     def list_all(self, request, pk=None, *args, **kwargs):
@@ -83,7 +84,7 @@ class BPMNViewsSet(viewsets.ModelViewSet):
             return Response(data=ok(serializer.data), status=status.HTTP_200_OK)
 
         except Exception as e:
-            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, pk=None, *args, **kwargs):
         """
@@ -103,15 +104,37 @@ class BPMNViewsSet(viewsets.ModelViewSet):
                 bpmn.firefly_url = request.data.get("firefly_url")
             if "envId" in request.data:
                 envId = request.data.get("envId")
-                bpmn.environment = Environment.objects.get(pk=envId)
+                envType = request.data.get("envType", "fabric")  # 默认为 fabric
+
+                try:
+                    if envType == "ethereum":
+                        # 查询以太坊环境
+                        eth_env = EthEnvironment.objects.get(pk=envId)
+                        bpmn.eth_environment = eth_env
+                        bpmn.environment = None
+                    else:
+                        # 查询 Fabric 环境
+                        env = Environment.objects.get(pk=envId)
+                        bpmn.environment = env
+                        bpmn.eth_environment = None
+                except (Environment.DoesNotExist, EthEnvironment.DoesNotExist):
+                    return Response(
+                        data=err(f"Environment with id {envId} and type {envType} does not exist"),
+                        status=status.HTTP_404_NOT_FOUND
+                    )
             if "events" in request.data:
                 bpmn.events = request.data.get("events")
 
             bpmn.save()
             serializer = BpmnSerializer(bpmn)
             return Response(data=ok(serializer.data), status=status.HTTP_202_ACCEPTED)
+        except BPMN.DoesNotExist:
+            return Response(
+                data=err(f"BPMN with id {pk} does not exist"),
+                status=status.HTTP_404_NOT_FOUND
+            )
         except Exception as e:
-            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, pk=None, *args, **kwargs):
         """
@@ -133,7 +156,7 @@ class BPMNViewsSet(viewsets.ModelViewSet):
             serializer = BpmnSerializer(bpmns, many=True)
             return Response(ok(serializer.data), status=status.HTTP_200_OK)
         except Exception as e:
-            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
     def _zip_folder(self, folder_path, output_path):
         with ZipFile(output_path, "w") as zipf:
@@ -193,7 +216,7 @@ class BPMNViewsSet(viewsets.ModelViewSet):
             )
 
         except Exception as e:
-            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
 
 class BPMNInstanceViewSet(viewsets.ModelViewSet):
@@ -214,7 +237,7 @@ class BPMNInstanceViewSet(viewsets.ModelViewSet):
             serializer = BpmnInstanceSerializer(bpmn_instance)
             return Response(data=ok(serializer.data), status=status.HTTP_201_CREATED)
         except Exception as e:
-            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, pk=None, *args, **kwargs):
         """
@@ -242,7 +265,7 @@ class BPMNInstanceViewSet(viewsets.ModelViewSet):
             serializer = BpmnInstanceSerializer(bpmn_instances, many=True)
             return Response(ok(serializer.data), status=status.HTTP_200_OK)
         except Exception as e:
-            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
     def _ends_with_time_format(self, input_string):
         pattern = r"^test-\d{4}-\d{2}-\d{2}-\d{2}\.\d{2}\.\d{2}\.bpmn$"
@@ -279,7 +302,7 @@ class DmnViewSet(viewsets.ModelViewSet):
             serializer = DmnSerializer(dmn)
             return Response(data=ok(serializer.data), status=status.HTTP_201_CREATED)
         except Exception as e:
-            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, pk=None, *args, **kwargs):
         """
@@ -301,7 +324,7 @@ class DmnViewSet(viewsets.ModelViewSet):
             serializer = DmnSerializer(dmns, many=True)
             return Response(ok(serializer.data), status=status.HTTP_200_OK)
         except Exception as e:
-            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, pk=None, *args, **kwargs):
         """
@@ -326,4 +349,4 @@ class DmnViewSet(viewsets.ModelViewSet):
             serializer = DmnSerializer(dmn)
             return Response(data=ok(serializer.data), status=status.HTTP_202_ACCEPTED)
         except Exception as e:
-            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)

@@ -1363,6 +1363,12 @@ class BPMN(models.Model):
         null=True,
         on_delete=models.CASCADE,
     )
+    eth_environment = models.ForeignKey(
+        EthEnvironment,
+        help_text="related eth_environment_id",
+        null=True,
+        on_delete=models.CASCADE,
+    )
 
 
 class BPMNInstance(models.Model):

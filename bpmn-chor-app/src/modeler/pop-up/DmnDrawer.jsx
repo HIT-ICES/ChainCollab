@@ -194,7 +194,7 @@ const DmnDrawer = forwardRef(({
         loadDiagram.addEventListener('change', js_file_input_listener);
 
         // create new diagram
-        const newDiagram = document.getElementById('js-new-diagram');
+        const newDiagram = document.getElementById('js-new-diagram-dmn');
         newDiagram.addEventListener('click', js_create_new_diagram_listener);
 
         // download diagram as SVG
@@ -218,7 +218,7 @@ const DmnDrawer = forwardRef(({
                 id='container'
                 ref={containerRef}
                 style={{
-                    width: 1700, height: 'calc(100vh - 400px)',
+                    width: '100%', height: 'calc(100vh - 400px)',
                     background: "white",
                 }}>
             </div>
@@ -235,11 +235,69 @@ const DmnDrawer = forwardRef(({
                     alignItems: "center", // Center items vertically
                     gap: "10px" // Add gap between elements
                 }}>
-                <div className="buttons djs-container">
-                    <button id="js-open-file-dmn" className="icon-folder" title="Select DMN XML file" ></button>
-                    <button id="js-new-diagram-dmn" className="icon-doc-new" title="Create new empty diagram" ></button>
-                    <a id="js-download-diagram-dmn" className="icon-file-code" title="Download DMN XML file" ></a>
-                    <a id="js-download-svg-dmn" className="icon-file-image" title="Download as SVG image" ></a>
+                <div className="buttons djs-container" style={{
+                    display: "flex",
+                    gap: "10px",
+                    alignItems: "center"
+                }}>
+                    <button id="js-open-file-dmn" className="icon-folder" title="Select DMN XML file" style={{
+                        width: "44px",
+                        height: "44px",
+                        borderRadius: "12px",
+                        border: "1px solid #dfe6fb",
+                        background: "#ffffff",
+                        color: "#64748b",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "20px",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease"
+                    }}></button>
+                    <button id="js-new-diagram-dmn" className="icon-doc-new" title="Create new empty diagram" style={{
+                        width: "44px",
+                        height: "44px",
+                        borderRadius: "12px",
+                        border: "1px solid #dfe6fb",
+                        background: "#ffffff",
+                        color: "#64748b",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "20px",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease"
+                    }}></button>
+                    <a id="js-download-diagram-dmn" className="icon-file-code" title="Download DMN XML file" style={{
+                        width: "44px",
+                        height: "44px",
+                        borderRadius: "12px",
+                        border: "1px solid #dfe6fb",
+                        background: "#ffffff",
+                        color: "#64748b",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "20px",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
+                        textDecoration: "none"
+                    }}></a>
+                    <a id="js-download-svg-dmn" className="icon-file-image" title="Download as SVG image" style={{
+                        width: "44px",
+                        height: "44px",
+                        borderRadius: "12px",
+                        border: "1px solid #dfe6fb",
+                        background: "#ffffff",
+                        color: "#64748b",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "20px",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
+                        textDecoration: "none"
+                    }}></a>
                     <input id="file-input-dmn" name="name" type="file" accept=".dmn, .xml" style={{ display: "none" }} />
                 </div>
             </div>

@@ -5,6 +5,7 @@ from api.models import (
     ChainCode,
     Consortium,
     Environment,
+    EthEnvironment,
     LoleidoOrganization,
 )
 from rest_framework import serializers
@@ -54,7 +55,11 @@ class BpmnListSerializer(serializers.ModelSerializer):
     environment_id = serializers.PrimaryKeyRelatedField(
         source="environment", queryset=Environment.objects.all(), allow_null=True
     )
+    eth_environment_id = serializers.PrimaryKeyRelatedField(
+        source="eth_environment", queryset=EthEnvironment.objects.all(), allow_null=True
+    )
     environment_name = serializers.SerializerMethodField()
+    environment_type = serializers.SerializerMethodField()
     organization_name = serializers.SerializerMethodField()
 
     class Meta:
@@ -75,11 +80,24 @@ class BpmnListSerializer(serializers.ModelSerializer):
             "firefly_url",
             "ffiContent",
             "environment_id",
+            "eth_environment_id",
             "environment_name",
+            "environment_type",
         ]
 
     def get_environment_name(self, obj):
-        return obj.environment.name if obj.environment else None
+        if obj.eth_environment:
+            return obj.eth_environment.name
+        elif obj.environment:
+            return obj.environment.name
+        return None
+
+    def get_environment_type(self, obj):
+        if obj.eth_environment:
+            return "ethereum"
+        elif obj.environment:
+            return "fabric"
+        return None
 
     def get_organization_name(self, obj):
         return obj.organization.name
