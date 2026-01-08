@@ -1,7 +1,7 @@
 import * as React from 'react';
 import $ from 'jquery';
 import { Button } from 'antd';
-import DataObjectMoadal from './DataObjectModal'
+import AssetTaskModal from './AssetTaskModal'
 import MessageModal from './MessageModal';
 import DmnModal from './DmnModal'
 import TaskModal from './TaskModal';
@@ -57,7 +57,7 @@ export default function MainPage({ xmlDataMap, onSave }) {
           onSave={onSave}
         />) : null}
       {dataElementType === 'bpmn:Task' && dataElementId ? (
-        <DataObjectMoadal
+        <AssetTaskModal
           dataElementId={dataElementId}
           open={modalOpen && 'bpmn:Task' === dataElementType}
           onClose={() => setModalOpen(false)}
