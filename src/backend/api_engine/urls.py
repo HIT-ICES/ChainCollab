@@ -38,6 +38,7 @@ from api.routes.file.views import FileViewSet
 from api.routes.general.views import RegisterViewSet
 from api.routes.channel.views import ChannelViewSet
 from api.routes.chaincode.views import ChainCodeViewSet
+from api.routes.ethereum.views import EthereumContractViewSet
 from api.routes.ca.views import FabricCAViewSet
 from api.routes.firefly.views import FireflyViewSet
 from api.routes.general.views import (
@@ -127,6 +128,11 @@ router.register(
     "environments/(?P<environment_id>[^/.]+)/chaincodes",
     ChainCodeViewSet,
     basename="chaincode",
+)
+router.register(
+    "eth-environments/(?P<environment_id>[^/.]+)/contracts",
+    EthereumContractViewSet,
+    basename="eth-ethereum-contract",
 )
 router.register(
     "environments/(?P<environment_id>[^/.]+)/fireflys",

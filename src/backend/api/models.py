@@ -823,6 +823,77 @@ class ChainCode(models.Model):
     )
 
 
+class EthereumContract(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        help_text="ID of Ethereum Contract",
+        default=make_uuid,
+        editable=False,
+        unique=True,
+    )
+    name = models.CharField(help_text="name of contract", max_length=128)
+    version = models.CharField(help_text="version of contract", max_length=128)
+    filename = models.CharField(
+        help_text="Filename of the contract file",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+    creator = models.ForeignKey("LoLeidoOrganization", on_delete=models.CASCADE)
+    language = models.CharField(
+        help_text="language of contract", max_length=128, default="solidity"
+    )
+    create_ts = models.DateTimeField(
+        help_text="Create time of contract", auto_now_add=True
+    )
+    environment = models.ForeignKey(
+        "Environment",
+        help_text="Fabric environment of contract",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    eth_environment = models.ForeignKey(
+        "EthEnvironment",
+        help_text="Ethereum environment of contract",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    abi = models.JSONField(
+        help_text="Contract ABI (Application Binary Interface)",
+        null=True,
+        blank=True,
+    )
+    bytecode = models.TextField(
+        help_text="Compiled contract bytecode",
+        null=True,
+        blank=True,
+    )
+    contract_content = models.TextField(
+        help_text="Content of Solidity contract file",
+        null=True,
+        blank=True,
+    )
+    contract_address = models.CharField(
+        help_text="Deployed contract address on blockchain",
+        max_length=42,
+        null=True,
+        blank=True,
+    )
+    deployment_tx_hash = models.CharField(
+        help_text="Transaction hash of contract deployment",
+        max_length=66,
+        null=True,
+        blank=True,
+    )
+    status = models.CharField(
+        help_text="Status of contract: compiled, deployed, failed",
+        max_length=32,
+        default="created",
+    )
+
+
 # new Model
 
 
@@ -1340,6 +1411,12 @@ class BPMN(models.Model):
     chaincode = models.ForeignKey(
         ChainCode,
         help_text="related chaincode_id",
+        null=True,
+        on_delete=models.CASCADE,
+    )
+    ethereum_contract = models.ForeignKey(
+        EthereumContract,
+        help_text="related ethereum_contract_id",
         null=True,
         on_delete=models.CASCADE,
     )

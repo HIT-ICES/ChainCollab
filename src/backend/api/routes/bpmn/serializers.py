@@ -6,6 +6,7 @@ from api.models import (
     Consortium,
     Environment,
     EthEnvironment,
+    EthereumContract,
     LoleidoOrganization,
 )
 from rest_framework import serializers
@@ -29,9 +30,15 @@ class ChaincodeSerializer(serializers.ModelSerializer):
         model = ChainCode
         fields = "__all__"
 
+class EthereumContractSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EthereumContract
+        fields = "__all__"
+
 class BpmnSerializer(serializers.ModelSerializer):
 
     chaincode = ChaincodeSerializer()
+    ethereum_contract = EthereumContractSerializer()
     mark = serializers.SerializerMethodField()
 
     def get_mark(self,obj):
@@ -51,6 +58,9 @@ class BpmnListSerializer(serializers.ModelSerializer):
     )
     chaincode_id = serializers.PrimaryKeyRelatedField(
         source="chaincode", queryset=ChainCode.objects.all(), allow_null=True
+    )
+    ethereum_contract_id = serializers.PrimaryKeyRelatedField(
+        source="ethereum_contract", queryset=EthereumContract.objects.all(), allow_null=True
     )
     environment_id = serializers.PrimaryKeyRelatedField(
         source="environment", queryset=Environment.objects.all(), allow_null=True
@@ -76,6 +86,7 @@ class BpmnListSerializer(serializers.ModelSerializer):
             "bpmnContent",
             "svgContent",
             "chaincode_id",
+            "ethereum_contract_id",
             "chaincode_content",
             "firefly_url",
             "ffiContent",

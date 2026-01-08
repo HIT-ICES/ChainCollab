@@ -226,16 +226,27 @@ export const invokeCreateInstance = async (chaincodeUrl: string, data: any) => {
         return [];
     }
 }
-export const invokeFireflyListeners = async (coreUrl: string, contractName: string, eventName: string, interfaceId: string) => {
+export const invokeFireflyListeners = async (
+    coreUrl: string,
+    contractName: string,
+    eventName: string,
+    interfaceId: string,
+    contractAddress?: string  // 新增可选参数：Ethereum 合约地址
+) => {
     try {
+        // 根据是否提供 contractAddress 决定使用 Fabric 还是 Ethereum location
+        const location = contractAddress
+            ? { address: contractAddress }  // Ethereum: 使用 address
+            : {  // Fabric: 使用 channel + chaincode
+                channel: "default",
+                chaincode: contractName
+            };
+
         const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/contracts/listeners`, {
             "interface": {
                 "id": interfaceId
             },
-            "location": {
-                "channel": "default",
-                "chaincode": contractName
-            },
+            "location": location,
             "event": {
                 "name": eventName
             },
