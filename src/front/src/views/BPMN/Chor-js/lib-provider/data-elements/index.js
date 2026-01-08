@@ -1,7 +1,8 @@
-// index.js
-import DataPaletteProvider from './DataPaletteProvider.js'
+import DataPaletteProvider from './DataPaletteProvider';
+import DataContextPadProvider from './DataContextPadProvider';
 
 export default {
-  __init__: ['dataPalette'],
-  dataPalette: ['type', DataPaletteProvider],
-}
+  __init__: ['dataPaletteProvider', 'dataContextPadProvider'],
+  dataPaletteProvider: ['type', DataPaletteProvider],
+  dataContextPadProvider: ['type', DataContextPadProvider],
+};

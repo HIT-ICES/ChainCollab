@@ -9,7 +9,8 @@ import Reporter from './lib-provider/validator/Validator.js';
 import MainPage from './pop-up/MainPage.js'
 import UploadDmnModal from './pop-up/UploadDmnModal';
 import TestPaletteProvider from './lib-provider/external-elements'
-import DataPaletteProvider from './lib-provider/data-elements'
+import AssetTaskProvider from './lib-provider/assettask-elements'
+import DataElementsModule from './lib-provider/data-elements'
 import { getParticipantsByContent } from '@/api/translator.ts'
 import { addBPMN } from '@/api/externalResource.js'
 import { useAppSelector } from "@/redux/hooks.ts";
@@ -42,7 +43,9 @@ const ChorJs = () => {
 
 
   async function renderModel(newXml) {
+    console.log('[ChorJs] renderModel start');
     await modeler.current.importXML(newXml);
+    console.log('[ChorJs] renderModel importXML done');
     isDirty = false;
   }
   const generatePanelListener = () => {
@@ -91,20 +94,34 @@ const ChorJs = () => {
   };
 
   const js_open_file_listener = (e: MouseEvent): void => {
+    console.log('[ChorJs] open file click');
     document.getElementById('file-input').click();
   };
 
   const js_file_input_listener = (e: Event): void => {
     const loadDiagram = document.getElementById('file-input');
+    console.log('[ChorJs] file input change', loadDiagram?.files?.length);
     const file = loadDiagram.files[0];
     if (file) {
+      console.log('[ChorJs] file selected', file.name, file.size);
       const reader = new FileReader();
       lastFile = file;
       reader.addEventListener('load', async () => {
-        await renderModel(reader.result);
+        console.log('[ChorJs] file reader loaded');
+        try {
+          await renderModel(reader.result);
+          console.log('[ChorJs] renderModel finished');
+        } catch (error) {
+          console.error('[ChorJs] renderModel failed', error);
+        }
         loadDiagram.value = null; // allows reloading the same file
       }, false);
+      reader.addEventListener('error', () => {
+        console.error('[ChorJs] file reader error', reader.error);
+      });
       reader.readAsText(file);
+    } else {
+      console.log('[ChorJs] no file selected');
     }
   };
 
@@ -291,7 +308,8 @@ const ChorJs = () => {
           PropertiesPanelModule,
           PropertiesProviderModule,
           TestPaletteProvider,
-          DataPaletteProvider,
+          AssetTaskProvider,
+          DataElementsModule,
         ],
         keyboard: {
           bindTo: document

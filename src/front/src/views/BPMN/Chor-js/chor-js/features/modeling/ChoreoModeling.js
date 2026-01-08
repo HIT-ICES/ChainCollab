@@ -1,5 +1,6 @@
 import inherits from 'inherits';
 import BpmnModeling from 'bpmn-js/lib/features/modeling/Modeling';
+import { is } from 'bpmn-js/lib/util/ModelUtil';
 import SwapParticipantBandHandler from './cmd/SwapParticipantBandHandler';
 import CreateParticipantBandHandler from './cmd/CreateParticipantBandHandler';
 import ToggleMessageVisibilityHandler from './cmd/ToggleMessageVisibilityHandler';
@@ -129,4 +130,64 @@ ChoreoModeling.prototype.createParticipant = function () {
   const participantContext = {};
   this._commandStack.execute('participant.create', participantContext);
   return participantContext.created;
+};
+
+/**
+ * Override connect method to handle DataAssociation properly for ChoreographyActivity
+ */
+ChoreoModeling.prototype.connect = function(source, target, attrs, hints) {
+  // If connecting DataObject to/from ChoreographyActivity, handle specially
+  const isDataAssociation =
+    (is(source, 'bpmn:DataObjectReference') || is(source, 'bpmn:DataStoreReference')) &&
+    is(target, 'bpmn:ChoreographyActivity') ||
+    (is(target, 'bpmn:DataObjectReference') || is(target, 'bpmn:DataStoreReference')) &&
+    is(source, 'bpmn:ChoreographyActivity');
+
+  if (isDataAssociation) {
+    console.log('[ChoreoModeling.connect] BEFORE connection:');
+    console.log('  Source:', source.type, source.businessObject.$type);
+    console.log('  Target:', target.type, target.businessObject.$type);
+    if (is(source, 'bpmn:ChoreographyActivity')) {
+      console.log('  Source bandShapes:', source.bandShapes?.length);
+      console.log('  Source participantRef:', source.businessObject.participantRef?.length);
+    }
+    if (is(target, 'bpmn:ChoreographyActivity')) {
+      console.log('  Target bandShapes:', target.bandShapes?.length);
+      console.log('  Target participantRef:', target.businessObject.participantRef?.length);
+    }
+
+    // CRITICAL: ChoreographyActivity doesn't natively support DataAssociation
+    // We need to prepare the arrays BEFORE bpmn-js tries to add to them
+    if (is(source, 'bpmn:ChoreographyActivity')) {
+      const sourceBo = source.businessObject;
+      if (!sourceBo.dataOutputAssociations) {
+        sourceBo.dataOutputAssociations = [];
+      }
+    }
+    if (is(target, 'bpmn:ChoreographyActivity')) {
+      const targetBo = target.businessObject;
+      if (!targetBo.dataInputAssociations) {
+        targetBo.dataInputAssociations = [];
+      }
+    }
+  }
+
+  // Call parent connect with prepared arrays
+  const result = BpmnModeling.prototype.connect.call(this, source, target, attrs, hints);
+
+  if (isDataAssociation) {
+    console.log('[ChoreoModeling.connect] AFTER connection:');
+    console.log('  Source:', source.type, source.businessObject.$type);
+    console.log('  Target:', target.type, target.businessObject.$type);
+    if (is(source, 'bpmn:ChoreographyActivity')) {
+      console.log('  Source bandShapes:', source.bandShapes?.length);
+      console.log('  Source participantRef:', source.businessObject.participantRef?.length);
+    }
+    if (is(target, 'bpmn:ChoreographyActivity')) {
+      console.log('  Target bandShapes:', target.bandShapes?.length);
+      console.log('  Target participantRef:', target.businessObject.participantRef?.length);
+    }
+  }
+
+  return result;
 };

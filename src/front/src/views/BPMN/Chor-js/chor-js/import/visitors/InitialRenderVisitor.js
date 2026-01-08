@@ -57,6 +57,9 @@ export default function InitialRenderVisitor(injector, eventBus, canvas, element
 InitialRenderVisitor.$inject = ['injector', 'eventBus', 'canvas', 'elementFactory', 'elementRegistry', 'translate', 'textRenderer', 'moddle'];
 InitialRenderVisitor.prototype.init = function (...parameters) {};
 InitialRenderVisitor.prototype.start = function (choreo, diagram) {
+  this._elementsById = collectElementsById(choreo);
+  this._ensureAssociationSemantics(choreo, diagram);
+  this._ensureAssociationDi(choreo, diagram);
   // load DI from selected diagram
   this._registerDi(diagram.plane);
   if (diagram.plane.planeElement) {
@@ -95,11 +98,32 @@ InitialRenderVisitor.prototype.visit = function (element, parentShape) {
  * Iterate through all DI elements and link their business objects to them.
  */
 InitialRenderVisitor.prototype._registerDi = function (di) {
+  if (!di) {
+    return;
+  }
   let bpmnElement = di.bpmnElement;
+  if (!bpmnElement && di.id && this._moddle && this._moddle.ids) {
+    const inferredId = di.id.endsWith('_di') ? di.id.slice(0, -3) : null;
+    if (inferredId) {
+      const mapped = this._elementsById && this._elementsById[inferredId];
+      if (mapped) {
+        bpmnElement = mapped;
+        di.bpmnElement = bpmnElement;
+      } else if (typeof this._moddle.ids.assigned === 'function') {
+        const assigned = this._moddle.ids.assigned(inferredId);
+        if (assigned && typeof assigned === 'object') {
+          bpmnElement = assigned;
+          di.bpmnElement = bpmnElement;
+        } else if (assigned) {
+          console.warn('DI id maps to non-object assignment:', inferredId, assigned);
+        }
+      }
+    }
+  }
   if (bpmnElement) {
     // do not link DIs for participants because they have more than one
     if (!is(bpmnElement, 'bpmn:Participant')) {
-      if (bpmnElement.di) {
+      if (bpmnElement.di && bpmnElement.di !== di) {
         throw new Error('multiple DI elements defined for ' + elementToString(bpmnElement));
       } else {
         diRefs.bind(bpmnElement, 'di');
@@ -107,9 +131,352 @@ InitialRenderVisitor.prototype._registerDi = function (di) {
       }
     }
   } else {
-    throw new Error('no bpmnElement referenced in ' + elementToString(di));
+    console.warn('skipping DI without bpmnElement:', elementToString(di));
   }
 };
+
+InitialRenderVisitor.prototype._ensureAssociationSemantics = function (choreo, diagram) {
+  const plane = diagram && diagram.plane;
+  if (!plane || !plane.planeElement) {
+    return;
+  }
+
+  const shapes = plane.planeElement
+    .filter(el => el.$type === 'bpmndi:BPMNShape' && el.bpmnElement && el.bounds)
+    .map(el => {
+      if (typeof el.bpmnElement === 'string') {
+        const resolved = this._elementsById && this._elementsById[el.bpmnElement];
+        if (resolved) {
+          el.bpmnElement = resolved;
+        }
+      }
+      return el;
+    });
+  const edges = plane.planeElement.filter(el => el.$type === 'bpmndi:BPMNEdge' && el.id);
+
+  edges.forEach(edge => {
+    if (edge.bpmnElement) {
+      return;
+    }
+
+    const inferredId = edge.id.endsWith('_di') ? edge.id.slice(0, -3) : null;
+    if (!inferredId || !/^Data(Input|Output)Association_/.test(inferredId)) {
+      return;
+    }
+
+    const type = inferredId.startsWith('DataInputAssociation_')
+      ? 'bpmn:DataInputAssociation'
+      : 'bpmn:DataOutputAssociation';
+
+    const endpoints = getEdgeEndpoints(edge, shapes, this._elementsById);
+    if (!endpoints || !endpoints.source || !endpoints.target) {
+      console.warn('cannot resolve endpoints for association edge', edge.id);
+      return;
+    }
+
+    const association = this._moddle.create(type, { id: inferredId });
+    let activity = null;
+    if (type === 'bpmn:DataInputAssociation') {
+      activity = endpoints.target;
+      association.sourceRef = [endpoints.source];
+      association.targetRef = null;
+    } else {
+      activity = endpoints.source;
+      association.sourceRef = [];
+      association.targetRef = endpoints.target;
+    }
+
+    if (!activity || !activity.$type || !activity.$type.startsWith('bpmn:Choreography')) {
+      console.warn('association activity endpoint not resolved', edge.id);
+      return;
+    }
+
+    association.$parent = activity;
+    if (type === 'bpmn:DataInputAssociation') {
+      if (!activity.dataInputAssociations) {
+        activity.dataInputAssociations = [];
+      }
+      activity.dataInputAssociations.push(association);
+    } else {
+      if (!activity.dataOutputAssociations) {
+        activity.dataOutputAssociations = [];
+      }
+      activity.dataOutputAssociations.push(association);
+    }
+    association.di = edge;
+    edge.bpmnElement = association;
+  });
+};
+
+InitialRenderVisitor.prototype._ensureAssociationDi = function (choreo, diagram) {
+  const plane = diagram && diagram.plane;
+  if (!plane) {
+    return;
+  }
+  if (!plane.planeElement) {
+    plane.planeElement = [];
+  }
+
+  const associations = collectAssociations(choreo);
+  const dataObjectRefs = collectDataObjectReferences(choreo);
+  associations.forEach(association => {
+    if (association.di) {
+      return;
+    }
+
+    const inferredId = association.id ? association.id + '_di' : null;
+    if (inferredId) {
+      const existing = plane.planeElement.find(el => el.id === inferredId);
+      if (existing && !existing.bpmnElement) {
+        existing.bpmnElement = association;
+        association.di = existing;
+      }
+      if (existing) {
+        return;
+      }
+    }
+
+    const sourceTarget = getAssociationEndpoints(association, dataObjectRefs);
+    if (!sourceTarget || !sourceTarget.source || !sourceTarget.target) {
+      console.warn('cannot infer endpoints for association', association.id);
+      return;
+    }
+
+    const sourceDi = sourceTarget.source.di;
+    const targetDi = sourceTarget.target.di;
+    if (!sourceDi || !sourceDi.bounds || !targetDi || !targetDi.bounds) {
+      console.warn('missing DI bounds for association', association.id);
+      return;
+    }
+
+    const sourceCenter = getBoundsCenter(sourceDi.bounds);
+    const targetCenter = getBoundsCenter(targetDi.bounds);
+    const edge = this._moddle.create('bpmndi:BPMNEdge', {
+      id: inferredId || this._moddle.ids.nextPrefixed('DataAssociation_', association) + '_di',
+      bpmnElement: association,
+      waypoint: [
+        this._moddle.create('dc:Point', sourceCenter),
+        this._moddle.create('dc:Point', targetCenter)
+      ]
+    });
+    association.di = edge;
+    plane.planeElement.push(edge);
+  });
+};
+
+function collectElementsById(choreo) {
+  const elementsById = {};
+
+  function addElement(element) {
+    if (element && element.id) {
+      elementsById[element.id] = element;
+    }
+  }
+
+  function walkFlowElements(container) {
+    if (!container || !container.flowElements) {
+      return;
+    }
+    container.flowElements.forEach(flowElement => {
+      addElement(flowElement);
+      if (flowElement.dataInputAssociations) {
+        flowElement.dataInputAssociations.forEach(addElement);
+      }
+      if (flowElement.dataOutputAssociations) {
+        flowElement.dataOutputAssociations.forEach(addElement);
+      }
+      if (flowElement.flowElements) {
+        walkFlowElements(flowElement);
+      }
+      if (flowElement.artifacts) {
+        flowElement.artifacts.forEach(addElement);
+      }
+      if (flowElement.messageFlowRef) {
+        flowElement.messageFlowRef.forEach(addElement);
+      }
+    });
+  }
+
+  addElement(choreo);
+  if (choreo.$parent && choreo.$parent.rootElements) {
+    choreo.$parent.rootElements.forEach(addElement);
+  }
+  if (choreo.participants) {
+    choreo.participants.forEach(addElement);
+  }
+  if (choreo.artifacts) {
+    choreo.artifacts.forEach(addElement);
+  }
+  walkFlowElements(choreo);
+
+  return elementsById;
+}
+
+function getEdgeEndpoints(edge, shapes, elementsById) {
+  if (!edge.waypoint || edge.waypoint.length < 2) {
+    return null;
+  }
+  const start = edge.waypoint[0];
+  const end = edge.waypoint[edge.waypoint.length - 1];
+
+  const sourceShape = findNearestShape(start, shapes);
+  const targetShape = findNearestShape(end, shapes);
+
+  const sourceElement = resolveElement(sourceShape && sourceShape.bpmnElement, elementsById);
+  const targetElement = resolveElement(targetShape && targetShape.bpmnElement, elementsById);
+
+  return {
+    source: sourceElement,
+    target: targetElement
+  };
+}
+
+function findNearestShape(point, shapes) {
+  let candidate = shapes.find(shape => isPointInsideBBox(shape.bounds, point));
+  if (candidate) {
+    return candidate;
+  }
+
+  let best = null;
+  let bestDistance = Number.POSITIVE_INFINITY;
+  shapes.forEach(shape => {
+    const distance = distanceToBBox(point, shape.bounds);
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      best = shape;
+    }
+  });
+
+  return bestDistance <= 6 ? best : null;
+}
+
+function distanceToBBox(point, bounds) {
+  const dx = Math.max(bounds.x - point.x, 0, point.x - (bounds.x + bounds.width));
+  const dy = Math.max(bounds.y - point.y, 0, point.y - (bounds.y + bounds.height));
+  return Math.hypot(dx, dy);
+}
+
+function resolveElement(elementOrId, elementsById) {
+  if (!elementOrId) {
+    return null;
+  }
+  if (typeof elementOrId === 'string') {
+    return elementsById && elementsById[elementOrId];
+  }
+  return elementOrId;
+}
+
+function collectAssociations(choreo) {
+  const associations = [];
+
+  function addAssociation(element) {
+    if (!element || !element.$type) {
+      return;
+    }
+    if (
+      element.$type === 'bpmn:DataAssociation' ||
+      element.$type === 'bpmn:DataInputAssociation' ||
+      element.$type === 'bpmn:DataOutputAssociation'
+    ) {
+      associations.push(element);
+    }
+  }
+
+  function walkFlowElements(container) {
+    if (!container || !container.flowElements) {
+      return;
+    }
+    container.flowElements.forEach(flowElement => {
+      addAssociation(flowElement);
+      if (flowElement.dataInputAssociations) {
+        flowElement.dataInputAssociations.forEach(addAssociation);
+      }
+      if (flowElement.dataOutputAssociations) {
+        flowElement.dataOutputAssociations.forEach(addAssociation);
+      }
+      if (flowElement.flowElements) {
+        walkFlowElements(flowElement);
+      }
+    });
+  }
+
+  walkFlowElements(choreo);
+  return associations;
+}
+
+function collectDataObjectReferences(choreo) {
+  const refsByDataObjectId = {};
+
+  function addRef(ref) {
+    if (!ref || !ref.dataObjectRef || !ref.dataObjectRef.id) {
+      return;
+    }
+    if (!refsByDataObjectId[ref.dataObjectRef.id]) {
+      refsByDataObjectId[ref.dataObjectRef.id] = ref;
+    }
+  }
+
+  function walkFlowElements(container) {
+    if (!container || !container.flowElements) {
+      return;
+    }
+    container.flowElements.forEach(flowElement => {
+      if (flowElement.$type === 'bpmn:DataObjectReference') {
+        addRef(flowElement);
+      }
+      if (flowElement.flowElements) {
+        walkFlowElements(flowElement);
+      }
+    });
+  }
+
+  walkFlowElements(choreo);
+  return refsByDataObjectId;
+}
+
+function resolveEndpoint(endpoint, dataObjectRefs) {
+  if (!endpoint) {
+    return null;
+  }
+  if (endpoint.di) {
+    return endpoint;
+  }
+  if (endpoint.$type === 'bpmn:DataObject' && endpoint.id && dataObjectRefs[endpoint.id]) {
+    return dataObjectRefs[endpoint.id];
+  }
+  return endpoint;
+}
+
+function getAssociationEndpoints(association, dataObjectRefs) {
+  if (!association) {
+    return null;
+  }
+
+  let source = null;
+  let target = null;
+
+  if (Array.isArray(association.sourceRef)) {
+    source = association.sourceRef[0];
+  } else if (association.sourceRef) {
+    source = association.sourceRef;
+  }
+
+  if (association.targetRef) {
+    target = association.targetRef;
+  }
+
+  return {
+    source: resolveEndpoint(source, dataObjectRefs),
+    target: resolveEndpoint(target, dataObjectRefs)
+  };
+}
+
+function getBoundsCenter(bounds) {
+  return {
+    x: bounds.x + bounds.width / 2,
+    y: bounds.y + bounds.height / 2
+  };
+}
 
 /**
  * Add bpmn element (semantic) to the canvas onto the specified parent shape.
@@ -139,6 +506,10 @@ InitialRenderVisitor.prototype._add = function (semantic, parentShape) {
       di = parentShape.businessObject.di.$parent.planeElement.find(diBand => diBand.choreographyActivityShape === parentShape.businessObject.di && diBand.bpmnElement === semantic);
     } else {
       di = semantic.di;
+    }
+    if (!di) {
+      console.warn('skipping element without DI', elementToString(semantic));
+      return null;
     }
 
     /*

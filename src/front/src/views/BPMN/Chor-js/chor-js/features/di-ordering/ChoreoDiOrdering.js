@@ -70,17 +70,30 @@ function getChildrenAndParticipantDIs(choreography, planeElements) {
   let orderedDIs = [];
   while (children.length > 0) {
     const nextBusinessObject = children.shift();
+    if (!nextBusinessObject) {
+      continue;
+    }
     const nextDi = planeElements.find(p => p.bpmnElement === nextBusinessObject); // Di might not be set yet for element
-    orderedDIs.push(nextDi);
-    if (is(nextBusinessObject, 'bpmn:ChoreographyActivity')) {
-      const participantDIs = planeElements.filter(di => !!di.choreographyActivityShape).filter(di => di.choreographyActivityShape === nextDi);
-      orderedDIs = orderedDIs.concat(participantDIs);
+    if (nextDi) {
+      orderedDIs.push(nextDi);
+      if (is(nextBusinessObject, 'bpmn:ChoreographyActivity')) {
+        const participantDIs = planeElements
+          .filter(di => !!di.choreographyActivityShape)
+          .filter(di => di.choreographyActivityShape === nextDi);
+        orderedDIs = orderedDIs.concat(participantDIs);
+      }
     }
     if (nextBusinessObject.flowElements) {
       children = children.concat(nextBusinessObject.flowElements);
     }
     if (nextBusinessObject.artifacts) {
       children = children.concat(nextBusinessObject.artifacts);
+    }
+    if (nextBusinessObject.dataInputAssociations) {
+      children = children.concat(nextBusinessObject.dataInputAssociations);
+    }
+    if (nextBusinessObject.dataOutputAssociations) {
+      children = children.concat(nextBusinessObject.dataOutputAssociations);
     }
   }
   return orderedDIs;
