@@ -7,7 +7,7 @@ interface FixedFieldsModalProps {
   onClose: (saved: boolean) => void;
 }
 
-export default function FixedFieldsModal({
+export default function AssetTaskModal({
   dataElementId,
   open: isModalOpen,
   onClose,
