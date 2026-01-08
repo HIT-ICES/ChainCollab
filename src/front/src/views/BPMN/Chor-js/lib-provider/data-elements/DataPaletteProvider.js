@@ -1,38 +1,41 @@
-import icon from '../../../../../assets/token.svg'
+/**
+ * 数据元素调色板提供者
+ * 在左侧调色板添加 DataObjectReference 元素
+ */
+export default class DataPaletteProvider {
+  constructor(palette, create, elementFactory, translate) {
+    this._create = create;
+    this._elementFactory = elementFactory;
+    this._translate = translate;
 
-export default class DataPaletteProvider{
-  // 自定义邮件收发组件
-  constructor(palette, create, elementFactory) {
-
-    this.create = create
-    this.elementFactory = elementFactory
-    palette.registerProvider(this)
+    palette.registerProvider(this);
   }
 
-  // 这个函数就是绘制palette的核心
   getPaletteEntries(element) {
-    const elementFactory = this.elementFactory
-    const create = this.create
+    const {
+      _create: create,
+      _elementFactory: elementFactory,
+      _translate: translate,
+    } = this;
 
-    function startCreate(event) {
-      const serviceTaskShape = elementFactory.create(
-        'shape', { type: 'bpmn:Task' },
-      )
-
-      create.start(event, serviceTaskShape)
+    function createDataObject(event) {
+      const shape = elementFactory.createShape({
+        type: 'bpmn:DataObjectReference'
+      });
+      create.start(event, shape);
     }
 
     return {
-      'create-test-data': {
-        group: 'activity',
-        title: '创建 NFT资产',
-        imageUrl: icon,
+      'create.data-object': {
+        group: 'data-object',
+        className: 'bpmn-icon-data-object',
+        title: translate('Create DataObjectReference'),
         action: {
-          dragstart: startCreate,
-          click: startCreate,
+          dragstart: createDataObject,
+          click: createDataObject,
         },
       },
-    }
+    };
   }
 }
 
@@ -40,4 +43,5 @@ DataPaletteProvider.$inject = [
   'palette',
   'create',
   'elementFactory',
-]
+  'translate',
+];

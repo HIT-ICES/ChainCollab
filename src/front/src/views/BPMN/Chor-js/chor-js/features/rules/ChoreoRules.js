@@ -225,6 +225,31 @@ ChoreoRules.prototype.canCreate = function (shape, target, source, position) {
   return BpmnRules.prototype.canCreate.call(this, shape, target, source, position);
 };
 ChoreoRules.prototype.canConnect = function (source, target, connection) {
+  // FIRST: Check if we should allow DataAssociation connections to/from ChoreographyActivity
+  // This must come BEFORE blocking rules
+  if (is(source, 'bpmn:DataObjectReference') || is(source, 'bpmn:DataStoreReference')) {
+    if (is(target, 'bpmn:ChoreographyActivity')) {
+      return { type: 'bpmn:DataInputAssociation' };
+    }
+  }
+  if (is(target, 'bpmn:DataObjectReference') || is(target, 'bpmn:DataStoreReference')) {
+    if (is(source, 'bpmn:ChoreographyActivity')) {
+      return { type: 'bpmn:DataOutputAssociation' };
+    }
+  }
+
+  // THEN: Prevent other types of connections to/from DataObject
+  if (is(source, 'bpmn:DataObjectReference') || is(source, 'bpmn:DataStoreReference') ||
+      is(target, 'bpmn:DataObjectReference') || is(target, 'bpmn:DataStoreReference')) {
+    // If we reach here, it's not a valid DataAssociation to ChoreographyActivity
+    // Only allow if it's an existing DataAssociation being reconnected
+    if (connection && is(connection, 'bpmn:DataAssociation')) {
+      return true;
+    }
+    // Block all other connections (like SequenceFlow)
+    return false;
+  }
+
   if (!is(connection, 'bpmn:DataAssociation')) {
     if (is(source, 'bpmn:EventBasedGateway') && is(target, 'bpmn:ChoreographyTask')) {
       // event-based gateways can connect to choreography tasks

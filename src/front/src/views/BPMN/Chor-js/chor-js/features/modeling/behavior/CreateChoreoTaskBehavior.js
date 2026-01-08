@@ -60,6 +60,11 @@ export default function CreateChoreoTaskBehavior(injector, bpmnFactory, canvas, 
     const context = event.context;
     const shape = context.shape;
     if (is(shape, 'bpmn:ChoreographyActivity') && shape.type !== 'label') {
+      console.log('[CreateChoreoTaskBehavior] preExecuted shape.create:');
+      console.log('  Shape type:', shape.type);
+      console.log('  BusinessObject type:', shape.businessObject.$type);
+      console.log('  Has name:', shape.businessObject.name);
+
       if (!shape.businessObject.name) {
         shape.businessObject.name = 'New Activity';
       }
@@ -70,6 +75,12 @@ export default function CreateChoreoTaskBehavior(injector, bpmnFactory, canvas, 
     let shape = context.shape;
     const businessObject = shape.businessObject;
     if (is(shape, 'bpmn:ChoreographyActivity') && shape.type !== 'label') {
+      console.log('[CreateChoreoTaskBehavior] postExecuted shape.create START:');
+      console.log('  Shape type:', shape.type);
+      console.log('  BusinessObject type:', businessObject.$type);
+      console.log('  bandShapes exists:', !!shape.bandShapes);
+      console.log('  participantRef length:', businessObject.participantRef?.length);
+
       let participants = [];
       if (context.hints.createElementsBehavior === false) {
         // the shape was copied
@@ -121,6 +132,12 @@ export default function CreateChoreoTaskBehavior(injector, bpmnFactory, canvas, 
           commandStack.execute('message.add', messageContext);
         }
       }
+
+      console.log('[CreateChoreoTaskBehavior] postExecuted shape.create END:');
+      console.log('  Shape type:', shape.type);
+      console.log('  BusinessObject type:', businessObject.$type);
+      console.log('  bandShapes length:', shape.bandShapes?.length);
+      console.log('  participantRef length:', businessObject.participantRef?.length);
     }
   });
 }

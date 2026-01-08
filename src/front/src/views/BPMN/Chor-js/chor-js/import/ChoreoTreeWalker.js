@@ -93,6 +93,19 @@ export default class ChoreoTreeWalker {
     if (is(flowNode, 'bpmn:ChoreographyActivity')) {
       this.handleChoreographyActivity(flowNode, flowNodeShape || parentShape);
     }
+    if (flowNode && (flowNode.dataInputAssociations || flowNode.dataOutputAssociations)) {
+      const associations = []
+        .concat(flowNode.dataInputAssociations || [], flowNode.dataOutputAssociations || []);
+      associations.forEach(association => {
+        if (!association || !association.di) {
+          console.warn('skipping DataAssociation without DI', elementToString(association));
+          return;
+        }
+        this._deferred.push(() => {
+          this.handleSequenceFlow(association, parentShape);
+        });
+      });
+    }
   }
   handleSequenceFlow(sequenceFlow, parentShape) {
     this._visitor.visit(sequenceFlow, parentShape);
@@ -111,10 +124,24 @@ export default class ChoreoTreeWalker {
         self._deferred.push(function () {
           self.handleSequenceFlow(flowElement, parentShape);
         });
+      } else if (is(flowElement, 'bpmn:DataAssociation')) {
+        if (!flowElement.di) {
+          console.warn('skipping DataAssociation without DI', elementToString(flowElement));
+          return;
+        }
+        self._deferred.push(function () {
+          self.handleSequenceFlow(flowElement, parentShape);
+        });
       } else if (is(flowElement, 'bpmn:BoundaryEvent')) {
         self._deferred.unshift(function () {
           self.handleBoundaryEvent(flowElement, parentShape);
         });
+      } else if (
+        is(flowElement, 'bpmn:DataObject') ||
+        is(flowElement, 'bpmn:DataObjectReference') ||
+        is(flowElement, 'bpmn:DataStoreReference')
+      ) {
+        self.handleFlowNode(flowElement, parentShape);
       } else if (is(flowElement, 'bpmn:FlowNode')) {
         self.handleFlowNode(flowElement, parentShape);
       } else {
