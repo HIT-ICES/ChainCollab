@@ -1,5 +1,11 @@
 # 集成指南
 
+## 概述
+
+本指南说明如何将IdentityRegistry合约集成到现有系统：
+1. **主流程**: 在创建EthereumIdentity时同步注册到链上
+2. **扩展功能**: 支持WorkflowContract等其他合约调用
+
 ## 1. 修改Django模型
 
 在 `backend/api/models.py` 中添加字段：
@@ -19,7 +25,7 @@ class EthEnvironment(models.Model):
     )
 ```
 
-## 2. 修改EthereumIdentity创建逻辑
+## 2. 修改EthereumIdentity创建逻辑（核心）
 
 在 `backend/api/routes/ethereum_identity/views.py` 中集成合约调用：
 
@@ -35,7 +41,29 @@ class EthereumIdentityViewSet(viewsets.ViewSet):
             eth_environment_id = serializer.data["eth_environment_id"]
             eth_environment = EthEnvironment.objects.get(id=eth_environment_id)
 
-            # ... 现有的FireFly注册逻辑 ...
+            # 获取resource set和firefly
+            resource_sets = eth_environment.resource_sets.all()
+            if not resource_sets.exists():
+                return Response(
+                    {"error": "No resource sets found for this Ethereum environment"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            resource_set = resource_sets.first()
+            target_firefly = resource_set.firefly.first()
+            if target_firefly is None:
+                return Response(
+                    {"error": "firefly not found"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # 注册到FireFly
+            firefly_identity_id = target_firefly.register_to_firefly(serializer.data["name"])
+            if not firefly_identity_id:
+                return Response(
+                    {"error": "register to firefly failed"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
             # 创建EthereumIdentity实例
             ethereum_identity = EthereumIdentity(
@@ -48,7 +76,7 @@ class EthereumIdentityViewSet(viewsets.ViewSet):
             )
             ethereum_identity.save()
 
-            # 【新增】同步到IdentityRegistry合约
+            # 【核心】同步到IdentityRegistry合约
             if eth_environment.identity_registry_address:
                 try:
                     self._sync_to_contract(
@@ -69,7 +97,7 @@ class EthereumIdentityViewSet(viewsets.ViewSet):
         """同步身份到IdentityRegistry合约"""
 
         # 初始化合约客户端
-        web3_url = f"http://{eth_environment.geth_rpc_endpoint}"  # 需要根据实际情况调整
+        web3_url = f"http://{eth_environment.geth_rpc_endpoint}"
         abi_path = os.path.join(
             os.path.dirname(__file__),
             '../../../geth_identity_contract/build/IdentityRegistry.abi'
@@ -80,6 +108,11 @@ class EthereumIdentityViewSet(viewsets.ViewSet):
             contract_address=eth_environment.identity_registry_address,
             abi_path=abi_path
         )
+
+        # 检查是否已注册
+        if client.is_identity_registered(ethereum_identity.address):
+            print(f"Identity {ethereum_identity.address} already registered")
+            return
 
         # 注册身份到合约
         tx_hash = client.register_identity(
@@ -96,23 +129,27 @@ class EthereumIdentityViewSet(viewsets.ViewSet):
         if receipt['status'] != 1:
             raise Exception(f"Transaction failed: {tx_hash}")
 
+        print(f"Identity registered on-chain: {tx_hash}")
         return tx_hash
 ```
 
-## 3. 在工作流合约中使用身份验证
+## 3. 在工作流合约中使用身份验证（可选）
 
-在 `WorkflowContract` 或其他业务合约中引用IdentityRegistry：
+WorkflowContract可以引用IdentityRegistry进行权限验证：
 
 ```solidity
-import "./IdentityRegistry.sol";
+import "./IIdentityRegistry.sol";
 
 contract WorkflowContract {
     IIdentityRegistry public identityRegistry;
 
-    constructor(address _identityRegistryAddress) {
-        identityRegistry = IIdentityRegistry(_identityRegistryAddress);
+    constructor(address oracleAddress, address identityRegistryAddress) {
+        owner = msg.sender;
+        oracle = IOracle(oracleAddress);
+        identityRegistry = IIdentityRegistry(identityRegistryAddress);
     }
 
+    // 示例1: 消息发送前验证组织身份
     modifier onlyOrgMember(string memory orgName) {
         require(
             identityRegistry.isOrgMember(msg.sender, orgName),
@@ -121,17 +158,85 @@ contract WorkflowContract {
         _;
     }
 
-    function someRestrictedFunction() external onlyOrgMember("OrgA") {
-        // 只有OrgA的成员可以调用
+    function Message_Send(uint256 instanceId, string calldata fireflyTranId)
+        external
+        onlyOrgMember("OrgA")  // 只允许OrgA的成员调用
+    {
+        // 执行消息发送逻辑
     }
-}
 
-interface IIdentityRegistry {
-    function isOrgMember(address identityAddress, string memory orgName) external view returns (bool);
+    // 示例2: 动态验证参与者组织
+    function _checkParticipant(
+        Instance storage inst,
+        ParticipantKey key
+    ) internal view {
+        Participant storage participant = inst.participants[key];
+        require(participant.exists, "participant not set");
+
+        // 验证调用者身份和组织
+        require(
+            msg.sender == participant.account,
+            "participant not allowed"
+        );
+
+        // 可选：验证参与者仍在指定组织中
+        require(
+            identityRegistry.isOrgMember(msg.sender, participant.orgName),
+            "participant no longer in organization"
+        );
+    }
 }
 ```
 
-## 4. 环境初始化流程
+**注意**: WorkflowContract**不需要**调用registerIdentity()，因为身份已经在创建EthereumIdentity时注册了。这里只用于验证。
+
+## 4. 授权其他合约调用（可选）
+
+如果有特殊场景需要让WorkflowContract或其他合约注册身份：
+
+### 4.1 授权合约
+
+```python
+# 在Python中授权
+client = IdentityRegistryClient(...)
+tx_hash = client.authorize_caller(
+    workflow_contract_address,
+    from_address=owner_address
+)
+```
+
+或使用Solidity：
+```solidity
+// 部署后授权
+identityRegistry.authorizeCaller(workflowContractAddress);
+```
+
+### 4.2 合约中调用注册
+
+```solidity
+contract WorkflowContract {
+    IIdentityRegistry public identityRegistry;
+
+    // 特殊场景：在实例创建时补充注册
+    function createInstance(InitParameters calldata params) external {
+        // ... 创建实例逻辑 ...
+
+        // 如果需要，可以补充注册身份
+        if (!identityRegistry.isIdentityRegistered(params.participant_account)) {
+            identityRegistry.registerIdentity(
+                params.participant_account,
+                params.firefly_identity_id,
+                params.org_name,
+                params.custom_key
+            );
+        }
+    }
+}
+```
+
+**推荐**: 大多数情况下不需要这样做，保持在Django层统一管理身份注册即可。
+
+## 5. 环境初始化流程
 
 创建新的EthEnvironment时：
 
