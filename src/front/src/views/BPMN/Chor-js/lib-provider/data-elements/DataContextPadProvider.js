@@ -4,7 +4,7 @@ import { isAny } from 'bpmn-js/lib/features/modeling/util/ModelingUtil';
 
 /**
  * 数据元素上下文菜单提供者
- * 为 DataObject 和 ChoreographyActivity 添加右键菜单（连接、删除功能）
+ * 为 DataObject 和 Task 添加右键菜单（连接、删除功能）
  */
 export default class DataContextPadProvider {
   constructor(contextPad, modeling, connect, rules, translate) {
@@ -72,8 +72,8 @@ export default class DataContextPadProvider {
       }
     }
 
-    // For ChoreographyActivity: add data connection option
-    if (is(element, 'bpmn:ChoreographyActivity')) {
+    // For Task: add data connection option
+    if (is(element, 'bpmn:Task')) {
       function startConnect(event, element) {
         connect.start(event, element);
       }

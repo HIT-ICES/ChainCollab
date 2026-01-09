@@ -225,15 +225,15 @@ ChoreoRules.prototype.canCreate = function (shape, target, source, position) {
   return BpmnRules.prototype.canCreate.call(this, shape, target, source, position);
 };
 ChoreoRules.prototype.canConnect = function (source, target, connection) {
-  // FIRST: Check if we should allow DataAssociation connections to/from ChoreographyActivity
+  // FIRST: Check if we should allow DataAssociation connections to/from Task
   // This must come BEFORE blocking rules
   if (is(source, 'bpmn:DataObjectReference') || is(source, 'bpmn:DataStoreReference')) {
-    if (is(target, 'bpmn:ChoreographyActivity')) {
+    if (is(target, 'bpmn:Task')) {
       return { type: 'bpmn:DataInputAssociation' };
     }
   }
   if (is(target, 'bpmn:DataObjectReference') || is(target, 'bpmn:DataStoreReference')) {
-    if (is(source, 'bpmn:ChoreographyActivity')) {
+    if (is(source, 'bpmn:Task')) {
       return { type: 'bpmn:DataOutputAssociation' };
     }
   }
@@ -241,7 +241,7 @@ ChoreoRules.prototype.canConnect = function (source, target, connection) {
   // THEN: Prevent other types of connections to/from DataObject
   if (is(source, 'bpmn:DataObjectReference') || is(source, 'bpmn:DataStoreReference') ||
       is(target, 'bpmn:DataObjectReference') || is(target, 'bpmn:DataStoreReference')) {
-    // If we reach here, it's not a valid DataAssociation to ChoreographyActivity
+    // If we reach here, it's not a valid DataAssociation to Task
     // Only allow if it's an existing DataAssociation being reconnected
     if (connection && is(connection, 'bpmn:DataAssociation')) {
       return true;
@@ -267,7 +267,7 @@ ChoreoRules.prototype.canConnect = function (source, target, connection) {
   return BpmnRules.prototype.canConnect.call(this, source, target, connection);
 };
 ChoreoRules.prototype.canResize = function (shape, newBounds) {
-  if (is(shape, 'bpmn:ChoreographyActivity')) {
+  if (is(shape, 'bpmn:Task')) {
     // choreography activities can be resized
     return true;
   } else if (shape.type === 'bpmn:Participant') {
@@ -277,7 +277,7 @@ ChoreoRules.prototype.canResize = function (shape, newBounds) {
   return BpmnRules.prototype.canResize.call(this, shape, newBounds);
 };
 ChoreoRules.prototype.canConnectSequenceFlow = function (source, target) {
-  if (is(source, 'bpmn:EventBasedGateway') && is(target, 'bpmn:ChoreographyActivity')) {
+  if (is(source, 'bpmn:EventBasedGateway') && is(target, 'bpmn:Task')) {
     return true;
   }
   return BpmnRules.prototype.canConnectSequenceFlow.call(this, source, target);

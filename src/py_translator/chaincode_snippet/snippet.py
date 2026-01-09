@@ -76,10 +76,11 @@ def CreateInstance_code(
         return content["InitBusinessRuleFrame"].format(business_rule=business_rule)
 
     def InitTokenElement(tokenelementID :str , documentation:str) -> str:
+        # documentation 现在已经是合并后的 JSON 字符串
         data = json.loads(documentation)
         documentation = json.dumps(data, separators=(',', ':'))
         return content["InitTokenElementFrame"].format(TokenelementId=tokenelementID,format=documentation)
-     
+
     return content["CreateInstanceFuncFrame"].format(
         create_elements_code="\n".join(
             [
@@ -104,7 +105,7 @@ def CreateInstance_code(
             ]
             + [InitGateway(gateway) for gateway in gateways]
             + [InitBusinessRule(business_rule) for business_rule in business_rules]
-            + [InitTokenElement(tokenelement.id,tokenelement.documentation)for tokenelement in tokenelements]
+            + [InitTokenElement(tokenelement["id"], tokenelement["documentation"]) for tokenelement in tokenelements]
         ),
         event_content="\n".join(
             [
