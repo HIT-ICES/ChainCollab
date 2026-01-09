@@ -19,6 +19,7 @@ from choreography_parser.elements import (
 from choreography_parser.parser import Choreography
 from chaincode_snippet import snippet
 import json
+import xml.etree.ElementTree as ET
 
 
 def type_change_from_bpmn_to_go(type: str) -> str:
@@ -58,11 +59,15 @@ class GoChaincodeTranslator:
         self._global_variabels: Optional[dict] = None
         self._judge_parameters: Optional[dict] = None
         self._hook_codes: Optional[dict] = None
+        self._bpmn_xml_root: Optional[ET.Element] = None
         choreography: Choreography = Choreography()
         if bpmnContent:
             choreography.load_diagram_from_string(bpmnContent)
+            self._bpmn_xml_root = ET.fromstring(bpmnContent)
         elif bpmn_file:
             choreography.load_diagram_from_xml_file(bpmn_file)
+            tree = ET.parse(bpmn_file)
+            self._bpmn_xml_root = tree.getroot()
         else:
             pass
         # add choreography to self
@@ -289,6 +294,122 @@ class GoChaincodeTranslator:
             instance_initparameters["BusinessRuleTask"][business_rule.id] = {}
         return instance_initparameters
 
+    def _get_linked_dataobject_for_task(self, task_id: str) -> Optional[dict]:
+        """
+        从 BPMN XML 中查找与 Task 连接的 DataObjectReference，
+        并返回其 documentation 中的资产信息
+        """
+        if not self._bpmn_xml_root:
+            return None
+
+        # 定义 BPMN 命名空间
+        namespaces = {
+            'bpmn': 'http://www.omg.org/spec/BPMN/20100524/MODEL',
+            'bpmndi': 'http://www.omg.org/spec/BPMN/20100524/DI'
+        }
+
+        # 查找 Task 元素
+        task_elem = self._bpmn_xml_root.find(f".//bpmn:task[@id='{task_id}']", namespaces)
+        if not task_elem:
+            return None
+
+        # 查找与 Task 关联的 DataInputAssociation 或 DataOutputAssociation
+        data_associations = (
+            task_elem.findall(".//bpmn:dataInputAssociation", namespaces) +
+            task_elem.findall(".//bpmn:dataOutputAssociation", namespaces)
+        )
+
+        for assoc in data_associations:
+            # 获取 sourceRef 或 targetRef
+            source_ref = assoc.find("bpmn:sourceRef", namespaces)
+            target_ref = assoc.find("bpmn:targetRef", namespaces)
+
+            dataobject_id = None
+            if source_ref is not None:
+                dataobject_id = source_ref.text
+            elif target_ref is not None:
+                dataobject_id = target_ref.text
+
+            if not dataobject_id:
+                continue
+
+            # 查找 DataObjectReference
+            dataobj_elem = self._bpmn_xml_root.find(
+                f".//bpmn:dataObjectReference[@id='{dataobject_id}']",
+                namespaces
+            )
+
+            if dataobj_elem is None:
+                continue
+
+            # 提取 documentation
+            doc_elem = dataobj_elem.find("bpmn:documentation", namespaces)
+            if doc_elem is not None and doc_elem.text:
+                try:
+                    doc_data = json.loads(doc_elem.text)
+                    return doc_data
+                except json.JSONDecodeError:
+                    continue
+
+        return None
+
+    def _merge_task_with_dataobject(self, task: Task) -> dict:
+        """
+        合并 Task 的 documentation 和关联的 DataObject 的 documentation
+        返回合并后的完整字段，只包含实际存在的非空字段
+        """
+        # 获取 Task 自己的字段
+        task_doc = {}
+        if task.documentation and task.documentation != "{}":
+            try:
+                task_doc = json.loads(task.documentation)
+            except json.JSONDecodeError:
+                pass
+
+        # 获取关联的 DataObject 的字段
+        dataobject_doc = self._get_linked_dataobject_for_task(task.id)
+
+        # 合并字段：DataObject 的资产信息 + Task 的操作信息
+        merged_doc = {}
+
+        # 如果有 DataObject，使用其资产信息
+        if dataobject_doc:
+            # 只添加非空的资产字段
+            if 'assetType' in dataobject_doc and dataobject_doc['assetType']:
+                merged_doc['assetType'] = dataobject_doc['assetType']
+            if 'tokenType' in dataobject_doc and dataobject_doc['tokenType']:
+                merged_doc['tokenType'] = dataobject_doc['tokenType']
+            if 'tokenName' in dataobject_doc and dataobject_doc['tokenName']:
+                merged_doc['tokenName'] = dataobject_doc['tokenName']
+            if 'tokenId' in dataobject_doc and dataobject_doc['tokenId']:
+                merged_doc['tokenId'] = dataobject_doc['tokenId']
+        else:
+            # 向后兼容：如果没有 DataObject，使用 Task 自己的资产信息
+            if 'assetType' in task_doc and task_doc['assetType']:
+                merged_doc['assetType'] = task_doc['assetType']
+            if 'tokenType' in task_doc and task_doc['tokenType']:
+                merged_doc['tokenType'] = task_doc['tokenType']
+            if 'tokenName' in task_doc and task_doc['tokenName']:
+                merged_doc['tokenName'] = task_doc['tokenName']
+            if 'tokenId' in task_doc and task_doc['tokenId']:
+                merged_doc['tokenId'] = task_doc['tokenId']
+
+        # 添加 Task 的操作信息，只添加非空字段
+        if 'operation' in task_doc and task_doc['operation']:
+            merged_doc['operation'] = task_doc['operation']
+        if 'caller' in task_doc and task_doc['caller']:
+            merged_doc['caller'] = task_doc['caller']
+        if 'callee' in task_doc and task_doc['callee']:
+            merged_doc['callee'] = task_doc['callee']
+        if 'tokenNumber' in task_doc and task_doc['tokenNumber']:
+            merged_doc['tokenNumber'] = task_doc['tokenNumber']
+        if 'refTokenIds' in task_doc and task_doc['refTokenIds']:
+            merged_doc['refTokenIds'] = task_doc['refTokenIds']
+        if 'outputs' in task_doc and task_doc['outputs']:
+            merged_doc['outputs'] = task_doc['outputs']
+
+        return merged_doc
+
     def _generate_instance_initparameters_code(self) -> str:
         instance_initparameters = self._instance_initparameters
         temp_list = []
@@ -335,8 +456,17 @@ class GoChaincodeTranslator:
             for participant in participants_exist
         ]
         business_rules = [business_rule for business_rule in self._instance_initparameters["BusinessRuleTask"]]
-    
-        tokenelements : List[Task] = choreography.query_element_with_type(NodeType.TASK)
+
+        # 为每个 Task 合并 DataObject 字段
+        tasks: List[Task] = choreography.query_element_with_type(NodeType.TASK)
+        tokenelements = [
+            {
+                "id": task.id,
+                "documentation": json.dumps(self._merge_task_with_dataobject(task))
+            }
+            for task in tasks
+        ]
+
         temp_list.append(
             snippet.CreateInstance_code(
                 start_event=start_event.id,
@@ -761,12 +891,10 @@ class GoChaincodeTranslator:
         temp_list =[]
         pre_activate_next_hook =self._hook_codes[task.id]["pre_activate_next"]
         when_triggered_code = self._hook_codes[task.id]["when_triggered"]
-        try:
-            doc_data = json.loads(task.documentation)
-        except json.JSONDecodeError:
-            # 如果 documentation 不是有效的 JSON，在这里处理错误
-            print(f"warning:the documentation of {task.id} is wrong")
-            return temp_list
+
+        # 使用合并后的字段（Task + DataObject）
+        doc_data = self._merge_task_with_dataobject(task)
+
         token_type = doc_data.get("tokenType")
         token_operation=doc_data.get("operation")
         token_assetType=doc_data.get("assetType")
@@ -794,18 +922,15 @@ class GoChaincodeTranslator:
                     )
                 )
             elif token_operation =="query":
-                doc = {}
-                if task.documentation and task.documentation != "{}":
-                    doc = json.loads(task.documentation)
-                outputs = doc.get("outputs", {})
+                outputs = doc_data.get("outputs", {})
                 filed = self._generate_query_output_filed(outputs,"string")
                 temp_list.append(
                     snippet.NFTQuery_code(
                         activityId=task.id,
                         after_all_hook=after_all_hook,
-                        filed = filed 
+                        filed = filed
                     )
-                ) 
+                )
         elif token_type=="FT":
             if token_operation=="mint":
                 temp_list.append(
@@ -825,22 +950,19 @@ class GoChaincodeTranslator:
                 temp_list.append(
                     snippet.FTBurn_code(
                         activityId=task.id,
-                        after_all_hook=after_all_hook 
+                        after_all_hook=after_all_hook
                     )
                 )
             elif token_operation =="query":
-                doc = {}
-                if task.documentation and task.documentation != "{}":
-                    doc = json.loads(task.documentation)
-                outputs = doc.get("outputs", {})
+                outputs = doc_data.get("outputs", {})
                 filed = self._generate_query_output_filed(outputs,"number")
                 temp_list.append(
                     snippet.FTQuery_code(
                         activityId=task.id,
                         after_all_hook=after_all_hook,
-                        filed = filed 
+                        filed = filed
                     )
-                )  
+                )
         elif token_assetType=="distributive":
             if token_operation=="mint":
                 temp_list.append(
@@ -878,10 +1000,7 @@ class GoChaincodeTranslator:
                     )
                 )
             elif token_operation=="query":
-                doc = {}
-                if task.documentation and task.documentation != "{}":
-                    doc = json.loads(task.documentation)
-                outputs = doc.get("outputs", {})
+                outputs = doc_data.get("outputs", {})
                 filed1 = self._generate_query_output_filed(outputs,"string")
                 filed2 = self._generate_query_output_filed(outputs,"boolean")
                 temp_list.append(
@@ -897,27 +1016,24 @@ class GoChaincodeTranslator:
                 temp_list.append(
                     snippet.AddValueMint_code(
                       activityId=task.id,
-                        after_all_hook=after_all_hook   
+                        after_all_hook=after_all_hook
                     )
                 )
             elif token_operation=="merge":
                 temp_list.append(
                     snippet.AddValueMint_code(
                       activityId=task.id,
-                        after_all_hook=after_all_hook   
+                        after_all_hook=after_all_hook
                     )
                 )
             elif token_operation=="query":
-                doc = {}
-                if task.documentation and task.documentation != "{}":
-                    doc = json.loads(task.documentation)
-                outputs = doc.get("outputs", {})
+                outputs = doc_data.get("outputs", {})
                 filed = self._generate_query_output_filed(outputs,"string")
                 temp_list.append(
                     snippet.AddValueQuery_code(
                         activityId=task.id,
                         after_all_hook=after_all_hook,
-                        filed = filed 
+                        filed = filed
                     )
                 )
         return temp_list
@@ -948,17 +1064,13 @@ class GoChaincodeTranslator:
         fields = ""
         output_fields = {}
         for task in self._choreography.query_element_with_type(NodeType.TASK):
-            if not task.documentation or task.documentation == "{}":
-                continue
-            try:
-                doc = json.loads(task.documentation)
-            except json.JSONDecodeError:
-                continue
-            
-            outputs = doc.get("outputs", {})
+            # 使用合并后的字段
+            merged_doc = self._merge_task_with_dataobject(task)
+
+            outputs = merged_doc.get("outputs", {})
             if not isinstance(outputs, dict):
                 continue
-            
+
             for name, info in outputs.items():
                 data_type = info.get("dataType")
                 if not data_type:
@@ -1204,16 +1316,15 @@ class GoChaincodeTranslator:
             ),
         ]
     def _generate_ffi_items_for_tokenTask(self,task:NodeType.TASK) ->list:
-        try:
-            doc_data = json.loads(task.documentation)
-        except:
-            doc_data = {}
+        # 使用合并后的字段
+        doc_data = self._merge_task_with_dataobject(task)
+
         token_operation = doc_data.get("operation")
-        token_Type =doc_data.get("tokenType")
+        token_Type = doc_data.get("tokenType")
         token_assetType = doc_data.get("assetType")
         first_name= task.id
         continue_method = task.id + "_Continue"
-        
+
         items = [
              self._generate_ffi_item(
                 name=first_name,
@@ -1466,7 +1577,7 @@ class GoChaincodeTranslator:
         return {
             task.id:{
                 "name":task.name,
-                "documentation":task.documentation,
+                "documentation": json.dumps(self._merge_task_with_dataobject(task)),
             }
             for task in self._choreography.query_element_with_type(NodeType.TASK)
         }

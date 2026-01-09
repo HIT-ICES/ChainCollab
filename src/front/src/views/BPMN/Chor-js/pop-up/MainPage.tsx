@@ -2,6 +2,7 @@ import * as React from 'react';
 import $ from 'jquery';
 import { Button } from 'antd';
 import AssetTaskModal from './AssetTaskModal'
+import AssetModal from './AssetModal'
 import MessageModal from './MessageModal';
 import DmnModal from './DmnModal'
 import TaskModal from './TaskModal';
@@ -27,7 +28,7 @@ export default function MainPage({ xmlDataMap, onSave }) {
       // const type = ids[0];
       setDataElementId(data_element_id);
       setDataElementType(type);
-      if (type === 'bpmn:BusinessRuleTask' || type === 'bpmn:Message' || type === 'bpmn:Task') {
+      if (type === 'bpmn:BusinessRuleTask' || type === 'bpmn:Message' || type === 'bpmn:Task' || type === 'bpmn:DataObjectReference') {
         setModalOpen(true);
       }
     }
@@ -60,6 +61,13 @@ export default function MainPage({ xmlDataMap, onSave }) {
         <AssetTaskModal
           dataElementId={dataElementId}
           open={modalOpen && 'bpmn:Task' === dataElementType}
+          onClose={() => setModalOpen(false)}
+        />
+      ) : null}
+      {dataElementType === 'bpmn:DataObjectReference' && dataElementId ? (
+        <AssetModal
+          dataElementId={dataElementId}
+          open={modalOpen && 'bpmn:DataObjectReference' === dataElementType}
           onClose={() => setModalOpen(false)}
         />
       ) : null}
