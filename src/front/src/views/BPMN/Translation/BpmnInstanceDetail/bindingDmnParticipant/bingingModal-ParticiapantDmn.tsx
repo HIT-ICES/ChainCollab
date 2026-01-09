@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Modal, Button, Alert } from "antd";
+import { Modal, Button, Alert, message } from "antd";
 import { BindingDmnModal } from "./bindingDmnModal";
 import { BindingParticipant } from "./bindingParticipantsModal";
 import { useBpmnSvg } from "./hooks";
@@ -10,6 +10,7 @@ import { useFireflyData, useParticipantsData } from "../hooks";
 import { getFireflyVerify, invokeCreateInstance } from "@/api/executionAPI";
 import { bindTokensToERCs, ERCAddMintAuthority, getMaxInstanceChaincodeId, retrieveBPMN } from "@/api/externalResource";
 import { BindingTaskERC } from "./bindingERCModal";
+import { validateInstance, formatValidationErrors } from "./validator/InstanceValidator";
 
 const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 	const [showBindingParticipantMap, setShowBindingParticipantMap] = useState(
@@ -24,6 +25,9 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 	const [participants, syncParticipants] = useParticipantsData(bpmnId);
 	const consortiumId = useAppSelector(state => state.consortium.currentConsortiumId);
 	const [showTaskERCMap, setShowTaskERCMap] = useState<Record<string, any>>({});
+	const [isValidating, setIsValidating] = useState(false);
+	const [validationErrors, setValidationErrors] = useState<any[]>([]);
+	const [showValidationResult, setShowValidationResult] = useState(false);
 	useEffect(() => {
 		console.log("父组件收到的 showTaskERCMap:", showTaskERCMap);
 	}, [showTaskERCMap]);
@@ -170,7 +174,7 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 				newObj[`${key}_Content`] = value[`${key}_Content`];
 				createInstanceParam.push({ ...newObj });
 			}
-
+			
 			return createInstanceParam;
 		}
 
@@ -202,6 +206,62 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 			return Array.from(new Set(msps));
 		}
 
+	};
+
+	// Validation handler
+	const handleValidation = async () => {
+		console.log('[Validation] Button clicked, starting validation...');
+		setIsValidating(true);
+		setValidationErrors([]);
+		setShowValidationResult(false);
+
+		try {
+			console.log('[Validation] Retrieving BPMN with ID:', bpmnId);
+			// Get BPMN XML content
+			const bpmn = await retrieveBPMN(bpmnId);
+			console.log('[Validation] BPMN retrieved:', bpmn);
+			console.log('[Validation] BPMN keys:', Object.keys(bpmn || {}));
+
+			// Try different possible field names for the BPMN content
+			const bpmnXml = bpmn.content || bpmn.bpmnContent || bpmn.xml || bpmn.xmlContent || bpmn.bpmn_content;
+			console.log('[Validation] BPMN XML extracted:', bpmnXml ? `${bpmnXml.substring(0, 100)}...` : 'NULL');
+
+			if (!bpmnXml) {
+				throw new Error('BPMN content is empty. Available fields: ' + Object.keys(bpmn || {}).join(', '));
+			}
+
+			console.log('[Validation] Participant bindings:', showBindingParticipantValueMap);
+			console.log('[Validation] Task ERC map:', showTaskERCMap);
+
+			// Run validation
+			console.log('[Validation] Running validateInstance...');
+			const result = await validateInstance(
+				bpmnXml,
+				showBindingParticipantValueMap,
+				showTaskERCMap
+			);
+
+			console.log('[Validation] Validation result:', result);
+			setValidationErrors(result.errors);
+			setShowValidationResult(true);
+
+			// Show validation result message
+			if (result.isValid) {
+				message.success('验证通过！所有代币操作和参与者绑定都是有效的。');
+			} else {
+				const errorCount = result.errors.filter(e => e.severity === 'error').length;
+				const warningCount = result.errors.filter(e => e.severity === 'warning').length;
+				message.warning(`验证完成：发现 ${errorCount} 个错误和 ${warningCount} 个警告。请查看下方详情。`);
+			}
+		} catch (error) {
+			console.error('[Validation] Error occurred:', error);
+			console.error('[Validation] Error stack:', error.stack);
+			message.error(`验证失败: ${error.message || '未知错误'}`);
+			setShowValidationResult(false);
+		} finally {
+			console.log('[Validation] Validation finished, resetting loading state');
+			setIsValidating(false);
+		}
 	};
 
 	const handleOK = async () => {
@@ -259,18 +319,91 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 					</div>
 				</div>
 
-				<Button
-					type="primary"
-					onClick={async () => {
-						const { param, url, contract_name } = await CreateInstance(true);
-						navigator.clipboard.writeText(
-							`param=${JSON.stringify(param, null, 2).replaceAll("false", "False")}\n    url="${url}"\n    contract_name="${contract_name}"`,
-						);
-						alert("The parameter has been copied to the clipboard");
-					}}
-				>
-					Get CreateInstance Param
-				</Button>
+				<div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+					<Button
+						type="default"
+						onClick={handleValidation}
+						loading={isValidating}
+						icon={<span style={{ marginRight: '4px' }}>🔍</span>}
+					>
+						Validate Instance
+					</Button>
+
+					<Button
+						type="primary"
+						onClick={async () => {
+							const { param, url, contract_name } = await CreateInstance(true);
+							navigator.clipboard.writeText(
+								`param=${JSON.stringify(param, null, 2).replaceAll("false", "False")}\n    url="${url}"\n    contract_name="${contract_name}"`,
+							);
+							alert("The parameter has been copied to the clipboard");
+						}}
+					>
+						Get CreateInstance Param
+					</Button>
+				</div>
+
+				{/* Validation Errors Display */}
+				{showValidationResult && validationErrors.length > 0 && (
+					<div style={{ marginBottom: '20px', maxHeight: '300px', overflowY: 'auto' }}>
+						<Alert
+							message={`验证结果: ${validationErrors.filter(e => e.severity === 'error').length} 个错误, ${validationErrors.filter(e => e.severity === 'warning').length} 个警告`}
+							description={
+								<div>
+									{validationErrors.map((error, index) => (
+										<div
+											key={index}
+											style={{
+												padding: '8px',
+												marginBottom: '8px',
+												borderLeft: `4px solid ${error.severity === 'error' ? '#ff4d4f' : '#faad14'}`,
+												backgroundColor: error.severity === 'error' ? '#fff2f0' : '#fffbe6'
+											}}
+										>
+											<div style={{ fontWeight: 'bold' }}>
+												{error.severity === 'error' ? '❌' : '⚠️'} {error.taskName}
+											</div>
+											<div style={{ marginTop: '4px', fontSize: '13px' }}>
+												{error.message}
+											</div>
+										</div>
+									))}
+								</div>
+							}
+							type={validationErrors.some(e => e.severity === 'error') ? 'error' : 'warning'}
+							closable
+							onClose={() => {
+								setValidationErrors([]);
+								setShowValidationResult(false);
+							}}
+						/>
+					</div>
+				)}
+
+				{/* Validation Success Display */}
+				{showValidationResult && validationErrors.length === 0 && (
+					<div style={{ marginBottom: '20px' }}>
+						<Alert
+							message="✅ 验证通过！"
+							description={
+								<div>
+									<div style={{ marginBottom: '8px' }}>
+										所有代币操作和参与者绑定都是有效的。
+									</div>
+									<div style={{ fontSize: '12px', color: '#52c41a' }}>
+										<div>✓ 所有参与者已正确绑定</div>
+										<div>✓ 代币所有权合法</div>
+										<div>✓ 操作权限验证通过</div>
+									</div>
+								</div>
+							}
+							type="success"
+							showIcon
+							closable
+							onClose={() => setShowValidationResult(false)}
+						/>
+					</div>
+				)}
 
 				<div style={{ textAlign: "center", height: "400px", marginTop: "-250px", marginBottom: "400px" }}>
 					<SVGDisplayComponent bpmnId={bpmnId} />
