@@ -3,7 +3,7 @@ import { Modal, Button, Alert } from "antd";
 import { BindingDmnModal } from "./bindingDmnModal";
 import { BindingParticipant } from "./bindingParticipantsModal";
 import { useBpmnSvg } from "./hooks";
-import { getMembership, retrieveFabricIdentity } from "@/api/platformAPI";
+import { getMembership, retrieveFabricIdentity, retrieveEthereumIdentity } from "@/api/platformAPI";
 import { getFireflyList, getResourceSets } from "@/api/resourceAPI";
 import { useAppSelector } from "@/redux/hooks";
 import { useFireflyData, useParticipantsData } from "../hooks";
@@ -93,30 +93,62 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 							`Participant ${participants.find(key)} user is null`,
 						);
 					}
-					const fabricIdentity = await retrieveFabricIdentity(
-						value.selectedUser,
-					);
-					const fireflyData = await getFireflyList(
-						currentEnvId,
-						null,
-						fabricIdentity.membership,
-					);
-					const fireflyCoreUrl = fireflyData[0].coreURL;
-					const verify = await getFireflyVerify(
-						fireflyCoreUrl,
-						fabricIdentity.firefly_identity_id,
-					);
-					const x509 = verify[0].value.split("::").slice(1).join("::");
-					createInstanceParam.push({
-						[key]: {
-							msp: msp,
-							attributes: {},
-							isMulti: false,
-							multiMaximum: 0,
-							multiMinimum: 0,
-							x509: `${btoa(x509)}@${msp}`,
-						},
-					});
+
+					// Check if we're in Ethereum environment
+					const currentEnvType = useAppSelector((state) => state.env.currentEnvType);
+					if (currentEnvType === "Ethereum") {
+						// Ethereum identity handling
+						const ethereumIdentity = await retrieveEthereumIdentity(
+							value.selectedUser,
+						);
+						const fireflyData = await getFireflyList(
+							currentEnvId,
+							null,
+							ethereumIdentity.membership,
+						);
+						const fireflyCoreUrl = fireflyData[0].coreURL;
+						const verify = await getFireflyVerify(
+							fireflyCoreUrl,
+							ethereumIdentity.firefly_identity_id,
+						);
+						const x509 = verify[0].value.split("::").slice(1).join("::");
+						createInstanceParam.push({
+							[key]: {
+								msp: msp,
+								attributes: {},
+								isMulti: false,
+								multiMaximum: 0,
+								multiMinimum: 0,
+								x509: `${btoa(x509)}@${msp}`,
+							},
+						});
+					} else {
+						// Fabric identity handling
+						const fabricIdentity = await retrieveFabricIdentity(
+							value.selectedUser,
+						);
+						const fireflyData = await getFireflyList(
+							currentEnvId,
+							null,
+							fabricIdentity.membership,
+						);
+						const fireflyCoreUrl = fireflyData[0].coreURL;
+						const verify = await getFireflyVerify(
+							fireflyCoreUrl,
+							fabricIdentity.firefly_identity_id,
+						);
+						const x509 = verify[0].value.split("::").slice(1).join("::");
+						createInstanceParam.push({
+							[key]: {
+								msp: msp,
+								attributes: {},
+								isMulti: false,
+								multiMaximum: 0,
+								multiMinimum: 0,
+								x509: `${btoa(x509)}@${msp}`,
+							},
+						});
+					}
 				}
 			};
 

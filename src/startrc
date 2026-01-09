@@ -5,14 +5,17 @@ export MODE="local"  # 或者设置为 'server'
 if [  "$MODE" = "local" ]; then
     alias start_front='cd $WorkDir/front && npm run dev'
     alias start_agent='cd $WorkDir/agent/docker-rest-agent && source venv/bin/activate && gunicorn server:app -c ./gunicorn.conf.py'
-    alias start_trans='cd $WorkDir/py_translator && source venv/bin/activate && uvicorn server:app --reload -c ./config.py'
+    alias start_trans='cd $WorkDir/newTranslator && export PYTHONPATH="$PWD/.." && source ./.venv/bin/activate && uvicorn newTranslator.service.api:app --reload --host 0.0.0.0 --port 9999'
 fi
 
 if [ "$MODE" = "server" ]; then
     alias start_front='cd $WorkDir/front && npm run dev-server'
     alias start_agent='cd $WorkDir/agent/docker-rest-agent && source venv/bin/activate && gunicorn server:app -c ./gunicorn.conf.py'
-    alias start_trans='cd $WorkDir/py_translator && source venv/bin/activate && uvicorn server:app --reload -c ./config.py'
+    alias start_trans='cd $WorkDir/newTranslator && export PYTHONPATH="$PWD/.." && source ./.venv/bin/activate && uvicorn newTranslator.service.api:app --reload --host 0.0.0.0 --port 9999'
 fi
+
+# deprecated old translator command
+# alias start_trans='cd $WorkDir/py_translator && source venv/bin/activate && uvicorn server:app --reload -c ./config.py'
 
 # COMMON PART
 

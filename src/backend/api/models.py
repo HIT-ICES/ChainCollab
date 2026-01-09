@@ -1205,18 +1205,90 @@ class Firefly(models.Model):
         return response.json()["success"]
 
     def register_to_firefly(self, key):
+        """
+        Register identity to Firefly (Fabric specific)
+
+        Args:
+            key: Identity key (usually certificate name)
+
+        Returns:
+            str or False: Firefly identity ID on success, False on failure
+        """
         org_name = self.org_name
-        address = f"http://{self.core_url}/api/v1/identities"
-        print(self.core_url, address, org_name, key)
-        print(org_name, key)
+        api_address = f"http://{self.core_url}/api/v1/identities"
+        print(f"Registering Fabric identity to Firefly:")
+        print(f"  Core URL: {self.core_url}")
+        print(f"  API Address: {api_address}")
+        print(f"  Org Name: {org_name}")
+        print(f"  Key: {key}")
+
+        # Build request payload
+        payload = {"parent": org_name, "key": key, "name": key}
+        print(f"  Request Payload: {json.dumps(payload, indent=2)}")
+
+        # Make API call
         response = post(
-            address,
-            data=json.dumps({"parent": org_name, "key": key, "name": key}),
+            api_address,
+            data=json.dumps(payload),
             headers={"Content-Type": "application/json"},
         )
-        print({"parent": org_name, "key": key, "name": key})
-        print(response.json())
-        return response.json().get("id", False)
+
+        print(f"  Response Status Code: {response.status_code}")
+        print(f"  Response Headers: {dict(response.headers)}")
+        print(f"  Response Content: {response.text}")
+
+        try:
+            response_json = response.json()
+            print(f"  Response JSON: {json.dumps(response_json, indent=2)}")
+        except Exception as e:
+            print(f"  Failed to parse response as JSON: {e}")
+            return False
+
+        return response_json.get("id", False)
+
+    def register_eth_identity_to_firefly(self, name, address):
+        """
+        Register Ethereum identity to Firefly (Ethereum specific)
+
+        Args:
+            name: Identity name
+            address: Ethereum address
+
+        Returns:
+            str or False: Firefly identity ID on success, False on failure
+        """
+        org_name = self.org_name
+        api_address = f"http://{self.core_url}/api/v1/identities?confirm=true"
+        print(f"Registering Ethereum identity to Firefly:")
+        print(f"  Core URL: {self.core_url}")
+        print(f"  API Address: {api_address}")
+        print(f"  Org Name: {org_name}")
+        print(f"  Name: {name}")
+        print(f"  Ethereum Address: {address}")
+
+        # Build request payload
+        payload = {"parent": org_name, "key": address, "name": name}
+        print(f"  Request Payload: {json.dumps(payload, indent=2)}")
+
+        # Make API call
+        response = post(
+            api_address,
+            data=json.dumps(payload),
+            headers={"Content-Type": "application/json"},
+        )
+
+        print(f"  Response Status Code: {response.status_code}")
+        print(f"  Response Headers: {dict(response.headers)}")
+        print(f"  Response Content: {response.text}")
+
+        try:
+            response_json = response.json()
+            print(f"  Response JSON: {json.dumps(response_json, indent=2)}")
+        except Exception as e:
+            print(f"  Failed to parse response as JSON: {e}")
+            return False
+
+        return response_json.get("id", False)
 
     # def invoke_chaincode(self, ):
     #     address = f"http://{self.core_url}/api/v1/chaincodes/{name}/invoke"
@@ -1679,6 +1751,51 @@ class FabricIdentity(models.Model):
         import hashlib
 
         return self.secret == hashlib.md5(secret.encode("utf-8")).hexdigest()
+
+
+class EthereumIdentity(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        help_text="ID of EthereumIdentity",
+        default=make_uuid,
+        editable=False,
+        unique=True,
+    )
+    name = models.TextField(help_text="name of EthereumIdentity")
+    address = models.TextField(
+        help_text="Ethereum address of identity",
+        null=True,
+        blank=True,
+    )
+    private_key = models.TextField(
+        help_text="Private key of Ethereum identity",
+        null=True,
+        blank=True,
+    )
+    firefly_identity_id = models.TextField(
+        help_text="firefly_identity_id of EthereumIdentity",
+        null=True,
+        blank=True,
+    )
+    eth_environment = models.ForeignKey(
+        "EthEnvironment",
+        help_text="related eth_environment_id",
+        null=True,
+        on_delete=models.CASCADE,
+    )
+    membership = models.ForeignKey(
+        Membership,
+        help_text="related membership_id",
+        null=True,
+        on_delete=models.CASCADE,
+    )
+    create_at = models.DateTimeField(
+        help_text="Create time of EthereumIdentity", auto_now_add=True
+    )
+
+    class Meta:
+        verbose_name = "Ethereum Identity"
+        verbose_name_plural = "Ethereum Identities"
 
 
 class Oracle(models.Model):

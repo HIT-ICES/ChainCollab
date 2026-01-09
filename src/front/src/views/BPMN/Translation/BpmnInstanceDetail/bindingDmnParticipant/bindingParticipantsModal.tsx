@@ -5,6 +5,7 @@ import { useAppSelector } from "@/redux/hooks";
 import { useParticipantsData, useAvailableMembers } from "../hooks"
 import { v4 as uuidv4 } from 'uuid';
 import { useFabricIdentities } from '@/views/Consortium/FabricUsers/hooks';
+import { useEthereumIdentities } from '@/views/Consortium/EthereumUsers/hooks';
 
 import {getMembershipList} from "@/api/platformAPI";
 
@@ -110,10 +111,12 @@ interface membershipItemType {
 const BindingParticipantComponent = ({ clickedActionIndex, showBindingParticipantMap, setShowBindingParticipantMap, showBindingParticipantValueMap, setShowBindingParticipantValueMap }) => {
 
   const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
+  const currentEnvType = useAppSelector((state) => state.env.currentEnvType);
 
   // fetch datas
-  const [fabricIdentities, { isLoading, isError, isSuccess }, refetch] = useFabricIdentities(currentEnvId,
-    showBindingParticipantValueMap.get(clickedActionIndex)?.selectedMembershipId);
+  const [identities, { isLoading, isError, isSuccess }, refetch] = currentEnvType === "Ethereum"
+    ? useEthereumIdentities(currentEnvId, showBindingParticipantValueMap.get(clickedActionIndex)?.selectedMembershipId)
+    : useFabricIdentities(currentEnvId, showBindingParticipantValueMap.get(clickedActionIndex)?.selectedMembershipId);
   const [members, syncMembers] = useAvailableMembers(currentEnvId)
 
   const [membershipList, setMembershipList] = useState<membershipItemType[]>([]);
@@ -244,7 +247,7 @@ const BindingParticipantComponent = ({ clickedActionIndex, showBindingParticipan
                     }}
                     style={{ width: 'auto', flexGrow: 1, paddingLeft: "10px" }}>
                     {
-                      fabricIdentities.map((user) => {
+                      identities.map((user) => {
                         return (
                           <Select.Option value={user.id} key={user.id}>
                             {user.name}

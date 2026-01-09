@@ -59,6 +59,7 @@ from api.routes.bpmn.views import (
     DmnViewSet,
 )
 from api.routes.fabric_identity.views import FabricIdentityViewSet
+from api.routes.ethereum_identity.views import EthereumIdentityViewSet
 from api.routes.api_secret_key.views import APISecretKeyViewSet
 
 DEBUG = getattr(settings, "DEBUG")
@@ -92,6 +93,12 @@ router.register("agents", AgentViewSet, basename="agent")  # No Change
 
 router.register("api_secret_keys", APISecretKeyViewSet, basename="api_secret_key")
 router.register("fabric_identities", FabricIdentityViewSet, basename="fabric_identity")
+router.register("ethereum_identities", EthereumIdentityViewSet, basename="ethereum_identity")
+router.register(
+    "eth-environments/(?P<environment_id>[^/.]+)/ethereum_identities",
+    EthereumIdentityViewSet,
+    basename="eth-ethereum-identity",
+)
 
 router.register(
     "fabric_resource_sets", FabricResourceSetViewSet, basename="fabric_resource_set"
