@@ -18,14 +18,16 @@ from api.routes.bpmn.serializers import (
     DmnSerializer,
 )
 import yaml
-from api.config import BASE_PATH, BPMN_CHAINCODE_STORE, CURRENT_IP
+from api.config import BASE_PATH, BPMN_CHAINCODE_STORE, CURRENT_IP, ETHEREUM_CONTRACT_STORE
 from api.common import ok, err
 from api.models import (
     BPMN,
     DMN,
     BPMNInstance,
     ChainCode,
+    EthereumContract,
     Environment,
+    EthEnvironment,
     LoleidoOrganization,
     Consortium,
 )
@@ -73,7 +75,7 @@ class BPMNViewsSet(viewsets.ModelViewSet):
             )
 
         except Exception as e:
-            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
     @action(methods=["get"], detail=False, url_path="_list")
     def list_all(self, request, pk=None, *args, **kwargs):
@@ -83,7 +85,7 @@ class BPMNViewsSet(viewsets.ModelViewSet):
             return Response(data=ok(serializer.data), status=status.HTTP_200_OK)
 
         except Exception as e:
-            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, pk=None, *args, **kwargs):
         """
@@ -103,15 +105,47 @@ class BPMNViewsSet(viewsets.ModelViewSet):
                 bpmn.firefly_url = request.data.get("firefly_url")
             if "envId" in request.data:
                 envId = request.data.get("envId")
-                bpmn.environment = Environment.objects.get(pk=envId)
+                envType = request.data.get("envType", "fabric")  # 默认为 fabric
+
+                try:
+                    if envType == "ethereum":
+                        # 查询以太坊环境
+                        eth_env = EthEnvironment.objects.get(pk=envId)
+                        bpmn.eth_environment = eth_env
+                        bpmn.environment = None
+                    else:
+                        # 查询 Fabric 环境
+                        env = Environment.objects.get(pk=envId)
+                        bpmn.environment = env
+                        bpmn.eth_environment = None
+                except (Environment.DoesNotExist, EthEnvironment.DoesNotExist):
+                    return Response(
+                        data=err(f"Environment with id {envId} and type {envType} does not exist"),
+                        status=status.HTTP_404_NOT_FOUND
+                    )
             if "events" in request.data:
                 bpmn.events = request.data.get("events")
+            if "ethereum_contract_id" in request.data:
+                ethereum_contract_id = request.data.get("ethereum_contract_id")
+                try:
+                    ethereum_contract = EthereumContract.objects.get(pk=ethereum_contract_id)
+                    bpmn.ethereum_contract = ethereum_contract
+                except EthereumContract.DoesNotExist:
+                    return Response(
+                        data=err(f"Ethereum contract with id {ethereum_contract_id} does not exist"),
+                        status=status.HTTP_404_NOT_FOUND
+                    )
 
             bpmn.save()
             serializer = BpmnSerializer(bpmn)
             return Response(data=ok(serializer.data), status=status.HTTP_202_ACCEPTED)
+        except BPMN.DoesNotExist:
+            return Response(
+                data=err(f"BPMN with id {pk} does not exist"),
+                status=status.HTTP_404_NOT_FOUND
+            )
         except Exception as e:
-            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, pk=None, *args, **kwargs):
         """
@@ -133,7 +167,7 @@ class BPMNViewsSet(viewsets.ModelViewSet):
             serializer = BpmnSerializer(bpmns, many=True)
             return Response(ok(serializer.data), status=status.HTTP_200_OK)
         except Exception as e:
-            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
     def _zip_folder(self, folder_path, output_path):
         with ZipFile(output_path, "w") as zipf:
@@ -193,7 +227,302 @@ class BPMNViewsSet(viewsets.ModelViewSet):
             )
 
         except Exception as e:
-            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=["post"], detail=True, url_path="upload-eth")
+    def upload_eth(self, request, pk, *args, **kwargs):
+        """
+        Upload Ethereum contract for BPMN (similar to Fabric package).
+        This endpoint accepts either:
+        1. contractId - references an existing contract
+        2. contractContent - creates a new contract from the provided code
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+
+        logger.info(f"Received upload-eth request for BPMN: {pk}")
+        logger.info(f"Request data: {request.data}")
+        logger.info(f"Request kwargs: {request.parser_context['kwargs']}")
+
+        try:
+            bpmn_id = pk
+            orgid = request.data.get("orgId")
+            contract_id = request.data.get("contractId")
+            contract_content = request.data.get("contractContent")
+
+            logger.info(f"Org ID: {orgid}, Contract ID: {contract_id}, Has contract content: {bool(contract_content)}")
+
+            bpmn = BPMN.objects.get(pk=bpmn_id)
+            logger.info(f"BPMN found: {bpmn.name}")
+            logger.info(f"BPMN environment: {bpmn.environment}")
+            logger.info(f"BPMN eth_environment: {bpmn.eth_environment}")
+
+            # 获取当前环境ID
+            # 尝试从请求上下文中获取环境ID，或者从请求参数中获取
+            env_id = request.parser_context["kwargs"].get("environment_id")
+            if not env_id:
+                # 如果没有直接获取到环境ID，检查是否有eth_environment关联
+                env_id = bpmn.eth_environment.id if bpmn.eth_environment else None
+
+            if not env_id:
+                # 检查是否有fabric环境关联，以太坊环境可能使用相同的字段
+                env_id = bpmn.environment.id if bpmn.environment else None
+
+            logger.info(f"Resolved env_id: {env_id}")
+
+            if not env_id:
+                logger.error("No environment associated with BPMN")
+                return Response(
+                    err("BPMN is not associated with any environment"),
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Prepare the upload request to Ethereum API
+            headers = request.headers
+
+            # 确定环境类型和API前缀
+            env_prefix = "eth-environments"  # 默认使用eth-environments前缀
+            try:
+                # 尝试确定环境类型
+                if EthEnvironment.objects.filter(id=env_id).exists():
+                    env_prefix = "eth-environments"
+                elif Environment.objects.filter(id=env_id).exists():
+                    env_prefix = "environments"
+            except Exception as e:
+                logger.error(f"Error checking environment type: {str(e)}")
+
+            # 如果提供了合约内容，需要先将其保存为临时文件再上传
+            if contract_content:
+                import tempfile
+
+                # 使用BPMN名称作为合约文件名
+                contract_filename = bpmn.name.replace(".bpmn", ".sol")
+
+                # 创建临时文件
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.sol', delete=False, encoding='utf-8') as temp_file:
+                    temp_file.write(contract_content)
+                    temp_file_path = temp_file.name
+
+                logger.info(f"Created temporary contract file: {temp_file_path}")
+
+                try:
+                    # 上传合约文件到 ethereum API
+                    with open(temp_file_path, 'rb') as file_obj:
+                        files = {"file": (contract_filename, file_obj, 'text/plain')}
+                        response = post(
+                            f"http://{CURRENT_IP}:8000/api/v1/{env_prefix}/{env_id}/contracts/upload",
+                            data={
+                                "name": bpmn.name.replace(".bpmn", ""),
+                                "version": "1.0",
+                                "language": "solidity",
+                                "org_id": orgid,
+                            },
+                            files=files,
+                            headers={"Authorization": headers["Authorization"]},
+                        )
+                finally:
+                    # 清理临时文件
+                    if os.path.exists(temp_file_path):
+                        os.unlink(temp_file_path)
+
+                if response.status_code != 200:
+                    logger.error(f"Failed to upload contract: {response.text}")
+                    return Response(
+                        err(f"Failed to upload contract: {response.text}"),
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                # 从响应中获取创建的合约ID
+                contract_id = response.json()["data"]["id"]
+                logger.info(f"Contract uploaded successfully with ID: {contract_id}")
+
+            else:
+                # 如果没有提供合约内容，使用已有的contractId
+                if not contract_id:
+                    logger.error("Neither contractId nor contractContent provided")
+                    return Response(
+                        err("Either contractId or contractContent must be provided"),
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                logger.info(f"Using existing contract ID: {contract_id}")
+
+            # 获取上传后的合约对象
+            eth_contract = EthereumContract.objects.get(id=contract_id)
+
+            # Update BPMN with contract information
+            bpmn.chaincode_content = eth_contract.contract_content  # Reuse existing field for contract content
+            bpmn.ethereum_contract = eth_contract  # 设置 ethereum_contract 字段
+            bpmn.status = "Generated"
+            bpmn.save()
+
+            logger.info(f"BPMN updated with contract ID: {contract_id}")
+
+            return Response(
+                data=ok({
+                    "message": "Ethereum contract uploaded successfully",
+                    "contract_id": contract_id
+                }),
+                status=status.HTTP_202_ACCEPTED
+            )
+
+        except BPMN.DoesNotExist:
+            logger.error(f"BPMN not found: {pk}")
+            return Response(err("BPMN not found"), status=status.HTTP_404_NOT_FOUND)
+        except LoleidoOrganization.DoesNotExist:
+            logger.error("Organization not found")
+            return Response(err("Organization not found"), status=status.HTTP_404_NOT_FOUND)
+        except EthereumContract.DoesNotExist:
+            logger.error(f"Contract not found: {contract_id}")
+            return Response(err("Contract not found"), status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error in upload_eth for BPMN {pk}: {str(e)}")
+            import traceback
+            logger.error(f"Stack trace: {traceback.format_exc()}")
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=["post"], detail=True, url_path="compile-eth")
+    def compile_eth(self, request, pk, *args, **kwargs):
+        """
+        Compile Ethereum contract for BPMN.
+        This endpoint saves the contract content and calls the Ethereum compile API.
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+
+        logger.info(f"Received compile-eth request for BPMN: {pk}")
+        logger.info(f"Request data: {request.data}")
+        logger.info(f"Request kwargs: {request.parser_context['kwargs']}")
+
+        try:
+            bpmn_id = pk
+            orgid = request.data.get("orgId")
+            contract_id = request.data.get("contractId")  # 接受 contractId，但优先使用 bpmn 关联的合约
+
+            logger.info(f"Org ID: {orgid}, Contract ID from request: {contract_id}")
+
+            bpmn = BPMN.objects.get(pk=bpmn_id)
+            logger.info(f"BPMN found: {bpmn.name}")
+            logger.info(f"BPMN environment: {bpmn.environment}")
+            logger.info(f"BPMN eth_environment: {bpmn.eth_environment}")
+
+            # 优先使用 bpmn 关联的合约，如果没有则使用请求中的 contractId
+            if bpmn.ethereum_contract:
+                eth_contract = bpmn.ethereum_contract
+                logger.info(f"Using BPMN associated contract: {eth_contract.id}")
+            elif contract_id:
+                eth_contract = EthereumContract.objects.get(pk=contract_id)
+                logger.info(f"Using request contract: {contract_id}")
+            else:
+                logger.error("No contract associated with BPMN and no contractId provided")
+                return Response(
+                    err("No contract associated with BPMN and no contractId provided"),
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            contract_content = eth_contract.contract_content
+            contract_name = eth_contract.filename or f"{eth_contract.name}.sol"  # 使用原始文件名，如果没有则使用合约名称
+
+            # 获取当前环境ID
+            # 尝试从请求上下文中获取环境ID，或者从请求参数中获取
+            env_id = request.parser_context["kwargs"].get("environment_id")
+            if not env_id:
+                # 如果没有直接获取到环境ID，检查是否有eth_environment关联
+                env_id = bpmn.eth_environment.id if bpmn.eth_environment else None
+
+            if not env_id:
+                # 检查是否有fabric环境关联，以太坊环境可能使用相同的字段
+                env_id = bpmn.environment.id if bpmn.environment else None
+
+            logger.info(f"Resolved env_id: {env_id}")
+
+            if not env_id:
+                logger.error("No environment associated with BPMN")
+                return Response(
+                    err("BPMN is not associated with any environment"),
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Save contract content to a temporary file
+            # 使用已存储的合约文件进行编译，而不是字符串
+            # 合约文件已在上传时保存到 ETHEREUM_CONTRACT_STORE/{contract_id}/ 目录下
+            contract_file_path = os.path.join(ETHEREUM_CONTRACT_STORE, str(eth_contract.id), eth_contract.filename)
+
+            if not os.path.exists(contract_file_path):
+                logger.error(f"Contract file not found: {contract_file_path}")
+                return Response(
+                    err("Contract file not found"),
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            logger.info(f"Compiling contract from file: {contract_file_path}")
+
+            # Prepare the compile request to Ethereum API
+            headers = request.headers
+
+            # 确定环境类型和API前缀
+            env_prefix = "eth-environments"  # 默认使用eth-environments前缀
+            try:
+                # 尝试确定环境类型
+                if EthEnvironment.objects.filter(id=env_id).exists():
+                    env_prefix = "eth-environments"
+                elif Environment.objects.filter(id=env_id).exists():
+                    env_prefix = "environments"
+            except Exception as e:
+                logger.error(f"Error checking environment type: {str(e)}")
+
+            with open(contract_file_path, 'rb') as file_obj:
+                files = {"file": (eth_contract.filename, file_obj, 'text/plain')}
+                response = post(
+                    f"http://{CURRENT_IP}:8000/api/v1/{env_prefix}/{env_id}/contracts/compile",
+                    data={
+                        "name": bpmn.name.replace(".bpmn", ""),
+                        "version": "1.0",
+                        "language": "solidity",
+                        "org_id": orgid,
+                        "contract_id": str(eth_contract.id),  # 传递已有合约ID
+                    },
+                    files=files,
+                    headers={"Authorization": headers["Authorization"]},
+                )
+
+            if response.status_code != 200:
+                logger.error(f"Failed to compile contract: {response.text}")
+                return Response(
+                    err(f"Failed to compile contract: {response.text}"),
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # 获取编译结果
+            compile_result = response.json()["data"]
+
+            # 刷新合约对象以获取最新数据
+            eth_contract.refresh_from_db()
+            logger.info(f"Contract {eth_contract.id} compiled successfully")
+
+            # Update BPMN with contract information
+            bpmn.chaincode_content = contract_content  # Reuse existing field for contract content
+            bpmn.ethereum_contract = eth_contract  # 确保 ethereum_contract 字段已设置
+            bpmn.status = "Compiled"  # 编译成功后状态更新为Compiled
+            bpmn.save()
+
+            return Response(
+                data=ok({
+                    "message": "Ethereum contract compiled successfully",
+                    "contract_id": str(eth_contract.id),
+                    "abi": compile_result.get("abi"),
+                    "bytecode": compile_result.get("bytecode")
+                }),
+                status=status.HTTP_202_ACCEPTED
+            )
+
+        except BPMN.DoesNotExist:
+            logger.error(f"BPMN not found: {pk}")
+            return Response(err("BPMN not found"), status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error in compile_eth for BPMN {pk}: {str(e)}")
+            import traceback
+            logger.error(f"Stack trace: {traceback.format_exc()}")
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
 
 class BPMNInstanceViewSet(viewsets.ModelViewSet):
@@ -214,7 +543,7 @@ class BPMNInstanceViewSet(viewsets.ModelViewSet):
             serializer = BpmnInstanceSerializer(bpmn_instance)
             return Response(data=ok(serializer.data), status=status.HTTP_201_CREATED)
         except Exception as e:
-            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, pk=None, *args, **kwargs):
         """
@@ -242,7 +571,7 @@ class BPMNInstanceViewSet(viewsets.ModelViewSet):
             serializer = BpmnInstanceSerializer(bpmn_instances, many=True)
             return Response(ok(serializer.data), status=status.HTTP_200_OK)
         except Exception as e:
-            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
     def _ends_with_time_format(self, input_string):
         pattern = r"^test-\d{4}-\d{2}-\d{2}-\d{2}\.\d{2}\.\d{2}\.bpmn$"
@@ -279,7 +608,7 @@ class DmnViewSet(viewsets.ModelViewSet):
             serializer = DmnSerializer(dmn)
             return Response(data=ok(serializer.data), status=status.HTTP_201_CREATED)
         except Exception as e:
-            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, pk=None, *args, **kwargs):
         """
@@ -301,7 +630,7 @@ class DmnViewSet(viewsets.ModelViewSet):
             serializer = DmnSerializer(dmns, many=True)
             return Response(ok(serializer.data), status=status.HTTP_200_OK)
         except Exception as e:
-            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, pk=None, *args, **kwargs):
         """
@@ -326,4 +655,4 @@ class DmnViewSet(viewsets.ModelViewSet):
             serializer = DmnSerializer(dmn)
             return Response(data=ok(serializer.data), status=status.HTTP_202_ACCEPTED)
         except Exception as e:
-            raise Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)

@@ -317,13 +317,53 @@ class FireflyViewSet(viewsets.ModelViewSet):
 
             LOG.info(f"Firefly initialization completed for {firefly_name}")
 
+            # Save Firefly objects to database
+            firefly_stack_path = os.path.expanduser("~/.firefly/stacks/") + firefly_name
+
+            # Read stack.json to get member/organization names and ports
+            with open(os.path.join(firefly_stack_path, "stack.json"), "r") as file:
+                stack_data = json.load(file)
+                # For Ethereum stacks, use orgName from members array
+                account_names = [member["orgName"] for member in stack_data["members"]]
+
+            LOG.info(f"Found {len(account_names)} accounts: {account_names}")
+
+            # Create Firefly objects for each resource set
+            for index, resource_set in enumerate(resource_sets):
+                # Get member info from stack.json
+                member = stack_data["members"][index]
+
+                # Get core port from stack.json or docker-compose ports
+                # For Ethereum, core port is in exposedFireflyPort
+                core_port = member["exposedFireflyPort"]
+
+                # Get sandbox port from stack.json
+                sandbox_port = member["exposedSandboxPort"]
+
+                # Get evmconnect port from stack.json
+                evmconnect_port = member["exposedConnectorPort"]
+
+                LOG.info(f"Creating Firefly object for {account_names[index]}: core={core_port}, sandbox={sandbox_port}, evmconnect={evmconnect_port}")
+
+                # Create and save Firefly object
+                firefly = Firefly(
+                    resource_set=resource_set,
+                    org_name=account_names[index],
+                    core_url=f"{CURRENT_IP}:{core_port}",
+                    sandbox_url=f"{CURRENT_IP}:{sandbox_port}",
+                    fab_connect_url=f"{CURRENT_IP}:{evmconnect_port}",
+                )
+                firefly.save()
+                LOG.info(f"Saved Firefly object for {account_names[index]}")
+
             return Response(
                 {
                     "message": "Firefly Ethereum initialization successful",
                     "firefly_name": firefly_name,
                     "system_node_url": system_node_url,
                     "connector_config": connector_config_path,
-                    "network": network_name
+                    "network": network_name,
+                    "firefly_count": len(account_names)
                 },
                 status=status.HTTP_202_ACCEPTED
             )

@@ -16,13 +16,13 @@ if __package__ in (None, ""):
     _PACKAGE_ROOT = _CURRENT_DIR.parent
     if str(_PACKAGE_ROOT) not in sys.path:
         sys.path.insert(0, str(_PACKAGE_ROOT))
-    from generator.translator import GoChaincodeTranslator  # type: ignore
+    from generator.translator import GoChaincodeTranslator, SolidityContractTranslator  # type: ignore
     from generator.parser.dmn_parser.parser import DMNParser  # type: ignore
     from generator.parser.choreography_parser.parser import Choreography  # type: ignore
     from generator.parser.choreography_parser.elements import NodeType  # type: ignore
     _CODEGEN_ROOT = _PACKAGE_ROOT / "CodeGenerator"
 else:
-    from ..generator.translator import GoChaincodeTranslator
+    from ..generator.translator import GoChaincodeTranslator, SolidityContractTranslator
     from ..generator.parser.dmn_parser.parser import DMNParser
     from ..generator.parser.choreography_parser.parser import Choreography
     from ..generator.parser.choreography_parser.elements import NodeType
@@ -73,6 +73,31 @@ async def generate_chaincode(params: ChaincodeGenerateParams):
     chaincode = translator.generate_chaincode()
     ffi = translator.generate_ffi()
     return ChaincodeGenerateResponse(bpmnContent=chaincode, ffiContent=ffi)
+
+
+class EthContractGenerateParams(BaseModel):
+    bpmnContent: str
+
+
+class EthContractGenerateResponse(BaseModel):
+    contractContent: str
+    dslContent: str
+    ffiContent: str
+
+
+@app.post("/api/v1/chaincode/generate-eth")
+async def generate_eth_contract(params: EthContractGenerateParams):
+    translator = SolidityContractTranslator(params.bpmnContent)
+    try:
+        contract_content, dsl_content = translator.generate_contract_bundle()
+    except ValueError as exc:
+        return JSONResponse(status_code=400, content={"message": str(exc)})
+    ffi_content = translator.generate_ffi()
+    return EthContractGenerateResponse(
+        contractContent=contract_content,
+        dslContent=dsl_content,
+        ffiContent=ffi_content,
+    )
 
 
 class ChaincodeCompileParams(BaseModel):

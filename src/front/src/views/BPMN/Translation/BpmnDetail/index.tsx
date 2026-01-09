@@ -1,11 +1,14 @@
 import { useState } from "react"
 import { Card, Row, Col, Button, Steps, Modal, Select, Tag, Collapse, Typography, Tabs } from "antd"
 import { useLocation, useNavigate } from "react-router-dom";
-import { retrieveBPMN, packageBpmn, updateBPMNStatus, updateBpmnEnv, updateBPMNFireflyUrl, updateBpmnEvents } from "@/api/externalResource"
+import { retrieveBPMN, packageBpmn, uploadEthContract, compileEthContract, deployEthContract, updateBPMNStatus, updateBpmnEnv, updateBPMNFireflyUrl, updateBpmnEvents } from "@/api/externalResource"
 import { generateChaincode, getMessagesByBpmnContent } from "@/api/translator"
 import { useAvaliableEnvs, useBpmnDetailData } from "./hooks"
 import axios from "axios"
-const steps = [
+import api from "@/api/apiConfig"
+
+// Fabric environment steps
+const fabricSteps = [
     {
         title: "Initiated",
     },
@@ -14,6 +17,28 @@ const steps = [
     },
     {
         title: 'Generated',
+    },
+    {
+        title: 'Installed',
+    },
+    {
+        title: 'Registered',
+    },
+];
+
+// Ethereum environment steps (includes Compiled)
+const ethereumSteps = [
+    {
+        title: "Initiated",
+    },
+    {
+        title: 'DeployEnved',
+    },
+    {
+        title: 'Generated',
+    },
+    {
+        title: 'Compiled',
     },
     {
         title: 'Installed',
@@ -47,28 +72,53 @@ const BPMNOverview = () => {
 
     const navigate = useNavigate();
     const [bpmn, { isLoading, isError, isSuccess }, refetchBpmn] = useBpmnDetailData(bpmnId);
+    const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
+    const currentConsortiumId = useAppSelector((state) => state.consortium.currentConsortiumId);
+    const currentEnvType = useAppSelector((state) => state.env.currentEnvType);
 
     const status = bpmn.status;
-    const currentNumber = ((status: string) => {
-        switch (status) {
-            case "Initiated":
-                return 0;
-            case "DeployEnved":
-                return 1;
-            case "Generated":
-                return 2;
-            case "Installed":
-                return 3;
-            case "Registered":
-                return 4;
+
+    // Use different steps based on environment type
+    const steps = currentEnvType === 'Ethereum' ? ethereumSteps : fabricSteps;
+
+    const currentNumber = ((status: string, envType: string) => {
+        if (envType === 'Ethereum') {
+            switch (status) {
+                case "Initiated":
+                    return 0;
+                case "DeployEnved":
+                    return 1;
+                case "Generated":
+                    return 2;
+                case "Compiled":
+                    return 3;
+                case "Installed":
+                    return 4;
+                case "Registered":
+                    return 5;
+            }
+        } else {
+            switch (status) {
+                case "Initiated":
+                    return 0;
+                case "DeployEnved":
+                    return 1;
+                case "Generated":
+                    return 2;
+                case "Installed":
+                    return 3;
+                case "Registered":
+                    return 4;
+            }
         }
-    })(status);
+    })(status, currentEnvType);
 
 
     const EnvModal = ({
         open, setOpen
     }) => {
         const [envId, setEnvId] = useState("");
+        const [envType, setEnvType] = useState("");
         const [envs, refetchEnvs] = useAvaliableEnvs(currentConsortiumId);
 
         return (
@@ -76,7 +126,7 @@ const BPMNOverview = () => {
                 title="Select Env"
                 open={open}
                 onOk={async () => {
-                    await updateBpmnEnv(bpmnId, envId);
+                    await updateBpmnEnv(bpmnId, envId, envType);
                     await updateBPMNStatus(bpmnId, "DeployEnved");
                     refetchBpmn()
                     setButtonLoading(false);
@@ -93,12 +143,14 @@ const BPMNOverview = () => {
                     optionFilterProp="children"
                     onChange={
                         (value) => {
-                            setEnvId(envs.find((env) => env.id == value).id);
+                            const selectedEnv = envs.find((env) => env.id == value);
+                            setEnvId(selectedEnv.id);
+                            setEnvType(selectedEnv.type);
                         }
                     }
                 >
                     {envs.map((env) => (
-                        <Select.Option value={env.id}>{env.name}</Select.Option>
+                        <Select.Option value={env.id}>{env.name} ({env.type})</Select.Option>
                     ))}
                 </Select>
             </Modal>
@@ -110,6 +162,7 @@ const BPMNOverview = () => {
         Initiated: "blue",
         DeployEnved: "gold",
         Generated: "cyan",
+        Compiled: "orange",
         Installed: "purple",
         Registered: "green",
     };
@@ -118,7 +171,9 @@ const BPMNOverview = () => {
         try {
             setButtonLoading(true);
             const bpmn = await retrieveBPMN(bpmnId);
-            const res = await generateChaincode(bpmn.bpmnContent);
+            // 根据环境类型调用不同的生成 API
+            const target = currentEnvType === 'Ethereum' ? 'solidity' : 'go';
+            const res = await generateChaincode(bpmn.bpmnContent, target);
             const chaincode_content = res.bpmnContent;
             const ffi_content = res.ffiContent;
             setDslContentForModify(res.dslContent || "");
@@ -147,65 +202,201 @@ const BPMNOverview = () => {
     const onRegister = async () => {
         try {
             setButtonLoading(true);
-            debugger
             const bpmn = await retrieveBPMN(bpmnId)
-            const chaincodeName = bpmn.name.replace(".bpmn", "")
-            const ffiContent = bpmn.ffiContent
-            const parsedFFIContent = JSON.parse(ffiContent);
-            const chaincodeIdPrefix = chaincodeName + "-" + bpmn.chaincode.id.substring(0, 6);
-            parsedFFIContent.name = chaincodeIdPrefix;
+            console.log("BPMN data:", bpmn);
+
+            const contractName = bpmn.name.replace(".bpmn", "")
+
+            // Determine if it's Fabric or Ethereum environment
+            const isEthereum = currentEnvType === 'Ethereum';
+
+            let ffiContent = bpmn.ffiContent;
+            let parsedFFIContent;
+
+            // For Ethereum, generate FFI if not already present
+            if (isEthereum && (!ffiContent || ffiContent.trim() === '')) {
+                console.log("FFI content is empty for Ethereum, generating FFI...");
+
+                // Get contract ABI
+                const contractAbi = bpmn.ethereum_contract?.abi;
+                if (!contractAbi) {
+                    throw new Error("Contract ABI not found. Please ensure the contract is compiled.");
+                }
+
+                // Call FireFly API to generate FFI
+                const fireflyUrlForRegister = `${current_ip}:5000`;
+                const generateUrl = `${fireflyUrlForRegister}/api/v1/namespaces/default/contracts/interfaces/generate`;
+
+                const payload = {
+                    name: contractName,
+                    version: "1.0",
+                    input: {
+                        abi: contractAbi
+                    }
+                };
+
+                console.log("Calling FireFly to generate FFI:", generateUrl);
+                const ffiResponse = await axios.post(generateUrl, payload);
+
+                if (ffiResponse.status === 200) {
+                    parsedFFIContent = ffiResponse.data;
+                    ffiContent = JSON.stringify(parsedFFIContent, null, 2);
+                    console.log("FFI generated successfully:", parsedFFIContent);
+
+                    // Save FFI content to backend using api instance
+                    await api.put(`/consortiums/1/bpmns/${bpmnId}`, {
+                        ffiContent: ffiContent
+                    });
+                    console.log("FFI content saved to backend");
+                } else {
+                    throw new Error(`Failed to generate FFI: ${ffiResponse.statusText}`);
+                }
+            } else {
+                // For Fabric or if FFI already exists, parse it
+                if (!ffiContent || ffiContent.trim() === '') {
+                    throw new Error("FFI content is empty. Please ensure the contract was compiled successfully and FFI was generated.");
+                }
+                parsedFFIContent = JSON.parse(ffiContent);
+            }
+
+            console.log("FFI Content:", parsedFFIContent);
+
+            // For Ethereum, use contract address; for Fabric, use chaincode ID
+            let contractIdPrefix;
+            if (isEthereum) {
+                // For Ethereum, use contract ID from ethereum_contract
+                contractIdPrefix = contractName + "-" + (bpmn.ethereum_contract?.id || bpmn.id).substring(0, 6);
+            } else {
+                // For Fabric, use chaincode ID
+                contractIdPrefix = contractName + "-" + bpmn.chaincode.id.substring(0, 6);
+            }
+
+            parsedFFIContent.name = contractIdPrefix;
             const fireflyUrlForRegister = `${current_ip}:5000`
+
             // register interface
             const response = await axios.post(`${current_ip}:5000/api/v1/namespaces/default/contracts/interfaces`,
                 parsedFFIContent)
             const interfaceid = response.data.id;
-            // register api
-            const location = {
-                channel: "default",        //写死在后端
-                chaincode: chaincodeName
-            };
+            console.log("Interface registered with ID:", interfaceid);
+
+            // Wait for interface to be fully created (FireFly processes this asynchronously)
+            console.log("Waiting for interface to be fully created...");
+            let interfaceReady = false;
+            let retries = 0;
+            const maxRetries = 10;
+
+            while (!interfaceReady && retries < maxRetries) {
+                try {
+                    const checkResponse = await axios.get(
+                        `${current_ip}:5000/api/v1/namespaces/default/contracts/interfaces/${interfaceid}`
+                    );
+                    if (checkResponse.status === 200 && checkResponse.data) {
+                        interfaceReady = true;
+                        console.log("Interface is ready:", checkResponse.data);
+                    }
+                } catch (error) {
+                    console.log(`Interface not ready yet, retry ${retries + 1}/${maxRetries}`);
+                    retries++;
+                    await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retry
+                }
+            }
+
+            if (!interfaceReady) {
+                throw new Error("Interface creation timeout. Please try again later.");
+            }
+
+            // register api with different location for Ethereum vs Fabric
+            let location;
+            if (isEthereum) {
+                // For Ethereum, use contract address
+                const contractAddress = bpmn.ethereum_contract?.contract_address;
+                if (!contractAddress) {
+                    // If contract address is not found, log a warning but continue with a placeholder
+                    console.warn("Contract address not found, using placeholder. This may cause issues with contract invocation.");
+                    // Use a placeholder address or skip registration
+                    location = {
+                        address: "0x0000000000000000000000000000000000000000" // Placeholder address
+                    };
+                } else {
+                    location = {
+                        address: contractAddress
+                    };
+                }
+            } else {
+                // For Fabric, use channel and chaincode
+                location = {
+                    channel: "default",
+                    chaincode: contractName
+                };
+            }
+
             const jsonData = {
-                name: response.data.name,  //接口id名字改为bpmninstanceid
+                name: response.data.name,
                 interface: {
                     id: interfaceid
                 },
                 location: location
             };
+
             await new Promise(resolve => setTimeout(resolve, 4000));
             const response2 = await axios.post(`${current_ip}:5000/api/v1/namespaces/default/apis`,
                 jsonData)
             const fireflyUrl = response2.data.urls.ui
+
             // sleep 4s 否则没法调用Init ledger
             await new Promise(resolve => setTimeout(resolve, 4000));
-            // Init ledger
-            await initLedger(fireflyUrlForRegister, chaincodeIdPrefix);
+
+            // Init ledger (only for Fabric)
+            if (!isEthereum) {
+                await initLedger(fireflyUrlForRegister, contractIdPrefix);
+            }
+
             // Register datatypes
-            await _registerDatatypes(bpmn, chaincodeName, fireflyUrlForRegister);
+            await _registerDatatypes(bpmn, contractName, fireflyUrlForRegister);
 
             await updateBPMNFireflyUrl(bpmnId, fireflyUrl);
 
             // 获取 events 字段
-            await _register_listeners(parsedFFIContent, fireflyUrlForRegister, chaincodeName, interfaceid);
-
+            await _register_listeners(parsedFFIContent, fireflyUrlForRegister, contractName, interfaceid, isEthereum);
 
             const res = await updateBPMNStatus(bpmnId, "Registered");
             refetchBpmn()
             setButtonLoading(false);
         } catch (error) {
             console.error("Error occurred while making post request:", error);
+            // Show user-friendly error message
+            if (error instanceof Error) {
+                alert(`Register failed: ${error.message}\n\nPlease check:\n1. Contract was compiled successfully\n2. FFI was generated during compilation\n3. FireFly is running and accessible`);
+            }
+            setButtonLoading(false);
         }
 
-        async function _register_listeners(parsedFFIContent: any, fireflyUrlForRegister: string, chaincodeName: any, interfaceid: string) {
+        async function _register_listeners(parsedFFIContent: any, fireflyUrlForRegister: string, contractName: any, interfaceid: string, isEthereum: boolean) {
             const events = parsedFFIContent.events;
 
             // 输出 events 字段
             console.log(events);
 
+            // 获取合约地址（仅用于 Ethereum）
+            const contractAddress = isEthereum ? bpmn.ethereum_contract?.contract_address : undefined;
+
+            if (isEthereum && !contractAddress) {
+                console.error("Contract address not found for Ethereum environment");
+                throw new Error("Contract address is required for Ethereum listeners");
+            }
+
             // 访问每个 event 的 name
             events.forEach(async (event) => {
-                const res = await invokeFireflyListeners(fireflyUrlForRegister, chaincodeName, event.name, interfaceid);
+                const res = await invokeFireflyListeners(
+                    fireflyUrlForRegister,
+                    contractName,
+                    event.name,
+                    interfaceid,
+                    contractAddress  // 传递合约地址
+                );
                 const listener_id = res.id;
-                await invokeFireflySubscriptions(fireflyUrlForRegister, event.name + "-" + chaincodeName, listener_id);
+                await invokeFireflySubscriptions(fireflyUrlForRegister, event.name + "-" + contractName, listener_id);
             });
             await updateBpmnEvents(bpmnId, events.map((event) => event.name).join(","));
         }
@@ -251,9 +442,6 @@ const BPMNOverview = () => {
         }
     }
 
-    const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
-    const currentConsortiumId = useAppSelector((state) => state.consortium.currentConsortiumId);
-
     const buttonText = (() => {
         if (status == 'Installed') {
             return 'Register';
@@ -263,8 +451,12 @@ const BPMNOverview = () => {
         // }
         else if (status == 'Initiated') {
             return 'Deploy to Env';
+        } else if (status == 'Compiled') {
+            // Compiled 状态显示 Install 按钮
+            return 'Install';
         } else if (status == 'Generated') {
-            return 'Install'
+            // Generated 状态：Fabric 显示 Install，Ethereum 显示 Upload & Compile
+            return currentEnvType === 'Ethereum' ? 'Upload & Compile' : 'Install'
         } else if (status == 'DeployEnved') {
             return 'Generate';
         }
@@ -272,15 +464,43 @@ const BPMNOverview = () => {
 
     const handlePackage = async () => {
         setButtonLoading(true);
-        await packageBpmn(
-            chainCodeContentForModify,
-            ffiContentForModify,
-            currentOrgId,
-            bpmnId,
-            currentConsortiumId || "1"
-        );
-        refetchBpmn();
-        setButtonLoading(false);
+        try {
+            if (currentEnvType === 'Ethereum') {
+                // Ethereum环境：上传并编译合约
+                // 1. 先上传合约
+                const uploadResult = await uploadEthContract(
+                    chainCodeContentForModify, // 传递合约代码内容
+                    currentOrgId,
+                    bpmnId,
+                    currentConsortiumId || "1"
+                );
+
+                if (uploadResult && uploadResult.data) {
+                    // 2. 上传成功后立即编译
+                    const contractId = uploadResult.data.contract_id;
+                    await compileEthContract(
+                        contractId,
+                        currentOrgId,
+                        bpmnId,
+                        currentConsortiumId || "1"
+                    );
+                }
+            } else {
+                // Fabric环境：打包链码
+                await packageBpmn(
+                    chainCodeContentForModify,
+                    ffiContentForModify,
+                    currentOrgId,
+                    bpmnId,
+                    currentConsortiumId || "1"
+                );
+            }
+            refetchBpmn();
+        } catch (error) {
+            console.error('Package/Upload/Compile failed:', error);
+        } finally {
+            setButtonLoading(false);
+        }
     };
 
     const CodeEditor = ({
@@ -424,9 +644,40 @@ const BPMNOverview = () => {
                                     <Button type="primary"
                                         // disabled={status == 'Initiated'}
                                         loading={buttonLoading}
-                                        onClick={() => {
-                                            if (status == 'Generated') {
-                                                navigate(`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/fabric/chaincode`)
+                                        onClick={async () => {
+                                            if (status == 'Compiled') {
+                                                // Compiled 状态：调用部署方法
+                                                try {
+                                                    setButtonLoading(true);
+                                                    const contractId = bpmn.ethereum_contract?.id;
+                                                    if (contractId) {
+                                                        await deployEthContract(
+                                                            contractId,
+                                                            currentEnvId,
+                                                            "default", // namespace
+                                                            [] // constructor_args
+                                                        );
+                                                        // 部署成功后更新 BPMN 状态为 Installed
+                                                        await updateBPMNStatus(bpmnId, "Installed");
+                                                        refetchBpmn();
+                                                    } else {
+                                                        console.error('Contract not found for this BPMN');
+                                                    }
+                                                } catch (error) {
+                                                    console.error('Deploy failed:', error);
+                                                } finally {
+                                                    setButtonLoading(false);
+                                                }
+                                            } else if (status == 'Generated') {
+                                                // Generated 状态：根据环境类型执行不同操作
+                                                if (currentEnvType === 'Ethereum') {
+                                                    // Ethereum 环境：上传并编译（不部署）
+                                                    // 这部分逻辑已经在 handlePackage 中处理
+                                                    handlePackage();
+                                                } else {
+                                                    // Fabric环境跳转到Package页面
+                                                    navigate(`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/fabric/chaincode`)
+                                                }
                                             } else if (status == 'Installed') {
                                                 onRegister();
                                             } else if (status == 'Initiated') {
@@ -453,16 +704,19 @@ const BPMNOverview = () => {
                     </Row>
                 </Card.Grid>
             </Card>
-            {showArtifacts ? (
+            {/* 只有在状态未达到 Generated 时才显示 Generated Artifacts */}
+            {status !== 'Generated' && status !== 'Installed' && status !== 'Registered' && showArtifacts ? (
                 <Card
                     title="Generated Artifacts"
                     style={{ width: "100%", marginTop: 16 }}
                     headStyle={{ borderBottom: "1px solid #e2e8f0", fontWeight: 600 }}
                     bodyStyle={{ padding: 20 }}
                     extra={
-                        <Button type="primary" onClick={handlePackage} loading={buttonLoading}>
-                            Package
-                        </Button>
+                        status !== 'Generated' && status !== 'Installed' && status !== 'Registered' ? (
+                            <Button type="primary" onClick={handlePackage} loading={buttonLoading}>
+                                {currentEnvType === 'Ethereum' ? 'Upload' : 'Package'}
+                            </Button>
+                        ) : null
                     }
                 >
                     <Tabs

@@ -24,6 +24,7 @@ FABRIC_CA_CFG = os.path.join(BASE_PATH, "opt", "node", "ca.yaml.bak")
 
 FABRIC_CHAINCODE_STORE = os.path.join(BASE_PATH, "opt", "chaincode")
 BPMN_CHAINCODE_STORE = os.path.join(BASE_PATH, "opt", "chaincode-go-bpmn")
+ETHEREUM_CONTRACT_STORE = os.path.join(BASE_PATH, "opt", "ethereum-contracts")
 CURRENT_IP = "127.0.0.1" if mode == "server" else "127.0.0.1"
 AGENT_PORT = 7001
 DEFAULT_AGENT = default_agent = {

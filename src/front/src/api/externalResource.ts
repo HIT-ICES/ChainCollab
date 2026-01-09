@@ -124,9 +124,12 @@ export const updateBPMNStatus = async (bpmnId: string, newStatus: string, consor
     }
 }
 
-export const updateBpmnEnv = async (bpmnId: string, envId: string, consortiumId: string = '1') => {
+export const updateBpmnEnv = async (bpmnId: string, envId: string, envType: string, consortiumId: string = '1') => {
     try {
-        const response = await api.put(`/consortiums/${consortiumId}/bpmns/${bpmnId}`, { envId: envId })
+        const response = await api.put(`/consortiums/${consortiumId}/bpmns/${bpmnId}`, {
+            envId: envId,
+            envType: envType.toLowerCase()
+        })
         return response.data;
     } catch (error) {
         console.log(error);
@@ -221,6 +224,57 @@ export const packageBpmn = async (chaincodeContent: string, ffiContent: string, 
             chaincodeContent: chaincodeContent,
             ffiContent: ffiContent,
             orgId: orgId
+        })
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
+export const uploadEthContract = async (contractContent: string, orgId: string, bpmnId: string, consortiumId: string = '1', contractId?: string) => {
+    try {
+        const requestData: any = {
+            orgId: orgId
+        };
+
+        // 如果提供了contractContent,则传递合约内容
+        if (contractContent) {
+            requestData.contractContent = contractContent;
+        }
+
+        // 如果提供了contractId,也一起传递(用于向后兼容)
+        if (contractId) {
+            requestData.contractId = contractId;
+        }
+
+        const response = await api.post(`/consortiums/${consortiumId}/bpmns/${bpmnId}/upload-eth`, requestData)
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
+export const compileEthContract = async (contractId: string, orgId: string, bpmnId: string, consortiumId: string = '1') => {
+    try {
+        const response = await api.post(`/consortiums/${consortiumId}/bpmns/${bpmnId}/compile-eth`, {
+            contractId: contractId,
+            orgId: orgId
+        })
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
+export const deployEthContract = async (contractId: string, envId: string, namespace: string = 'default', constructorArgs: any[] = []) => {
+    try {
+        const response = await api.post(`/eth-environments/${envId}/contracts/deploy`, {
+            contract_id: contractId,
+            namespace: namespace,
+            constructor_args: constructorArgs
         })
         return response.data;
     } catch (error) {

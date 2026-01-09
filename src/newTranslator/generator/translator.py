@@ -6,6 +6,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from textx import metamodel_from_file
+
 if not __package__:
     CURRENT_DIR = Path(__file__).resolve().parent
     PACKAGE_ROOT = CURRENT_DIR.parent
@@ -61,6 +63,38 @@ def summarize_message_schema(message: Message) -> str:
 def escape_quotes(value: str) -> str:
     """Escape double quotes so schema strings can live inside DSL literals."""
     return value.replace("\"", "\\\"")
+
+
+_B2C_METAMODEL = None
+_PACKAGE_ROOT = Path(__file__).resolve().parent.parent
+
+
+def _load_b2c_metamodel():
+    global _B2C_METAMODEL
+    if _B2C_METAMODEL is None:
+        grammar_path = _PACKAGE_ROOT / "DSL" / "B2CDSL" / "b2cdsl" / "b2c.tx"
+        _B2C_METAMODEL = metamodel_from_file(str(grammar_path))
+    return _B2C_METAMODEL
+
+
+def _render_solidity_contract(dsl_content: str) -> str:
+    from b2cdsl_solidity import (
+        DSLContractAdapter as SolidityDSLContractAdapter,
+        SolidityRenderer,
+        TEMPLATE_ENV as SOL_TEMPLATE_ENV,
+        CONTRACT_TEMPLATE as SOL_CONTRACT_TEMPLATE,
+    )
+
+    metamodel = _load_b2c_metamodel()
+    model = metamodel.model_from_str(dsl_content)
+    if not getattr(model, "contracts", None):
+        raise ValueError("No contracts defined in DSL.")
+    contract = model.contracts[0]
+    adapter = SolidityDSLContractAdapter(contract)
+    renderer = SolidityRenderer(adapter)
+    context = renderer.build_context()
+    template = SOL_TEMPLATE_ENV.get_template(SOL_CONTRACT_TEMPLATE)
+    return template.render(**context).strip() + "\n"
 
 
 @dataclass
@@ -991,6 +1025,31 @@ class GoChaincodeTranslator:
             for business_rule in self._choreography.query_element_with_type(NodeType.BUSINESS_RULE_TASK)
         }
 
+class SolidityContractTranslator(GoChaincodeTranslator):
+    def generate_contract_bundle(
+        self,
+        output_path: Optional[str] = None,
+        is_output: bool = False,
+        contract_name: Optional[str] = None,
+    ) -> tuple[str, str]:
+        dsl_content = self.generate_chaincode(contract_name=contract_name)
+        contract_content = _render_solidity_contract(dsl_content)
+        if is_output and output_path:
+            Path(output_path).write_text(contract_content, encoding="utf8")
+        return contract_content, dsl_content
+
+    def generate_contract(
+        self,
+        output_path: Optional[str] = None,
+        is_output: bool = False,
+        contract_name: Optional[str] = None,
+    ) -> str:
+        contract_content, _ = self.generate_contract_bundle(
+            output_path=output_path,
+            is_output=is_output,
+            contract_name=contract_name,
+        )
+        return contract_content
 
 if __name__ == "__main__":
     demo_file = Path(__file__).with_name("resource").joinpath("bpmn", "BokeRental.bpmn")

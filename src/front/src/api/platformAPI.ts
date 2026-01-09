@@ -447,3 +447,46 @@ export const getFireflyIdentity = async (envId, orgId) => {
     console.error("获取fireflyIdentity失败", err);
   }
 }
+
+// Ethereum Identity
+export const getEthereumIdentityList = async (ethEnvironmentId, membershipId = null) => {
+  try {
+    let url = `/ethereum_identities?eth_environment_id=${ethEnvironmentId}`;
+    if (membershipId) {
+      url += `&membership_id=${membershipId}`;
+    }
+    const res = await api.get(url);
+    return res.data;
+  } catch (err) {
+    console.error("获取ethereumIdentityList失败", err);
+  }
+}
+
+export const retrieveEthereumIdentity = async (ethereumIdentityId) => {
+  try {
+    const res = await api.get(`/ethereum_identities/${ethereumIdentityId}`);
+    return res.data;
+  } catch (err) {
+    console.error("获取ethereumIdentity失败", err);
+  }
+}
+
+export const createEthereumIdentity = async (ethEnvironmentId, info = {
+  membership_id: "",
+  name: "",
+  address: "",
+  private_key: ""
+}) => {
+  try {
+    const res = await api.post(`/ethereum_identities`, {
+      eth_environment_id: ethEnvironmentId,
+      membership_id: info.membership_id,
+      name: info.name,
+      address: info.address,
+      private_key: info.private_key
+    });
+    return res.data;
+  } catch (err) {
+    console.error("创建ethereumIdentity失败", err);
+  }
+}

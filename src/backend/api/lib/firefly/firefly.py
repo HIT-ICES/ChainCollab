@@ -165,3 +165,41 @@ class Firefly_cli:
             traceback.print_exc()
             err_msg = f"Firefly init ethereum fail: {e}"
             raise Exception(err_msg)
+
+    def create_account(self, firefly_name):
+        """
+        Create a new Ethereum account using Firefly CLI
+
+        Args:
+            firefly_name: Name of the Firefly stack
+
+        Returns:
+            dict: Contains address and private_key of the new account
+        """
+        try:
+            command = [
+                self.ff_path,
+                "accounts",
+                "create",
+                firefly_name,
+            ]
+
+            print("Running Firefly create account command: " + " ".join(command))
+            result = subprocess.run(command, check=True, capture_output=True, text=True)
+            print(f"Firefly create account output: {result.stdout}")
+
+            # Parse the JSON output
+            account_info = json.loads(result.stdout)
+            return {
+                "address": account_info["address"],
+                "privateKey": account_info["privateKey"]
+            }
+
+        except subprocess.CalledProcessError as e:
+            traceback.print_exc()
+            err_msg = f"Firefly create account command failed: {e.stderr}"
+            raise Exception(err_msg)
+        except Exception as e:
+            traceback.print_exc()
+            err_msg = f"Firefly create account fail: {e}"
+            raise Exception(err_msg)
