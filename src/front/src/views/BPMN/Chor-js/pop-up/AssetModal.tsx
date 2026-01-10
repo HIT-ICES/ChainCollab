@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Modal, Input, Select, message } from 'antd';
+import { Modal, Input, Select, message, Checkbox } from 'antd';
 
 interface AssetModalProps {
   dataElementId: string;
@@ -26,6 +26,7 @@ export default function AssetModal({
   const [tokenId, setTokenId] = React.useState('');
   const [originalTokenId, setOriginalTokenId] = React.useState('');
   const [refTokenIds, setRefTokenIds] = React.useState<string[]>([]);
+  const [tokenHasExistInERC, setTokenHasExistInERC] = React.useState(false);
 
   // tokenId 和 FT tokenName 可选列表
   const [tokenIdOptions, setTokenIdOptions] = React.useState<string[]>([]);
@@ -45,6 +46,7 @@ export default function AssetModal({
         const loadedTokenId = parsed.tokenId || '';
         setTokenId(loadedTokenId);
         setOriginalTokenId(loadedTokenId);
+        setTokenHasExistInERC(parsed.tokenHasExistInERC || false);
         if (parsed.assetType === 'value-added' && Array.isArray(parsed.refTokenIds)) {
           setRefTokenIds(parsed.refTokenIds);
         } else {
@@ -66,6 +68,7 @@ export default function AssetModal({
       setTokenId('');
       setOriginalTokenId('');
       setRefTokenIds([]);
+      setTokenHasExistInERC(false);
       loadDataFromBPMN();
     }
   }, [shape, isModalOpen]);
@@ -165,6 +168,8 @@ export default function AssetModal({
     // FT 不需要 tokenId
     if (!(assetType === 'transferable' && tokenType === 'FT') && tokenId) {
       payload.tokenId = tokenId;
+      // 添加 tokenHasExistInERC 字段
+      payload.tokenHasExistInERC = tokenHasExistInERC;
     }
 
     // value-added 需要 refTokenIds
@@ -262,6 +267,19 @@ export default function AssetModal({
             onChange={e => setTokenId(e.target.value)}
             placeholder="Enter token ID"
           />
+          <div style={{ marginTop: 8 }}>
+            <Checkbox
+              checked={tokenHasExistInERC}
+              onChange={e => setTokenHasExistInERC(e.target.checked)}
+            >
+              Token already exists in ERC contract (skip mint operation)
+            </Checkbox>
+          </div>
+          {tokenHasExistInERC && (
+            <div style={{ fontSize: 12, color: '#1890ff', marginTop: 4, paddingLeft: 24 }}>
+              ℹ️ This token will be treated as already minted. A default mint owner will be assigned based on participant bindings.
+            </div>
+          )}
         </div>
       )}
 

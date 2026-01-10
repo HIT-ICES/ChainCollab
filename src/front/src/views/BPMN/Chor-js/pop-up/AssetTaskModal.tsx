@@ -41,6 +41,7 @@ export default function AssetTaskModal({
   const [tokenId, setTokenId] = React.useState('');
   const [originalTokenId, setOriginalTokenId] = React.useState('');
   const [tokenURL, setTokenURL] = React.useState('');
+  const [tokenHasExistInERC, setTokenHasExistInERC] = React.useState(false);
   // 新增：tokenId 和 FT tokenName 可选列表
   const [tokenIdOptions, setTokenIdOptions] = React.useState<string[]>([]);
   const [tokenNameOptions, setTokenNameOptions] = React.useState<string[]>([]);
@@ -183,6 +184,7 @@ export default function AssetTaskModal({
           setTokenName(linkedAsset.tokenName || '');
           setTokenId(linkedAsset.tokenId || '');
           setOriginalTokenId(linkedAsset.tokenId || '');
+          setTokenHasExistInERC(linkedAsset.tokenHasExistInERC || false);
           // refTokenIds 也从 DataObject 读取
           if (linkedAsset.assetType === 'value-added' && Array.isArray(linkedAsset.refTokenIds)) {
             setRefTokenIds(linkedAsset.refTokenIds);
@@ -239,6 +241,7 @@ export default function AssetTaskModal({
       setTokenName(linkedAsset.tokenName || '');
       setTokenId(linkedAsset.tokenId || '');
       setOriginalTokenId(linkedAsset.tokenId || '');
+      setTokenHasExistInERC(linkedAsset.tokenHasExistInERC || false);
       // refTokenIds 也从 DataObject 读取
       if (linkedAsset.assetType === 'value-added' && Array.isArray(linkedAsset.refTokenIds)) {
         setRefTokenIds(linkedAsset.refTokenIds);
@@ -565,6 +568,11 @@ export default function AssetTaskModal({
             disabled
             placeholder="Token ID from connected DataObject"
           />
+          {tokenHasExistInERC && (
+            <div style={{ fontSize: 12, color: '#52c41a', marginTop: 4, padding: '4px 8px', background: '#f6ffed', border: '1px solid #b7eb8f', borderRadius: 4 }}>
+              ✓ This token is marked as already existing in ERC contract. Validation will assume it has been minted.
+            </div>
+          )}
         </div>
       )}
 
