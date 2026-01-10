@@ -230,6 +230,10 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 				throw new Error('BPMN content is empty. Available fields: ' + Object.keys(bpmn || {}).join(', '));
 			}
 
+			// Extract firefly URL for blockchain queries
+			const fireflyUrl = bpmn.firefly_url;
+			console.log('[Validation] Firefly URL:', fireflyUrl);
+
 			console.log('[Validation] Participant bindings:', showBindingParticipantValueMap);
 			console.log('[Validation] Task ERC map:', showTaskERCMap);
 
@@ -238,7 +242,8 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 			const result = await validateInstance(
 				bpmnXml,
 				showBindingParticipantValueMap,
-				showTaskERCMap
+				showTaskERCMap,
+				fireflyUrl
 			);
 
 			console.log('[Validation] Validation result:', result);
