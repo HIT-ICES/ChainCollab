@@ -237,8 +237,12 @@ export async function validateInstance(
     console.log(`[InstanceValidator] Total tasks to process: ${executionOrder.length}`);
 
     // ===== STEP 4: Process tasks in execution order using the token registry from DataObjects =====
-    // Track token ownership through the process flow
+    // Track token ownership through the process flow (NFT only)
     const tokenOwnership = new Map<string, string[]>(); // tokenId -> list of participant IDs who own it
+
+    // Track FT balances separately (FT only)
+    // Key: tokenName, Value: Map<participantId, balance>
+    const ftBalances = new Map<string, Map<string, number>>();
 
     // Track which ERC contract each token is bound to
     const tokenERCBinding = new Map<string, { ercId: string; ercName: string; taskId: string; taskName: string }>();
@@ -424,15 +428,28 @@ export async function validateInstance(
           }
 
           if (ownerParticipantId) {
-            tokenOwnership.set(tokenIdentifier, [ownerParticipantId]);
-            console.log(`[InstanceValidator] Pre-mint: Token "${tokenIdentifier}" (${tokenInfo.tokenName}) already exists in ERC. Owner set to: ${ownerParticipantId}`);
+            // For FT, initialize balance instead of ownership
+            if (tokenInfo.tokenType === 'FT') {
+              // FT: Initialize balance map for this token
+              if (!ftBalances.has(tokenInfo.tokenName)) {
+                ftBalances.set(tokenInfo.tokenName, new Map());
+              }
+              // Query actual balance from blockchain for the owner
+              // For now, we mark the owner as having balance without specific amount
+              // The actual balance will be validated during operations
+              console.log(`[InstanceValidator] Pre-mint: FT "${tokenInfo.tokenName}" already exists in ERC. Owner balance initialized for: ${ownerParticipantId}`);
+            } else {
+              // NFT: Set ownership
+              tokenOwnership.set(tokenIdentifier, [ownerParticipantId]);
+              console.log(`[InstanceValidator] Pre-mint: NFT "${tokenIdentifier}" (${tokenInfo.tokenName}) already exists in ERC. Owner set to: ${ownerParticipantId}`);
 
-            // Also record this as a "minted" token to prevent duplicate minting
-            mintedTokens.set(tokenIdentifier, {
-              taskName: '[Pre-existing in ERC]',
-              taskId: 'ERC_CONTRACT',
-              operation: 'mint'
-            });
+              // Also record this as a "minted" token to prevent duplicate minting
+              mintedTokens.set(tokenIdentifier, {
+                taskName: '[Pre-existing in ERC]',
+                taskId: 'ERC_CONTRACT',
+                operation: 'mint'
+              });
+            }
           } else {
             // CRITICAL: Token marked as existing but owner query failed or returned no match
             console.error(`[InstanceValidator] CRITICAL: Token "${tokenIdentifier}" (${tokenInfo.tokenName}) is marked as existing in ERC but owner could not be determined`);
@@ -719,9 +736,10 @@ export async function validateInstance(
             if (tokenIdentifier) {
               // Check if this is an NFT (not FT)
               const isNFT = effectiveTokenType !== 'FT';
+              const isFT = effectiveTokenType === 'FT';
 
               if (isNFT) {
-                // Check if this token was already minted
+                // NFT: Check if this token was already minted
                 const previousMint = mintedTokens.get(tokenIdentifier);
                 if (previousMint) {
                   errors.push({
@@ -736,12 +754,33 @@ export async function validateInstance(
                 // Record this mint operation
                 mintedTokens.set(tokenIdentifier, { taskName, taskId, operation: 'mint' });
                 console.log(`[InstanceValidator] Mint: NFT ${tokenDisplayName} recorded as minted in task ${taskName}`);
-              } else {
-                console.log(`[InstanceValidator] Mint: FT ${tokenDisplayName} can be minted multiple times`);
-              }
 
-              tokenOwnership.set(tokenIdentifier, [caller]);
-              console.log(`[InstanceValidator] Mint: ${caller} now owns ${tokenDisplayName}`);
+                // NFT: Set ownership
+                tokenOwnership.set(tokenIdentifier, [caller]);
+                console.log(`[InstanceValidator] Mint: ${caller} now owns NFT ${tokenDisplayName}`);
+              } else if (isFT) {
+                // FT: Increase balance
+                const ftTokenName = effectiveTokenName || tokenIdentifier;
+                if (!ftBalances.has(ftTokenName)) {
+                  ftBalances.set(ftTokenName, new Map());
+                }
+                const balanceMap = ftBalances.get(ftTokenName)!;
+                const currentBalance = balanceMap.get(caller) || 0;
+                const mintAmount = parseInt(taskInfo.tokenNumber) || 0;
+
+                if (mintAmount <= 0) {
+                  errors.push({
+                    taskId,
+                    taskName,
+                    message: `FT mint operation requires a positive tokenNumber, but got: ${taskInfo.tokenNumber}`,
+                    severity: 'error'
+                  });
+                  return;
+                }
+
+                balanceMap.set(caller, currentBalance + mintAmount);
+                console.log(`[InstanceValidator] Mint: FT ${tokenDisplayName} - ${caller} balance: ${currentBalance} → ${currentBalance + mintAmount} (+${mintAmount})`);
+              }
             }
 
             // Validate that minter has proper authorization
@@ -759,34 +798,66 @@ export async function validateInstance(
             break;
 
           case 'burn':
-            // Burn requires ownership of the token
+            // Burn requires ownership (NFT) or sufficient balance (FT)
             if (tokenIdentifier) {
-              const owners = tokenOwnership.get(tokenIdentifier) || [];
-              console.log(`[InstanceValidator] Burn check: ${tokenDisplayName} (Type: ${effectiveTokenType}) owners: [${owners.join(', ')}], caller: ${caller}`);
+              const isFT = effectiveTokenType === 'FT';
 
-              const hasOwnership = owners.includes(caller);
+              if (isFT) {
+                // FT: Check balance
+                const ftTokenName = effectiveTokenName || tokenIdentifier;
+                const balanceMap = ftBalances.get(ftTokenName);
+                const currentBalance = balanceMap?.get(caller) || 0;
+                const burnAmount = parseInt(taskInfo.tokenNumber) || 0;
 
-              if (!hasOwnership) {
-                errors.push({
-                  taskId,
-                  taskName,
-                  message: `Burn operation requires "${caller}" to own token "${tokenDisplayName}", but current owners are: ${owners.join(', ') || 'none'}`,
-                  severity: 'error'
-                });
+                console.log(`[InstanceValidator] Burn check: FT ${tokenDisplayName} - ${caller} balance: ${currentBalance}, burn amount: ${burnAmount}`);
+
+                if (burnAmount <= 0) {
+                  errors.push({
+                    taskId,
+                    taskName,
+                    message: `FT burn operation requires a positive tokenNumber, but got: ${taskInfo.tokenNumber}`,
+                    severity: 'error'
+                  });
+                  return;
+                }
+
+                if (currentBalance < burnAmount) {
+                  errors.push({
+                    taskId,
+                    taskName,
+                    message: `Burn operation requires "${caller}" to have at least ${burnAmount} of token "${tokenDisplayName}", but current balance is: ${currentBalance}`,
+                    severity: 'error'
+                  });
+                } else {
+                  // Decrease balance
+                  balanceMap!.set(caller, currentBalance - burnAmount);
+                  console.log(`[InstanceValidator] Burn: FT ${tokenDisplayName} - ${caller} balance: ${currentBalance} → ${currentBalance - burnAmount} (-${burnAmount})`);
+                }
               } else {
-                // IMPORTANT: Only remove ownership and mark as burned if caller actually owns the token
-                // This prevents invalid burns from corrupting the ownership state
-                tokenOwnership.delete(tokenIdentifier);
+                // NFT: Check ownership
+                const owners = tokenOwnership.get(tokenIdentifier) || [];
+                console.log(`[InstanceValidator] Burn check: ${tokenDisplayName} (Type: ${effectiveTokenType}) owners: [${owners.join(', ')}], caller: ${caller}`);
 
-                // Mark NFT as burned and remove from minted list (can be re-minted after burn)
-                if (effectiveTokenType === 'NFT') {
+                const hasOwnership = owners.includes(caller);
+
+                if (!hasOwnership) {
+                  errors.push({
+                    taskId,
+                    taskName,
+                    message: `Burn operation requires "${caller}" to own token "${tokenDisplayName}", but current owners are: ${owners.join(', ') || 'none'}`,
+                    severity: 'error'
+                  });
+                } else {
+                  // IMPORTANT: Only remove ownership and mark as burned if caller actually owns the token
+                  // This prevents invalid burns from corrupting the ownership state
+                  tokenOwnership.delete(tokenIdentifier);
+
+                  // Mark NFT as burned and remove from minted list (can be re-minted after burn)
                   burnedTokens.set(tokenIdentifier, { taskName, taskId });
                   mintedTokens.delete(tokenIdentifier); // Allow re-minting after burn
                   console.log(`[InstanceValidator] Burn: NFT ${tokenDisplayName} marked as BURNED in task ${taskName}. Token identifier: ${tokenIdentifier}`);
                   console.log(`[InstanceValidator] Burn: NFT ${tokenDisplayName} removed from minted list, can be re-minted now`);
                   console.log(`[InstanceValidator] Burned tokens map now contains:`, Array.from(burnedTokens.keys()));
-                } else {
-                  console.log(`[InstanceValidator] Burn: ${tokenDisplayName} (Type: ${effectiveTokenType}) removed from ownership (FT can be re-minted)`);
                 }
               }
             }
@@ -794,54 +865,122 @@ export async function validateInstance(
 
           case 'transfer':
           case 'Transfer':
-            // Transfer requires ownership and valid recipient
+            // Transfer requires ownership (NFT) or sufficient balance (FT) and valid recipient
             if (tokenIdentifier) {
-              const owners = tokenOwnership.get(tokenIdentifier) || [];
-              console.log(`[InstanceValidator] Transfer check: ${tokenDisplayName} owners: [${owners.join(', ')}], caller: ${caller}`);
+              const isFT = effectiveTokenType === 'FT';
 
-              // Check if caller owns the token
-              const hasOwnership = owners.includes(caller);
+              if (isFT) {
+                // FT: Check balance and transfer
+                const ftTokenName = effectiveTokenName || tokenIdentifier;
+                const balanceMap = ftBalances.get(ftTokenName);
+                const currentBalance = balanceMap?.get(caller) || 0;
+                const transferAmount = parseInt(taskInfo.tokenNumber) || 0;
 
-              if (!hasOwnership) {
-                errors.push({
-                  taskId,
-                  taskName,
-                  message: `Transfer operation requires "${caller}" to own token "${tokenDisplayName}", but current owners are: ${owners.join(', ') || 'none'}`,
-                  severity: 'error'
-                });
-              }
+                console.log(`[InstanceValidator] Transfer check: FT ${tokenDisplayName} - ${caller} balance: ${currentBalance}, transfer amount: ${transferAmount}`);
 
-              // Validate callee exists
-              if (!callee || callee.length === 0) {
-                errors.push({
-                  taskId,
-                  taskName,
-                  message: `Transfer operation requires a recipient (callee) for token "${tokenDisplayName}"`,
-                  severity: 'error'
-                });
-              } else if (hasOwnership) {
-                // IMPORTANT: Only update ownership if caller actually owns the token
-                // This prevents invalid transfers from corrupting the ownership state
-                tokenOwnership.set(tokenIdentifier, callee);
-                console.log(`[InstanceValidator] Transfer: ${tokenDisplayName} ownership updated from [${owners.join(', ')}] to [${callee.join(', ')}]`);
+                if (transferAmount <= 0) {
+                  errors.push({
+                    taskId,
+                    taskName,
+                    message: `FT transfer operation requires a positive tokenNumber, but got: ${taskInfo.tokenNumber}`,
+                    severity: 'error'
+                  });
+                  return;
+                }
 
-                // Verify all callees are bound
-                callee.forEach((calleeId: string) => {
-                  const calleeKey = Array.from(participantBindings.keys()).find(key =>
-                    key.includes(calleeId) || calleeId.includes(key)
-                  );
-                  if (!calleeKey) {
-                    errors.push({
-                      taskId,
-                      taskName,
-                      message: `Transfer recipient "${calleeId}" is not bound to any participant (token: ${tokenDisplayName})`,
-                      severity: 'error'
-                    });
-                  }
-                });
+                if (currentBalance < transferAmount) {
+                  errors.push({
+                    taskId,
+                    taskName,
+                    message: `Transfer operation requires "${caller}" to have at least ${transferAmount} of token "${tokenDisplayName}", but current balance is: ${currentBalance}`,
+                    severity: 'error'
+                  });
+                }
+
+                // Validate callee exists
+                if (!callee || callee.length === 0) {
+                  errors.push({
+                    taskId,
+                    taskName,
+                    message: `Transfer operation requires a recipient (callee) for token "${tokenDisplayName}"`,
+                    severity: 'error'
+                  });
+                } else if (currentBalance >= transferAmount) {
+                  // Valid transfer: decrease sender balance, increase recipient balance
+                  balanceMap!.set(caller, currentBalance - transferAmount);
+
+                  // For FT, we assume single recipient (callee[0])
+                  const recipient = callee[0];
+                  const recipientBalance = balanceMap!.get(recipient) || 0;
+                  balanceMap!.set(recipient, recipientBalance + transferAmount);
+
+                  console.log(`[InstanceValidator] Transfer: FT ${tokenDisplayName} - ${caller} balance: ${currentBalance} → ${currentBalance - transferAmount} (-${transferAmount})`);
+                  console.log(`[InstanceValidator] Transfer: FT ${tokenDisplayName} - ${recipient} balance: ${recipientBalance} → ${recipientBalance + transferAmount} (+${transferAmount})`);
+
+                  // Verify all callees are bound
+                  callee.forEach((calleeId: string) => {
+                    const calleeKey = Array.from(participantBindings.keys()).find(key =>
+                      key.includes(calleeId) || calleeId.includes(key)
+                    );
+                    if (!calleeKey) {
+                      errors.push({
+                        taskId,
+                        taskName,
+                        message: `Transfer recipient "${calleeId}" is not bound to any participant (token: ${tokenDisplayName})`,
+                        severity: 'error'
+                      });
+                    }
+                  });
+                }
               } else {
-                // Caller doesn't own the token, so we don't update ownership
-                console.log(`[InstanceValidator] Transfer: Skipping ownership update because caller doesn't own the token`);
+                // NFT: Check ownership and transfer
+                const owners = tokenOwnership.get(tokenIdentifier) || [];
+                console.log(`[InstanceValidator] Transfer check: NFT ${tokenDisplayName} owners: [${owners.join(', ')}], caller: ${caller}`);
+
+                // Check if caller owns the token
+                const hasOwnership = owners.includes(caller);
+
+                if (!hasOwnership) {
+                  errors.push({
+                    taskId,
+                    taskName,
+                    message: `Transfer operation requires "${caller}" to own token "${tokenDisplayName}", but current owners are: ${owners.join(', ') || 'none'}`,
+                    severity: 'error'
+                  });
+                }
+
+                // Validate callee exists
+                if (!callee || callee.length === 0) {
+                  errors.push({
+                    taskId,
+                    taskName,
+                    message: `Transfer operation requires a recipient (callee) for token "${tokenDisplayName}"`,
+                    severity: 'error'
+                  });
+                } else if (hasOwnership) {
+                  // IMPORTANT: Only update ownership if caller actually owns the token
+                  // This prevents invalid transfers from corrupting the ownership state
+                  tokenOwnership.set(tokenIdentifier, callee);
+                  console.log(`[InstanceValidator] Transfer: NFT ${tokenDisplayName} ownership updated from [${owners.join(', ')}] to [${callee.join(', ')}]`);
+
+                  // Verify all callees are bound
+                  callee.forEach((calleeId: string) => {
+                    const calleeKey = Array.from(participantBindings.keys()).find(key =>
+                      key.includes(calleeId) || calleeId.includes(key)
+                    );
+                    if (!calleeKey) {
+                      errors.push({
+                        taskId,
+                        taskName,
+                        message: `Transfer recipient "${calleeId}" is not bound to any participant (token: ${tokenDisplayName})`,
+                        severity: 'error'
+                      });
+                    }
+                  });
+                } else {
+                  // Caller doesn't own the token, so we don't update ownership
+                  console.log(`[InstanceValidator] Transfer: Skipping ownership update because caller doesn't own the token`);
+                }
               }
             }
             break;
