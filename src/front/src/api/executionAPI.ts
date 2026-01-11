@@ -1,6 +1,6 @@
-import { identity } from 'lodash';
 import { fireflyAPI } from './apiConfig.ts';
 import axios from 'axios';
+import { identity } from 'lodash';
 // Register Interface and Contract
 
 
@@ -299,6 +299,116 @@ export const invokeAddAuthority = async (
     } catch (error) {
         console.error("Error occurred while invoking AddMintAuthority_nft:", error);
         return [];
+    }
+};
+
+/**
+ * Get registered API name from chaincode name by querying Firefly API list
+ * @param fireflyUrl - Full Firefly URL (e.g., http://127.0.0.1:5002/api/v1/namespaces/default/apis/test9-bdccb7)
+ * @param chaincodeName - The chaincode name to search for (e.g., "ERC721test1")
+ * @returns The registered API name (e.g., "ERC721test1-5e139d") or null if not found
+ */
+export const getRegisteredApiName = async (fireflyUrl: string, chaincodeName: string): Promise<string | null> => {
+    try {
+        // Extract base APIs URL from full Firefly URL
+        // Input: http://127.0.0.1:5002/api/v1/namespaces/default/apis/test9-bdccb7
+        // Output: http://127.0.0.1:5002/api/v1/namespaces/default/apis
+        const urlMatch = fireflyUrl.match(/^(https?:\/\/[^\/]+\/api\/v1\/namespaces\/[^\/]+\/apis)/);
+
+        if (!urlMatch) {
+            console.error(`[getRegisteredApiName] Invalid Firefly URL format: ${fireflyUrl}`);
+            return null;
+        }
+
+        const baseApisUrl = urlMatch[1];
+        console.log(`[getRegisteredApiName] Base APIs URL: ${baseApisUrl}`);
+        console.log(`[getRegisteredApiName] Searching for chaincode: ${chaincodeName}`);
+
+        // Query Firefly API list
+        const res = await fireflyAPI.get(baseApisUrl);
+        const apisList = res.data;
+
+        console.log(`[getRegisteredApiName] Found ${Array.isArray(apisList) ? apisList.length : 0} APIs`);
+
+        if (!Array.isArray(apisList)) {
+            console.error(`[getRegisteredApiName] Unexpected response format:`, apisList);
+            return null;
+        }
+
+        // Find API by chaincode name
+        const matchingApi = apisList.find((api: any) =>
+            api.location && api.location.chaincode === chaincodeName
+        );
+
+        if (matchingApi) {
+            console.log(`[getRegisteredApiName] ✓ Found registered API name: ${matchingApi.name}`);
+            console.log(`[getRegisteredApiName] ✓ API details:`, {
+                id: matchingApi.id,
+                name: matchingApi.name,
+                chaincode: matchingApi.location.chaincode,
+                channel: matchingApi.location.channel
+            });
+            return matchingApi.name;
+        }
+
+        console.warn(`[getRegisteredApiName] No API found for chaincode: ${chaincodeName}`);
+        console.log(`[getRegisteredApiName] Available chaincodes:`,
+            apisList.map((a: any) => a.location?.chaincode).filter(Boolean)
+        );
+        return null;
+
+    } catch (error) {
+        console.error(`[getRegisteredApiName] Error querying API list:`, error);
+        return null;
+    }
+};
+
+/**
+ * Query data from ERC contract using registered API name
+ * @param fireflyUrl - Full Firefly URL (e.g., http://127.0.0.1:5002/api/v1/namespaces/default/apis/test9-bdccb7)
+ * @param chaincodeName - The chaincode name (e.g., "ERC721test1")
+ * @param methodName - The query method name (e.g., "OwnerOf", "BalanceOf")
+ * @param inputParams - Input parameters for the query
+ * @returns Query result data
+ */
+export const queryERCContract = async (
+    fireflyUrl: string,
+    chaincodeName: string,
+    methodName: string,
+    inputParams: any
+) => {
+    try {
+        // Get registered API name from chaincode name
+        const registeredApiName = await getRegisteredApiName(fireflyUrl, chaincodeName);
+
+        if (!registeredApiName) {
+            console.error(`[queryERCContract] Could not find registered API for chaincode: ${chaincodeName}`);
+            return null;
+        }
+
+        // Extract base APIs URL
+        const urlMatch = fireflyUrl.match(/^(https?:\/\/[^\/]+\/api\/v1\/namespaces\/[^\/]+\/apis)/);
+        if (!urlMatch) {
+            console.error(`[queryERCContract] Invalid Firefly URL format: ${fireflyUrl}`);
+            return null;
+        }
+
+        const baseApisUrl = urlMatch[1];
+        const queryUrl = `${baseApisUrl}/${registeredApiName}/query/${methodName}`;
+
+        console.log(`[queryERCContract] Query URL: ${queryUrl}`);
+        console.log(`[queryERCContract] Input params:`, inputParams);
+
+        const res = await fireflyAPI.post(queryUrl, {
+            input: inputParams
+        });
+
+        console.log(`[queryERCContract] Query result:`, res.data);
+        return res.data;
+
+    } catch (error) {
+        console.error(`[queryERCContract] Error querying ERC contract:`, error);
+        return null;
     }
 };
 

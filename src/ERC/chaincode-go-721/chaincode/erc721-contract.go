@@ -65,14 +65,17 @@ func _nftExists(ctx contractapi.TransactionContextInterface, tokenId string) boo
 // 权限相关
 func (c *TokenERC721Contract) AddMintAuthority(ctx contractapi.TransactionContextInterface, instanceID string, allowedMSPs []string) error {
 	key := "instance_auth_" + instanceID
+	fmt.Printf("[AddMintAuthority] Starting for instanceID: %s, allowedMSPs: %v\n", instanceID, allowedMSPs)
 
 	// 先检查是否已经存在
 	existing, err := ctx.GetStub().GetState(key)
 	if err != nil {
+		fmt.Printf("[AddMintAuthority] Error getting state: %v\n", err)
 		return err
 	}
 	if existing != nil {
 		// 已经存在，不再存储
+		fmt.Printf("[AddMintAuthority] Authority already exists for instanceID: %s\n", instanceID)
 		return nil
 	}
 
@@ -83,10 +86,18 @@ func (c *TokenERC721Contract) AddMintAuthority(ctx contractapi.TransactionContex
 
 	data, err := json.Marshal(authority)
 	if err != nil {
+		fmt.Printf("[AddMintAuthority] Error marshaling data: %v\n", err)
 		return err
 	}
 
-	return ctx.GetStub().PutState(key, data)
+	err = ctx.GetStub().PutState(key, data)
+	if err != nil {
+		fmt.Printf("[AddMintAuthority] Error putting state: %v\n", err)
+		return err
+	}
+
+	fmt.Printf("[AddMintAuthority] Successfully added mint authority for instanceID: %s\n", instanceID)
+	return nil
 }
 
 // BalanceOf counts all non-fungible tokens assigned to an owner
@@ -151,6 +162,7 @@ func (c *TokenERC721Contract) OwnerOf(ctx contractapi.TransactionContextInterfac
 // param {String} tokenId the non-fungible token to approve
 // returns {Boolean} Return whether the approval was successful or not
 func (c *TokenERC721Contract) Approve(ctx contractapi.TransactionContextInterface, operator string, tokenId string) (bool, error) {
+	fmt.Printf("[Approve] Starting for tokenId: %s, operator: %s\n", tokenId, operator)
 
 	// Check if contract has been intilized first
 	initialized, err := checkInitialized(ctx)
@@ -171,6 +183,7 @@ func (c *TokenERC721Contract) Approve(ctx contractapi.TransactionContextInterfac
 		return false, fmt.Errorf("failed to DecodeString senderBytes: %v", err)
 	}
 	sender := string(senderBytes)
+	fmt.Printf("[Approve] Sender: %s\n", sender)
 
 	nft, err := _readNFT(ctx, tokenId)
 	if err != nil {
@@ -185,6 +198,7 @@ func (c *TokenERC721Contract) Approve(ctx contractapi.TransactionContextInterfac
 		return false, fmt.Errorf("failed to get IsApprovedForAll: %v", err)
 	}
 	if owner != sender && !operatorApproval {
+		fmt.Printf("[Approve] Permission denied: sender %s is not owner %s nor authorized operator\n", sender, owner)
 		return false, errors.New("the sender is not the current owner nor an authorized operator")
 	}
 
@@ -205,6 +219,7 @@ func (c *TokenERC721Contract) Approve(ctx contractapi.TransactionContextInterfac
 		return false, fmt.Errorf("failed to PutState for nftKey: %v", err)
 	}
 
+	fmt.Printf("[Approve] Successfully approved operator %s for tokenId: %s\n", operator, tokenId)
 	return true, nil
 }
 
@@ -214,6 +229,7 @@ func (c *TokenERC721Contract) Approve(ctx contractapi.TransactionContextInterfac
 // param {Boolean} approved True if the operator is approved, false to revoke approval
 // returns {Boolean} Return whether the approval was successful or not
 func (c *TokenERC721Contract) SetApprovalForAll(ctx contractapi.TransactionContextInterface, operator string, approved bool) (bool, error) {
+	fmt.Printf("[SetApprovalForAll] Starting for operator: %s, approved: %v\n", operator, approved)
 
 	// Check if contract has been intilized first
 	initialized, err := checkInitialized(ctx)
@@ -234,6 +250,7 @@ func (c *TokenERC721Contract) SetApprovalForAll(ctx contractapi.TransactionConte
 		return false, fmt.Errorf("failed to DecodeString sender: %v", err)
 	}
 	sender := string(senderBytes)
+	fmt.Printf("[SetApprovalForAll] Owner: %s\n", sender)
 
 	nftApproval := new(Approval)
 	nftApproval.Owner = sender
@@ -261,6 +278,7 @@ func (c *TokenERC721Contract) SetApprovalForAll(ctx contractapi.TransactionConte
 		return false, fmt.Errorf("failed to SetEvent ApprovalForAll: %v", err)
 	}
 
+	fmt.Printf("[SetApprovalForAll] Successfully set approval for operator %s to %v\n", operator, approved)
 	return true, nil
 }
 
@@ -331,6 +349,7 @@ func (c *TokenERC721Contract) GetApproved(ctx contractapi.TransactionContextInte
 // returns {Boolean} Return whether the transfer was successful or not
 
 func (c *TokenERC721Contract) TransferFrom(ctx contractapi.TransactionContextInterface, from string, to string, tokenId string) (bool, error) {
+	fmt.Printf("[TransferFrom] Starting transfer of tokenId: %s from %s to %s\n", tokenId, from, to)
 
 	// Check if contract has been intilized first
 	initialized, err := checkInitialized(ctx)
@@ -352,6 +371,7 @@ func (c *TokenERC721Contract) TransferFrom(ctx contractapi.TransactionContextInt
 		return false, fmt.Errorf("failed to DecodeString sender: %v", err)
 	}
 	sender := string(senderBytes)
+	fmt.Printf("[TransferFrom] Sender: %s\n", sender)
 
 	nft, err := _readNFT(ctx, tokenId)
 	if err != nil {
@@ -365,11 +385,13 @@ func (c *TokenERC721Contract) TransferFrom(ctx contractapi.TransactionContextInt
 		return false, fmt.Errorf("failed to get IsApprovedForAll : %v", err)
 	}
 	if owner != sender && operator != sender && !operatorApproval {
+		fmt.Printf("[TransferFrom] Permission denied: sender %s is not owner %s nor authorized\n", sender, owner)
 		return false, errors.New("the sender is not the current owner nor an authorized operator")
 	}
 
 	// Check if `from` is the current owner
 	if owner != from {
+		fmt.Printf("[TransferFrom] Error: from address %s is not the current owner %s\n", from, owner)
 		return false, errors.New("the from is not the current owner")
 	}
 
@@ -392,6 +414,7 @@ func (c *TokenERC721Contract) TransferFrom(ctx contractapi.TransactionContextInt
 	if err != nil {
 		return false, fmt.Errorf("failed to PutState nftBytes %s: %v", nftBytes, err)
 	}
+	fmt.Printf("[TransferFrom] Updated NFT ownership to %s\n", to)
 
 	// Remove a composite key from the balance of the current owner
 	balanceKeyFrom, err := ctx.GetStub().CreateCompositeKey(balancePrefix, []string{from, tokenId})
@@ -403,6 +426,7 @@ func (c *TokenERC721Contract) TransferFrom(ctx contractapi.TransactionContextInt
 	if err != nil {
 		return false, fmt.Errorf("failed to DelState balanceKeyFrom %s: %v", nftBytes, err)
 	}
+	fmt.Printf("[TransferFrom] Removed balance from %s\n", from)
 
 	// Save a composite key to count the balance of a new owner
 	balanceKeyTo, err := ctx.GetStub().CreateCompositeKey(balancePrefix, []string{to, tokenId})
@@ -413,6 +437,7 @@ func (c *TokenERC721Contract) TransferFrom(ctx contractapi.TransactionContextInt
 	if err != nil {
 		return false, fmt.Errorf("failed to PutState balanceKeyTo %s: %v", balanceKeyTo, err)
 	}
+	fmt.Printf("[TransferFrom] Added balance to %s\n", to)
 
 	// Emit the Transfer event
 	transferEvent := new(Transfer)
@@ -429,6 +454,7 @@ func (c *TokenERC721Contract) TransferFrom(ctx contractapi.TransactionContextInt
 	if err != nil {
 		return false, fmt.Errorf("failed to SetEvent transferEventBytes %s: %v", transferEventBytes, err)
 	}
+	fmt.Printf("[TransferFrom] Successfully transferred tokenId %s from %s to %s\n", tokenId, from, to)
 	return true, nil
 }
 
@@ -546,6 +572,7 @@ func (c *TokenERC721Contract) TotalSupply(ctx contractapi.TransactionContextInte
 // param {String} symbol The symbol of the token
 
 func (c *TokenERC721Contract) Initialize(ctx contractapi.TransactionContextInterface, name string, symbol string) (bool, error) {
+	fmt.Printf("[Initialize] Starting initialization with name: %s, symbol: %s\n", name, symbol)
 	// Check minter authorization - this sample assumes Org1 is the issuer with privilege to set the name and symbol
 	//初始化权限暂停
 	// clientMSPID, err := ctx.GetClientIdentity().GetMSPID()
@@ -561,6 +588,7 @@ func (c *TokenERC721Contract) Initialize(ctx contractapi.TransactionContextInter
 		return false, fmt.Errorf("failed to get Name: %v", err)
 	}
 	if bytes != nil {
+		fmt.Printf("[Initialize] Contract already initialized\n")
 		return false, errors.New("contract options are already set, client is not authorized to change them")
 	}
 
@@ -574,6 +602,7 @@ func (c *TokenERC721Contract) Initialize(ctx contractapi.TransactionContextInter
 		return false, fmt.Errorf("failed to PutState symbolKey %s: %v", symbolKey, err)
 	}
 
+	fmt.Printf("[Initialize] Successfully initialized contract with name: %s, symbol: %s\n", name, symbol)
 	return true, nil
 }
 
@@ -583,6 +612,7 @@ func (c *TokenERC721Contract) Initialize(ctx contractapi.TransactionContextInter
 // returns {Object} Return the non-fungible token object
 
 func (c *TokenERC721Contract) MintWithTokenURI(ctx contractapi.TransactionContextInterface, tokenId string, tokenURI string, instanceID string) (*Nft, error) {
+	fmt.Printf("[MintWithTokenURI] Starting mint for tokenId: %s, instanceID: %s\n", tokenId, instanceID)
 
 	// Check if contract has been intilized first
 	initialized, err := checkInitialized(ctx)
@@ -598,10 +628,12 @@ func (c *TokenERC721Contract) MintWithTokenURI(ctx contractapi.TransactionContex
 	if err != nil {
 		return nil, fmt.Errorf("failed to get clientMSPID: %v", err)
 	}
+	fmt.Printf("[MintWithTokenURI] Client MSPID: %s\n", clientMSPID)
 
 	key := "instance_auth_" + instanceID
 	authJSON, err := ctx.GetStub().GetState(key)
 	if err != nil || authJSON == nil {
+		fmt.Printf("[MintWithTokenURI] No mint authority found for instance %s\n", instanceID)
 		return nil, fmt.Errorf("no mint authority found for instance %s", instanceID)
 	}
 
@@ -617,6 +649,7 @@ func (c *TokenERC721Contract) MintWithTokenURI(ctx contractapi.TransactionContex
 	}
 
 	if !allowed {
+		fmt.Printf("[MintWithTokenURI] MSP %s not authorized for instance %s\n", clientMSPID, instanceID)
 		return nil, fmt.Errorf("MSP %s not authorized to mint for instance %s", clientMSPID, instanceID)
 	}
 
@@ -631,10 +664,12 @@ func (c *TokenERC721Contract) MintWithTokenURI(ctx contractapi.TransactionContex
 		return nil, fmt.Errorf("failed to DecodeString minter64: %v", err)
 	}
 	minter := string(minterBytes)
+	fmt.Printf("[MintWithTokenURI] Minter: %s\n", minter)
 
 	// Check if the token to be minted does not exist
 	exists := _nftExists(ctx, tokenId)
 	if exists {
+		fmt.Printf("[MintWithTokenURI] Token %s already exists\n", tokenId)
 		return nil, fmt.Errorf("the token %s is already minted.: %v", tokenId, err)
 	}
 
@@ -658,6 +693,7 @@ func (c *TokenERC721Contract) MintWithTokenURI(ctx contractapi.TransactionContex
 	if err != nil {
 		return nil, fmt.Errorf("failed to PutState nftBytes %s: %v", nftBytes, err)
 	}
+	fmt.Printf("[MintWithTokenURI] Created NFT with tokenId: %s\n", tokenId)
 
 	// A composite key would be balancePrefix.owner.tokenId, which enables partial
 	// composite key query to find and count all records matching balance.owner.*
@@ -672,6 +708,7 @@ func (c *TokenERC721Contract) MintWithTokenURI(ctx contractapi.TransactionContex
 	if err != nil {
 		return nil, fmt.Errorf("failed to PutState balanceKey %s: %v", nftBytes, err)
 	}
+	fmt.Printf("[MintWithTokenURI] Updated balance for minter: %s\n", minter)
 
 	// Emit the Transfer event
 	transferEvent := new(Transfer)
@@ -689,6 +726,7 @@ func (c *TokenERC721Contract) MintWithTokenURI(ctx contractapi.TransactionContex
 		return nil, fmt.Errorf("failed to SetEvent transferEventBytes %s: %v", transferEventBytes, err)
 	}
 
+	fmt.Printf("[MintWithTokenURI] Successfully minted tokenId: %s for minter: %s\n", tokenId, minter)
 	return nft, nil
 }
 
@@ -696,6 +734,7 @@ func (c *TokenERC721Contract) MintWithTokenURI(ctx contractapi.TransactionContex
 // param {String} tokenId Unique ID of a non-fungible token
 // returns {Boolean} Return whether the burn was successful or not
 func (c *TokenERC721Contract) Burn(ctx contractapi.TransactionContextInterface, tokenId string) (bool, error) {
+	fmt.Printf("[Burn] Starting burn for tokenId: %s\n", tokenId)
 
 	// Check if contract has been intilized first
 	initialized, err := checkInitialized(ctx)
@@ -716,6 +755,7 @@ func (c *TokenERC721Contract) Burn(ctx contractapi.TransactionContextInterface, 
 		return false, fmt.Errorf("failed to DecodeString owner64: %v", err)
 	}
 	owner := string(ownerBytes)
+	fmt.Printf("[Burn] Caller: %s\n", owner)
 
 	// Check if a caller is the owner of the non-fungible token
 	nft, err := _readNFT(ctx, tokenId)
@@ -723,6 +763,7 @@ func (c *TokenERC721Contract) Burn(ctx contractapi.TransactionContextInterface, 
 		return false, fmt.Errorf("failed to _readNFT nft : %v", err)
 	}
 	if nft.Owner != owner {
+		fmt.Printf("[Burn] Permission denied: caller %s is not owner %s\n", owner, nft.Owner)
 		return false, fmt.Errorf("non-fungible token %s is not owned by %s", tokenId, owner)
 	}
 
@@ -736,6 +777,7 @@ func (c *TokenERC721Contract) Burn(ctx contractapi.TransactionContextInterface, 
 	if err != nil {
 		return false, fmt.Errorf("failed to DelState nftKey: %v", err)
 	}
+	fmt.Printf("[Burn] Deleted NFT tokenId: %s\n", tokenId)
 
 	// Remove a composite key from the balance of the owner
 	balanceKey, err := ctx.GetStub().CreateCompositeKey(balancePrefix, []string{owner, tokenId})
@@ -747,6 +789,7 @@ func (c *TokenERC721Contract) Burn(ctx contractapi.TransactionContextInterface, 
 	if err != nil {
 		return false, fmt.Errorf("failed to DelState balanceKey %s: %v", balanceKey, err)
 	}
+	fmt.Printf("[Burn] Removed balance for owner: %s\n", owner)
 
 	// Emit the Transfer event
 	transferEvent := new(Transfer)
@@ -764,6 +807,7 @@ func (c *TokenERC721Contract) Burn(ctx contractapi.TransactionContextInterface, 
 		return false, fmt.Errorf("failed to SetEvent transferEventBytes: %v", err)
 	}
 
+	fmt.Printf("[Burn] Successfully burned tokenId: %s\n", tokenId)
 	return true, nil
 }
 

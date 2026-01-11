@@ -234,14 +234,76 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 			const fireflyUrl = bpmn.firefly_url;
 			console.log('[Validation] Firefly URL:', fireflyUrl);
 
-			console.log('[Validation] Participant bindings:', showBindingParticipantValueMap);
+			console.log('[Validation] Raw participant bindings from UI:', showBindingParticipantValueMap);
 			console.log('[Validation] Task ERC map:', showTaskERCMap);
 
-			// Run validation
-			console.log('[Validation] Running validateInstance...');
+			// IMPORTANT: Construct enriched participant bindings with x509 information
+			// This mirrors the logic in CreateInstance's constructParam function
+			console.log('[Validation] Enriching participant bindings with x509 data...');
+			const enrichedBindings = new Map();
+
+			for (const [participantId, value] of showBindingParticipantValueMap.entries()) {
+				console.log(`[Validation] Processing participant: ${participantId}`);
+
+				if (value.selectedValidationType === "equal" && value.selectedUser) {
+					try {
+						// Get MSP from membership
+						let msp = "";
+						if (value.selectedMembershipId) {
+							const memberships = await getResourceSets(
+								currentEnvId,
+								null,
+								value.selectedMembershipId,
+							);
+							msp = memberships[0].msp;
+						}
+
+						// Get fabric identity and x509 certificate
+						const fabricIdentity = await retrieveFabricIdentity(value.selectedUser);
+						const fireflyData = await getFireflyList(
+							currentEnvId,
+							null,
+							fabricIdentity.membership,
+						);
+						const fireflyCoreUrl = fireflyData[0].coreURL;
+						const verify = await getFireflyVerify(
+							fireflyCoreUrl,
+							fabricIdentity.firefly_identity_id,
+						);
+						const x509 = verify[0].value.split("::").slice(1).join("::");
+						const x509Encoded = `${btoa(x509)}@${msp}`;
+
+						console.log(`[Validation] Retrieved x509 for ${participantId}:`, {
+							msp,
+							x509Preview: x509.substring(0, 100) + '...',
+							x509EncodedPreview: x509Encoded.substring(0, 50) + '...'
+						});
+
+						// Create enriched binding with Attr array containing x509
+						enrichedBindings.set(participantId, {
+							...value,
+							Attr: [
+								{ attr: 'x509', value: x509Encoded }
+							]
+						});
+					} catch (error) {
+						console.error(`[Validation] Error enriching binding for ${participantId}:`, error);
+						// Keep original binding if enrichment fails
+						enrichedBindings.set(participantId, value);
+					}
+				} else {
+					// For non-equal validation types, keep original binding
+					enrichedBindings.set(participantId, value);
+				}
+			}
+
+			console.log('[Validation] Enriched participant bindings:', enrichedBindings);
+
+			// Run validation with enriched bindings
+			console.log('[Validation] Running validateInstance with enriched bindings...');
 			const result = await validateInstance(
 				bpmnXml,
-				showBindingParticipantValueMap,
+				enrichedBindings,
 				showTaskERCMap,
 				fireflyUrl
 			);

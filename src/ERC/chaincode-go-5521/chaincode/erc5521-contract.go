@@ -27,19 +27,19 @@ type SmartContract struct {
 // 当 rNFT 中的节点被引用和更改时记录。
 // @notice 当 `node`（即 rNFT）更改时发出事件。
 type UpdataNode struct {
-	TokenId               string     `Json:"tokenid"`
-	Owneraccount          string     `Json:"owneraccount"`
-	AddressRefferingList  []string   `Json:"addressRefferingList"`
-	TokenIdsRefferingList [][]uint64 `json:"tokenIdsRefferingList"`
-	AddressRefferedList   []string   `json:"addressRefferedList"`
-	TokenIDsRefferedList  [][]uint64 `json:"tokenIDsRefferedList"`
+	TokenId               string     `json:"tokenid"`
+	Owneraccount          string     `json:"owneraccount"`
+	AddressReferringList  []string   `json:"addressReferringList"`
+	TokenIdsReferringList [][]uint64 `json:"tokenIdsReferringList"`
+	AddressReferredList   []string   `json:"addressReferredList"`
+	TokenIDsReferredList  [][]uint64 `json:"tokenIDsReferredList"`
 }
 
 type Relationship struct {
-	Reffering        map[string][]string `json:"reffering"`
-	Reffered         map[string][]string `json:"reffered"`
-	RefferingKeys    []string            `json:"refferingKeys"`
-	RefferedKeys     []string            `json:"refferedKeys"`
+	Referring        map[string][]string `json:"referring"`
+	Referred         map[string][]string `json:"referred"`
+	ReferringKeys    []string            `json:"referringKeys"`
+	ReferredKeys     []string            `json:"referredKeys"`
 	CreatedTimestamp uint64              `json:"createdTimestamp"`
 }
 
@@ -50,12 +50,21 @@ type InstanceMintAuthority struct {
 }
 
 func (s *SmartContract) AddMintAuthority(ctx contractapi.TransactionContextInterface, instanceID string, allowedMSPs []string) error {
-	//test
-	// id, err := ctx.GetClientIdentity().GetID()
-	// fmt.Println("ctx.GetClientIdentity().GetID() ----" + id)
-	// fmt.Println(base64decoding(id))
-
 	key := "instance_auth_" + instanceID
+	fmt.Printf("[AddMintAuthority] Starting for instanceID: %s, allowedMSPs: %v\n", instanceID, allowedMSPs)
+
+	// 先检查是否已经存在
+	existing, err := ctx.GetStub().GetState(key)
+	if err != nil {
+		fmt.Printf("[AddMintAuthority] Error getting state: %v\n", err)
+		return err
+	}
+	if existing != nil {
+		// 已经存在，不再存储
+		fmt.Printf("[AddMintAuthority] Authority already exists for instanceID: %s\n", instanceID)
+		return nil
+	}
+
 	authority := InstanceMintAuthority{
 		InstanceID:  instanceID,
 		AllowedMSPs: allowedMSPs,
@@ -63,10 +72,18 @@ func (s *SmartContract) AddMintAuthority(ctx contractapi.TransactionContextInter
 
 	data, err := json.Marshal(authority)
 	if err != nil {
+		fmt.Printf("[AddMintAuthority] Error marshaling data: %v\n", err)
 		return err
 	}
 
-	return ctx.GetStub().PutState(key, data)
+	err = ctx.GetStub().PutState(key, data)
+	if err != nil {
+		fmt.Printf("[AddMintAuthority] Error putting state: %v\n", err)
+		return err
+	}
+
+	fmt.Printf("[AddMintAuthority] Successfully added mint authority for instanceID: %s\n", instanceID)
+	return nil
 }
 
 func (s *SmartContract) authorizationHelper(ctx contractapi.TransactionContextInterface, instanceID string) error {
@@ -83,7 +100,10 @@ func (s *SmartContract) authorizationHelper(ctx contractapi.TransactionContextIn
 	}
 
 	var auth InstanceMintAuthority
-	_ = json.Unmarshal(authJSON, &auth)
+	err = json.Unmarshal(authJSON, &auth)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal mint authority: %v", err)
+	}
 
 	allowed := false
 	for _, msp := range auth.AllowedMSPs {
@@ -639,7 +659,10 @@ func (c *SmartContract) mintWithTokenURI(ctx contractapi.TransactionContextInter
 	}
 
 	var auth InstanceMintAuthority
-	_ = json.Unmarshal(authJSON, &auth)
+	err = json.Unmarshal(authJSON, &auth)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal mint authority: %v", err)
+	}
 
 	allowed := false
 	for _, msp := range auth.AllowedMSPs {
@@ -923,8 +946,8 @@ func (c *SmartContract) GetRelationshipById(ctx contractapi.TransactionContextIn
 	}
 	if relationshipJson == nil {
 		temp := &Relationship{
-			Reffering: make(map[string][]string),
-			Reffered:  make(map[string][]string),
+			Referring: make(map[string][]string),
+			Referred:  make(map[string][]string),
 		}
 		err := c.SetRelationshipById(ctx, Id, temp)
 		if err != nil {
@@ -951,10 +974,10 @@ func (c *SmartContract) SetRelationshipById(ctx contractapi.TransactionContextIn
 		return fmt.Errorf("the compositekey of relationship which you try to get is empty")
 	}
 	tempRelationship := Relationship{
-		Reffering:        relationship.Reffering,
-		Reffered:         relationship.Reffered,
-		RefferingKeys:    relationship.RefferingKeys,
-		RefferedKeys:     relationship.RefferedKeys,
+		Referring:        relationship.Referring,
+		Referred:         relationship.Referred,
+		ReferringKeys:    relationship.ReferringKeys,
+		ReferredKeys:     relationship.ReferredKeys,
 		CreatedTimestamp: relationship.CreatedTimestamp,
 	}
 
@@ -996,18 +1019,27 @@ func (c *SmartContract) setNode(ctx contractapi.TransactionContextInterface, tok
 			return fmt.Errorf("ERC5521:the referring list cannot be empty")
 		}
 	}
-	c.setNodeReferring(ctx, chaincodeName, tokenid, _tokenIds)
-	c.setNodeReferred(ctx, chaincodeName, tokenid, _tokenIds)
+	err := c.setNodeReferring(ctx, chaincodeName, tokenid, _tokenIds)
+	if err != nil {
+		return err
+	}
+	err = c.setNodeReferred(ctx, chaincodeName, tokenid, _tokenIds)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func (c *SmartContract) setNodeReferring(ctx contractapi.TransactionContextInterface, chaincodeName []string, tokenid string, _tokenIds [][]string) error {
-	tempRelationship, _ := c.GetRelationshipById(ctx, tokenid)
+	tempRelationship, err := c.GetRelationshipById(ctx, tokenid)
+	if err != nil {
+		return fmt.Errorf("failed to get relationship for tokenid %s: %w", tokenid, err)
+	}
 	for i := 0; i < len(chaincodeName); i++ {
-		if len(tempRelationship.Reffering[chaincodeName[i]]) == 0 {
-			tempRelationship.RefferingKeys = append(tempRelationship.RefferingKeys, chaincodeName[i])
+		if len(tempRelationship.Referring[chaincodeName[i]]) == 0 {
+			tempRelationship.ReferringKeys = append(tempRelationship.ReferringKeys, chaincodeName[i])
 		}
-		tempRelationship.Reffering[chaincodeName[i]] = _tokenIds[i]
+		tempRelationship.Referring[chaincodeName[i]] = _tokenIds[i]
 	}
 	//事件时间戳
 	timestampProto, err := ctx.GetStub().GetTxTimestamp()
@@ -1027,10 +1059,10 @@ func (c *SmartContract) setNodeReferring(ctx contractapi.TransactionContextInter
 func (c *SmartContract) setNodeReferred(ctx contractapi.TransactionContextInterface, chaincodeName []string, tokenId string, _tokenId [][]string) error {
 	thischaincodeName, err := c.getChaincodeName(ctx)
 	if err != nil {
-		return fmt.Errorf("fail to get chaincode Name and cannot set NodeReffered")
+		return fmt.Errorf("fail to get chaincode Name and cannot set NodeReferred")
 	}
 	if thischaincodeName == "" {
-		return fmt.Errorf("this chaincodeName is empty and cannot set NodeReffered")
+		return fmt.Errorf("this chaincodeName is empty and cannot set NodeReferred")
 	}
 	var tempRelationship *Relationship
 	for i := 0; i < len(chaincodeName); i++ {
@@ -1038,10 +1070,10 @@ func (c *SmartContract) setNodeReferred(ctx contractapi.TransactionContextInterf
 			for j := 0; j < len(_tokenId[i]); j++ {
 				tempRelationship, err = c.GetRelationshipById(ctx, _tokenId[i][j])
 				if err != nil {
-					return fmt.Errorf("setNoadeReferred fail to execute getrelationshipById")
+					return fmt.Errorf("setNodeReferred fail to execute getrelationshipById")
 				}
-				if len(tempRelationship.Reffered[chaincodeName[i]]) == 0 {
-					tempRelationship.RefferedKeys = append(tempRelationship.RefferedKeys, chaincodeName[i])
+				if len(tempRelationship.Referred[chaincodeName[i]]) == 0 {
+					tempRelationship.ReferredKeys = append(tempRelationship.ReferredKeys, chaincodeName[i])
 				}
 				if tokenId == _tokenId[i][j] {
 					return fmt.Errorf("self-reference not allowed")
@@ -1057,7 +1089,7 @@ func (c *SmartContract) setNodeReferred(ctx contractapi.TransactionContextInterf
 					return fmt.Errorf("the referred NFT needs to be a predecessor")
 				}
 
-				tempRelationship.Reffered[thischaincodeName] = append(tempRelationship.Reffered[thischaincodeName], tokenId)
+				tempRelationship.Referred[thischaincodeName] = append(tempRelationship.Referred[thischaincodeName], tokenId)
 				err = c.SetRelationshipById(ctx, _tokenId[i][j], tempRelationship)
 				if err != nil {
 					return fmt.Errorf("fail to set relationshipById or fail to change relationship of tokenid: %s ", _tokenId[i][j])
@@ -1101,8 +1133,8 @@ func (c *SmartContract) setNodeReferredExternal(ctx contractapi.TransactionConte
 		if err != nil {
 			return fmt.Errorf("setNodeReferredExternal fail to execute getrelationshipbyid")
 		}
-		if len(tempRelationship.Reffered[chaincodeName]) == 0 {
-			tempRelationship.RefferedKeys = append(tempRelationship.RefferedKeys, chaincodeName)
+		if len(tempRelationship.Referred[chaincodeName]) == 0 {
+			tempRelationship.ReferredKeys = append(tempRelationship.ReferredKeys, chaincodeName)
 		}
 		thischaincodeName, _ := c.getChaincodeName(ctx)
 		if chaincodeName == thischaincodeName {
@@ -1119,7 +1151,7 @@ func (c *SmartContract) setNodeReferredExternal(ctx contractapi.TransactionConte
 			return fmt.Errorf("the referred NFT needs to be a predecessor")
 		}
 
-		tempRelationship.Reffered[chaincodeName] = append(tempRelationship.Reffered[chaincodeName], tokenId)
+		tempRelationship.Referred[chaincodeName] = append(tempRelationship.Referred[chaincodeName], tokenId)
 		err = c.SetRelationshipById(ctx, _tokenIds[i], tempRelationship)
 		if err != nil {
 			return fmt.Errorf("fail to set relationshipById or fail to change relationship of tokenid: %s ", _tokenIds[i])
@@ -1142,7 +1174,7 @@ func (c *SmartContract) ReferringOf(ctx contractapi.TransactionContextInterface,
 		if err != nil {
 			return nil, fmt.Errorf("there is something wrong when get temprelationship")
 		}
-		result := resultOf{tempRelationship.RefferingKeys, tempRelationship.Reffering}
+		result := resultOf{tempRelationship.ReferringKeys, tempRelationship.Referring}
 		return &result, nil
 	} else {
 		tempchaincode := chaincodeName
@@ -1176,7 +1208,7 @@ func (c *SmartContract) ReferredOf(ctx contractapi.TransactionContextInterface, 
 		if err != nil {
 			return nil, fmt.Errorf("there is something wrong when get temprelationship")
 		}
-		result := resultOf{tempRelationship.RefferedKeys, tempRelationship.Reffered}
+		result := resultOf{tempRelationship.ReferredKeys, tempRelationship.Referred}
 		return &result, nil
 	} else {
 		tempchaincode := chaincodeName
