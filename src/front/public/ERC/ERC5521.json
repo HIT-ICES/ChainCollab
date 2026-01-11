@@ -17,9 +17,20 @@
           "schema": {
             "type": "string"
           }
+        },
+        {
+          "name": "chaincodeName",
+          "schema": {
+            "type": "string"
+          }
         }
       ],
-      "returns": []
+      "returns": [{
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      }]
     },
     {
       "name": "AddMintAuthority",
@@ -43,7 +54,7 @@
       "returns": []
     },
     {
-      "name": "setChaincodeName",
+      "name": "SetChaincodeName",
       "description": "",
       "params": [{
         "name": "chaincodeName",
@@ -51,7 +62,28 @@
           "type": "string"
         }
       }],
-      "returns": []
+      "returns": [{
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      }]
+    },
+    {
+      "name": "Burn",
+      "description": "",
+      "params": [{
+        "name": "tokenId",
+        "schema": {
+          "type": "string"
+        }
+      }],
+      "returns": [{
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      }]
     },
     {
       "name": "BalanceOf",
@@ -101,7 +133,12 @@
           }
         }
       ],
-      "returns": []
+      "returns": [{
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      }]
     },
     {
       "name": "SetApprovalForAll",
@@ -119,7 +156,12 @@
           }
         }
       ],
-      "returns": []
+      "returns": [{
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      }]
     },
     {
       "name": "IsApprovedForAll",
@@ -182,7 +224,12 @@
           }
         }
       ],
-      "returns": []
+      "returns": [{
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      }]
     },
     {
       "name": "Name",
@@ -306,7 +353,7 @@
       }]
     },
     {
-      "name": "referringOf",
+      "name": "ReferringOf",
       "description": "",
       "params": [{
           "name": "chaincodeName",
@@ -329,7 +376,7 @@
       }]
     },
     {
-      "name": "referredOf",
+      "name": "ReferredOf",
       "description": "",
       "params": [{
           "name": "chaincodeName",
@@ -352,7 +399,7 @@
       }]
     },
     {
-      "name": "createdTimestampOf",
+      "name": "CreatedTimestampOf",
       "description": "",
       "params": [{
           "name": "chaincodeName",
@@ -376,7 +423,7 @@
       }]
     },
     {
-      "name": "branchmint",
+      "name": "Branchmint",
       "description": "",
       "params": [{
           "name": "tokenid",

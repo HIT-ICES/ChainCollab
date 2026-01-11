@@ -383,6 +383,12 @@ class GoChaincodeTranslator:
                 merged_doc['tokenName'] = dataobject_doc['tokenName']
             if 'tokenId' in dataobject_doc and dataobject_doc['tokenId']:
                 merged_doc['tokenId'] = dataobject_doc['tokenId']
+            # 增值型资产的 refTokenIds 也从 DataObject 读取
+            if 'refTokenIds' in dataobject_doc and dataobject_doc['refTokenIds']:
+                merged_doc['refTokenIds'] = dataobject_doc['refTokenIds']
+            # 添加 tokenHasExistInERC 字段
+            if 'tokenHasExistInERC' in dataobject_doc:
+                merged_doc['tokenHasExistInERC'] = dataobject_doc['tokenHasExistInERC']
         else:
             # 向后兼容：如果没有 DataObject，使用 Task 自己的资产信息
             if 'assetType' in task_doc and task_doc['assetType']:
@@ -393,6 +399,12 @@ class GoChaincodeTranslator:
                 merged_doc['tokenName'] = task_doc['tokenName']
             if 'tokenId' in task_doc and task_doc['tokenId']:
                 merged_doc['tokenId'] = task_doc['tokenId']
+            # 向后兼容：从 Task 读取 refTokenIds
+            if 'refTokenIds' in task_doc and task_doc['refTokenIds']:
+                merged_doc['refTokenIds'] = task_doc['refTokenIds']
+            # 向后兼容：从 Task 读取 tokenHasExistInERC
+            if 'tokenHasExistInERC' in task_doc:
+                merged_doc['tokenHasExistInERC'] = task_doc['tokenHasExistInERC']
 
         # 添加 Task 的操作信息，只添加非空字段
         if 'operation' in task_doc and task_doc['operation']:
@@ -403,8 +415,6 @@ class GoChaincodeTranslator:
             merged_doc['callee'] = task_doc['callee']
         if 'tokenNumber' in task_doc and task_doc['tokenNumber']:
             merged_doc['tokenNumber'] = task_doc['tokenNumber']
-        if 'refTokenIds' in task_doc and task_doc['refTokenIds']:
-            merged_doc['refTokenIds'] = task_doc['refTokenIds']
         if 'outputs' in task_doc and task_doc['outputs']:
             merged_doc['outputs'] = task_doc['outputs']
 
