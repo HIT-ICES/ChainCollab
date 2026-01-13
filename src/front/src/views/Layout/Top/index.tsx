@@ -88,7 +88,8 @@ const View: React.FC = () => {
       const orgName = `Atlas-${suffix}`;
       const consortiumName = `Aegis-${suffix}`;
       const envName = `Forge-${suffix}`;
-      const membershipLabels = ["Core", "Ops", "Labs"];
+      // const membershipLabels = ["Core", "Ops", "Labs"];
+      const membershipLabels = ["Core"];
 
       const org = await createOrg(orgName);
       dispatch(activateOrg({ currentOrgId: org.id, currentOrgName: org.name }));

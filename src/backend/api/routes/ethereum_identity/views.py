@@ -93,7 +93,7 @@ class EthereumIdentityViewSet(viewsets.ViewSet):
 
                 # Wait for account creation to be broadcast and confirmed
                 import time
-                time.sleep(2)
+                time.sleep(4)
 
             # Register identity to Firefly (Ethereum identity registration)
             firefly_identity_id = target_firefly.register_eth_identity_to_firefly(serializer.data["name"], address)
