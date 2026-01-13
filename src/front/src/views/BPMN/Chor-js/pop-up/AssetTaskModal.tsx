@@ -122,21 +122,34 @@ export default function AssetTaskModal({
     const outgoing = shape.outgoing || [];
     const allConnections = [...incoming, ...outgoing];
 
-    // 查找 DataInputAssociation 或 DataOutputAssociation 连线
+    // 查找 DataOutputAssociation 连线（Task -> DataObject，主输出）
     for (const connection of allConnections) {
       const connBo = connection.businessObject;
-      if (connBo.$type === 'bpmn:DataInputAssociation' ||
-          connBo.$type === 'bpmn:DataOutputAssociation') {
+      if (connBo.$type === 'bpmn:DataOutputAssociation') {
+        // Task -> DataObject
+        const dataObjectElement = connection.target;
 
-        // 获取 DataObject 端
-        let dataObjectElement = null;
-        if (connBo.$type === 'bpmn:DataInputAssociation') {
-          // DataObject -> Task
-          dataObjectElement = connection.source;
-        } else {
-          // Task -> DataObject
-          dataObjectElement = connection.target;
+        // 检查是否是 DataObjectReference
+        if (dataObjectElement && dataObjectElement.type === 'bpmn:DataObjectReference') {
+          const docs = dataObjectElement.businessObject.documentation;
+          if (Array.isArray(docs) && docs.length) {
+            try {
+              const parsed = JSON.parse(docs[0].text);
+              return parsed;
+            } catch {
+              // ignore
+            }
+          }
         }
+      }
+    }
+
+    // 如果没有输出连接，尝试从输入连接获取（向后兼容）
+    for (const connection of allConnections) {
+      const connBo = connection.businessObject;
+      if (connBo.$type === 'bpmn:DataInputAssociation') {
+        // DataObject -> Task
+        const dataObjectElement = connection.source;
 
         // 检查是否是 DataObjectReference
         if (dataObjectElement && dataObjectElement.type === 'bpmn:DataObjectReference') {
@@ -153,6 +166,38 @@ export default function AssetTaskModal({
       }
     }
     return null;
+  };
+
+  // 获取所有输入 DataObject 的 tokenId（用于 value-added 的 refTokenIds）
+  const getIncomingDataObjectTokenIds = () => {
+    if (!shape) return [];
+
+    const incoming = shape.incoming || [];
+    const tokenIds: string[] = [];
+
+    // 查找所有 DataInputAssociation 连线（DataObject -> Task，引用输入）
+    for (const connection of incoming) {
+      const connBo = connection.businessObject;
+      if (connBo.$type === 'bpmn:DataInputAssociation') {
+        const dataObjectElement = connection.source;
+
+        // 检查是否是 DataObjectReference
+        if (dataObjectElement && dataObjectElement.type === 'bpmn:DataObjectReference') {
+          const docs = dataObjectElement.businessObject.documentation;
+          if (Array.isArray(docs) && docs.length) {
+            try {
+              const parsed = JSON.parse(docs[0].text);
+              if (parsed.tokenId) {
+                tokenIds.push(parsed.tokenId);
+              }
+            } catch {
+              // ignore
+            }
+          }
+        }
+      }
+    }
+    return tokenIds;
   };
 
   // 从 BPMN 文档加载已有值
@@ -185,8 +230,13 @@ export default function AssetTaskModal({
           setTokenId(linkedAsset.tokenId || '');
           setOriginalTokenId(linkedAsset.tokenId || '');
           setTokenHasExistInERC(linkedAsset.tokenHasExistInERC || false);
-          // refTokenIds 也从 DataObject 读取
-          if (linkedAsset.assetType === 'value-added' && Array.isArray(linkedAsset.refTokenIds)) {
+
+          // 对于 value-added 的 branch/merge 操作，自动从输入连接收集 refTokenIds
+          if (linkedAsset.assetType === 'value-added' && parsed.operation && ['branch', 'merge'].includes(parsed.operation)) {
+            const incomingTokenIds = getIncomingDataObjectTokenIds();
+            setRefTokenIds(incomingTokenIds);
+          } else if (linkedAsset.assetType === 'value-added' && Array.isArray(linkedAsset.refTokenIds)) {
+            // 否则从 DataObject 读取（向后兼容）
             setRefTokenIds(linkedAsset.refTokenIds);
           } else {
             setRefTokenIds([]);
@@ -268,6 +318,76 @@ export default function AssetTaskModal({
       loadDataFromBPMN();
     }
   }, [shape, isModalOpen]);
+
+  // 监听连接变化，自动同步 refTokenIds 到输出 DataObject
+  React.useEffect(() => {
+    if (!isModalOpen || !shape) return;
+
+    const handleConnectionChange = () => {
+      // 只在 value-added 的 branch/merge 操作时才需要同步
+      const linkedAsset = getLinkedDataObjectAsset();
+      if (!linkedAsset || linkedAsset.assetType !== 'value-added') return;
+
+      const doc = shape.businessObject.documentation;
+      if (!Array.isArray(doc) || !doc.length) return;
+
+      try {
+        const parsed = JSON.parse(doc[0].text);
+        if (!parsed.operation || !['branch', 'merge'].includes(parsed.operation)) return;
+
+        // 收集最新的输入 tokenIds
+        const incomingTokenIds = getIncomingDataObjectTokenIds();
+
+        // 更新 refTokenIds 状态
+        setRefTokenIds(incomingTokenIds);
+
+        // 直接更新输出 DataObject 的 refTokenIds
+        const outgoing = shape.outgoing || [];
+        for (const connection of outgoing) {
+          const connBo = connection.businessObject;
+          if (connBo.$type === 'bpmn:DataOutputAssociation') {
+            const dataObjectElement = connection.target;
+
+            if (dataObjectElement && dataObjectElement.type === 'bpmn:DataObjectReference') {
+              const docs = dataObjectElement.businessObject.documentation;
+              if (Array.isArray(docs) && docs.length) {
+                try {
+                  const parsed = JSON.parse(docs[0].text);
+                  parsed.refTokenIds = incomingTokenIds;
+
+                  commandStack.execute('element.updateProperties', {
+                    element: dataObjectElement,
+                    properties: {
+                      documentation: [
+                        modeler._moddle.create('bpmn:Documentation', {
+                          text: JSON.stringify(parsed, null, 2),
+                        }),
+                      ],
+                    },
+                  });
+                } catch {
+                  // ignore
+                }
+              }
+            }
+          }
+        }
+      } catch {
+        // ignore
+      }
+    };
+
+    // 监听连接创建和删除事件
+    eventBus.on('connection.added', handleConnectionChange);
+    eventBus.on('connection.removed', handleConnectionChange);
+    eventBus.on('commandStack.changed', handleConnectionChange);
+
+    return () => {
+      eventBus.off('connection.added', handleConnectionChange);
+      eventBus.off('connection.removed', handleConnectionChange);
+      eventBus.off('commandStack.changed', handleConnectionChange);
+    };
+  }, [isModalOpen, shape, eventBus, commandStack, modeler]);
 
   // ===== 扫描所有 FT tokenName =====
   const scanFTTokenNames = React.useCallback(() => {
@@ -422,7 +542,10 @@ export default function AssetTaskModal({
       payload.tokenNumber = tokenNumber;
     }
 
-    // refTokenIds 不再保存到 Task，而是保存到 DataObject
+    // 对于 value-added 的 branch/merge 操作，将 refTokenIds 更新到输出的 DataObject
+    if (assetType === 'value-added' && operation && ['branch', 'merge'].includes(operation)) {
+      updateOutputDataObjectRefTokenIds();
+    }
 
     // Only query operation supports outputs
     if (operation === "query") {
@@ -446,6 +569,48 @@ export default function AssetTaskModal({
         ],
       },
     });
+  };
+
+  // 更新输出 DataObject 的 refTokenIds
+  const updateOutputDataObjectRefTokenIds = () => {
+    if (!shape) return;
+
+    const outgoing = shape.outgoing || [];
+
+    // 查找 DataOutputAssociation 连线（Task -> DataObject）
+    for (const connection of outgoing) {
+      const connBo = connection.businessObject;
+      if (connBo.$type === 'bpmn:DataOutputAssociation') {
+        const dataObjectElement = connection.target;
+
+        // 检查是否是 DataObjectReference
+        if (dataObjectElement && dataObjectElement.type === 'bpmn:DataObjectReference') {
+          const docs = dataObjectElement.businessObject.documentation;
+          if (Array.isArray(docs) && docs.length) {
+            try {
+              const parsed = JSON.parse(docs[0].text);
+
+              // 更新 refTokenIds
+              parsed.refTokenIds = refTokenIds;
+
+              // 保存回 DataObject
+              commandStack.execute('element.updateProperties', {
+                element: dataObjectElement,
+                properties: {
+                  documentation: [
+                    modeler._moddle.create('bpmn:Documentation', {
+                      text: JSON.stringify(parsed, null, 2),
+                    }),
+                  ],
+                },
+              });
+            } catch {
+              // ignore
+            }
+          }
+        }
+      }
+    }
   };
 
   const handleOk = () => {
