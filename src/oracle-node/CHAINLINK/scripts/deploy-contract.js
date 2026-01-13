@@ -2,8 +2,9 @@ const fs = require('fs');
 const http = require('http');
 
 // 读取编译后的合约
-const compiled = JSON.parse(fs.readFileSync('compiled.json', 'utf8'));
-const contractKey = 'contracts/simple.sol:MyChainlinkRequester';
+const deploymentDir = 'deployment';
+const compiled = JSON.parse(fs.readFileSync(`${deploymentDir}/compiled.json`, 'utf8'));
+const contractKey = 'contracts/MyChainlinkRequester.sol:MyChainlinkRequester';
 const contractData = compiled.contracts[contractKey];
 
 if (!contractData) {
@@ -87,9 +88,35 @@ async function deploy() {
         }
 
         // 构造函数参数（使用已部署的合约地址）
-        const linkToken = '0xb232b28da508ef56cb13b124faa0b93fcff9ff65';
-        const oracle = '0x75cd7081c3224a11b2b013faed8606acd4cec737';
-        const jobId = '0x85666de4e963484fb3423eaa583733ad00000000000000000000000000000000';
+        let linkToken;
+        let oracle;
+        let chainlinkDeployment;
+
+        const deploymentDir = 'deployment';
+        if (fs.existsSync(`${deploymentDir}/chainlink-deployment.json`)) {
+            chainlinkDeployment = JSON.parse(fs.readFileSync(`${deploymentDir}/chainlink-deployment.json`, 'utf8'));
+            linkToken = chainlinkDeployment.linkToken;
+            oracle = chainlinkDeployment.operator;
+            console.log('✅ 使用已部署的 LinkToken 地址:', linkToken);
+            console.log('✅ 使用已部署的 Operator 地址:', oracle);
+        } else {
+            console.error('❌ 请先部署 Chainlink 基础设施: node scripts/deploy-chainlink.js');
+            process.exit(1);
+        }
+
+        // 从 chainlink-deployment.json 中读取 Job ID
+        let jobId;
+        if (chainlinkDeployment.jobId) {
+            jobId = chainlinkDeployment.jobId;
+            // 将 Job ID 转换为 bytes32 格式
+            if (!jobId.startsWith('0x')) {
+                jobId = '0x' + Buffer.from(jobId.replace(/-/g, ''), 'utf8').toString('hex').padEnd(64, '0');
+            }
+            console.log('✅ 使用已创建的 Job ID:', jobId);
+        } else {
+            console.error('❌ 请先创建 Chainlink Job: node scripts/create-job.js');
+            process.exit(1);
+        }
         const fee = '0x' + (BigInt('100000000000000000')).toString(16); // 0.1 LINK
 
         console.log('\n部署参数:');
@@ -153,8 +180,13 @@ async function deploy() {
             fee: '0.1 LINK'
         };
 
-        fs.writeFileSync('deployment.json', JSON.stringify(deploymentInfo, null, 2));
-        console.log('\n部署信息已保存到 deployment.json');
+        // 确保 deployment 文件夹存在（已在第 5 行声明）
+        if (!fs.existsSync(deploymentDir)) {
+            fs.mkdirSync(deploymentDir);
+        }
+
+        fs.writeFileSync(`${deploymentDir}/deployment.json`, JSON.stringify(deploymentInfo, null, 2));
+        console.log('\n部署信息已保存到 deployment/deployment.json');
 
     } catch (error) {
         console.error('❌ 部署失败:', error.message);

@@ -89,15 +89,12 @@ echo -e "${YELLOW}[5/6] 清理编译和部署产物...${NC}"
 
 CLEANED=0
 
-if [ -f "compiled.json" ]; then
-    rm -f compiled.json
-    echo "  - 已删除 compiled.json"
-    CLEANED=1
-fi
+# compiled.json 现在在 deployment 文件夹下，会被 rm -rf deployment 一起删除，所以不需要单独处理
 
-if [ -f "deployment.json" ]; then
-    rm -f deployment.json
-    echo "  - 已删除 deployment.json"
+DEPLOYMENT_DIR="deployment"
+if [ -d "$DEPLOYMENT_DIR" ]; then
+    rm -rf "$DEPLOYMENT_DIR"
+    echo "  - 已删除 $DEPLOYMENT_DIR/ 文件夹"
     CLEANED=1
 fi
 

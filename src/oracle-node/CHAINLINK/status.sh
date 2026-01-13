@@ -81,9 +81,23 @@ echo ""
 echo -e "${BLUE}================================================${NC}"
 echo -e "${YELLOW}📝 部署信息:${NC}"
 echo ""
-echo -e "  ${BLUE}LINK Token:${NC}  0xb232b28da508ef56cb13b124faa0b93fcff9ff65"
-echo -e "  ${BLUE}Operator:${NC}    0x75cd7081c3224a11b2b013faed8606acd4cec737"
-echo -e "  ${BLUE}Job ID:${NC}      85666de4-e963-484f-b342-3eaa583733ad"
+
+DEPLOYMENT_DIR="deployment"
+if [ -f "$DEPLOYMENT_DIR/chainlink-deployment.json" ] && command -v jq &> /dev/null; then
+    LINK_ADDR=$(jq -r '.linkToken' $DEPLOYMENT_DIR/chainlink-deployment.json)
+    OPERATOR_ADDR=$(jq -r '.operator' $DEPLOYMENT_DIR/chainlink-deployment.json)
+    echo -e "  ${BLUE}LINK Token:${NC}  $LINK_ADDR"
+    echo -e "  ${BLUE}Operator:${NC}    $OPERATOR_ADDR"
+    if jq -r '.jobId' $DEPLOYMENT_DIR/chainlink-deployment.json 2>/dev/null | grep -v "null" > /dev/null; then
+        JOB_ID=$(jq -r '.jobId' $DEPLOYMENT_DIR/chainlink-deployment.json)
+        echo -e "  ${BLUE}Job ID:${NC}      $JOB_ID"
+    fi
+else
+    echo -e "  ${BLUE}LINK Token:${NC}  (未部署)"
+    echo -e "  ${BLUE}Operator:${NC}    (未部署)"
+    echo -e "  ${BLUE}Job ID:${NC}      (未创建)"
+fi
+
 echo -e "  ${BLUE}部署账户:${NC}    0x365Acf78C44060CAF3A4789D804Df11E3B4AA17d"
 echo ""
 

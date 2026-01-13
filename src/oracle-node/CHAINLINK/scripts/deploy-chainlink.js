@@ -89,30 +89,46 @@ async function main() {
     try {
         console.log('开始部署 Chainlink 基础设施...\n');
 
-        // 1. 编译 MockLinkToken
-        console.log('=== 步骤 1: 编译 MockLinkToken ===');
-        execSync('solc --optimize --base-path . --include-path node_modules --combined-json abi,bin MockLinkToken.sol > mock-link-compiled.json', { stdio: 'inherit' });
+        // 确保 deployment 文件夹存在
+        const deploymentDir = 'deployment';
+        if (!fs.existsSync(deploymentDir)) {
+            fs.mkdirSync(deploymentDir);
+        }
 
-        const mockLinkCompiled = JSON.parse(fs.readFileSync('mock-link-compiled.json', 'utf8'));
-        const mockLinkData = mockLinkCompiled.contracts['MockLinkToken.sol:MockLinkToken'];
-        const mockLinkBytecode = '0x' + mockLinkData.bin;
+        // 1. 检查是否已编译合约
+        if (!fs.existsSync(`${deploymentDir}/compiled.json`)) {
+            console.log('=== 步骤 1: 编译合约 ===');
+            execSync('./compile.sh', { stdio: 'inherit' });
+        } else {
+            console.log('=== 步骤 1: 合约已编译 ===');
+        }
 
-        // 2. 部署 MockLinkToken
-        console.log('\n=== 步骤 2: 部署 LINK Token ===');
-        const linkTokenAddress = await deployContract('MockLinkToken', mockLinkBytecode);
+        // 读取编译后的合约
+        const compiled = JSON.parse(fs.readFileSync(`${deploymentDir}/compiled.json`, 'utf8'));
 
-        // 3. 编译 Operator
-        console.log('\n=== 步骤 3: 编译 Operator ===');
+        // 2. 部署 LinkToken 合约
+        console.log('\n=== 步骤 2: 部署 LinkToken ===');
+        const linkTokenKey = 'contracts/LinkToken-v0.6-fix/LinkToken.sol:LinkToken';
+        const linkTokenData = compiled.contracts[linkTokenKey];
+
+        if (!linkTokenData) {
+            console.error('❌ 找不到 LinkToken 合约');
+            process.exit(1);
+        }
+
+        const linkTokenBytecode = '0x' + linkTokenData.bin;
+        const linkTokenAddress = await deployContract('LinkToken', linkTokenBytecode);
+
+        // 3. 部署 Operator 合约
+        console.log('\n=== 步骤 3: 编译并部署 Operator ===');
         const operatorPath = 'node_modules/@chainlink/contracts/src/v0.8/operatorforwarder/Operator.sol';
-        execSync(`solc --optimize --base-path . --include-path node_modules --combined-json abi,bin ${operatorPath} > operator-compiled.json`, { stdio: 'inherit' });
+        execSync(`solc --optimize --base-path . --include-path node_modules --combined-json abi,bin ${operatorPath} > ${deploymentDir}/operator-compiled.json`, { stdio: 'inherit' });
 
-        const operatorCompiled = JSON.parse(fs.readFileSync('operator-compiled.json', 'utf8'));
+        const operatorCompiled = JSON.parse(fs.readFileSync(`${deploymentDir}/operator-compiled.json`, 'utf8'));
         const operatorData = operatorCompiled.contracts[operatorPath + ':Operator'];
         const operatorBytecode = '0x' + operatorData.bin;
         const operatorAbi = operatorData.abi;
 
-        // 4. 部署 Operator
-        console.log('\n=== 步骤 4: 部署 Operator ===');
         const accounts = await rpcCall('eth_accounts', []);
         const deployer = accounts[0];
 
@@ -131,8 +147,13 @@ async function main() {
             chainId: 3456
         };
 
-        fs.writeFileSync('chainlink-deployment.json', JSON.stringify(deploymentInfo, null, 2));
-        fs.writeFileSync('operator-abi.json', JSON.stringify(operatorAbi, null, 2));
+        // 确保 deployment 文件夹存在（已在第 93 行声明）
+        if (!fs.existsSync(deploymentDir)) {
+            fs.mkdirSync(deploymentDir);
+        }
+
+        fs.writeFileSync(`${deploymentDir}/chainlink-deployment.json`, JSON.stringify(deploymentInfo, null, 2));
+        fs.writeFileSync(`${deploymentDir}/operator-abi.json`, JSON.stringify(operatorAbi, null, 2));
 
         console.log('\n========================================');
         console.log('✅ 所有合约部署完成!');
@@ -140,8 +161,13 @@ async function main() {
         console.log('LINK Token 地址:', linkTokenAddress);
         console.log('Operator 地址:', operatorAddress);
         console.log('Owner 地址:', deployer);
-        console.log('\n部署信息已保存到 chainlink-deployment.json');
-        console.log('Operator ABI 已保存到 operator-abi.json');
+        console.log('\n部署信息已保存到 deployment/chainlink-deployment.json');
+        console.log('Operator ABI 已保存到 deployment/operator-abi.json');
+
+        // 清理临时编译文件
+        if (fs.existsSync(`${deploymentDir}/operator-compiled.json`)) {
+            fs.unlinkSync(`${deploymentDir}/operator-compiled.json`);
+        }
 
         console.log('\n========================================');
         console.log('下一步: 创建 Chainlink Job');

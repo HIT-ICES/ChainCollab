@@ -27,8 +27,9 @@ fi
 
 ./compile.sh
 
-if [ ! -f "compiled.json" ]; then
-    echo -e "${RED}❌ 编译失败，compiled.json 不存在${NC}"
+DEPLOYMENT_DIR="deployment"
+if [ ! -f "$DEPLOYMENT_DIR/compiled.json" ]; then
+    echo -e "${RED}❌ 编译失败，$DEPLOYMENT_DIR/compiled.json 不存在${NC}"
     exit 1
 fi
 
@@ -132,8 +133,41 @@ fi
 
 echo ""
 
-# 步骤 3: 部署合约
-echo -e "${YELLOW}[3/4] 部署合约...${NC}"
+# 步骤 3: 部署 Chainlink 基础设施 (LinkToken + Operator)
+echo -e "${YELLOW}[3/5] 部署 Chainlink 基础设施...${NC}"
+
+# 检查是否已部署 Chainlink 基础设施
+DEPLOYMENT_DIR="deployment"
+if [ ! -f "$DEPLOYMENT_DIR/chainlink-deployment.json" ]; then
+    echo "Chainlink 基础设施未部署，开始部署..."
+    node scripts/deploy-chainlink.js
+
+    if [ $? -ne 0 ] || [ ! -f "$DEPLOYMENT_DIR/chainlink-deployment.json" ]; then
+        echo -e "${RED}❌ Chainlink 基础设施部署失败${NC}"
+        exit 1
+    fi
+
+    echo -e "${GREEN}✅ Chainlink 基础设施部署成功${NC}"
+    if command -v jq &> /dev/null; then
+        LINK_ADDR=$(jq -r '.linkToken' $DEPLOYMENT_DIR/chainlink-deployment.json)
+        OPERATOR_ADDR=$(jq -r '.operator' $DEPLOYMENT_DIR/chainlink-deployment.json)
+        echo -e "   LinkToken 地址: $LINK_ADDR"
+        echo -e "   Operator 地址: $OPERATOR_ADDR"
+    fi
+else
+    echo -e "${GREEN}✅ Chainlink 基础设施已存在${NC}"
+    if command -v jq &> /dev/null; then
+        LINK_ADDR=$(jq -r '.linkToken' $DEPLOYMENT_DIR/chainlink-deployment.json)
+        OPERATOR_ADDR=$(jq -r '.operator' $DEPLOYMENT_DIR/chainlink-deployment.json)
+        echo -e "   LinkToken 地址: $LINK_ADDR"
+        echo -e "   Operator 地址: $OPERATOR_ADDR"
+    fi
+fi
+
+echo ""
+
+# 步骤 4: 部署 MyChainlinkRequester 合约
+echo -e "${YELLOW}[4/5] 部署 MyChainlinkRequester 合约...${NC}"
 
 # 检查 Node.js
 if ! command -v node &> /dev/null; then
@@ -153,11 +187,11 @@ fi
 # 执行部署
 node scripts/deploy-contract.js
 
-# 步骤 4: 显示结果
+# 步骤 5: 显示结果
 echo ""
-echo -e "${YELLOW}[4/4] 部署结果${NC}"
+echo -e "${YELLOW}[5/5] 部署结果${NC}"
 
-if [ $? -eq 0 ] && [ -f "deployment.json" ]; then
+if [ $? -eq 0 ] && [ -f "$DEPLOYMENT_DIR/deployment.json" ]; then
     echo ""
     echo -e "${BLUE}================================================${NC}"
     echo -e "${GREEN}🎉 部署流程完成！${NC}"
@@ -168,9 +202,9 @@ if [ $? -eq 0 ] && [ -f "deployment.json" ]; then
     echo -e "${YELLOW}📝 部署信息:${NC}"
     echo ""
     if command -v jq &> /dev/null; then
-        CONTRACT_ADDR=$(jq -r '.contractAddress' deployment.json)
-        DEPLOYER=$(jq -r '.deployer' deployment.json)
-        TIMESTAMP=$(jq -r '.timestamp' deployment.json)
+        CONTRACT_ADDR=$(jq -r '.contractAddress' $DEPLOYMENT_DIR/deployment.json)
+        DEPLOYER=$(jq -r '.deployer' $DEPLOYMENT_DIR/deployment.json)
+        TIMESTAMP=$(jq -r '.timestamp' $DEPLOYMENT_DIR/deployment.json)
 
         echo -e "  ${BLUE}合约地址:${NC} $CONTRACT_ADDR"
         echo -e "  ${BLUE}部署者:${NC}   $DEPLOYER"
@@ -195,8 +229,13 @@ if [ $? -eq 0 ] && [ -f "deployment.json" ]; then
     echo -e "   ${BLUE}./status.sh${NC}"
     echo ""
     echo -e "3. 给合约转入 LINK Token (如需测试 Oracle 请求):"
-    echo -e "   LINK Token: 0xb232b28da508ef56cb13b124faa0b93fcff9ff65"
-    echo -e "   合约地址:   $CONTRACT_ADDR"
+    if [ -f "$DEPLOYMENT_DIR/chainlink-deployment.json" ] && command -v jq &> /dev/null; then
+        LINK_ADDR=$(jq -r '.linkToken' $DEPLOYMENT_DIR/chainlink-deployment.json)
+        echo -e "   LINK Token: $LINK_ADDR"
+    else
+        echo -e "   LINK Token: (请查看 $DEPLOYMENT_DIR/chainlink-deployment.json)"
+    fi
+    echo -e "   MyChainlinkRequester 合约地址: $CONTRACT_ADDR"
     echo ""
     echo -e "4. 测试 Oracle 请求:"
     echo -e "   参考 ${BLUE}README.md${NC} 中的测试步骤"

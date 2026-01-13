@@ -169,9 +169,17 @@ echo -e "  ${BLUE}PostgreSQL:${NC}    localhost:5432"
 echo ""
 echo -e "${YELLOW}📝 已部署合约:${NC}"
 echo ""
-echo -e "  ${BLUE}LINK Token:${NC}  0xb232b28da508ef56cb13b124faa0b93fcff9ff65"
-echo -e "  ${BLUE}Operator:${NC}    0x75cd7081c3224a11b2b013faed8606acd4cec737"
-echo -e "  ${BLUE}Job ID:${NC}      85666de4-e963-484f-b342-3eaa583733ad"
+DEPLOYMENT_DIR="deployment"
+if [ -f "$DEPLOYMENT_DIR/chainlink-deployment.json" ] && command -v jq &> /dev/null; then
+    LINK_ADDR=$(jq -r '.linkToken' $DEPLOYMENT_DIR/chainlink-deployment.json)
+    OPERATOR_ADDR=$(jq -r '.operator' $DEPLOYMENT_DIR/chainlink-deployment.json)
+    echo -e "  ${BLUE}LINK Token:${NC}  $LINK_ADDR"
+    echo -e "  ${BLUE}Operator:${NC}    $OPERATOR_ADDR"
+else
+    echo -e "  ${BLUE}LINK Token:${NC}  (未部署)"
+    echo -e "  ${BLUE}Operator:${NC}    (未部署)"
+fi
+echo -e "  ${BLUE}Job ID:${NC}      1e7d2a7c-fd9c-40c0-bb7f-287032908212"
 echo -e "  ${BLUE}部署账户:${NC}    $GETH_ACCOUNT"
 echo ""
 echo -e "${YELLOW}🔧 常用命令:${NC}"

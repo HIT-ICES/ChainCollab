@@ -32,26 +32,38 @@ solc --version | head -1
 echo ""
 
 # 编译合约
-echo -e "${YELLOW}正在编译 simple.sol...${NC}"
+echo -e "${YELLOW}正在编译 MyChainlinkRequester.sol...${NC}"
+
+# 确保 deployment 文件夹存在
+DEPLOYMENT_DIR="deployment"
+if [ ! -d "$DEPLOYMENT_DIR" ]; then
+    mkdir -p "$DEPLOYMENT_DIR"
+fi
 
 solc --optimize \
   --base-path . \
   --include-path node_modules \
   --combined-json abi,bin \
-  contracts/simple.sol > compiled.json
+  contracts/MyChainlinkRequester.sol \
+  contracts/LinkToken-v0.6-fix/LinkToken.sol \
+  contracts/LinkToken-v0.6-fix/ERC677.sol \
+  contracts/LinkToken-v0.6-fix/ITypeAndVersion.sol \
+  contracts/LinkToken-v0.6-fix/token/LinkERC20.sol \
+  contracts/LinkToken-v0.6-fix/token/IERC677.sol \
+  contracts/LinkToken-v0.6-fix/token/IERC677Receiver.sol > $DEPLOYMENT_DIR/compiled.json
 
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✅ 合约编译成功${NC}"
     echo ""
     echo -e "${YELLOW}生成的文件:${NC}"
-    echo -e "  ${BLUE}compiled.json${NC} - 合约 ABI 和字节码"
+    echo -e "  ${BLUE}deployment/compiled.json${NC} - 合约 ABI 和字节码"
     echo ""
 
     # 显示编译信息
     echo -e "${YELLOW}合约信息:${NC}"
     if command -v jq &> /dev/null; then
-        echo "  合约数量: $(jq '.contracts | length' compiled.json)"
-        echo "  合约名称: $(jq -r '.contracts | keys[]' compiled.json)"
+        echo "  合约数量: $(jq '.contracts | length' $DEPLOYMENT_DIR/compiled.json)"
+        echo "  合约名称: $(jq -r '.contracts | keys[]' $DEPLOYMENT_DIR/compiled.json)"
     else
         echo "  (安装 jq 可查看详细信息: apt-get install jq)"
     fi
