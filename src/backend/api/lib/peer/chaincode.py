@@ -1,11 +1,35 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import os
 import json
+import logging
+import os
+import shlex
 import subprocess
 from api.lib.peer.command import Command
 from api.config import FABRIC_TOOL, FABRIC_CFG
+
+LOG = logging.getLogger(__name__)
+
+
+def _format_cmd(cmd) -> str:
+    if isinstance(cmd, (list, tuple)):
+        return " ".join(shlex.quote(str(part)) for part in cmd)
+    return str(cmd)
+
+
+def _log_cmd(cmd):
+    LOG.info("[CMD] %s", _format_cmd(cmd))
+
+
+def run_system(cmd: str) -> int:
+    _log_cmd(cmd)
+    return os.system(cmd)
+
+
+def popen_cmd(cmd, **kwargs):
+    _log_cmd(cmd)
+    return subprocess.Popen(cmd, **kwargs)
 
 
 class ChainCode(Command):
@@ -24,7 +48,7 @@ class ChainCode(Command):
         """
         try:
             label = cc_name + "_" + cc_version
-            res = os.system(
+            res = run_system(
                 "{} lifecycle chaincode package {}.tar.gz --path {} --lang {} --label {}".format(
                     self.peer, cc_name, cc_path, language, label
                 )
@@ -43,7 +67,7 @@ class ChainCode(Command):
         """
         try:
             print("{} lifecycle chaincode install {}".format(self.peer, cc_targz))
-            res = os.system(
+            res = run_system(
                 "{} lifecycle chaincode install {}".format(self.peer, cc_targz)
             )
             res = res >> 8
@@ -61,7 +85,7 @@ class ChainCode(Command):
         """
 
         try:
-            res = subprocess.Popen(
+            res = popen_cmd(
                 "{} lifecycle chaincode queryinstalled --output json --connTimeout {}".format(
                     self.peer, timeout
                 ),
@@ -96,7 +120,7 @@ class ChainCode(Command):
             res_return = 0
             if res == 0:
                 for item in installed["installed_chaincodes"]:
-                    res_get = os.system(
+                    res_get = run_system(
                         "{} lifecycle chaincode getinstalledpackage --package-id {} "
                         "--output-directory {} --connTimeout {}".format(
                             self.peer, item["package_id"], FABRIC_CFG, timeout
@@ -154,7 +178,7 @@ class ChainCode(Command):
                 os.getenv("CORE_PEER_TLS_ENABLED") == "false"
                 or os.getenv("CORE_PEER_TLS_ENABLED") is None
             ):
-                # res = subprocess.Popen(
+                # res = popen_cmd(
                 #     "{} lifecycle chaincode approveformyorg -o {} - --channelID {} --name {} "
                 #     "--version {} --init-required --package-id {} --sequence {} --signature-policy {}".format(
                 #         self.peer,
@@ -170,7 +194,7 @@ class ChainCode(Command):
                 #     stdout=subprocess.PIPE,
                 #     stderr=subprocess.PIPE,
                 # )
-                res = subprocess.Popen(
+                res = popen_cmd(
                     "{} lifecycle chaincode approveformyorg -o {} - --channelID {} --name {} "
                     "--version {} --package-id {} --sequence {} ".format(
                         self.peer,
@@ -186,13 +210,13 @@ class ChainCode(Command):
                     stderr=subprocess.PIPE,
                 )
             else:
-                # res = subprocess.Popen("{} lifecycle chaincode approveformyorg -o {} --tls --cafile {} --channelID {} "
+                # res = popen_cmd("{} lifecycle chaincode approveformyorg -o {} --tls --cafile {} --channelID {} "
                 #                        "--name {} --version {} --init-required --package-id {} --sequence {} "
                 #                        "--signature-policy {}"
                 #                        .format(self.peer, orderer_url, orderer_tls_rootcert, channel_name,
                 #                                cc_name, chaincode_version, package_id, sequence, policy), shell=True,
                 #                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                res = subprocess.Popen(
+                res = popen_cmd(
                     "{} lifecycle chaincode approveformyorg -o {} --tls --cafile {} --channelID {} "
                     "--name {} --version {} --package-id {} --sequence {} ".format(
                         self.peer,
@@ -242,7 +266,7 @@ class ChainCode(Command):
         """
 
         try:
-            res = subprocess.Popen(
+            res = popen_cmd(
                 "{} lifecycle chaincode queryapproved --output json --channelID {}"
                 " --name {}".format(self.peer, channel_name, cc_name),
                 shell=True,
@@ -289,7 +313,7 @@ class ChainCode(Command):
                 os.getenv("CORE_PEER_TLS_ENABLED") == "false"
                 or os.getenv("CORE_PEER_TLS_ENABLED") is None
             ):
-                res = subprocess.Popen(
+                res = popen_cmd(
                     "{} lifecycle chaincode checkcommitreadiness --output json "
                     " --channelID {}  --name {} --version {} --init-required --sequence {} ".format(
                         self.peer,
@@ -312,7 +336,7 @@ class ChainCode(Command):
                     stderr = str(stderr, encoding="utf-8")
                     return return_code, stderr
             else:
-                res = subprocess.Popen(
+                res = popen_cmd(
                     "{} lifecycle chaincode checkcommitreadiness --output json "
                     "-o {} --tls --cafile {} --channelID {}  --name {} --version {} "
                     " --init-required --sequence {}".format(
@@ -390,7 +414,7 @@ class ChainCode(Command):
                     command_str_without_tls = (
                         command_str_without_tls + peer_addresses_format
                     )
-                res = os.system(
+                res = run_system(
                     command_str_without_tls.format(
                         self.peer,
                         orderer_url,
@@ -416,7 +440,7 @@ class ChainCode(Command):
                     *peer_addressed
                 )
 
-                res = os.system(
+                res = run_system(
                     command_str_with_tls.format(
                         self.peer,
                         orderer_url,
@@ -444,7 +468,7 @@ class ChainCode(Command):
         :return: chaincodes info has commited in channel of the cc_name
         """
         try:
-            res = subprocess.Popen(
+            res = popen_cmd(
                 "{} lifecycle chaincode querycommitted --channelID {} "
                 "--output json --name {}".format(self.peer, channel_name, cc_name),
                 shell=True,
@@ -494,7 +518,7 @@ class ChainCode(Command):
                 os.getenv("CORE_PEER_TLS_ENABLED") == "false"
                 or os.getenv("CORE_PEER_TLS_ENABLED") is None
             ):
-                res = subprocess.Popen(
+                res = popen_cmd(
                     invoke_command.format(
                         self.peer, orderer_url, channel_name, cc_name, args
                     ),
@@ -510,7 +534,7 @@ class ChainCode(Command):
                     stderr = str(stderr, encoding="utf-8")
                     return return_code, stderr
             else:
-                res = subprocess.Popen(
+                res = popen_cmd(
                     invoke_command_tls.format(
                         self.peer,
                         orderer_url,
@@ -540,7 +564,7 @@ class ChainCode(Command):
                 os.getenv("CORE_PEER_TLS_ENABLED") == "false"
                 or os.getenv("CORE_PEER_TLS_ENABLED") is None
             ):
-                res = subprocess.Popen(
+                res = popen_cmd(
                     "{} chaincode query -o {} --channelID {} --name {} -c '{}'".format(
                         self.peer, orderer_url, channel_name, cc_name, args
                     ),
@@ -556,7 +580,7 @@ class ChainCode(Command):
                     stderr = str(stderr, encoding="utf-8")
                     return return_code, stderr
             else:
-                res = subprocess.Popen(
+                res = popen_cmd(
                     "{} chaincode query -o {} --tls --cafile {} --channelID {}"
                     " --name {} -c '{}'".format(
                         self.peer,

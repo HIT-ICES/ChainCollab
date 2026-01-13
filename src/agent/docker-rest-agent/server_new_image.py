@@ -10,7 +10,7 @@ PASS_CODE = 'OK'
 FAIL_CODE = 'Fail'
 
 # docker_url = os.getenv("DOCKER_URL")
-docker_url = "unix://var/run/docker.sock"
+docker_url = "unix:///var/run/docker.sock"
 # storage_path = os.getenv("STORAGE_PATH")
 PWD = os.path.dirname(os.path.abspath(__file__))
 storage_path = os.path.join(PWD, "storage")

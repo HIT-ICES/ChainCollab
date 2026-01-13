@@ -193,10 +193,8 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
             resource_set.id,
         )
 
-        node_name = "orderer1"
-        orderer_domain_name = (
-            node_name + "0." + fabric_resource_set.name.split(".", 1)[1]
-        )
+        node_name = "orderer0"
+        orderer_domain_name = f"{node_name}.{fabric_resource_set.name.split('.', 1)[1]}"
 
         # # Register Orderer Node
         post(
@@ -232,8 +230,15 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         )
 
         # Register System peer node
-        node_name = "peer1"
-        peer_domain_name = node_name + "0." + fabric_resource_set.name
+        node_name = "peer0"
+        peer_domain_name = f"{node_name}.{fabric_resource_set.name}"
+        LOG.info(
+            "Init env %s -> prepare peer node name=%s domain=%s (resource_set %s)",
+            env.id,
+            node_name,
+            peer_domain_name,
+            resource_set.id,
+        )
         # # Register Peer Node
         post(
             f"http://{CURRENT_IP}:8000/api/v1/resource_sets/{resource_set.id}/cas/register_enroll",
@@ -332,8 +337,15 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
             headers={"Authorization": headers["Authorization"]},
         )
 
-        node_name = "peer1"
-        peer_domain_name = node_name + "0." + fabric_resource_set.name
+        node_name = "peer0"
+        peer_domain_name = f"{node_name}.{fabric_resource_set.name}"
+        LOG.info(
+            "Join env %s -> prepare peer node name=%s domain=%s (resource_set %s)",
+            environment.id,
+            node_name,
+            peer_domain_name,
+            resource_set.id,
+        )
         # # Register Peer Node
         post(
             f"http://{CURRENT_IP}:8000/api/v1/resource_sets/{resource_set.id}/cas/register_enroll",

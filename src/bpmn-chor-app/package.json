@@ -1,0 +1,70 @@
+{
+  "name": "bpmn-chor-app",
+  "private": false,
+  "version": "0.1.2",
+  "description": "Standalone BPMN choreography modeler with DMN integration",
+  "type": "module",
+  "main": "./dist/bpmn-chor-app.cjs",
+  "module": "./dist/bpmn-chor-app.es.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/bpmn-chor-app.es.js",
+      "require": "./dist/bpmn-chor-app.cjs"
+    },
+    "./dist/bpmn-chor-app.css": "./dist/bpmn-chor-app.css"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@bpmn-io/dmn-migrate": "^0.4.2",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.6",
+    "@mui/material": "^7.3.6",
+    "antd": "^5.13.2",
+    "bpmn-js": "^7.5.0",
+    "bpmn-js-properties-panel": "^0.35.0",
+    "chor-js": "0.7.1",
+    "diagram-js": "^6.8.2",
+    "diagram-js-direct-editing": "^1.6.1",
+    "dmn-js": "^16.5.0",
+    "ids": "^1.0.5",
+    "inherits": "^2.0.4",
+    "jquery": "^3.7.1",
+    "min-dash": "^3.5.2",
+    "object-refs": "^0.3.0",
+    "react-draggable": "^4.5.0",
+    "tiny-svg": "^2.2.2"
+  },
+  "peerDependencies": {
+    "react": ">=18.2.0",
+    "react-dom": ">=18.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/jquery": "^3.5.30",
+    "@types/node": "^24.10.1",
+    "@types/react": "^18.2.48",
+    "@types/react-dom": "^18.2.19",
+    "@vitejs/plugin-react": "^5.1.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "less": "^4.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vite": "^7.2.4"
+  }
+}

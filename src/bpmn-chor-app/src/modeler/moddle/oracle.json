@@ -1,0 +1,36 @@
+{
+  "name": "Oracle",
+  "uri": "http://oracle.example/schema/bpmn",
+  "prefix": "oracle",
+  "xml": {
+    "tagAlias": "lowerCase"
+  },
+  "types": [
+    {
+      "name": "DataTask",
+      "extends": [
+        "bpmn:ChoreographyTask"
+      ],
+      "properties": [
+        {
+          "name": "dataSource",
+          "type": "String",
+          "isAttr": true
+        }
+      ]
+    },
+    {
+      "name": "DataConfig",
+      "superClass": [
+        "Element"
+      ],
+      "properties": [
+        {
+          "name": "value",
+          "type": "String",
+          "isAttr": true
+        }
+      ]
+    }
+  ]
+}

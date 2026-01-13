@@ -1,10 +1,38 @@
-from subprocess import Popen, call
+import logging
+import shlex
 import subprocess
 import traceback
 from api.config import CELLO_HOME, FABRIC_CONFIG, FABRIC_TOOL
 import yaml
 import os
 import json
+
+LOG = logging.getLogger(__name__)
+
+
+def _format_cmd(cmd) -> str:
+    if isinstance(cmd, (list, tuple)):
+        return " ".join(shlex.quote(str(part)) for part in cmd)
+    return str(cmd)
+
+
+def _log_cmd(cmd):
+    LOG.info("[CMD] %s", _format_cmd(cmd))
+
+
+def run_cmd(cmd, **kwargs):
+    _log_cmd(cmd)
+    return subprocess.run(cmd, **kwargs)
+
+
+def popen_cmd(cmd, **kwargs):
+    _log_cmd(cmd)
+    return subprocess.Popen(cmd, **kwargs)
+
+
+def check_output_cmd(cmd, **kwargs):
+    _log_cmd(cmd)
+    return subprocess.check_output(cmd, **kwargs)
 
 
 class Firefly_cli:
@@ -29,8 +57,7 @@ class Firefly_cli:
             for ccp_path in ccp_files_path:
                 command.extend(["--ccp", ccp_path, "--msp", CELLO_HOME])
             command.extend(["--channel", channel_name, "--chaincode", firefly_chaincode_name])
-            print(" ".join(command))
-            subprocess.run(command, check=True)
+            run_cmd(command, check=True)
             firefly_stack_path = self.firefly_config_path + firefly_name
             # 读取YAML文件
             with open(firefly_stack_path + "/docker-compose.override.yml", "r") as file:
@@ -54,7 +81,7 @@ class Firefly_cli:
                 "--verbose",
                 "--no-rollback",
             ]
-            p = Popen(command)
+            p = popen_cmd(command)
             p.wait()
         except Exception as e:
             traceback.print_exc(e)
@@ -68,7 +95,7 @@ class Firefly_cli:
                 "remove",
                 firefly_name,
             ]
-            process = Popen(
+            process = popen_cmd(
                 command,
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
@@ -126,17 +153,16 @@ class Firefly_cli:
                 "--remote-node-deploy",
             ]
 
-            print("Running Firefly init command: " + " ".join(ff_init_command))
-            result = subprocess.run(ff_init_command, check=True, capture_output=True, text=True)
-            print(f"Firefly init output: {result.stdout}")
+            result = run_cmd(ff_init_command, check=True, capture_output=True, text=True)
+            LOG.info("Firefly init output: %s", result.stdout)
 
             # Get container network information
             inspect_command = ["docker", "inspect", system_node_name]
-            inspect_output = subprocess.check_output(inspect_command).decode().strip()
+            inspect_output = check_output_cmd(inspect_command).decode().strip()
             container_info = json.loads(inspect_output)[0]
             network_name = list(container_info["NetworkSettings"]["Networks"].keys())[0]
 
-            print(f"Detected docker network: {network_name}")
+            LOG.info("Detected docker network: %s", network_name)
 
             # Update Firefly docker-compose configuration
             firefly_stack_path = self.firefly_config_path + firefly_name
@@ -153,7 +179,7 @@ class Firefly_cli:
             with open(override_file_path, "w") as file:
                 yaml.dump(data, file)
 
-            print(f"Updated Firefly docker-compose with network: {network_name}")
+            LOG.info("Updated Firefly docker-compose with network: %s", network_name)
 
             return network_name
 
@@ -184,9 +210,8 @@ class Firefly_cli:
                 firefly_name,
             ]
 
-            print("Running Firefly create account command: " + " ".join(command))
-            result = subprocess.run(command, check=True, capture_output=True, text=True)
-            print(f"Firefly create account output: {result.stdout}")
+            result = run_cmd(command, check=True, capture_output=True, text=True)
+            LOG.info("Firefly create account output: %s", result.stdout)
 
             # Parse the JSON output
             account_info = json.loads(result.stdout)

@@ -7,6 +7,7 @@ import {
   Divider,
   Drawer,
   IconButton,
+  Menu,
   MenuItem,
   Select,
   Stack,
@@ -27,7 +28,14 @@ import NotificationCenter from "../NotificationCenter";
 import "./style.css";
 import { useTranslation } from "react-i18next";
 import { message } from "antd";
-import { createOrg, createConsortium, createEnvironment, createMembership } from "@/api/platformAPI";
+import {
+  createOrg,
+  createConsortium,
+  createEnvironment,
+  createEthEnvironment,
+  createMembership,
+} from "@/api/platformAPI";
+import { login, register } from "@/api/loginAPI";
 import { useAppDispatch } from "@/redux/hooks";
 import { activateOrg } from "@/redux/slices/orgSlice";
 import { activateConsortium } from "@/redux/slices/consortiumSlice";
@@ -39,6 +47,7 @@ const View: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [themeMode, setThemeMode] = useState<"light" | "dark">("light");
   const [autoLoading, setAutoLoading] = useState(false);
+  const [setupMenuAnchor, setSetupMenuAnchor] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { t, i18n } = useTranslation();
@@ -55,31 +64,36 @@ const View: React.FC = () => {
     i18n.changeLanguage(value);
   };
 
-  const handleOneClickSetup = async () => {
+  const handleOneClickSetup = async (envType: "Fabric" | "Ethereum") => {
     try {
       setAutoLoading(true);
+      const bootstrapUser = {
+        username: "logres",
+        email: "logres_king@126.com",
+        password: "123",
+      };
+      try {
+        await register(bootstrapUser.email, bootstrapUser.username, bootstrapUser.password);
+      } catch (err: any) {
+        const msg = err?.response?.data?.message || err?.message || "";
+        if (!String(msg).toLowerCase().includes("exist")) {
+          throw err;
+        }
+      }
+      const loginResult = await login(bootstrapUser.email, bootstrapUser.password);
+      if (!loginResult.isSuccess) {
+        throw new Error("Login failed after one-click registration");
+      }
       const suffix = Math.random().toString(36).slice(2, 5).toUpperCase();
-      const orgSpecs = [
-        {
-          name: `Atlas`,
-          memberships: ["Core", "Ops", "Labs"],
-        },
-        {
-          name: `Nimbus`,
-          memberships: ["Edge", "Data"],
-        },
-      ];
+      const orgName = `Atlas-${suffix}`;
       const consortiumName = `Aegis-${suffix}`;
       const envName = `Forge-${suffix}`;
+      const membershipLabels = ["Core", "Ops", "Labs"];
 
-      const [orgA, orgB] = await Promise.all([
-        createOrg(`${orgSpecs[0].name}-${suffix}`),
-        createOrg(`${orgSpecs[1].name}-${suffix}`),
-      ]);
+      const org = await createOrg(orgName);
+      dispatch(activateOrg({ currentOrgId: org.id, currentOrgName: org.name }));
 
-      dispatch(activateOrg({ currentOrgId: orgA.id, currentOrgName: orgA.name }));
-
-      const consortium = await createConsortium(orgA.id, consortiumName);
+      const consortium = await createConsortium(org.id, consortiumName);
       dispatch(
         activateConsortium({
           currentConsortiumId: consortium.id,
@@ -88,34 +102,45 @@ const View: React.FC = () => {
       );
 
       const membershipTasks: Promise<void>[] = [];
-      orgSpecs[0].memberships.forEach((label) => {
+      membershipLabels.forEach((label) => {
         membershipTasks.push(
-          createMembership(orgA.id, consortium.id, `${orgSpecs[0].name} ${label}`)
-        );
-      });
-      orgSpecs[1].memberships.forEach((label) => {
-        membershipTasks.push(
-          createMembership(orgB.id, consortium.id, `${orgSpecs[1].name} ${label}`)
+          createMembership(org.id, consortium.id, `${orgName}-${label}`)
         );
       });
       await Promise.all(membershipTasks);
 
-      const env = await createEnvironment(consortium.id, envName);
+      const env =
+        envType === "Ethereum"
+          ? await createEthEnvironment(consortium.id, envName)
+          : await createEnvironment(consortium.id, envName);
       dispatch(
         activateEnv({
           currentEnvId: env.id,
           currentEnvName: env.name,
-          currentEnvType: env.type || "Fabric",
+          currentEnvType: envType,
         })
       );
 
       message.success("One-click setup completed");
-      navigate(`/orgs/${orgA.id}/consortia/${consortium.id}/envs/${env.id}/envdashboard`);
+      navigate(`/orgs/${org.id}/consortia/${consortium.id}/envs/${env.id}/envdashboard`);
     } catch (error: any) {
       message.error(error?.message || "One-click setup failed");
     } finally {
       setAutoLoading(false);
     }
+  };
+
+  const handleOpenSetupMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setSetupMenuAnchor(event.currentTarget);
+  };
+
+  const handleCloseSetupMenu = () => {
+    setSetupMenuAnchor(null);
+  };
+
+  const handleSelectSetupType = (envType: "Fabric" | "Ethereum") => {
+    handleCloseSetupMenu();
+    handleOneClickSetup(envType);
   };
 
   const appBarStyles = useMemo(
@@ -218,12 +243,32 @@ const View: React.FC = () => {
               variant="contained"
               color="primary"
               startIcon={<RocketLaunchIcon />}
-              onClick={handleOneClickSetup}
+              onClick={handleOpenSetupMenu}
               disabled={autoLoading}
               sx={{ textTransform: "none" }}
             >
               {autoLoading ? "Creating..." : "One-click Setup"}
             </MUIButton>
+            <Menu
+              anchorEl={setupMenuAnchor}
+              open={Boolean(setupMenuAnchor)}
+              onClose={handleCloseSetupMenu}
+              anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+              transformOrigin={{ vertical: "top", horizontal: "left" }}
+            >
+              <MenuItem
+                onClick={() => handleSelectSetupType("Fabric")}
+                disabled={autoLoading}
+              >
+                Fabric
+              </MenuItem>
+              <MenuItem
+                onClick={() => handleSelectSetupType("Ethereum")}
+                disabled={autoLoading}
+              >
+                Ethereum (ETH)
+              </MenuItem>
+            </Menu>
             <Select
               size="small"
               value={i18n.language}

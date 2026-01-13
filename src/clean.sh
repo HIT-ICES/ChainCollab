@@ -1,81 +1,175 @@
-#!/bin/bash
+#!/usr/bin/env python3
+import re
+import shutil
+import subprocess
+from pathlib import Path
 
-# Remove Storage
-
-echo "Remove Storage"
-
-sudo chmod -R 777 ./agent/docker-rest-agent/CA_related/storage/fabric-ca-servers
-sudo chmod -R 777 ./agent/docker-rest-agent/storage
-rm -rf ./agent/docker-rest-agent/storage/*
-
-echo "Remove Fabric CA storage"
-
-sudo chmod -R 777 ./agent/docker-rest-agent/CA_related/storage/fabric-ca-servers
-rm -rf ./agent/docker-rest-agent/CA_related/storage/fabric-ca-servers/*
-
-echo "Remove Ethereum storage"
-
-sudo chmod -R 777 ./agent/docker-rest-agent/eth/storage/servers
-rm -rf ./agent/docker-rest-agent/eth/storage/servers/*
-
-# Remove opt/cello
-
-echo "Remove opt/cello"
-
-rm -rf ./backend/opt/cello/*
-
-# Remove opt/chaincode
-echo "Remove opt/chaincode"
-rm -rf ./backend/opt/chaincode/*
-rm -rf ./backend/opt/ethereum-contracts/*
-# Remove pgdata
+SRC_DIR = Path(__file__).resolve().parent
+AGENT_DIR = SRC_DIR / "agent" / "docker-rest-agent"
+BACKEND_DIR = SRC_DIR / "backend"
 
 
-echo "Remove pgdata"
-sudo chmod -R 777 ./backend/pgdata
-rm -rf ./backend/pgdata/*
+def cmd_exists(name: str) -> bool:
+    return shutil.which(name) is not None
 
-# rm -rf /home/logres/LoLeido/cello/src/backend/opt/chaincode/*
 
-echo "Remove py migrations"
-find ./backend/api/migrations -type f -name '*_auto_*.py' -exec rm -f {} \;
+def run_cmd(cmd, *, check=True, input_text=None):
+    return subprocess.run(
+        cmd,
+        check=check,
+        text=True,
+        input=input_text,
+    )
 
-# Remove Firefly
-echo "Remove Firefly"
-if command -v ff >/dev/null 2>&1; then
-  ff list | grep 'cello_' | xargs -r -I{} sh -c "echo 'y' | ff remove {}" || true
-else
-  echo "ff not found, skip Firefly cleanup"
-fi
 
-# Remove Docker Container
-#!/bin/bash
+def run_output(cmd) -> str:
+    try:
+        result = subprocess.run(
+            cmd,
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+    except FileNotFoundError:
+        return ""
+    if result.returncode != 0:
+        return ""
+    return result.stdout.strip()
 
-# 停止和删除以cello.com、edu.cn、tech.cn或org.com结尾的Docker容器，以及以太坊节点容器
-while read -r container_name; do
-    [ -n "$container_name" ] || continue
-    echo "Stopping and removing container: $container_name"
-    docker stop "$container_name" >/dev/null 2>&1 || true
-    docker rm "$container_name" >/dev/null 2>&1 || true
-done < <(docker ps -a --format "{{.Names}}" | grep -E 'com$|edu.cn$|tech.cn$|org.com$|geth|ethereum' || true)
 
-# 移除 dev开头的image
-while read -r image_name; do
-    [ -n "$image_name" ] || continue
-    echo "Removing image: $image_name"
-    docker rmi "$image_name" >/dev/null 2>&1 || true
-done < <(docker images --format "{{.Repository}}" | grep '^dev' || true)
-# docker container prune -f
-# docker volume prune -f
+def sudo_chmod(path: Path):
+    if not path.exists():
+        return
+    run_cmd(["sudo", "chmod", "-R", "777", str(path)], check=False)
 
-# Remove DB
-echo "Remove DB"
-docker stop cello-postgres >/dev/null 2>&1 || true
-docker rm cello-postgres >/dev/null 2>&1 || true
 
-# Remove Redis
-echo "Remove Redis"
-docker stop cello-redis >/dev/null 2>&1 || true
-docker rm cello-redis >/dev/null 2>&1 || true
+def sudo_remove_contents(path: Path):
+    if not path.exists():
+        return
+    for child in path.iterdir():
+        run_cmd(["sudo", "rm", "-rf", str(child)], check=False)
 
-echo "Finished cleaning"
+
+def remove_contents(path: Path):
+    if not path.exists():
+        return
+    for child in path.iterdir():
+        if child.is_dir():
+            shutil.rmtree(child, ignore_errors=True)
+        else:
+            try:
+                child.unlink()
+            except FileNotFoundError:
+                continue
+            except PermissionError:
+                run_cmd(["sudo", "rm", "-f", str(child)], check=False)
+
+
+def list_docker_containers() -> list[str]:
+    if not cmd_exists("docker"):
+        return []
+    output = run_output(["docker", "ps", "-a", "--format", "{{.Names}}"])
+    return [line.strip() for line in output.splitlines() if line.strip()]
+
+
+def list_docker_images() -> list[str]:
+    if not cmd_exists("docker"):
+        return []
+    output = run_output(["docker", "images", "--format", "{{.Repository}}"])
+    return [line.strip() for line in output.splitlines() if line.strip()]
+
+
+def stop_remove_container(name: str):
+    if not cmd_exists("docker"):
+        return
+    run_cmd(["docker", "stop", name], check=False)
+    run_cmd(["docker", "rm", name], check=False)
+
+
+def remove_firefly():
+    print("Remove Firefly")
+    if not cmd_exists("ff"):
+        print("ff not found, skip Firefly cleanup")
+        return
+    output = run_output(["ff", "list"])
+    for line in output.splitlines():
+        if "cello_" not in line:
+            continue
+        stack = line.split()[0]
+        run_cmd(["ff", "remove", stack], check=False, input_text="y\n")
+
+
+def main():
+    print("Remove Storage")
+    storage_dir = AGENT_DIR / "storage"
+    ca_storage = AGENT_DIR / "CA_related" / "storage" / "fabric-ca-servers"
+    sudo_chmod(ca_storage)
+    sudo_chmod(storage_dir)
+    sudo_remove_contents(storage_dir)
+
+    print("Remove Fabric CA storage")
+    sudo_chmod(ca_storage)
+    sudo_remove_contents(ca_storage)
+
+    print("Remove Ethereum storage")
+    eth_storage = AGENT_DIR / "eth" / "storage" / "servers"
+    sudo_chmod(eth_storage)
+    sudo_remove_contents(eth_storage)
+
+    print("Remove opt/cello")
+    remove_contents(BACKEND_DIR / "opt" / "cello")
+
+    print("Remove opt/chaincode")
+    remove_contents(BACKEND_DIR / "opt" / "chaincode")
+    remove_contents(BACKEND_DIR / "opt" / "ethereum-contracts")
+
+    print("Remove pgdata")
+    pgdata_dir = BACKEND_DIR / "pgdata"
+    sudo_chmod(pgdata_dir)
+    sudo_remove_contents(pgdata_dir)
+
+    print("Remove py migrations")
+    migrations_dir = BACKEND_DIR / "api" / "migrations"
+    for path in migrations_dir.glob("*_auto_*.py"):
+        run_cmd(["sudo", "rm", "-f", str(path)], check=False)
+
+    remove_firefly()
+
+    print("Remove runtime logs")
+    runtime_dir = SRC_DIR / "runtime"
+    if runtime_dir.exists():
+        for path in runtime_dir.glob("*.log"):
+            try:
+                path.unlink()
+            except FileNotFoundError:
+                continue
+        for path in runtime_dir.glob("*.pids"):
+            try:
+                path.unlink()
+            except FileNotFoundError:
+                continue
+
+    print("Remove Docker Container")
+    pattern = re.compile(r"(com$|edu\.cn$|tech\.cn$|org\.com$|geth|ethereum)")
+    for name in list_docker_containers():
+        if pattern.search(name):
+            print(f"Stopping and removing container: {name}")
+            stop_remove_container(name)
+
+    print("Remove dev images")
+    for image in list_docker_images():
+        if image.startswith("dev"):
+            print(f"Removing image: {image}")
+            run_cmd(["docker", "rmi", image], check=False)
+
+    print("Remove DB")
+    stop_remove_container("cello-postgres")
+
+    print("Remove Redis")
+    stop_remove_container("cello-redis")
+
+    print("Finished cleaning")
+
+
+if __name__ == "__main__":
+    main()

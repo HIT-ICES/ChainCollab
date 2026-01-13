@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
+import re
 import base64
 import shutil
 import os
@@ -310,9 +311,21 @@ class NodeViewSet(viewsets.ViewSet):
                     )
                 fabric_resource_set = resource_set.sub_resource_set
                 agent = resource_set.agent
+                name_match = re.match(r"^(.*?)(\d+)$", node_name or "")
+                if name_match:
+                    base_name = name_match.group(1)
+                    start_index = int(name_match.group(2))
+                else:
+                    base_name = node_name
+                    start_index = 0
                 if agent:
                     nodes = Node.objects.filter(
-                        name=node_name + "0",
+                        name=(
+                            f"{base_name}{start_index}"
+                            if start_index
+                            or (name_match and num == 1)
+                            else f"{base_name}0"
+                        ),
                         fabric_resource_set=fabric_resource_set,
                         type=node_type,
                     )
@@ -321,7 +334,18 @@ class NodeViewSet(viewsets.ViewSet):
                 else:
                     raise NoResource
                 for n in range(num):
-                    name = node_name + str(n)
+                    name = (
+                        f"{base_name}{start_index + n}"
+                        if start_index or name_match
+                        else f"{base_name}{n}"
+                    )
+                    LOG.info(
+                        "Create node name=%s type=%s org=%s (resource_set=%s)",
+                        name,
+                        node_type,
+                        fabric_resource_set.name,
+                        resource_set.id,
+                    )
 
                     urls = "{}.{}".format(
                         name,
@@ -462,6 +486,16 @@ class NodeViewSet(viewsets.ViewSet):
         """
         args = {}
         if type == "peer":
+            config_path = (
+                f"{CELLO_HOME}/{org}/crypto-config/peerOrganizations/{org}/peers/"
+                f"{node}.{org}/core.yaml"
+            )
+            LOG.info(
+                "Generate peer config org=%s node=%s path=%s",
+                org,
+                node,
+                config_path,
+            )
             args.update({"peer_id": "{}.{}".format(node, org)})
             args.update({"peer_address": "{}.{}:{}".format(node, org, 7051)})
             args.update(
@@ -473,6 +507,17 @@ class NodeViewSet(viewsets.ViewSet):
             a = NodeConfig(org)
             a.peer(node, **args)
         else:
+            config_path = (
+                f"{CELLO_HOME}/{org}/crypto-config/ordererOrganizations/"
+                f"{org.split('.', 1)[1]}/orderers/{node}.{org.split('.', 1)[1]}/"
+                "orderer.yaml"
+            )
+            LOG.info(
+                "Generate orderer config org=%s node=%s path=%s",
+                org,
+                node,
+                config_path,
+            )
             args.update({"General_ListenPort": 7050})
             args.update({"General_LocalMSPID": "{}OrdererMSP".format(org.capitalize())})
             args.update({"General_TLS_Enabled": True})

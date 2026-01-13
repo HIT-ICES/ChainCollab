@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Tuple
+from typing import Optional, Tuple
 
 from werkzeug.datastructures import ImmutableMultiDict
 
@@ -13,6 +13,18 @@ from ..utils import parse_port_map, require_param
 
 
 class EthereumNodeTemplate:
+    def _get_network_subnet(self) -> Optional[str]:
+        try:
+            net = docker_client.networks.get(CONFIG.fabric_network)
+            ipam = net.attrs.get("IPAM", {}).get("Config", [])
+            for cfg in ipam:
+                subnet = cfg.get("Subnet")
+                if subnet:
+                    return subnet
+        except Exception:
+            logging.exception("Failed to detect docker network subnet")
+        return None
+
     def render(self, form_data: ImmutableMultiDict) -> Tuple[ContainerSpec, ProvisionContext]:
         node_name = require_param(form_data, "name")
         raw_port_map = form_data.get("port_map", '{"8545": 8545, "30303": 30303}')
@@ -121,29 +133,33 @@ class EthereumNodeTemplate:
             "30303/tcp": port_map.get("30303", 30303),
         }
 
+        netrestrict = self._get_network_subnet()
+        command = [
+            "--datadir=/root/.ethereum",
+            "--networkid=3456",
+            "--syncmode=full",
+            # P2P: bootnode must enable discovery
+            "--port=30303",
+            "--maxpeers=50",
+            # HTTP RPC for FireFly
+            "--http",
+            "--http.addr=0.0.0.0",
+            "--http.port=8545",
+            "--http.api=eth,net,web3,txpool",
+            "--http.corsdomain=*",
+            "--http.vhosts=*",
+            # Unlock fixed account (only for dev/internal network)
+            "--unlock=0x365acf78c44060caf3a4789d804df11e3b4aa17d",
+            "--password=/root/password.txt",
+            "--allow-insecure-unlock",
+            "--verbosity=4",
+        ]
+        if netrestrict:
+            command.insert(5, f"--netrestrict={netrestrict}")
+
         spec = ContainerSpec(
             image="geth-custom:latest",
-            command=[
-                "--datadir=/root/.ethereum",
-                "--networkid=3456",
-                "--syncmode=full",
-                # P2P: bootnode must enable discovery
-                "--port=30303",
-                "--maxpeers=50",
-                "--netrestrict=172.20.0.0/16",
-                # HTTP RPC for FireFly
-                "--http",
-                "--http.addr=0.0.0.0",
-                "--http.port=8545",
-                "--http.api=eth,net,web3,txpool",
-                "--http.corsdomain=*",
-                "--http.vhosts=*",
-                # Unlock fixed account (only for dev/internal network)
-                "--unlock=0x365acf78c44060caf3a4789d804df11e3b4aa17d",
-                "--password=/root/password.txt",
-                "--allow-insecure-unlock",
-                "--verbosity=4",
-            ],
+            command=command,
             name=node_name,
             environment={},
             volumes=volumes,
@@ -203,22 +219,26 @@ class EthereumNodeTemplate:
             for internal_port, external_port in port_map.items():
                 ports[f"{internal_port}/tcp"] = external_port
 
+        netrestrict = self._get_network_subnet()
+        command = [
+            "--datadir=/root/.ethereum",
+            "--networkid=3456",
+            "--syncmode=full",
+            "--port=30303",
+            f"--bootnodes={sys_enode}",
+            # PoW mining
+            "--mine",
+            "--miner.threads=1",
+            "--miner.gasprice=0",
+            "--miner.etherbase=0x1111111111111111111111111111111111111111",
+            "--verbosity=3",
+        ]
+        if netrestrict:
+            command.insert(0, f"--netrestrict={netrestrict}")
+
         spec = ContainerSpec(
             image="geth-custom:latest",
-            command=[
-                "--netrestrict=172.20.0.0/16",
-                "--datadir=/root/.ethereum",
-                "--networkid=3456",
-                "--syncmode=full",
-                "--port=30303",
-                f"--bootnodes={sys_enode}",
-                # PoW mining
-                "--mine",
-                "--miner.threads=1",
-                "--miner.gasprice=0",
-                "--miner.etherbase=0x1111111111111111111111111111111111111111",
-                "--verbosity=3",
-            ],
+            command=command,
             name=node_name,
             environment={"SYS_ENODE": sys_enode},
             volumes=volumes,

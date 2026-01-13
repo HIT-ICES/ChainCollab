@@ -220,6 +220,16 @@ class FabricResourceSetViewSet(viewsets.ViewSet):
         """
         args = {}
         if type == "peer":
+            config_path = (
+                f"{CELLO_HOME}/{org}/crypto-config/peerOrganizations/{org}/peers/"
+                f"{node}.{org}/core.yaml"
+            )
+            LOG.info(
+                "Generate peer config org=%s node=%s path=%s",
+                org,
+                node,
+                config_path,
+            )
             args.update({"peer_id": "{}.{}".format(node, org)})
             args.update({"peer_address": "{}.{}:{}".format(node, org, 7051)})
             args.update(
@@ -232,6 +242,17 @@ class FabricResourceSetViewSet(viewsets.ViewSet):
             a = NodeConfig(org)
             a.peer(node, **args)
         else:
+            config_path = (
+                f"{CELLO_HOME}/{org}/crypto-config/ordererOrganizations/"
+                f"{org.split('.', 1)[1]}/orderers/{node}.{org.split('.', 1)[1]}/"
+                "orderer.yaml"
+            )
+            LOG.info(
+                "Generate orderer config org=%s node=%s path=%s",
+                org,
+                node,
+                config_path,
+            )
             args.update({"General_ListenPort": 7050})
             args.update({"General_LocalMSPID": "{}OrdererMSP".format(org.capitalize())})
             args.update({"General_TLS_Enabled": True})

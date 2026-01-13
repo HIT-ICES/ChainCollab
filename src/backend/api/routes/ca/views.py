@@ -38,6 +38,11 @@ from api.config import CURRENT_IP
 LOG = logging.getLogger(__name__)
 
 
+def run_system(cmd: str) -> int:
+    LOG.info("[CMD] %s", cmd)
+    return os.system(cmd)
+
+
 class FabricCAViewSet(viewsets.ViewSet):
     # TODO 标准MSP生成方法，通过调用code/loleido/cello/src/api-engine/api/lib/ca/ca.py的方法，生成一套标准的MSP，例如Peer0的标准MSP目录，Order0的
 
@@ -160,10 +165,10 @@ class FabricCAViewSet(viewsets.ViewSet):
             print("copy ca server.pem")
             with open(ca_server_file_path, "wb") as f:
                 f.write(file)
-            os.system(
+            run_system(
                 f"""mkdir -p {org_path}msp/tlscacerts ; mkdir -p {org_path}tlsca ; mkdir -p {org_path}ca"""
             )
-            os.system(
+            run_system(
                 f"""cp {ca_server_file_path} {org_path}msp/tlscacerts/{ca_file_name} ;
                 cp {ca_server_file_path} {org_path}tlsca/tlsca.{org_name}-cert.pem ;
                 cp {ca_server_file_path} {org_path}ca/ca.{org_name}-cert.pem"""
@@ -182,10 +187,10 @@ class FabricCAViewSet(viewsets.ViewSet):
                 print("copy ca server.pem to system org peer")
                 with open(ca_server_file_path, "wb") as f:
                     f.write(file)
-                os.system(
+                run_system(
                     f"""mkdir -p {sys_org_path}msp/tlscacerts ; mkdir -p {sys_org_path}tlsca ; mkdir -p {sys_org_path}ca"""
                 )
-                os.system(
+                run_system(
                     f"""cp {ca_server_file_path} {sys_org_path}msp/tlscacerts/ca.crt ;
                     cp {ca_server_file_path} {sys_org_path}tlsca/tlsca.{org_name}-cert.pem ;
                     cp {ca_server_file_path} {sys_org_path}ca/ca.{org_name}-cert.pem"""
@@ -254,9 +259,9 @@ class FabricCAViewSet(viewsets.ViewSet):
                 sys_peer_org_path = "{}/{}/crypto-config/peerOrganizations/{}/".format(
                     CELLO_HOME, org_name, org_name
                 )
-                os.system(f"""cp -r {org_path}/msp {sys_peer_org_path}""")
-                os.system(f"""rm {sys_peer_org_path}/msp/tlscacerts/tlsca.*-cert.pem""")
-                os.system(
+                run_system(f"""cp -r {org_path}/msp {sys_peer_org_path}""")
+                run_system(f"""rm {sys_peer_org_path}/msp/tlscacerts/tlsca.*-cert.pem""")
+                run_system(
                     f"""cp {org_path}/fabric-ca-client-config.yaml {sys_peer_org_path}/fabric-ca-client-config.yaml"""
                 )
         except Exception as e:
@@ -308,7 +313,7 @@ class FabricCAViewSet(viewsets.ViewSet):
             )
             # cp org admin msp config.yaml to Admin
             print("cp org admin msp config.yaml to Admin")
-            res = os.system(
+            res = run_system(
                 f"""cp {org_path}msp/config.yaml {org_path}/users/Admin@{org_name_path}/msp/config.yaml"""
             )
             print(res)
@@ -328,7 +333,7 @@ class FabricCAViewSet(viewsets.ViewSet):
                 )
                 # cp org admin msp config.yaml to Admin
                 print("cp org admin msp config.yaml to Admin")
-                res = os.system(
+                res = run_system(
                     f"""cp {sys_peer_org_path}msp/config.yaml {sys_peer_org_path}/users/Admin@{org_name}/msp/config.yaml"""
                 )
                 print(res)
@@ -352,7 +357,7 @@ class FabricCAViewSet(viewsets.ViewSet):
                     org_path=org_path,
                 )
                 print("cp org user msp config.yaml to User1")
-                res = os.system(
+                res = run_system(
                     f"""cp {org_path}msp/config.yaml {org_path}/users/User1@{org_name_path}/msp/config.yaml"""
                 )
                 print(res)
@@ -420,7 +425,7 @@ class FabricCAViewSet(viewsets.ViewSet):
                 hosts=[node_url],
             )
             print("cp org msp config.yaml to node msp")
-            res = os.system(
+            res = run_system(
                 f"""cp {org_path}msp/config.yaml {generate_path}msp/config.yaml"""
             )
             print(res)
@@ -440,20 +445,20 @@ class FabricCAViewSet(viewsets.ViewSet):
 
             # Copy the tls CA cert, server cert, server keystore to well known file names in the peer/orderer's tls directory that are referenced by peer/orderer startup config
             print("copy tls related")
-            os.system(
+            run_system(
                 f"""cp {generate_path}tls/tlscacerts/* {generate_path}tls/ca.crt"""
             )
-            os.system(
+            run_system(
                 f"""cp {generate_path}tls/signcerts/* {generate_path}tls/server.crt"""
             )
-            os.system(
+            run_system(
                 f"""cp {generate_path}tls/keystore/* {generate_path}tls/server.key"""
             )
             if node_type is FabricCAOrgType.SYSTEMORG:
                 orderer_tls_path = generate_path + "msp/tlscacerts"
                 os.mkdir(orderer_tls_path)
                 ca_file_name = "tlsca." + org_name.split(".", 1)[1] + "-cert.pem"
-                os.system(
+                run_system(
                     f"""cp {generate_path}tls/tlscacerts/* {generate_path}msp/tlscacerts/{ca_file_name}"""
                 )
         except Exception as e:
