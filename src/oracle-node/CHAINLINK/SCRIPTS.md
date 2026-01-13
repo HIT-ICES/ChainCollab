@@ -227,7 +227,7 @@ docker exec -it chainlink-mybootnode-1 geth attach /root/.ethereum/geth.ipc
 **功能**:
 - 🔍 检查 solc 编译器
 - 📝 编译 simple.sol 合约
-- 💾 生成 compiled.json 文件
+- 💾 生成 deployment/compiled.json 文件
 - ℹ️ 显示合约信息
 
 **使用方法**:
@@ -248,7 +248,7 @@ solc, the solidity compiler commandline interface
 ✅ 合约编译成功
 
 生成的文件:
-  compiled.json - 合约 ABI 和字节码
+  deployment/compiled.json - 合约 ABI 和字节码
 
 合约信息:
   合约数量: 15
@@ -273,7 +273,7 @@ solc, the solidity compiler commandline interface
 - 📝 自动编译合约
 - 🔓 自动解锁账户
 - 🚀 自动部署合约
-- 💾 保存部署信息到 deployment.json
+- 💾 保存部署信息到 deployment/deployment.json
 - ℹ️ 显示下一步操作提示
 
 **使用方法**:
@@ -299,7 +299,7 @@ solc, the solidity compiler commandline interface
 账户余额: 1000000 ETH
 
 部署参数:
-- LINK Token: 0xb232b28da508ef56cb13b124faa0b93fcff9ff65
+- LINK Token: 0xe640cdaf5df426bfaa1664e47a91f3106db07792
 - Oracle: 0x75cd7081c3224a11b2b013faed8606acd4cec737
 - Job ID: 0x85666de4e963484fb3423eaa583733ad...
 - Fee: 0.1 LINK
@@ -531,8 +531,8 @@ npm install
 ✅ Chainlink 运行时数据已删除
 
 [5/6] 清理编译和部署产物...
-  - 已删除 compiled.json
-  - 已删除 deployment.json
+  - 已删除 deployment/compiled.json
+  - 已删除 deployment/deployment.json
 ✅ 编译产物已清理
 
 [6/6] 清理 Docker 系统缓存...

@@ -56,7 +56,7 @@ CHAINLINK/
 │   └── job-spec.toml      # Job 规范
 │
 ├── deployment/            # 部署信息
-│   └── chainlink-deployment.json
+│   └── deployment/chainlink-deployment.json
 │
 ├── 🚀 一键脚本
 │   ├── start.sh           # 一键启动所有服务
@@ -75,7 +75,7 @@ CHAINLINK/
 ### 合约地址 (Chain ID: 3456)
 
 ```
-LINK Token:  0xb232b28da508ef56cb13b124faa0b93fcff9ff65
+LINK Token:  0xe640cdaf5df426bfaa1664e47a91f3106db07792
 Operator:    0x75cd7081c3224a11b2b013faed8606acd4cec737
 部署账户:    0x7e9519a329908320829f4a747b8bac06cf0955cb
 ```
@@ -83,7 +83,7 @@ Operator:    0x75cd7081c3224a11b2b013faed8606acd4cec737
 ### Chainlink Job
 
 ```
-Job ID:      85666de4-e963-484f-b342-3eaa583733ad
+Job ID:      1e7d2a7c-fd9c-40c0-bb7f-287032908212
 Job Type:    directrequest (HTTP GET)
 ```
 
@@ -147,8 +147,8 @@ node scripts/create-job.js
 **输出示例:**
 ```
 ✅ Job 创建成功!
-Job ID: 85666de4-e963-484f-b342-3eaa583733ad
-Job External Job ID: 85666de4-e963-484f-b342-3eaa583733ad
+Job ID: 1e7d2a7c-fd9c-40c0-bb7f-287032908212
+Job External Job ID: 1e7d2a7c-fd9c-40c0-bb7f-287032908212
 ```
 
 **注意**:
@@ -183,7 +183,7 @@ node scripts/deploy-contract.js
 ```bash
 # 编译合约
 solc --optimize --base-path . --include-path node_modules \
-  --combined-json abi,bin contracts/simple.sol > compiled.json
+  --combined-json abi,bin contracts/simple.sol > deployment/compiled.json
 
 # 解锁账户
 docker exec chainlink-mybootnode-1 geth --exec \
@@ -321,9 +321,9 @@ docker exec chainlink-mybootnode-1 geth --exec \
 
 ```javascript
 const params = {
-  linkToken: "0xb232b28da508ef56cb13b124faa0b93fcff9ff65",
+  linkToken: "0xe640cdaf5df426bfaa1664e47a91f3106db07792",
   oracle: "0x75cd7081c3224a11b2b013faed8606acd4cec737",
-  jobId: "0x85666de4e963484fb3423eaa583733ad00000000000000000000000000000000",
+  jobId: "0x3961656236363530303833653436366661353330616464323632656630333765",
   fee: "100000000000000000" // 0.1 LINK
 };
 ```
@@ -394,7 +394,7 @@ docker exec chainlink-mybootnode-1 geth --exec \
 docker logs chainlink-node --tail 100
 
 # 访问 Chainlink UI 查看 Job Runs
-open http://localhost:6688/jobs/85666de4-e963-484f-b342-3eaa583733ad
+open http://localhost:6688/jobs/1e7d2a7c-fd9c-40c0-bb7f-287032908212
 ```
 
 ### EIP55 地址错误

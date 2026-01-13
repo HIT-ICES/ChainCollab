@@ -1,5 +1,20 @@
 const http = require('http');
 const fs = require('fs');
+const { keccak256 } = require('@ethersproject/keccak256');
+const { toUtf8Bytes } = require('@ethersproject/strings');
+
+// EIP55 地址格式化函数
+function toChecksumAddress(address) {
+    address = address.toLowerCase().replace('0x', '');
+    const hash = keccak256(toUtf8Bytes(address)).slice(2);
+    let result = '0x';
+    for (let i = 0; i < address.length; i++) {
+        result += parseInt(hash[i], 16) >= 8 ?
+                  address[i].toUpperCase() :
+                  address[i].toLowerCase();
+    }
+    return result;
+}
 
 const username = 'admin@chain.link';
 const password = 'change-me-strong';
@@ -83,8 +98,24 @@ async function main() {
         const cookie = await login();
         console.log('✅ 登录成功');
 
+        // 检查 chainlink-deployment.json 文件是否存在
+        const deploymentDir = 'deployment';
+        if (!fs.existsSync(`${deploymentDir}/chainlink-deployment.json`)) {
+            console.error('❌ 找不到 chainlink-deployment.json 文件，请先部署 Chainlink 基础设施');
+            process.exit(1);
+        }
+
+        // 读取 chainlink-deployment.json 文件
+        const chainlinkDeployment = JSON.parse(fs.readFileSync(`${deploymentDir}/chainlink-deployment.json`, 'utf8'));
+        const operatorAddress = chainlinkDeployment.operator;
+
         // 读取 Job Spec
-        const jobSpec = fs.readFileSync('config/job-spec.toml', 'utf8');
+        let jobSpec = fs.readFileSync('config/job-spec.toml', 'utf8');
+
+        // 动态替换合约地址，确保是 EIP55 格式
+        const checksumAddress = toChecksumAddress(operatorAddress);
+        jobSpec = jobSpec.replace(/0x75CD7081c3224a11B2b013fAED8606Acd4cec737/g, checksumAddress);
+
         console.log('\n读取 Job Spec:');
         console.log(jobSpec);
 
@@ -97,10 +128,10 @@ async function main() {
         console.log('Job External Job ID:', result.data.attributes.externalJobID);
 
         // 保存 Job ID
-        const deployment = JSON.parse(fs.readFileSync('deployment/chainlink-deployment.json', 'utf8'));
+        const deployment = JSON.parse(fs.readFileSync(`${deploymentDir}/chainlink-deployment.json`, 'utf8'));
         deployment.jobId = result.data.attributes.externalJobID;
         deployment.jobInternalId = result.data.id;
-        fs.writeFileSync('deployment/chainlink-deployment.json', JSON.stringify(deployment, null, 2));
+        fs.writeFileSync(`${deploymentDir}/chainlink-deployment.json`, JSON.stringify(deployment, null, 2));
 
         console.log('\n========================================');
         console.log('✅ Chainlink 设置完成!');
