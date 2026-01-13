@@ -172,8 +172,10 @@ export default function AssetModal({
       payload.tokenHasExistInERC = tokenHasExistInERC;
     }
 
-    // value-added 需要 refTokenIds
-    if (assetType === 'value-added' && refTokenIds.length > 0) {
+    // value-added 的 refTokenIds 由 DataAssociationBehavior 自动管理
+    // 但我们必须保存当前状态到 BPMN 文档，以便文件重新加载后保持数据
+    // 即使是空数组也要保存，这样可以清除旧的引用
+    if (assetType === 'value-added') {
       payload.refTokenIds = refTokenIds;
     }
 
@@ -187,6 +189,53 @@ export default function AssetModal({
         ],
       },
     });
+
+    // 如果 tokenId 发生了变化，触发全局同步
+    if (tokenId && tokenId !== originalTokenId) {
+      syncRefTokenIdsGlobally(originalTokenId, tokenId);
+    }
+  };
+
+  // 全局同步 refTokenIds：将所有引用 oldTokenId 的 DataObject 更新为 newTokenId
+  const syncRefTokenIdsGlobally = (oldTokenId: string, newTokenId: string) => {
+    if (!oldTokenId || !newTokenId || oldTokenId === newTokenId) return;
+
+    const allElements = elementRegistry.getAll();
+
+    allElements.forEach((el: any) => {
+      // 只处理 DataObjectReference
+      if (el.type !== 'bpmn:DataObjectReference') return;
+
+      const docs = el.businessObject.documentation;
+      if (Array.isArray(docs) && docs.length) {
+        try {
+          const parsed = JSON.parse(docs[0].text);
+
+          // 检查是否有 refTokenIds 并且包含 oldTokenId
+          if (parsed.assetType === 'value-added' && Array.isArray(parsed.refTokenIds)) {
+            const index = parsed.refTokenIds.indexOf(oldTokenId);
+            if (index !== -1) {
+              // 替换 oldTokenId 为 newTokenId
+              parsed.refTokenIds[index] = newTokenId;
+
+              // 更新 DataObject
+              commandStack.execute('element.updateProperties', {
+                element: el,
+                properties: {
+                  documentation: [
+                    modeler._moddle.create('bpmn:Documentation', {
+                      text: JSON.stringify(parsed, null, 2),
+                    }),
+                  ],
+                },
+              });
+            }
+          }
+        } catch {
+          // ignore parse error
+        }
+      }
+    });
   };
 
   const handleOk = () => {
@@ -198,6 +247,37 @@ export default function AssetModal({
     updateDataToBPMN();
     onClose(true);
   };
+
+  // 检查 DataObject 是否被 branch/merge Task 使用（输出连接）
+  const isUsedByBranchMergeTask = React.useMemo(() => {
+    if (!shape || assetType !== 'value-added') return false;
+
+    const incoming = shape.incoming || [];
+
+    // 查找 DataOutputAssociation 连线（Task -> DataObject）
+    for (const connection of incoming) {
+      const connBo = connection.businessObject;
+      if (connBo.$type === 'bpmn:DataOutputAssociation') {
+        const taskElement = connection.source;
+
+        // 检查 Task 的 operation
+        if (taskElement && taskElement.type === 'bpmn:Task') {
+          const docs = taskElement.businessObject.documentation;
+          if (Array.isArray(docs) && docs.length) {
+            try {
+              const parsed = JSON.parse(docs[0].text);
+              if (parsed.operation && ['branch', 'merge'].includes(parsed.operation)) {
+                return true;
+              }
+            } catch {
+              // ignore
+            }
+          }
+        }
+      }
+    }
+    return false;
+  }, [shape, assetType]);
 
   // 显示条件
   const shouldShowTokenId = React.useMemo(() => {
@@ -298,15 +378,18 @@ export default function AssetModal({
         <div style={{ marginBottom: 16 }}>
           <label style={{ display: 'block', marginBottom: 4 }}>Reference Token IDs:</label>
           <Select
-            mode="tags"
+            mode="multiple"
             value={refTokenIds}
-            onChange={setRefTokenIds}
-            placeholder="Enter or select token IDs to reference"
+            disabled
             style={{ width: '100%' }}
-            options={tokenIdOptions.map(id => ({ label: id, value: id }))}
+            placeholder="Auto-filled from Task connections"
           />
-          <div style={{ fontSize: 12, color: '#888', marginTop: 4 }}>
-            Select existing token IDs or type new ones to create references for value-added assets
+          <div style={{ fontSize: 12, color: '#1890ff', marginTop: 4, padding: '4px 8px', background: '#e6f7ff', border: '1px solid #91d5ff', borderRadius: 4 }}>
+            {isUsedByBranchMergeTask ? (
+              <>ℹ️ This DataObject is created by a branch/merge Task. Reference Token IDs are automatically collected from DataObjects connected to that Task.</>
+            ) : (
+              <>ℹ️ For value-added assets, Reference Token IDs are automatically managed through Task connections. Connect this DataObject as output of a branch/merge Task to populate refTokenIds.</>
+            )}
           </div>
         </div>
       )}

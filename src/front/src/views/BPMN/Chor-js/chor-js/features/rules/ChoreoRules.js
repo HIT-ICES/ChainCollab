@@ -225,15 +225,155 @@ ChoreoRules.prototype.canCreate = function (shape, target, source, position) {
   return BpmnRules.prototype.canCreate.call(this, shape, target, source, position);
 };
 ChoreoRules.prototype.canConnect = function (source, target, connection) {
+  // Helper function to get operation from Task documentation
+  const getTaskOperation = function(taskElement) {
+    if (!taskElement || !is(taskElement, 'bpmn:Task')) return null;
+    const docs = taskElement.businessObject.documentation;
+    if (Array.isArray(docs) && docs.length) {
+      try {
+        const parsed = JSON.parse(docs[0].text);
+        return parsed.operation || null;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  // Helper function to get asset type from DataObject documentation
+  const getDataObjectAssetType = function(dataObjectElement) {
+    if (!dataObjectElement) return null;
+    const docs = dataObjectElement.businessObject.documentation;
+    if (Array.isArray(docs) && docs.length) {
+      try {
+        const parsed = JSON.parse(docs[0].text);
+        return parsed.assetType || null;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  // Helper function to check if Task has outgoing connection to a value-added DataObject
+  const hasValueAddedOutput = function(taskElement) {
+    if (!taskElement || !taskElement.outgoing) return false;
+    for (const conn of taskElement.outgoing) {
+      if (is(conn, 'bpmn:DataOutputAssociation')) {
+        const targetElement = conn.target;
+        const assetType = getDataObjectAssetType(targetElement);
+        if (assetType === 'value-added') {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  // Helper function to count DataAssociation connections for a Task
+  const countDataAssociations = function(taskElement) {
+    if (!taskElement) return { inputCount: 0, outputCount: 0 };
+
+    let inputCount = 0;
+    let outputCount = 0;
+
+    // Count incoming DataInputAssociation
+    if (taskElement.incoming) {
+      for (const conn of taskElement.incoming) {
+        if (is(conn, 'bpmn:DataInputAssociation')) {
+          inputCount++;
+        }
+      }
+    }
+
+    // Count outgoing DataOutputAssociation
+    if (taskElement.outgoing) {
+      for (const conn of taskElement.outgoing) {
+        if (is(conn, 'bpmn:DataOutputAssociation')) {
+          outputCount++;
+        }
+      }
+    }
+
+    return { inputCount, outputCount };
+  };
+
   // FIRST: Check if we should allow DataAssociation connections to/from Task
   // This must come BEFORE blocking rules
   if (is(source, 'bpmn:DataObjectReference') || is(source, 'bpmn:DataStoreReference')) {
     if (is(target, 'bpmn:Task')) {
+      const operation = getTaskOperation(target);
+      const { inputCount, outputCount } = countDataAssociations(target);
+
+      // Special case: For value-added branch/merge operations,
+      // allow multiple DataObject -> Task connections (reference inputs)
+      // This allows inputs regardless of whether output connection exists
+      if (operation && ['branch', 'merge'].includes(operation)) {
+        // branch/merge allows multiple inputs + 1 output
+        // Check if output already exceeds limit
+        if (outputCount > 1) {
+          return false; // Already has more than 1 output, should not happen but prevent
+        }
+        // Always allow for branch/merge (they need multiple inputs and one output)
+        return { type: 'bpmn:DataInputAssociation' };
+      }
+
+      // For other operations: only allow ONE DataAssociation connection total
+      // If adding an input, there should be no existing output
+      if (outputCount > 0) {
+        return false; // Already has output connection, cannot add input
+      }
+
+      // If already has input, cannot add another
+      if (inputCount > 0) {
+        return false; // Already has one input, cannot add more
+      }
+
+      // DataObject -> Task: Check if operation is NOT mint
+      if (operation && ['mint'].includes(operation)) {
+        // Block this connection: mint should be Task -> DataObject only
+        return false;
+      }
       return { type: 'bpmn:DataInputAssociation' };
     }
   }
   if (is(target, 'bpmn:DataObjectReference') || is(target, 'bpmn:DataStoreReference')) {
     if (is(source, 'bpmn:Task')) {
+      const operation = getTaskOperation(source);
+      const { inputCount, outputCount } = countDataAssociations(source);
+
+      // For branch/merge, allow Task -> DataObject (creating output)
+      if (operation && ['branch', 'merge'].includes(operation)) {
+        // branch/merge allows multiple inputs + 1 output
+        // Only allow 1 output
+        if (outputCount >= 1) {
+          return false; // Already has 1 output, cannot add more
+        }
+        return { type: 'bpmn:DataOutputAssociation' };
+      }
+
+      // For other operations: only allow ONE DataAssociation connection total
+      // If adding an output, there should be no existing input
+      if (inputCount > 0) {
+        return false; // Already has input connection, cannot add output
+      }
+
+      // If already has output, cannot add another
+      if (outputCount > 0) {
+        return false; // Already has one output, cannot add more
+      }
+
+      // For mint, allow Task -> DataObject
+      if (operation && ['mint'].includes(operation)) {
+        return { type: 'bpmn:DataOutputAssociation' };
+      }
+
+      // For other operations, block Task -> DataObject
+      if (operation && !['mint', 'branch', 'merge'].includes(operation)) {
+        // Block this connection: other operations should be DataObject -> Task
+        return false;
+      }
+
       return { type: 'bpmn:DataOutputAssociation' };
     }
   }
