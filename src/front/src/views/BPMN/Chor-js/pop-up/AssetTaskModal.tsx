@@ -51,7 +51,7 @@ export default function AssetTaskModal({
   const operationOptions: Record<string, string[]> = {
     'distributive': ['mint', 'burn', 'grant usage rights', 'revoke usage rights', 'transfer', 'query'],
     'transferable': ['mint', 'burn', 'Transfer', 'query'],
-    'value-added': ['branch', 'merge', 'query'],
+    'value-added': ['branch', 'merge', 'Transfer', 'query'],
   };
 
   const operationToCallerLabel: Record<string, string> = {
@@ -532,6 +532,7 @@ export default function AssetTaskModal({
     }
 
     if ((assetType === 'transferable' && operation === 'Transfer') ||
+      (assetType === 'value-added' && operation === 'Transfer') ||
       (assetType === 'distributive' && ['grant usage rights', 'revoke usage rights', 'transfer'].includes(operation))) {
       if (callee.length) {
         payload.callee = callee.map(id => id.split('_ChoreographyTask_')[0]);
@@ -635,6 +636,7 @@ export default function AssetTaskModal({
   const shouldShowCallee = React.useMemo(() => {
     return (
       (assetType === 'transferable' && operation === 'Transfer') ||
+      (assetType === 'value-added' && operation === 'Transfer') ||
       (assetType === 'distributive' && ['grant usage rights', 'revoke usage rights', 'transfer'].includes(operation))
     );
   }, [assetType, operation]);
