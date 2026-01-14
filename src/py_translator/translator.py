@@ -297,7 +297,9 @@ class GoChaincodeTranslator:
     def _get_linked_dataobject_for_task(self, task_id: str) -> Optional[dict]:
         """
         从 BPMN XML 中查找与 Task 连接的 DataObjectReference，
-        并返回其 documentation 中的资产信息
+        根据操作类型选择正确的连接方向：
+        - mint, branch, merge: 查找 DataOutputAssociation (Task -> DataObject)
+        - 其他操作: 查找 DataInputAssociation (DataObject -> Task)
         """
         if not self._bpmn_xml_root:
             return None
@@ -313,23 +315,54 @@ class GoChaincodeTranslator:
         if not task_elem:
             return None
 
-        # 查找与 Task 关联的 DataInputAssociation 或 DataOutputAssociation
-        data_associations = (
-            task_elem.findall(".//bpmn:dataInputAssociation", namespaces) +
-            task_elem.findall(".//bpmn:dataOutputAssociation", namespaces)
-        )
+        # 先获取 Task 的 operation 信息，判断应该查找哪个方向的连接
+        task_doc_elem = task_elem.find("bpmn:documentation", namespaces)
+        operation = None
+        if task_doc_elem is not None and task_doc_elem.text:
+            try:
+                task_doc = json.loads(task_doc_elem.text)
+                operation = task_doc.get('operation')
+            except json.JSONDecodeError:
+                pass
 
-        for assoc in data_associations:
-            # 获取 sourceRef 或 targetRef
-            source_ref = assoc.find("bpmn:sourceRef", namespaces)
-            target_ref = assoc.find("bpmn:targetRef", namespaces)
+        # mint, branch, merge 操作：查找 DataOutputAssociation (Task -> DataObject)
+        if operation in ['mint', 'branch', 'merge']:
+            output_associations = task_elem.findall(".//bpmn:dataOutputAssociation", namespaces)
+            for assoc in output_associations:
+                target_ref = assoc.find("bpmn:targetRef", namespaces)
+                if target_ref is None:
+                    continue
 
-            dataobject_id = None
-            if source_ref is not None:
-                dataobject_id = source_ref.text
-            elif target_ref is not None:
                 dataobject_id = target_ref.text
+                if not dataobject_id:
+                    continue
 
+                # 查找 DataObjectReference
+                dataobj_elem = self._bpmn_xml_root.find(
+                    f".//bpmn:dataObjectReference[@id='{dataobject_id}']",
+                    namespaces
+                )
+
+                if dataobj_elem is None:
+                    continue
+
+                # 提取 documentation
+                doc_elem = dataobj_elem.find("bpmn:documentation", namespaces)
+                if doc_elem is not None and doc_elem.text:
+                    try:
+                        doc_data = json.loads(doc_elem.text)
+                        return doc_data
+                    except json.JSONDecodeError:
+                        continue
+
+        # 其他操作：查找 DataInputAssociation (DataObject -> Task)
+        input_associations = task_elem.findall(".//bpmn:dataInputAssociation", namespaces)
+        for assoc in input_associations:
+            source_ref = assoc.find("bpmn:sourceRef", namespaces)
+            if source_ref is None:
+                continue
+
+            dataobject_id = source_ref.text
             if not dataobject_id:
                 continue
 
@@ -352,6 +385,59 @@ class GoChaincodeTranslator:
                     continue
 
         return None
+
+    def _get_input_dataobject_tokenids(self, task_id: str) -> list:
+        """
+        从 BPMN XML 中收集与 Task 通过 DataInputAssociation 连接的所有 DataObject 的 tokenId
+        用于 value-added 资产的 refTokenIds
+        """
+        if not self._bpmn_xml_root:
+            return []
+
+        # 定义 BPMN 命名空间
+        namespaces = {
+            'bpmn': 'http://www.omg.org/spec/BPMN/20100524/MODEL',
+            'bpmndi': 'http://www.omg.org/spec/BPMN/20100524/DI'
+        }
+
+        # 查找 Task 元素
+        task_elem = self._bpmn_xml_root.find(f".//bpmn:task[@id='{task_id}']", namespaces)
+        if not task_elem:
+            return []
+
+        token_ids = []
+
+        # 查找所有 DataInputAssociation (DataObject -> Task)
+        input_associations = task_elem.findall(".//bpmn:dataInputAssociation", namespaces)
+        for assoc in input_associations:
+            source_ref = assoc.find("bpmn:sourceRef", namespaces)
+            if source_ref is None:
+                continue
+
+            dataobject_id = source_ref.text
+            if not dataobject_id:
+                continue
+
+            # 查找 DataObjectReference
+            dataobj_elem = self._bpmn_xml_root.find(
+                f".//bpmn:dataObjectReference[@id='{dataobject_id}']",
+                namespaces
+            )
+
+            if dataobj_elem is None:
+                continue
+
+            # 提取 documentation 中的 tokenId
+            doc_elem = dataobj_elem.find("bpmn:documentation", namespaces)
+            if doc_elem is not None and doc_elem.text:
+                try:
+                    doc_data = json.loads(doc_elem.text)
+                    if 'tokenId' in doc_data and doc_data['tokenId']:
+                        token_ids.append(doc_data['tokenId'])
+                except json.JSONDecodeError:
+                    continue
+
+        return token_ids
 
     def _merge_task_with_dataobject(self, task: Task) -> dict:
         """
@@ -1033,6 +1119,13 @@ class GoChaincodeTranslator:
                 temp_list.append(
                     snippet.AddValueMint_code(
                       activityId=task.id,
+                        after_all_hook=after_all_hook
+                    )
+                )
+            elif token_operation=="Transfer":
+                temp_list.append(
+                    snippet.NFTTransfer_code(
+                        activityId=task.id,
                         after_all_hook=after_all_hook
                     )
                 )
