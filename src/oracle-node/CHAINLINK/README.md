@@ -196,19 +196,49 @@ node scripts/deploy-contract.js
 
 ### 4. 测试 Oracle 请求
 
-```javascript
-// 1. 给合约转入 LINK Token
-await linkToken.transfer(contractAddress, ethers.utils.parseEther("1"));
+#### 方式 1: 自动化测试（推荐）
 
-// 2. 发起 Oracle 请求
-await contract.requestOffchainData("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd");
-
-// 3. 等待 Chainlink 处理 (约 10-30 秒)
-
-// 4. 读取结果
-const result = await contract.result();
-console.log("Result:", result.toString());
+```bash
+chmod +x run-test.sh scripts/*.js
+./run-test.sh
 ```
+
+**脚本自动执行的操作**:
+1. 检查服务状态和部署文件
+2. 为合约充值 LINK Token（如果需要）
+3. 检查并充值 Chainlink 节点 ETH 账户（如果需要）
+4. 启动本地测试服务器（返回 {"value": 123}）
+5. 发送 Oracle 请求
+6. 等待响应（30-60 秒）
+7. 检查并显示结果
+
+**预期输出**: `Value: 123`
+
+#### 方式 2: 手动分步骤测试
+
+```bash
+# 1. 检查并充值 Chainlink 节点 ETH 账户
+node scripts/fund-chainlink-node.js
+
+# 2. 授权 Chainlink 节点地址
+node scripts/authorize-chainlink-node.js
+
+# 3. 为合约充值 LINK Token
+node scripts/fund-contract.js
+
+# 4. 启动本地测试服务器
+node scripts/test-server.js &
+
+# 5. 发送 Oracle 请求
+node scripts/test-oracle.js
+
+# 6. 等待响应（30-60 秒）
+
+# 7. 检查结果
+node scripts/check-result.js
+```
+
+**预期输出**: `Value: 123`
 
 ## 完整工作流程
 
