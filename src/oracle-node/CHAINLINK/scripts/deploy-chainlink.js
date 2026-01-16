@@ -1,6 +1,8 @@
 const fs = require('fs');
+const path = require('path');
 const { execSync } = require('child_process');
 const http = require('http');
+const axios = require('axios');
 
 // RPC 调用函数
 function rpcCall(method, params) {
@@ -85,6 +87,74 @@ async function deployContract(contractName, bytecode, args = []) {
     return receipt.contractAddress;
 }
 
+function readChainlinkApiCredentials() {
+    const apiPath = path.resolve(__dirname, '../chainlink/.api');
+    if (!fs.existsSync(apiPath)) {
+        return null;
+    }
+    const lines = fs.readFileSync(apiPath, 'utf8').split('\n').map(line => line.trim()).filter(Boolean);
+    if (lines.length < 2) {
+        return null;
+    }
+    return { email: lines[0], password: lines[1] };
+}
+
+async function fetchChainlinkNodeAddressFromApi() {
+    const chainlinkUrl = process.env.CHAINLINK_URL || 'http://localhost:6688';
+    const creds = readChainlinkApiCredentials();
+    if (!creds) {
+        return null;
+    }
+
+    const session = await axios.post(`${chainlinkUrl}/sessions`, {
+        email: creds.email,
+        password: creds.password
+    });
+
+    const cookies = session.headers['set-cookie'];
+    if (!cookies || cookies.length === 0) {
+        return null;
+    }
+
+    const keys = await axios.get(`${chainlinkUrl}/v2/keys/eth`, {
+        headers: { Cookie: cookies.join('; ') }
+    });
+
+    const address = keys?.data?.data?.[0]?.attributes?.address;
+    return address || null;
+}
+
+async function getChainlinkNodeAddress(existingDeployment) {
+    if (existingDeployment && existingDeployment.chainlinkNodeAddress) {
+        return existingDeployment.chainlinkNodeAddress;
+    }
+
+    if (process.env.CHAINLINK_NODE_ADDRESS) {
+        return process.env.CHAINLINK_NODE_ADDRESS;
+    }
+
+    try {
+        const fromApi = await fetchChainlinkNodeAddressFromApi();
+        if (fromApi) {
+            return fromApi;
+        }
+    } catch (error) {
+        // Ignore API failures; fallback to docker logs.
+    }
+
+    try {
+        const stdout = execSync('docker logs chainlink-node 2>&1 | grep -i "Unlocked .*ETH keys" | head -1', { encoding: 'utf8' });
+        const match = stdout.match(/0x[a-fA-F0-9]{40}/);
+        if (match) {
+            return match[0];
+        }
+    } catch (error) {
+        // Ignore log parsing failures; caller will decide whether to use null.
+    }
+
+    return null;
+}
+
 async function main() {
     try {
         console.log('开始部署 Chainlink 基础设施...\n');
@@ -138,13 +208,21 @@ async function main() {
         ]);
 
         // 5. 保存部署信息
+        let existingDeployment = {};
+        if (fs.existsSync(`${deploymentDir}/chainlink-deployment.json`)) {
+            existingDeployment = JSON.parse(fs.readFileSync(`${deploymentDir}/chainlink-deployment.json`, 'utf8'));
+        }
+
+        const chainlinkNodeAddress = await getChainlinkNodeAddress(existingDeployment);
+
         const deploymentInfo = {
             linkToken: linkTokenAddress,
             operator: operatorAddress,
             operatorOwner: deployer,
             deployer: deployer,
             timestamp: new Date().toISOString(),
-            chainId: 3456
+            chainId: 3456,
+            chainlinkNodeAddress: chainlinkNodeAddress
         };
 
         // 确保 deployment 文件夹存在（已在第 93 行声明）
@@ -161,6 +239,9 @@ async function main() {
         console.log('LINK Token 地址:', linkTokenAddress);
         console.log('Operator 地址:', operatorAddress);
         console.log('Owner 地址:', deployer);
+        if (chainlinkNodeAddress) {
+            console.log('Chainlink 节点地址:', chainlinkNodeAddress);
+        }
         console.log('\n部署信息已保存到 deployment/chainlink-deployment.json');
         console.log('Operator ABI 已保存到 deployment/operator-abi.json');
 

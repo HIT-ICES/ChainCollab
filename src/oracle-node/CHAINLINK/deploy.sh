@@ -166,8 +166,16 @@ fi
 
 echo ""
 
-# 步骤 4: 部署 MyChainlinkRequester 合约
-echo -e "${YELLOW}[4/5] 部署 MyChainlinkRequester 合约...${NC}"
+# 步骤 4: 部署 Chainlink 请求合约
+CONTRACT_NAME="MyChainlinkRequester"
+if command -v jq &> /dev/null && [ -f "$DEPLOYMENT_DIR/chainlink-deployment.json" ]; then
+    DMN_JOB_ID=$(jq -r '.dmnJobId // empty' "$DEPLOYMENT_DIR/chainlink-deployment.json")
+    JOB_ID=$(jq -r '.jobId // empty' "$DEPLOYMENT_DIR/chainlink-deployment.json")
+    if [ -n "$DMN_JOB_ID" ] && [ -z "$JOB_ID" ]; then
+        CONTRACT_NAME="MyChainlinkRequesterDMN"
+    fi
+fi
+echo -e "${YELLOW}[4/5] 部署 ${CONTRACT_NAME} 合约...${NC}"
 
 # 检查 Node.js
 if ! command -v node &> /dev/null; then
@@ -235,7 +243,7 @@ if [ $? -eq 0 ] && [ -f "$DEPLOYMENT_DIR/deployment.json" ]; then
     else
         echo -e "   LINK Token: (请查看 $DEPLOYMENT_DIR/chainlink-deployment.json)"
     fi
-    echo -e "   MyChainlinkRequester 合约地址: $CONTRACT_ADDR"
+    echo -e "   ${CONTRACT_NAME} 合约地址: $CONTRACT_ADDR"
     echo ""
     echo -e "4. 测试 Oracle 请求:"
     echo -e "   参考 ${BLUE}README.md${NC} 中的测试步骤"

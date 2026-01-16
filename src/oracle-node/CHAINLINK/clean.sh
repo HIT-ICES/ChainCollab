@@ -98,12 +98,6 @@ if [ -d "$DEPLOYMENT_DIR" ]; then
     CLEANED=1
 fi
 
-if [ -d "node_modules/web3-eth-abi" ]; then
-    rm -rf node_modules/web3-eth-abi
-    echo "  - 已删除 web3-eth-abi"
-    CLEANED=1
-fi
-
 if [ $CLEANED -eq 0 ]; then
     echo -e "${YELLOW}没有需要清理的编译产物${NC}"
 else

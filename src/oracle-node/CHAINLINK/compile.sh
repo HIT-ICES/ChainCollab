@@ -32,7 +32,7 @@ solc --version | head -1
 echo ""
 
 # 编译合约
-echo -e "${YELLOW}正在编译 MyChainlinkRequester.sol...${NC}"
+echo -e "${YELLOW}正在编译 MyChainlinkRequester / MyChainlinkRequesterDMN 合约...${NC}"
 
 # 确保 deployment 文件夹存在
 DEPLOYMENT_DIR="deployment"
@@ -45,6 +45,7 @@ solc --optimize \
   --include-path node_modules \
   --combined-json abi,bin \
   contracts/MyChainlinkRequester.sol \
+  contracts/MyChainlinkRequesterDMN.sol \
   contracts/LinkToken-v0.6-fix/LinkToken.sol \
   contracts/LinkToken-v0.6-fix/ERC677.sol \
   contracts/LinkToken-v0.6-fix/ITypeAndVersion.sol \

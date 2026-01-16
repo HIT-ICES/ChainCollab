@@ -1,4 +1,7 @@
+const fs = require('fs');
+const path = require('path');
 const http = require('http');
+const axios = require('axios');
 
 function rpcCall(method, params) {
     return new Promise((resolve, reject) => {
@@ -36,13 +39,95 @@ function rpcCall(method, params) {
     });
 }
 
+function readChainlinkApiCredentials() {
+    const apiPath = path.resolve(__dirname, '../chainlink/.api');
+    if (!fs.existsSync(apiPath)) {
+        return null;
+    }
+    const lines = fs.readFileSync(apiPath, 'utf8').split('\n').map(line => line.trim()).filter(Boolean);
+    if (lines.length < 2) {
+        return null;
+    }
+    return { email: lines[0], password: lines[1] };
+}
+
+async function fetchChainlinkNodeAddressFromApi() {
+    const chainlinkUrl = process.env.CHAINLINK_URL || 'http://localhost:6688';
+    const creds = readChainlinkApiCredentials();
+    if (!creds) {
+        return null;
+    }
+
+    const session = await axios.post(`${chainlinkUrl}/sessions`, {
+        email: creds.email,
+        password: creds.password
+    });
+
+    const cookies = session.headers['set-cookie'];
+    if (!cookies || cookies.length === 0) {
+        return null;
+    }
+
+    const keys = await axios.get(`${chainlinkUrl}/v2/keys/eth`, {
+        headers: { Cookie: cookies.join('; ') }
+    });
+
+    return keys?.data?.data?.[0]?.attributes?.address || null;
+}
+
+function persistChainlinkNodeAddress(address) {
+    try {
+        const deploymentPath = path.resolve(__dirname, '../deployment/chainlink-deployment.json');
+        if (!fs.existsSync(deploymentPath)) {
+            return;
+        }
+        const deployment = JSON.parse(fs.readFileSync(deploymentPath, 'utf8'));
+        deployment.chainlinkNodeAddress = address;
+        fs.writeFileSync(deploymentPath, JSON.stringify(deployment, null, 2));
+    } catch (error) {
+        console.warn('⚠️  写入 chainlinkNodeAddress 失败:', error.message);
+    }
+}
+
 async function getChainlinkNodeAddress() {
     try {
+        const deploymentPath = path.resolve(__dirname, '../deployment/chainlink-deployment.json');
+        if (fs.existsSync(deploymentPath)) {
+            const deployment = JSON.parse(fs.readFileSync(deploymentPath, 'utf8'));
+            if (deployment.chainlinkNodeAddress) {
+                console.log('✅ 使用部署文件中的 chainlinkNodeAddress:', deployment.chainlinkNodeAddress);
+                return deployment.chainlinkNodeAddress;
+            }
+        }
+
+        const fromEnv = process.env.CHAINLINK_NODE_ADDRESS;
+        if (fromEnv) {
+            console.log('✅ 使用环境变量 CHAINLINK_NODE_ADDRESS:', fromEnv);
+            return fromEnv;
+        }
+
+        if (process.argv[2]) {
+            console.log('✅ 使用命令行参数提供的地址:', process.argv[2]);
+            persistChainlinkNodeAddress(process.argv[2]);
+            return process.argv[2];
+        }
+
+        try {
+            const fromApi = await fetchChainlinkNodeAddressFromApi();
+            if (fromApi) {
+                console.log('✅ 从 Chainlink API 获取节点地址:', fromApi);
+                persistChainlinkNodeAddress(fromApi);
+                return fromApi;
+            }
+        } catch (error) {
+            // Ignore API failures; fallback to docker logs.
+        }
+
         // 使用 Docker 命令获取 Chainlink 节点的 ETH 账户地址
         const { exec } = require('child_process');
 
         return new Promise((resolve, reject) => {
-            exec('docker logs chainlink-node 2>&1 | grep -i "Created EVM key with ID" | head -1', (error, stdout, stderr) => {
+            exec('docker logs chainlink-node 2>&1 | grep -i "Unlocked .*ETH keys" | head -1', (error, stdout, stderr) => {
                 if (error) {
                     console.error('❌ 获取 Chainlink 节点账户失败:', error.message);
                     reject(error);
@@ -56,14 +141,17 @@ async function getChainlinkNodeAddress() {
                 }
 
                 // 解析地址
-                // 匹配: Created EVM key with ID 0xEce2A0846275575BB5f7ac98fEFd2246b09CaBA7
+                // 匹配: Unlocked 1 ETH keys                                keystore/models.go:298           keys=["0xbB64621210982bb8504E20F1D81b2028647A5957"]
                 const match = stdout.match(/0x[a-fA-F0-9]{40}/);
                 if (match) {
                     const address = match[0];
                     console.log('✅ 找到 Chainlink 节点 ETH 账户:', address);
+                    persistChainlinkNodeAddress(address);
                     resolve(address);
                 } else {
                     console.error('❌ 无法解析 Chainlink 节点地址');
+                    console.error('请在 deployment/chainlink-deployment.json 中设置 chainlinkNodeAddress');
+                    console.error('请手动传入地址: node scripts/fund-chainlink-node.js <address>');
                     reject(new Error('无法解析 Chainlink 节点地址'));
                 }
             });
