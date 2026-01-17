@@ -101,6 +101,9 @@ const Overview: React.FC = () => {
   const [setUpEthereumNetworkLoading, setSetUpEthereumNetworkLoading] = useState(false)
 
   const [setupComponentLoading, setSetupComponentLoading] = useState(false)
+  const [setupFireflyLoading, setSetupFireflyLoading] = useState(false)
+  const [setupOracleLoading, setSetupOracleLoading] = useState(false)
+  const [setupDMNLoading, setSetupDMNLoading] = useState(false)
 
   const handleSetUpFabricNetwork = async () => {
     // Init
@@ -173,6 +176,60 @@ const Overview: React.FC = () => {
     await StartFireflyForEthEnv(currentEnvId)
     setSync()
     setSetupComponentLoading(false)
+  }
+
+  const handleSetUpFireflyOnly = async () => {
+    try {
+      setSetupFireflyLoading(true)
+      if (currentEnvType === "Fabric") {
+        await InstallFirefly(currentOrgId, currentEnvId)
+        setSync()
+        await StartFireflyForEnv(currentEnvId)
+        setSync()
+      } else {
+        await InitFireflyForEthEnv(currentEnvId)
+        setSync()
+        await StartFireflyForEthEnv(currentEnvId)
+        setSync()
+      }
+    } finally {
+      setSetupFireflyLoading(false)
+    }
+  }
+
+  const handleSetUpOracleOnly = async () => {
+    try {
+      setSetupOracleLoading(true)
+      if (currentEnvType !== "Fabric") {
+        message.warning("Oracle only supports Fabric environment")
+        return
+      }
+      await InstallOracle(currentOrgId, currentEnvId)
+      setSync()
+      const oracleFFI = await requestOracleFFI()
+      const res = await registerInterface(systemFireflyURL, oracleFFI.ffiContent, "Oracle")
+      await new Promise((resolve) => {
+        setTimeout(resolve, 5000)
+      })
+      await registerAPI(systemFireflyURL, "Oracle", "default", "Oracle", res.id)
+      setSync()
+    } finally {
+      setSetupOracleLoading(false)
+    }
+  }
+
+  const handleSetUpDMNOnly = async () => {
+    try {
+      setSetupDMNLoading(true)
+      if (currentEnvType !== "Fabric") {
+        message.warning("DMN only supports Fabric environment")
+        return
+      }
+      await InstallDmnEngine(currentOrgId, currentEnvId)
+      setSync()
+    } finally {
+      setSetupDMNLoading(false)
+    }
   }
 
   return (
@@ -282,9 +339,48 @@ const Overview: React.FC = () => {
               </Col>
             </Row>
             <Row style={{ display: "flex", justifyContent: "space-evenly" }}>
-              <FireflyComponentCard ChaincodeStatus={envInfo.fireflyStatus !== "NO"} ClusterStatus={envInfo.fireflyStatus === "STARTED"} />
-              <OracleComponentCard ChaincodeStatus={envInfo.oracleStatus === "CHAINCODEINSTALLED"} />
-              <DMNComponentCard ChaincodeStatus={envInfo.dmnStatus === "CHAINCODEINSTALLED"} />
+              <FireflyComponentCard
+                ChaincodeStatus={envInfo.fireflyStatus !== "NO"}
+                ClusterStatus={envInfo.fireflyStatus === "STARTED"}
+                onSetup={
+                  <LoadingButton
+                    size="small"
+                    variant="outlined"
+                    loading={setupFireflyLoading}
+                    onClick={handleSetUpFireflyOnly}
+                  >
+                    Setup
+                  </LoadingButton>
+                }
+              />
+              <OracleComponentCard
+                ChaincodeStatus={envInfo.oracleStatus === "CHAINCODEINSTALLED"}
+                onSetup={
+                  <LoadingButton
+                    size="small"
+                    variant="outlined"
+                    loading={setupOracleLoading}
+                    onClick={handleSetUpOracleOnly}
+                    disabled={currentEnvType !== "Fabric"}
+                  >
+                    Setup
+                  </LoadingButton>
+                }
+              />
+              <DMNComponentCard
+                ChaincodeStatus={envInfo.dmnStatus === "CHAINCODEINSTALLED"}
+                onSetup={
+                  <LoadingButton
+                    size="small"
+                    variant="outlined"
+                    loading={setupDMNLoading}
+                    onClick={handleSetUpDMNOnly}
+                    disabled={currentEnvType !== "Fabric"}
+                  >
+                    Setup
+                  </LoadingButton>
+                }
+              />
             </Row>
           </Card.Grid>
 

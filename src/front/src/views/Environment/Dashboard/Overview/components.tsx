@@ -107,7 +107,7 @@ export const NaiveEthereumStepBar = (props) => {
 // Function Cards
 export const CustomCard = (props) => {
 
-  const { color = "#4e4d4a", logo, title, status } = props
+  const { color = "#4e4d4a", logo, title, status, action } = props
   return (
     <div
       style={{
@@ -149,44 +149,64 @@ export const CustomCard = (props) => {
           );
         })}
       </div>
+      {action ? (
+        <div style={{ marginTop: 12, display: "flex", justifyContent: "center" }}>
+          {action}
+        </div>
+      ) : null}
     </div >)
 }
 
 export const FireflyComponentCard = ({
   ChaincodeStatus = false,
-  ClusterStatus = false
+  ClusterStatus = false,
+  onSetup
 }) => {
   return (
     <CustomCard
       color="#88c100"
-      logo={<img src={FireflyIcon} alt="firefly" style={{ width: 100, height: 100 }} />} title="Firefly" status={[
+      logo={<img src={FireflyIcon} alt="firefly" style={{ width: 100, height: 100 }} />}
+      title="Firefly"
+      status={[
         { key: "ChainCode", value: ChaincodeStatus },
         { key: "Cluster", value: ClusterStatus }
-      ]} />
+      ]}
+      action={onSetup}
+    />
   );
 }
 
 export const OracleComponentCard = ({
-  ChaincodeStatus = false
+  ChaincodeStatus = false,
+  onSetup
 }) => {
   return (
     <CustomCard
       color="#2790b0"
-      logo={<img src={OracleIcon} alt="firefly" style={{ width: 100, height: 100 }} />} title="Oracle" status={[
+      logo={<img src={OracleIcon} alt="firefly" style={{ width: 100, height: 100 }} />}
+      title="Oracle"
+      status={[
         { key: "ChainCode", value: ChaincodeStatus }
-      ]} />
+      ]}
+      action={onSetup}
+    />
   );
 }
 
 export const DMNComponentCard = ({
-  ChaincodeStatus = false
+  ChaincodeStatus = false,
+  onSetup
 }) => {
   return (
     <CustomCard
       color="#ffaa00"
-      logo={<img src={DmnIcon} alt="dmn" style={{ width: 100, height: 100 }} />} title="DMN" status={[
+      logo={<img src={DmnIcon} alt="dmn" style={{ width: 100, height: 100 }} />}
+      title="DMN"
+      status={[
         { key: "ChainCode", value: ChaincodeStatus }
-      ]} />
+      ]}
+      action={onSetup}
+    />
   );
 }
 

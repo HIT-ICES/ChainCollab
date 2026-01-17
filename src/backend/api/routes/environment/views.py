@@ -913,7 +913,7 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
             # Get system node enode from the system resource set
             # Find the system resource set (org_type=1)
             system_resource_sets = environment.resource_sets.filter(
-                ethereum_sub_resource_sets__org_type=1
+                ethereum_sub_resource_set__org_type=1
             )
             if not system_resource_sets.exists():
                 LOG.error(f"No system resource set found for environment {pk}")

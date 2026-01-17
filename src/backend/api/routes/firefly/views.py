@@ -13,6 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 import yaml
 import json
 import subprocess
+from threading import Thread
 from subprocess import Popen
 
 from api.config import CELLO_HOME, CURRENT_IP, DEFAULT_CHANNEL_NAME
@@ -32,6 +33,7 @@ from api.models import (
     LoleidoOrganization,
     Membership,
     FabricResourceSet,
+    Task,
 )
 from api.common import ok, err
 
@@ -45,6 +47,206 @@ class FireflyViewSet(viewsets.ModelViewSet):
         IsAuthenticated,
     ]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def _start_task(self, task, handler, *args, **kwargs):
+        def runner():
+            task.status = "RUNNING"
+            task.save(update_fields=["status", "updated_at"])
+            try:
+                result = handler(*args, **kwargs)
+                task.status = "SUCCESS"
+                task.result = result
+                task.error = None
+            except Exception as exc:
+                LOG.exception("Task %s failed", task.id)
+                task.status = "FAILED"
+                task.error = str(exc)
+            task.save(update_fields=["status", "result", "error", "updated_at"])
+
+        thread = Thread(target=runner, daemon=True)
+        thread.start()
+
+    def _init_eth_for_env(self, env_id):
+        LOG.info("Starting Ethereum Firefly initialization")
+        env = EthEnvironment.objects.get(id=env_id)
+
+        resource_sets = env.resource_sets.all()
+        system_resource_sets = resource_sets.filter(
+            ethereum_sub_resource_set__org_type=1
+        )
+        if not system_resource_sets.exists():
+            raise Exception("System resource set not found")
+
+        system_resource_set = system_resource_sets.first()
+
+        from api.models import EthNode
+        from api.common.enums import EthNodeType
+
+        system_nodes = EthNode.objects.filter(
+            fabric_resource_set__resource_set=system_resource_set,
+            type=EthNodeType.System.value,
+        )
+        if not system_nodes.exists():
+            raise Exception("System node not found")
+
+        system_node = system_nodes.first()
+        system_node_url = f"http://{system_node.name}:8545"
+        LOG.info(f"Using system node URL: {system_node_url}")
+
+        system_node_count = system_nodes.count()
+        org_resource_sets = resource_sets.exclude(
+            ethereum_sub_resource_set__org_type=1
+        )
+        org_node_count = EthNode.objects.filter(
+            fabric_resource_set__resource_set__in=org_resource_sets,
+            type=EthNodeType.Organization.value,
+        ).count()
+        total_member_count = system_node_count + org_node_count
+        LOG.info(
+            "Total member count: %s (system: %s, organization: %s)",
+            total_member_count,
+            system_node_count,
+            org_node_count,
+        )
+
+        connector_config_dir = os.path.join(CELLO_HOME, env.name.lower())
+        os.makedirs(connector_config_dir, exist_ok=True)
+        connector_config = {
+            "connectors": [
+                {
+                    "type": "ethereum",
+                    "server": {"port": 5102},
+                    "ethereum": {"url": system_node_url},
+                }
+            ]
+        }
+        connector_config_path = os.path.join(connector_config_dir, "evmconnect.yml")
+        with open(connector_config_path, "w") as f:
+            yaml.dump(connector_config, f, default_flow_style=False)
+        LOG.info(f"Generated connector config at {connector_config_path}")
+
+        firefly_name = "cello_" + env.name.lower()
+        ff_cli = Firefly_cli()
+        network_name = ff_cli.init_eth(
+            firefly_name=firefly_name,
+            system_node_url=system_node_url,
+            system_node_name=system_node.name,
+            connector_config_path=connector_config_path,
+            member_count=total_member_count,
+        )
+        LOG.info(f"Firefly initialization completed for {firefly_name}")
+
+        env.firefly_status = "CHAINCODEINSTALLED"
+        env.save()
+
+        firefly_stack_path = os.path.expanduser("~/.firefly/stacks/") + firefly_name
+        with open(os.path.join(firefly_stack_path, "stack.json"), "r") as file:
+            stack_data = json.load(file)
+            account_names = [member["orgName"] for member in stack_data["members"]]
+
+        LOG.info(f"Found {len(account_names)} accounts: {account_names}")
+
+        for index, resource_set in enumerate(resource_sets):
+            member = stack_data["members"][index]
+            core_port = member["exposedFireflyPort"]
+            sandbox_port = member["exposedSandboxPort"]
+            evmconnect_port = member["exposedConnectorPort"]
+
+            LOG.info(
+                "Creating Firefly object for %s: core=%s, sandbox=%s, evmconnect=%s",
+                account_names[index],
+                core_port,
+                sandbox_port,
+                evmconnect_port,
+            )
+
+            firefly = Firefly(
+                resource_set=resource_set,
+                org_name=account_names[index],
+                core_url=f"{CURRENT_IP}:{core_port}",
+                sandbox_url=f"{CURRENT_IP}:{sandbox_port}",
+                fab_connect_url=f"{CURRENT_IP}:{evmconnect_port}",
+            )
+            firefly.save()
+
+        return {
+            "message": "Firefly Ethereum initialization successful",
+            "firefly_name": firefly_name,
+            "system_node_url": system_node_url,
+            "connector_config": connector_config_path,
+            "network": network_name,
+            "firefly_count": len(account_names),
+        }
+
+    def _start_eth_for_env(self, env_id):
+        env = EthEnvironment.objects.get(id=env_id)
+        firefly_name = "cello_" + env.name.lower()
+
+        resource_sets = env.resource_sets.all()
+        system_resource_sets = resource_sets.filter(
+            ethereum_sub_resource_set__org_type=1
+        )
+        if not system_resource_sets.exists():
+            raise Exception("System resource set not found")
+        system_resource_set = system_resource_sets.first()
+
+        from api.models import EthNode
+        from api.common.enums import EthNodeType
+
+        system_nodes = EthNode.objects.filter(
+            fabric_resource_set__resource_set=system_resource_set,
+            type=EthNodeType.System.value,
+        )
+        if not system_nodes.exists():
+            raise Exception("System node not found")
+
+        system_node = system_nodes.first()
+        container_name = system_node.name
+        LOG.info(f"Using system node container: {container_name}")
+
+        firefly_stack_path = os.path.expanduser("~/.firefly/stacks/") + firefly_name
+        stack_state_file = os.path.join(firefly_stack_path, "init/stackState.json")
+        with open(stack_state_file, "r") as file:
+            stack_data = json.load(file)
+            accounts = [account["address"] for account in stack_data["accounts"][:3]]
+
+        LOG.info(f"Found {len(accounts)} accounts to fund: {accounts}")
+
+        sender_account = "0x365acf78c44060caf3a4789d804df11e3b4aa17d"
+        geth_attach_command = ["docker", "exec", "-i", container_name, "geth", "attach"]
+        geth_attach_process = subprocess.Popen(
+            geth_attach_command,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+        )
+        for account in accounts:
+            transfer_command = (
+                "eth.sendTransaction({from: \""
+                + sender_account
+                + "\", to: \""
+                + account
+                + "\", value: web3.toWei(10, 'ether')})\n"
+            )
+            geth_attach_process.stdin.write(transfer_command)
+            geth_attach_process.stdin.flush()
+            LOG.info(f"Transferred 10 ether from {sender_account} to {account}")
+        geth_attach_process.stdin.write("exit\n")
+        geth_attach_process.stdin.flush()
+        geth_attach_process.communicate()
+
+        Firefly_cli().start(firefly_name=firefly_name)
+
+        env.firefly_status = "STARTED"
+        env.save()
+
+        return {
+            "message": "Firefly Ethereum started successfully",
+            "firefly_name": firefly_name,
+            "funded_accounts": accounts,
+            "amount_per_account": "10 ether",
+        }
 
     def list(self, request, *args, **kwargs):
         try:
@@ -226,147 +428,9 @@ class FireflyViewSet(viewsets.ModelViewSet):
         4. Configure docker network
         """
         try:
-            LOG.info("Starting Ethereum Firefly initialization")
             env_id = request.parser_context["kwargs"].get("environment_id")
-            env = EthEnvironment.objects.get(id=env_id)
-
-            # Get all resource sets for this environment
-            resource_sets = env.resource_sets.all()
-
-            # Find the system node to get its URL
-            system_resource_sets = resource_sets.filter(
-                ethereum_sub_resource_sets__org_type=1
-            )
-            if not system_resource_sets.exists():
-                raise Exception("System resource set not found")
-
-            system_resource_set = system_resource_sets.first()
-
-            # Import EthNode and EthNodeType at function level to avoid circular imports
-            from api.models import EthNode
-            from api.common.enums import EthNodeType
-
-            system_nodes = EthNode.objects.filter(
-                fabric_resource_set__resource_set=system_resource_set,
-                type=EthNodeType.System.value
-            )
-
-            if not system_nodes.exists():
-                raise Exception("System node not found")
-
-            system_node = system_nodes.first()
-            system_node_url = f"http://{system_node.name}:8545"
-
-            LOG.info(f"Using system node URL: {system_node_url}")
-
-            # Calculate total node count: system nodes + organization nodes
-            system_node_count = system_nodes.count()
-
-            # Get organization resource sets (org_type != 1 means organization type)
-            org_resource_sets = resource_sets.exclude(
-                ethereum_sub_resource_sets__org_type=1
-            )
-
-            # Count organization nodes
-            org_node_count = EthNode.objects.filter(
-                fabric_resource_set__resource_set__in=org_resource_sets,
-                type=EthNodeType.Organization.value
-            ).count()
-
-            total_member_count = system_node_count + org_node_count
-
-            LOG.info(f"Total member count: {total_member_count} (system: {system_node_count}, organization: {org_node_count})")
-
-            # Generate single connector config for the environment
-            connector_config_dir = os.path.join(CELLO_HOME, env.name.lower())
-            os.makedirs(connector_config_dir, exist_ok=True)
-
-            # Generate evmconnect.yml
-            connector_config = {
-                "connectors": [
-                    {
-                        "type": "ethereum",
-                        "server": {
-                            "port": 5102
-                        },
-                        "ethereum": {
-                            "url": system_node_url
-                        }
-                    }
-                ]
-            }
-
-            connector_config_path = os.path.join(connector_config_dir, "evmconnect.yml")
-            with open(connector_config_path, "w") as f:
-                yaml.dump(connector_config, f, default_flow_style=False)
-
-            LOG.info(f"Generated connector config at {connector_config_path}")
-
-            # Initialize Firefly stack using Firefly_cli
-            firefly_name = "cello_" + env.name.lower()
-            ff_cli = Firefly_cli()
-
-            # Call the init_eth method from Firefly_cli
-            network_name = ff_cli.init_eth(
-                firefly_name=firefly_name,
-                system_node_url=system_node_url,
-                system_node_name=system_node.name,
-                connector_config_path=connector_config_path,
-                member_count=total_member_count
-            )
-
-            LOG.info(f"Firefly initialization completed for {firefly_name}")
-
-            # Save Firefly objects to database
-            firefly_stack_path = os.path.expanduser("~/.firefly/stacks/") + firefly_name
-
-            # Read stack.json to get member/organization names and ports
-            with open(os.path.join(firefly_stack_path, "stack.json"), "r") as file:
-                stack_data = json.load(file)
-                # For Ethereum stacks, use orgName from members array
-                account_names = [member["orgName"] for member in stack_data["members"]]
-
-            LOG.info(f"Found {len(account_names)} accounts: {account_names}")
-
-            # Create Firefly objects for each resource set
-            for index, resource_set in enumerate(resource_sets):
-                # Get member info from stack.json
-                member = stack_data["members"][index]
-
-                # Get core port from stack.json or docker-compose ports
-                # For Ethereum, core port is in exposedFireflyPort
-                core_port = member["exposedFireflyPort"]
-
-                # Get sandbox port from stack.json
-                sandbox_port = member["exposedSandboxPort"]
-
-                # Get evmconnect port from stack.json
-                evmconnect_port = member["exposedConnectorPort"]
-
-                LOG.info(f"Creating Firefly object for {account_names[index]}: core={core_port}, sandbox={sandbox_port}, evmconnect={evmconnect_port}")
-
-                # Create and save Firefly object
-                firefly = Firefly(
-                    resource_set=resource_set,
-                    org_name=account_names[index],
-                    core_url=f"{CURRENT_IP}:{core_port}",
-                    sandbox_url=f"{CURRENT_IP}:{sandbox_port}",
-                    fab_connect_url=f"{CURRENT_IP}:{evmconnect_port}",
-                )
-                firefly.save()
-                LOG.info(f"Saved Firefly object for {account_names[index]}")
-
-            return Response(
-                {
-                    "message": "Firefly Ethereum initialization successful",
-                    "firefly_name": firefly_name,
-                    "system_node_url": system_node_url,
-                    "connector_config": connector_config_path,
-                    "network": network_name,
-                    "firefly_count": len(account_names)
-                },
-                status=status.HTTP_202_ACCEPTED
-            )
+            result = self._init_eth_for_env(env_id)
+            return Response(result, status=status.HTTP_202_ACCEPTED)
 
         except EthEnvironment.DoesNotExist:
             LOG.error(f"Environment {env_id} not found")
@@ -390,88 +454,40 @@ class FireflyViewSet(viewsets.ModelViewSet):
         """
         try:
             env_id = request.parser_context["kwargs"].get("environment_id")
-            env = EthEnvironment.objects.get(id=env_id)
-            firefly_name = "cello_" + env.name.lower()
-
-            # Get all resource sets for this environment
-            resource_sets = env.resource_sets.all()
-
-            # Find the system node
-            system_resource_sets = resource_sets.filter(
-                ethereum_sub_resource_sets__org_type=1
-            )
-            if not system_resource_sets.exists():
-                raise Exception("System resource set not found")
-
-            system_resource_set = system_resource_sets.first()
-
-            # Import EthNode and EthNodeType at function level to avoid circular imports
-            from api.models import EthNode
-            from api.common.enums import EthNodeType
-
-            system_nodes = EthNode.objects.filter(
-                fabric_resource_set__resource_set=system_resource_set,
-                type=EthNodeType.System.value
-            )
-
-            if not system_nodes.exists():
-                raise Exception("System node not found")
-
-            system_node = system_nodes.first()
-            container_name = system_node.name  # Use system node container name
-
-            LOG.info(f"Using system node container: {container_name}")
-
-            # Read organization accounts from stackState.json
-            firefly_stack_path = os.path.expanduser("~/.firefly/stacks/") + firefly_name
-            stack_state_file = os.path.join(firefly_stack_path, "init/stackState.json")
-
-            with open(stack_state_file, "r") as file:
-                stack_data = json.load(file)
-                # Get the 3 account addresses
-                accounts = [account["address"] for account in stack_data["accounts"][:3]]
-
-            LOG.info(f"Found {len(accounts)} accounts to fund: {accounts}")
-
-            # Sender account (predefined)
-            sender_account = "0x365acf78c44060caf3a4789d804df11e3b4aa17d"
-
-            # Enter the eth container and transfer funds
-            geth_attach_command = ["docker", "exec", "-i", container_name, "geth", "attach"]
-            geth_attach_process = subprocess.Popen(
-                geth_attach_command,
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                universal_newlines=True
-            )
-
-            # Transfer 10 ether to each account
-            for account in accounts:
-                transfer_command = f"eth.sendTransaction({{from: \"{sender_account}\", to: \"{account}\", value: web3.toWei(10, 'ether')}})\n"
-                geth_attach_process.stdin.write(transfer_command)
-                geth_attach_process.stdin.flush()
-                LOG.info(f"Transferred 10 ether from {sender_account} to {account}")
-
-            # Close geth attach process
-            geth_attach_process.stdin.write("exit\n")
-            geth_attach_process.stdin.flush()
-            geth_attach_process.communicate()
-
-            # Start Firefly
-            Firefly_cli().start(firefly_name=firefly_name)
-
-            return Response(
-                {
-                    "message": "Firefly Ethereum started successfully",
-                    "firefly_name": firefly_name,
-                    "funded_accounts": accounts,
-                    "amount_per_account": "10 ether"
-                },
-                status=status.HTTP_202_ACCEPTED
-            )
+            result = self._start_eth_for_env(env_id)
+            return Response(result, status=status.HTTP_202_ACCEPTED)
 
         except Exception as e:
             LOG.exception(f"Firefly start_eth failed: {e}")
             traceback.print_exc()
             return Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=["post"], detail=False, url_path="init_eth_async")
+    def init_eth_async(self, request, pk=None, *args, **kwargs):
+        env_id = request.parser_context["kwargs"].get("environment_id")
+        task = Task.objects.create(
+            type="firefly_init_eth",
+            status="PENDING",
+            target_type="EthEnvironment",
+            target_id=str(env_id),
+        )
+        self._start_task(task, self._init_eth_for_env, env_id)
+        return Response(
+            {"task_id": str(task.id), "status": task.status},
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+    @action(methods=["post"], detail=False, url_path="start_eth_async")
+    def start_eth_async(self, request, pk=None, *args, **kwargs):
+        env_id = request.parser_context["kwargs"].get("environment_id")
+        task = Task.objects.create(
+            type="firefly_start_eth",
+            status="PENDING",
+            target_type="EthEnvironment",
+            target_id=str(env_id),
+        )
+        self._start_task(task, self._start_eth_for_env, env_id)
+        return Response(
+            {"task_id": str(task.id), "status": task.status},
+            status=status.HTTP_202_ACCEPTED,
+        )

@@ -346,9 +346,9 @@ export const getEnvironment = async (environmentId: string, consortiumId: string
       id: res.data.id,
       status: res.data.status,
       createdAt: res.data.created_at,
-      fireflyStatus: res.data.firefly_status,
-      oracleStatus: res.data.Oracle_status,
-      dmnStatus: res.data.DMN_status,
+      fireflyStatus: res.data.firefly_status ?? "NO",
+      oracleStatus: res.data.Oracle_status ?? "NO",
+      dmnStatus: res.data.DMN_status ?? "NO",
       type: envType,
     }
   } catch (err) {

@@ -7,7 +7,7 @@ from .serializers import MembershipSerializer
 from api.models import LoleidoOrganization, Consortium, Membership
 
 
-class MemebershipViewSet(viewsets.ViewSet):
+class MembershipViewSet(viewsets.ViewSet):
     """
     Membership管理
     """

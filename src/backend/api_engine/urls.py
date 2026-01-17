@@ -50,9 +50,10 @@ from api.routes.loleido_organization.views import (
     UserJoinOrgInviteViewSet,
 )
 from api.routes.consortium.views import ConsortiumViewSet, ConsortiumInviteViewSet
-from api.routes.memebership.views import MemebershipViewSet
+from api.routes.membership.views import MembershipViewSet
 from api.routes.environment.views import EnvironmentViewSet, EnvironmentOperateViewSet, EthEnvironmentViewSet, EthEnvironmentOperateViewSet
-from api.routes.resource_set.views import EthereumResourceSetViewSet, ResourceSetViewSet
+from api.routes.resource_set.views import ResourceSetViewSet
+from api.routes.ethereum_resource_set.views import EthereumResourceSetViewSet
 from api.routes.bpmn.views import (
     BPMNViewsSet,
     BPMNInstanceViewSet,
@@ -61,6 +62,7 @@ from api.routes.bpmn.views import (
 from api.routes.fabric_identity.views import FabricIdentityViewSet
 from api.routes.ethereum_identity.views import EthereumIdentityViewSet
 from api.routes.api_secret_key.views import APISecretKeyViewSet
+from api.routes.task.views import TaskViewSet
 
 DEBUG = getattr(settings, "DEBUG")
 API_VERSION = os.getenv("API_VERSION")
@@ -92,6 +94,7 @@ router.register("register", RegisterViewSet, basename="register")
 router.register("agents", AgentViewSet, basename="agent")  # No Change
 
 router.register("api_secret_keys", APISecretKeyViewSet, basename="api_secret_key")
+router.register("tasks", TaskViewSet, basename="task")
 router.register("fabric_identities", FabricIdentityViewSet, basename="fabric_identity")
 router.register("ethereum_identities", EthereumIdentityViewSet, basename="ethereum_identity")
 router.register(
@@ -177,7 +180,7 @@ router.register(
 )
 router.register(
     "consortium/(?P<consortium_id>[^/.]+)/memberships",
-    MemebershipViewSet,
+    MembershipViewSet,
     basename="consortium-membership",
 )
 router.register(

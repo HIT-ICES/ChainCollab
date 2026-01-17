@@ -108,11 +108,11 @@ class EthereumResourceSet(models.Model):
         max_length=32,
         help_text="Organization type",
     )
-    resource_set = models.ForeignKey(
+    resource_set = models.OneToOneField(
         "ResourceSet",
         help_text="Resource set to which the ethereum resourceset belongs",
         null=True,
-        related_name="ethereum_sub_resource_sets",
+        related_name="ethereum_sub_resource_set",
         on_delete=models.CASCADE,
     )
 
@@ -897,6 +897,119 @@ class EthereumContract(models.Model):
 # new Model
 
 
+class EthereumDeployment(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        help_text="ID of Ethereum deployment",
+        default=make_uuid,
+        editable=False,
+        unique=True,
+    )
+    contract = models.ForeignKey(
+        EthereumContract,
+        help_text="related ethereum_contract_id",
+        on_delete=models.CASCADE,
+        related_name="deployments",
+    )
+    environment = models.ForeignKey(
+        "Environment",
+        help_text="Fabric environment of deployment (legacy)",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    eth_environment = models.ForeignKey(
+        "EthEnvironment",
+        help_text="Ethereum environment of deployment",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    namespace = models.CharField(
+        help_text="FireFly namespace for deployment",
+        max_length=64,
+        default="default",
+    )
+    constructor_args = models.JSONField(
+        help_text="Constructor arguments used during deployment",
+        null=True,
+        blank=True,
+    )
+    contract_address = models.CharField(
+        help_text="Deployed contract address on blockchain",
+        max_length=42,
+        null=True,
+        blank=True,
+    )
+    deployment_tx_hash = models.CharField(
+        help_text="Transaction hash of deployment",
+        max_length=66,
+        null=True,
+        blank=True,
+    )
+    deployment_id = models.CharField(
+        help_text="FireFly deployment request ID",
+        max_length=128,
+        null=True,
+        blank=True,
+    )
+    status = models.CharField(
+        help_text="Deployment status: Pending, Succeeded, Failed",
+        max_length=32,
+        default="Pending",
+    )
+    create_ts = models.DateTimeField(
+        help_text="Create time of deployment", auto_now_add=True
+    )
+
+
+class Task(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        help_text="ID of task",
+        default=make_uuid,
+        editable=False,
+        unique=True,
+    )
+    type = models.CharField(
+        help_text="Task type",
+        max_length=64,
+    )
+    status = models.CharField(
+        help_text="Task status: PENDING, RUNNING, SUCCESS, FAILED",
+        max_length=16,
+        default="PENDING",
+    )
+    target_type = models.CharField(
+        help_text="Target model name",
+        max_length=64,
+        null=True,
+        blank=True,
+    )
+    target_id = models.CharField(
+        help_text="Target model ID",
+        max_length=64,
+        null=True,
+        blank=True,
+    )
+    result = models.JSONField(
+        help_text="Task result payload",
+        null=True,
+        blank=True,
+    )
+    error = models.TextField(
+        help_text="Task error message",
+        null=True,
+        blank=True,
+    )
+    created_at = models.DateTimeField(
+        help_text="Create time of task", auto_now_add=True
+    )
+    updated_at = models.DateTimeField(
+        help_text="Update time of task", auto_now=True
+    )
+
+
 class Environment(models.Model):
     id = models.UUIDField(
         primary_key=True,
@@ -964,25 +1077,55 @@ class EthEnvironment(models.Model):
         max_length=32,
         default="CREATED",
     )
-    # 下方参数存疑
-    # firefly_status = models.CharField(
-    #     help_text="status of firefly,can be NO|CHAINCODEINSTALLED|STARTED",
-    #     max_length=32,
-    #     default="NO",
-    # )
-    # Oracle_status = models.CharField(
-    #     help_text="status of Oracle,can be NO|CHAINCODEINSTALLED",
-    #     max_length=32,
-    #     default="NO",
-    # )
-    # DMN_status = models.CharField(
-    #     help_text="status of DMN,can be NO|CHAINCODEINSTALLED",
-    #     max_length=32,
-    #     default="NO",
-    # )
+    firefly_status = models.CharField(
+        help_text="status of firefly,can be NO|CHAINCODEINSTALLED|STARTED",
+        max_length=32,
+        default="NO",
+    )
+    Oracle_status = models.CharField(
+        help_text="status of Oracle,can be NO|CHAINCODEINSTALLED",
+        max_length=32,
+        default="NO",
+    )
+    DMN_status = models.CharField(
+        help_text="status of DMN,can be NO|CHAINCODEINSTALLED",
+        max_length=32,
+        default="NO",
+    )
     create_at = models.DateTimeField(
         help_text="create time of environment", auto_now_add=True
     )
+
+
+class LoleidoMembership(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        help_text="ID of LoleidoMembership",
+        default=make_uuid,
+        editable=False,
+        unique=True,
+    )
+    loleido_organization = models.ForeignKey(
+        "LoleidoOrganization",
+        help_text="related loleido_organization_id",
+        null=False,
+        on_delete=models.CASCADE,
+    )
+    user = models.ForeignKey(
+        UserProfile,
+        help_text="related user_id",
+        null=False,
+        on_delete=models.CASCADE,
+    )
+    role = models.CharField(
+        help_text="role of LoleidoMembership",
+        default="Member",
+        max_length=32,
+        choices=(("Member", "Member"), ("Admin", "Admin"), ("Owner", "Owner")),
+    )
+
+    class Meta:
+        unique_together = ("loleido_organization", "user")
 
 
 class LoleidoOrganization(models.Model):
@@ -997,40 +1140,9 @@ class LoleidoOrganization(models.Model):
     members = models.ManyToManyField(
         UserProfile,
         help_text="related user_id",
-        through="LoleidoMemebership",
+        through=LoleidoMembership,
         related_name="orgs",
     )
-
-
-class LoleidoMemebership(models.Model):
-    id = models.UUIDField(
-        primary_key=True,
-        help_text="ID of LoleidoMemebership",
-        default=make_uuid,
-        editable=False,
-        unique=True,
-    )
-    loleido_organization = models.ForeignKey(
-        LoleidoOrganization,
-        help_text="related loleido_organization_id",
-        null=False,
-        on_delete=models.CASCADE,
-    )
-    user = models.ForeignKey(
-        UserProfile,
-        help_text="related user_id",
-        null=False,
-        on_delete=models.CASCADE,
-    )
-    role = models.CharField(
-        help_text="role of LoleidoMemebership",
-        default="Member",
-        max_length=32,
-        choices=(("Member", "Member"), ("Admin", "Admin"), ("Owner", "Owner")),
-    )
-
-    class Meta:
-        unique_together = ("loleido_organization", "user")
 
 
 class Consortium(models.Model):
@@ -1084,7 +1196,7 @@ class Membership(models.Model):
 
 class ResourceSet(models.Model):
     """
-    Stand for a set of resource for some memebership in a environment
+    Stand for a set of resource for some membership in a environment
     """
 
     id = models.UUIDField(
@@ -1138,8 +1250,7 @@ class ResourceSet(models.Model):
             return self.sub_resource_set
         except Exception:
             try:
-                # For ForeignKey, use .first() to get the first related object
-                return self.ethereum_sub_resource_sets.first()
+                return self.ethereum_sub_resource_set
             except Exception:
                 return None
 

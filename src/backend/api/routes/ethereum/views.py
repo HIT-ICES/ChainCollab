@@ -15,6 +15,7 @@ from drf_yasg.utils import swagger_auto_schema
 from api.config import ETHEREUM_CONTRACT_STORE
 from api.models import (
     EthereumContract,
+    EthereumDeployment,
     Environment,
     LoleidoOrganization,
 )
@@ -574,10 +575,26 @@ class EthereumContractViewSet(viewsets.ViewSet):
 
             tx_hash = output_data.get("transactionHash")
 
-            # Update contract with deployment information
+            # Update contract with latest deployment information
             contract.contract_address = contract_address
             contract.deployment_tx_hash = tx_hash or tx_id
             contract.save()
+
+            # Persist deployment history
+            deployment_kwargs = {
+                "contract": contract,
+                "namespace": namespace,
+                "constructor_args": constructor_args,
+                "contract_address": contract_address,
+                "deployment_tx_hash": tx_hash or tx_id,
+                "deployment_id": deployment_id,
+                "status": deployment_status,
+            }
+            if isinstance(env, EthEnvironment):
+                deployment_kwargs["eth_environment"] = env
+            else:
+                deployment_kwargs["environment"] = env
+            EthereumDeployment.objects.create(**deployment_kwargs)
 
             if deployment_status == "Succeeded" and contract_address:
                 logger.info(f"✓ Contract deployed successfully")
@@ -612,4 +629,3 @@ class EthereumContractViewSet(viewsets.ViewSet):
             logger.error(f"Traceback: {traceback.format_exc()}")
             traceback.print_exc()
             return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
-
