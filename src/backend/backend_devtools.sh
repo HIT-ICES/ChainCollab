@@ -24,6 +24,13 @@ def exec_cmd(cmd, *, cwd=PROJECT_DIR, env=None):
     os.execvpe(cmd[0], cmd, env or os.environ)
 
 
+def env_with_venv(venv: Path) -> dict:
+    env = os.environ.copy()
+    venv_bin = str(venv / "bin")
+    env["PATH"] = f"{venv_bin}:{env.get('PATH', '')}"
+    return env
+
+
 def docker_compose_base_cmd() -> list[str] | None:
     if cmd_exists("docker-compose"):
         return ["docker-compose"]
@@ -69,7 +76,7 @@ def run_manage(args: list[str]):
             sys.exit(1)
     python_bin = venv / "bin" / "python"
     print(f"[backend] run manage.py {' '.join(args)}", flush=True)
-    run_cmd([str(python_bin), "manage.py", *args])
+    run_cmd([str(python_bin), "manage.py", *args], env=env_with_venv(venv))
 
 
 def start_db():
@@ -109,7 +116,10 @@ def start_api():
             print("[backend] virtualenv not found after setup.")
             sys.exit(1)
     python_bin = venv / "bin" / "python"
-    exec_cmd([str(python_bin), "manage.py", "runserver", "0.0.0.0:8000"])
+    exec_cmd(
+        [str(python_bin), "manage.py", "runserver", "0.0.0.0:8000"],
+        env=env_with_venv(venv),
+    )
 
 
 def start_backend():

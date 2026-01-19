@@ -6,6 +6,11 @@ import {
   Typography,
   Button as AntdButton,
   message,
+  Modal,
+  Form,
+  Input,
+  Space,
+  Tag,
 } from "antd";
 
 import ClearAllIcon from "@mui/icons-material/ClearAll";
@@ -36,12 +41,16 @@ import {
   JoinEthEnv,
   ActivateEthEnv,
   InitFireflyForEthEnv,
-  StartFireflyForEthEnv
+  StartFireflyForEthEnv,
+  InstallIdentityContract,
+  getIdentityContractDetail,
+  redeployIdentityContract
 } from "@/api/resourceAPI";
 
 import {
   registerInterface,
-  registerAPI
+  registerAPI,
+  callFireflyContract
 } from "@/api/executionAPI"
 
 const systemFireflyURL = "http://127.0.0.1:5000"
@@ -61,6 +70,7 @@ import {
   FireflyComponentCard,
   OracleComponentCard,
   DMNComponentCard,
+  IdentityContractComponentCard,
 
   JoinModal,
   NaiveEthereumStepBar
@@ -104,6 +114,57 @@ const Overview: React.FC = () => {
   const [setupFireflyLoading, setSetupFireflyLoading] = useState(false)
   const [setupOracleLoading, setSetupOracleLoading] = useState(false)
   const [setupDMNLoading, setSetupDMNLoading] = useState(false)
+  const [setupIdentityLoading, setSetupIdentityLoading] = useState(false)
+
+  const [detailOpen, setDetailOpen] = useState(false)
+  const [detailType, setDetailType] = useState("")
+  const [detailLoading, setDetailLoading] = useState(false)
+  const [detailPayload, setDetailPayload] = useState(null)
+  const [callLoading, setCallLoading] = useState(false)
+  const [callResult, setCallResult] = useState<string | null>(null)
+  const [callForm] = Form.useForm()
+  const [identityAction, setIdentityAction] = useState(null)
+  const identityQuickActions = [
+    {
+      label: "Check Identity Registered",
+      method: "isIdentityRegistered",
+      mode: "query",
+      params: [{ key: "identityAddress", label: "Address", placeholder: "0x..." }],
+    },
+    {
+      label: "Get Identity Org",
+      method: "getIdentityOrg",
+      mode: "query",
+      params: [{ key: "identityAddress", label: "Address", placeholder: "0x..." }],
+    },
+    {
+      label: "Check Org Member",
+      method: "isOrgMember",
+      mode: "query",
+      params: [
+        { key: "identityAddress", label: "Address", placeholder: "0x..." },
+        { key: "orgName", label: "Org Name", placeholder: "OrgName" },
+      ],
+    },
+    {
+      label: "Get Identity Info",
+      method: "getIdentityInfo",
+      mode: "query",
+      params: [{ key: "identityAddress", label: "Address", placeholder: "0x..." }],
+    },
+    {
+      label: "Get Org Members",
+      method: "getOrgMembers",
+      mode: "query",
+      params: [{ key: "orgName", label: "Org Name", placeholder: "OrgName" }],
+    },
+    {
+      label: "Get All Orgs",
+      method: "getAllOrganizations",
+      mode: "query",
+      params: [],
+    },
+  ]
 
   const handleSetUpFabricNetwork = async () => {
     // Init
@@ -232,6 +293,119 @@ const Overview: React.FC = () => {
     }
   }
 
+  const handleSetUpIdentityContractOnly = async () => {
+    try {
+      setSetupIdentityLoading(true)
+      if (currentEnvType !== "Ethereum") {
+        message.warning("Identity contract only supports Ethereum environment")
+        return
+      }
+      await InstallIdentityContract(currentEnvId)
+      setSync()
+    } finally {
+      setSetupIdentityLoading(false)
+    }
+  }
+
+  const openComponentDetail = async (type: string) => {
+    if (type === "Firefly") {
+      navigate(`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/firefly`)
+      return
+    }
+    setDetailType(type)
+    setDetailOpen(true)
+    setCallResult(null)
+    if (type === "Identity") {
+      try {
+        setDetailLoading(true)
+        const detail = await getIdentityContractDetail(currentEnvId, true)
+        setDetailPayload(detail)
+      } finally {
+        setDetailLoading(false)
+      }
+    } else {
+      setDetailPayload(null)
+    }
+  }
+
+  const handleIdentityCall = async () => {
+    try {
+      const values = await callForm.validateFields()
+      const apiBase = detailPayload?.deployment?.firefly_api_base
+      if (!apiBase) {
+        message.error("Firefly API base URL is not available")
+        return
+      }
+      if (!identityAction) {
+        message.error("Select a quick action first")
+        return
+      }
+      const missingLabels: string[] = []
+      const params = (identityAction.params || []).reduce((acc, param) => {
+        if (!param.key) {
+          return acc
+        }
+        const value = values[param.key]
+        if (value === undefined || value === null || value === "") {
+          missingLabels.push(param.label || param.key)
+          return acc
+        }
+        acc[param.key] = value
+        return acc
+      }, {})
+      if (missingLabels.length > 0) {
+        message.error(`Missing required params: ${missingLabels.join(", ")}`)
+        return
+      }
+      setCallLoading(true)
+      const res = await callFireflyContract(
+        apiBase,
+        values.method,
+        params,
+        values.mode
+      )
+      setCallResult(JSON.stringify(res, null, 2))
+    } catch (err) {
+      if (err?.message) {
+        message.error(err.message)
+      }
+    } finally {
+      setCallLoading(false)
+    }
+  }
+
+  const handleRedeployIdentity = async () => {
+    if (currentEnvType !== "Ethereum") {
+      message.warning("Identity contract only supports Ethereum environment")
+      return
+    }
+    try {
+      setCallLoading(true)
+      await redeployIdentityContract(currentEnvId)
+      message.success("Redeploy triggered. Syncing users in background.")
+    } catch (err) {
+      message.error("Redeploy failed to start")
+    } finally {
+      setCallLoading(false)
+    }
+  }
+
+  const applyIdentityQuickAction = (action) => {
+    setIdentityAction(action)
+    const paramDefaults = {}
+    action.params.forEach((param) => {
+      if (!param.key) {
+        return
+      }
+      paramDefaults[param.key] = ""
+    })
+    callForm.setFieldsValue({
+      method: action.method,
+      mode: action.mode,
+      ...paramDefaults,
+    })
+  }
+
   return (
     <>
       <Col span={16}>
@@ -342,6 +516,7 @@ const Overview: React.FC = () => {
               <FireflyComponentCard
                 ChaincodeStatus={envInfo.fireflyStatus !== "NO"}
                 ClusterStatus={envInfo.fireflyStatus === "STARTED"}
+                onOpen={() => openComponentDetail("Firefly")}
                 onSetup={
                   <LoadingButton
                     size="small"
@@ -355,6 +530,7 @@ const Overview: React.FC = () => {
               />
               <OracleComponentCard
                 ChaincodeStatus={envInfo.oracleStatus === "CHAINCODEINSTALLED"}
+                onOpen={() => openComponentDetail("Oracle")}
                 onSetup={
                   <LoadingButton
                     size="small"
@@ -369,6 +545,7 @@ const Overview: React.FC = () => {
               />
               <DMNComponentCard
                 ChaincodeStatus={envInfo.dmnStatus === "CHAINCODEINSTALLED"}
+                onOpen={() => openComponentDetail("DMN")}
                 onSetup={
                   <LoadingButton
                     size="small"
@@ -376,6 +553,21 @@ const Overview: React.FC = () => {
                     loading={setupDMNLoading}
                     onClick={handleSetUpDMNOnly}
                     disabled={currentEnvType !== "Fabric"}
+                  >
+                    Setup
+                  </LoadingButton>
+                }
+              />
+              <IdentityContractComponentCard
+                ContractStatus={envInfo.identityContractStatus ?? "NO"}
+                onOpen={() => openComponentDetail("Identity")}
+                onSetup={
+                  <LoadingButton
+                    size="small"
+                    variant="outlined"
+                    loading={setupIdentityLoading}
+                    onClick={handleSetUpIdentityContractOnly}
+                    disabled={currentEnvType !== "Ethereum"}
                   >
                     Setup
                   </LoadingButton>
@@ -521,6 +713,105 @@ const Overview: React.FC = () => {
               message.error("Join Failed")
             }
           }} />
+      <Modal
+        open={detailOpen}
+        title={`${detailType} Detail`}
+        onCancel={() => setDetailOpen(false)}
+        footer={null}
+        destroyOnClose
+      >
+        {detailType === "Oracle" ? (
+          <Space direction="vertical" style={{ width: "100%" }}>
+            <Tag color={envInfo.oracleStatus === "CHAINCODEINSTALLED" ? "green" : "red"}>
+              Status: {envInfo.oracleStatus || "NO"}
+            </Tag>
+            <div>Oracle 通过 Firefly 注册的 FFI/API 使用。</div>
+          </Space>
+        ) : null}
+        {detailType === "DMN" ? (
+          <Space direction="vertical" style={{ width: "100%" }}>
+            <Tag color={envInfo.dmnStatus === "CHAINCODEINSTALLED" ? "green" : "red"}>
+              Status: {envInfo.dmnStatus || "NO"}
+            </Tag>
+            <div>DMN Engine 仅支持 Fabric 环境。</div>
+          </Space>
+        ) : null}
+        {detailType === "Identity" ? (
+          <Space direction="vertical" style={{ width: "100%" }}>
+            <Tag color={(envInfo.identityContractStatus === "STARTED") ? "green" : "red"}>
+              Status: {envInfo.identityContractStatus || "NO"}
+            </Tag>
+            {detailLoading ? (
+              <div>Loading...</div>
+            ) : (
+              <>
+                <div>
+                  Firefly Core: {detailPayload?.firefly_core_url || "-"}
+                </div>
+                <div>
+                  Contract Address: {detailPayload?.deployment?.contract_address || "-"}
+                </div>
+                <div>
+                  Firefly API Base: {detailPayload?.deployment?.firefly_api_base || "-"}
+                </div>
+                <Form form={callForm} layout="vertical">
+                  <Form.Item label="Quick Actions">
+                    <Space wrap>
+                      {identityQuickActions.map((action) => (
+                        <AntdButton
+                          key={action.method}
+                          onClick={() => applyIdentityQuickAction(action)}
+                        >
+                          {action.label}
+                        </AntdButton>
+                      ))}
+                    </Space>
+                  </Form.Item>
+                  <Form.Item>
+                    <AntdButton danger onClick={handleRedeployIdentity}>
+                      Redeploy & Sync All
+                    </AntdButton>
+                  </Form.Item>
+                  <Form.Item
+                    label="Method"
+                    name="method"
+                    rules={[{ required: true, message: "Method is required" }]}
+                  >
+                    <Input placeholder="registerIdentity / isOrgMember ..." />
+                  </Form.Item>
+                  {identityAction ? (
+                    identityAction.params.map((param, index) => (
+                      <Form.Item
+                        key={param.key || `${param.label}-${index}`}
+                        label={param.label}
+                        name={param.key}
+                        rules={[{ required: true, message: `${param.label} is required` }]}
+                      >
+                        <Input placeholder={param.placeholder} />
+                      </Form.Item>
+                    ))
+                  ) : (
+                    <Form.Item>
+                      <Input disabled placeholder="Select a quick action to auto-fill parameters." />
+                    </Form.Item>
+                  )}
+                  <Form.Item label="Mode" name="mode" initialValue="invoke">
+                    <Input placeholder="invoke / query" />
+                  </Form.Item>
+                  <AntdButton loading={callLoading} onClick={handleIdentityCall}>
+                    Call via Firefly API
+                  </AntdButton>
+                </Form>
+                {callResult ? (
+                  <pre style={{ marginTop: 12, background: "#f8fafc", padding: 12 }}>
+                    {callResult}
+                  </pre>
+                ) : null}
+              </>
+            )}
+          </Space>
+        ) : null}
+      </Modal>
     </>
   );
 };

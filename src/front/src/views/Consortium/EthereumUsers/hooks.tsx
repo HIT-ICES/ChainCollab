@@ -1,5 +1,11 @@
 import { getResourceSets } from '@/api/resourceAPI';
-import { getEthereumIdentityList, createEthereumIdentity, retrieveEthereumIdentity } from '@/api/platformAPI';
+import {
+    getEthereumIdentityList,
+    createEthereumIdentity,
+    retrieveEthereumIdentity,
+    syncEthereumIdentity,
+    syncAllEthereumIdentities
+} from '@/api/platformAPI';
 import { useQuery, useMutation } from 'react-query';
 
 export const useEthereumIdentities = (ethEnvironmentId, membershipId) => {
@@ -24,6 +30,30 @@ export const useCreateEthereumIdentity = () => {
                 membership_id: membershipId,
                 name
             });
+        }
+    );
+
+    return [mutate, {
+        isLoading, isError, isSuccess
+    }];
+}
+
+export const useSyncEthereumIdentity = () => {
+    const { mutate, isLoading, isError, isSuccess } = useMutation(
+        ({ identityId }) => {
+            return syncEthereumIdentity(identityId);
+        }
+    );
+
+    return [mutate, {
+        isLoading, isError, isSuccess
+    }];
+}
+
+export const useSyncAllEthereumIdentities = () => {
+    const { mutate, isLoading, isError, isSuccess } = useMutation(
+        ({ ethEnvironmentId, membershipId }) => {
+            return syncAllEthereumIdentities(ethEnvironmentId, membershipId);
         }
     );
 

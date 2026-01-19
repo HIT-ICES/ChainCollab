@@ -1,5 +1,11 @@
+import json
 import logging
+import os
+import shutil
+import time
+from threading import Thread
 from requests import post
+import requests
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -20,6 +26,10 @@ from api.models import (
     Membership,
     FabricResourceSet,
     LoleidoOrganization,
+    Firefly,
+    Task,
+    IdentityDeployment,
+    EthereumIdentity,
 )
 from api.config import (
     DEFAULT_AGENT,
@@ -28,7 +38,10 @@ from api.config import (
     CURRENT_IP,
     ORACLE_CONTRACT_PATH,
     DMN_CONTRACT_PATH,
+    ETHEREUM_CONTRACT_STORE,
 )
+from api.lib.ethereum.solc_compiler import SolidityCompiler
+from api.lib.ethereum.convert_contract import extract_contract_info
 from api.utils.test_time import timeitwithname
 from .utils import (
     packageChaincodeForEnv,
@@ -776,6 +789,965 @@ class EthEnvironmentViewSet(viewsets.ModelViewSet):
 class EthEnvironmentOperateViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
+    def _start_task(self, task, handler, *args, **kwargs):
+        def runner():
+            task.status = "RUNNING"
+            task.save(update_fields=["status", "updated_at"])
+            LOG.info("Task %s started (%s)", task.id, task.type)
+            try:
+                result = handler(*args, **kwargs)
+                task.status = "SUCCESS"
+                task.result = result
+                task.error = None
+                LOG.info("Task %s finished (%s)", task.id, task.type)
+            except Exception as exc:
+                LOG.exception("Task %s failed", task.id)
+                task.status = "FAILED"
+                task.error = str(exc)
+            task.save(update_fields=["status", "result", "error", "updated_at"])
+
+        thread = Thread(target=runner, daemon=True)
+        thread.start()
+
+    def _resolve_identity_artifacts(self):
+        repo_root = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "../../../../..")
+        )
+        contract_dir = os.path.join(ETHEREUM_CONTRACT_STORE, "identity-contract")
+        os.makedirs(contract_dir, exist_ok=True)
+        abi_path = os.path.join(contract_dir, "IdentityRegistry.abi")
+        bin_path = os.path.join(contract_dir, "IdentityRegistry.bin")
+        sol_copy_path = os.path.join(contract_dir, "IdentityRegistry.sol")
+
+        if not os.path.exists(sol_copy_path):
+            source_path = os.path.join(
+                repo_root,
+                "src",
+                "geth_identity_contract",
+                "contracts",
+                "IdentityRegistry.sol",
+            )
+            if not os.path.exists(source_path):
+                raise FileNotFoundError(
+                    "IdentityRegistry.sol not found under geth_identity_contract/contracts"
+                )
+            shutil.copyfile(source_path, sol_copy_path)
+
+        if not os.path.exists(abi_path) or not os.path.exists(bin_path):
+            compiler = SolidityCompiler()
+            is_installed, version_or_error = compiler.check_installation()
+            if not is_installed:
+                raise Exception(
+                    f"Solidity compiler not available: {version_or_error}"
+                )
+            output_json_path = os.path.join(contract_dir, "IdentityRegistry.json")
+            return_code, compiled_data, error_msg = compiler.compile_contract(
+                sol_copy_path, output_json_path
+            )
+            if return_code != 0:
+                raise Exception(f"Compilation failed: {error_msg}")
+            contract_info = extract_contract_info(
+                compiled_data, contract_name="IdentityRegistry"
+            )
+            with open(abi_path, "w") as abi_file:
+                json.dump(contract_info["definition"], abi_file, indent=2)
+            with open(bin_path, "w") as bin_file:
+                bin_file.write(contract_info["contract"])
+        with open(abi_path, "r") as abi_file:
+            abi = json.load(abi_file)
+        with open(bin_path, "r") as bin_file:
+            bytecode = bin_file.read().strip()
+        if not bytecode:
+            raise ValueError("IdentityRegistry bytecode is empty")
+        return abi, bytecode
+
+    def _looks_like_eth_address(self, value: str | None) -> bool:
+        if not value or not isinstance(value, str):
+            return False
+        return value.startswith("0x") and len(value) == 42
+
+    def _fetch_firefly_org_admin_address(self, firefly: Firefly) -> str | None:
+        try:
+            response = requests.get(
+                f"http://{firefly.core_url}/api/v1/identities",
+                params={"fetchverifiers": "true"},
+                timeout=30,
+            )
+            LOG.info(
+                "FireFly identities request org=%s status=%s",
+                firefly.org_name,
+                response.status_code,
+            )
+            if response.status_code not in [200, 202]:
+                LOG.warning(
+                    "FireFly identities query failed org=%s status=%s",
+                    firefly.org_name,
+                    response.status_code,
+                )
+                return None
+            payload = response.json()
+        except Exception as exc:
+            LOG.warning(
+                "FireFly identities query failed org=%s err=%s",
+                firefly.org_name,
+                exc,
+            )
+            return None
+        if isinstance(payload, list):
+            items = payload
+        elif isinstance(payload, dict):
+            items = payload.get("identities") or payload.get("items") or []
+        else:
+            items = []
+        if not isinstance(items, list):
+            return None
+        org_identities = [item for item in items if item.get("type") == "org"]
+        LOG.info(
+            "FireFly identities fetched org=%s total=%s org_total=%s",
+            firefly.org_name,
+            len(items),
+            len(org_identities),
+        )
+        for identity in items:
+            if identity.get("type") != "org":
+                continue
+            if identity.get("name") != firefly.org_name:
+                continue
+            verifiers = identity.get("verifiers") or []
+            for verifier in verifiers:
+                if verifier.get("type") == "ethereum_address":
+                    value = verifier.get("value")
+                    if self._looks_like_eth_address(value):
+                        return value
+        return None
+
+    def _abi_type_to_schema(self, abi_type: str) -> dict:
+        if abi_type.endswith("]"):
+            base = abi_type[: abi_type.index("[")]
+            return {
+                "type": "array",
+                "details": {"type": abi_type},
+                "items": self._abi_type_to_schema(base),
+            }
+        if abi_type.startswith("uint") or abi_type.startswith("int"):
+            return {
+                "type": "integer",
+                "details": {"type": abi_type},
+            }
+        if abi_type == "bool":
+            return {"type": "boolean", "details": {"type": abi_type}}
+        if abi_type == "address":
+            return {"type": "string", "details": {"type": abi_type}}
+        if abi_type.startswith("bytes"):
+            return {"type": "string", "details": {"type": abi_type}}
+        if abi_type == "string":
+            return {"type": "string", "details": {"type": abi_type}}
+        return {"type": "string", "details": {"type": abi_type}}
+
+    def _build_identity_ffi(self, abi: list) -> dict:
+        methods = []
+        for entry in abi:
+            if entry.get("type") != "function":
+                continue
+            params = [
+                {
+                    "name": param.get("name") or f"arg{idx}",
+                    "schema": self._abi_type_to_schema(param.get("type", "string")),
+                }
+                for idx, param in enumerate(entry.get("inputs", []))
+            ]
+            returns = [
+                {
+                    "name": output.get("name") or f"ret{idx}",
+                    "schema": self._abi_type_to_schema(output.get("type", "string")),
+                }
+                for idx, output in enumerate(entry.get("outputs", []))
+            ]
+            methods.append(
+                {
+                    "name": entry.get("name"),
+                    "pathname": "",
+                    "description": "",
+                    "params": params,
+                    "returns": returns,
+                }
+            )
+        return {
+            "namespace": "default",
+            "name": "IdentityRegistry",
+            "description": "Identity registry contract interface",
+            "version": "1.0",
+            "methods": methods,
+        }
+
+    def _normalize_identity_ffi(self, ffi: dict, version_suffix: str | None = None) -> dict:
+        methods = ffi.get("methods", [])
+        for method in methods:
+            params = method.get("params", [])
+            for idx, param in enumerate(params):
+                name = param.get("name", "")
+                if name:
+                    continue
+                if method.get("name") == "orgExists":
+                    param["name"] = "orgName"
+                else:
+                    param["name"] = f"arg{idx}"
+            returns = method.get("returns", [])
+            for idx, output in enumerate(returns):
+                if output.get("name", ""):
+                    continue
+                output["name"] = f"ret{idx}"
+        if version_suffix:
+            current = ffi.get("version", "1.0")
+            ffi["version"] = f"{current}.{version_suffix}"
+        return ffi
+
+    def _write_identity_ffi(self, ffi: dict) -> str:
+        contract_dir = os.path.join(ETHEREUM_CONTRACT_STORE, "identity-contract")
+        os.makedirs(contract_dir, exist_ok=True)
+        ffi_path = os.path.join(contract_dir, "identityFFI.json")
+        with open(ffi_path, "w") as handle:
+            json.dump(ffi, handle, indent=2)
+        return ffi_path
+
+    def _generate_identity_ffi(self, firefly_core_url: str, abi: list) -> dict:
+        payload = {
+            "name": "IdentityRegistry",
+            "namespace": "default",
+            "version": "1.0",
+            "description": "Identity registry contract interface",
+            "input": {"abi": abi},
+        }
+        response = requests.post(
+            f"http://{firefly_core_url}/api/v1/namespaces/default/contracts/interfaces/generate",
+            headers={"Content-Type": "application/json"},
+            data=json.dumps(payload),
+            timeout=60,
+        )
+        if response.status_code not in [200, 201, 202]:
+            raise Exception(
+                f"FireFly FFI generate failed with status {response.status_code}: "
+                f"{response.text[:500]}"
+            )
+        return response.json()
+
+    def _register_identity_ffi(self, firefly_core_url: str, abi: list) -> dict:
+        contract_dir = os.path.join(ETHEREUM_CONTRACT_STORE, "identity-contract")
+        os.makedirs(contract_dir, exist_ok=True)
+        existing = self._find_identity_interface_id(firefly_core_url)
+        if existing:
+            LOG.info(
+                "Identity FFI already exists core=%s interface=%s",
+                firefly_core_url,
+                existing,
+            )
+            try:
+                detail = requests.get(
+                    f"http://{firefly_core_url}/api/v1/namespaces/default/contracts/interfaces/{existing}",
+                    headers={"Content-Type": "application/json"},
+                    timeout=30,
+                )
+                if detail.status_code in [200, 202]:
+                    payload = detail.json()
+                    methods = payload.get("methods", [])
+                    has_empty = any(
+                        (not p.get("name"))
+                        for m in methods
+                        for p in (m.get("params") or [])
+                    )
+                    if not has_empty:
+                        return {"id": existing, "existing": True}
+                else:
+                    return {"id": existing, "existing": True}
+            except Exception:
+                return {"id": existing, "existing": True}
+        try:
+            LOG.info("Identity FFI generate start core=%s", firefly_core_url)
+            ffi = self._generate_identity_ffi(firefly_core_url, abi)
+            ffi = self._normalize_identity_ffi(ffi, version_suffix="1")
+            self._write_identity_ffi(ffi)
+        except Exception as exc:
+            fallback_ffi = self._build_identity_ffi(abi)
+            fallback_ffi = self._normalize_identity_ffi(fallback_ffi, version_suffix="1")
+            with open(os.path.join(contract_dir, "identityFFI.generate_error.log"), "w") as handle:
+                handle.write(str(exc))
+            self._write_identity_ffi(fallback_ffi)
+            ffi = fallback_ffi
+            LOG.warning("Identity FFI generate failed core=%s err=%s", firefly_core_url, exc)
+        response = requests.post(
+            f"http://{firefly_core_url}/api/v1/namespaces/default/contracts/interfaces?confirm=true",
+            headers={"Content-Type": "application/json"},
+            data=json.dumps(ffi),
+            timeout=60,
+        )
+        LOG.info(
+            "Identity FFI register status=%s core=%s body=%s",
+            response.status_code,
+            firefly_core_url,
+            response.text[:300],
+        )
+        if response.status_code not in [200, 201, 202]:
+            try:
+                payload = response.json()
+            except Exception:
+                payload = {}
+            if isinstance(payload, dict) and payload.get("error", "").startswith("FF10127"):
+                existing = self._find_identity_interface_id(firefly_core_url)
+                if existing:
+                    return {"id": existing, "existing": True}
+            raise Exception(
+                f"FireFly FFI registration failed with status {response.status_code}: "
+                f"{response.text[:500]}"
+            )
+        try:
+            payload = response.json()
+        except Exception:
+            payload = {}
+        if isinstance(payload, list):
+            payload = payload[0] if payload else {}
+        return payload
+
+    def _find_identity_interface_id(self, firefly_core_url: str) -> str | None:
+        response = requests.get(
+            f"http://{firefly_core_url}/api/v1/namespaces/default/contracts/interfaces",
+            params={"name": "IdentityRegistry"},
+            timeout=30,
+        )
+        if response.status_code != 200:
+            return None
+        try:
+            payload = response.json()
+        except Exception:
+            return None
+        if isinstance(payload, dict):
+            payload = payload.get("interfaces") or payload.get("items") or []
+        if not isinstance(payload, list) or not payload:
+            return None
+        return payload[0].get("id")
+
+    def _register_identity_api(
+        self,
+        firefly_core_url: str,
+        interface_id: str,
+        contract_address: str,
+        api_name: str,
+    ) -> dict:
+        payload = {
+            "name": api_name,
+            "interface": {
+                "id": interface_id,
+            },
+            "location": {
+                "address": contract_address,
+            },
+        }
+        LOG.info(
+            "Identity API register request core=%s name=%s interface=%s address=%s",
+            firefly_core_url,
+            api_name,
+            interface_id,
+            contract_address,
+        )
+        existing_api = None
+        existing_api_id = None
+        existing_interface_id = None
+        existing_location = None
+        try:
+            api_list = requests.get(
+                f"http://{firefly_core_url}/api/v1/namespaces/default/apis",
+                params={"name": api_name},
+                timeout=30,
+            )
+            if api_list.status_code == 200:
+                api_payload = api_list.json()
+                items = api_payload.get("apis") or api_payload.get("items") or []
+                if isinstance(items, list) and items:
+                    existing_api = items[0]
+                    existing_api_id = existing_api.get("id")
+                    existing_interface = existing_api.get("interface") or {}
+                    existing_interface_id = existing_interface.get("id")
+                    existing_location = (existing_api.get("location") or {}).get(
+                        "address"
+                    )
+                    LOG.info(
+                        "Identity API existing core=%s name=%s api_id=%s interface=%s address=%s",
+                        firefly_core_url,
+                        api_name,
+                        existing_api_id,
+                        existing_interface_id,
+                        existing_location,
+                    )
+                else:
+                    LOG.info(
+                        "Identity API existing core=%s name=%s none",
+                        firefly_core_url,
+                        api_name,
+                    )
+            else:
+                LOG.warning(
+                    "Identity API list failed core=%s name=%s status=%s body=%s",
+                    firefly_core_url,
+                    api_name,
+                    api_list.status_code,
+                    api_list.text[:300],
+                )
+        except Exception:
+            existing_api = None
+        last_error = None
+        for attempt in range(1, 4):
+            if attempt > 1:
+                time.sleep(2)
+            if existing_api_id:
+                try:
+                    requests.delete(
+                        f"http://{firefly_core_url}/api/v1/namespaces/default/apis/{existing_api_id}",
+                        timeout=30,
+                    )
+                    LOG.info(
+                        "Identity API removed before re-create core=%s api_id=%s",
+                        firefly_core_url,
+                        existing_api_id,
+                    )
+                    existing_api_id = None
+                except Exception:
+                    LOG.warning(
+                        "Identity API delete failed core=%s api_id=%s",
+                        firefly_core_url,
+                        existing_api_id,
+                    )
+            response = requests.post(
+                f"http://{firefly_core_url}/api/v1/namespaces/default/apis?confirm=true",
+                headers={"Content-Type": "application/json"},
+                data=json.dumps(payload),
+                timeout=60,
+            )
+            LOG.info(
+                "Identity API register attempt=%s status=%s core=%s name=%s body=%s",
+                attempt,
+                response.status_code,
+                firefly_core_url,
+                api_name,
+                response.text[:300],
+            )
+            if response.status_code in [200, 201, 202]:
+                try:
+                    payload = response.json()
+                except Exception:
+                    payload = {}
+                if isinstance(payload, list):
+                    payload = payload[0] if payload else {}
+                return payload
+            try:
+                payload_body = response.json()
+            except Exception:
+                payload_body = {}
+            if isinstance(payload_body, dict) and payload_body.get("error", "").startswith("FF10127"):
+                if existing_api_id and (
+                    existing_interface_id != interface_id
+                    or (existing_location and existing_location != contract_address)
+                ):
+                    try:
+                        requests.delete(
+                            f"http://{firefly_core_url}/api/v1/namespaces/default/apis/{existing_api_id}",
+                            timeout=30,
+                        )
+                    except Exception:
+                        return payload_body
+                    continue
+                return payload_body
+            last_error = (
+                f"status {response.status_code}: {response.text[:500]}"
+            )
+        raise Exception(f"FireFly API registration failed after retries: {last_error}")
+
+    def _invoke_identity_api(
+        self,
+        firefly_core_url: str,
+        method: str,
+        params: dict,
+        mode: str = "invoke",
+        api_name: str = "IdentityRegistry",
+    ) -> dict:
+        payload = {
+            "input": params,
+        }
+        suffix = "?confirm=true" if mode == "invoke" else ""
+        url = (
+            f"http://{firefly_core_url}/api/v1/namespaces/default/apis/"
+            f"{api_name}/{mode}/{method}{suffix}"
+        )
+        LOG.info(
+            "Identity API call url=%s path=/api/v1/namespaces/default/apis/%s/%s/%s",
+            url,
+            api_name,
+            mode,
+            method,
+        )
+        response = requests.post(
+            url,
+            headers={"Content-Type": "application/json"},
+            data=json.dumps(payload),
+            timeout=60,
+        )
+        LOG.info(
+            "Identity API response url=%s status=%s",
+            url,
+            response.status_code,
+        )
+        if response.status_code not in [200, 201, 202]:
+            raise Exception(
+                f"FireFly API call failed with status {response.status_code}: "
+                f"{response.text[:500]}"
+            )
+        try:
+            payload = response.json()
+        except Exception:
+            payload = {}
+        if isinstance(payload, list):
+            payload = payload[0] if payload else {}
+        return payload
+
+    def _ensure_org_registered(
+        self,
+        firefly_core_url: str,
+        org_name: str,
+        org_admin_address: str,
+        api_name: str = "IdentityRegistry",
+    ) -> None:
+        if not org_admin_address:
+            raise Exception("org_admin_address is required")
+        LOG.info(
+            "Identity org register start core=%s name=%s org=%s admin=%s",
+            firefly_core_url,
+            api_name,
+            org_name,
+            org_admin_address,
+        )
+        try:
+            self._invoke_identity_api(
+                firefly_core_url,
+                "createOrganization",
+                {
+                    "orgName": org_name,
+                    "orgAdmin": org_admin_address,
+                },
+                mode="invoke",
+                api_name=api_name,
+            )
+        except Exception as exc:
+            error_text = str(exc)
+            if "already exists" in error_text.lower():
+                LOG.info(
+                    "Identity org register exists core=%s name=%s org=%s",
+                    firefly_core_url,
+                    api_name,
+                    org_name,
+                )
+                return
+            raise
+        LOG.info(
+            "Identity org register done core=%s name=%s org=%s",
+            firefly_core_url,
+            api_name,
+            org_name,
+        )
+
+    def _register_memberships_for_env(self, env: EthEnvironment) -> dict:
+        memberships = [rs.membership for rs in env.resource_sets.all() if rs.membership]
+        memberships = list({m.id: m for m in memberships}.values())
+        if not memberships:
+            return {"total": 0, "success": 0, "failed": 0, "results": []}
+        results = []
+        success = 0
+        failed = 0
+        system_resource_set = env.resource_sets.filter(
+            ethereum_sub_resource_set__org_type=1
+        ).first()
+        system_firefly = (
+            Firefly.objects.filter(resource_set=system_resource_set).first()
+            if system_resource_set
+            else None
+        )
+        if not system_firefly:
+            return {
+                "total": len(memberships),
+                "success": 0,
+                "failed": len(memberships),
+                "results": [
+                    {"membership": m.name, "status": "failed", "error": "system firefly not found"}
+                    for m in memberships
+                ],
+            }
+        api_name = self._get_identity_api_name(env)
+        LOG.info(
+            "========== Identity Org Registration START env=%s ==========",
+            env.id,
+        )
+        LOG.info("Identity org registration memberships count=%s", len(memberships))
+        LOG.info(
+            "Identity org registration memberships env=%s names=%s",
+            env.id,
+            [m.name for m in memberships],
+        )
+        system_membership = (
+            system_resource_set.membership if system_resource_set else None
+        )
+        default_admin_address = None
+        if system_membership:
+            system_identity = (
+                EthereumIdentity.objects.filter(
+                    eth_environment=env, membership=system_membership
+                )
+                .order_by("create_at")
+                .first()
+            )
+            if system_identity and system_identity.address:
+                default_admin_address = system_identity.address
+        if not default_admin_address:
+            fallback_identity = (
+                EthereumIdentity.objects.filter(eth_environment=env)
+                .order_by("create_at")
+                .first()
+            )
+            if fallback_identity and fallback_identity.address:
+                default_admin_address = fallback_identity.address
+        for membership in memberships:
+            try:
+                identity = (
+                    EthereumIdentity.objects.filter(
+                        eth_environment=env, membership=membership
+                    )
+                    .order_by("create_at")
+                    .first()
+                )
+                org_admin_address = None
+                if identity and identity.address:
+                    org_admin_address = identity.address
+                if not org_admin_address:
+                    rs = env.resource_sets.filter(membership=membership).first()
+                    firefly = rs.firefly.first() if rs else None
+                    if firefly:
+                        org_admin_address = self._fetch_firefly_org_admin_address(firefly)
+                if not org_admin_address:
+                    org_admin_address = default_admin_address
+                if not org_admin_address:
+                    raise Exception("no org admin address available")
+                LOG.info(
+                    "Identity org register resolve env=%s membership=%s admin=%s",
+                    env.id,
+                    membership.name,
+                    org_admin_address,
+                )
+                LOG.info(
+                    "Identity org register call env=%s membership=%s core=%s api=%s method=createOrganization",
+                    env.id,
+                    membership.name,
+                    system_firefly.core_url,
+                    api_name,
+                )
+                self._ensure_org_registered(
+                    system_firefly.core_url,
+                    membership.name,
+                    org_admin_address,
+                    api_name=api_name,
+                )
+                results.append({"membership": membership.name, "status": "ok"})
+                success += 1
+            except Exception as exc:
+                LOG.warning(
+                    "Identity org register failed env=%s membership=%s error=%s",
+                    env.id,
+                    membership.name,
+                    exc,
+                )
+                results.append(
+                    {"membership": membership.name, "status": "failed", "error": str(exc)}
+                )
+                failed += 1
+        LOG.info(
+            "========== Identity Org Registration END env=%s success=%s failed=%s ==========",
+            env.id,
+            success,
+            failed,
+        )
+        return {
+            "total": len(memberships),
+            "success": success,
+            "failed": failed,
+            "results": results,
+        }
+
+    def _sync_all_identities_for_env(self, env: EthEnvironment) -> dict:
+        identities = EthereumIdentity.objects.filter(eth_environment=env)
+        results = []
+        success = 0
+        failed = 0
+        LOG.info("Identity sync-all start env=%s identities=%s", env.id, identities.count())
+        firefly_core_url = self._get_firefly_core_url(env)
+        api_name = self._get_identity_api_name(env)
+        for identity in identities:
+            try:
+                self._ensure_org_registered(
+                    firefly_core_url,
+                    identity.membership.name,
+                    identity.address,
+                    api_name=api_name,
+                )
+                self._invoke_identity_api(
+                    firefly_core_url,
+                    "registerIdentity",
+                    {
+                        "identityAddress": identity.address,
+                        "fireflyIdentityId": identity.firefly_identity_id or "",
+                        "orgName": identity.membership.name,
+                        "customKey": identity.membership.name,
+                    },
+                    api_name=api_name,
+                )
+                results.append({"id": str(identity.id), "status": "ok"})
+                success += 1
+            except Exception as exc:
+                results.append(
+                    {"id": str(identity.id), "status": "failed", "error": str(exc)}
+                )
+                failed += 1
+        LOG.info(
+            "Identity sync-all done env=%s success=%s failed=%s",
+            env.id,
+            success,
+            failed,
+        )
+        return {
+            "total": len(results),
+            "success": success,
+            "failed": failed,
+            "results": results,
+        }
+
+    def _load_identity_abi(self):
+        contract_dir = os.path.join(ETHEREUM_CONTRACT_STORE, "identity-contract")
+        abi_path = os.path.join(contract_dir, "IdentityRegistry.abi")
+        if not os.path.exists(abi_path):
+            return None
+        with open(abi_path, "r") as abi_file:
+            return json.load(abi_file)
+
+    def _get_firefly_core_url(self, env):
+        resource_sets = env.resource_sets.all()
+        system_resource_sets = resource_sets.filter(
+            ethereum_sub_resource_set__org_type=1
+        )
+        if not system_resource_sets.exists():
+            raise Exception("System resource set not found")
+        system_resource_set = system_resource_sets.first()
+        firefly = Firefly.objects.filter(resource_set=system_resource_set).first()
+        if not firefly:
+            raise Exception("Firefly instance not found for system resource set")
+        return firefly.core_url
+
+    def _get_identity_api_name(self, env: EthEnvironment) -> str:
+        deployment = IdentityDeployment.objects.filter(eth_environment=env).first()
+        if deployment and deployment.api_name:
+            return deployment.api_name
+        return "IdentityRegistry"
+
+    def _deploy_identity_contract(self, env_id):
+        env = EthEnvironment.objects.get(id=env_id)
+        LOG.info("========== Identity Deploy START env=%s ==========", env.id)
+        deployment, _ = IdentityDeployment.objects.get_or_create(
+            eth_environment=env
+        )
+        deployment.status = "SETTINGUP"
+        deployment.error = None
+        deployment.save(update_fields=["status", "error", "updated_at"])
+        env.identity_contract_status = "SETTINGUP"
+        env.save(update_fields=["identity_contract_status"])
+
+        abi, bytecode = self._resolve_identity_artifacts()
+        firefly_core_url = self._get_firefly_core_url(env)
+        LOG.info("Identity contract using FireFly core=%s", firefly_core_url)
+
+        payload = {
+            "contract": bytecode,
+            "definition": abi,
+            "input": [],
+        }
+        deploy_url = (
+            f"http://{firefly_core_url}/api/v1/namespaces/default/"
+            "contracts/deploy?confirm=true"
+        )
+        response = requests.post(
+            deploy_url,
+            headers={"Content-Type": "application/json"},
+            data=json.dumps(payload),
+            timeout=120,
+        )
+        LOG.info("Identity contract deploy response status=%s", response.status_code)
+        if response.status_code not in [200, 202]:
+            raise Exception(
+                f"FireFly deployment failed with status {response.status_code}: "
+                f"{response.text[:500]}"
+            )
+
+        deployment_result = response.json()
+        deployment_status = deployment_result.get("status", "Unknown")
+        output_data = deployment_result.get("output", {})
+        contract_location = output_data.get("contractLocation", {})
+        contract_address = contract_location.get("address") or output_data.get("address")
+        tx_hash = output_data.get("transactionHash") or deployment_result.get("tx")
+        deployment_id = deployment_result.get("id")
+
+        if str(deployment_status).lower() in ["succeeded", "success", "started"]:
+            mapped_status = "STARTED"
+        elif str(deployment_status).lower() in ["pending", "running"]:
+            mapped_status = "SETTINGUP"
+        else:
+            mapped_status = "FAILED"
+
+        deployment.contract_address = contract_address
+        deployment.deployment_tx_hash = tx_hash
+        deployment.deployment_id = deployment_id
+        deployment.status = mapped_status
+        deployment.save(
+            update_fields=[
+                "contract_address",
+                "deployment_tx_hash",
+                "deployment_id",
+                "status",
+                "updated_at",
+            ]
+        )
+        env.identity_contract_status = mapped_status
+        env.save(update_fields=["identity_contract_status"])
+        LOG.info(
+            "Identity contract deploy status=%s address=%s tx=%s",
+            mapped_status,
+            contract_address,
+            tx_hash,
+        )
+
+        if mapped_status in ["STARTED", "SETTINGUP"]:
+            try:
+                # Generate FFI using FireFly (fallback to local builder) and register interfaces/APIs
+                api_name = None
+                if contract_address:
+                    api_name = f"IdentityRegistry-{contract_address[-6:]}"
+                else:
+                    api_name = f"IdentityRegistry-{int(time.time())}"
+                system_rs = env.resource_sets.filter(
+                    ethereum_sub_resource_set__org_type=1
+                ).first()
+                if not system_rs:
+                    raise Exception("System resource set not found for identity deploy")
+                firefly = Firefly.objects.filter(resource_set=system_rs).first()
+                if not firefly:
+                    raise Exception("System firefly not found for identity deploy")
+                LOG.info(
+                    "Identity deploy register start resource_set=%s core=%s",
+                    system_rs.id,
+                    firefly.core_url,
+                )
+                ffi_response = self._register_identity_ffi(firefly.core_url, abi)
+                interface_id = (
+                    ffi_response.get("id")
+                    or ffi_response.get("interface", {}).get("id")
+                )
+                LOG.info(
+                    "Identity deploy register interface core=%s interface=%s",
+                    firefly.core_url,
+                    interface_id,
+                )
+                if interface_id and contract_address:
+                    try:
+                        api_response = self._register_identity_api(
+                            firefly.core_url,
+                            interface_id,
+                            contract_address,
+                            api_name,
+                        )
+                    except Exception as exc:
+                        error_text = str(exc)
+                        if "FF10303" in error_text or "interface" in error_text.lower():
+                            LOG.warning(
+                                "Identity API register retry: interface missing core=%s interface=%s",
+                                firefly.core_url,
+                                interface_id,
+                            )
+                            ffi_response = self._register_identity_ffi(
+                                firefly.core_url, abi
+                            )
+                            interface_id = (
+                                ffi_response.get("id")
+                                or ffi_response.get("interface", {}).get("id")
+                            )
+                            api_response = self._register_identity_api(
+                                firefly.core_url,
+                                interface_id,
+                                contract_address,
+                                api_name,
+                            )
+                        else:
+                            raise
+                    LOG.info(
+                        "Identity deploy register api core=%s api_id=%s api_name=%s",
+                        firefly.core_url,
+                        api_response.get("id"),
+                        api_name,
+                    )
+                    deployment.interface_id = interface_id
+                    deployment.api_id = api_response.get("id")
+                    deployment.api_name = api_name
+                    deployment.api_address = (
+                        f"http://{firefly.core_url}/api/v1/namespaces/default/apis/{api_name}"
+                    )
+                    deployment.save(
+                        update_fields=[
+                            "interface_id",
+                            "api_id",
+                            "api_name",
+                            "api_address",
+                            "updated_at",
+                        ]
+                    )
+                LOG.info("Identity contract FFI/APIs registered for env=%s", env.id)
+                org_result = self._register_memberships_for_env(env)
+                LOG.info(
+                    "Identity contract org registration env=%s success=%s failed=%s",
+                    env.id,
+                    org_result.get("success"),
+                    org_result.get("failed"),
+                )
+            except Exception as exc:
+                deployment.error = f"FFI registration failed: {exc}"
+                deployment.save(update_fields=["error", "updated_at"])
+                LOG.warning("Identity contract FFI/APIs registration failed: %s", exc)
+
+        LOG.info(
+            "========== Identity Deploy END env=%s status=%s ==========",
+            env.id,
+            mapped_status,
+        )
+        return {
+            "status": mapped_status,
+            "contract_address": contract_address,
+            "transaction_hash": tx_hash,
+            "deployment_id": deployment_id,
+        }
+
+    def _redeploy_and_sync(self, env_id):
+        LOG.info("Identity contract redeploy+sync start env=%s", env_id)
+        deploy_result = self._deploy_identity_contract(env_id)
+        env = EthEnvironment.objects.get(id=env_id)
+        sync_result = self._sync_all_identities_for_env(env)
+        LOG.info(
+            "Identity contract redeploy+sync done env=%s deploy_status=%s sync_success=%s sync_failed=%s",
+            env_id,
+            deploy_result.get("status"),
+            sync_result.get("success"),
+            sync_result.get("failed"),
+        )
+        return {"deploy": deploy_result, "sync": sync_result}
+
     @action(methods=["post"], detail=True, url_path="init")
     @timeitwithname("InitEth")
     def init(self, request, pk=None, *args, **kwargs):
@@ -851,6 +1823,137 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
         env.status = "INITIALIZED"
         env.save()
         return Response(status=status.HTTP_201_CREATED)
+
+    @action(methods=["post"], detail=True, url_path="identity-contract/install")
+    def install_identity_contract(self, request, pk=None, *args, **kwargs):
+        try:
+            env = EthEnvironment.objects.get(pk=pk)
+        except EthEnvironment.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        deployment, _ = IdentityDeployment.objects.get_or_create(
+            eth_environment=env
+        )
+        if deployment.status == "STARTED" and deployment.contract_address:
+            LOG.info("Identity contract already deployed env=%s", env.id)
+            return Response(
+                {
+                    "status": deployment.status,
+                    "contract_address": deployment.contract_address,
+                    "transaction_hash": deployment.deployment_tx_hash,
+                    "deployment_id": deployment.deployment_id,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        env.identity_contract_status = "PENDING"
+        env.save(update_fields=["identity_contract_status"])
+        deployment.status = "PENDING"
+        deployment.error = None
+        deployment.save(update_fields=["status", "error", "updated_at"])
+
+        task = Task.objects.create(
+            type="IDENTITY_CONTRACT_INSTALL",
+            target_type="EthEnvironment",
+            target_id=str(env.id),
+            status="PENDING",
+        )
+        LOG.info("Identity contract install task=%s env=%s", task.id, env.id)
+
+        self._start_task(task, self._deploy_identity_contract, env.id)
+
+        return Response(
+            {"task_id": str(task.id), "status": task.status},
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+    @action(methods=["post"], detail=True, url_path="identity-contract/redeploy")
+    def redeploy_identity_contract(self, request, pk=None, *args, **kwargs):
+        try:
+            env = EthEnvironment.objects.get(pk=pk)
+        except EthEnvironment.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        env.identity_contract_status = "PENDING"
+        env.save(update_fields=["identity_contract_status"])
+        deployment, _ = IdentityDeployment.objects.get_or_create(
+            eth_environment=env
+        )
+        deployment.status = "PENDING"
+        deployment.error = None
+        deployment.save(update_fields=["status", "error", "updated_at"])
+
+        task = Task.objects.create(
+            type="IDENTITY_CONTRACT_REDEPLOY",
+            target_type="EthEnvironment",
+            target_id=str(env.id),
+            status="PENDING",
+        )
+        LOG.info("Identity contract redeploy task=%s env=%s", task.id, env.id)
+        self._start_task(task, self._redeploy_and_sync, env.id)
+        return Response(
+            {"task_id": str(task.id), "status": task.status},
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+    @action(methods=["get"], detail=True, url_path="identity-contract")
+    def identity_contract_detail(self, request, pk=None, *args, **kwargs):
+        try:
+            env = EthEnvironment.objects.get(pk=pk)
+        except EthEnvironment.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        deployment = IdentityDeployment.objects.filter(
+            eth_environment=env
+        ).first()
+        firefly_core_url = None
+        try:
+            firefly_core_url = self._get_firefly_core_url(env)
+        except Exception:
+            firefly_core_url = None
+        abi = None
+        if request.query_params.get("include_abi") in ["1", "true", "yes"]:
+            abi = self._load_identity_abi()
+
+        response = {
+            "environment_id": str(env.id),
+            "status": env.identity_contract_status,
+            "deployment": None,
+            "abi": abi,
+            "firefly_core_url": firefly_core_url,
+        }
+        if deployment:
+            api_name = deployment.api_name or "IdentityRegistry"
+            api_base = None
+            if deployment.api_address:
+                api_base = deployment.api_address
+            elif firefly_core_url:
+                api_base = (
+                    f"http://{firefly_core_url}/api/v1/namespaces/default/apis/{api_name}"
+                )
+            response["deployment"] = {
+                "id": str(deployment.id),
+                "contract_name": deployment.contract_name,
+                "contract_address": deployment.contract_address,
+                "deployment_tx_hash": deployment.deployment_tx_hash,
+                "deployment_id": deployment.deployment_id,
+                "interface_id": deployment.interface_id,
+                "api_id": deployment.api_id,
+                "api_name": api_name,
+                "api_address": deployment.api_address,
+                "status": deployment.status,
+                "error": deployment.error,
+                "updated_at": deployment.updated_at,
+                "firefly_contract_base": (
+                    f"http://{firefly_core_url}/api/v1/namespaces/default/contracts/"
+                    f"{deployment.contract_address}"
+                )
+                if firefly_core_url and deployment.contract_address
+                else None,
+                "firefly_api_base": api_base,
+            }
+        return Response(response, status=status.HTTP_200_OK)
+
 
     @action(methods=["post"], detail=True, url_path="join")
     @timeitwithname("JoinEthereum")

@@ -1092,8 +1092,91 @@ class EthEnvironment(models.Model):
         max_length=32,
         default="NO",
     )
+    identity_contract_status = models.CharField(
+        help_text="status of identity contract,can be NO|PENDING|SETTINGUP|STARTED|FAILED",
+        max_length=32,
+        default="NO",
+    )
     create_at = models.DateTimeField(
         help_text="create time of environment", auto_now_add=True
+    )
+
+class IdentityDeployment(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        help_text="ID of identity contract deployment",
+        default=make_uuid,
+        editable=False,
+        unique=True,
+    )
+    eth_environment = models.OneToOneField(
+        EthEnvironment,
+        help_text="related eth_environment id",
+        related_name="identity_deployment",
+        on_delete=models.CASCADE,
+    )
+    contract_name = models.CharField(
+        help_text="identity contract name",
+        max_length=128,
+        default="IdentityRegistry",
+    )
+    contract_address = models.CharField(
+        help_text="deployed contract address",
+        max_length=66,
+        null=True,
+        blank=True,
+    )
+    deployment_tx_hash = models.CharField(
+        help_text="deployment transaction hash",
+        max_length=128,
+        null=True,
+        blank=True,
+    )
+    deployment_id = models.CharField(
+        help_text="FireFly deployment request ID",
+        max_length=128,
+        null=True,
+        blank=True,
+    )
+    interface_id = models.CharField(
+        help_text="FireFly interface ID",
+        max_length=128,
+        null=True,
+        blank=True,
+    )
+    api_id = models.CharField(
+        help_text="FireFly API ID",
+        max_length=128,
+        null=True,
+        blank=True,
+    )
+    api_name = models.CharField(
+        help_text="FireFly API name",
+        max_length=128,
+        null=True,
+        blank=True,
+    )
+    api_address = models.CharField(
+        help_text="FireFly API address",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+    status = models.CharField(
+        help_text="status of identity deployment",
+        max_length=32,
+        default="NO",
+    )
+    error = models.TextField(
+        help_text="deployment error message",
+        null=True,
+        blank=True,
+    )
+    created_at = models.DateTimeField(
+        help_text="create time of deployment", auto_now_add=True
+    )
+    updated_at = models.DateTimeField(
+        help_text="update time of deployment", auto_now=True
     )
 
 

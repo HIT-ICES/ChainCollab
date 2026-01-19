@@ -1,12 +1,15 @@
-import { Button, Table, Input, Select, Modal } from "antd"
+import { Button, Table, Input, Select, Modal, Space } from "antd"
 import {
-    useEthereumIdentities, useCreateEthereumIdentity
+    useEthereumIdentities,
+    useCreateEthereumIdentity,
+    useSyncEthereumIdentity,
+    useSyncAllEthereumIdentities
 } from "./hooks"
 import { useAPIKeyList, useRegisterAPIKey, useResourceSet } from '@/views/Consortium/FabricUsers/hooks'
 
 import React from "react"
 
-const tableSchema = [
+const tableSchema = (onSync) => [
     {
         title: "ID",
         dataIndex: "Id",
@@ -34,6 +37,7 @@ const tableSchema = [
             <span>
                 <Button type="link">Edit</Button>
                 <Button type="link">Delete</Button>
+                <Button type="link" onClick={() => onSync(record.Id)}>Sync</Button>
             </span>
         ),
     },
@@ -41,6 +45,8 @@ const tableSchema = [
 
 export const EthereumUserTable = ({ membershipId, envId }) => {
     const [ethereumIdentities, { isLoading, isError, isSuccess }, refetch] = useEthereumIdentities(envId, membershipId);
+    const [syncIdentity, { isLoading: syncLoading }] = useSyncEthereumIdentity();
+    const [syncAll, { isLoading: syncAllLoading }] = useSyncAllEthereumIdentities();
     const dataToShow = isSuccess ? ethereumIdentities.map((item, index) => {
         return {
             key: index,
@@ -53,7 +59,35 @@ export const EthereumUserTable = ({ membershipId, envId }) => {
     ) : [];
     return (
         isError ? <div>error...</div> :
-            <Table columns={tableSchema} dataSource={dataToShow} loading={isLoading} />
+            <>
+                <Space style={{ marginBottom: 12 }}>
+                    <Button
+                        onClick={() => {
+                            syncAll(
+                                { ethEnvironmentId: envId, membershipId },
+                                { onSuccess: () => refetch() }
+                            );
+                        }}
+                        loading={syncAllLoading}
+                    >
+                        Sync All
+                    </Button>
+                </Space>
+                <Table
+                    columns={tableSchema((identityId) => {
+                        syncIdentity(
+                            { identityId },
+                            {
+                                onSuccess: () => {
+                                    refetch();
+                                },
+                            }
+                        );
+                    })}
+                    dataSource={dataToShow}
+                    loading={isLoading || syncLoading || syncAllLoading}
+                />
+            </>
     )
 }
 
