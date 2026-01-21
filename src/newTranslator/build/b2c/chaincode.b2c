@@ -1,58 +1,25 @@
 contract GeneratedContract {
 
     participants {
-        participant Participant_0w6qkdf {
-            msp "大宗买家MSP"
+        participant Participant_1p9owwo {
+            msp "Amazon_support_centerMSP"
             x509 ""
             isMulti false
             multiMin 0
             multiMax 0
             attributes {
-                role = "大宗买家"
+                role = "amazon support center"
 
             }
         }
-        participant Participant_19mgbdn {
-            msp "制造商MSP"
+        participant Participant_12df78t {
+            msp "CustomerMSP"
             x509 ""
             isMulti false
             multiMin 0
             multiMax 0
             attributes {
-                role = "制造商"
-
-            }
-        }
-        participant Participant_09cjol2 {
-            msp "中间商MSP"
-            x509 ""
-            isMulti false
-            multiMin 0
-            multiMax 0
-            attributes {
-                role = "中间商"
-
-            }
-        }
-        participant Participant_0sa2v7d {
-            msp "供应商MSP"
-            x509 ""
-            isMulti false
-            multiMin 0
-            multiMax 0
-            attributes {
-                role = "供应商"
-
-            }
-        }
-        participant Participant_19j1e3o {
-            msp "特殊承运方MSP"
-            x509 ""
-            isMulti false
-            multiMin 0
-            multiMax 0
-            attributes {
-                role = "特殊承运方"
+                role = "customer"
 
             }
         }
@@ -62,74 +29,57 @@ contract GeneratedContract {
 
 
     globals {
-        DeliveryConfirmation: bool
-        FinalPriority: string
-        NumberOfUnits: int
-        OrderDetails: string
-        ProductionStart: string
-        RequestId: int
-        SupplierReputation: int
-        SupplyOrderDetails: string
-        SupplyOrderId: string
-        TransportOrderId: string
-        Urgent: bool
+        EC2_resource_ID: string
+        Amount: int
+        Confirm: bool
+        Description: string
+        Duration: int
+        Instance_ID: string
+        Logs: string
+        Other_information: string
+        Question_name: string
+        Reason: string
+        Result: string
+        ServiceType: string
+        Time: string
+        Type: string
 
     }
 
 
 
     messages {
-        message Message_04wmlqe from Participant_19mgbdn to Participant_0w6qkdf {
+        message Message_01jq2zl from Participant_1p9owwo to Participant_12df78t {
             initial state INACTIVE
-            schema "productionStart"
+            schema "amount"
         }
-        message Message_0cba4t6 from Participant_09cjol2 to Participant_0sa2v7d {
+        message Message_068kmzv from Participant_12df78t to Participant_1p9owwo {
             initial state INACTIVE
-            schema "supplyOrderId"
+            schema "time + instance ID + logs"
         }
-        message Message_0d2xte5 from Participant_19j1e3o to Participant_19mgbdn {
+        message Message_076ulzs from Participant_12df78t to Participant_1p9owwo {
             initial state INACTIVE
-            schema "deliveryConfirmation"
+            schema "time + description + EC2 resource ID + logs + other information"
         }
-        message Message_0hpha6h from Participant_0sa2v7d to Participant_19j1e3o {
+        message Message_09krt7c from Participant_12df78t to Participant_1p9owwo {
             initial state INACTIVE
-            schema "requestId + supplierReputation"
+            schema "question name + description"
         }
-        message Message_0pm90nx from Participant_09cjol2 to Participant_19j1e3o {
+        message Message_0ywghlt from Participant_12df78t to Participant_1p9owwo {
             initial state INACTIVE
-            schema "transportOrderId"
+            schema "serviceType"
         }
-        message Message_0rwz1km from Participant_19j1e3o to Participant_0sa2v7d {
+        message Message_12n6jjk from Participant_12df78t to Participant_1p9owwo {
             initial state INACTIVE
-            schema "requestId + numberOfUnits + urgent"
+            schema "type + duration"
         }
-        message Message_196q1fj from Participant_19mgbdn to Participant_0w6qkdf {
+        message Message_1b1qlzd from Participant_1p9owwo to Participant_12df78t {
             initial state INACTIVE
-            schema "{\"properties\":{},\"required\":[],\"files\":{\"deliveryNote\":{\"type\":\"file\",\"description\":\"A document confirming the delivery of goods\"}},\"file required\":[\"deliveryNote\"]}"
+            schema "reason + result"
         }
-        message Message_1ajdm9l from Participant_19mgbdn to Participant_09cjol2 {
+        message Message_1bhhp1n from Participant_12df78t to Participant_1p9owwo {
             initial state INACTIVE
-            schema "supplyOrderDetails"
-        }
-        message Message_1dmeexg from Participant_19j1e3o to Participant_19mgbdn {
-            initial state INACTIVE
-            schema "{}"
-        }
-        message Message_1dzkcn0 from Participant_19j1e3o to Participant_19mgbdn {
-            initial state INACTIVE
-            schema "{}"
-        }
-        message Message_1io2g9u from Participant_0sa2v7d to Participant_19j1e3o {
-            initial state INACTIVE
-            schema "{\"properties\":{},\"required\":[],\"files\":{\"waybill\":{\"type\":\"file\",\"description\":\"Digital or physical waybill document，detailing the shipment contents and destination.\"}},\"file required\":[\"waybill\"]}"
-        }
-        message Message_1oxmq1k from Participant_19j1e3o to Participant_19mgbdn {
-            initial state INACTIVE
-            schema "{}"
-        }
-        message Message_1wswgqu from Participant_0w6qkdf to Participant_19mgbdn {
-            initial state INACTIVE
-            schema "orderDetails"
+            schema "serviceType"
         }
 
     }
@@ -137,20 +87,16 @@ contract GeneratedContract {
 
 
     gateways {
-        gateway Gateway_1cr0nma {
+        gateway Gateway_0auc3he {
             type exclusive
             initial state INACTIVE
         }
-        gateway Gateway_0ep8cuh {
+        gateway Gateway_0ivv4vg {
             type exclusive
             initial state INACTIVE
         }
-        gateway Gateway_0onpe6x {
-            type parallel
-            initial state INACTIVE
-        }
-        gateway Gateway_1fbifca {
-            type parallel
+        gateway Gateway_0jgq0a6 {
+            type event
             initial state INACTIVE
         }
 
@@ -159,10 +105,13 @@ contract GeneratedContract {
 
 
     events {
-        event Event_06sexe6 {
+        event Event_0ojehz6 {
             initial state READY
         }
-        event Event_13pbqdz {
+        event Event_0ci2gl8 {
+            initial state INACTIVE
+        }
+        event Event_0dyp0ut {
             initial state INACTIVE
         }
 
@@ -171,17 +120,16 @@ contract GeneratedContract {
 
 
     businessrules {
-        businessrule Activity_0rm8bkp {
-            dmn "Activity_0rm8bkp.dmn"
-            decision "Activity_0rm8bkp_DecisionID"
+        businessrule Activity_0tya4bp {
+            dmn "Activity_0tya4bp.dmn"
+            decision "Activity_0tya4bp_DecisionID"
             input mapping {
-                numberOfUnits -> NumberOfUnits
-                urgent -> Urgent
-                supplierReputation -> SupplierReputation
+                type -> Type
+                duration -> Duration
 
             }
             output mapping {
-                finalPriority -> FinalPriority
+                confirm -> Confirm
 
             }
 
@@ -193,57 +141,40 @@ contract GeneratedContract {
 
 
     flows {
-        start event Event_06sexe6 enables Message_1wswgqu;
+        start event Event_0ojehz6 enables Message_09krt7c;
 
-        when message Message_1wswgqu completed
-        then enable Message_1ajdm9l;
-        when message Message_1ajdm9l completed
-        then enable Gateway_0onpe6x;
-        when message Message_0cba4t6 completed
-        then enable Gateway_1fbifca;
-        when message Message_0pm90nx completed
-        then enable Gateway_1fbifca;
-        when message Message_0rwz1km completed
-        then enable Message_0hpha6h;
-        when message Message_0hpha6h completed
-        then enable Message_1io2g9u;
-        when message Message_1io2g9u completed
-        then enable Activity_0rm8bkp;
-        when message Message_0d2xte5 completed
-        then enable Gateway_1cr0nma;
-        when message Message_04wmlqe completed
-        then enable Message_196q1fj;
-        when message Message_196q1fj completed
-        then enable Event_13pbqdz;
-        when message Message_1oxmq1k completed
-        then enable Gateway_1cr0nma;
-        when message Message_1dzkcn0 completed
-        then enable Gateway_1cr0nma;
-        when message Message_1dmeexg completed
-        then enable Gateway_1cr0nma;
+        when message Message_09krt7c completed
+        then enable Gateway_0jgq0a6;
+        when message Message_0ywghlt completed
+        then disable Message_1bhhp1n, enable Message_068kmzv;
+        when message Message_1bhhp1n completed
+        then disable Message_0ywghlt, enable Message_076ulzs;
+        when message Message_068kmzv completed
+        then enable Gateway_0auc3he;
+        when message Message_076ulzs completed
+        then enable Gateway_0auc3he;
+        when message Message_12n6jjk completed
+        then enable Activity_0tya4bp;
+        when message Message_1b1qlzd completed
+        then enable Event_0dyp0ut;
+        when message Message_01jq2zl completed
+        then enable Event_0ci2gl8;
 
-        when gateway Gateway_1cr0nma completed
-        then enable Message_04wmlqe;
-        when gateway Gateway_0ep8cuh completed
+        when gateway Gateway_0auc3he completed
+        then enable Message_12n6jjk;
+        when gateway Gateway_0ivv4vg completed
         choose {
-            if FinalPriority == "\"Low\""
-            then enable Message_1oxmq1k;
-            if FinalPriority == "\"High\""
-            then enable Message_1dmeexg;
-            if FinalPriority == "\"Medium\""
-            then enable Message_1dzkcn0;
-            if FinalPriority == "\"VeryLow\""
-            then enable Message_0d2xte5;
+            if Confirm == false
+            then enable Message_1b1qlzd;
+            if Confirm == true
+            then enable Message_01jq2zl;
 
         }
-        when gateway Gateway_0onpe6x completed
-        then enable Message_0cba4t6, enable Message_0pm90nx;
+        when gateway Gateway_0jgq0a6 completed
+        then enable Message_0ywghlt, enable Message_1bhhp1n;
 
-        parallel gateway Gateway_1fbifca await Message_0cba4t6, Message_0pm90nx
-        then enable Message_0rwz1km;
-
-        when businessrule Activity_0rm8bkp done
-        then enable Gateway_0ep8cuh;
+        when businessrule Activity_0tya4bp done
+        then enable Gateway_0ivv4vg;
 
     }
 

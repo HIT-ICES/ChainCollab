@@ -8,6 +8,10 @@ interface IOracle {
     ) external view returns (string memory value);
 }
 
+interface IIdentityRegistry {
+    function getIdentityOrg(address identityAddress) external view returns (string memory);
+}
+
 contract WorkflowContract {
     // ------------------------------------------------------------------
     // Enums
@@ -52,6 +56,14 @@ contract WorkflowContract {
     {% endif %}
     }
 
+    enum BusinessRuleKey {
+    {% if business_rules %}
+        {{ business_rules | map(attribute='enum_name') | join(',\n        ') }}
+    {% else %}
+        PlaceholderBusinessRule
+    {% endif %}
+    }
+
     // ------------------------------------------------------------------
     // Structs
     // ------------------------------------------------------------------
@@ -69,6 +81,7 @@ contract WorkflowContract {
     struct Participant {
         bool exists;
         address account;
+        string org;
         bool isMulti;
         uint8 multiMaximum;
         uint8 multiMinimum;
@@ -95,6 +108,7 @@ contract WorkflowContract {
 
     struct BusinessRule {
         bool exists;
+        address contractAddress;
         bytes32 hashOfDmn;
         string decisionId;
         ElementState state;
@@ -103,12 +117,13 @@ contract WorkflowContract {
     struct Instance {
         bool exists;
         uint256 instanceId;
+        address identityContractAddress;
         StateMemory stateMemory;
         mapping(MessageKey => Message) messages;
         mapping(GatewayKey => Gateway) gateways;
         mapping(EventKey => ActionEvent) events;
         mapping(ParticipantKey => Participant) participants;
-        mapping(bytes32 => BusinessRule) businessRules;
+        mapping(BusinessRuleKey => BusinessRule) businessRules;
     }
 
     // ------------------------------------------------------------------
@@ -180,13 +195,23 @@ contract WorkflowContract {
     ) internal view {
         Participant storage participant = inst.participants[key];
         require(participant.exists, "participant not set");
-        require(msg.sender == participant.account, "participant not allowed");
+        if (!participant.isMulti) {
+            require(msg.sender == participant.account, "participant not allowed");
+            return;
+        }
+        require(inst.identityContractAddress != address(0), "identity contract not set");
+        string memory callerOrg = IIdentityRegistry(inst.identityContractAddress).getIdentityOrg(msg.sender);
+        require(
+            keccak256(bytes(callerOrg)) == keccak256(bytes(participant.org)),
+            "participant org not allowed"
+        );
     }
 
     function _createParticipant(
         Instance storage inst,
         ParticipantKey key,
         address account,
+        string memory org,
         bool isMulti,
         uint8 maxMulti,
         uint8 minMulti
@@ -194,6 +219,7 @@ contract WorkflowContract {
         inst.participants[key] = Participant({
             exists: true,
             account: account,
+            org: org,
             isMulti: isMulti,
             multiMaximum: maxMulti,
             multiMinimum: minMulti
@@ -236,12 +262,14 @@ contract WorkflowContract {
 
     function _createBusinessRule(
         Instance storage inst,
-        bytes32 key,
+        BusinessRuleKey key,
+        address contractAddress,
         string memory dmnContent,
         string memory decisionId
     ) internal {
         inst.businessRules[key] = BusinessRule({
             exists: true,
+            contractAddress: contractAddress,
             hashOfDmn: keccak256(bytes(dmnContent)),
             decisionId: decisionId,
             state: ElementState.DISABLED
@@ -253,14 +281,17 @@ contract WorkflowContract {
     // ------------------------------------------------------------------
 
     struct InitParameters {
+        address identityContractAddress;
     {% if participants %}
     {% for participant in participants %}
         address {{ participant.param_name }};
+        string {{ participant.org_param }};
     {% endfor %}
     {% else %}
         address placeholder;
     {% endif %}
     {% for rule in business_rules %}
+        address {{ rule.address_param }};
         string {{ rule.content_param }};
         string {{ rule.decision_param }};
     {% endfor %}
@@ -275,12 +306,15 @@ contract WorkflowContract {
 
         inst.exists = true;
         inst.instanceId = instanceId;
+        require(params.identityContractAddress != address(0), "identity contract not set");
+        inst.identityContractAddress = params.identityContractAddress;
 
         {% for participant in participants %}
         _createParticipant(
             inst,
             ParticipantKey.{{ participant.enum_name }},
             params.{{ participant.param_name }},
+            params.{{ participant.org_param }},
             {{ participant.is_multi }},
             {{ participant.multi_maximum }},
             {{ participant.multi_minimum }}
@@ -317,7 +351,8 @@ contract WorkflowContract {
         {% for rule in business_rules %}
         _createBusinessRule(
             inst,
-            keccak256(bytes("{{ rule.name }}")),
+            BusinessRuleKey.{{ rule.enum_name }},
+            params.{{ rule.address_param }},
             params.{{ rule.content_param }},
             params.{{ rule.decision_param }}
         );
@@ -334,8 +369,7 @@ contract WorkflowContract {
 {% for rule in business_rules %}
     function {{ rule.enum_name }}(uint256 instanceId) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
-        bytes32 ruleKey = keccak256(bytes("{{ rule.name }}"));
-        BusinessRule storage br = inst.businessRules[ruleKey];
+        BusinessRule storage br = inst.businessRules[BusinessRuleKey.{{ rule.enum_name }}];
         require(br.exists, "business rule not set");
         require(br.state == ElementState.ENABLED, "business rule not enabled");
 
@@ -344,8 +378,7 @@ contract WorkflowContract {
 
     function {{ rule.enum_name }}_Continue(uint256 instanceId) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
-        bytes32 ruleKey = keccak256(bytes("{{ rule.name }}"));
-        BusinessRule storage br = inst.businessRules[ruleKey];
+        BusinessRule storage br = inst.businessRules[BusinessRuleKey.{{ rule.enum_name }}];
         require(br.state == ElementState.WAITING_FOR_CONFIRMATION, "business rule not waiting");
 
         br.state = ElementState.COMPLETED;

@@ -127,6 +127,7 @@ class SolidityRenderer:
                     "name": participant.name,
                     "enum_name": enum_name,
                     "param_name": f"{enum_name}_account",
+                    "org_param": f"{enum_name}_org",
                     "is_multi": "true" if getattr(participant, "isMulti", False) else "false",
                     "multi_maximum": getattr(participant, "multiMax", 0) or 0,
                     "multi_minimum": getattr(participant, "multiMin", 0) or 0,
@@ -177,6 +178,7 @@ class SolidityRenderer:
                 {
                     "name": rule.name,
                     "enum_name": enum_name,
+                    "address_param": f"{enum_name}_contract",
                     "content_param": f"{enum_name}_content",
                     "decision_param": f"{enum_name}_decision",
                     "done_actions": rule_done_actions.get(rule.name, ""),
@@ -501,7 +503,8 @@ class SolidityFlowRenderer:
             enum_name = self.enum_maps["event"].get(name, sanitize_identifier(name))
             return f"inst.events[EventKey.{enum_name}].state == ElementState.COMPLETED"
         if cls_name == "BusinessRule":
-            return f"inst.businessRules[keccak256(bytes(\"{name}\"))].state == ElementState.COMPLETED"
+            enum_name = self.enum_maps["rule"].get(name, sanitize_identifier(name))
+            return f"inst.businessRules[BusinessRuleKey.{enum_name}].state == ElementState.COMPLETED"
         return None
 
     def _change_state_code(self, element: Any, state: str) -> str:
@@ -517,10 +520,7 @@ class SolidityFlowRenderer:
             return f"inst.events[EventKey.{enum_name}].state = ElementState.{state};\n"
         if cls_name == "BusinessRule":
             enum_name = self.enum_maps["rule"].get(element.name, sanitize_identifier(element.name))
-            return (
-                f"bytes32 brKey_{enum_name} = keccak256(bytes(\"{element.name}\"));\n"
-                f"inst.businessRules[brKey_{enum_name}].state = ElementState.{state};\n"
-            )
+            return f"inst.businessRules[BusinessRuleKey.{enum_name}].state = ElementState.{state};\n"
         return ""
 
     def _indent(self, text: str, level: int = 1) -> str:

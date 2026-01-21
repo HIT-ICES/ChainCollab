@@ -1,4 +1,6 @@
-if [ -n "${BASH_SOURCE[0]}" ]; then
+#!/usr/bin/env bash
+
+if [ -n "${BASH_SOURCE[0]:-}" ]; then
   NEWTRANS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 elif [ -n "${ZSH_VERSION:-}" ]; then
   NEWTRANS_ROOT="$(cd "$(dirname "${(%):-%N}")" && pwd)"
@@ -6,7 +8,7 @@ else
   NEWTRANS_ROOT="$(cd "$(dirname "$0")" && pwd)"
 fi
 export NEWTRANS_ROOT
-cd "$NEWTRANS_ROOT" || return
+cd "$NEWTRANS_ROOT" || exit 1
 
 export NT_B2C_DIR="$NEWTRANS_ROOT/build/b2c"
 export NT_BPMN_DIR="$NEWTRANS_ROOT/build/bpmn"
@@ -190,6 +192,54 @@ nt-clean-env() {
   fi
 }
 
-echo "NewTranslator environment loaded."
-echo "Commands: nt-bootstrap, nt-clean-env, nt-go-gen, nt-go-fmt, nt-go-build, nt-go-clean, nt-sol-gen, nt-sol-fmt, nt-sol-build, nt-sol-clean, nt-bpmn-to-b2c, nt-b2c-view"
-echo "Example: nt-bpmn-to-b2c ./build/bpmn/YourFlow.bpmn"
+show_help() {
+  cat <<'EOF'
+NewTranslator helper (no source required)
+
+Usage:
+  ./newtranslator_env.sh <command> [args...]
+
+Commands:
+  bootstrap         Create venv and install deps
+  clean-env         Remove .venv
+  go-gen            Generate Go chaincode from .b2c
+  go-fmt            Run gofmt in build/chaincode
+  go-build          Go build in build/chaincode
+  go-clean          Remove build/chaincode
+  sol-gen           Generate Solidity contracts from .b2c
+  sol-fmt           Run solhint on Solidity output
+  sol-build         Compile Solidity output with solc
+  sol-clean         Remove build/solidity
+  bpmn-to-b2c        Convert .bpmn to .b2c
+  b2c-view          Render .b2c to dot/png
+  help              Show this help
+
+Examples:
+  ./newtranslator_env.sh bpmn-to-b2c ./build/bpmn/YourFlow.bpmn
+  ./newtranslator_env.sh go-gen ./build/b2c/chaincode.b2c
+EOF
+}
+
+command="${1:-help}"
+shift || true
+
+case "$command" in
+  bootstrap) nt-bootstrap "$@" ;;
+  clean-env) nt-clean-env "$@" ;;
+  go-gen) nt-go-gen "$@" ;;
+  go-fmt) nt-go-fmt "$@" ;;
+  go-build) nt-go-build "$@" ;;
+  go-clean) nt-go-clean "$@" ;;
+  sol-gen) nt-sol-gen "$@" ;;
+  sol-fmt) nt-sol-fmt "$@" ;;
+  sol-build) nt-sol-build "$@" ;;
+  sol-clean) nt-sol-clean "$@" ;;
+  bpmn-to-b2c) nt-bpmn-to-b2c "$@" ;;
+  b2c-view) nt-b2c-view "$@" ;;
+  help|-h|--help) show_help ;;
+  *)
+    echo "Unknown command: $command"
+    show_help
+    exit 1
+    ;;
+esac
