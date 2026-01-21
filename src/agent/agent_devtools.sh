@@ -126,10 +126,6 @@ def status_backend():
 
 
 def clean_artifacts():
-    for name in ("venv", ".venv", "__pycache__"):
-        path = APP_DIR / name
-        if path.exists():
-            shutil.rmtree(path, ignore_errors=True)
     if APP_DIR.exists():
         for path in APP_DIR.rglob("__pycache__"):
             shutil.rmtree(path, ignore_errors=True)
@@ -141,7 +137,7 @@ def clean_artifacts():
                 path.unlink()
             except FileNotFoundError:
                 continue
-    print("[agent] cleaned venv/cache/pids/logs")
+    print("[agent] cleaned __pycache__/pids/logs")
 
 
 def archive_logs(tag: str):
@@ -178,7 +174,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("stop", help="Stop agent backend using agent.pid if present.")
     sub.add_parser("restart", help="Stop (if needed) then start backend in foreground.")
     sub.add_parser("status", help="Show backend status from agent.pid.")
-    sub.add_parser("clean", help="Remove venv/cache/pids/logs.")
+    sub.add_parser("clean", help="Remove __pycache__/pids/logs.")
     sub.add_parser("help", help="Show this help.")
 
     return parser

@@ -1,47 +1,88 @@
-import React from "react";
-import { Card, Row, Col, Typography, Divider } from "antd";
-import { useParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Card, Typography, Descriptions, Tag, Space, Button, Skeleton, Empty } from "antd";
+import { useNavigate, useParams } from "react-router-dom";
+import { getMembership } from "@/api/platformAPI";
+import { useAppSelector } from "@/redux/hooks";
 
-const { Text } = Typography;
-
-const gridDetailStyle: React.CSSProperties = {
-  width: "100%",
-  // height: "20px"
-}
+const { Title, Text } = Typography;
 
 const Detail: React.FC = () => {
   const params = useParams();
+  const navigate = useNavigate();
+  const { currentConsortiumId } = useAppSelector((state) => state.consortium);
+  const { currentOrgId } = useAppSelector((state) => state.org);
+  const [loading, setLoading] = useState(true);
+  const [membership, setMembership] = useState<any | null>(null);
 
-  const detailList = {
-    "Membership Name": "待获取1",
-    "Membership ID": params.id,
-    "Organization Name": "待获取2",
-    "Organization ID": "待获取3",
-    "Primary Contact Email": "待获取4",
-    "Join Date": "待获取5"
-  };
+  useEffect(() => {
+    const fetchMembership = async () => {
+      if (!params.id) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const data = await getMembership(params.id, currentConsortiumId);
+        setMembership(data);
+      } catch (error) {
+        setMembership(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMembership();
+  }, [params.id, currentConsortiumId]);
 
-  const detailItem = Object.entries(detailList).map(([key, value], index) => {
+  if (loading) {
     return (
-      // <React.Fragment key={key}>
-      <Card.Grid key={key} style={gridDetailStyle}>
-        <Row>
-          <Col span={12}>
-            <Text strong>{key}</Text>
-          </Col>
-          <Col span={12}>
-            <Text>{value}</Text>
-          </Col>
-        </Row>
-        {/* {index !== Object.keys(detailList).length - 1 && <Divider />}
-      </React.Fragment> */}
-      </Card.Grid>
-    )
-  })
+      <Card style={{ borderRadius: 14 }}>
+        <Skeleton active />
+      </Card>
+    );
+  }
+
+  if (!membership) {
+    return (
+      <Card style={{ borderRadius: 14 }}>
+        <Empty description="Membership not found" />
+      </Card>
+    );
+  }
+
+  const orgId = membership.loleido_organization || membership.orgId;
+  const isMine = orgId && currentOrgId && orgId === currentOrgId;
+  const createdAt = membership.created_at || membership.createdAt;
 
   return (
-    <Card title="Membership Detail" style={{ width: 500 }}>
-      {detailItem}
+    <Card
+      style={{ borderRadius: 16, boxShadow: "0 12px 32px rgba(15, 23, 42, 0.12)", border: "1px solid #e5e7eb" }}
+      title={
+        <Space direction="vertical" size={0}>
+          <Title level={4} style={{ margin: 0 }}>
+            {membership.name || "Membership"}
+          </Title>
+          <Text type="secondary">{membership.id}</Text>
+        </Space>
+      }
+      extra={
+        <Space>
+          <Tag color={isMine ? "blue" : "gold"}>{isMine ? "My Org" : "External"}</Tag>
+          <Button onClick={() => navigate(`../${membership.id}/fabricUsers`)}>Manage Users</Button>
+        </Space>
+      }
+    >
+      <Descriptions
+        bordered
+        size="middle"
+        column={1}
+        labelStyle={{ width: 220, background: "#f8fafc" }}
+        contentStyle={{ background: "#ffffff" }}
+      >
+        <Descriptions.Item label="Membership Name">{membership.name || "-"}</Descriptions.Item>
+        <Descriptions.Item label="Membership ID">{membership.id || "-"}</Descriptions.Item>
+        <Descriptions.Item label="Organization ID">{orgId || "-"}</Descriptions.Item>
+        <Descriptions.Item label="Consortium ID">{membership.consortium || membership.consortiumId || "-"}</Descriptions.Item>
+        <Descriptions.Item label="Join Date">{createdAt || "-"}</Descriptions.Item>
+      </Descriptions>
     </Card>
   )
 };

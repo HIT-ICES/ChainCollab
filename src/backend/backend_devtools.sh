@@ -146,10 +146,6 @@ def export_er_dot():
 
 
 def clean_artifacts():
-    for name in (".venv", "venv", "__pycache__"):
-        path = PROJECT_DIR / name
-        if path.exists():
-            shutil.rmtree(path, ignore_errors=True)
     for path in PROJECT_DIR.rglob("__pycache__"):
         shutil.rmtree(path, ignore_errors=True)
     for path in PROJECT_DIR.glob("*.pyc"):
@@ -157,7 +153,7 @@ def clean_artifacts():
             path.unlink()
         except FileNotFoundError:
             continue
-    print("[backend] cleaned venv/__pycache__/pyc")
+    print("[backend] cleaned __pycache__/pyc")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -181,7 +177,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command")
 
     sub.add_parser("setup", help="Create venv and install requirements.")
-    sub.add_parser("clean", help="Remove venv/__pycache__/pyc.")
+    sub.add_parser("clean", help="Remove __pycache__/pyc.")
     sub.add_parser("db", help="Start database via docker compose.")
     sub.add_parser("db-down", help="Stop database (docker compose down).")
     sub.add_parser("prepare-api", help="makemigrations + migrate.")

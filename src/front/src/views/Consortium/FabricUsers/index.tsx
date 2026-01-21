@@ -34,6 +34,12 @@ const FabricUsers = () => {
     const [ethereumIdentities, { isLoading: ethereumIdentitiesLoading, isError: ethereumIdentitiesError, isSuccess: ethereumIdentitiesSuccess }, ethereumIdentitiesRefetch] = useEthereumIdentities(selectedEnv, selectMembershipId);
     const [createEthereumIdentity, { isLoading: createEthereumIdentityLoading, isError: createEthereumIdentityError, isSuccess: createEthereumIdentitySuccess }] = useCreateEthereumIdentity();
 
+    React.useEffect(() => {
+        if (!selectedEnv && environments.length > 0) {
+            setSelectedEnv(environments[0].id);
+        }
+    }, [selectedEnv, environments]);
+
     return (
         <div style={{ gap: "20px" }} >
             {/* Env Selector */}

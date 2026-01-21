@@ -132,7 +132,7 @@ export const CustomCard = (props) => {
     <div
       style={{
         width: 220,
-        height: 240,
+        minHeight: 240,
         background: `linear-gradient(145deg, ${color} 0%, #ffffff 80%)`,
         border: "1px solid #e2e8f0",
         borderRadius: 16,
@@ -151,7 +151,7 @@ export const CustomCard = (props) => {
       <Title level={4} style={{ textAlign: "center", marginTop: 12, marginBottom: 8 }}>
         {title}
       </Title>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }} >
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }} >
         {status.map((item) => {
           const resolved = resolveStatus(item.value);
           return (
@@ -173,7 +173,12 @@ export const CustomCard = (props) => {
       </div>
       {action ? (
         <div
-          style={{ marginTop: 12, display: "flex", justifyContent: "center" }}
+          style={{
+            marginTop: "auto",
+            display: "flex",
+            justifyContent: "center",
+            flexWrap: "wrap",
+          }}
           onClick={(event) => event.stopPropagation()}
         >
           {action}
