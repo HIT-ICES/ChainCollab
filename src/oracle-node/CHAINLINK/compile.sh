@@ -32,7 +32,7 @@ solc --version | head -1
 echo ""
 
 # 编译合约
-echo -e "${YELLOW}正在编译 MyChainlinkRequester.sol...${NC}"
+echo -e "${YELLOW}正在编译 MyChainlinkRequester / MyChainlinkRequesterDMN 合约...${NC}"
 
 # 确保 deployment 文件夹存在
 DEPLOYMENT_DIR="deployment"
@@ -41,16 +41,35 @@ if [ ! -d "$DEPLOYMENT_DIR" ]; then
 fi
 
 solc --optimize \
+  --via-ir \
   --base-path . \
   --include-path node_modules \
+  --include-path contracts \
+  --allow-paths .,node_modules,contracts \
+  @openzeppelin/=node_modules/@openzeppelin/ \
+  @chainlink/=node_modules/@chainlink/ \
   --combined-json abi,bin \
   contracts/MyChainlinkRequester.sol \
+  contracts/MyChainlinkRequesterDMN.sol \
   contracts/LinkToken-v0.6-fix/LinkToken.sol \
   contracts/LinkToken-v0.6-fix/ERC677.sol \
   contracts/LinkToken-v0.6-fix/ITypeAndVersion.sol \
   contracts/LinkToken-v0.6-fix/token/LinkERC20.sol \
   contracts/LinkToken-v0.6-fix/token/IERC677.sol \
-  contracts/LinkToken-v0.6-fix/token/IERC677Receiver.sol > $DEPLOYMENT_DIR/compiled.json
+  contracts/LinkToken-v0.6-fix/token/IERC677Receiver.sol \
+  contracts/ocr/OffchainAggregator.sol \
+  contracts/ocr/AccessControlledOffchainAggregator.sol \
+  contracts/ocr/OffchainAggregatorBilling.sol \
+  contracts/ocr/Owned.sol \
+  contracts/ocr/SimpleReadAccessController.sol \
+  contracts/ocr/SimpleWriteAccessController.sol \
+  contracts/ocr/AccessControllerInterface.sol \
+  contracts/ocr/AggregatorInterface.sol \
+  contracts/ocr/AggregatorV2V3Interface.sol \
+  contracts/ocr/AggregatorV3Interface.sol \
+  contracts/ocr/AggregatorValidatorInterface.sol \
+  contracts/ocr/LinkTokenInterface.sol \
+  contracts/ocr/TypeAndVersionInterface.sol > $DEPLOYMENT_DIR/compiled.json
 
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✅ 合约编译成功${NC}"

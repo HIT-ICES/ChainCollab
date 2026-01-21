@@ -4,22 +4,6 @@ const http = require('http');
 // 读取编译后的合约
 const deploymentDir = 'deployment';
 const compiled = JSON.parse(fs.readFileSync(`${deploymentDir}/compiled.json`, 'utf8'));
-const contractKey = 'contracts/MyChainlinkRequester.sol:MyChainlinkRequester';
-const contractData = compiled.contracts[contractKey];
-
-if (!contractData) {
-    console.error('❌ 找不到合约:', contractKey);
-    console.log('\n可用的合约:');
-    Object.keys(compiled.contracts).forEach(key => {
-        if (key.includes('simple.sol')) {
-            console.log(' -', key);
-        }
-    });
-    process.exit(1);
-}
-
-const abi = contractData.abi;
-const bytecode = '0x' + contractData.bin;
 
 // RPC 调用函数
 function rpcCall(method, params) {
@@ -63,8 +47,6 @@ function rpcCall(method, params) {
 
 async function deploy() {
     try {
-        console.log('开始部署 MyChainlinkRequester 合约...\n');
-
         // 获取账户
         const accounts = await rpcCall('eth_accounts', []);
         if (accounts.length === 0) {
@@ -104,33 +86,103 @@ async function deploy() {
             process.exit(1);
         }
 
+        const selectContractKey = (deployment) => {
+            if (deployment && deployment.dmnJobId && !deployment.jobId) {
+                return 'contracts/MyChainlinkRequesterDMN.sol:MyChainlinkRequesterDMN';
+            }
+            return 'contracts/MyChainlinkRequester.sol:MyChainlinkRequester';
+        };
+
+        const contractKey = selectContractKey(chainlinkDeployment);
+        const contractData = compiled.contracts[contractKey];
+
+        if (!contractData) {
+            console.error('❌ 找不到合约:', contractKey);
+            console.log('\n可用的合约:');
+            Object.keys(compiled.contracts).forEach(key => {
+                console.log(' -', key);
+            });
+            process.exit(1);
+        }
+
+        const abi = contractData.abi;
+        const bytecode = '0x' + contractData.bin;
+
+        console.log(`开始部署 ${contractKey.split(':')[1]} 合约...\n`);
+
+        const isDmnContract = contractKey.includes('MyChainlinkRequesterDMN');
+
         // 从 chainlink-deployment.json 中读取 Job ID
         let jobId;
+        let dmnJobId;
+
+        const normalizeJobId = (id) => {
+            let raw = id.toLowerCase().replace(/-/g, '');
+            if (raw.startsWith('0x')) {
+                raw = raw.slice(2);
+            }
+            if (!/^[0-9a-f]+$/.test(raw)) {
+                throw new Error(`Job ID 不是有效的十六进制字符串: ${id}`);
+            }
+            if (raw.length > 64) {
+                throw new Error(`Job ID 长度不正确: ${id}`);
+            }
+            return '0x' + raw.padEnd(64, '0');
+        };
+
+        // 检查是否有至少一个 Job ID 存在
         if (chainlinkDeployment.jobId) {
             jobId = chainlinkDeployment.jobId;
             // 将 Job ID 转换为 bytes32 格式
             if (!jobId.startsWith('0x')) {
-                jobId = '0x' + Buffer.from(jobId.replace(/-/g, ''), 'utf8').toString('hex').padEnd(64, '0');
+                jobId = normalizeJobId(jobId);
             }
             console.log('✅ 使用已创建的 Job ID:', jobId);
+            // 如果没有 DMN Job ID，设置为空 bytes32
+            dmnJobId = '0x' + '0'.repeat(64);
+        } else if (chainlinkDeployment.dmnJobId) {
+            dmnJobId = chainlinkDeployment.dmnJobId;
+            // 将 Job ID 转换为 bytes32 格式
+            if (!dmnJobId.startsWith('0x')) {
+                dmnJobId = normalizeJobId(dmnJobId);
+            }
+            console.log('✅ 使用已创建的 DMN Job ID:', dmnJobId);
+            // 如果没有普通 Job ID，设置为空 bytes32
+            jobId = '0x' + '0'.repeat(64);
         } else {
-            console.error('❌ 请先创建 Chainlink Job: node scripts/create-job.js');
+            console.error('❌ 请先创建至少一个 Chainlink Job:');
+            console.error('   - 普通 Job: node scripts/create-job.js');
+            console.error('   - 或 DMN Job: node scripts/create-dmn-job.js');
             process.exit(1);
         }
+
         const fee = '0x' + (BigInt('100000000000000000')).toString(16); // 0.1 LINK
 
         console.log('\n部署参数:');
         console.log('- LINK Token:', linkToken);
         console.log('- Oracle:', oracle);
-        console.log('- Job ID:', jobId);
+        if (isDmnContract) {
+            console.log('- DMN Job ID:', dmnJobId);
+        } else {
+            console.log('- Job ID:', jobId);
+            console.log('- DMN Job ID:', dmnJobId);
+        }
         console.log('- Fee:', '0.1 LINK');
 
         // 编码构造函数参数
         const Web3EthAbi = require('web3-eth-abi');
-        const encodedParams = Web3EthAbi.encodeParameters(
-            ['address', 'address', 'bytes32', 'uint256'],
-            [linkToken, oracle, jobId, fee]
-        ).slice(2); // 移除 '0x'
+        let encodedParams;
+        if (isDmnContract) {
+            encodedParams = Web3EthAbi.encodeParameters(
+                ['address', 'address', 'bytes32', 'uint256'],
+                [linkToken, oracle, dmnJobId, fee]
+            ).slice(2); // 移除 '0x'
+        } else {
+            encodedParams = Web3EthAbi.encodeParameters(
+                ['address', 'address', 'bytes32', 'bytes32', 'uint256'],
+                [linkToken, oracle, jobId, dmnJobId, fee]
+            ).slice(2); // 移除 '0x'
+        }
 
         const deployData = bytecode + encodedParams;
 
@@ -177,6 +229,7 @@ async function deploy() {
             linkToken: linkToken,
             oracle: oracle,
             jobId: jobId,
+            dmnJobId: dmnJobId,
             fee: '0.1 LINK'
         };
 

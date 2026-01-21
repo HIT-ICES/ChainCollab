@@ -1,0 +1,28 @@
+type = "directrequest"
+schemaVersion = 1
+name = "DMN Decision Engine (Java) Request"
+contractAddress = "0x5430d622657AB294D93c836D4C2fb5dB5F92BDC2"
+evmChainID = "3456"
+maxTaskDuration = "0s"
+observationSource = """
+    decode_log   [type="ethabidecodelog"
+                  abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                  data="$(jobRun.logData)"
+                  topics="$(jobRun.logTopics)"]
+
+    decode_cbor  [type="cborparse" data="$(decode_log.data)"]
+    parse_input  [type="jsonparse" data="$(decode_cbor.inputData)"]
+    fetch        [type="http" method=POST url="$(decode_cbor.url)"
+                  requestData="{\\\"dmnContent\\\": $(decode_cbor.dmnContent), \\\"decisionId\\\": $(decode_cbor.decisionId), \\\"inputData\\\": $(parse_input)}"
+                  contentType="application/json"
+                  allowUnrestrictedNetworkAccess="true"]
+    parse        [type="jsonparse" path="result,0,result" data="$(fetch)"]
+    encode_data  [type="ethabiencode" abi="(bytes32 requestId, bytes result)" data="{ \\\"requestId\\\": $(decode_log.requestId), \\\"result\\\": $(parse) }"]
+    encode_tx    [type="ethabiencode"
+                  abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
+                  data="{\\\"requestId\\\": $(decode_log.requestId), \\\"payment\\\":   $(decode_log.payment), \\\"callbackAddress\\\": $(decode_log.callbackAddr), \\\"callbackFunctionId\\\": $(decode_log.callbackFunctionId), \\\"expiration\\\": $(decode_log.cancelExpiration), \\\"data\\\": $(encode_data)}"
+                  ]
+    submit_tx    [type="ethtx" to="0x5430d622657AB294D93c836D4C2fb5dB5F92BDC2" data="$(encode_tx)"]
+
+    decode_log -> decode_cbor -> parse_input -> fetch -> parse -> encode_data -> encode_tx -> submit_tx
+"""

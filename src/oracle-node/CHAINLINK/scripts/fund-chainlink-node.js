@@ -1,4 +1,7 @@
+const fs = require('fs');
+const path = require('path');
 const http = require('http');
+const axios = require('axios');
 
 function rpcCall(method, params) {
     return new Promise((resolve, reject) => {
@@ -36,13 +39,96 @@ function rpcCall(method, params) {
     });
 }
 
+function readChainlinkApiCredentials() {
+    const apiPath = path.resolve(__dirname, '../chainlink/.api');
+    if (!fs.existsSync(apiPath)) {
+        return null;
+    }
+    const lines = fs.readFileSync(apiPath, 'utf8').split('\n').map(line => line.trim()).filter(Boolean);
+    if (lines.length < 2) {
+        return null;
+    }
+    return { email: lines[0], password: lines[1] };
+}
+
+async function fetchChainlinkNodeAddressFromApi() {
+    const chainlinkUrl = process.env.CHAINLINK_URL || 'http://localhost:6688';
+    const creds = readChainlinkApiCredentials();
+    if (!creds) {
+        return null;
+    }
+
+    const session = await axios.post(`${chainlinkUrl}/sessions`, {
+        email: creds.email,
+        password: creds.password
+    });
+
+    const cookies = session.headers['set-cookie'];
+    if (!cookies || cookies.length === 0) {
+        return null;
+    }
+
+    const keys = await axios.get(`${chainlinkUrl}/v2/keys/eth`, {
+        headers: { Cookie: cookies.join('; ') }
+    });
+
+    return keys?.data?.data?.[0]?.attributes?.address || null;
+}
+
+function persistChainlinkNodeAddress(address) {
+    try {
+        const deploymentPath = path.resolve(__dirname, '../deployment/chainlink-deployment.json');
+        if (!fs.existsSync(deploymentPath)) {
+            return;
+        }
+        const deployment = JSON.parse(fs.readFileSync(deploymentPath, 'utf8'));
+        deployment.chainlinkNodeAddress = address;
+        fs.writeFileSync(deploymentPath, JSON.stringify(deployment, null, 2));
+    } catch (error) {
+        console.warn('⚠️  写入 chainlinkNodeAddress 失败:', error.message);
+    }
+}
+
 async function getChainlinkNodeAddress() {
     try {
+        const deploymentPath = path.resolve(__dirname, '../deployment/chainlink-deployment.json');
+        if (fs.existsSync(deploymentPath)) {
+            const deployment = JSON.parse(fs.readFileSync(deploymentPath, 'utf8'));
+            if (deployment.chainlinkNodeAddress) {
+                console.log('✅ 使用部署文件中的 chainlinkNodeAddress:', deployment.chainlinkNodeAddress);
+                return deployment.chainlinkNodeAddress;
+            }
+        }
+
+        const fromEnv = process.env.CHAINLINK_NODE_ADDRESS;
+        if (fromEnv) {
+            console.log('✅ 使用环境变量 CHAINLINK_NODE_ADDRESS:', fromEnv);
+            return fromEnv;
+        }
+
+        // Allow an explicit address override from the caller.
+        if (arguments.length && arguments[0]) {
+            console.log('✅ 使用命令行参数提供的地址:', arguments[0]);
+            persistChainlinkNodeAddress(arguments[0]);
+            return arguments[0];
+        }
+
+        try {
+            const fromApi = await fetchChainlinkNodeAddressFromApi();
+            if (fromApi) {
+                console.log('✅ 从 Chainlink API 获取节点地址:', fromApi);
+                persistChainlinkNodeAddress(fromApi);
+                return fromApi;
+            }
+        } catch (error) {
+            // Ignore API failures; fallback to docker logs.
+        }
+
         // 使用 Docker 命令获取 Chainlink 节点的 ETH 账户地址
         const { exec } = require('child_process');
 
         return new Promise((resolve, reject) => {
-            exec('docker logs chainlink-node 2>&1 | grep -i "Created EVM key with ID" | head -1', (error, stdout, stderr) => {
+            exec('docker logs chainlink-node 2>&1 | grep -i "Unlocked .*ETH keys" | head -1', (error, stdout, stderr) => {
                 if (error) {
                     console.error('❌ 获取 Chainlink 节点账户失败:', error.message);
                     reject(error);
@@ -56,14 +142,17 @@ async function getChainlinkNodeAddress() {
                 }
 
                 // 解析地址
-                // 匹配: Created EVM key with ID 0xEce2A0846275575BB5f7ac98fEFd2246b09CaBA7
+                // 匹配: Unlocked 1 ETH keys                                keystore/models.go:298           keys=["0xbB64621210982bb8504E20F1D81b2028647A5957"]
                 const match = stdout.match(/0x[a-fA-F0-9]{40}/);
                 if (match) {
                     const address = match[0];
                     console.log('✅ 找到 Chainlink 节点 ETH 账户:', address);
+                    persistChainlinkNodeAddress(address);
                     resolve(address);
                 } else {
                     console.error('❌ 无法解析 Chainlink 节点地址');
+                    console.error('请在 deployment/chainlink-deployment.json 中设置 chainlinkNodeAddress');
+                    console.error('请手动传入地址: node scripts/fund-chainlink-node.js <address>');
                     reject(new Error('无法解析 Chainlink 节点地址'));
                 }
             });
@@ -132,20 +221,62 @@ async function transferEth(toAddress, amountEth) {
     }
 }
 
-async function fundChainlinkNode() {
+function getArgValue(args, flag) {
+    const idx = args.indexOf(flag);
+    if (idx === -1 || idx + 1 >= args.length) return null;
+    return args[idx + 1];
+}
+
+function parseAmount(value, fallback) {
+    if (!value) return fallback;
+    const num = Number(value);
+    return Number.isFinite(num) && num >= 0 ? num : fallback;
+}
+
+function getNodeInfoAddresses() {
+    const deploymentPath = path.resolve(__dirname, '../deployment/node-info.json');
+    if (!fs.existsSync(deploymentPath)) {
+        throw new Error('deployment/node-info.json 不存在，无法批量获取节点地址');
+    }
+    const info = JSON.parse(fs.readFileSync(deploymentPath, 'utf8'));
+    const addresses = info
+        .map((node) => node.ethAddress)
+        .filter(Boolean);
+    return Array.from(new Set(addresses));
+}
+
+async function fundAddresses(addresses, minBalance, transferAmount) {
+    for (const address of addresses) {
+        console.log('');
+        console.log('📦 检查节点账户:', address);
+        const currentBalance = await getBalance(address);
+        if (currentBalance < minBalance) {
+            console.log(`⚠️  节点余额低于 ${minBalance} ETH，需要充值`);
+            const success = await transferEth(address, transferAmount);
+            if (success) {
+                const newBalance = await getBalance(address);
+                console.log('✅ 充值成功！新的余额:', newBalance.toFixed(6), 'ETH');
+            }
+        } else {
+            console.log('✅ 节点余额充足');
+        }
+    }
+}
+
+async function fundChainlinkNode(addressOverride, minBalance, transferAmount) {
     try {
         console.log('📦 检查 Chainlink 节点账户状态...');
         console.log('');
 
         // 获取 Chainlink 节点地址
-        const nodeAddress = await getChainlinkNodeAddress();
+        const nodeAddress = await getChainlinkNodeAddress(addressOverride);
 
         // 检查当前余额
         const currentBalance = await getBalance(nodeAddress);
 
         // 如果余额小于 10 ETH，转账 100 ETH
-        const MIN_BALANCE = 10;
-        const TRANSFER_AMOUNT = 100;
+        const MIN_BALANCE = minBalance ?? 10;
+        const TRANSFER_AMOUNT = transferAmount ?? 100;
 
         if (currentBalance < MIN_BALANCE) {
             console.log('');
@@ -175,9 +306,24 @@ async function fundChainlinkNode() {
 
 // 如果直接运行此脚本
 if (require.main === module) {
-    fundChainlinkNode().then(success => {
-        process.exit(success ? 0 : 1);
-    });
+    const args = process.argv.slice(2);
+    const useAll = args.includes('--all');
+    const minBalance = parseAmount(getArgValue(args, '--min'), 10);
+    const transferAmount = parseAmount(getArgValue(args, '--amount'), 100);
+    const addressOverride = getArgValue(args, '--address') || args.find((arg) => !arg.startsWith('-'));
+
+    if (useAll) {
+        fundAddresses(getNodeInfoAddresses(), minBalance, transferAmount)
+            .then(() => process.exit(0))
+            .catch((error) => {
+                console.error('❌ 批量充值失败:', error.message);
+                process.exit(1);
+            });
+    } else {
+        fundChainlinkNode(addressOverride, minBalance, transferAmount).then(success => {
+            process.exit(success ? 0 : 1);
+        });
+    }
 }
 
 module.exports = fundChainlinkNode;

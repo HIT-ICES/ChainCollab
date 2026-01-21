@@ -52,7 +52,7 @@ abstract contract ERC677 is IERC677, ERC20 {
     returns (bool hasCode)
   {
     uint256 length;
-    assembly { length := extcodesize(addr) }
+    assembly ("memory-safe") { length := extcodesize(addr) }
     return length > 0;
   }
 }
