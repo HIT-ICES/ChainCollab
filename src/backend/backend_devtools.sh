@@ -24,6 +24,13 @@ def exec_cmd(cmd, *, cwd=PROJECT_DIR, env=None):
     os.execvpe(cmd[0], cmd, env or os.environ)
 
 
+def env_with_venv(venv: Path) -> dict:
+    env = os.environ.copy()
+    venv_bin = str(venv / "bin")
+    env["PATH"] = f"{venv_bin}:{env.get('PATH', '')}"
+    return env
+
+
 def docker_compose_base_cmd() -> list[str] | None:
     if cmd_exists("docker-compose"):
         return ["docker-compose"]
@@ -69,7 +76,7 @@ def run_manage(args: list[str]):
             sys.exit(1)
     python_bin = venv / "bin" / "python"
     print(f"[backend] run manage.py {' '.join(args)}", flush=True)
-    run_cmd([str(python_bin), "manage.py", *args])
+    run_cmd([str(python_bin), "manage.py", *args], env=env_with_venv(venv))
 
 
 def start_db():
@@ -109,7 +116,10 @@ def start_api():
             print("[backend] virtualenv not found after setup.")
             sys.exit(1)
     python_bin = venv / "bin" / "python"
-    exec_cmd([str(python_bin), "manage.py", "runserver", "0.0.0.0:8000"])
+    exec_cmd(
+        [str(python_bin), "manage.py", "runserver", "0.0.0.0:8000"],
+        env=env_with_venv(venv),
+    )
 
 
 def start_backend():
@@ -136,10 +146,6 @@ def export_er_dot():
 
 
 def clean_artifacts():
-    for name in (".venv", "venv", "__pycache__"):
-        path = PROJECT_DIR / name
-        if path.exists():
-            shutil.rmtree(path, ignore_errors=True)
     for path in PROJECT_DIR.rglob("__pycache__"):
         shutil.rmtree(path, ignore_errors=True)
     for path in PROJECT_DIR.glob("*.pyc"):
@@ -147,7 +153,7 @@ def clean_artifacts():
             path.unlink()
         except FileNotFoundError:
             continue
-    print("[backend] cleaned venv/__pycache__/pyc")
+    print("[backend] cleaned __pycache__/pyc")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -171,7 +177,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command")
 
     sub.add_parser("setup", help="Create venv and install requirements.")
-    sub.add_parser("clean", help="Remove venv/__pycache__/pyc.")
+    sub.add_parser("clean", help="Remove __pycache__/pyc.")
     sub.add_parser("db", help="Start database via docker compose.")
     sub.add_parser("db-down", help="Stop database (docker compose down).")
     sub.add_parser("prepare-api", help="makemigrations + migrate.")

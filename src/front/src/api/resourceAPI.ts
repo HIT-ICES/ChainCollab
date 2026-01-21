@@ -270,6 +270,38 @@ export const StartFireflyForEthEnv = async (envId: string) => {
     }
 }
 
+export const InstallIdentityContract = async (envId: string) => {
+    try {
+        const response = await api.post(`/eth-environments/${envId}/identity-contract/install`)
+        return response.data;
+    } catch (error) {
+        return error;
+    }
+}
+
+export const getIdentityContractDetail = async (envId: string, includeAbi: boolean = false) => {
+    try {
+        const response = await api.get(
+            `/eth-environments/${envId}/identity-contract`,
+            {
+                params: { include_abi: includeAbi ? 1 : 0 }
+            }
+        )
+        return response.data;
+    } catch (error) {
+        return error;
+    }
+}
+
+export const redeployIdentityContract = async (envId: string) => {
+    try {
+        const response = await api.post(`/eth-environments/${envId}/identity-contract/redeploy`)
+        return response.data;
+    } catch (error) {
+        return error;
+    }
+}
+
 
 // Node Related
 

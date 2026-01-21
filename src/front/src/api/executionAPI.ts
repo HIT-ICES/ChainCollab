@@ -208,6 +208,19 @@ export const getFireflyVerify = async (coreUrl: string, fireflyIdentityId: strin
     }
 }
 
+export const callFireflyContract = async (
+    contractBaseUrl: string,
+    method: string,
+    params: Record<string, any> = {},
+    mode: "invoke" | "query" = "invoke"
+) => {
+    const payload = {
+        input: params,
+    };
+    const res = await fireflyAPI.post(`${contractBaseUrl}/${mode}/${method}`, payload);
+    return res.data;
+}
+
 export const invokeCreateInstance = async (chaincodeUrl: string, data: any) => {
     console.log("chaincodeUrl", chaincodeUrl);
     console.log(data)

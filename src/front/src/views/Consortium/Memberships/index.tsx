@@ -14,25 +14,27 @@ import {
 } from "@/api/platformAPI";
 import { useAppSelector } from "@/redux/hooks";
 
-const { Link } = Typography;
+const { Link, Title, Text } = Typography;
 
 const boxStyle: React.CSSProperties = {
   width: "100%",
 };
 
 const cardStyle: React.CSSProperties = {
-  width: "300px",
+  width: "320px",
   marginBottom: "16px",
-  borderRadius: "16px",
-  boxShadow: "0 12px 32px rgba(15,23,42,0.12)",
-  border: "1px solid #e2e8f0",
+  borderRadius: "14px",
+  boxShadow: "0 10px 28px rgba(15, 23, 42, 0.12)",
+  border: "1px solid #e5e7eb",
   overflow: "hidden",
+  background: "#ffffff",
 };
 
 const gridStyle: React.CSSProperties = {
   width: "100%",
   textAlign: "start",
-  background: "linear-gradient(135deg, #f8fafc, #ffffff)",
+  background: "linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%)",
+  borderBottom: "1px solid #e5e7eb",
 };
 
 const gridDetailStyle: React.CSSProperties = {
@@ -49,6 +51,7 @@ const gridDeleteStyle: React.CSSProperties = {
   alignItems: "center",
   textAlign: "start",
   padding: "10px 16px",
+  background: "#fafafa",
 };
 
 interface membershipItemType {
@@ -121,7 +124,7 @@ const Memberships: React.FC = () => {
           title={
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <TeamOutlined style={{ color: "#2563eb" }} />
-              <span>{item.name}</span>
+              <span style={{ fontWeight: 600 }}>{item.name}</span>
             </div>
           }
           extra={
@@ -141,20 +144,20 @@ const Memberships: React.FC = () => {
                   }}
                 />
               }
-              title="Organization"
-              description={item.orgId}
+              title="Organization ID"
+              description={<Text type="secondary">{item.orgId}</Text>}
             />
           </Card.Grid>
           <Divider style={{ margin: 0 }} />
           <div style={gridDetailStyle}>
-            <Link strong onClick={() => navigate(`./${item.id}`)} disabled={true}>
+            <Link strong onClick={() => navigate(`./${item.id}`)} disabled={false}>
               VIEW DETAILS
             </Link>
           </div>
           <Divider style={{ margin: 0 }} />
           <div style={gridDetailStyle}>
             <Link strong onClick={() => navigate(`./${item.id}/fabricUsers`)} disabled={false}>
-              MANAGE FABRIC USERS
+              MANAGE USERS
             </Link>
           </div>
           <Divider style={{ margin: 0 }} />
@@ -172,12 +175,13 @@ const Memberships: React.FC = () => {
         bordered={false}
         style={{
           width: "100%",
-          borderRadius: 18,
-          boxShadow: "0 14px 40px rgba(15,23,42,0.12)",
-          border: "1px solid #e2e8f0",
+          borderRadius: 16,
+          boxShadow: "0 12px 36px rgba(15, 23, 42, 0.12)",
+          border: "1px solid #e5e7eb",
           marginBottom: 16,
+          background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
         }}
-        title="Memberships"
+        title={<Title level={4} style={{ margin: 0 }}>Memberships</Title>}
       >
         <div style={{
           width: "100%",
@@ -191,25 +195,31 @@ const Memberships: React.FC = () => {
         </div>
       </Card>
 
-      <Flex
-        gap="large"
-        style={boxStyle}
-        justify="flex-start"
-        align="flex-start"
-        wrap="wrap"
-      >
-        <MembershipItemList orgId={orgId} isMine={true} />
-      </Flex>
+      <div style={{ width: "100%" }}>
+        <Title level={5} style={{ marginBottom: 8 }}>My Organization</Title>
+        <Flex
+          gap="large"
+          style={boxStyle}
+          justify="flex-start"
+          align="flex-start"
+          wrap="wrap"
+        >
+          <MembershipItemList orgId={orgId} isMine={true} />
+        </Flex>
+      </div>
 
-      <Flex
-        gap="large"
-        style={boxStyle}
-        justify="flex-start"
-        align="flex-start"
-        wrap="wrap"
-      >
-        <MembershipItemList orgId={orgId} isMine={false} />
-      </Flex>
+      <div style={{ width: "100%" }}>
+        <Title level={5} style={{ marginBottom: 8 }}>External Memberships</Title>
+        <Flex
+          gap="large"
+          style={boxStyle}
+          justify="flex-start"
+          align="flex-start"
+          wrap="wrap"
+        >
+          <MembershipItemList orgId={orgId} isMine={false} />
+        </Flex>
+      </div>
     </Flex>
   );
 };

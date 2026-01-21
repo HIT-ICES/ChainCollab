@@ -302,6 +302,7 @@ export const getEnvironmentList = async (consortiumId: string) => {
       fireflyStatus: env.firefly_status,
       oracleStatus: env.Oracle_status,
       dmnStatus: env.DMN_status,
+      identityContractStatus: env.identity_contract_status ?? "NO",
       type: "Fabric",
     }));
 
@@ -317,6 +318,7 @@ export const getEnvironmentList = async (consortiumId: string) => {
         fireflyStatus: env.firefly_status,
         oracleStatus: env.Oracle_status,
         dmnStatus: env.DMN_status,
+        identityContractStatus: env.identity_contract_status ?? "NO",
         type: "Ethereum",
       }));
     } catch (err) {
@@ -346,9 +348,10 @@ export const getEnvironment = async (environmentId: string, consortiumId: string
       id: res.data.id,
       status: res.data.status,
       createdAt: res.data.created_at,
-      fireflyStatus: res.data.firefly_status,
-      oracleStatus: res.data.Oracle_status,
-      dmnStatus: res.data.DMN_status,
+      fireflyStatus: res.data.firefly_status ?? "NO",
+      oracleStatus: res.data.Oracle_status ?? "NO",
+      dmnStatus: res.data.DMN_status ?? "NO",
+      identityContractStatus: res.data.identity_contract_status ?? "NO",
       type: envType,
     }
   } catch (err) {
@@ -488,5 +491,30 @@ export const createEthereumIdentity = async (ethEnvironmentId, info = {
     return res.data;
   } catch (err) {
     console.error("创建ethereumIdentity失败", err);
+  }
+}
+
+export const syncEthereumIdentity = async (ethereumIdentityId) => {
+  try {
+    const res = await api.post(`/ethereum_identities/${ethereumIdentityId}/sync`);
+    return res.data;
+  } catch (err) {
+    console.error("同步ethereumIdentity失败", err);
+  }
+}
+
+export const syncAllEthereumIdentities = async (ethEnvironmentId, membershipId = null) => {
+  try {
+    const payload: any = {};
+    if (ethEnvironmentId) {
+      payload.eth_environment_id = ethEnvironmentId;
+    }
+    if (membershipId) {
+      payload.membership_id = membershipId;
+    }
+    const res = await api.post(`/ethereum_identities/sync_all`, payload);
+    return res.data;
+  } catch (err) {
+    console.error("同步全部ethereumIdentity失败", err);
   }
 }

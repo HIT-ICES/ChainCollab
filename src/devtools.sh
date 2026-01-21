@@ -39,6 +39,7 @@ PROXY_ENV_KEYS = (
     "ALL_PROXY",
     "NO_PROXY",
 )
+DEBUG_MODE = os.getenv("DEVTOOLS_DEBUG", "").lower() in ("1", "true", "yes", "on")
 
 
 def cmd_exists(name: str) -> bool:
@@ -185,6 +186,17 @@ def archive_runtime_logs(tag: str):
     if PID_FILE.exists():
         shutil.copy2(PID_FILE, archive_dir / PID_FILE.name)
     print(f"[dev] archived logs -> {archive_dir}")
+    prune_log_archives(keep=3)
+
+
+def prune_log_archives(keep: int = 3):
+    archive_root = RUNTIME_DIR / "archive"
+    if not archive_root.exists():
+        return
+    entries = [p for p in archive_root.iterdir() if p.is_dir()]
+    entries.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+    for old in entries[keep:]:
+        shutil.rmtree(old, ignore_errors=True)
 
 
 def read_pid(path: Path) -> int | None:
@@ -240,6 +252,7 @@ def spawn_service(
     env=None,
     log_to_file: bool = True,
     pipe_logs: bool = True,
+    startup_wait: float = 1.0,
 ) -> int:
     ensure_runtime_dir()
     log_path.parent.mkdir(parents=True, exist_ok=True)
@@ -272,7 +285,8 @@ def spawn_service(
         threading.Thread(target=_pipe_to_log, daemon=True).start()
     elif log_file:
         log_file.close()
-    time.sleep(1)
+    if startup_wait > 0:
+        time.sleep(startup_wait)
     exit_code = process.poll()
     if exit_code is not None:
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
@@ -384,7 +398,7 @@ def run_clean():
     clean_hosts()
 
 
-def start_stack(monitor: bool = True):
+def start_stack(monitor: bool = True, *, debug: bool = False):
     failures: list[str] = []
     ensure_runtime_dir()
     pids: dict[str, int] = {}
@@ -415,8 +429,10 @@ def start_stack(monitor: bool = True):
             log_to_file=log_to_file,
             pipe_logs=pipe_logs,
             env=env,
+            startup_wait=1.0 if debug else 0.0,
         )
-        time.sleep(0.2)
+        if debug:
+            time.sleep(0.2)
         if not pid_is_running(pid):
             failures.append(f"{name}: exited early")
             return
@@ -575,6 +591,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Do not monitor processes after startup.",
     )
+    up_parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Enable startup waits for debugging.",
+    )
     sub.add_parser("down", help="Stop stack using PIDs from runtime file.")
     sub.add_parser("restart", help="Run down -> clean -> up.")
     front_parser = sub.add_parser("front", help="Proxy to front_devtools.sh.")
@@ -652,7 +673,7 @@ def main():
         return 0
 
     if args.command == "up":
-        start_stack(monitor=not args.no_monitor)
+        start_stack(monitor=not args.no_monitor, debug=args.debug or DEBUG_MODE)
         return 0
 
     handler = dispatch.get(args.command)

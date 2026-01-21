@@ -48,6 +48,7 @@ const View: React.FC = () => {
   const [themeMode, setThemeMode] = useState<"light" | "dark">("light");
   const [autoLoading, setAutoLoading] = useState(false);
   const [setupMenuAnchor, setSetupMenuAnchor] = useState<null | HTMLElement>(null);
+  const [membershipCount, setMembershipCount] = useState(1);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { t, i18n } = useTranslation();
@@ -88,8 +89,18 @@ const View: React.FC = () => {
       const orgName = `Atlas-${suffix}`;
       const consortiumName = `Aegis-${suffix}`;
       const envName = `Forge-${suffix}`;
-      // const membershipLabels = ["Core", "Ops", "Labs"];
-      const membershipLabels = ["Core"];
+      const baseMembershipLabels = ["Core", "Ops", "Labs"];
+      const targetCount = Math.max(1, membershipCount);
+      const membershipLabels =
+        targetCount <= baseMembershipLabels.length
+          ? baseMembershipLabels.slice(0, targetCount)
+          : [
+              ...baseMembershipLabels,
+              ...Array.from(
+                { length: targetCount - baseMembershipLabels.length },
+                (_, index) => `Member${index + 1}`
+              ),
+            ];
 
       const org = await createOrg(orgName);
       dispatch(activateOrg({ currentOrgId: org.id, currentOrgName: org.name }));
@@ -257,6 +268,28 @@ const View: React.FC = () => {
               anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
               transformOrigin={{ vertical: "top", horizontal: "left" }}
             >
+              <MenuItem
+                disableRipple
+                onClick={(event) => event.stopPropagation()}
+                sx={{ gap: 2 }}
+              >
+                <Typography variant="body2" sx={{ minWidth: 110 }}>
+                  Memberships
+                </Typography>
+                <Select
+                  size="small"
+                  value={membershipCount}
+                  onChange={(event) => setMembershipCount(Number(event.target.value))}
+                  onClick={(event) => event.stopPropagation()}
+                  sx={{ minWidth: 80 }}
+                >
+                  {[1, 2, 3, 4, 5, 6].map((count) => (
+                    <MenuItem key={count} value={count}>
+                      {count}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </MenuItem>
               <MenuItem
                 onClick={() => handleSelectSetupType("Fabric")}
                 disabled={autoLoading}

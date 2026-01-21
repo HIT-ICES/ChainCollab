@@ -160,10 +160,6 @@ def start_all():
 
 
 def clean_artifacts():
-    for name in (".venv", "venv", "__pycache__"):
-        path = PROJECT_DIR / name
-        if path.exists():
-            shutil.rmtree(path, ignore_errors=True)
     for path in PROJECT_DIR.rglob("__pycache__"):
         shutil.rmtree(path, ignore_errors=True)
 
@@ -171,7 +167,7 @@ def clean_artifacts():
         path = DASH_DIR / name
         if path.exists():
             shutil.rmtree(path, ignore_errors=True)
-    print("[newTranslator] cleaned venv/node_modules/cache")
+    print("[newTranslator] cleaned __pycache__/node_modules/cache")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -196,7 +192,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("api", help="Start FastAPI service via uvicorn.")
     sub.add_parser("start", help="Alias for api.")
     sub.add_parser("dashboard", help="Start dashboard dev server.")
-    sub.add_parser("clean", help="Remove venv/node_modules/cache.")
+    sub.add_parser("clean", help="Remove __pycache__/node_modules/cache.")
     sub.add_parser("help", help="Show this help.")
 
     return parser
