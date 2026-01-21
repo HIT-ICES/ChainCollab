@@ -20,9 +20,11 @@
 1. [编译合约](#2-编译合约)
 2. [部署 OCR 合约](#3-部署-ocr-合约)
 3. [收集节点信息](#4-收集节点信息)
-4. [创建 OCR Jobs](#5-创建-ocr-jobs)
-5. [配置 OCR 合约](#6-配置-ocr-合约)
-6. [测试 OCR 网络](#7-测试-ocr-网络)
+4. [为节点充值 ETH](#5-为节点充值-eth)
+5. [为合约充值 LINK](#6-为合约充值-link)
+6. [创建 OCR Jobs](#7-创建-ocr-jobs)
+7. [配置 OCR 合约](#8-配置-ocr-合约)
+8. [测试 OCR 网络](#9-测试-ocr-网络)
 
 ---
 
@@ -76,7 +78,29 @@ node scripts/get-node-info.js
 
 ---
 
-## 5. 创建 OCR Jobs
+## 5. 为节点充值 ETH
+
+OCR 节点发送交易需要 ETH 作为 gas。批量给 `node-info.json` 里的所有节点地址充值：
+
+```bash
+cd /home/shenxz-lab/code/ChainCollab/src/oracle-node/CHAINLINK
+node scripts/fund-chainlink-node.js --all --min 1 --amount 10
+```
+
+---
+
+## 6. 为合约充值 LINK
+
+为 OCR 合约充值 LINK（用于支付 OCR 报告费用）：
+
+```bash
+cd /home/shenxz-lab/code/ChainCollab/src/oracle-node/CHAINLINK
+node scripts/fund-contract.js
+```
+
+---
+
+## 7. 创建 OCR Jobs
 
 为每个 Chainlink 节点创建 OCR Job：
 
@@ -89,7 +113,7 @@ Job 信息将保存在 `deployment/chainlink-deployment.json` 文件中。
 
 ---
 
-## 6. 配置 OCR 合约
+## 8. 配置 OCR 合约
 
 配置 OCR 合约的 setConfig 方法，设置节点列表和参数：
 
@@ -102,7 +126,7 @@ node scripts/set-ocr-config.js
 
 ---
 
-## 7. 测试 OCR 网络
+## 9. 测试 OCR 网络
 
 测试 OCR 网络是否正常工作：
 
@@ -143,7 +167,8 @@ node scripts/test-ocr-network.js
 3. **价格未更新**：
    - 检查节点日志是否有错误
    - 验证所有节点的 Job 是否在运行
-   - 检查节点是否有足够的 LINK 代币
+   - 检查节点是否有足够的 ETH 余额
+   - 检查合约是否已收到 LINK 代币
 
 ---
 
