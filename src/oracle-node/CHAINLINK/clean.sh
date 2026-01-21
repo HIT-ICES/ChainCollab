@@ -43,8 +43,8 @@ echo ""
 
 # 步骤 1: 停止所有容器
 echo -e "${YELLOW}[1/6] 停止所有容器...${NC}"
-if docker-compose ps -q &>/dev/null; then
-    docker-compose down
+if docker-compose -f docker-compose-multinode.yml ps -q &>/dev/null; then
+    docker-compose -f docker-compose-multinode.yml down
     echo -e "${GREEN}✅ 容器已停止${NC}"
 else
     echo -e "${YELLOW}没有运行的容器${NC}"
@@ -53,7 +53,7 @@ echo ""
 
 # 步骤 2: 删除所有容器和网络
 echo -e "${YELLOW}[2/6] 删除容器、网络和 volumes...${NC}"
-docker-compose down -v 2>/dev/null || true
+docker-compose -f docker-compose-multinode.yml down -v 2>/dev/null || true
 echo -e "${GREEN}✅ 容器和 volumes 已删除${NC}"
 echo ""
 
@@ -76,20 +76,20 @@ echo ""
 # 步骤 4: 清理 Chainlink 数据
 echo -e "${YELLOW}[4/6] 清理 Chainlink 节点数据...${NC}"
 # 不删除配置文件,只删除运行时数据
-if [ -d "chainlink/.chainlink" ]; then
-    rm -rf chainlink/.chainlink
-    echo -e "${GREEN}✅ Chainlink 运行时数据已删除${NC}"
-else
-    echo -e "${YELLOW}Chainlink 数据目录不存在${NC}"
-fi
+for node in chainlink1 chainlink2 chainlink3 chainlink4 chainlink-bootstrap; do
+    if [ -d "$node/.chainlink" ]; then
+        rm -rf $node/.chainlink
+        echo -e "${GREEN}✅ ${node} 运行时数据已删除${NC}"
+    else
+        echo -e "${YELLOW}${node} 数据目录不存在${NC}"
+    fi
+done
 echo ""
 
 # 步骤 5: 清理编译和部署产物
 echo -e "${YELLOW}[5/6] 清理编译和部署产物...${NC}"
 
 CLEANED=0
-
-# compiled.json 现在在 deployment 文件夹下，会被 rm -rf deployment 一起删除，所以不需要单独处理
 
 DEPLOYMENT_DIR="deployment"
 if [ -d "$DEPLOYMENT_DIR" ]; then
@@ -129,10 +129,10 @@ echo -e "${BLUE}================================================${NC}"
 echo ""
 echo -e "${YELLOW}保留的文件:${NC}"
 echo "  - geth-node/datadir/keystore/ (账户密钥)"
-echo "  - chainlink/config.toml (Chainlink 配置)"
-echo "  - chainlink/secrets.toml (Chainlink 密钥)"
-echo "  - chainlink/.api (API 凭据)"
-echo "  - chainlink/.password (钱包密码)"
+echo "  - chainlink1/config.toml, chainlink2/config.toml, chainlink3/config.toml, chainlink4/config.toml, chainlink-bootstrap/config.toml (Chainlink 配置)"
+echo "  - chainlink1/secrets.toml, chainlink2/secrets.toml, chainlink3/secrets.toml, chainlink4/secrets.toml, chainlink-bootstrap/secrets.toml (Chainlink 密钥)"
+echo "  - chainlink1/.api, chainlink2/.api, chainlink3/.api, chainlink4/.api, chainlink-bootstrap/.api (API 凭据)"
+echo "  - chainlink1/.password, chainlink2/.password, chainlink3/.password, chainlink4/.password, chainlink-bootstrap/.password (钱包密码)"
 echo "  - contracts/ (智能合约源码)"
 echo "  - scripts/ (部署脚本)"
 echo ""
@@ -145,7 +145,7 @@ echo "  ✓ 编译产物 (compiled.json)"
 echo "  ✓ 部署记录 (deployment.json)"
 echo ""
 echo -e "${GREEN}现在可以重新开始了:${NC}"
-echo -e "  ${BLUE}./start.sh${NC}     # 启动服务"
+echo -e "  ${BLUE}./start-ocr-network.sh${NC}     # 启动服务"
 echo -e "  ${BLUE}./compile.sh${NC}   # 编译合约"
-echo -e "  ${BLUE}./deploy.sh${NC}    # 部署合约"
-echo ""
+echo -e "  ${BLUE}node scripts/deploy-ocr-contract.js${NC}    # 部署合约"
+echo

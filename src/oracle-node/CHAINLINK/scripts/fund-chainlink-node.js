@@ -106,10 +106,11 @@ async function getChainlinkNodeAddress() {
             return fromEnv;
         }
 
-        if (process.argv[2]) {
-            console.log('✅ 使用命令行参数提供的地址:', process.argv[2]);
-            persistChainlinkNodeAddress(process.argv[2]);
-            return process.argv[2];
+        // Allow an explicit address override from the caller.
+        if (arguments.length && arguments[0]) {
+            console.log('✅ 使用命令行参数提供的地址:', arguments[0]);
+            persistChainlinkNodeAddress(arguments[0]);
+            return arguments[0];
         }
 
         try {
@@ -220,20 +221,62 @@ async function transferEth(toAddress, amountEth) {
     }
 }
 
-async function fundChainlinkNode() {
+function getArgValue(args, flag) {
+    const idx = args.indexOf(flag);
+    if (idx === -1 || idx + 1 >= args.length) return null;
+    return args[idx + 1];
+}
+
+function parseAmount(value, fallback) {
+    if (!value) return fallback;
+    const num = Number(value);
+    return Number.isFinite(num) && num >= 0 ? num : fallback;
+}
+
+function getNodeInfoAddresses() {
+    const deploymentPath = path.resolve(__dirname, '../deployment/node-info.json');
+    if (!fs.existsSync(deploymentPath)) {
+        throw new Error('deployment/node-info.json 不存在，无法批量获取节点地址');
+    }
+    const info = JSON.parse(fs.readFileSync(deploymentPath, 'utf8'));
+    const addresses = info
+        .map((node) => node.ethAddress)
+        .filter(Boolean);
+    return Array.from(new Set(addresses));
+}
+
+async function fundAddresses(addresses, minBalance, transferAmount) {
+    for (const address of addresses) {
+        console.log('');
+        console.log('📦 检查节点账户:', address);
+        const currentBalance = await getBalance(address);
+        if (currentBalance < minBalance) {
+            console.log(`⚠️  节点余额低于 ${minBalance} ETH，需要充值`);
+            const success = await transferEth(address, transferAmount);
+            if (success) {
+                const newBalance = await getBalance(address);
+                console.log('✅ 充值成功！新的余额:', newBalance.toFixed(6), 'ETH');
+            }
+        } else {
+            console.log('✅ 节点余额充足');
+        }
+    }
+}
+
+async function fundChainlinkNode(addressOverride, minBalance, transferAmount) {
     try {
         console.log('📦 检查 Chainlink 节点账户状态...');
         console.log('');
 
         // 获取 Chainlink 节点地址
-        const nodeAddress = await getChainlinkNodeAddress();
+        const nodeAddress = await getChainlinkNodeAddress(addressOverride);
 
         // 检查当前余额
         const currentBalance = await getBalance(nodeAddress);
 
         // 如果余额小于 10 ETH，转账 100 ETH
-        const MIN_BALANCE = 10;
-        const TRANSFER_AMOUNT = 100;
+        const MIN_BALANCE = minBalance ?? 10;
+        const TRANSFER_AMOUNT = transferAmount ?? 100;
 
         if (currentBalance < MIN_BALANCE) {
             console.log('');
@@ -263,9 +306,24 @@ async function fundChainlinkNode() {
 
 // 如果直接运行此脚本
 if (require.main === module) {
-    fundChainlinkNode().then(success => {
-        process.exit(success ? 0 : 1);
-    });
+    const args = process.argv.slice(2);
+    const useAll = args.includes('--all');
+    const minBalance = parseAmount(getArgValue(args, '--min'), 10);
+    const transferAmount = parseAmount(getArgValue(args, '--amount'), 100);
+    const addressOverride = getArgValue(args, '--address') || args.find((arg) => !arg.startsWith('-'));
+
+    if (useAll) {
+        fundAddresses(getNodeInfoAddresses(), minBalance, transferAmount)
+            .then(() => process.exit(0))
+            .catch((error) => {
+                console.error('❌ 批量充值失败:', error.message);
+                process.exit(1);
+            });
+    } else {
+        fundChainlinkNode(addressOverride, minBalance, transferAmount).then(success => {
+            process.exit(success ? 0 : 1);
+        });
+    }
 }
 
 module.exports = fundChainlinkNode;
