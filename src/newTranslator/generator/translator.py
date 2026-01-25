@@ -42,9 +42,23 @@ def map_bpmn_type(origin_type: str) -> str:
     return BPMN_TYPE_TO_DSL.get(origin_type, origin_type)
 
 
+def _normalize_identifier(name: str) -> str:
+    """Normalize identifiers by replacing spaces and symbols with underscores."""
+    if not name:
+        return ""
+    normalized = "".join(
+        ch if ch.isalnum() else "_"
+        for ch in name.strip()
+    )
+    while "__" in normalized:
+        normalized = normalized.replace("__", "_")
+    return normalized.strip("_")
+
+
 def public_the_name(name: str) -> str:
-    """Uppercase the first character to build exported-style identifiers."""
-    return "".join(name[:1].upper() + name[1:]) if name else name
+    """Normalize and uppercase the first character to build identifiers."""
+    normalized = _normalize_identifier(name)
+    return "".join(normalized[:1].upper() + normalized[1:]) if normalized else normalized
 
 
 def summarize_message_schema(message: Message) -> str:
@@ -815,7 +829,7 @@ class GoChaincodeTranslator:
         """Derive a contract name from the BPMN start event when possible."""
         start_events = self._choreography.query_element_with_type(NodeType.START_EVENT)
         if start_events and start_events[0].name:
-            return public_the_name(start_events[0].name.replace(" ", ""))
+            return public_the_name(start_events[0].name)
         return "GeneratedContract"
 
     def generate_chaincode(self, output_path: str = "resource/contract.b2c", is_output: bool = False, contract_name: Optional[str] = None) -> str:
