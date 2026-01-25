@@ -239,10 +239,70 @@ export default function AssetModal({
   };
 
   const handleOk = () => {
-    // 验证 tokenId 是否重复
-    if (tokenId && tokenId !== originalTokenId && tokenIdOptions.includes(tokenId)) {
-      message.warning('The tokenId already exists. Please choose a different one');
+    // ===== FT tokenName 唯一性校验（DataObject 为 transferable + FT 时）=====
+if (assetType === 'transferable' && tokenType === 'FT') {
+  const name = (tokenName || '').trim();
+  if (name) {
+    const allElements = elementRegistry.getAll();
+    let duplicated = false;
+
+    allElements.forEach((el: any) => {
+      // 跳过当前编辑的元素
+      if (el.id === dataElementId) return;
+      if (el.type !== 'bpmn:DataObjectReference') return;
+
+      const docs = el.businessObject.documentation;
+      if (Array.isArray(docs) && docs.length) {
+        try {
+          const parsed = JSON.parse(docs[0].text);
+          const otherName = (parsed.tokenName || '').trim();
+          if (
+            parsed.assetType === 'transferable' &&
+            parsed.tokenType === 'FT' &&
+            otherName &&
+            otherName === name
+          ) {
+            duplicated = true;
+          }
+        } catch {
+          // ignore
+        }
+      }
+    });
+
+    if (duplicated) {
+      message.warning('FT tokenName already exists. Please choose a different tokenName');
       return;
+    }
+  }
+}
+
+    // 验证 tokenId 是否重复 - 实时扫描所有 DataObject
+    if (tokenId) {
+      const allElements = elementRegistry.getAll();
+      const existingTokenIds = new Set<string>();
+
+      allElements.forEach((el: any) => {
+        // 跳过当前编辑的元素
+        if (el.id === dataElementId) return;
+
+        const docs = el.businessObject.documentation;
+        if (Array.isArray(docs) && docs.length) {
+          try {
+            const parsed = JSON.parse(docs[0].text);
+            if (el.type === 'bpmn:DataObjectReference' && parsed.tokenId) {
+              existingTokenIds.add(parsed.tokenId);
+            }
+          } catch {
+            // ignore
+          }
+        }
+      });
+
+      if (existingTokenIds.has(tokenId)) {
+        message.warning('The tokenId already exists. Please choose a different one');
+        return;
+      }
     }
     updateDataToBPMN();
     onClose(true);

@@ -1,0 +1,204 @@
+{
+  "_comment": "BPMN-NFT Supply Chain 完整配置示例",
+  "_使用说明": "1. 复制此文件为 config_runtime.json, 2. 修改URL中的合约ID, 3. 更新参与者的x509和key, 4. 运行: python3 main_enhanced.py config_runtime.json",
+
+  "url": "http://127.0.0.1:5000/api/v1/namespaces/default/apis/test-65872c",
+  "contract_name": "test",
+  "bpmn_id": "27d83348-fe35-480c-9cff-8619d4d6f49a", 
+ 
+  "participants": {
+    "Participant_12jdsig": {
+      "name": "Bulk buyer",
+      "key": "Mem.org.comMSP::x509::CN=user1,OU=client::CN=ca.mem.org.com,OU=Fabric,O=mem.org.com,ST=North Carolina,C=US",
+      "x509": "eDUwOTo6Q049dXNlcjEsT1U9Y2xpZW50OjpDTj1jYS5tZW0ub3JnLmNvbSxPVT1GYWJyaWMsTz1tZW0ub3JnLmNvbSxTVD1Ob3J0aCBDYXJvbGluYSxDPVVT@Mem.org.comMSP",
+      "msp": "Mem.org.comMSP"
+    },
+    "Participant_18g06ah": {
+      "name": "Manufacturer",
+      "key": "Mem.org.comMSP::x509::CN=user2,OU=client::CN=ca.mem.org.com,OU=Fabric,O=mem.org.com,ST=North Carolina,C=US",
+      "x509": "eDUwOTo6Q049dXNlcjIsT1U9Y2xpZW50OjpDTj1jYS5tZW0ub3JnLmNvbSxPVT1GYWJyaWMsTz1tZW0ub3JnLmNvbSxTVD1Ob3J0aCBDYXJvbGluYSxDPVVT@Mem.org.comMSP",
+      "msp": "Mem.org.comMSP"
+    },
+    "Participant_121jlha": {
+      "name": "Middleman",
+      "key": "Mem.org.comMSP::x509::CN=user3,OU=client::CN=ca.mem.org.com,OU=Fabric,O=mem.org.com,ST=North Carolina,C=US",
+      "x509": "eDUwOTo6Q049dXNlcjMsT1U9Y2xpZW50OjpDTj1jYS5tZW0ub3JnLmNvbSxPVT1GYWJyaWMsTz1tZW0ub3JnLmNvbSxTVD1Ob3J0aCBDYXJvbGluYSxDPVVT@Mem.org.comMSP",
+      "msp": "Mem.org.comMSP"
+    },
+    "Participant_0wg64sj": {
+      "name": "Supplier",
+      "key": "Mem.org.comMSP::x509::CN=user3,OU=client::CN=ca.mem.org.com,OU=Fabric,O=mem.org.com,ST=North Carolina,C=US",
+      "x509": "eDUwOTo6Q049dXNlcjMsT1U9Y2xpZW50OjpDTj1jYS5tZW0ub3JnLmNvbSxPVT1GYWJyaWMsTz1tZW0ub3JnLmNvbSxTVD1Ob3J0aCBDYXJvbGluYSxDPVVT@Mem.org.comMSP",
+      "msp": "Mem.org.comMSP"
+    },
+    "Participant_1incub6": {
+      "name": "Special carrier",
+      "key": "Mem.org.comMSP::x509::CN=user3,OU=client::CN=ca.mem.org.com,OU=Fabric,O=mem.org.com,ST=North Carolina,C=US",
+      "x509": "eDUwOTo6Q049dXNlcjMsT1U9Y2xpZW50OjpDTj1jYS5tZW0ub3JnLmNvbSxPVT1GYWJyaWMsTz1tZW0ub3JnLmNvbSxTVD1Ob3J0aCBDYXJvbGluYSxDPVVT@Mem.org.comMSP",
+      "msp": "Mem.org.comMSP"
+    }
+  },
+
+  "erc_chaincodes": {
+    "Activity_0i3c0p3": "ERC721",
+    "Activity_11qv4ci": "ERC721",
+    "Activity_12g7edm": "ERC721"
+  },
+
+  "execution_path": [
+    {
+      "step": 1,
+      "type": "event",
+      "id": "Event_1so6gi5",
+      "description": "Start event"
+    },
+    {
+      "step": 2,
+      "type": "message",
+      "id": "Message_1f0g7ng",
+      "invoker": "Participant_12jdsig",
+      "description": "Bulk buyer sends order to Manufacturer",
+      "params": {
+        "order": "Purchase Order #PO-2026-001 for 1000 units"
+      }
+    },
+    {
+      "step": 3,
+      "type": "message",
+      "id": "Message_15pq051",
+      "invoker": "Participant_18g06ah",
+      "description": "Manufacturer places order with Middleman",
+      "params": {
+        "placed_order": "Material Order #MO-2026-001"
+      }
+    },
+    {
+      "step": 4,
+      "type": "gateway",
+      "id": "Gateway_1yei1dm",
+      "description": "Parallel gateway - split into two flows"
+    },
+    {
+      "step": 5,
+      "type": "message",
+      "id": "Message_0wvtw7k",
+      "invoker": "Participant_12jdsig",
+      "description": "Bulk buyer sends forward order to Supplier",
+      "params": {
+        "fwd_order": "Forward Order #FO-2026-001 to Supplier"
+      }
+    },
+    {
+      "step": 6,
+      "type": "message",
+      "id": "Message_0dy0w96",
+      "invoker": "Participant_12jdsig",
+      "description": "Bulk buyer sends transport order to Special carrier",
+      "params": {
+        "transport_order": "Transport Order #TO-2026-001"
+      }
+    },
+    {
+      "step": 7,
+      "type": "activity",
+      "id": "Activity_0i3c0p3",
+      "invoker": "Participant_0wg64sj",
+      "description": "Supplier mints NFT for raw material",
+      "note": "This activity requires asset upload - Activity_0i3c0p3_Continue must be called after uploading asset to IPFS"
+    },
+    {
+      "step": 8,
+      "type": "activity",
+      "id": "Activity_0i3c0p3_Continue",
+      "invoker": "Participant_0wg64sj",
+      "description": "Supplier mints NFT for raw material",
+      "note": "This activity requires asset upload - Activity_0i3c0p3_Continue must be called after uploading asset to IPFS"
+    },
+    {
+      "step": 9,
+      "type": "gateway",
+      "id": "Gateway_0n7lupx",
+      "description": "Parallel gateway - join two flows"
+    },
+    {
+      "step": 10,
+      "type": "message",
+      "id": "Message_09uka8c",
+      "invoker": "Participant_1incub6",
+      "description": "Special carrier requests details from Supplier",
+      "params": {
+        "requested_details": "Request shipping details for Order #TO-2026-001"
+      }
+    },
+    {
+      "step": 11,
+      "type": "message",
+      "id": "Message_1v05oen",
+      "invoker": "Participant_0wg64sj",
+      "description": "Supplier provides details to Special carrier",
+      "params": {
+        "provided_details": "Shipping details: 500kg, pickup at warehouse A"
+      }
+    },
+    {
+      "step": 12,
+      "type": "message",
+      "id": "Message_1kqcpl3",
+      "invoker": "Participant_0wg64sj",
+      "description": "Supplier sends waybill to Special carrier",
+      "params": {
+        "waybill": "Waybill #WB-2026-001"
+      }
+    },
+    {
+      "step": 13,
+      "type": "message",
+      "id": "Message_0olnqt0",
+      "invoker": "Participant_1incub6",
+      "description": "Special carrier delivers order to Manufacturer",
+      "params": {
+        "deliverd_order": "Delivery confirmation #DC-2026-001"
+      }
+    },
+    {
+      "step": 14,
+      "type": "activity",
+      "id": "Activity_11qv4ci",
+      "invoker": "Participant_0wg64sj",
+      "description": "Supplier transfers NFT to Manufacturer"
+    },
+    {
+      "step": 15,
+      "type": "activity",
+      "id": "Activity_12g7edm",
+      "invoker": "Participant_18g06ah",
+      "description": "Manufacturer queries NFT information"
+    },
+    {
+      "step": 16,
+      "type": "message",
+      "id": "Message_10m6wae",
+      "invoker": "Participant_18g06ah",
+      "description": "Manufacturer sends report to Bulk buyer",
+      "params": {
+        "report": "Quality Report #QR-2026-001: All materials verified"
+      }
+    },
+    {
+      "step": 17,
+      "type": "message",
+      "id": "Message_1wyvezt",
+      "invoker": "Participant_18g06ah",
+      "description": "Manufacturer delivers product to Bulk buyer",
+      "params": {
+        "deliverd_product": "Final Product Delivery #FPD-2026-001"
+      }
+    },
+    {
+      "step": 18,
+      "type": "event",
+      "id": "Event_1r44vsj",
+      "description": "End event"
+    }
+  ]
+}

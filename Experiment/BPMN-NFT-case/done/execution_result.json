@@ -1,0 +1,191 @@
+ [
+  {
+    "task_name": "SupplyChain_clean_path",
+    "timestamp": "2026-01-24T20:31:03.744047",
+    "instance_id": "3",
+    "steps_executed": [
+      {
+        "step_number": 1,
+        "step_id": "Event_1so6gi5",
+        "step_type": "event",
+        "description": "Start event",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:82ad6e91-5a4b-4993-ba04-2d3444471365', 'type': 'TransactionSuccess'}, 'transactionHash': 'c0e7c1eda769b7bd1736b3ad2a47f788d13b9ea9b89124930d1fa71c2e24c71e'}",
+        "error": null,
+        "timestamp": "2026-01-24T20:31:09.820785"
+      },
+      {
+        "step_number": 2,
+        "step_id": "Message_1f0g7ng",
+        "step_type": "message",
+        "description": "Bulk buyer sends order to Manufacturer",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:ce83d057-5027-487d-9f7c-8f311d127559', 'type': 'TransactionSuccess'}, 'transactionHash': '95fcc56df717fad2e5bf82c6272ffd7d055f279a44ff08a674b9c70cb1eacf63'}",
+        "error": null,
+        "timestamp": "2026-01-24T20:31:14.854428"
+      },
+      {
+        "step_number": 3,
+        "step_id": "Message_15pq051",
+        "step_type": "message",
+        "description": "Manufacturer places order with Middleman",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:32d88a04-f71c-40cc-a3ac-5087159805ef', 'type': 'TransactionSuccess'}, 'transactionHash': '202c7c1a7888c115f8ab9d4c6843c2cef57bb230dfc87cd438df51e39578df4a'}",
+        "error": null,
+        "timestamp": "2026-01-24T20:31:19.896799"
+      },
+      {
+        "step_number": 4,
+        "step_id": "Gateway_1yei1dm",
+        "step_type": "gateway",
+        "description": "Parallel gateway - split into two flows",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:721f1f8a-ece4-48cb-b70f-3bd8bf64069c', 'type': 'TransactionSuccess'}, 'transactionHash': '39dee2cc5531279886686897c1fa3e5db2387c42c1aaad4f187dffa4f296fa6c'}",
+        "error": null,
+        "timestamp": "2026-01-24T20:31:24.939351"
+      },
+      {
+        "step_number": 5,
+        "step_id": "Message_0wvtw7k",
+        "step_type": "message",
+        "description": "Bulk buyer sends forward order to Supplier",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:c284fb85-f3d4-4f92-916d-37433f3058c0', 'type': 'TransactionSuccess'}, 'transactionHash': '0001f78097acedb316f667bbb1fe741fac88b41ab715b13f78138071e0953670'}",
+        "error": null,
+        "timestamp": "2026-01-24T20:31:29.968774"
+      },
+      {
+        "step_number": 6,
+        "step_id": "Message_0dy0w96",
+        "step_type": "message",
+        "description": "Bulk buyer sends transport order to Special carrier",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:0cbaf150-935a-4c8a-aebb-79d8b4e41880', 'type': 'TransactionSuccess'}, 'transactionHash': '70e18e21a7588e2803525cce55e4c46966ee18c2588afbbaa74524a8a96c332c'}",
+        "error": null,
+        "timestamp": "2026-01-24T20:31:34.993510"
+      },
+      {
+        "step_number": 7,
+        "step_id": "Activity_0i3c0p3",
+        "step_type": "activity",
+        "description": "Supplier mints NFT for raw material",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:3b2622d8-13bd-401a-9512-d9b1196cb161', 'type': 'TransactionSuccess'}, 'transactionHash': '29d7e395101e47d5309dc809df08a4a25ba79f908e3c69da23e57d0afe2e71b0'}",
+        "error": null,
+        "timestamp": "2026-01-24T20:31:40.022706"
+      },
+      {
+        "step_number": 8,
+        "step_id": "Activity_0i3c0p3_Continue",
+        "step_type": "activity",
+        "description": "Supplier mints NFT for raw material",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:947b4edc-68a1-49ae-aac5-cbc0d10e16fa', 'type': 'TransactionSuccess'}, 'transactionHash': '37dc2db77ead29615b2c76b93b2aff05bd9eb79be7a465e25e5cc93e18754c32'}",
+        "error": null,
+        "timestamp": "2026-01-24T20:31:45.051416"
+      },
+      {
+        "step_number": 9,
+        "step_id": "Gateway_0n7lupx",
+        "step_type": "gateway",
+        "description": "Parallel gateway - join two flows",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:dd37f7ff-d262-41ce-b39b-c938bc4f0c41', 'type': 'TransactionSuccess'}, 'transactionHash': '59202d8481d02246d9fda49e9c2ffe70e1553147bfc24ee34e8967cbac1ee920'}",
+        "error": null,
+        "timestamp": "2026-01-24T20:31:50.082840"
+      },
+      {
+        "step_number": 10,
+        "step_id": "Message_09uka8c",
+        "step_type": "message",
+        "description": "Special carrier requests details from Supplier",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:5a85862e-8cee-48ae-b111-0da21922e3a8', 'type': 'TransactionSuccess'}, 'transactionHash': '90eb97c7656fcc738bd34f512a1ae38cd01c41132ad1224237fafe17938b977d'}",
+        "error": null,
+        "timestamp": "2026-01-24T20:31:55.114675"
+      },
+      {
+        "step_number": 11,
+        "step_id": "Message_1v05oen",
+        "step_type": "message",
+        "description": "Supplier provides details to Special carrier",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:8f513b90-5d28-4678-bad7-db6b15b5a0a9', 'type': 'TransactionSuccess'}, 'transactionHash': '6b1ff98b1a1c7b91656c9c271055ee61cf6c7e6af4dd66ec18ef64138541b11f'}",
+        "error": null,
+        "timestamp": "2026-01-24T20:32:00.149867"
+      },
+      {
+        "step_number": 12,
+        "step_id": "Message_1kqcpl3",
+        "step_type": "message",
+        "description": "Supplier sends waybill to Special carrier",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:342f131d-6bfd-41b4-9c73-8fb68f61a8b6', 'type': 'TransactionSuccess'}, 'transactionHash': '6f302d630f619d0d283befd6b9ce929f077ee7435fb98984fe7008b5e6066538'}",
+        "error": null,
+        "timestamp": "2026-01-24T20:32:05.181112"
+      },
+      {
+        "step_number": 13,
+        "step_id": "Message_0olnqt0",
+        "step_type": "message",
+        "description": "Special carrier delivers order to Manufacturer",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:989b3750-4160-436f-90a9-67cfb83b6c00', 'type': 'TransactionSuccess'}, 'transactionHash': '66909abea9c233001c9a024feaa9013566d1c8f27cd95af1361764dea2d2744c'}",
+        "error": null,
+        "timestamp": "2026-01-24T20:32:10.218121"
+      },
+      {
+        "step_number": 14,
+        "step_id": "Activity_11qv4ci",
+        "step_type": "activity",
+        "description": "Supplier transfers NFT to Manufacturer",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:30428293-610d-4a3c-95ba-81c27f7c55a2', 'type': 'TransactionSuccess'}, 'transactionHash': 'bcb1e62034790ac429a34a518eab1982f862a336de3aebb7373a55ba0ebf289d'}",
+        "error": null,
+        "timestamp": "2026-01-24T20:32:15.262551"
+      },
+      {
+        "step_number": 15,
+        "step_id": "Activity_12g7edm",
+        "step_type": "activity",
+        "description": "Manufacturer queries NFT information",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:e5fd5d9e-63ce-4286-9aac-7108ff7a9ce6', 'type': 'TransactionSuccess'}, 'transactionHash': '014aebc79113df72b7ab6bacee1d13d84a45ff5750146635a99581c41335ae0b'}",
+        "error": null,
+        "timestamp": "2026-01-24T20:32:20.293946"
+      },
+      {
+        "step_number": 16,
+        "step_id": "Message_10m6wae",
+        "step_type": "message",
+        "description": "Manufacturer sends report to Bulk buyer",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:d078c982-e7df-4f7f-b745-9b2c847c5e85', 'type': 'TransactionSuccess'}, 'transactionHash': 'a226dc05fddd5620592b726b682546eb76ea37f967e0a3f693b33bf481210576'}",
+        "error": null,
+        "timestamp": "2026-01-24T20:32:25.324290"
+      },
+      {
+        "step_number": 17,
+        "step_id": "Message_1wyvezt",
+        "step_type": "message",
+        "description": "Manufacturer delivers product to Bulk buyer",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:3e75a94a-d3f5-4a1b-a671-a2de4f7d3982', 'type': 'TransactionSuccess'}, 'transactionHash': 'ebfdc12badc4852f7d9f0680a2eb8dfea73b35910524406f2f0140189bae4643'}",
+        "error": null,
+        "timestamp": "2026-01-24T20:32:30.360801"
+      },
+      {
+        "step_number": 18,
+        "step_id": "Event_1r44vsj",
+        "step_type": "event",
+        "description": "End event",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:8741eb60-2e17-4a8d-bc96-98ad2bcb6a86', 'type': 'TransactionSuccess'}, 'transactionHash': '8cf536583036d9a462042a5dbab1c2a0b357435e1557814a01050846e0e1c418'}",
+        "error": null,
+        "timestamp": "2026-01-24T20:32:35.382161"
+      }
+    ],
+    "status": "success",
+    "error_message": null
+  }
+]
