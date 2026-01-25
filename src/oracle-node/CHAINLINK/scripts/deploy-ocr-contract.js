@@ -75,7 +75,7 @@ async function deploy() {
         }
 
         // 获取合约数据
-        const contractKey = 'contracts/ocr/OffchainAggregator.sol:OffchainAggregator';
+        const contractKey = 'contracts/ocr/OffchainAggregator_Allequal.sol:OffchainAggregator';
         const contractData = compiled.contracts[contractKey];
 
         if (!contractData) {
@@ -107,43 +107,21 @@ async function deploy() {
         // 11. uint8 _decimals
         // 12. string memory _description
 
-        // 首先需要部署 LinkToken 合约
-        let linkTokenAddress;
-        const linkTokenKey = 'contracts/LinkToken-v0.6-fix/LinkToken.sol:LinkToken';
-        const linkTokenData = compiled.contracts[linkTokenKey];
-        if (!linkTokenData) {
-            console.error('❌ 找不到 LinkToken 合约');
+        // 使用已部署的 LinkToken 合约地址
+        const chainlinkDeploymentFile = `${deploymentDir}/chainlink-deployment.json`;
+        if (!fs.existsSync(chainlinkDeploymentFile)) {
+            console.error('❌ 找不到 chainlink-deployment.json，请先部署 LinkToken');
             process.exit(1);
         }
-        const linkTokenBytecode = '0x' + linkTokenData.bin;
 
-        console.log('正在部署 LinkToken 合约...');
-        const linkTxHash = await rpcCall('eth_sendTransaction', [{
-            from: deployer,
-            data: linkTokenBytecode,
-            gas: '0x' + (2000000).toString(16)
-        }]);
-
-        // 等待 LinkToken 部署
-        let linkReceipt = null;
-        for (let i = 0; i < 30; i++) {
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            linkReceipt = await rpcCall('eth_getTransactionReceipt', [linkTxHash]);
-            if (linkReceipt) break;
+        const chainlinkDeployment = JSON.parse(fs.readFileSync(chainlinkDeploymentFile, 'utf8'));
+        const linkTokenAddress = chainlinkDeployment.linkToken;
+        if (!linkTokenAddress || linkTokenAddress === '0x0000000000000000000000000000000000000000') {
+            console.error('❌ chainlink-deployment.json 中缺少有效的 LinkToken 地址');
+            process.exit(1);
         }
 
-        if (!linkReceipt) {
-            console.error('❌ LinkToken 部署超时');
-            return;
-        }
-
-        if (linkReceipt.status === '0x0') {
-            console.error('❌ LinkToken 部署失败');
-            return;
-        }
-
-        linkTokenAddress = linkReceipt.contractAddress;
-        console.log('✅ LinkToken 部署成功:', linkTokenAddress);
+        console.log('✅ 使用已部署的 LinkToken 地址:', linkTokenAddress);
 
         // 配置参数
         const maximumGasPrice = 100; // 100 Gwei (uint32 in gwei)
@@ -216,12 +194,6 @@ async function deploy() {
         console.log('\n部署信息已保存到 deployment/ocr-deployment.json');
 
         // 将 OCR 合约地址添加到 chainlink-deployment.json
-        let chainlinkDeployment = {};
-        const chainlinkDeploymentFile = `${deploymentDir}/chainlink-deployment.json`;
-        if (fs.existsSync(chainlinkDeploymentFile)) {
-            chainlinkDeployment = JSON.parse(fs.readFileSync(chainlinkDeploymentFile, 'utf8'));
-        }
-
         chainlinkDeployment.ocrContract = receipt.contractAddress;
         fs.writeFileSync(chainlinkDeploymentFile, JSON.stringify(chainlinkDeployment, null, 2));
 

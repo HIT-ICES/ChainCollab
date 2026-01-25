@@ -57,7 +57,7 @@ solc --optimize \
   contracts/LinkToken-v0.6-fix/token/LinkERC20.sol \
   contracts/LinkToken-v0.6-fix/token/IERC677.sol \
   contracts/LinkToken-v0.6-fix/token/IERC677Receiver.sol \
-  contracts/ocr/OffchainAggregator.sol \
+  contracts/ocr/OffchainAggregator_Allequal.sol \
   contracts/ocr/AccessControlledOffchainAggregator.sol \
   contracts/ocr/OffchainAggregatorBilling.sol \
   contracts/ocr/Owned.sol \
