@@ -72,7 +72,7 @@ Bootnode 节点的私钥文件，用于 P2P 网络发现。
 docker-compose up -d mybootnode
 
 # 查看日志
-docker logs chainlink-mybootnode-1 -f
+docker logs <mybootnode-container> -f
 
 # 停止节点
 docker-compose stop mybootnode
@@ -82,7 +82,7 @@ docker-compose stop mybootnode
 
 ```bash
 # 进入容器
-docker exec -it chainlink-mybootnode-1 sh
+docker exec -it <mybootnode-container> sh
 
 # 连接到 Geth 控制台
 geth attach /root/.ethereum/geth.ipc
@@ -147,7 +147,7 @@ admin.nodeInfo
 ### 节点无法启动
 ```bash
 # 检查容器日志
-docker logs chainlink-mybootnode-1
+docker logs <mybootnode-container>
 
 # 检查端口占用
 netstat -tuln | grep 8545
@@ -165,7 +165,7 @@ netstat -tuln | grep 8545
 ### 账户无法解锁
 ```bash
 # 在容器内执行
-docker exec chainlink-mybootnode-1 geth --exec \
+docker exec <mybootnode-container> geth --exec \
   "personal.unlockAccount('0x7e9519A329908320829F4a747b8Bac06cF0955cb', 'password123', 0)" \
   attach /root/.ethereum/geth.ipc
 ```

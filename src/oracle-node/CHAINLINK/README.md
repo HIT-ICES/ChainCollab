@@ -52,8 +52,29 @@ CHAINLINK/
 │   ├── config.toml
 │   └── secrets.toml
 │
-├── config/                # 配置文件
-│   └── job-spec.toml      # Job 规范
+├── features/              # 功能分组
+│   ├── 01-single-node-basic/
+│   │   ├── CHAINLINK工作流总结.md
+│   │   ├── TEST_GUIDE.md
+│   │   ├── SCRIPTS.md
+│   │   └── job-spec.toml
+│   ├── 02-single-node-dmn/
+│   │   ├── DMN_SERVICES_GUIDE.md
+│   │   ├── job-spec-dmn-java.toml
+│   │   ├── dmn-server-java/
+│   │   └── start-dmn-server-java.sh
+│   ├── 03-ocr-multinode/
+│   │   ├── OCR_SETUP_GUIDE.md
+│   │   ├── docker-compose-multinode.yml
+│   │   ├── chainlink-bootstrap/
+│   │   ├── chainlink1/ chainlink2/ chainlink3/ chainlink4/
+│   │   ├── job-spec-ocr.toml
+│   │   ├── job-spec-ocr-bootstrap.toml
+│   │   └── start-ocr-network.sh
+│   └── 04-dmn-ocr/
+│       ├── README.md
+│       ├── job-spec-dmn-event.toml
+│       └── job-spec-ocr-dmn.toml
 │
 ├── deployment/            # 部署信息
 │   └── deployment/chainlink-deployment.json
@@ -138,7 +159,7 @@ docker logs chainlink-node -f
 **如果是首次部署或清理过 Jobs,需要创建 Chainlink Job:**
 
 ```bash
-# 创建 Job (会读取 config/job-spec.toml)
+# 创建 Job (会读取 features/01-single-node-basic/job-spec.toml)
 node scripts/create-job.js
 ```
 
@@ -186,7 +207,7 @@ solc --optimize --base-path . --include-path node_modules \
   --combined-json abi,bin contracts/simple.sol > deployment/compiled.json
 
 # 解锁账户
-docker exec chainlink-mybootnode-1 geth --exec \
+docker exec <mybootnode-container> geth --exec \
   "personal.unlockAccount('0x7e9519A329908320829F4a747b8Bac06cF0955cb', 'password123', 0)" \
   attach /root/.ethereum/geth.ipc
 
@@ -325,22 +346,22 @@ docker-compose restart
 
 # 查看日志
 docker logs chainlink-node --tail 100 -f
-docker logs chainlink-mybootnode-1 --tail 100 -f
+docker logs <mybootnode-container> --tail 100 -f
 ```
 
 ### 账户管理
 
 ```bash
 # 查看账户列表
-docker exec chainlink-mybootnode-1 geth --exec "eth.accounts" attach /root/.ethereum/geth.ipc
+docker exec <mybootnode-container> geth --exec "eth.accounts" attach /root/.ethereum/geth.ipc
 
 # 查看账户余额
-docker exec chainlink-mybootnode-1 geth --exec \
+docker exec <mybootnode-container> geth --exec \
   "web3.fromWei(eth.getBalance('0x7e9519A329908320829F4a747b8Bac06cF0955cb'), 'ether')" \
   attach /root/.ethereum/geth.ipc
 
 # 解锁账户 (0 表示永久解锁)
-docker exec chainlink-mybootnode-1 geth --exec \
+docker exec <mybootnode-container> geth --exec \
   "personal.unlockAccount('0x7e9519A329908320829F4a747b8Bac06cF0955cb', 'password123', 0)" \
   attach /root/.ethereum/geth.ipc
 ```
@@ -393,7 +414,7 @@ Job 配置中的合约地址必须使用 EIP55 校验和格式,否则会报错�
 **解决方案**:
 ```bash
 # 检查 Geth WebSocket 是否启用
-docker exec chainlink-mybootnode-1 ps aux | grep ws
+docker exec <mybootnode-container> ps aux | grep ws
 
 # 重启服务
 docker-compose restart
@@ -405,7 +426,7 @@ docker-compose restart
 
 **解决方案**:
 ```bash
-docker exec chainlink-mybootnode-1 geth --exec \
+docker exec <mybootnode-container> geth --exec \
   "personal.unlockAccount('0x7e9519A329908320829F4a747b8Bac06cF0955cb', 'password123', 0)" \
   attach /root/.ethereum/geth.ipc
 ```
@@ -533,7 +554,7 @@ node scripts/deploy-contract.js
 - [Chainlink 官方文档](https://docs.chain.link/)
 - [Geth 节点配置](geth-node/README.md)
 - [合约源码](contracts/simple.sol)
-- [Job 配置](config/job-spec.toml)
+- [Job 配置](features/01-single-node-basic/job-spec.toml)
 
 ## 注意事项
 
@@ -584,4 +605,3 @@ MIT License
 - 账户 keystore
 - 配置文件
 - 智能合约源码
-

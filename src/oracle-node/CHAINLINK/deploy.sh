@@ -13,6 +13,18 @@ NC='\033[0m'
 
 GETH_ACCOUNT="0x365Acf78C44060CAF3A4789D804Df11E3B4AA17d"
 
+# 尝试自动定位 mybootnode 容器名称
+get_mybootnode_container() {
+    local name
+    name=$(docker ps --filter "label=com.docker.compose.service=mybootnode" --format "{{.Names}}" | head -n 1)
+    if [ -z "$name" ]; then
+        name=$(docker ps --filter "name=mybootnode" --format "{{.Names}}" | head -n 1)
+    fi
+    echo "$name"
+}
+
+MYBOOTNODE_CONTAINER="$(get_mybootnode_container)"
+
 echo -e "${BLUE}================================================${NC}"
 echo -e "${BLUE}  完整部署流程 (含自动转账)${NC}"
 echo -e "${BLUE}================================================${NC}"
@@ -40,7 +52,7 @@ echo ""
 echo -e "${YELLOW}[2/4] 解锁账户并检查余额...${NC}"
 
 # 检查 Geth 是否运行
-if ! docker ps | grep -q "chainlink-mybootnode-1"; then
+if [ -z "$MYBOOTNODE_CONTAINER" ]; then
     echo -e "${RED}❌ Geth 节点未运行${NC}"
     echo "请先启动服务: ./start.sh"
     exit 1
@@ -51,13 +63,13 @@ fi
 # 检查账户余额
 echo ""
 echo -e "${YELLOW}检查账户余额...${NC}"
-BALANCE=$(docker exec chainlink-mybootnode-1 geth attach /root/.ethereum/geth.ipc --exec "eth.getBalance('$GETH_ACCOUNT')" 2>/dev/null)
+BALANCE=$(docker exec "$MYBOOTNODE_CONTAINER" geth attach /root/.ethereum/geth.ipc --exec "eth.getBalance('$GETH_ACCOUNT')" 2>/dev/null)
 
 if [ -z "$BALANCE" ] || [ "$BALANCE" = "0" ]; then
     echo -e "${YELLOW}⚠️  账户余额为 0，开始从 coinbase 转账...${NC}"
 
     # 获取 coinbase 地址
-    COINBASE=$(docker exec chainlink-mybootnode-1 geth attach /root/.ethereum/geth.ipc --exec "eth.coinbase" 2>/dev/null | tr -d '"')
+    COINBASE=$(docker exec "$MYBOOTNODE_CONTAINER" geth attach /root/.ethereum/geth.ipc --exec "eth.coinbase" 2>/dev/null | tr -d '"')
 
     if [ -z "$COINBASE" ] || [ "$COINBASE" = "null" ]; then
         echo -e "${RED}❌ 无法获取 coinbase 地址${NC}"
@@ -67,41 +79,41 @@ if [ -z "$BALANCE" ] || [ "$BALANCE" = "0" ]; then
         echo "  - 挖矿未启用"
         echo ""
         echo "尝试手动启动挖矿:"
-        echo "  docker exec chainlink-mybootnode-1 geth attach /root/.ethereum/geth.ipc --exec \"miner.start()\""
+        echo "  docker exec <mybootnode-container> geth attach /root/.ethereum/geth.ipc --exec \"miner.start()\""
         exit 1
     fi
 
     echo "Coinbase 地址: $COINBASE"
 
     # 检查 coinbase 余额
-    COINBASE_BALANCE=$(docker exec chainlink-mybootnode-1 geth attach /root/.ethereum/geth.ipc --exec "web3.fromWei(eth.getBalance('$COINBASE'), 'ether')" 2>/dev/null)
+    COINBASE_BALANCE=$(docker exec "$MYBOOTNODE_CONTAINER" geth attach /root/.ethereum/geth.ipc --exec "web3.fromWei(eth.getBalance('$COINBASE'), 'ether')" 2>/dev/null)
     echo "Coinbase 余额: $COINBASE_BALANCE ETH"
 
     if [ -z "$COINBASE_BALANCE" ] || [ "$COINBASE_BALANCE" = "0" ]; then
         echo -e "${YELLOW}⚠️  Coinbase 余额不足，启动挖矿...${NC}"
-        docker exec chainlink-mybootnode-1 geth attach /root/.ethereum/geth.ipc --exec "miner.start()" 2>/dev/null
+        docker exec "$MYBOOTNODE_CONTAINER" geth attach /root/.ethereum/geth.ipc --exec "miner.start()" 2>/dev/null
         echo "等待挖出一些区块 (约 10 秒)..."
         sleep 10
-        docker exec chainlink-mybootnode-1 geth attach /root/.ethereum/geth.ipc --exec "miner.stop()" 2>/dev/null
+        docker exec "$MYBOOTNODE_CONTAINER" geth attach /root/.ethereum/geth.ipc --exec "miner.stop()" 2>/dev/null
 
         # 再次检查余额
-        COINBASE_BALANCE=$(docker exec chainlink-mybootnode-1 geth attach /root/.ethereum/geth.ipc --exec "web3.fromWei(eth.getBalance('$COINBASE'), 'ether')" 2>/dev/null)
+        COINBASE_BALANCE=$(docker exec "$MYBOOTNODE_CONTAINER" geth attach /root/.ethereum/geth.ipc --exec "web3.fromWei(eth.getBalance('$COINBASE'), 'ether')" 2>/dev/null)
         echo "Coinbase 新余额: $COINBASE_BALANCE ETH"
     fi
 
     # 解锁 coinbase
     echo "解锁 coinbase 账户..."
-    UNLOCK_RESULT=$(docker exec chainlink-mybootnode-1 geth attach /root/.ethereum/geth.ipc --exec "personal.unlockAccount('$COINBASE', "", 0)" 2>/dev/null)
+    UNLOCK_RESULT=$(docker exec "$MYBOOTNODE_CONTAINER" geth attach /root/.ethereum/geth.ipc --exec "personal.unlockAccount('$COINBASE', "", 0)" 2>/dev/null)
 
     if [ "$UNLOCK_RESULT" != "true" ]; then
         echo -e "${RED}❌ Coinbase 解锁失败${NC}"
         echo "尝试使用空密码..."
-        docker exec chainlink-mybootnode-1 geth attach /root/.ethereum/geth.ipc --exec "personal.unlockAccount('$COINBASE', '', 0)" 2>/dev/null
+        docker exec "$MYBOOTNODE_CONTAINER" geth attach /root/.ethereum/geth.ipc --exec "personal.unlockAccount('$COINBASE', '', 0)" 2>/dev/null
     fi
 
     # 从 coinbase 转账 1000 ETH
     echo "开始转账 1000 ETH 到部署账户..."
-    TX_HASH=$(docker exec chainlink-mybootnode-1 geth attach /root/.ethereum/geth.ipc --exec "eth.sendTransaction({from: '$COINBASE', to: '$GETH_ACCOUNT', value: web3.toWei(1000, 'ether')})" 2>&1)
+    TX_HASH=$(docker exec "$MYBOOTNODE_CONTAINER" geth attach /root/.ethereum/geth.ipc --exec "eth.sendTransaction({from: '$COINBASE', to: '$GETH_ACCOUNT', value: web3.toWei(1000, 'ether')})" 2>&1)
 
     # 检查是否有错误
     if echo "$TX_HASH" | grep -q "Error"; then
@@ -109,9 +121,9 @@ if [ -z "$BALANCE" ] || [ "$BALANCE" = "0" ]; then
         echo "$TX_HASH"
         echo ""
         echo "请手动检查:"
-        echo "  1. Coinbase 账户: docker exec chainlink-mybootnode-1 geth attach /root/.ethereum/geth.ipc --exec \"eth.coinbase\""
-        echo "  2. Coinbase 余额: docker exec chainlink-mybootnode-1 geth attach /root/.ethereum/geth.ipc --exec \"web3.fromWei(eth.getBalance(eth.coinbase), 'ether')\""
-        echo "  3. 手动转账: docker exec chainlink-mybootnode-1 geth attach /root/.ethereum/geth.ipc --exec \"eth.sendTransaction({from: eth.coinbase, to: '$GETH_ACCOUNT', value: web3.toWei(1000, 'ether')})\""
+        echo "  1. Coinbase 账户: docker exec <mybootnode-container> geth attach /root/.ethereum/geth.ipc --exec \"eth.coinbase\""
+        echo "  2. Coinbase 余额: docker exec <mybootnode-container> geth attach /root/.ethereum/geth.ipc --exec \"web3.fromWei(eth.getBalance(eth.coinbase), 'ether')\""
+        echo "  3. 手动转账: docker exec <mybootnode-container> geth attach /root/.ethereum/geth.ipc --exec \"eth.sendTransaction({from: eth.coinbase, to: '$GETH_ACCOUNT', value: web3.toWei(1000, 'ether')})\""
         exit 1
     fi
 
@@ -124,10 +136,10 @@ if [ -z "$BALANCE" ] || [ "$BALANCE" = "0" ]; then
     sleep 5
 
     # 再次检查余额
-    NEW_BALANCE=$(docker exec chainlink-mybootnode-1 geth attach /root/.ethereum/geth.ipc --exec "web3.fromWei(eth.getBalance('$GETH_ACCOUNT'), 'ether')" 2>/dev/null)
+    NEW_BALANCE=$(docker exec "$MYBOOTNODE_CONTAINER" geth attach /root/.ethereum/geth.ipc --exec "web3.fromWei(eth.getBalance('$GETH_ACCOUNT'), 'ether')" 2>/dev/null)
     echo -e "${GREEN}✅ 转账成功! 当前余额: $NEW_BALANCE ETH${NC}"
 else
-    BALANCE_ETH=$(docker exec chainlink-mybootnode-1 geth attach /root/.ethereum/geth.ipc --exec "web3.fromWei(eth.getBalance('$GETH_ACCOUNT'), 'ether')" 2>/dev/null)
+    BALANCE_ETH=$(docker exec "$MYBOOTNODE_CONTAINER" geth attach /root/.ethereum/geth.ipc --exec "web3.fromWei(eth.getBalance('$GETH_ACCOUNT'), 'ether')" 2>/dev/null)
     echo -e "${GREEN}✅ 账户余额充足: $BALANCE_ETH ETH${NC}"
 fi
 
@@ -219,7 +231,7 @@ if [ $? -eq 0 ] && [ -f "$DEPLOYMENT_DIR/deployment.json" ]; then
         echo -e "  ${BLUE}时间:${NC}     $TIMESTAMP"
 
         # 再次获取最新余额
-        FINAL_BALANCE=$(docker exec chainlink-mybootnode-1 geth attach /root/.ethereum/geth.ipc --exec "web3.fromWei(eth.getBalance('$GETH_ACCOUNT'), 'ether')" 2>/dev/null)
+        FINAL_BALANCE=$(docker exec "$MYBOOTNODE_CONTAINER" geth attach /root/.ethereum/geth.ipc --exec "web3.fromWei(eth.getBalance('$GETH_ACCOUNT'), 'ether')" 2>/dev/null)
         echo -e "  ${BLUE}剩余余额:${NC} $FINAL_BALANCE ETH"
     else
         cat deployment.json

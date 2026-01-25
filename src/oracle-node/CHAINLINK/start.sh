@@ -12,6 +12,15 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+# 尝试自动定位 mybootnode 容器名称
+get_mybootnode_container() {
+    local name
+    name=$(docker ps --filter "label=com.docker.compose.service=mybootnode" --format "{{.Names}}" | head -n 1)
+    if [ -z "$name" ]; then
+        name=$(docker ps --filter "name=mybootnode" --format "{{.Names}}" | head -n 1)
+    fi
+    echo "$name"
+}
 # 配置信息
 GETH_ACCOUNT="0x365Acf78C44060CAF3A4789D804Df11E3B4AA17d"
 GETH_PASSWORD=""
@@ -65,7 +74,8 @@ sleep 5
 echo "等待 Geth 节点启动 (IPC 准备)..."
 # 先等待 IPC 文件创建
 for i in {1..20}; do
-    if docker exec chainlink-mybootnode-1 test -S /root/.ethereum/geth.ipc 2>/dev/null; then
+    MYBOOTNODE_CONTAINER="$(get_mybootnode_container)"
+    if [ -n "$MYBOOTNODE_CONTAINER" ] && docker exec "$MYBOOTNODE_CONTAINER" test -S /root/.ethereum/geth.ipc 2>/dev/null; then
         echo "IPC 文件已创建"
         break
     fi
@@ -81,7 +91,8 @@ echo ""
 # 再等待节点完全启动
 echo "等待 Geth 节点就绪..."
 for i in {1..30}; do
-    if docker exec chainlink-mybootnode-1 geth attach /root/.ethereum/geth.ipc --exec "eth.blockNumber" &>/dev/null; then
+    MYBOOTNODE_CONTAINER="$(get_mybootnode_container)"
+    if [ -n "$MYBOOTNODE_CONTAINER" ] && docker exec "$MYBOOTNODE_CONTAINER" geth attach /root/.ethereum/geth.ipc --exec "eth.blockNumber" &>/dev/null; then
         echo -e "${GREEN}✅ Geth 节点已就绪${NC}"
         break
     fi
@@ -119,14 +130,15 @@ echo ""
 echo "检查 Geth 账户..."
 ACCOUNTS=""
 for i in {1..5}; do
-    ACCOUNTS=$(docker exec chainlink-mybootnode-1 geth attach /root/.ethereum/geth.ipc --exec "eth.accounts" 2>/dev/null)
+    MYBOOTNODE_CONTAINER="$(get_mybootnode_container)"
+    ACCOUNTS=$(docker exec "$MYBOOTNODE_CONTAINER" geth attach /root/.ethereum/geth.ipc --exec "eth.accounts" 2>/dev/null)
     if [ $? -eq 0 ] && [ -n "$ACCOUNTS" ]; then
         break
     fi
     if [ $i -eq 5 ]; then
         echo -e "${RED}❌ 无法获取 Geth 账户列表${NC}"
         echo "尝试手动检查:"
-        echo "  docker exec chainlink-mybootnode-1 geth attach /root/.ethereum/geth.ipc --exec \"eth.accounts\""
+        echo "  docker exec <mybootnode-container> geth attach /root/.ethereum/geth.ipc --exec \"eth.accounts\""
         exit 1
     fi
     echo "重试 $i/5..."
@@ -186,7 +198,7 @@ echo -e "${YELLOW}🔧 常用命令:${NC}"
 echo ""
 echo -e "  查看日志:"
 echo -e "    ${BLUE}docker logs chainlink-node -f${NC}"
-echo -e "    ${BLUE}docker logs chainlink-mybootnode-1 -f${NC}"
+echo -e "    ${BLUE}docker logs <mybootnode-container> -f${NC}"
 echo ""
 echo -e "  解锁账户:"
 echo -e "    ${BLUE}./unlock-account.sh${NC}"

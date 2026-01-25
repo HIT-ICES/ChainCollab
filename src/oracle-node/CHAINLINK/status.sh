@@ -9,6 +9,18 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
+# 尝试自动定位 mybootnode 容器名称
+get_mybootnode_container() {
+    local name
+    name=$(docker ps --filter "label=com.docker.compose.service=mybootnode" --format "{{.Names}}" | head -n 1)
+    if [ -z "$name" ]; then
+        name=$(docker ps --filter "name=mybootnode" --format "{{.Names}}" | head -n 1)
+    fi
+    echo "$name"
+}
+
+MYBOOTNODE_CONTAINER="$(get_mybootnode_container)"
+
 echo -e "${BLUE}================================================${NC}"
 echo -e "${BLUE}  Chainlink Oracle 服务状态${NC}"
 echo -e "${BLUE}================================================${NC}"
@@ -21,19 +33,19 @@ echo ""
 
 # 检查 Geth 节点
 echo -e "${YELLOW}⛓️  Geth 节点状态:${NC}"
-if docker exec chainlink-mybootnode-1 geth attach /root/.ethereum/geth.ipc --exec "eth.blockNumber" &>/dev/null; then
-    BLOCK_NUM=$(docker exec chainlink-mybootnode-1 geth attach /root/.ethereum/geth.ipc --exec "eth.blockNumber" 2>/dev/null)
+if [ -n "$MYBOOTNODE_CONTAINER" ] && docker exec "$MYBOOTNODE_CONTAINER" geth attach /root/.ethereum/geth.ipc --exec "eth.blockNumber" &>/dev/null; then
+    BLOCK_NUM=$(docker exec "$MYBOOTNODE_CONTAINER" geth attach /root/.ethereum/geth.ipc --exec "eth.blockNumber" 2>/dev/null)
     echo -e "  状态: ${GREEN}运行中${NC}"
     echo -e "  区块高度: ${GREEN}$BLOCK_NUM${NC}"
 
-    MINING=$(docker exec chainlink-mybootnode-1 geth attach /root/.ethereum/geth.ipc --exec "eth.mining" 2>/dev/null)
+    MINING=$(docker exec "$MYBOOTNODE_CONTAINER" geth attach /root/.ethereum/geth.ipc --exec "eth.mining" 2>/dev/null)
     if [ "$MINING" = "true" ]; then
         echo -e "  挖矿状态: ${GREEN}进行中${NC}"
     else
         echo -e "  挖矿状态: ${RED}未启动${NC}"
     fi
 
-    PEER_COUNT=$(docker exec chainlink-mybootnode-1 geth attach /root/.ethereum/geth.ipc --exec "net.peerCount" 2>/dev/null)
+    PEER_COUNT=$(docker exec "$MYBOOTNODE_CONTAINER" geth attach /root/.ethereum/geth.ipc --exec "net.peerCount" 2>/dev/null)
     echo -e "  连接节点数: ${GREEN}$PEER_COUNT${NC}"
 else
     echo -e "  状态: ${RED}未运行${NC}"
@@ -74,7 +86,11 @@ docker logs chainlink-node --tail 10 2>&1 | sed 's/^/  /'
 echo ""
 
 echo -e "${YELLOW}📋 最近日志 (Geth):${NC}"
-docker logs chainlink-mybootnode-1 --tail 10 2>&1 | sed 's/^/  /'
+if [ -n "$MYBOOTNODE_CONTAINER" ]; then
+    docker logs "$MYBOOTNODE_CONTAINER" --tail 10 2>&1 | sed 's/^/  /'
+else
+    echo "  (未找到 mybootnode 容器)"
+fi
 echo ""
 
 # 部署信息
@@ -106,7 +122,7 @@ echo -e "${YELLOW}🔧 快捷命令:${NC}"
 echo ""
 echo -e "  查看完整日志:"
 echo -e "    ${BLUE}docker logs chainlink-node -f${NC}"
-echo -e "    ${BLUE}docker logs chainlink-mybootnode-1 -f${NC}"
+echo -e "    ${BLUE}docker logs <mybootnode-container> -f${NC}"
 echo ""
 echo -e "  重启服务:"
 echo -e "    ${BLUE}docker-compose restart${NC}"

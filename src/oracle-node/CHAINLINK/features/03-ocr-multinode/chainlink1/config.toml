@@ -1,0 +1,39 @@
+[Log]
+Level = "debug"
+
+[WebServer]
+AllowOrigins = "*"
+SecureCookies = false
+
+[WebServer.TLS]
+HTTPSPort = 0
+
+[Database]
+MaxIdleConns = 10
+MaxOpenConns = 20
+
+[Feature]
+LogPoller = true
+
+[OCR]
+Enabled = true
+# 关键：填你节点里生成的 OCR2 Key Bundle ID（在 UI 的 Key Management/Keys 页面可见）
+
+[[EVM]]
+ChainID = "3456"
+Enabled = true
+
+[[EVM.Nodes]]
+Name = "mybootnode"
+HTTPURL = "http://mybootnode:8545"
+WSURL = "ws://mybootnode:8545"
+
+[P2P.V2]
+Enabled = true
+# 宣告（其他节点能访问到的地址；同一 docker network 内用容器 IP/别名都行）
+AnnounceAddresses = ["172.31.61.180:6698"]
+DefaultBootstrappers = ["12D3KooWEW1feNwzEzjE4rpD9GWdhQPVCwkp15uG88D5u2FMZ91Q@172.31.61.180:6690"]
+
+DeltaDial = "15s"
+DeltaReconcile = "1m0s"
+ListenAddresses = ["0.0.0.0:6698"]

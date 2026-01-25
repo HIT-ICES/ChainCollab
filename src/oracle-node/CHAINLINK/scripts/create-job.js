@@ -1,5 +1,6 @@
 const http = require('http');
 const fs = require('fs');
+const path = require('path');
 const { keccak256 } = require('@ethersproject/keccak256');
 const { toUtf8Bytes } = require('@ethersproject/strings');
 
@@ -110,7 +111,8 @@ async function main() {
         const operatorAddress = chainlinkDeployment.operator;
 
         // 读取 Job Spec
-        let jobSpec = fs.readFileSync('config/job-spec.toml', 'utf8');
+        const jobSpecPath = path.resolve(__dirname, '../features/01-single-node-basic/job-spec.toml');
+        let jobSpec = fs.readFileSync(jobSpecPath, 'utf8');
 
         // 动态替换合约地址，确保是 EIP55 格式
         const checksumAddress = toChecksumAddress(operatorAddress);

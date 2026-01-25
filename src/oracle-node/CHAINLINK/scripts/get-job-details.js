@@ -90,7 +90,7 @@ async function main() {
         const jobId = chainlinkDeployment.dmnJobInternalId;
         if (!jobId) {
             console.error('❌ 未找到 DMN Job ID，请先创建 DMN Job');
-            console.log('使用方法: node scripts/create-dmn-job.js');
+            console.log('使用方法: node features/02-single-node-dmn/create-dmn-job.js');
             process.exit(1);
         }
 

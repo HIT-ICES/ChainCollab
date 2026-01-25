@@ -65,7 +65,7 @@ async function deploy() {
         if (balanceEth === 0) {
             console.error('\n❌ 账户余额为 0，无法部署合约');
             console.log('请先使用以下命令解锁挖矿账户并转账:');
-            console.log(`docker exec chainlink-mybootnode-1 geth --exec "eth.sendTransaction({from: eth.coinbase, to: '${deployer}', value: web3.toWei(100, 'ether')})" attach /root/.ethereum/geth.ipc`);
+            console.log(`docker exec <mybootnode-container> geth --exec "eth.sendTransaction({from: eth.coinbase, to: '${deployer}', value: web3.toWei(100, 'ether')})" attach /root/.ethereum/geth.ipc`);
             return;
         }
 
@@ -152,7 +152,7 @@ async function deploy() {
         } else {
             console.error('❌ 请先创建至少一个 Chainlink Job:');
             console.error('   - 普通 Job: node scripts/create-job.js');
-            console.error('   - 或 DMN Job: node scripts/create-dmn-job.js');
+            console.error('   - 或 DMN Job: node features/02-single-node-dmn/create-dmn-job.js');
             process.exit(1);
         }
 
