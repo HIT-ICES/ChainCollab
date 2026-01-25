@@ -1,0 +1,21 @@
+type = "log"
+schemaVersion = 1
+name = "DMN Event -> Local Cache"
+evmChainID = 3456
+contractAddress = "<YOUR_DMN_EVENT_CONTRACT_ADDRESS>"
+
+observationSource = """
+    decode_log   [type="ethabidecodelog"
+                  abi="DMNEvent(bytes32 requestId, string dmnContent, string decisionId, string inputData)"
+                  data="$(jobRun.logData)"
+                  topics="$(jobRun.logTopics)"]
+
+    call_cache   [type="http" method=POST url="http://localhost:8080/api/dmn/calc"
+                  requestData="{\\\"requestId\\\": \\\"$(decode_log.requestId)\\\", \\\"dmnContent\\\": \\\"$(decode_log.dmnContent)\\\", \\\"decisionId\\\": \\\"$(decode_log.decisionId)\\\", \\\"inputData\\\": $(decode_log.inputData)}"
+                  contentType="application/json"
+                  allowUnrestrictedNetworkAccess="true"]
+
+    parse_ok     [type="jsonparse" path="ok" data="$(call_cache)"]
+
+    decode_log -> call_cache -> parse_ok
+"""

@@ -1,0 +1,20 @@
+type            = "offchainreporting"
+schemaVersion   = 1
+name            = "OCR DMN Cache Job"
+externalJobID   = "11111111-2222-3333-4444-555555555555"
+isBootstrapPeer = false
+evmChainID      = 3456
+keyBundleID     = "<YOUR_OCR_KEY_BUNDLE_ID>"
+
+contractAddress    = "<YOUR_OCR_V1_AGGREGATOR_ADDRESS>"
+transmitterAddress = "<YOUR_ONCHAIN_TRANSMITTER_ADDRESS>"
+
+p2pBootstrapPeers = [
+  "<BOOTSTRAP_PEER_ADDRESS>"
+]
+
+observationSource = """
+    fetch  [type="http" method=GET url="http://localhost:8080/api/dmn/latest"]
+    parse  [type="jsonparse" path="value"]
+    fetch -> parse
+"""

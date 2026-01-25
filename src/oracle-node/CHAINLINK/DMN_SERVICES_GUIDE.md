@@ -82,6 +82,9 @@ DMN Decision Engine Server 已启动
 健康检查: GET http://localhost:8080/api/dmn/health
 执行决策: POST http://localhost:8080/api/dmn/evaluate
 获取决策信息: POST http://localhost:8080/api/dmn/input-info
+缓存决策: POST http://localhost:8080/api/dmn/calc
+读取缓存: GET http://localhost:8080/api/dmn/latest
+确认清缓存: POST http://localhost:8080/api/dmn/ack
 ===============================================
 ```
 
@@ -219,7 +222,74 @@ node check-dmn-result.js
 }
 ```
 
-### 3. 获取 DMN 输入信息
+### 3. 执行决策并缓存（供 OCR 读取）
+
+**POST** `/api/dmn/calc`
+
+**请求体**:
+```json
+{
+  "requestId": "0x...",
+  "dmnContent": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><definitions ...>",
+  "decisionId": "testDecision",
+  "inputData": {
+    "age": 15,
+    "income": 5000
+  }
+}
+```
+
+**响应示例**:
+```json
+{
+  "ok": true,
+  "requestId": "0x...",
+  "value": [{"Decision": "Minor"}],
+  "updatedAt": 1705296340123
+}
+```
+
+### 4. 获取最近一次缓存结果
+
+**GET** `/api/dmn/latest`
+
+**响应示例**:
+```json
+{
+  "ok": true,
+  "ready": true,
+  "value": [{"Decision": "Minor"}],
+  "requestId": "0x...",
+  "updatedAt": 1705296340123
+}
+```
+
+### 5. OCR 写回确认并清缓存
+
+**POST** `/api/dmn/ack`
+
+**请求体**:
+```json
+{
+  "requestId": "0x...",
+  "aggregatorRoundId": 12,
+  "answer": "123",
+  "txHash": "0x...",
+  "blockTimestampMs": 1705296340123
+}
+```
+
+**响应示例**:
+```json
+{
+  "ok": true,
+  "clearedLatest": true,
+  "skippedLatest": false,
+  "removedByRequestId": false
+}
+```
+
+### 6. 获取 DMN 输入信息
 
 **POST** `/api/dmn/input-info`
 
