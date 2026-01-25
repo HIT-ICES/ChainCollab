@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { css } from "@emotion/css";
 import {
 	Button,
@@ -1051,17 +1051,34 @@ const ExecutionPage = (props) => {
 		contractName,
 		bpmnInstance.instance_chaincode_id,
 	);
-	const currentElements = [
-		...allMessages,
-		...allEvents,
-		...allGateways,
-		...allBusinessRules,
-		...allTokenTasks,
-	].filter((msg) => {
-		return msg.state === 1 || msg.state === 2;
-	});
+	const getElementKey = (e) => {
+    const id =
+        e?.tokenElementID ||
+        e?.TokenElementID ||
+        e?.MessageID ||
+        e?.EventID ||
+        e?.GatewayID ||
+        e?.BusinessRuleID ||
+        e?.id ||
+        "";
+    return `${e?.type || "unknown"}_${id}`;
+};
 
-	const renderSvg = () => {
+const currentElements = useMemo(() => {
+    const list = [
+        ...allMessages,
+        ...allEvents,
+        ...allGateways,
+        ...allBusinessRules,
+        ...allTokenTasks,
+    ].filter((msg) => msg.state === 1 || msg.state === 2);
+
+    // 固定顺序，避免每秒刷新时列表项“换位置”
+    list.sort((a, b) => getElementKey(a).localeCompare(getElementKey(b)));
+    return list;
+}, [allMessages, allEvents, allGateways, allBusinessRules, allTokenTasks]);
+
+const renderSvg = () => {
 		const updatedMsgList = [
 			...allMessages,
 			...allEvents,
@@ -1175,22 +1192,20 @@ const ExecutionPage = (props) => {
 			{/* <Tag color="blue">Participant: {" " + getParticipantName(participant)}</Tag> */}
 
 			<div style={{ display: "flex", marginTop: "20px" }}>
-				{currentElements.map((currentElement) => {
-					return (
-						<ControlPanel
-							currentElement={currentElement}
-							contractName={contractName}
-							coreURL={full_core_url}
-							bpmnName={bpmnData.name}
-							contractMethodDes={contractMethodDes}
-							bpmn={bpmnData}
-							bpmnInstance={bpmnInstance}
-							instanceId={bpmnInstance.instance_chaincode_id}
-							identity={identity}
-						/>
-					);
-				})}
-			</div>
+				{currentElements.map((currentElement) => (
+    <ControlPanel
+        key={getElementKey(currentElement)}
+        currentElement={currentElement}
+        contractName={contractName}
+        coreURL={full_core_url}
+        bpmnName={bpmnData.name}
+        contractMethodDes={contractMethodDes}
+        bpmn={bpmnData}
+        bpmnInstance={bpmnInstance}
+        instanceId={bpmnInstance.instance_chaincode_id}
+        identity={identity}
+    />
+))}</div>
 			<Button
 				onClick={() => {
 					syncFireflyData();

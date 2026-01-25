@@ -18,16 +18,62 @@ export default function AssetTaskModal({
   const eventBus = modeler.get('eventBus');
   const shape = elementRegistry.get(dataElementId);
 
-  // Participant 列表去重
-  const rawOptions = elementRegistry
-    .filter((el: any) => el.businessObject.$type === 'bpmn:Participant')
-    .map((el: any) => ({
-      value: el.id,
-      label: el.businessObject.name || el.id,
-    }));
-  const participantOptions = Array.from(
-    new Map(rawOptions.map(item => [item.label, item])).values()
-  );
+  // Participant 选项：Task 弹窗里显示的是“参与者名”，documentation 里仍然只存“参与者ID”
+  // 关键点：
+  // 1) Select 的 value 统一使用 “pureId”（去掉 _ChoreographyTask_... 后缀），label 用 participant.name
+  // 2) options 按 pureId 去重（不要按 name 去重，否则同名会被误删，回显时就会显示 id）
+  // 3) 监听参与者改名/新增/删除，刷新 options；并用 key 强制 Select 重新挂载，避免 antd 缓存旧 label
+  const toPureParticipantId = (id: string) => (id || '').split('_ChoreographyTask_')[0];
+
+  const buildParticipantOptions = React.useCallback(() => {
+    const rawOptions = elementRegistry
+      .filter((el: any) => el.businessObject.$type === 'bpmn:Participant')
+      .map((el: any) => {
+        const pureId = toPureParticipantId(el.id);
+        return {
+          value: pureId,
+          label: el.businessObject.name || pureId,
+        };
+      });
+
+    return Array.from(
+      new Map(rawOptions.map(item => [item.value, item])).values()
+    );
+  }, [elementRegistry]);
+
+  const [participantOptions, setParticipantOptions] = React.useState<{ value: string; label: string }[]>([]);
+  const [participantOptionsKey, setParticipantOptionsKey] = React.useState(0);
+
+  const refreshParticipantOptions = React.useCallback(() => {
+    setParticipantOptions(buildParticipantOptions());
+    setParticipantOptionsKey(k => k + 1);
+  }, [buildParticipantOptions]);
+
+  React.useEffect(() => {
+    if (!isModalOpen) return;
+
+    refreshParticipantOptions();
+
+    const onMaybeParticipantChanged = (e: any) => {
+      const el = e?.element;
+      if (el?.businessObject?.$type === 'bpmn:Participant') {
+        refreshParticipantOptions();
+      }
+    };
+
+    eventBus.on('element.changed', onMaybeParticipantChanged);
+    eventBus.on('shape.added', onMaybeParticipantChanged);
+    eventBus.on('shape.removed', onMaybeParticipantChanged);
+    // 兜底：有些改名动作只触发 commandStack.changed
+    eventBus.on('commandStack.changed', refreshParticipantOptions);
+
+    return () => {
+      eventBus.off('element.changed', onMaybeParticipantChanged);
+      eventBus.off('shape.added', onMaybeParticipantChanged);
+      eventBus.off('shape.removed', onMaybeParticipantChanged);
+      eventBus.off('commandStack.changed', refreshParticipantOptions);
+    };
+  }, [isModalOpen, eventBus, refreshParticipantOptions]);
 
   // state
   const [elementName, setElementName] = React.useState('');
@@ -95,7 +141,7 @@ export default function AssetTaskModal({
     // 增值型（value-added）
     if (assetType === "value-added") {
       return [
-         { value: "URI", label: "URI", dataType: "string" },
+        { value: "URI", label: "URI", dataType: "string" },
         { value: "owner", label: "Owner", dataType: "string" },
         { value: "referring", label: "Referring", dataType: "string" },
         { value: "referred", label: "referred", dataType: "string" },
@@ -213,11 +259,8 @@ export default function AssetTaskModal({
       try {
         const parsed = JSON.parse(doc[0].text);
         if (parsed.caller) {
-          // 在 options 中找 value 以 parsed.caller 为前缀的项（支持 choreo 结构）
-          const match = participantOptions.find(opt =>
-            opt.value.startsWith(parsed.caller)
-          );
-          setCaller(match ? match.value : parsed.caller); // 设置 value（完整 ID）
+          // documentation 里保存的是参与者ID；这里统一转成 pureId，保证能命中 options 并显示 label(name)
+          setCaller(toPureParticipantId(parsed.caller));
         } else {
           setCaller('');
         }
@@ -260,13 +303,8 @@ export default function AssetTaskModal({
         setOperation(parsed.operation || '');
         setTokenNumber(parsed.tokenNumber || '');
         if (Array.isArray(parsed.callee)) {
-          const matchedCalleeIds = parsed.callee.map(callerId => {
-            const match = participantOptions.find(opt =>
-              opt.value.startsWith(callerId)
-            );
-            return match ? match.value : callerId;
-          });
-          setCallee(matchedCalleeIds);
+          // documentation 里保存的是参与者ID；这里统一转成 pureId，保证能命中 options 并显示 label(name)
+          setCallee(parsed.callee.map((id: string) => toPureParticipantId(id)));
         } else {
           setCallee([]);
         }
@@ -315,9 +353,11 @@ export default function AssetTaskModal({
       setTokenId('');
       setOriginalTokenId('');
       setTokenURL('');
+      // 打开弹窗先刷新参与者 options，确保回显时能匹配到 label(name)
+      refreshParticipantOptions();
       loadDataFromBPMN();
     }
-  }, [shape, isModalOpen]);
+  }, [shape, isModalOpen, refreshParticipantOptions]);
 
   // 监听连接变化，自动同步 refTokenIds 到输出 DataObject
   React.useEffect(() => {
@@ -527,7 +567,7 @@ export default function AssetTaskModal({
     const payload: any = { operation };
 
     if (caller) {
-      const pureCaller = caller.split('_ChoreographyTask_')[0];
+      const pureCaller = toPureParticipantId(caller);
       payload.caller = pureCaller;
     }
 
@@ -535,7 +575,7 @@ export default function AssetTaskModal({
       (assetType === 'value-added' && operation === 'Transfer') ||
       (assetType === 'distributive' && ['grant usage rights', 'revoke usage rights', 'transfer'].includes(operation))) {
       if (callee.length) {
-        payload.callee = callee.map(id => id.split('_ChoreographyTask_')[0]);
+        payload.callee = callee.map(id => toPureParticipantId(id));
       }
     }
 
@@ -621,12 +661,112 @@ export default function AssetTaskModal({
       message.warning('Please connect this Task to a DataObject first to define the asset');
       return;
     }
+    if (assetType === 'value-added' && Array.isArray(refTokenIds) && refTokenIds.length > 0 && tokenId) {
+      if (refTokenIds.includes(tokenId)) {
+        message.warning('refTokenIds cannot include its own tokenId (no self-reference)');
+        return;
+      }
+    }
+    // ✅ tokenNumber 只能为正值（>0）
+    // 仅在需要 tokenNumber 的场景下校验：transferable + FT 且 operation != query
+    if (assetType === 'transferable' && tokenType === 'FT' && operation !== 'query') {
+      const raw = (tokenNumber || '').trim();
+      if (raw) {
+        const num = Number(raw);
+        if (!Number.isFinite(num) || num <= 0) {
+          message.warning('tokenNumber must be a positive number');
+          return;
+        }
+      }
+    }
+
+    // ===== 2.1 参数完备性校验（仅在 Task 保存时校验）=====
+    const assetTypeDO = linkedAsset.assetType || assetType;     // 资产信息来自连线 DataObject
+    const tokenTypeDO = linkedAsset.tokenType || tokenType;
+    const tokenIdDO = (linkedAsset.tokenId || '').trim();
+    const tokenNameDO = (linkedAsset.tokenName || '').trim();
+    const op = operation;
+
+    const isQuery = op === 'query';
+    const isTransfer = op === 'Transfer' || op === 'transfer';
+    const isGrant = op === 'grant usage rights';
+    const isRevoke = op === 'revoke usage rights';
+
+    // 0) operation 必填（否则无法判定规则）
+    if (!op) {
+      message.warning('Please select operation');
+      return;
+    }
+
+    // 1) caller 必填（你给的所有用例都要求 caller）
+    if (!caller) {
+      message.warning(`Please select ${operationToCallerLabel[op] || 'caller'}`);
+      return;
+    }
+
+    // 2) tokenName 必填（从 DataObject 来；你用例里 query 缺 tokenName 也要失败）
+    if (!tokenNameDO) {
+      message.warning('tokenName is required (from connected DataObject)');
+      return;
+    }
+
+    // ===== 2.1-Transferable NFT（mint/transfer/burn/query）=====
+    if (assetTypeDO === 'transferable' && tokenTypeDO === 'NFT') {
+      if (!tokenIdDO) {
+        message.warning('tokenId is required for Transferable NFT (from connected DataObject)');
+        return;
+      }
+      // transfer 的 callee：你下面已有 shouldShowCallee 校验，这里不重复写也行
+    }
+
+    // ===== 2.1-Transferable FT（mint/transfer/burn/query）=====
+    if (assetTypeDO === 'transferable' && tokenTypeDO === 'FT') {
+      // query 不需要 tokenNumber；其余 mint/transfer/burn 都需要
+      if (!isQuery && !(tokenNumber || '').trim()) {
+        message.warning('tokenNumber is required for Transferable FT (mint/transfer/burn)');
+        return;
+      }
+    }
+
+    // ===== 2.1-Distributive NFT（mint/grant/revoke/transfer/burn/query）=====
+    if (assetTypeDO === 'distributive') {
+      // burn 缺 tokenId 要失败
+      if (op === 'burn' && !tokenIdDO) {
+        message.warning('tokenId is required for Distributive burn (from connected DataObject)');
+        return;
+      }
+      // grant/revoke/transfer 缺 callee 要失败：你下面已有 shouldShowCallee 校验，会覆盖
+      // query 缺 caller：上面 caller 必填已经覆盖
+    }
+
+    // ===== 2.1-Value-added NFT（branch/merge/burn/query）=====
+    if (assetTypeDO === 'value-added') {
+      // branch / merge 需要 tokenId+tokenName+caller（tokenName/caller 已在上面校验）
+      if ((op === 'branch' || op === 'merge') && !tokenIdDO) {
+        message.warning('tokenId is required for value-added branch/merge (from connected DataObject)');
+        return;
+      }
+      // merge 必须 refTokenIds 非空；branch 根节点可以空
+      if (op === 'merge' && (!refTokenIds || refTokenIds.length === 0)) {
+        message.warning('refTokenIds is required for merge (must be non-empty)');
+        return;
+      }
+    }
 
     if (shouldShowCallee && (!callee || callee.length === 0)) {
       message.warning(
         `Please select ${operationToCalleeLabel[operation] || 'callee'}`
       );
       return;
+    }
+    // ✅ caller 与 callee 不能相同（callee 为多选：不允许包含 caller）
+    if (shouldShowCallee && caller && Array.isArray(callee) && callee.length > 0) {
+      const pureCaller = toPureParticipantId(caller);
+      const hasSame = callee.some(id => toPureParticipantId(id) === pureCaller);
+      if (hasSame) {
+        message.warning('Caller and Callee cannot be the same participant');
+        return;
+      }
     }
     updateDataToBPMN();
     onClose(true);
@@ -669,13 +809,13 @@ export default function AssetTaskModal({
         </div>
       )}
 
-      {/* 1.elementName */}
+      {/* 1.elementName (用户输入) */}
       <div style={{ marginBottom: 16 }}>
         <label style={{ display: 'block', marginBottom: 4 }}>Element Name:</label>
         <Input value={elementName} onChange={e => setElementName(e.target.value)} />
       </div>
 
-      {/* 2.assetType (只读) */}
+      {/* 2.assetType (只读，自动填入) */}
       <div style={{ marginBottom: 16 }}>
         <label style={{ display: 'block', marginBottom: 4 }}>Asset Type (from DataObject):</label>
         <Select
@@ -689,7 +829,67 @@ export default function AssetTaskModal({
         </Select>
       </div>
 
-      {/* 3.operation */}
+      {/* 3.tokenType (只读，自动填入) */}
+      {assetType === 'transferable' && (
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 4 }}>Token Type (from DataObject):</label>
+          <Select
+            value={tokenType}
+            disabled
+            style={{ width: '100%' }}
+          >
+            <Select.Option value="NFT">NFT</Select.Option>
+            <Select.Option value="FT">FT</Select.Option>
+          </Select>
+        </div>
+      )}
+
+      {/* 4.tokenId (只读，自动填入) */}
+      {shouldShowTokenId && (
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 4 }}>Token ID (from DataObject):</label>
+          <Input
+            value={tokenId}
+            disabled
+            placeholder="Token ID from connected DataObject"
+          />
+          {tokenHasExistInERC && (
+            <div style={{ fontSize: 12, color: '#52c41a', marginTop: 4, padding: '4px 8px', background: '#f6ffed', border: '1px solid #b7eb8f', borderRadius: 4 }}>
+              ✓ This token is marked as already existing in ERC contract. Validation will assume it has been minted.
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 5.tokenName (只读，自动填入) */}
+      {(
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 4 }}>Token Name (from DataObject):</label>
+          <Input
+            value={tokenName}
+            disabled
+            placeholder="Token name from connected DataObject"
+          />
+        </div>
+      )}
+      {/* 10.Reference Token IDs (只读，自动填入，从 DataObject 读取) */}
+      {assetType === 'value-added' && refTokenIds.length > 0 && (
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 4 }}>Reference Token IDs (from DataObject):</label>
+          <Select
+            mode="multiple"
+            value={refTokenIds}
+            disabled
+            style={{ width: '100%' }}
+            placeholder="Reference token IDs from connected DataObject"
+          />
+          <div style={{ fontSize: 12, color: '#888', marginTop: 4 }}>
+            To modify reference token IDs, please edit the connected DataObject element
+          </div>
+        </div>
+      )}
+
+      {/* 6.operation (用户选择) */}
       <div style={{ marginBottom: 16 }}>
         <label style={{ display: 'block', marginBottom: 4 }}>Operation:</label>
         <Select
@@ -711,71 +911,7 @@ export default function AssetTaskModal({
         </Select>
       </div>
 
-      {/* 4.tokenType (只读) */}
-      {assetType === 'transferable' && (
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', marginBottom: 4 }}>Token Type (from DataObject):</label>
-          <Select
-            value={tokenType}
-            disabled
-            style={{ width: '100%' }}
-          >
-            <Select.Option value="NFT">NFT</Select.Option>
-            <Select.Option value="FT">FT</Select.Option>
-          </Select>
-        </div>
-      )}
-
-      {/* 5.tokenId (只读) */}
-      {shouldShowTokenId && (
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', marginBottom: 4 }}>Token ID (from DataObject):</label>
-          <Input
-            value={tokenId}
-            disabled
-            placeholder="Token ID from connected DataObject"
-          />
-          {tokenHasExistInERC && (
-            <div style={{ fontSize: 12, color: '#52c41a', marginTop: 4, padding: '4px 8px', background: '#f6ffed', border: '1px solid #b7eb8f', borderRadius: 4 }}>
-              ✓ This token is marked as already existing in ERC contract. Validation will assume it has been minted.
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* 6.tokenName (只读) */}
-      {(
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', marginBottom: 4 }}>Token Name (from DataObject):</label>
-          <Input
-            value={tokenName}
-            disabled
-            placeholder="Token name from connected DataObject"
-          />
-        </div>
-      )}
-
-      {/*7. tokenURI */}
-      {/*  {shouldShowTokenId && tokenId && (
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', marginBottom: 4 }}>Token URL:</label>
-          {operation === 'mint' || operation === 'branch'||operation==='merge' ? (
-            <Input
-              value={tokenURL}
-              onChange={e => setTokenURL(e.target.value)}
-              placeholder="Enter token URL"
-            />
-          ) : (
-            <Input
-              value={tokenURL}
-              disabled
-              placeholder="Auto-filled token URL"
-            />
-          )}
-        </div>
-      )} */}
-
-      {/* 8.tokenNumber */}
+      {/* 7.tokenNumber (用户输入) */}
       {shouldShowTokenNumber && (
         <div style={{ marginBottom: 16 }}>
           <label style={{ display: 'block', marginBottom: 4 }}>Token Number:</label>
@@ -783,12 +919,13 @@ export default function AssetTaskModal({
         </div>
       )}
 
-      {/* caller */}
+      {/* 8.caller (用户选择) */}
       <div style={{ marginBottom: 16 }}>
         <label style={{ display: 'block', marginBottom: 4 }}>
           {operationToCallerLabel[operation] || 'Caller'}:
         </label>
         <Select
+          key={participantOptionsKey}
           value={caller}
           onChange={setCaller}
           options={participantOptions}
@@ -798,13 +935,14 @@ export default function AssetTaskModal({
         />
       </div>
 
-      {/* callee */}
+      {/* 9.callee (用户选择) */}
       {shouldShowCallee && (
         <div style={{ marginBottom: 16 }}>
           <label style={{ display: 'block', marginBottom: 4 }}>
             {operationToCalleeLabel[operation] || 'Callee'}:
           </label>
           <Select
+            key={participantOptionsKey}
             mode="multiple"
             value={callee}
             onChange={setCallee}
@@ -816,22 +954,6 @@ export default function AssetTaskModal({
         </div>
       )}
 
-      {/* Reference Token IDs (只读，从 DataObject 读取) */}
-      {assetType === 'value-added' && refTokenIds.length > 0 && (
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', marginBottom: 4 }}>Reference Token IDs (from DataObject):</label>
-          <Select
-            mode="multiple"
-            value={refTokenIds}
-            disabled
-            style={{ width: '100%' }}
-            placeholder="Reference token IDs from connected DataObject"
-          />
-          <div style={{ fontSize: 12, color: '#888', marginTop: 4 }}>
-            To modify reference token IDs, please edit the connected DataObject element
-          </div>
-        </div>
-      )}
       {operation === "query" && (
         <div style={{ marginBottom: 20 }}>
           <label style={{ display: "block", marginBottom: 4 }}>Output Fields:</label>

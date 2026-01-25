@@ -1,0 +1,231 @@
+[
+  {
+    "task_name": "test789_clean_path",
+    "timestamp": "2026-01-25T15:18:03.683463",
+    "instance_id": "1",
+    "steps_executed": [
+      {
+        "step_number": 1,
+        "step_id": "Event_0vzvzbx",
+        "step_type": "event",
+        "description": "Start event",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:58db32ed-a738-41a8-b03a-d89c07fec148', 'type': 'TransactionSuccess'}, 'transactionHash': 'dc521895c85e6ece90ffa3acde6967ee29367e204e0e152455cbf5f50407f3d0'}",
+        "error": null,
+        "timestamp": "2026-01-25T15:18:09.724054"
+      },
+      {
+        "step_number": 2,
+        "step_id": "Message_1u0k5bg",
+        "step_type": "message",
+        "description": "test1 (OrgA \u2192 OrgB)",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:c9405fef-6d34-4b47-b23d-1fd511c1e5b5', 'type': 'TransactionSuccess'}, 'transactionHash': '4385f2255e419c8409a2ebeb6f323a402917ffc8afab03b842c70aea06eb8ccd'}",
+        "error": null,
+        "timestamp": "2026-01-25T15:18:14.751234"
+      },
+      {
+        "step_number": 3,
+        "step_id": "Message_03ugqo3",
+        "step_type": "message",
+        "description": "test2 (OrgB \u2192 OrgC)",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:6f0f7542-9cb9-40ac-b6e2-344443beb50e', 'type': 'TransactionSuccess'}, 'transactionHash': '270aae108a33a411c6189ac66801027f03eee33ed28a3611ce4be6a302a694e0'}",
+        "error": null,
+        "timestamp": "2026-01-25T15:18:19.785184"
+      },
+      {
+        "step_number": 4,
+        "step_id": "Gateway_18ppa7k",
+        "step_type": "gateway",
+        "description": "Parallel gateway - enable three mint branches (NFT/FT/Distributive)",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:9779da2e-8703-4ce3-a1ad-50072ff375e7', 'type': 'TransactionSuccess'}, 'transactionHash': '8a5e6f3fd002bec9fb55561a7617853e379bcea24831da9c98359eb879a7fcf1'}",
+        "error": null,
+        "timestamp": "2026-01-25T15:18:24.830784"
+      },
+      {
+        "step_number": 5,
+        "step_id": "Activity_1rbnz2g",
+        "step_type": "activity",
+        "description": "T_MintN - mint transferable NFT",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:fa3d82bf-89ad-425f-9901-8269e6583806', 'type': 'TransactionSuccess'}, 'transactionHash': '588a0e4aab607d4f2fefd1d7e44ce35643116b68c09046099d56c0e55cde9b34'}",
+        "error": null,
+        "timestamp": "2026-01-25T15:18:29.869159"
+      },
+      {
+        "step_number": 6,
+        "step_id": "Activity_1rbnz2g_Continue",
+        "step_type": "activity",
+        "description": "T_MintN - mint transferable NFT (continue after upload)",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:e30adedc-3ead-47e2-ac03-8d43f2c62c8c', 'type': 'TransactionSuccess'}, 'transactionHash': '2f065d5f4853dfe2e9a3f763f03babbd87a4986883ef07e1ac1dfb86e626cca3'}",
+        "error": null,
+        "timestamp": "2026-01-25T15:18:34.901546"
+      },
+      {
+        "step_number": 7,
+        "step_id": "Activity_1cb3r3t",
+        "step_type": "activity",
+        "description": "T_TransferN - transfer NFT to OrgB",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:a5b78e89-bf36-4bf5-bc02-62646d63f626', 'type': 'TransactionSuccess'}, 'transactionHash': '3c6ca05fb0f51f90cf967fc3074de609f759b62b29837148e75e904580be7df9'}",
+        "error": null,
+        "timestamp": "2026-01-25T15:18:39.932406"
+      },
+      {
+        "step_number": 8,
+        "step_id": "Activity_0zfhk4l",
+        "step_type": "activity",
+        "description": "T_QueyN - query NFT owner",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:6e55fd78-7d47-4ce2-8b83-2a8fd085db46', 'type': 'TransactionSuccess'}, 'transactionHash': '701e4c09d414fa991b5db251a71f2a2fc65a1d54fc3c68099eb6dd5551727f17'}",
+        "error": null,
+        "timestamp": "2026-01-25T15:18:44.969870"
+      },
+      {
+        "step_number": 9,
+        "step_id": "Activity_0gembam",
+        "step_type": "activity",
+        "description": "T_BurnN - burn NFT",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:cc7e8f18-a1b1-435d-831a-8fc15bd6f19e', 'type': 'TransactionSuccess'}, 'transactionHash': '20e9543111151880275e243b46f8ede33bbe0dedaa3a6499a18b71105dc49075'}",
+        "error": null,
+        "timestamp": "2026-01-25T15:18:49.993176"
+      },
+      {
+        "step_number": 10,
+        "step_id": "Activity_1kj22ns",
+        "step_type": "activity",
+        "description": "T_MintF - mint FT (500)",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:6ef26193-42dd-4f15-9db6-668ac078a11d', 'type': 'TransactionSuccess'}, 'transactionHash': '47f9f62a6dc3bcf712f8b1bc39e9de91d9635aadf6935dc26fed40d056023e55'}",
+        "error": null,
+        "timestamp": "2026-01-25T15:18:55.021940"
+      },
+      {
+        "step_number": 11,
+        "step_id": "Activity_0ldqu5j",
+        "step_type": "activity",
+        "description": "T_TransferF - transfer FT (2) to OrgC",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:c08530bf-f2ec-43cf-a897-3d9ff97fb9f7', 'type': 'TransactionSuccess'}, 'transactionHash': '26ebf029af1a23c3c8e03d4e1016156dd281fa0402ef3faa09c28c6f8f3fde09'}",
+        "error": null,
+        "timestamp": "2026-01-25T15:19:00.055627"
+      },
+      {
+        "step_number": 12,
+        "step_id": "Activity_1fmyf03",
+        "step_type": "activity",
+        "description": "T_QueryF - query FT balance",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:2a318b7f-8415-4447-a645-90790b09646c', 'type': 'TransactionSuccess'}, 'transactionHash': 'cf920bdcbe0af7f5277f0af56fd450d26107732f38df4c7c8df2ce5ee40beb31'}",
+        "error": null,
+        "timestamp": "2026-01-25T15:19:05.089919"
+      },
+      {
+        "step_number": 13,
+        "step_id": "Activity_1bzn6ux",
+        "step_type": "activity",
+        "description": "T_BurnF - burn FT (2)",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:6ea68d6e-3630-4903-9d68-62317682daa6', 'type': 'TransactionSuccess'}, 'transactionHash': '469d9c3cf51fa139655ecf803601265e296607183d482a4b8e0b43a5fa518e6b'}",
+        "error": null,
+        "timestamp": "2026-01-25T15:19:10.127505"
+      },
+      {
+        "step_number": 14,
+        "step_id": "Activity_0d9p376",
+        "step_type": "activity",
+        "description": "T_MintD - mint distributive asset",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:8d94241e-9f1a-483f-94bb-1123f6fa8a52', 'type': 'TransactionSuccess'}, 'transactionHash': 'e294a5dfb2d7e2f473dc308a61a39213844a1a58d5b003db1bc32c366c81aac6'}",
+        "error": null,
+        "timestamp": "2026-01-25T15:19:15.162362"
+      },
+      {
+        "step_number": 15,
+        "step_id": "Activity_0d9p376_Continue",
+        "step_type": "activity",
+        "description": "T_MintD - mint distributive asset (continue after upload)",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:c2f34cda-d9e3-4230-9773-804402f70eb7', 'type': 'TransactionSuccess'}, 'transactionHash': '1d64038b5fd48752f94a62513d0c4857c4239aa6aefe646f3fd878ee804c5f80'}",
+        "error": null,
+        "timestamp": "2026-01-25T15:19:20.201157"
+      },
+      {
+        "step_number": 16,
+        "step_id": "Activity_1mp2kpf",
+        "step_type": "activity",
+        "description": "T_Grant - grant usage rights to OrgA",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:4b0b6fe9-b6e1-4f20-9c19-2440fdca6cb7', 'type': 'TransactionSuccess'}, 'transactionHash': 'a1b80b6fa861b842bbf9678d029a9313df01a86d3ff5ae94467a71729ce0de35'}",
+        "error": null,
+        "timestamp": "2026-01-25T15:19:25.229961"
+      },
+      {
+        "step_number": 17,
+        "step_id": "Activity_1p9spoi",
+        "step_type": "activity",
+        "description": "T_Revoke - revoke usage rights from OrgA",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:aa2ceece-7408-4bf9-82a3-eaea8e7934b1', 'type': 'TransactionSuccess'}, 'transactionHash': '069395cba052537862f7c835ed43332d979e685e873cadc657adfd573bc01b6a'}",
+        "error": null,
+        "timestamp": "2026-01-25T15:19:30.263699"
+      },
+      {
+        "step_number": 18,
+        "step_id": "Activity_0madwxn",
+        "step_type": "activity",
+        "description": "T_TransferD - transfer ownership to OrgB",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:d12ddfbd-8b14-4ed7-bbc8-b5a5ff510a87', 'type': 'TransactionSuccess'}, 'transactionHash': 'aa8af0c094fd98b95b489fddd1f2e6153b53461c7ca53337e2134f874772eff6'}",
+        "error": null,
+        "timestamp": "2026-01-25T15:19:35.289530"
+      },
+      {
+        "step_number": 19,
+        "step_id": "Activity_1ry7kej",
+        "step_type": "activity",
+        "description": "T_QueryD - query distributive ownership flag",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:7d0370b2-8501-4312-909c-d59e66cb3fee', 'type': 'TransactionSuccess'}, 'transactionHash': '11a2c7b5f21031c2cacb5c8501abc19001864a65e6e6f156f10bd21e969e71f7'}",
+        "error": null,
+        "timestamp": "2026-01-25T15:19:40.315815"
+      },
+      {
+        "step_number": 20,
+        "step_id": "Activity_18zo839",
+        "step_type": "activity",
+        "description": "T_BurnD - burn distributive asset",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:3633dd10-d5d1-419f-9c1a-8d7d04893184', 'type': 'TransactionSuccess'}, 'transactionHash': 'fa4bb278a300334b08fc91811e186805bf595d6bef30203eec52223822ad2d36'}",
+        "error": null,
+        "timestamp": "2026-01-25T15:19:45.346052"
+      },
+      {
+        "step_number": 21,
+        "step_id": "Gateway_1mg35sb",
+        "step_type": "gateway",
+        "description": "Parallel gateway - join three branches (wait all burns) then enable end event",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:1d53db6b-ad43-44d3-a861-ad97271b1409', 'type': 'TransactionSuccess'}, 'transactionHash': '067888ae8943fbbcb934b865d1cd978b446f4c3327753b44e29bbb6b255d1b01'}",
+        "error": null,
+        "timestamp": "2026-01-25T15:19:50.378246"
+      },
+      {
+        "step_number": 22,
+        "step_id": "Event_1tk8uf5",
+        "step_type": "event",
+        "description": "End event",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:05249dab-8c22-4b00-aa47-727f8de23c8a', 'type': 'TransactionSuccess'}, 'transactionHash': '73adda4f4142aa8c487f21432de397e4a80f1430aa13880efa88c7fcabcc2dd2'}",
+        "error": null,
+        "timestamp": "2026-01-25T15:19:55.412236"
+      }
+    ],
+    "status": "success",
+    "error_message": null
+  }
+]
