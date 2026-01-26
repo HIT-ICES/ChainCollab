@@ -1,0 +1,111 @@
+[
+  {
+    "task_name": "11ft_clean_path",
+    "timestamp": "2026-01-25T21:06:54.368241",
+    "instance_id": "0",
+    "steps_executed": [
+      {
+        "step_number": 1,
+        "step_id": "Event_0vzvzbx",
+        "step_type": "event",
+        "description": "Start event",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:a66782b7-7ad6-470b-9545-4a15d164cac3', 'type': 'TransactionSuccess'}, 'transactionHash': '6366d108369c8bb875a223ad63020636aa0fab7c0c96e29fd808f1f839490bef'}",
+        "error": null,
+        "timestamp": "2026-01-25T21:06:59.683139"
+      },
+      {
+        "step_number": 2,
+        "step_id": "Message_1u0k5bg",
+        "step_type": "message",
+        "description": "test1 (OrgA \u2192 OrgB)",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:5877f267-b693-4439-b17f-11dda8b4b9f3', 'type': 'TransactionSuccess'}, 'transactionHash': 'ff0ed55d9186435040f44c888dd87133657a1230571e361c5a0b01475e879108'}",
+        "error": null,
+        "timestamp": "2026-01-25T21:07:04.707921"
+      },
+      {
+        "step_number": 3,
+        "step_id": "Message_03ugqo3",
+        "step_type": "message",
+        "description": "test2 (OrgB \u2192 OrgC)",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:82b1b278-ff28-45bf-bff1-cedb2e330433', 'type': 'TransactionSuccess'}, 'transactionHash': '68769c8c9de932c87105d34756bbc05372b19b49c16beab3c15316681790fd5d'}",
+        "error": null,
+        "timestamp": "2026-01-25T21:07:09.738452"
+      },
+      {
+        "step_number": 4,
+        "step_id": "Gateway_18ppa7k",
+        "step_type": "gateway",
+        "description": "Parallel gateway - enable three mint branches (NFT/FT/Distributive)",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:ddd2367d-af65-4053-8ed4-e0ff5149ecb6', 'type': 'TransactionSuccess'}, 'transactionHash': '1a02186f2d9b0f1bbc70d1c930a991ca623bae7503dcc2e4ad7a87653f4bd8fc'}",
+        "error": null,
+        "timestamp": "2026-01-25T21:07:14.773273"
+      },
+      {
+        "step_number": 5,
+        "step_id": "Activity_1rbnz2g",
+        "step_type": "activity",
+        "description": "T_MintN - mint transferable NFT",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:a7d98a2a-119f-47f9-9982-a57a4dec56ef', 'type': 'TransactionSuccess'}, 'transactionHash': '3b242f059cd55198ccbde6ab4072e49eb43669fdd93f6d1b3c20c57089456b93'}",
+        "error": null,
+        "timestamp": "2026-01-25T21:07:19.798634"
+      },
+      {
+        "step_number": 6,
+        "step_id": "Activity_1rbnz2g_Continue",
+        "step_type": "activity",
+        "description": "T_MintN - mint transferable NFT (continue after upload)",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:44a51362-72f2-40b7-92d6-7cd0ea274529', 'type': 'TransactionSuccess'}, 'transactionHash': '0d1ca8e6bbda7c7f714d98ae446c88410c556cc1e4730f3c4ec4bae1c22a2f8a'}",
+        "error": null,
+        "timestamp": "2026-01-25T21:07:24.828183"
+      },
+      {
+        "step_number": 7,
+        "step_id": "Activity_1cb3r3t",
+        "step_type": "activity",
+        "description": "T_TransferN - transfer NFT to OrgB",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:2735a2e5-84c2-4ea7-9685-7892735fbdfb', 'type': 'TransactionSuccess'}, 'transactionHash': 'f3de2c594fefefc2d055edf7a0fc759d83a3fcbeac0c4c895b00a8e024d54e16'}",
+        "error": null,
+        "timestamp": "2026-01-25T21:07:29.864089"
+      },
+      {
+        "step_number": 8,
+        "step_id": "Activity_0zfhk4l",
+        "step_type": "activity",
+        "description": "T_QueyN - query NFT owner",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:b28379ee-93b0-46dd-9cbd-52ffc5273472', 'type': 'TransactionSuccess'}, 'transactionHash': '32ea2391bd516e09f6161b52ba8ddb3765cba2b446da19583387c101b4611fde'}",
+        "error": null,
+        "timestamp": "2026-01-25T21:07:34.904284"
+      },
+      {
+        "step_number": 9,
+        "step_id": "Activity_0gembam",
+        "step_type": "activity",
+        "description": "T_BurnN - burn NFT",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:75e2398a-209e-43ed-afa4-f1da35376a2b', 'type': 'TransactionSuccess'}, 'transactionHash': '399ac7ee89887c06208c457f48cb88a04844d804177f6a6dacdddc568d7eafce'}",
+        "error": null,
+        "timestamp": "2026-01-25T21:07:39.937865"
+      },
+      {
+        "step_number": 10,
+        "step_id": "Activity_0ldqu5j",
+        "step_type": "activity",
+        "description": "T_TransferF - transfer FT (2) to OrgC",
+        "status": "failed",
+        "result": null,
+        "error": "Multiple errors occurred: - Transaction processing for endorser [peer10.Organization-Consortium.org.com:7051]: Chaincode status Code: (500) UNKNOWN. Description: insufficient balance: have 0, need 2 - Transaction processing for endorser [peer10.mem.org.com:7051]: Chaincode status Code: (500) UNKNOWN. Description: insufficient balance: have 0, need 2",
+        "timestamp": "2026-01-25T21:07:44.968981"
+      }
+    ],
+    "status": "failed",
+    "error_message": "Step 10 (Activity_0ldqu5j) failed: Multiple errors occurred: - Transaction processing for endorser [peer10.Organization-Consortium.org.com:7051]: Chaincode status Code: (500) UNKNOWN. Description: insufficient balance: have 0, need 2 - Transaction processing for endorser [peer10.mem.org.com:7051]: Chaincode status Code: (500) UNKNOWN. Description: insufficient balance: have 0, need 2"
+  }
+]

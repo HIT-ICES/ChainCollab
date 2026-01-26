@@ -10,6 +10,8 @@ import simpleFlowConstraint from './constraints/SimpleFlowConstraint';
 import subChoreoParticipantsConstraint from './constraints/SubChoreoParticipantsConstraint';
 import callChoreoParticipantsBijectivityConstraint from './constraints/CallChoreoParticipantsBijectivityConstraint';
 import noCyclicCallChoreosConstraint from './constraints/NoCyclicCallChoreosConstraint';
+import assetTaskOperationConstraint from './constraints/AssetTaskOperationConstraint';
+import assetTaskConnectionConstraint from './constraints/AssetTaskConnectionConstraint';
 
 const CONSTRAINTS = [
   eventBasedGatewayConstraint,
@@ -18,6 +20,8 @@ const CONSTRAINTS = [
   subChoreoParticipantsConstraint,
   callChoreoParticipantsBijectivityConstraint,
   noCyclicCallChoreosConstraint,
+  assetTaskOperationConstraint,
+  assetTaskConnectionConstraint,
 
 ];
 

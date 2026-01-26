@@ -161,7 +161,7 @@ def get_instance_id_by_tx(api_url: str, tx_id: str, timeout: int = 60) -> str | 
 def websocket_listen_get_result(subscription_name: str, timeout: int = 30, ws_uri: str | None = None):
     """Listen for websocket events with timeout."""
     if ws_uri is None:
-        ws_uri = "ws://localhost:5001/ws"
+        ws_uri = "ws://localhost:5002/ws"
 
     ws = websocket.WebSocket()
     ws.connect(ws_uri)
