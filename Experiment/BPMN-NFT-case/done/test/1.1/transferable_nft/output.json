@@ -1,0 +1,61 @@
+[
+  {
+    "task_name": "11nft_clean_path",
+    "timestamp": "2026-01-25T20:43:41.389297",
+    "instance_id": "0",
+    "steps_executed": [
+      {
+        "step_number": 1,
+        "step_id": "Event_0vzvzbx",
+        "step_type": "event",
+        "description": "Start event",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:3bc9ba0c-f8a1-4d4e-99f4-338012dcf9dc', 'type': 'TransactionSuccess'}, 'transactionHash': 'd4bc036fcf7d3c57cc68e052a50e31dda42a8b150d9750ba570a8fae08ab8267'}",
+        "error": null,
+        "timestamp": "2026-01-25T20:43:46.925669"
+      },
+      {
+        "step_number": 2,
+        "step_id": "Message_1u0k5bg",
+        "step_type": "message",
+        "description": "test1 (OrgA \u2192 OrgB)",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:fada4276-af0e-4850-8719-b0f2881fd626', 'type': 'TransactionSuccess'}, 'transactionHash': '8032336bd8f847182c80598e177f24b85655b8d4c1303f5108b6a5ede7c13bb9'}",
+        "error": null,
+        "timestamp": "2026-01-25T20:43:51.964242"
+      },
+      {
+        "step_number": 3,
+        "step_id": "Message_03ugqo3",
+        "step_type": "message",
+        "description": "test2 (OrgB \u2192 OrgC)",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:b0ab8d08-6360-4f48-adee-24cbf4953305', 'type': 'TransactionSuccess'}, 'transactionHash': 'a0e0468d8a68e8dfa7929499ed027a81175160356a6256a367d0718453cfbc10'}",
+        "error": null,
+        "timestamp": "2026-01-25T20:43:56.980507"
+      },
+      {
+        "step_number": 4,
+        "step_id": "Gateway_18ppa7k",
+        "step_type": "gateway",
+        "description": "Parallel gateway - enable three mint branches (NFT/FT/Distributive)",
+        "status": "success",
+        "result": "{'headers': {'requestId': 'default:2e33945c-a53f-4f98-846e-4c1230075897', 'type': 'TransactionSuccess'}, 'transactionHash': '1fccb13c93a9e3f246b8a01aee7c3da807620c129586e52ed874c6594e74ef7a'}",
+        "error": null,
+        "timestamp": "2026-01-25T20:44:02.015961"
+      },
+      {
+        "step_number": 5,
+        "step_id": "Activity_1cb3r3t",
+        "step_type": "activity",
+        "description": "T_TransferN - transfer NFT to OrgB",
+        "status": "failed",
+        "result": null,
+        "error": "Multiple errors occurred: - Transaction processing for endorser [peer10.mem.org.com:7051]: Chaincode status Code: (500) UNKNOWN. Description: failed to invoke chaincode ERC721: failed to invoke chaincode. Response status: 500. Response message: failed to _readNFT : failed to Unmarshal nftBytes: unexpected end of JSON input - Transaction processing for endorser [peer10.Organization-Consortium.org.com:7051]: Chaincode status Code: (500) UNKNOWN. Description: failed to invoke chaincode ERC721: failed to invoke chaincode. Response status: 500. Response message: failed to _readNFT : failed to Unmarshal nftBytes: unexpected end of JSON input",
+        "timestamp": "2026-01-25T20:44:07.047790"
+      }
+    ],
+    "status": "failed",
+    "error_message": "Step 5 (Activity_1cb3r3t) failed: Multiple errors occurred: - Transaction processing for endorser [peer10.mem.org.com:7051]: Chaincode status Code: (500) UNKNOWN. Description: failed to invoke chaincode ERC721: failed to invoke chaincode. Response status: 500. Response message: failed to _readNFT : failed to Unmarshal nftBytes: unexpected end of JSON input - Transaction processing for endorser [peer10.Organization-Consortium.org.com:7051]: Chaincode status Code: (500) UNKNOWN. Description: failed to invoke chaincode ERC721: failed to invoke chaincode. Response status: 500. Response message: failed to _readNFT : failed to Unmarshal nftBytes: unexpected end of JSON input"
+  }
+]
