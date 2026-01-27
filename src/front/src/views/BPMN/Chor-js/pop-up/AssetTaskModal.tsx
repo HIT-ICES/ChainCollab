@@ -97,7 +97,7 @@ export default function AssetTaskModal({
   const operationOptions: Record<string, string[]> = {
     'distributive': ['mint', 'burn', 'grant usage rights', 'revoke usage rights', 'transfer', 'query'],
     'transferable': ['mint', 'burn', 'Transfer', 'query'],
-    'value-added': ['branch', 'merge', 'Transfer', 'query'],
+    'value-added': ['branch', 'merge', 'Transfer', 'burn', 'query'],
   };
 
   const operationToCallerLabel: Record<string, string> = {
@@ -741,9 +741,9 @@ export default function AssetTaskModal({
 
     // ===== 2.1-Value-added NFT（branch/merge/burn/query）=====
     if (assetTypeDO === 'value-added') {
-      // branch / merge 需要 tokenId+tokenName+caller（tokenName/caller 已在上面校验）
-      if ((op === 'branch' || op === 'merge') && !tokenIdDO) {
-        message.warning('tokenId is required for value-added branch/merge (from connected DataObject)');
+      // branch / merge / burn 需要 tokenId+tokenName+caller（tokenName/caller 已在上面校验）
+      if ((op === 'branch' || op === 'merge' || op === 'burn') && !tokenIdDO) {
+        message.warning('tokenId is required for value-added branch/merge/burn (from connected DataObject)');
         return;
       }
       // merge 必须 refTokenIds 非空；branch 根节点可以空
