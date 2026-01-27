@@ -5,7 +5,7 @@ import { is } from 'bpmn-js/lib/util/ModelUtil';
  *
  * Connection rules:
  * - mint: Requires DataOutputAssociation (Task -> DataObject) - creates new token
- * - branch: Requires DataInputAssociation (DataObject -> Task) + DataOutputAssociation (Task -> DataObject)
+ * - branch: Requires DataOutputAssociation (Task -> DataObject), DataInputAssociation is optional (root node can have no input)
  * - merge: Requires multiple DataInputAssociation + DataOutputAssociation
  * - transfer: Requires DataInputAssociation (reads token to transfer)
  * - burn: Requires DataInputAssociation (reads token to burn)
@@ -105,15 +105,9 @@ function validateConnectionsByOperation(shape, operation, inputCount, outputCoun
     }
   }
 
-  // Rule 2: branch operation requires input + output connections
+  // Rule 2: branch operation requires output connection (input is optional for root nodes)
   if (operationLower === 'branch') {
-    if (inputCount === 0) {
-      reporter.error(
-        shape,
-        `<b>branch</b> operation requires at least one DataInputAssociation (DataObject → Task). ` +
-        `Please connect source DataObject(s) to this Task to specify which tokens to branch from.`
-      );
-    }
+    // Note: branch can have no input (root node) or have inputs (derived branch)
     if (outputCount === 0) {
       reporter.error(
         shape,

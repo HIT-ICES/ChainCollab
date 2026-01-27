@@ -8,6 +8,8 @@ import { is } from 'bpmn-js/lib/util/ModelUtil';
  * - Initial state: determined by tokenHasExistInERC
  * - State transitions:
  *   - mint: NOT_EXISTS → EXISTS
+ *   - branch: NOT_EXISTS → EXISTS (creates new derived token)
+ *   - merge: NOT_EXISTS → EXISTS (creates new merged token)
  *   - burn: EXISTS → NOT_EXISTS
  *   - transfer/query/grant/revoke: requires EXISTS, no state change
  *
@@ -138,7 +140,7 @@ function validateOperationAssetTypeMatch(shape, operation, assetType, tokenType,
   const validOperations = {
     'distributive': ['mint', 'burn', 'grant usage rights', 'revoke usage rights', 'transfer', 'query'],
     'transferable': ['mint', 'burn', 'transfer', 'query'],
-    'value-added': ['branch', 'merge', 'transfer', 'query']
+    'value-added': ['branch', 'merge', 'transfer', 'burn', 'query']
   };
 
   // Get valid operations for this asset type
@@ -264,7 +266,7 @@ function getPossibleStatesAtTask(targetTask, tokenId, tokenHasExistInERC, elemen
 
           if (linkedAsset && linkedAsset.tokenId === tokenId && taskConfig.operation) {
             const op = taskConfig.operation.toLowerCase();
-            if (op === 'mint') {
+            if (op === 'mint' || op === 'branch' || op === 'merge') {
               newState = 'EXISTS';
             } else if (op === 'burn') {
               newState = 'NOT_EXISTS';
