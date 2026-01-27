@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Modal, Button, Alert, message } from "antd";
 import { BindingDmnModal } from "./bindingDmnModal";
 import { BindingParticipant } from "./bindingParticipantsModal";
+import { ValidationModal } from "./validationModal";
 import { useBpmnSvg } from "./hooks";
 import { getMembership, retrieveFabricIdentity } from "@/api/platformAPI";
 import { getFireflyList, getResourceSets } from "@/api/resourceAPI";
@@ -24,6 +25,12 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 	const [participants, syncParticipants] = useParticipantsData(bpmnId);
 	const consortiumId = useAppSelector(state => state.consortium.currentConsortiumId);
 	const [showTaskERCMap, setShowTaskERCMap] = useState<Record<string, any>>({});
+	const [validationModalOpen, setValidationModalOpen] = useState(false);
+	const [validationData, setValidationData] = useState<{
+		param: any;
+		url: string;
+		contract_name: string;
+	} | null>(null);
 	useEffect(() => {
 		console.log("父组件收到的 showTaskERCMap:", showTaskERCMap);
 	}, [showTaskERCMap]);
@@ -214,6 +221,7 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 	};
 
 	return (
+		<>
 		<Modal
 			title="Binding Dmns and Participants"
 			open={open}
@@ -272,6 +280,18 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 					>
 						Get CreateInstance Param
 					</Button>
+					<Button
+						type="default"
+						onClick={async () => {
+							const { param, url, contract_name } = await CreateInstance(true);
+
+							// 设置校验数据并打开校验模态框
+							setValidationData({ param, url, contract_name });
+							setValidationModalOpen(true);
+						}}
+					>
+						校验
+					</Button>
 				</div>
 
 				<div style={{ textAlign: "center", height: "400px", marginTop: "-250px", marginBottom: "400px" }}>
@@ -288,6 +308,19 @@ const ParticipantDmnBindingModal = ({ open, setOpen, bpmnId }) => {
 				)}
 			</div>
 		</Modal>
+
+		{validationData && (
+			<ValidationModal
+				open={validationModalOpen}
+				setOpen={setValidationModalOpen}
+				param={validationData.param}
+				url={validationData.url}
+				contract_name={validationData.contract_name}
+				bpmnId={bpmnId}
+				consortiumId={consortiumId}
+			/>
+		)}
+		</>
 	);
 };
 
