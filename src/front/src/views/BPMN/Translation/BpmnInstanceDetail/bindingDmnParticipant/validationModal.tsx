@@ -1,7 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Button, Descriptions, message, Alert, Table } from "antd";
 import { useBpmnSvg } from "./hooks";
 import { retrieveBPMN } from "@/api/externalResource";
+import { fireflyAPI } from "@/api/apiConfig";
+
+// 参与者信息接口
+interface ParticipantInfo {
+	participantId: string;       // 参与者 ID，如 "Participant_1auujox"
+	x509Encoded: string;         // x509 字段中 @ 前面的 base64 编码部分
+	x509Decoded: string;         // base64 解码后的内容
+}
 
 interface ValidationModalProps {
 	open: boolean;
@@ -30,37 +38,402 @@ export const ValidationModal: React.FC<ValidationModalProps> = ({
 		errors?: Array<{ dataObjectId: string; taskIds: string[]; contracts: string[] }>;
 	} | null>(null);
 	const [isValidating, setIsValidating] = useState(false);
+	// 存储 Firefly API 列表中 chaincode 到 name 的映射
+	const [chaincodeToNameMap, setChaincodeToNameMap] = useState<Record<string, string>>({});
+	const [isLoadingApiList, setIsLoadingApiList] = useState(false);
+	// 存储参与者信息列表
+	const [participantInfoList, setParticipantInfoList] = useState<ParticipantInfo[]>([]);
+
+	/**
+	 * 从 param 中提取参与者信息
+	 * 提取 Participant_xxx 字段，解析 x509 中 @ 前面的 base64 编码部分并解码
+	 */
+	const extractParticipantInfo = (paramData: any): ParticipantInfo[] => {
+		const result: ParticipantInfo[] = [];
+		const excludeKeys = ["ERCChaincodeNames", "BpmnId"];
+
+		for (const key of Object.keys(paramData)) {
+			// 跳过非参与者字段
+			if (excludeKeys.includes(key)) continue;
+			// 检查是否是参与者字段（以 Participant_ 开头）
+			if (!key.startsWith("Participant_")) continue;
+
+			const participantData = paramData[key];
+			if (!participantData || !participantData.x509) continue;
+
+			const x509Full = participantData.x509;
+			// 提取 @ 前面的部分
+			const atIndex = x509Full.indexOf("@");
+			const x509Encoded = atIndex > -1 ? x509Full.substring(0, atIndex) : x509Full;
+
+			// Base64 解码
+			let x509Decoded = "";
+			try {
+				x509Decoded = atob(x509Encoded);
+			} catch (e) {
+				console.warn(`Failed to decode base64 for ${key}:`, e);
+				x509Decoded = "[解码失败]";
+			}
+
+			result.push({
+				participantId: key,
+				x509Encoded,
+				x509Decoded,
+			});
+		}
+
+		return result;
+	};
+
+	// 组件打开时自动提取参与者信息
+	useEffect(() => {
+		if (!open || !param) return;
+
+		console.log("=== 提取参与者信息 ===");
+		const participantList = extractParticipantInfo(param);
+		setParticipantInfoList(participantList);
+
+		console.log("参与者信息列表:");
+		participantList.forEach((info, index) => {
+			console.log(`\n[${index + 1}] ${info.participantId}`);
+			console.log(`    x509Encoded: ${info.x509Encoded}`);
+			console.log(`    x509Decoded: ${info.x509Decoded}`);
+		});
+		console.log("\n=== 参与者信息提取完成 ===\n");
+	}, [open, param]);
+
+	// 组件打开时自动获取 Firefly API 列表
+	useEffect(() => {
+		const fetchFireflyApiList = async () => {
+			if (!open || !url) return;
+
+			setIsLoadingApiList(true);
+			try {
+				// 使用固定的 5001 端口
+				const fireflyBaseUrl = "http://127.0.0.1:5001";
+				console.log("=== 自动获取 Firefly API 列表 ===");
+				console.log("Firefly Base URL:", fireflyBaseUrl);
+
+				const result = await getFireflyApiList(fireflyBaseUrl);
+				setChaincodeToNameMap(result);
+				console.log("chaincodeToNameMap 已更新:", result);
+				console.log("=== Firefly API 列表获取完成 ===\n");
+			} catch (error) {
+				console.error("获取 Firefly API 列表失败:", error);
+			} finally {
+				setIsLoadingApiList(false);
+			}
+		};
+
+		fetchFireflyApiList();
+	}, [open, url]);
 
 	/**
 	 * 调用合约函数的模板方法
-	 * @param methodName - 要调用的合约方法名
-	 * @param contractName - 合约名称
-	 * @param additionalParams - 额外的参数对象
+	 * 参考 ERCAddMintAuthority 的调用方式，本质上是通过 Firefly API 调用链码
 	 *
-	 * 参考 ERCAddMintAuthority 的调用方式:
-	 * await ERCAddMintAuthority(ercIdTokenMap, chaincode_url, consortiumId, instanceid.toString(), msps)
+	 * @param methodName - 要调用的合约方法名 (如 "mint", "transfer", "burn" 等)
+	 * @param chaincodeUrl - 链码的 Firefly URL (如 "http://127.0.0.1:5002/api/v1/namespaces/default/apis/test9-bdccb7")
+	 * @param inputParams - 调用方法的输入参数
+	 * @returns 调用结果
+	 *
+	 * 调用链说明:
+	 * 1. ERCAddMintAuthority (externalResource.ts) 遍历 ercIdTokenMap
+	 * 2. 调用 invokeAddAuthority (executionAPI.ts)
+	 * 3. invokeAddAuthority 使用 fireflyAPI.post 发送请求到 Firefly
+	 * 4. Firefly 将请求转发到区块链上的智能合约
 	 */
 	const invokeContractMethod = async (
 		methodName: string,
-		contractName: string,
-		additionalParams?: Record<string, any>
+		chaincodeUrl: string,
+		inputParams: Record<string, any>
 	) => {
 		try {
-			console.log(`Invoking contract method: ${methodName}`);
-			console.log(`Contract name: ${contractName}`);
-			console.log(`Consortium ID: ${consortiumId}`);
-			console.log(`Additional params:`, additionalParams);
+			console.log(`[invokeContractMethod] 调用合约方法: ${methodName}`);
+			console.log(`[invokeContractMethod] Chaincode URL: ${chaincodeUrl}`);
+			console.log(`[invokeContractMethod] 输入参数:`, inputParams);
 
-			// TODO: 实现具体的合约调用逻辑
-			// 这里可以根据 methodName 动态调用不同的 API 方法
-			// 例如: await someAPI[methodName](contractName, consortiumId, ...additionalParams)
+			// 构建请求 URL: 移除末尾的 /api 部分，添加 /query/{methodName}
+			// 例如: http://127.0.0.1:5002/api/v1/namespaces/default/apis/test9-bdccb7
+			//    -> http://127.0.0.1:5002/api/v1/namespaces/default/apis/test9-bdccb7/query/mint
+			const invokeUrl = `${chaincodeUrl}/query/${methodName}`;
 
-			message.info(`合约方法 ${methodName} 调用准备就绪`);
-		} catch (error) {
-			console.error(`Error invoking contract method ${methodName}:`, error);
-			message.error(`调用合约方法 ${methodName} 失败`);
+			// 构建请求体
+			const requestBody = {
+				input: inputParams
+			};
+
+			console.log(`[invokeContractMethod] 请求 URL: ${invokeUrl}`);
+			console.log(`[invokeContractMethod] 请求体:`, requestBody);
+
+			// 发送 POST 请求到 Firefly API
+			const res = await fireflyAPI.post(invokeUrl, requestBody);
+
+			console.log(`[invokeContractMethod] 调用成功，返回结果:`, res.data);
+			message.success(`合约方法 ${methodName} 调用成功`);
+
+			return res.data;
+		} catch (error: any) {
+			console.error(`[invokeContractMethod] 调用合约方法 ${methodName} 失败:`, error);
+			message.error(`调用合约方法 ${methodName} 失败: ${error?.message || "未知错误"}`);
+			throw error;
 		}
 	};
+
+	/**
+	 * 查询 FT (ERC20) 代币余额
+	 * 根据 chaincodeName 和参与者的 base64 编码查询余额
+	 *
+	 * @param chaincodeName - 合约名称 (如 "ERC20")
+	 * @param accountBase64 - 参与者的 base64 编码 (如 "eDUwOTo6Q049dXNlcjEsT1U9...")
+	 * @returns 余额查询结果
+	 */
+	const FTqueryBalanceOf = async (chaincodeName: string, accountBase64: string) => {
+		console.log(`[FTqueryBalanceOf] 开始查询余额`);
+		console.log(`[FTqueryBalanceOf] chaincodeName: ${chaincodeName}`);
+		console.log(`[FTqueryBalanceOf] accountBase64: ${accountBase64}`);
+
+		// 1. 从 chaincodeToNameMap 中查找完整的 API 名称
+		// chaincodeToNameMap 的结构是 { chaincode: apiName }，需要反向查找
+		// 例如: { "ERC20-eda31c-chaincode": "ERC20-eda31c" }
+		// 但实际上我们需要根据 chaincodeName (如 "ERC20") 匹配到 apiName (如 "ERC20-eda31c")
+		let matchedApiName: string | null = null;
+
+		for (const [, apiName] of Object.entries(chaincodeToNameMap)) {
+			// 检查 apiName 是否以 chaincodeName 开头（如 "ERC20-eda31c" 以 "ERC20" 开头）
+			if (apiName.startsWith(chaincodeName)) {
+				matchedApiName = apiName;
+				console.log(`[FTqueryBalanceOf] 匹配成功: ${chaincodeName} -> ${apiName}`);
+				break;
+			}
+		}
+
+		if (!matchedApiName) {
+			const error = `未找到与 ${chaincodeName} 匹配的 API`;
+			console.error(`[FTqueryBalanceOf] ${error}`);
+			message.error(error);
+			throw new Error(error);
+		}
+
+		// 2. 构建 chaincodeUrl
+		// 使用固定的 5001 端口
+		const chaincodeUrl = `http://127.0.0.1:5001/api/v1/namespaces/default/apis/${matchedApiName}`;
+		console.log(`[FTqueryBalanceOf] chaincodeUrl: ${chaincodeUrl}`);
+
+		// 3. 构建输入参数
+		const inputParams = {
+			account: accountBase64,
+			instanceID: "0",
+		};
+		console.log(`[FTqueryBalanceOf] inputParams:`, inputParams);
+
+		// 4. 调用合约方法
+		return await invokeContractMethod("BalanceOf", chaincodeUrl, inputParams);
+	};
+
+	/**
+	 * Transferable NFT (可转让非同质化代币) 合约调用
+	 * 支持操作: mint, burn, Transfer, query
+	 * 特点: 需要 tokenId, 不需要 tokenNumber
+	 *
+	 * @param chaincodeUrl - 链码的 Firefly URL
+	 * @param operation - 操作类型 ("mint" | "burn" | "Transfer" | "query")
+	 * @param params - 操作参数
+	 */
+	const invokeTransferableNFT = async (
+		chaincodeUrl: string,
+		operation: "mint" | "burn" | "Transfer" | "query",
+		params: {
+			tokenName: string;
+			tokenId: string;
+			caller?: string;
+			callee?: string;
+		}
+	) => {
+		console.log(`[invokeTransferableNFT] 操作: ${operation}`);
+		console.log(`[invokeTransferableNFT] 参数:`, params);
+
+		const inputParams: Record<string, any> = {
+			tokenName: params.tokenName,
+			tokenId: params.tokenId,
+		};
+
+		switch (operation) {
+			case "mint":
+				inputParams.to = params.callee;
+				break;
+			case "burn":
+				inputParams.from = params.caller;
+				break;
+			case "Transfer":
+				inputParams.from = params.caller;
+				inputParams.to = params.callee;
+				break;
+			case "query":
+				// query 操作通常查询 tokenId 的所有者
+				break;
+		}
+
+		return await invokeContractMethod(operation, chaincodeUrl, inputParams);
+	};
+
+	/**
+	 * Value-added NFT (增值型 NFT) 合约调用
+	 * 支持操作: branch, merge, Transfer, query
+	 * 特点: 需要 tokenId, refTokenIds (merge 必须非空)
+	 *
+	 * @param chaincodeUrl - 链码的 Firefly URL
+	 * @param operation - 操作类型 ("branch" | "merge" | "Transfer" | "query")
+	 * @param params - 操作参数
+	 */
+	const invokeValueAddedNFT = async (
+		chaincodeUrl: string,
+		operation: "branch" | "merge" | "Transfer" | "query",
+		params: {
+			tokenName: string;
+			tokenId: string;
+			refTokenIds?: string[];
+			caller?: string;
+			callee?: string;
+		}
+	) => {
+		console.log(`[invokeValueAddedNFT] 操作: ${operation}`);
+		console.log(`[invokeValueAddedNFT] 参数:`, params);
+
+		const inputParams: Record<string, any> = {
+			tokenName: params.tokenName,
+			tokenId: params.tokenId,
+		};
+
+		switch (operation) {
+			case "branch":
+				inputParams.from = params.caller;
+				inputParams.refTokenIds = params.refTokenIds || [];
+				break;
+			case "merge":
+				inputParams.from = params.caller;
+				inputParams.refTokenIds = params.refTokenIds || [];
+				break;
+			case "Transfer":
+				inputParams.from = params.caller;
+				inputParams.to = params.callee;
+				break;
+			case "query":
+				// query 操作通常查询 tokenId 的所有者或引用关系
+				break;
+		}
+
+		return await invokeContractMethod(operation, chaincodeUrl, inputParams);
+	};
+
+	/**
+	 * Distributive NFT (分配型 NFT) 合约调用
+	 * 支持操作: mint, burn, grantUsageRights, revokeUsageRights, Transfer, query
+	 * 特点: burn 需要 tokenId, 支持使用权管理
+	 *
+	 * @param chaincodeUrl - 链码的 Firefly URL
+	 * @param operation - 操作类型
+	 * @param params - 操作参数
+	 */
+	const invokeDistributiveNFT = async (
+		chaincodeUrl: string,
+		operation: "mint" | "burn" | "grantUsageRights" | "revokeUsageRights" | "Transfer" | "query",
+		params: {
+			tokenName: string;
+			tokenId: string;
+			caller?: string;
+			callee?: string | string[];
+		}
+	) => {
+		console.log(`[invokeDistributiveNFT] 操作: ${operation}`);
+		console.log(`[invokeDistributiveNFT] 参数:`, params);
+
+		const inputParams: Record<string, any> = {
+			tokenName: params.tokenName,
+			tokenId: params.tokenId,
+		};
+
+		switch (operation) {
+			case "mint":
+				inputParams.to = Array.isArray(params.callee) ? params.callee[0] : params.callee;
+				break;
+			case "burn":
+				inputParams.from = params.caller;
+				break;
+			case "grantUsageRights":
+				inputParams.from = params.caller;
+				inputParams.to = params.callee; // 可以是数组
+				break;
+			case "revokeUsageRights":
+				inputParams.from = params.caller;
+				inputParams.to = params.callee; // 可以是数组
+				break;
+			case "Transfer":
+				inputParams.from = params.caller;
+				inputParams.to = Array.isArray(params.callee) ? params.callee[0] : params.callee;
+				break;
+			case "query":
+				// query 操作通常查询 tokenId 的所有者或使用权
+				break;
+		}
+
+		return await invokeContractMethod(operation, chaincodeUrl, inputParams);
+	};
+
+	/**
+	 * 获取 Firefly API 列表并提取 chaincode 和 name 的映射
+	 * 调用 http://{host}/api/v1/namespaces/default/apis 获取所有注册的 API
+	 *
+	 * @param fireflyBaseUrl - Firefly 基础 URL (如 "http://127.0.0.1:5002")
+	 * @returns chaincode 到 API name 的映射 { chaincode: name }
+	 */
+	const getFireflyApiList = async (fireflyBaseUrl: string) => {
+		try {
+			const apisUrl = `${fireflyBaseUrl}/api/v1/namespaces/default/apis`;
+			console.log(`[getFireflyApiList] 请求 URL: ${apisUrl}`);
+
+			const res = await fireflyAPI.get(apisUrl);
+			const apisList = res.data;
+
+			console.log(`[getFireflyApiList] 获取到 ${Array.isArray(apisList) ? apisList.length : 0} 个 API`);
+
+			if (!Array.isArray(apisList)) {
+				console.error(`[getFireflyApiList] 返回数据格式错误:`, apisList);
+				return {};
+			}
+
+			// 提取 chaincode 和 name 的映射
+			const chaincodeToNameMap: Record<string, string> = {};
+
+			apisList.forEach((api: any) => {
+				const chaincode = api.location?.chaincode;
+				const name = api.name;
+
+				if (chaincode && name) {
+					chaincodeToNameMap[chaincode] = name;
+				}
+			});
+
+			console.log(`[getFireflyApiList] 提取的 chaincode -> name 映射:`);
+			console.table(chaincodeToNameMap);
+
+			return chaincodeToNameMap;
+		} catch (error: any) {
+			console.error(`[getFireflyApiList] 获取 API 列表失败:`, error);
+			return {};
+		}
+	};
+
+	// 定义验证结果类型
+	interface ValidationResult {
+		dataObjectId: string;
+		assetType: string;
+		tokenType?: string;
+		success: boolean;
+		errors: string[];
+		finalOwner?: string;
+		finalUsageRights?: string[];
+	}
 
 	/**
 	 * 基于资产类型的推理验证框架
@@ -234,6 +607,9 @@ export const ValidationModal: React.FC<ValidationModalProps> = ({
 			}
 
 			// 根据资产类型进行分支推理
+			// 收集所有验证结果
+			const allValidationResults: ValidationResult[] = [];
+
 			for (const [dataObjectId, info] of Object.entries(dataObjectTaskMap)) {
 				console.log(`\n=== Validating DataObject: ${dataObjectId} ===`);
 
@@ -272,34 +648,111 @@ export const ValidationModal: React.FC<ValidationModalProps> = ({
 
 				console.log(`\n>>> 该 DataObject 将进入: ${targetBranch} <<<\n`);
 
+				let result: ValidationResult | null = null;
+
 				// 分支 1: Transferable FT
 				if (info.assetType === "transferable" && info.tokenType === "FT") {
 					console.log("Branch: Transferable FT");
-					await validateTransferableFT(info);
+					result = await validateTransferableFT(info);
 				}
 				// 分支 2: Transferable NFT
 				else if (info.assetType === "transferable" && info.tokenType === "NFT") {
 					console.log("Branch: Transferable NFT");
-					await validateTransferableNFT(info);
+					result = await validateTransferableNFT(info);
 				}
 				// 分支 3: Value-added NFT
 				else if (info.assetType === "value-added") {
 					console.log("Branch: Value-added NFT");
-					await validateValueAddedNFT(info);
+					result = await validateValueAddedNFT(info);
 				}
 				// 分支 4: Distributive NFT
 				else if (info.assetType === "distributive") {
 					console.log("Branch: Distributive NFT");
-					await validateDistributiveNFT(info);
+					result = await validateDistributiveNFT(info);
 				}
 				else {
 					console.warn(`Unknown asset type combination: ${info.assetType} / ${info.tokenType}`);
+					result = {
+						dataObjectId: info.dataObjectId,
+						assetType: info.assetType,
+						tokenType: info.tokenType,
+						success: false,
+						errors: [`未知资产类型组合: ${info.assetType} / ${info.tokenType}`],
+					};
+				}
+
+				if (result) {
+					allValidationResults.push(result);
 				}
 			}
 
 			console.log("=== Asset Type Based Validation Complete ===");
-			// 注意：各分支验证函数内部已经显示了具体的验证结果消息
-			// 这里不再显示额外的成功消息，避免弹窗重复
+
+			// 显示汇总弹窗
+			const successResults = allValidationResults.filter(r => r.success);
+			const failedResults = allValidationResults.filter(r => !r.success);
+
+			if (failedResults.length > 0) {
+				// 有失败的验证
+				Modal.error({
+					title: "资产类型推理验证结果",
+					content: (
+						<div style={{ maxHeight: "400px", overflow: "auto" }}>
+							<p>共验证 {allValidationResults.length} 个 DataObject，其中 {failedResults.length} 个失败：</p>
+							{failedResults.map((result, idx) => (
+								<div key={idx} style={{ marginTop: "15px", padding: "10px", background: "#fff2f0", borderRadius: "4px" }}>
+									<p style={{ fontWeight: "bold", color: "#ff4d4f" }}>
+										{result.dataObjectId} ({result.assetType}{result.tokenType ? ` - ${result.tokenType}` : ""})
+									</p>
+									<ul style={{ paddingLeft: "20px", margin: "5px 0" }}>
+										{result.errors.map((err, errIdx) => (
+											<li key={errIdx} style={{ marginBottom: "3px" }}>{err}</li>
+										))}
+									</ul>
+								</div>
+							))}
+							{successResults.length > 0 && (
+								<div style={{ marginTop: "15px" }}>
+									<p style={{ color: "#52c41a" }}>验证通过的 DataObject ({successResults.length} 个):</p>
+									<ul style={{ paddingLeft: "20px", margin: "5px 0" }}>
+										{successResults.map((result, idx) => (
+											<li key={idx}>
+												{result.dataObjectId} ({result.assetType}{result.tokenType ? ` - ${result.tokenType}` : ""})
+												{result.finalOwner && ` - 最终所有者: ${result.finalOwner}`}
+											</li>
+										))}
+									</ul>
+								</div>
+							)}
+						</div>
+					),
+					width: 700,
+				});
+			} else if (allValidationResults.length > 0) {
+				// 全部验证通过
+				Modal.success({
+					title: "资产类型推理验证通过",
+					content: (
+						<div style={{ maxHeight: "400px", overflow: "auto" }}>
+							<p>共验证 {allValidationResults.length} 个 DataObject，全部通过：</p>
+							{allValidationResults.map((result, idx) => (
+								<div key={idx} style={{ marginTop: "10px", padding: "8px", background: "#f6ffed", borderRadius: "4px" }}>
+									<p style={{ fontWeight: "bold", color: "#52c41a", margin: 0 }}>
+										{result.dataObjectId} ({result.assetType}{result.tokenType ? ` - ${result.tokenType}` : ""})
+									</p>
+									{result.finalOwner && <p style={{ margin: "5px 0 0 0" }}>最终所有者: {result.finalOwner}</p>}
+									{result.finalUsageRights && result.finalUsageRights.length > 0 && (
+										<p style={{ margin: "5px 0 0 0" }}>使用权: [{result.finalUsageRights.join(", ")}]</p>
+									)}
+								</div>
+							))}
+						</div>
+					),
+					width: 600,
+				});
+			} else {
+				message.info("没有找到需要验证的 DataObject");
+			}
 
 		} catch (error) {
 			console.error("Asset type based validation error:", error);
@@ -309,19 +762,392 @@ export const ValidationModal: React.FC<ValidationModalProps> = ({
 
 	/**
 	 * 分支 1: Transferable FT 验证逻辑
+	 * FT（同质化代币）使用余额追踪方案：
+	 * - 每个参与者初始余额为 0
+	 * - mint: 给 callee 增加 tokenNumber 数量
+	 * - burn: 从 caller 减少 tokenNumber 数量（需检查余额）
+	 * - Transfer: 从 caller 减少，给 callee 增加 tokenNumber 数量（需检查 caller 余额）
+	 * - query: 不影响余额
 	 */
-	const validateTransferableFT = async (info: any) => {
-		console.log("TODO: Implement Transferable FT validation logic");
+	const validateTransferableFT = async (info: any): Promise<ValidationResult> => {
+		console.log("Validating Transferable FT");
 		// 可用操作: mint, burn, Transfer, query
 		// 特点: 使用 tokenNumber, 不需要 tokenId
 		// 注意: FT 不使用 tokenHasExistInERC 字段，因为 FT 没有单独的 tokenId
-		// TODO: 添加具体的验证逻辑
+
+		// 获取 BPMN XML 用于解析 SequenceFlow
+		const bpmnData = await retrieveBPMN(bpmnId, consortiumId);
+		if (!bpmnData || !bpmnData.bpmnContent) {
+			console.error("Failed to retrieve BPMN data for task ordering");
+			return {
+				dataObjectId: info.dataObjectId,
+				assetType: info.assetType,
+				tokenType: info.tokenType,
+				success: false,
+				errors: ["无法获取 BPMN 数据"],
+			};
+		}
+
+		const parser = new DOMParser();
+		const xmlDoc = parser.parseFromString(bpmnData.bpmnContent, "text/xml");
+
+		// 构建 Task 执行顺序
+		// 1. 收集所有 SequenceFlow
+		const sequenceFlows: Array<{ sourceRef: string; targetRef: string }> = [];
+		const allElements = xmlDoc.getElementsByTagName("*");
+
+		for (let i = 0; i < allElements.length; i++) {
+			const el = allElements[i];
+			const tagName = el.tagName.toLowerCase();
+			if (tagName.includes("sequenceflow")) {
+				const sourceRef = el.getAttribute("sourceRef");
+				const targetRef = el.getAttribute("targetRef");
+				if (sourceRef && targetRef) {
+					sequenceFlows.push({ sourceRef, targetRef });
+				}
+			}
+		}
+
+		console.log("SequenceFlows found:", sequenceFlows);
+
+		// 2. 获取与此 DataObject 关联的 Task IDs
+		const relatedTaskIds = info.tasks.map((t: any) => t.taskId);
+		console.log("Related Task IDs:", relatedTaskIds);
+
+		// 3. 构建 Task 之间的依赖关系图
+		const taskOrder: Map<string, number> = new Map();
+		const inDegree: Map<string, number> = new Map();
+		const adjacencyList: Map<string, string[]> = new Map();
+
+		// 初始化
+		relatedTaskIds.forEach((taskId: string) => {
+			inDegree.set(taskId, 0);
+			adjacencyList.set(taskId, []);
+		});
+
+		// 构建图：只考虑相关 Task 之间的直接或间接连接
+		sequenceFlows.forEach(({ sourceRef, targetRef }) => {
+			if (relatedTaskIds.includes(sourceRef) && relatedTaskIds.includes(targetRef)) {
+				adjacencyList.get(sourceRef)?.push(targetRef);
+				inDegree.set(targetRef, (inDegree.get(targetRef) || 0) + 1);
+			}
+		});
+
+		// 4. 拓扑排序确定执行顺序
+		const sortedTasks: string[] = [];
+		const queue: string[] = [];
+
+		// 找到入度为 0 的节点
+		relatedTaskIds.forEach((taskId: string) => {
+			if (inDegree.get(taskId) === 0) {
+				queue.push(taskId);
+			}
+		});
+
+		while (queue.length > 0) {
+			const current = queue.shift()!;
+			sortedTasks.push(current);
+			taskOrder.set(current, sortedTasks.length - 1);
+
+			const neighbors = adjacencyList.get(current) || [];
+			neighbors.forEach((neighbor) => {
+				const newDegree = (inDegree.get(neighbor) || 1) - 1;
+				inDegree.set(neighbor, newDegree);
+				if (newDegree === 0) {
+					queue.push(neighbor);
+				}
+			});
+		}
+
+		// 如果拓扑排序没有包含所有任务，说明可能存在环或者任务之间没有直接连接
+		// 此时按照原始顺序补充
+		relatedTaskIds.forEach((taskId: string) => {
+			if (!sortedTasks.includes(taskId)) {
+				sortedTasks.push(taskId);
+				taskOrder.set(taskId, sortedTasks.length - 1);
+			}
+		});
+
+		console.log("Sorted Task execution order:", sortedTasks);
+
+		// 5. 按执行顺序排列 Task 信息
+		const sortedTaskInfos = [...info.tasks].sort((a: any, b: any) => {
+			const orderA = taskOrder.get(a.taskId) ?? Number.MAX_VALUE;
+			const orderB = taskOrder.get(b.taskId) ?? Number.MAX_VALUE;
+			return orderA - orderB;
+		});
+
+		console.log("Sorted Task infos:", sortedTaskInfos);
+
+		// 6. 余额追踪验证
+		// 使用 Map 记录每个参与者的余额，初始为 0
+		const balances: Map<string, number> = new Map();
+		const validationErrors: string[] = [];
+
+		// 辅助函数：获取参与者余额（不存在则返回 0）
+		const getBalance = (participant: string): number => {
+			return balances.get(participant.trim()) || 0;
+		};
+
+		// 辅助函数：设置参与者余额
+		const setBalance = (participant: string, amount: number) => {
+			balances.set(participant.trim(), amount);
+		};
+
+		// 从 param 中获取所有参与者 ID，直接使用 ID 进行余额追踪
+		// param 的 key 是参与者 ID（如 Participant_0bmf8tk），需要排除特殊 key
+		const specialKeys = ["ERCChaincodeNames", "BpmnId"];
+		const participantIds = Object.keys(param).filter(key => !specialKeys.includes(key));
+
+		// 构建 name 到 ID 的映射（用于将 caller/callee 中的 name 转换为 ID）
+		const participantElements = xmlDoc.querySelectorAll('participant, bpmn\\:participant, bpmn2\\:participant');
+		const nameToIdMap: Map<string, string> = new Map();
+
+		participantElements.forEach((participant: any) => {
+			const id = (participant.getAttribute("id") || "").trim();
+			const name = (participant.getAttribute("name") || "").trim();
+			if (id && name) {
+				nameToIdMap.set(name, id);
+			}
+		});
+
+		// 1. 获取与此 DataObject 关联的 ERC 合约名
+		// 从 info.tasks 中获取任意一个 taskId，然后从 param.ERCChaincodeNames 中获取合约名
+		let ercContractName = "";
+		const ercChaincodeNames = param?.ERCChaincodeNames || {};
+		for (const task of info.tasks) {
+			if (task.taskId && ercChaincodeNames[task.taskId]) {
+				ercContractName = ercChaincodeNames[task.taskId];
+				console.log(`[validateTransferableFT] 从 Task ${task.taskId} 获取到 ERC 合约名: ${ercContractName}`);
+				break;
+			}
+		}
+
+		if (!ercContractName) {
+			console.warn("[validateTransferableFT] 未找到与此 DataObject 关联的 ERC 合约名，将使用默认余额 0");
+		}
+
+		// 2. 使用 param 中的参与者 ID 列表初始化余额
+		// 通过 participantInfoList 获取每个参与者的 base64 编码，调用 FTqueryBalanceOf 查询初始余额
+		const allParticipants: string[] = [];
+
+		// 构建 participantId 到 x509Encoded (base64 编码) 的映射
+		const participantIdToX509Map: Map<string, string> = new Map();
+		participantInfoList.forEach((pInfo) => {
+			participantIdToX509Map.set(pInfo.participantId, pInfo.x509Encoded);
+		});
+
+		console.log("[validateTransferableFT] participantIdToX509Map:", Object.fromEntries(participantIdToX509Map));
+
+		// 3. 为每个参与者查询初始余额
+		for (const participantId of participantIds) {
+			if (!allParticipants.includes(participantId)) {
+				allParticipants.push(participantId);
+
+				// 获取该参与者的 x509Encoded (base64 编码)
+				const x509Encoded = participantIdToX509Map.get(participantId);
+
+				if (ercContractName && x509Encoded) {
+					// 调用 FTqueryBalanceOf 查询余额
+					try {
+						console.log(`[validateTransferableFT] 查询 ${participantId} 的初始余额...`);
+						const result = await FTqueryBalanceOf(ercContractName, x509Encoded);
+						// 解析返回结果，获取余额值
+						// 假设返回格式为 { output: { balance: "100" } } 或类似结构
+						let balance = 0;
+						if (result?.output?.balance !== undefined) {
+							balance = parseFloat(result.output.balance) || 0;
+						} else if (result?.output !== undefined && typeof result.output === "string") {
+							balance = parseFloat(result.output) || 0;
+						} else if (typeof result === "number") {
+							balance = result;
+						}
+						console.log(`[validateTransferableFT] ${participantId} 初始余额: ${balance}`);
+						setBalance(participantId, balance);
+					} catch (error) {
+						// 查询失败，默认余额为 0
+						console.warn(`[validateTransferableFT] 查询 ${participantId} 余额失败，使用默认值 0:`, error);
+						setBalance(participantId, 0);
+					}
+				} else {
+					// 没有合约名或 x509Encoded，默认余额为 0
+					console.log(`[validateTransferableFT] ${participantId} 无法查询余额（缺少合约名或 x509），使用默认值 0`);
+					setBalance(participantId, 0);
+				}
+			}
+		}
+
+		// 辅助函数：将参与者 name 转换为 ID（如果是 name 的话）
+		const convertNameToId = (value: string): string => {
+			if (!value) return value;
+			// 如果 value 是一个 name（存在于 nameToIdMap 中），则转换为 ID
+			const id = nameToIdMap.get(value);
+			return id || value;
+		};
+
+		console.log("\n=== 开始余额追踪验证 (Transferable FT) ===");
+		console.log(`Token Name: ${info.tokenName}`);
+		console.log(`所有参与者: [${allParticipants.join(", ")}]`);
+		console.log(`初始余额状态:`, Object.fromEntries(balances));
+
+		for (const taskInfo of sortedTaskInfos) {
+			const { taskId, operation, documentation } = taskInfo;
+
+			// 解析 documentation 获取 caller, callee, tokenNumber
+			let caller = "";
+			let callee = "";
+			let tokenNumber = 0;
+
+			if (documentation) {
+				try {
+					const docObj = JSON.parse(documentation);
+					console.log(`  Task ${taskId} documentation 完整内容:`, docObj);
+
+					caller = (docObj.caller || docObj.from || docObj.sender || "").trim();
+
+					// callee 可能是数组或字符串
+					let calleeValue = docObj.callee || docObj.to || docObj.recipient || docObj.receiver || "";
+					if (Array.isArray(calleeValue)) {
+						callee = (calleeValue[0] || "").trim();
+					} else {
+						callee = (calleeValue || "").trim();
+					}
+
+					// 解析 tokenNumber
+					const tokenNumStr = docObj.tokenNumber || "0";
+					tokenNumber = parseFloat(tokenNumStr) || 0;
+				} catch (e) {
+					console.warn(`Failed to parse documentation for task ${taskId}:`, e);
+				}
+			}
+
+			// 将 caller 和 callee 从 name 转换为 ID（如果是 name 的话）
+			caller = convertNameToId(caller);
+			callee = convertNameToId(callee);
+
+			console.log(`\n处理 Task: ${taskId}`);
+			console.log(`  操作: ${operation}`);
+			console.log(`  caller: "${caller}"`);
+			console.log(`  callee: "${callee}"`);
+			console.log(`  tokenNumber: ${tokenNumber}`);
+			console.log(`  当前余额状态:`, Object.fromEntries(balances));
+
+			const operationLower = (operation || "").toLowerCase().trim();
+
+			if (operationLower === "mint") {
+				// mint 操作：给 callee（接收者）增加 tokenNumber 数量
+				if (tokenNumber <= 0) {
+					const error = `Task ${taskId}: mint 操作失败 - tokenNumber 必须为正数，当前值: ${tokenNumber}`;
+					validationErrors.push(error);
+					console.error(`  ✗ ${error}`);
+				} else {
+					const receiver = callee || caller;
+					if (!receiver) {
+						const error = `Task ${taskId}: mint 操作失败 - 未指定接收者 (callee)`;
+						validationErrors.push(error);
+						console.error(`  ✗ ${error}`);
+					} else {
+						const currentBalance = getBalance(receiver);
+						const newBalance = currentBalance + tokenNumber;
+						setBalance(receiver, newBalance);
+						console.log(`  ✓ mint 成功，${receiver} 余额: ${currentBalance} + ${tokenNumber} = ${newBalance}`);
+					}
+				}
+			} else if (operationLower === "transfer") {
+				// Transfer 操作：从 caller 减少，给 callee 增加 tokenNumber 数量
+				if (tokenNumber <= 0) {
+					const error = `Task ${taskId}: Transfer 操作失败 - tokenNumber 必须为正数，当前值: ${tokenNumber}`;
+					validationErrors.push(error);
+					console.error(`  ✗ ${error}`);
+				} else if (!caller) {
+					const error = `Task ${taskId}: Transfer 操作失败 - 未指定发送者 (caller)`;
+					validationErrors.push(error);
+					console.error(`  ✗ ${error}`);
+				} else if (!callee) {
+					const error = `Task ${taskId}: Transfer 操作失败 - 未指定接收者 (callee)`;
+					validationErrors.push(error);
+					console.error(`  ✗ ${error}`);
+				} else {
+					const senderBalance = getBalance(caller);
+					if (senderBalance < tokenNumber) {
+						const error = `Task ${taskId}: Transfer 操作失败 - ${caller} 余额不足 (当前: ${senderBalance}, 需要: ${tokenNumber})`;
+						validationErrors.push(error);
+						console.error(`  ✗ ${error}`);
+					} else {
+						// 扣除发送者余额
+						const newSenderBalance = senderBalance - tokenNumber;
+						setBalance(caller, newSenderBalance);
+						// 增加接收者余额
+						const receiverBalance = getBalance(callee);
+						const newReceiverBalance = receiverBalance + tokenNumber;
+						setBalance(callee, newReceiverBalance);
+						console.log(`  ✓ Transfer 成功`);
+						console.log(`    ${caller}: ${senderBalance} - ${tokenNumber} = ${newSenderBalance}`);
+						console.log(`    ${callee}: ${receiverBalance} + ${tokenNumber} = ${newReceiverBalance}`);
+					}
+				}
+			} else if (operationLower === "burn") {
+				// burn 操作：从 caller 减少 tokenNumber 数量
+				if (tokenNumber <= 0) {
+					const error = `Task ${taskId}: burn 操作失败 - tokenNumber 必须为正数，当前值: ${tokenNumber}`;
+					validationErrors.push(error);
+					console.error(`  ✗ ${error}`);
+				} else if (!caller) {
+					const error = `Task ${taskId}: burn 操作失败 - 未指定销毁者 (caller)`;
+					validationErrors.push(error);
+					console.error(`  ✗ ${error}`);
+				} else {
+					const burnerBalance = getBalance(caller);
+					if (burnerBalance < tokenNumber) {
+						const error = `Task ${taskId}: burn 操作失败 - ${caller} 余额不足 (当前: ${burnerBalance}, 需要: ${tokenNumber})`;
+						validationErrors.push(error);
+						console.error(`  ✗ ${error}`);
+					} else {
+						const newBalance = burnerBalance - tokenNumber;
+						setBalance(caller, newBalance);
+						console.log(`  ✓ burn 成功，${caller} 余额: ${burnerBalance} - ${tokenNumber} = ${newBalance}`);
+					}
+				}
+			} else if (operationLower === "query") {
+				// query 操作：不影响余额
+				console.log(`  ✓ query 操作，不影响余额`);
+			} else {
+				console.warn(`  ? 未知操作类型: ${operation}`);
+			}
+		}
+
+		console.log("\n=== 余额追踪验证完成 (Transferable FT) ===");
+		console.log("最终余额状态:", Object.fromEntries(balances));
+
+		// 7. 返回验证结果
+		if (validationErrors.length > 0) {
+			console.error("\n验证失败，发现以下错误:");
+			validationErrors.forEach((err, idx) => {
+				console.error(`  ${idx + 1}. ${err}`);
+			});
+		} else {
+			console.log("\n✓ 验证通过：所有操作的余额变更逻辑正确");
+		}
+
+		// 构建最终余额信息字符串
+		const finalBalanceInfo = Array.from(balances.entries())
+			.map(([participant, balance]) => `${participant}: ${balance}`)
+			.join(", ");
+
+		return {
+			dataObjectId: info.dataObjectId,
+			assetType: info.assetType,
+			tokenType: info.tokenType,
+			success: validationErrors.length === 0,
+			errors: validationErrors,
+			finalOwner: finalBalanceInfo || "无余额记录",
+		};
 	};
 
 	/**
 	 * 分支 2: Transferable NFT 验证逻辑
 	 */
-	const validateTransferableNFT = async (info: any) => {
+	const validateTransferableNFT = async (info: any): Promise<ValidationResult> => {
 		console.log("Validating Transferable NFT");
 		// 可用操作: mint, burn, Transfer, query
 		// 特点: 需要 tokenId, 不需要 tokenNumber
@@ -335,6 +1161,13 @@ export const ValidationModal: React.FC<ValidationModalProps> = ({
 			// TODO: 添加具体的验证逻辑
 			// - 验证不应该有 mint 操作
 			// - 可以有 burn, Transfer, query 操作
+			return {
+				dataObjectId: info.dataObjectId,
+				assetType: info.assetType,
+				tokenType: info.tokenType,
+				success: true,
+				errors: [],
+			};
 		} else {
 			console.log("Sub-branch: Token needs to be minted");
 			// 子分支 2.2: Token 需要被铸造
@@ -541,41 +1374,31 @@ export const ValidationModal: React.FC<ValidationModalProps> = ({
 			console.log("\n=== 所有权追踪验证完成 ===");
 			console.log(`最终所有者: ${currentOwner}`);
 
-			// 7. 输出验证结果
+			// 7. 返回验证结果
 			if (validationErrors.length > 0) {
 				console.error("\n验证失败，发现以下错误:");
 				validationErrors.forEach((err, idx) => {
 					console.error(`  ${idx + 1}. ${err}`);
 				});
-				// 使用 Modal.error 弹窗显示详细错误信息
-				Modal.error({
-					title: "Transferable NFT 验证失败",
-					content: (
-						<div>
-							<p>发现 {validationErrors.length} 个错误:</p>
-							<ul style={{ paddingLeft: "20px", margin: "10px 0" }}>
-								{validationErrors.map((err, idx) => (
-									<li key={idx} style={{ marginBottom: "5px" }}>{err}</li>
-								))}
-							</ul>
-						</div>
-					),
-					width: 600,
-				});
 			} else {
 				console.log("\n✓ 验证通过：所有操作的所有权转移逻辑正确");
-				Modal.success({
-					title: "Transferable NFT 验证通过",
-					content: "所有操作的所有权转移逻辑正确",
-				});
 			}
+
+			return {
+				dataObjectId: info.dataObjectId,
+				assetType: info.assetType,
+				tokenType: info.tokenType,
+				success: validationErrors.length === 0,
+				errors: validationErrors,
+				finalOwner: currentOwner,
+			};
 		}
 	};
 
 	/**
 	 * 分支 3: Value-added NFT 验证逻辑
 	 */
-	const validateValueAddedNFT = async (info: any) => {
+	const validateValueAddedNFT = async (info: any): Promise<ValidationResult> => {
 		console.log("Validating Value-added NFT");
 		// 可用操作: branch, merge, Transfer, query
 		// 特点: 需要 tokenId, refTokenIds (merge 必须非空)
@@ -589,20 +1412,252 @@ export const ValidationModal: React.FC<ValidationModalProps> = ({
 			// TODO: 添加具体的验证逻辑
 			// - 验证 branch/merge 操作时不需要铸造新 token
 			// - 可以直接进行 Transfer, query 操作
+			return {
+				dataObjectId: info.dataObjectId,
+				assetType: info.assetType,
+				tokenType: info.tokenType,
+				success: true,
+				errors: [],
+			};
 		} else {
 			console.log("Sub-branch: Token needs to be created via branch/merge");
 			// 子分支 3.2: Token 需要通过 branch/merge 创建
 			// 逻辑: 需要通过 branch 或 merge 操作创建新的增值型 token
-			// TODO: 添加具体的验证逻辑
-			// - 验证应该有 branch 或 merge 操作
-			// - branch/merge 操作会创建新的 token
+
+			// 获取 BPMN XML 用于解析 SequenceFlow
+			const bpmnData = await retrieveBPMN(bpmnId, consortiumId);
+			if (!bpmnData || !bpmnData.bpmnContent) {
+				console.error("Failed to retrieve BPMN data for task ordering");
+				return;
+			}
+
+			const parser = new DOMParser();
+			const xmlDoc = parser.parseFromString(bpmnData.bpmnContent, "text/xml");
+
+			// 构建 Task 执行顺序
+			// 1. 收集所有 SequenceFlow
+			const sequenceFlows: Array<{ sourceRef: string; targetRef: string }> = [];
+			const allElements = xmlDoc.getElementsByTagName("*");
+
+			for (let i = 0; i < allElements.length; i++) {
+				const el = allElements[i];
+				const tagName = el.tagName.toLowerCase();
+				if (tagName.includes("sequenceflow")) {
+					const sourceRef = el.getAttribute("sourceRef");
+					const targetRef = el.getAttribute("targetRef");
+					if (sourceRef && targetRef) {
+						sequenceFlows.push({ sourceRef, targetRef });
+					}
+				}
+			}
+
+			console.log("SequenceFlows found:", sequenceFlows);
+
+			// 2. 获取与此 DataObject 关联的 Task IDs
+			const relatedTaskIds = info.tasks.map((t: any) => t.taskId);
+			console.log("Related Task IDs:", relatedTaskIds);
+
+			// 3. 构建 Task 之间的依赖关系图
+			const taskOrder: Map<string, number> = new Map();
+			const inDegree: Map<string, number> = new Map();
+			const adjacencyList: Map<string, string[]> = new Map();
+
+			// 初始化
+			relatedTaskIds.forEach((taskId: string) => {
+				inDegree.set(taskId, 0);
+				adjacencyList.set(taskId, []);
+			});
+
+			// 构建图：只考虑相关 Task 之间的直接或间接连接
+			sequenceFlows.forEach(({ sourceRef, targetRef }) => {
+				if (relatedTaskIds.includes(sourceRef) && relatedTaskIds.includes(targetRef)) {
+					adjacencyList.get(sourceRef)?.push(targetRef);
+					inDegree.set(targetRef, (inDegree.get(targetRef) || 0) + 1);
+				}
+			});
+
+			// 4. 拓扑排序确定执行顺序
+			const sortedTasks: string[] = [];
+			const queue: string[] = [];
+
+			// 找到入度为 0 的节点
+			relatedTaskIds.forEach((taskId: string) => {
+				if (inDegree.get(taskId) === 0) {
+					queue.push(taskId);
+				}
+			});
+
+			while (queue.length > 0) {
+				const current = queue.shift()!;
+				sortedTasks.push(current);
+				taskOrder.set(current, sortedTasks.length - 1);
+
+				const neighbors = adjacencyList.get(current) || [];
+				neighbors.forEach((neighbor) => {
+					const newDegree = (inDegree.get(neighbor) || 1) - 1;
+					inDegree.set(neighbor, newDegree);
+					if (newDegree === 0) {
+						queue.push(neighbor);
+					}
+				});
+			}
+
+			// 如果拓扑排序没有包含所有任务，说明可能存在环或者任务之间没有直接连接
+			// 此时按照原始顺序补充
+			relatedTaskIds.forEach((taskId: string) => {
+				if (!sortedTasks.includes(taskId)) {
+					sortedTasks.push(taskId);
+					taskOrder.set(taskId, sortedTasks.length - 1);
+				}
+			});
+
+			console.log("Sorted Task execution order:", sortedTasks);
+
+			// 5. 按执行顺序排列 Task 信息
+			const sortedTaskInfos = [...info.tasks].sort((a: any, b: any) => {
+				const orderA = taskOrder.get(a.taskId) ?? Number.MAX_VALUE;
+				const orderB = taskOrder.get(b.taskId) ?? Number.MAX_VALUE;
+				return orderA - orderB;
+			});
+
+			console.log("Sorted Task infos:", sortedTaskInfos);
+
+			// 6. 所有权追踪验证
+			// 初始所有者为 "none"，表示 token 尚未被铸造
+			let currentOwner: string = "none";
+			const validationErrors: string[] = [];
+
+			console.log("\n=== 开始所有权追踪验证 (Value-added NFT) ===");
+			console.log(`初始所有者: ${currentOwner}`);
+
+			for (const taskInfo of sortedTaskInfos) {
+				const { taskId, operation, documentation, isInput } = taskInfo;
+
+				// 解析 documentation 获取 caller 和 callee
+				let caller = "";
+				let callee = "";
+
+				if (documentation) {
+					try {
+						const docObj = JSON.parse(documentation);
+						// 打印完整的 docObj 以便调试
+						console.log(`  Task ${taskId} documentation 完整内容:`, docObj);
+						console.log(`  docObj 的所有字段:`, Object.keys(docObj));
+
+						// 使用 trim() 去除可能的空白字符
+						caller = (docObj.caller || docObj.from || docObj.sender || "").trim();
+
+						// callee 可能是数组或字符串，需要处理两种情况
+						let calleeValue = docObj.callee || docObj.to || docObj.recipient || docObj.receiver || "";
+						if (Array.isArray(calleeValue)) {
+							// 如果是数组，取第一个元素
+							callee = (calleeValue[0] || "").trim();
+						} else {
+							callee = (calleeValue || "").trim();
+						}
+					} catch (e) {
+						console.warn(`Failed to parse documentation for task ${taskId}:`, e);
+					}
+				}
+
+				// 确保 currentOwner 也是干净的字符串
+				currentOwner = currentOwner.trim();
+
+				console.log(`\n处理 Task: ${taskId}`);
+				console.log(`  操作: ${operation}`);
+				console.log(`  caller: "${caller}" (length: ${caller.length})`);
+				console.log(`  callee: "${callee}" (length: ${callee.length})`);
+				console.log(`  当前所有者: "${currentOwner}" (length: ${currentOwner.length})`);
+				console.log(`  isInput (Task→DataObject): ${isInput}`);
+
+				const operationLower = (operation || "").toLowerCase().trim();
+
+				if (operationLower === "branch" || operationLower === "merge") {
+					// branch/merge 操作：
+					// - 只有 Task → DataObject (isInput: true) 才能真正改变所有权
+					// - DataObject → Task (isInput: false) 只是引用，不改变所有权（类似 query）
+					if (!isInput) {
+						// DataObject → Task：只是引用输入，不改变所有权
+						console.log(`  ✓ ${operation} 操作（作为输入引用），不影响所有权`);
+					} else {
+						// Task → DataObject：创建新 token，改变所有权
+						if (currentOwner !== "none") {
+							const error = `Task ${taskId}: ${operation} 操作失败 - token 已存在，当前所有者为 ${currentOwner}`;
+							validationErrors.push(error);
+							console.error(`  ✗ ${error}`);
+						} else {
+							// branch/merge 成功，所有者变为 caller（Brancher/Merger）
+							currentOwner = (caller || "unknown").trim();
+							console.log(`  ✓ ${operation} 成功，所有者变更为: ${currentOwner}`);
+						}
+					}
+				} else if (operationLower === "transfer") {
+					// transfer 操作：先验证 caller 是当前所有者，再更改为 callee
+					if (currentOwner === "none") {
+						const error = `Task ${taskId}: transfer 操作失败 - token 尚未被铸造`;
+						validationErrors.push(error);
+						console.error(`  ✗ ${error}`);
+					} else if (caller && caller !== currentOwner) {
+						const error = `Task ${taskId}: transfer 操作失败 - caller(${caller}) 不是当前所有者(${currentOwner})`;
+						validationErrors.push(error);
+						console.error(`  ✗ ${error}`);
+					} else {
+						// transfer 成功，所有者变为 callee
+						const previousOwner = currentOwner;
+						currentOwner = (callee || "unknown").trim();
+						console.log(`  ✓ transfer 成功，所有者从 ${previousOwner} 变更为: ${currentOwner}`);
+					}
+				} else if (operationLower === "burn") {
+					// burn 操作：先验证 caller 是当前所有者，然后所有者变为 none
+					if (currentOwner === "none") {
+						const error = `Task ${taskId}: burn 操作失败 - token 尚未被铸造或已被销毁`;
+						validationErrors.push(error);
+						console.error(`  ✗ ${error}`);
+					} else if (caller && caller !== currentOwner) {
+						const error = `Task ${taskId}: burn 操作失败 - caller(${caller}) 不是当前所有者(${currentOwner})`;
+						validationErrors.push(error);
+						console.error(`  ✗ ${error}`);
+					} else {
+						// burn 成功，所有者变为 none
+						console.log(`  ✓ burn 成功，所有者从 ${currentOwner} 变更为: none`);
+						currentOwner = "none";
+					}
+				} else if (operationLower === "query") {
+					// query 操作：不影响所有权
+					console.log(`  ✓ query 操作，不影响所有权`);
+				} else {
+					console.warn(`  ? 未知操作类型: ${operation}`);
+				}
+			}
+
+			console.log("\n=== 所有权追踪验证完成 (Value-added NFT) ===");
+			console.log(`最终所有者: ${currentOwner}`);
+
+			// 7. 返回验证结果
+			if (validationErrors.length > 0) {
+				console.error("\n验证失败，发现以下错误:");
+				validationErrors.forEach((err, idx) => {
+					console.error(`  ${idx + 1}. ${err}`);
+				});
+			} else {
+				console.log("\n✓ 验证通过：所有操作的所有权转移逻辑正确");
+			}
+
+			return {
+				dataObjectId: info.dataObjectId,
+				assetType: info.assetType,
+				tokenType: info.tokenType,
+				success: validationErrors.length === 0,
+				errors: validationErrors,
+				finalOwner: currentOwner,
+			};
 		}
 	};
 
 	/**
 	 * 分支 4: Distributive NFT 验证逻辑
 	 */
-	const validateDistributiveNFT = async (info: any) => {
+	const validateDistributiveNFT = async (info: any): Promise<ValidationResult> => {
 		console.log("Validating Distributive NFT");
 		// 可用操作: mint, burn, grant usage rights, revoke usage rights, transfer, query
 		// 特点: burn 需要 tokenId
@@ -616,6 +1671,13 @@ export const ValidationModal: React.FC<ValidationModalProps> = ({
 			// TODO: 添加具体的验证逻辑
 			// - 验证不应该有 mint 操作
 			// - 可以有 burn, grant usage rights, revoke usage rights, transfer, query 操作
+			return {
+				dataObjectId: info.dataObjectId,
+				assetType: info.assetType,
+				tokenType: info.tokenType,
+				success: true,
+				errors: [],
+			};
 		} else {
 			console.log("Sub-branch: Token needs to be minted");
 			// 子分支 4.2: Token 需要被铸造
@@ -877,43 +1939,25 @@ export const ValidationModal: React.FC<ValidationModalProps> = ({
 			console.log(`最终所有者: ${currentOwner}`);
 			console.log(`最终使用权: [${usageRights.join(", ")}]`);
 
-			// 7. 输出验证结果
+			// 7. 返回验证结果
 			if (validationErrors.length > 0) {
 				console.error("\n验证失败，发现以下错误:");
 				validationErrors.forEach((err, idx) => {
 					console.error(`  ${idx + 1}. ${err}`);
 				});
-				// 使用 Modal.error 弹窗显示详细错误信息
-				Modal.error({
-					title: "Distributive NFT 验证失败",
-					content: (
-						<div>
-							<p>发现 {validationErrors.length} 个错误:</p>
-							<ul style={{ paddingLeft: "20px", margin: "10px 0" }}>
-								{validationErrors.map((err, idx) => (
-									<li key={idx} style={{ marginBottom: "5px" }}>{err}</li>
-								))}
-							</ul>
-						</div>
-					),
-					width: 600,
-				});
 			} else {
 				console.log("\n✓ 验证通过：所有操作的所有权和使用权转移逻辑正确");
-				Modal.success({
-					title: "Distributive NFT 验证通过",
-					content: (
-						<div>
-							<p>所有操作的所有权和使用权转移逻辑正确</p>
-							<p style={{ marginTop: "10px" }}>最终状态:</p>
-							<ul style={{ paddingLeft: "20px", margin: "5px 0" }}>
-								<li>所有者: {currentOwner}</li>
-								<li>使用权: [{usageRights.join(", ")}]</li>
-							</ul>
-						</div>
-					),
-				});
 			}
+
+			return {
+				dataObjectId: info.dataObjectId,
+				assetType: info.assetType,
+				tokenType: info.tokenType,
+				success: validationErrors.length === 0,
+				errors: validationErrors,
+				finalOwner: currentOwner,
+				finalUsageRights: usageRights,
+			};
 		}
 	};
 
@@ -927,6 +1971,7 @@ export const ValidationModal: React.FC<ValidationModalProps> = ({
 			console.log("param:", param);
 			console.log("ERCChaincodeNames:", param.ERCChaincodeNames);
 			console.log("bpmnId:", bpmnId);
+			console.log("chaincodeToNameMap (from state):", chaincodeToNameMap);
 
 			// 获取 BPMN 内容
 			console.log("Fetching BPMN data...");
