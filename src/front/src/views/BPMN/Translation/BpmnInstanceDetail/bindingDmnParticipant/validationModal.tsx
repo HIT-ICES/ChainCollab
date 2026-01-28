@@ -128,6 +128,14 @@ export const ValidationModal: React.FC<ValidationModalProps> = ({
 		fetchFireflyApiList();
 	}, [open, url]);
 
+	// 组件打开且数据加载完成后自动执行校验
+	useEffect(() => {
+		if (!open || isLoadingApiList || participantInfoList.length === 0) return;
+
+		// 自动执行合并后的校验
+		handleCombinedValidation();
+	}, [open, isLoadingApiList, participantInfoList]);
+
 	/**
 	 * 调用合约函数的模板方法
 	 * 参考 ERCAddMintAuthority 的调用方式，本质上是通过 Firefly API 调用链码
@@ -2167,7 +2175,7 @@ export const ValidationModal: React.FC<ValidationModalProps> = ({
 		};
 	};
 
-	const handleValidation = async () => {
+	const handleValidation = async (): Promise<boolean> => {
 		setIsValidating(true);
 		setValidationResult(null);
 
@@ -2348,6 +2356,7 @@ export const ValidationModal: React.FC<ValidationModalProps> = ({
 					errors,
 				});
 				message.error("校验失败：存在 DataObject 连接的 Tasks 使用了不同的合约名");
+				return false;
 			} else {
 				setValidationResult({
 					success: true,
@@ -2356,6 +2365,7 @@ export const ValidationModal: React.FC<ValidationModalProps> = ({
 				});
 				console.log("DataObject -> Contract mapping:", dataObjectContractMap);
 				message.success("校验通过！");
+				return true;
 			}
 		} catch (error) {
 			console.error("Validation error:", error);
@@ -2364,6 +2374,7 @@ export const ValidationModal: React.FC<ValidationModalProps> = ({
 				success: false,
 				message: `校验错误: ${error.message}`,
 			});
+			return false;
 		} finally {
 			setIsValidating(false);
 		}
@@ -2373,49 +2384,11 @@ export const ValidationModal: React.FC<ValidationModalProps> = ({
 		setOpen(false);
 	};
 
-	const handleDownloadBpmnXml = async () => {
-		try {
-			console.log("Downloading BPMN XML...");
-			console.log("Using bpmnId:", bpmnId);
-			console.log("Using consortiumId:", consortiumId);
-
-			const bpmnData = await retrieveBPMN(bpmnId, consortiumId);
-			console.log("BPMN data retrieved:", bpmnData ? "Yes" : "No");
-			console.log("Full BPMN data object:", bpmnData);
-			console.log("BPMN data keys:", bpmnData ? Object.keys(bpmnData) : "null");
-
-			if (!bpmnData || !bpmnData.bpmnContent) {
-				message.error("无法获取 BPMN XML 内容");
-				console.error("BPMN data is null or missing bpmnContent");
-				console.error("Available fields:", bpmnData ? Object.keys(bpmnData).join(", ") : "none");
-				return;
-			}
-
-			const bpmnXml = bpmnData.bpmnContent;
-			console.log("BPMN XML retrieved, length:", bpmnXml.length);
-
-			// 创建 Blob 对象
-			const blob = new Blob([bpmnXml], { type: "text/xml" });
-
-			// 创建下载链接
-			const url = window.URL.createObjectURL(blob);
-			const link = document.createElement("a");
-			link.href = url;
-			link.download = `bpmn_${bpmnId}_${new Date().getTime()}.xml`;
-
-			// 触发下载
-			document.body.appendChild(link);
-			link.click();
-
-			// 清理
-			document.body.removeChild(link);
-			window.URL.revokeObjectURL(url);
-
-			message.success("BPMN XML 已下载");
-			console.log("BPMN XML downloaded successfully");
-		} catch (error) {
-			console.error("Download error:", error);
-			message.error("下载 BPMN XML 时发生错误");
+	// 合并后的验证函数：先执行校验，通过后执行资产类型推理验证
+	const handleCombinedValidation = async () => {
+		const validationPassed = await handleValidation();
+		if (validationPassed) {
+			await performAssetTypeBasedValidation();
 		}
 	};
 
@@ -2427,27 +2400,6 @@ export const ValidationModal: React.FC<ValidationModalProps> = ({
 			footer={[
 				<Button key="cancel" onClick={handleCancel}>
 					关闭
-				</Button>,
-				<Button
-					key="download"
-					onClick={handleDownloadBpmnXml}
-				>
-					下载 BPMN XML
-				</Button>,
-				<Button
-					key="assetValidation"
-					type="default"
-					onClick={performAssetTypeBasedValidation}
-				>
-					资产类型推理验证
-				</Button>,
-				<Button
-					key="validate"
-					type="primary"
-					onClick={handleValidation}
-					loading={isValidating}
-				>
-					执行校验
 				</Button>,
 			]}
 			width={1200}
