@@ -232,152 +232,98 @@ export const ValidationModal: React.FC<ValidationModalProps> = ({
 	};
 
 	/**
-	 * Transferable NFT (可转让非同质化代币) 合约调用
-	 * 支持操作: mint, burn, Transfer, query
-	 * 特点: 需要 tokenId, 不需要 tokenNumber
+	 * 查询 NFT 代币所有者
+	 * 根据 chaincodeName 和 tokenId 查询 NFT 的当前所有者
 	 *
-	 * @param chaincodeUrl - 链码的 Firefly URL
-	 * @param operation - 操作类型 ("mint" | "burn" | "Transfer" | "query")
-	 * @param params - 操作参数
+	 * @param chaincodeName - 合约名称 (如 "ERC721")
+	 * @param tokenId - NFT 的 tokenId
+	 * @returns 所有者查询结果
 	 */
-	const invokeTransferableNFT = async (
-		chaincodeUrl: string,
-		operation: "mint" | "burn" | "Transfer" | "query",
-		params: {
-			tokenName: string;
-			tokenId: string;
-			caller?: string;
-			callee?: string;
-		}
-	) => {
-		console.log(`[invokeTransferableNFT] 操作: ${operation}`);
-		console.log(`[invokeTransferableNFT] 参数:`, params);
+	const NFTqueryOwnerOf = async (chaincodeName: string, tokenId: string) => {
+		console.log(`[NFTqueryOwnerOf] 开始查询 NFT 所有者`);
+		console.log(`[NFTqueryOwnerOf] chaincodeName: ${chaincodeName}`);
+		console.log(`[NFTqueryOwnerOf] tokenId: ${tokenId}`);
 
-		const inputParams: Record<string, any> = {
-			tokenName: params.tokenName,
-			tokenId: params.tokenId,
+		// 1. 从 chaincodeToNameMap 中查找完整的 API 名称
+		let matchedApiName: string | null = null;
+
+		for (const [, apiName] of Object.entries(chaincodeToNameMap)) {
+			// 检查 apiName 是否以 chaincodeName 开头
+			if (apiName.startsWith(chaincodeName)) {
+				matchedApiName = apiName;
+				console.log(`[NFTqueryOwnerOf] 匹配成功: ${chaincodeName} -> ${apiName}`);
+				break;
+			}
+		}
+
+		if (!matchedApiName) {
+			const error = `未找到与 ${chaincodeName} 匹配的 API`;
+			console.error(`[NFTqueryOwnerOf] ${error}`);
+			message.error(error);
+			throw new Error(error);
+		}
+
+		// 2. 构建 chaincodeUrl
+		// 使用固定的 5001 端口
+		const chaincodeUrl = `http://127.0.0.1:5001/api/v1/namespaces/default/apis/${matchedApiName}`;
+		console.log(`[NFTqueryOwnerOf] chaincodeUrl: ${chaincodeUrl}`);
+
+		// 3. 构建输入参数
+		const inputParams = {
+			tokenId: tokenId,
 		};
+		console.log(`[NFTqueryOwnerOf] inputParams:`, inputParams);
 
-		switch (operation) {
-			case "mint":
-				inputParams.to = params.callee;
-				break;
-			case "burn":
-				inputParams.from = params.caller;
-				break;
-			case "Transfer":
-				inputParams.from = params.caller;
-				inputParams.to = params.callee;
-				break;
-			case "query":
-				// query 操作通常查询 tokenId 的所有者
-				break;
-		}
-
-		return await invokeContractMethod(operation, chaincodeUrl, inputParams);
+		// 4. 调用合约方法
+		return await invokeContractMethod("OwnerOf", chaincodeUrl, inputParams);
 	};
 
 	/**
-	 * Value-added NFT (增值型 NFT) 合约调用
-	 * 支持操作: branch, merge, Transfer, query
-	 * 特点: 需要 tokenId, refTokenIds (merge 必须非空)
-	 *
-	 * @param chaincodeUrl - 链码的 Firefly URL
-	 * @param operation - 操作类型 ("branch" | "merge" | "Transfer" | "query")
-	 * @param params - 操作参数
+	 * 查询 Distributive NFT 余额
+	 * @param chaincodeName - 链码名称
+	 * @param tokenId - Token ID
+	 * @param account - 账户地址
+	 * @returns 余额查询结果
 	 */
-	const invokeValueAddedNFT = async (
-		chaincodeUrl: string,
-		operation: "branch" | "merge" | "Transfer" | "query",
-		params: {
-			tokenName: string;
-			tokenId: string;
-			refTokenIds?: string[];
-			caller?: string;
-			callee?: string;
-		}
-	) => {
-		console.log(`[invokeValueAddedNFT] 操作: ${operation}`);
-		console.log(`[invokeValueAddedNFT] 参数:`, params);
+	const DisNFTquery = async (chaincodeName: string, tokenId: string, account: string) => {
+		console.log(`[DisNFTquery] 开始查询 Distributive NFT 余额`);
+		console.log(`[DisNFTquery] chaincodeName: ${chaincodeName}`);
+		console.log(`[DisNFTquery] tokenId: ${tokenId}`);
+		console.log(`[DisNFTquery] account: ${account}`);
 
-		const inputParams: Record<string, any> = {
-			tokenName: params.tokenName,
-			tokenId: params.tokenId,
+		// 1. 从 chaincodeToNameMap 中查找完整的 API 名称
+		let matchedApiName: string | null = null;
+
+		for (const [, apiName] of Object.entries(chaincodeToNameMap)) {
+			// 检查 apiName 是否以 chaincodeName 开头
+			if (apiName.startsWith(chaincodeName)) {
+				matchedApiName = apiName;
+				console.log(`[DisNFTquery] 匹配成功: ${chaincodeName} -> ${apiName}`);
+				break;
+			}
+		}
+
+		if (!matchedApiName) {
+			const error = `未找到与 ${chaincodeName} 匹配的 API`;
+			console.error(`[DisNFTquery] ${error}`);
+			message.error(error);
+			throw new Error(error);
+		}
+
+		// 2. 构建 chaincodeUrl
+		// 使用固定的 5001 端口
+		const chaincodeUrl = `http://127.0.0.1:5001/api/v1/namespaces/default/apis/${matchedApiName}`;
+		console.log(`[DisNFTquery] chaincodeUrl: ${chaincodeUrl}`);
+
+		// 3. 构建输入参数
+		const inputParams = {
+			account: account,
+			id: tokenId,
 		};
+		console.log(`[DisNFTquery] inputParams:`, inputParams);
 
-		switch (operation) {
-			case "branch":
-				inputParams.from = params.caller;
-				inputParams.refTokenIds = params.refTokenIds || [];
-				break;
-			case "merge":
-				inputParams.from = params.caller;
-				inputParams.refTokenIds = params.refTokenIds || [];
-				break;
-			case "Transfer":
-				inputParams.from = params.caller;
-				inputParams.to = params.callee;
-				break;
-			case "query":
-				// query 操作通常查询 tokenId 的所有者或引用关系
-				break;
-		}
-
-		return await invokeContractMethod(operation, chaincodeUrl, inputParams);
-	};
-
-	/**
-	 * Distributive NFT (分配型 NFT) 合约调用
-	 * 支持操作: mint, burn, grantUsageRights, revokeUsageRights, Transfer, query
-	 * 特点: burn 需要 tokenId, 支持使用权管理
-	 *
-	 * @param chaincodeUrl - 链码的 Firefly URL
-	 * @param operation - 操作类型
-	 * @param params - 操作参数
-	 */
-	const invokeDistributiveNFT = async (
-		chaincodeUrl: string,
-		operation: "mint" | "burn" | "grantUsageRights" | "revokeUsageRights" | "Transfer" | "query",
-		params: {
-			tokenName: string;
-			tokenId: string;
-			caller?: string;
-			callee?: string | string[];
-		}
-	) => {
-		console.log(`[invokeDistributiveNFT] 操作: ${operation}`);
-		console.log(`[invokeDistributiveNFT] 参数:`, params);
-
-		const inputParams: Record<string, any> = {
-			tokenName: params.tokenName,
-			tokenId: params.tokenId,
-		};
-
-		switch (operation) {
-			case "mint":
-				inputParams.to = Array.isArray(params.callee) ? params.callee[0] : params.callee;
-				break;
-			case "burn":
-				inputParams.from = params.caller;
-				break;
-			case "grantUsageRights":
-				inputParams.from = params.caller;
-				inputParams.to = params.callee; // 可以是数组
-				break;
-			case "revokeUsageRights":
-				inputParams.from = params.caller;
-				inputParams.to = params.callee; // 可以是数组
-				break;
-			case "Transfer":
-				inputParams.from = params.caller;
-				inputParams.to = Array.isArray(params.callee) ? params.callee[0] : params.callee;
-				break;
-			case "query":
-				// query 操作通常查询 tokenId 的所有者或使用权
-				break;
-		}
-
-		return await invokeContractMethod(operation, chaincodeUrl, inputParams);
+		// 4. 调用合约方法
+		return await invokeContractMethod("BalanceOf", chaincodeUrl, inputParams);
 	};
 
 	/**
@@ -1154,245 +1100,340 @@ export const ValidationModal: React.FC<ValidationModalProps> = ({
 
 		const tokenHasExistInERC = info.tokenHasExistInERC || false;
 
+		// 获取 BPMN XML 用于解析 SequenceFlow
+		const bpmnData = await retrieveBPMN(bpmnId, consortiumId);
+		if (!bpmnData || !bpmnData.bpmnContent) {
+			console.error("Failed to retrieve BPMN data for task ordering");
+			return {
+				dataObjectId: info.dataObjectId,
+				assetType: info.assetType,
+				tokenType: info.tokenType,
+				success: false,
+				errors: ["无法获取 BPMN 数据"],
+			};
+		}
+
+		const parser = new DOMParser();
+		const xmlDoc = parser.parseFromString(bpmnData.bpmnContent, "text/xml");
+
+		// 初始化所有者变量
+		let currentOwner: string = "none";
+
+		// 根据 tokenHasExistInERC 决定初始所有者
 		if (tokenHasExistInERC) {
 			console.log("Sub-branch: Token already exists in ERC contract");
 			// 子分支 2.1: Token 已存在于 ERC 合约中
-			// 逻辑: 跳过 mint 操作，假设 token 已经被铸造
-			// TODO: 添加具体的验证逻辑
-			// - 验证不应该有 mint 操作
-			// - 可以有 burn, Transfer, query 操作
-			return {
-				dataObjectId: info.dataObjectId,
-				assetType: info.assetType,
-				tokenType: info.tokenType,
-				success: true,
-				errors: [],
-			};
+			// 需要查询区块链获取当前所有者
+
+			// 1. 获取 tokenId
+			const tokenId = info.tokenId;
+			if (!tokenId) {
+				console.warn("[validateTransferableNFT] tokenHasExistInERC=true 但未找到 tokenId，将使用默认所有者 none");
+			} else {
+				// 2. 获取 ERC 合约名（参考 FT 的获取逻辑）
+				let ercContractName = "";
+				const ercChaincodeNames = param?.ERCChaincodeNames || {};
+				for (const task of info.tasks) {
+					if (task.taskId && ercChaincodeNames[task.taskId]) {
+						ercContractName = ercChaincodeNames[task.taskId];
+						console.log(`[validateTransferableNFT] 从 Task ${task.taskId} 获取到 ERC 合约名: ${ercContractName}`);
+						break;
+					}
+				}
+
+				if (!ercContractName) {
+					console.warn("[validateTransferableNFT] 未找到与此 DataObject 关联的 ERC 合约名，将使用默认所有者 none");
+				} else {
+					// 3. 调用 NFTqueryOwnerOf 查询当前所有者
+					try {
+						console.log(`[validateTransferableNFT] 查询 NFT (tokenId: ${tokenId}) 的当前所有者...`);
+						const result = await NFTqueryOwnerOf(ercContractName, tokenId);
+
+						// 解析返回结果，获取所有者信息
+						// 打印完整的返回结果以便调试
+						console.log(`[validateTransferableNFT] NFTqueryOwnerOf 返回结果:`, result);
+						console.log(`[validateTransferableNFT] 返回结果类型:`, typeof result);
+
+						let ownerX509 = "";
+
+						// 尝试多种可能的返回格式
+						if (typeof result === "string") {
+							// 直接返回字符串
+							ownerX509 = result;
+						} else if (result?.output !== undefined) {
+							if (typeof result.output === "string") {
+								// { output: "x509::..." }
+								ownerX509 = result.output;
+							} else if (result.output?.owner) {
+								// { output: { owner: "x509::..." } }
+								ownerX509 = result.output.owner;
+							} else if (result.output?.value) {
+								// { output: { value: "x509::..." } }
+								ownerX509 = result.output.value;
+							}
+						} else if (result?.owner) {
+							// { owner: "x509::..." }
+							ownerX509 = result.owner;
+						} else if (result?.value) {
+							// { value: "x509::..." }
+							ownerX509 = result.value;
+						} else if (result?.data) {
+							// { data: "x509::..." }
+							if (typeof result.data === "string") {
+								ownerX509 = result.data;
+							} else if (result.data?.output) {
+								ownerX509 = typeof result.data.output === "string" ? result.data.output : "";
+							}
+						}
+
+						console.log(`[validateTransferableNFT] 解析后的所有者 x509: ${ownerX509}`);
+
+						if (ownerX509) {
+							// 4. 将 x509 结果与 participantInfoList 中的 x509Decoded 进行匹配
+							let matchedParticipantId: string | null = null;
+							for (const pInfo of participantInfoList) {
+								// 比较 x509Decoded 是否与查询结果匹配
+								// 查询结果可能是完整的 x509 字符串，需要进行包含匹配
+								if (ownerX509.includes(pInfo.x509Decoded) || pInfo.x509Decoded.includes(ownerX509)) {
+									matchedParticipantId = pInfo.participantId;
+									console.log(`[validateTransferableNFT] 匹配成功: ${ownerX509} -> ${pInfo.participantId}`);
+									break;
+								}
+							}
+
+							if (matchedParticipantId) {
+								currentOwner = matchedParticipantId;
+								console.log(`[validateTransferableNFT] 初始所有者设置为: ${currentOwner}`);
+							} else {
+								console.warn(`[validateTransferableNFT] 未找到匹配的参与者，所有者设置为 none`);
+								currentOwner = "none";
+							}
+						} else {
+							console.warn(`[validateTransferableNFT] 查询结果为空，所有者设置为 none`);
+							currentOwner = "none";
+						}
+					} catch (error) {
+						console.warn(`[validateTransferableNFT] 查询 NFT 所有者失败，使用默认所有者 none:`, error);
+						currentOwner = "none";
+					}
+				}
+			}
 		} else {
 			console.log("Sub-branch: Token needs to be minted");
 			// 子分支 2.2: Token 需要被铸造
-			// 逻辑: 需要先执行 mint 操作，然后根据所有权追踪验证后续操作
-
-			// 获取 BPMN XML 用于解析 SequenceFlow
-			const bpmnData = await retrieveBPMN(bpmnId, consortiumId);
-			if (!bpmnData || !bpmnData.bpmnContent) {
-				console.error("Failed to retrieve BPMN data for task ordering");
-				return;
-			}
-
-			const parser = new DOMParser();
-			const xmlDoc = parser.parseFromString(bpmnData.bpmnContent, "text/xml");
-
-			// 构建 Task 执行顺序
-			// 1. 收集所有 SequenceFlow
-			const sequenceFlows: Array<{ sourceRef: string; targetRef: string }> = [];
-			const allElements = xmlDoc.getElementsByTagName("*");
-
-			for (let i = 0; i < allElements.length; i++) {
-				const el = allElements[i];
-				const tagName = el.tagName.toLowerCase();
-				if (tagName.includes("sequenceflow")) {
-					const sourceRef = el.getAttribute("sourceRef");
-					const targetRef = el.getAttribute("targetRef");
-					if (sourceRef && targetRef) {
-						sequenceFlows.push({ sourceRef, targetRef });
-					}
-				}
-			}
-
-			console.log("SequenceFlows found:", sequenceFlows);
-
-			// 2. 获取与此 DataObject 关联的 Task IDs
-			const relatedTaskIds = info.tasks.map((t: any) => t.taskId);
-			console.log("Related Task IDs:", relatedTaskIds);
-
-			// 3. 构建 Task 之间的依赖关系图
-			const taskOrder: Map<string, number> = new Map();
-			const inDegree: Map<string, number> = new Map();
-			const adjacencyList: Map<string, string[]> = new Map();
-
-			// 初始化
-			relatedTaskIds.forEach((taskId: string) => {
-				inDegree.set(taskId, 0);
-				adjacencyList.set(taskId, []);
-			});
-
-			// 构建图：只考虑相关 Task 之间的直接或间接连接
-			sequenceFlows.forEach(({ sourceRef, targetRef }) => {
-				if (relatedTaskIds.includes(sourceRef) && relatedTaskIds.includes(targetRef)) {
-					adjacencyList.get(sourceRef)?.push(targetRef);
-					inDegree.set(targetRef, (inDegree.get(targetRef) || 0) + 1);
-				}
-			});
-
-			// 4. 拓扑排序确定执行顺序
-			const sortedTasks: string[] = [];
-			const queue: string[] = [];
-
-			// 找到入度为 0 的节点
-			relatedTaskIds.forEach((taskId: string) => {
-				if (inDegree.get(taskId) === 0) {
-					queue.push(taskId);
-				}
-			});
-
-			while (queue.length > 0) {
-				const current = queue.shift()!;
-				sortedTasks.push(current);
-				taskOrder.set(current, sortedTasks.length - 1);
-
-				const neighbors = adjacencyList.get(current) || [];
-				neighbors.forEach((neighbor) => {
-					const newDegree = (inDegree.get(neighbor) || 1) - 1;
-					inDegree.set(neighbor, newDegree);
-					if (newDegree === 0) {
-						queue.push(neighbor);
-					}
-				});
-			}
-
-			// 如果拓扑排序没有包含所有任务，说明可能存在环或者任务之间没有直接连接
-			// 此时按照原始顺序补充
-			relatedTaskIds.forEach((taskId: string) => {
-				if (!sortedTasks.includes(taskId)) {
-					sortedTasks.push(taskId);
-					taskOrder.set(taskId, sortedTasks.length - 1);
-				}
-			});
-
-			console.log("Sorted Task execution order:", sortedTasks);
-
-			// 5. 按执行顺序排列 Task 信息
-			const sortedTaskInfos = [...info.tasks].sort((a: any, b: any) => {
-				const orderA = taskOrder.get(a.taskId) ?? Number.MAX_VALUE;
-				const orderB = taskOrder.get(b.taskId) ?? Number.MAX_VALUE;
-				return orderA - orderB;
-			});
-
-			console.log("Sorted Task infos:", sortedTaskInfos);
-
-			// 6. 所有权追踪验证
-			// 初始所有者为 "none"，表示 token 尚未被铸造
-			let currentOwner: string = "none";
-			const validationErrors: string[] = [];
-
-			console.log("\n=== 开始所有权追踪验证 ===");
-			console.log(`初始所有者: ${currentOwner}`);
-
-			for (const taskInfo of sortedTaskInfos) {
-				const { taskId, operation, documentation } = taskInfo;
-
-				// 解析 documentation 获取 caller 和 callee
-				let caller = "";
-				let callee = "";
-
-				if (documentation) {
-					try {
-						const docObj = JSON.parse(documentation);
-						// 打印完整的 docObj 以便调试
-						console.log(`  Task ${taskId} documentation 完整内容:`, docObj);
-						console.log(`  docObj 的所有字段:`, Object.keys(docObj));
-
-						// 使用 trim() 去除可能的空白字符
-						// 尝试多种可能的字段名
-						caller = (docObj.caller || docObj.from || docObj.sender || "").trim();
-
-						// callee 可能是数组或字符串，需要处理两种情况
-						let calleeValue = docObj.callee || docObj.to || docObj.recipient || docObj.receiver || "";
-						if (Array.isArray(calleeValue)) {
-							// 如果是数组，取第一个元素
-							callee = (calleeValue[0] || "").trim();
-						} else {
-							callee = (calleeValue || "").trim();
-						}
-					} catch (e) {
-						console.warn(`Failed to parse documentation for task ${taskId}:`, e);
-					}
-				}
-
-				// 确保 currentOwner 也是干净的字符串
-				currentOwner = currentOwner.trim();
-
-				console.log(`\n处理 Task: ${taskId}`);
-				console.log(`  操作: ${operation}`);
-				console.log(`  caller: "${caller}" (length: ${caller.length})`);
-				console.log(`  callee: "${callee}" (length: ${callee.length})`);
-				console.log(`  当前所有者: "${currentOwner}" (length: ${currentOwner.length})`);
-
-				const operationLower = (operation || "").toLowerCase().trim();
-
-				if (operationLower === "mint") {
-					// mint 操作：只有当所有者为 none 时才能执行
-					if (currentOwner !== "none") {
-						const error = `Task ${taskId}: mint 操作失败 - token 已存在，当前所有者为 ${currentOwner}`;
-						validationErrors.push(error);
-						console.error(`  ✗ ${error}`);
-					} else {
-						// mint 成功，所有者变为 callee（接收者）
-						currentOwner = (callee || caller || "unknown").trim();
-						console.log(`  ✓ mint 成功，所有者变更为: ${currentOwner}`);
-					}
-				} else if (operationLower === "transfer") {
-					// transfer 操作：先验证 caller 是当前所有者，再更改为 callee
-					if (currentOwner === "none") {
-						const error = `Task ${taskId}: transfer 操作失败 - token 尚未被铸造`;
-						validationErrors.push(error);
-						console.error(`  ✗ ${error}`);
-					} else if (caller && caller !== currentOwner) {
-						const error = `Task ${taskId}: transfer 操作失败 - caller(${caller}) 不是当前所有者(${currentOwner})`;
-						validationErrors.push(error);
-						console.error(`  ✗ ${error}`);
-					} else {
-						// transfer 成功，所有者变为 callee
-						const previousOwner = currentOwner;
-						currentOwner = (callee || "unknown").trim();
-						console.log(`  ✓ transfer 成功，所有者从 ${previousOwner} 变更为: ${currentOwner}`);
-					}
-				} else if (operationLower === "burn") {
-					// burn 操作：先验证 caller 是当前所有者，然后所有者变为 none
-					if (currentOwner === "none") {
-						const error = `Task ${taskId}: burn 操作失败 - token 尚未被铸造或已被销毁`;
-						validationErrors.push(error);
-						console.error(`  ✗ ${error}`);
-					} else if (caller && caller !== currentOwner) {
-						const error = `Task ${taskId}: burn 操作失败 - caller(${caller}) 不是当前所有者(${currentOwner})`;
-						validationErrors.push(error);
-						console.error(`  ✗ ${error}`);
-					} else {
-						// burn 成功，所有者变为 none
-						console.log(`  ✓ burn 成功，所有者从 ${currentOwner} 变更为: none`);
-						currentOwner = "none";
-					}
-				} else if (operationLower === "query") {
-					// query 操作：不影响所有权
-					console.log(`  ✓ query 操作，不影响所有权`);
-				} else {
-					console.warn(`  ? 未知操作类型: ${operation}`);
-				}
-			}
-
-			console.log("\n=== 所有权追踪验证完成 ===");
-			console.log(`最终所有者: ${currentOwner}`);
-
-			// 7. 返回验证结果
-			if (validationErrors.length > 0) {
-				console.error("\n验证失败，发现以下错误:");
-				validationErrors.forEach((err, idx) => {
-					console.error(`  ${idx + 1}. ${err}`);
-				});
-			} else {
-				console.log("\n✓ 验证通过：所有操作的所有权转移逻辑正确");
-			}
-
-			return {
-				dataObjectId: info.dataObjectId,
-				assetType: info.assetType,
-				tokenType: info.tokenType,
-				success: validationErrors.length === 0,
-				errors: validationErrors,
-				finalOwner: currentOwner,
-			};
+			// 初始所有者为 "none"
+			currentOwner = "none";
 		}
+
+		// ========== 以下是共用的验证逻辑 ==========
+
+		// 构建 Task 执行顺序
+		// 1. 收集所有 SequenceFlow
+		const sequenceFlows: Array<{ sourceRef: string; targetRef: string }> = [];
+		const allElements = xmlDoc.getElementsByTagName("*");
+
+		for (let i = 0; i < allElements.length; i++) {
+			const el = allElements[i];
+			const tagName = el.tagName.toLowerCase();
+			if (tagName.includes("sequenceflow")) {
+				const sourceRef = el.getAttribute("sourceRef");
+				const targetRef = el.getAttribute("targetRef");
+				if (sourceRef && targetRef) {
+					sequenceFlows.push({ sourceRef, targetRef });
+				}
+			}
+		}
+
+		console.log("SequenceFlows found:", sequenceFlows);
+
+		// 2. 获取与此 DataObject 关联的 Task IDs
+		const relatedTaskIds = info.tasks.map((t: any) => t.taskId);
+		console.log("Related Task IDs:", relatedTaskIds);
+
+		// 3. 构建 Task 之间的依赖关系图
+		const taskOrder: Map<string, number> = new Map();
+		const inDegree: Map<string, number> = new Map();
+		const adjacencyList: Map<string, string[]> = new Map();
+
+		// 初始化
+		relatedTaskIds.forEach((taskId: string) => {
+			inDegree.set(taskId, 0);
+			adjacencyList.set(taskId, []);
+		});
+
+		// 构建图：只考虑相关 Task 之间的直接或间接连接
+		sequenceFlows.forEach(({ sourceRef, targetRef }) => {
+			if (relatedTaskIds.includes(sourceRef) && relatedTaskIds.includes(targetRef)) {
+				adjacencyList.get(sourceRef)?.push(targetRef);
+				inDegree.set(targetRef, (inDegree.get(targetRef) || 0) + 1);
+			}
+		});
+
+		// 4. 拓扑排序确定执行顺序
+		const sortedTasks: string[] = [];
+		const queue: string[] = [];
+
+		// 找到入度为 0 的节点
+		relatedTaskIds.forEach((taskId: string) => {
+			if (inDegree.get(taskId) === 0) {
+				queue.push(taskId);
+			}
+		});
+
+		while (queue.length > 0) {
+			const current = queue.shift()!;
+			sortedTasks.push(current);
+			taskOrder.set(current, sortedTasks.length - 1);
+
+			const neighbors = adjacencyList.get(current) || [];
+			neighbors.forEach((neighbor) => {
+				const newDegree = (inDegree.get(neighbor) || 1) - 1;
+				inDegree.set(neighbor, newDegree);
+				if (newDegree === 0) {
+					queue.push(neighbor);
+				}
+			});
+		}
+
+		// 如果拓扑排序没有包含所有任务，说明可能存在环或者任务之间没有直接连接
+		// 此时按照原始顺序补充
+		relatedTaskIds.forEach((taskId: string) => {
+			if (!sortedTasks.includes(taskId)) {
+				sortedTasks.push(taskId);
+				taskOrder.set(taskId, sortedTasks.length - 1);
+			}
+		});
+
+		console.log("Sorted Task execution order:", sortedTasks);
+
+		// 5. 按执行顺序排列 Task 信息
+		const sortedTaskInfos = [...info.tasks].sort((a: any, b: any) => {
+			const orderA = taskOrder.get(a.taskId) ?? Number.MAX_VALUE;
+			const orderB = taskOrder.get(b.taskId) ?? Number.MAX_VALUE;
+			return orderA - orderB;
+		});
+
+		console.log("Sorted Task infos:", sortedTaskInfos);
+
+		// 6. 所有权追踪验证
+		const validationErrors: string[] = [];
+
+		console.log("\n=== 开始所有权追踪验证 ===");
+		console.log(`初始所有者: ${currentOwner}`);
+
+		for (const taskInfo of sortedTaskInfos) {
+			const { taskId, operation, documentation } = taskInfo;
+
+			// 解析 documentation 获取 caller 和 callee
+			let caller = "";
+			let callee = "";
+
+			if (documentation) {
+				try {
+					const docObj = JSON.parse(documentation);
+					// 打印完整的 docObj 以便调试
+					console.log(`  Task ${taskId} documentation 完整内容:`, docObj);
+					console.log(`  docObj 的所有字段:`, Object.keys(docObj));
+
+					// 使用 trim() 去除可能的空白字符
+					// 尝试多种可能的字段名
+					caller = (docObj.caller || docObj.from || docObj.sender || "").trim();
+
+					// callee 可能是数组或字符串，需要处理两种情况
+					let calleeValue = docObj.callee || docObj.to || docObj.recipient || docObj.receiver || "";
+					if (Array.isArray(calleeValue)) {
+						// 如果是数组，取第一个元素
+						callee = (calleeValue[0] || "").trim();
+					} else {
+						callee = (calleeValue || "").trim();
+					}
+				} catch (e) {
+					console.warn(`Failed to parse documentation for task ${taskId}:`, e);
+				}
+			}
+
+			// 确保 currentOwner 也是干净的字符串
+			currentOwner = currentOwner.trim();
+
+			console.log(`\n处理 Task: ${taskId}`);
+			console.log(`  操作: ${operation}`);
+			console.log(`  caller: "${caller}" (length: ${caller.length})`);
+			console.log(`  callee: "${callee}" (length: ${callee.length})`);
+			console.log(`  当前所有者: "${currentOwner}" (length: ${currentOwner.length})`);
+
+			const operationLower = (operation || "").toLowerCase().trim();
+
+			if (operationLower === "mint") {
+				// mint 操作：只有当所有者为 none 时才能执行
+				if (currentOwner !== "none") {
+					const error = `Task ${taskId}: mint 操作失败 - token 已存在，当前所有者为 ${currentOwner}`;
+					validationErrors.push(error);
+					console.error(`  ✗ ${error}`);
+				} else {
+					// mint 成功，所有者变为 callee（接收者）
+					currentOwner = (callee || caller || "unknown").trim();
+					console.log(`  ✓ mint 成功，所有者变更为: ${currentOwner}`);
+				}
+			} else if (operationLower === "transfer") {
+				// transfer 操作：先验证 caller 是当前所有者，再更改为 callee
+				if (currentOwner === "none") {
+					const error = `Task ${taskId}: transfer 操作失败 - token 尚未被铸造`;
+					validationErrors.push(error);
+					console.error(`  ✗ ${error}`);
+				} else if (caller && caller !== currentOwner) {
+					const error = `Task ${taskId}: transfer 操作失败 - caller(${caller}) 不是当前所有者(${currentOwner})`;
+					validationErrors.push(error);
+					console.error(`  ✗ ${error}`);
+				} else {
+					// transfer 成功，所有者变为 callee
+					const previousOwner = currentOwner;
+					currentOwner = (callee || "unknown").trim();
+					console.log(`  ✓ transfer 成功，所有者从 ${previousOwner} 变更为: ${currentOwner}`);
+				}
+			} else if (operationLower === "burn") {
+				// burn 操作：先验证 caller 是当前所有者，然后所有者变为 none
+				if (currentOwner === "none") {
+					const error = `Task ${taskId}: burn 操作失败 - token 尚未被铸造或已被销毁`;
+					validationErrors.push(error);
+					console.error(`  ✗ ${error}`);
+				} else if (caller && caller !== currentOwner) {
+					const error = `Task ${taskId}: burn 操作失败 - caller(${caller}) 不是当前所有者(${currentOwner})`;
+					validationErrors.push(error);
+					console.error(`  ✗ ${error}`);
+				} else {
+					// burn 成功，所有者变为 none
+					console.log(`  ✓ burn 成功，所有者从 ${currentOwner} 变更为: none`);
+					currentOwner = "none";
+				}
+			} else if (operationLower === "query") {
+				// query 操作：不影响所有权
+				console.log(`  ✓ query 操作，不影响所有权`);
+			} else {
+				console.warn(`  ? 未知操作类型: ${operation}`);
+			}
+		}
+
+		console.log("\n=== 所有权追踪验证完成 ===");
+		console.log(`最终所有者: ${currentOwner}`);
+
+		// 7. 返回验证结果
+		if (validationErrors.length > 0) {
+			console.error("\n验证失败，发现以下错误:");
+			validationErrors.forEach((err, idx) => {
+				console.error(`  ${idx + 1}. ${err}`);
+			});
+		} else {
+			console.log("\n✓ 验证通过：所有操作的所有权转移逻辑正确");
+		}
+
+		return {
+			dataObjectId: info.dataObjectId,
+			assetType: info.assetType,
+			tokenType: info.tokenType,
+			success: validationErrors.length === 0,
+			errors: validationErrors,
+			finalOwner: currentOwner,
+		};
 	};
 
 	/**
@@ -1405,253 +1446,338 @@ export const ValidationModal: React.FC<ValidationModalProps> = ({
 
 		const tokenHasExistInERC = info.tokenHasExistInERC || false;
 
+		// 获取 BPMN XML 用于解析 SequenceFlow
+		const bpmnData = await retrieveBPMN(bpmnId, consortiumId);
+		if (!bpmnData || !bpmnData.bpmnContent) {
+			console.error("Failed to retrieve BPMN data for task ordering");
+			return {
+				dataObjectId: info.dataObjectId,
+				assetType: info.assetType,
+				tokenType: info.tokenType,
+				success: false,
+				errors: ["无法获取 BPMN 数据"],
+			};
+		}
+
+		const parser = new DOMParser();
+		const xmlDoc = parser.parseFromString(bpmnData.bpmnContent, "text/xml");
+
+		// 初始化所有者变量
+		let currentOwner: string = "none";
+
+		// 根据 tokenHasExistInERC 决定初始所有者
 		if (tokenHasExistInERC) {
 			console.log("Sub-branch: Token already exists in ERC contract");
 			// 子分支 3.1: Token 已存在于 ERC 合约中
-			// 逻辑: 跳过 branch/merge 操作中的 mint 部分
-			// TODO: 添加具体的验证逻辑
-			// - 验证 branch/merge 操作时不需要铸造新 token
-			// - 可以直接进行 Transfer, query 操作
-			return {
-				dataObjectId: info.dataObjectId,
-				assetType: info.assetType,
-				tokenType: info.tokenType,
-				success: true,
-				errors: [],
-			};
+			// 需要查询区块链获取当前所有者
+
+			// 1. 获取 tokenId
+			const tokenId = info.tokenId;
+			if (!tokenId) {
+				console.warn("[validateValueAddedNFT] tokenHasExistInERC=true 但未找到 tokenId，将使用默认所有者 none");
+			} else {
+				// 2. 获取 ERC 合约名（参考 FT 的获取逻辑）
+				let ercContractName = "";
+				const ercChaincodeNames = param?.ERCChaincodeNames || {};
+				for (const task of info.tasks) {
+					if (task.taskId && ercChaincodeNames[task.taskId]) {
+						ercContractName = ercChaincodeNames[task.taskId];
+						console.log(`[validateValueAddedNFT] 从 Task ${task.taskId} 获取到 ERC 合约名: ${ercContractName}`);
+						break;
+					}
+				}
+
+				if (!ercContractName) {
+					console.warn("[validateValueAddedNFT] 未找到与此 DataObject 关联的 ERC 合约名，将使用默认所有者 none");
+				} else {
+					// 3. 调用 NFTqueryOwnerOf 查询当前所有者
+					try {
+						console.log(`[validateValueAddedNFT] 查询 NFT (tokenId: ${tokenId}) 的当前所有者...`);
+						const result = await NFTqueryOwnerOf(ercContractName, tokenId);
+
+						// 解析返回结果，获取所有者信息
+						console.log(`[validateValueAddedNFT] NFTqueryOwnerOf 返回结果:`, result);
+						console.log(`[validateValueAddedNFT] 返回结果类型:`, typeof result);
+
+						let ownerX509 = "";
+
+						// 尝试多种可能的返回格式
+						if (typeof result === "string") {
+							ownerX509 = result;
+						} else if (result?.output !== undefined) {
+							if (typeof result.output === "string") {
+								ownerX509 = result.output;
+							} else if (result.output?.owner) {
+								ownerX509 = result.output.owner;
+							} else if (result.output?.value) {
+								ownerX509 = result.output.value;
+							}
+						} else if (result?.owner) {
+							ownerX509 = result.owner;
+						} else if (result?.value) {
+							ownerX509 = result.value;
+						} else if (result?.data) {
+							if (typeof result.data === "string") {
+								ownerX509 = result.data;
+							} else if (result.data?.output) {
+								ownerX509 = typeof result.data.output === "string" ? result.data.output : "";
+							}
+						}
+
+						console.log(`[validateValueAddedNFT] 解析后的所有者 x509: ${ownerX509}`);
+
+						if (ownerX509) {
+							// 4. 将 x509 结果与 participantInfoList 中的 x509Decoded 进行匹配
+							let matchedParticipantId: string | null = null;
+							for (const pInfo of participantInfoList) {
+								if (ownerX509.includes(pInfo.x509Decoded) || pInfo.x509Decoded.includes(ownerX509)) {
+									matchedParticipantId = pInfo.participantId;
+									console.log(`[validateValueAddedNFT] 匹配成功: ${ownerX509} -> ${pInfo.participantId}`);
+									break;
+								}
+							}
+
+							if (matchedParticipantId) {
+								currentOwner = matchedParticipantId;
+								console.log(`[validateValueAddedNFT] 初始所有者设置为: ${currentOwner}`);
+							} else {
+								console.warn(`[validateValueAddedNFT] 未找到匹配的参与者，所有者设置为 none`);
+								currentOwner = "none";
+							}
+						} else {
+							console.warn(`[validateValueAddedNFT] 查询结果为空，所有者设置为 none`);
+							currentOwner = "none";
+						}
+					} catch (error) {
+						console.warn(`[validateValueAddedNFT] 查询 NFT 所有者失败，使用默认所有者 none:`, error);
+						currentOwner = "none";
+					}
+				}
+			}
 		} else {
 			console.log("Sub-branch: Token needs to be created via branch/merge");
 			// 子分支 3.2: Token 需要通过 branch/merge 创建
-			// 逻辑: 需要通过 branch 或 merge 操作创建新的增值型 token
-
-			// 获取 BPMN XML 用于解析 SequenceFlow
-			const bpmnData = await retrieveBPMN(bpmnId, consortiumId);
-			if (!bpmnData || !bpmnData.bpmnContent) {
-				console.error("Failed to retrieve BPMN data for task ordering");
-				return;
-			}
-
-			const parser = new DOMParser();
-			const xmlDoc = parser.parseFromString(bpmnData.bpmnContent, "text/xml");
-
-			// 构建 Task 执行顺序
-			// 1. 收集所有 SequenceFlow
-			const sequenceFlows: Array<{ sourceRef: string; targetRef: string }> = [];
-			const allElements = xmlDoc.getElementsByTagName("*");
-
-			for (let i = 0; i < allElements.length; i++) {
-				const el = allElements[i];
-				const tagName = el.tagName.toLowerCase();
-				if (tagName.includes("sequenceflow")) {
-					const sourceRef = el.getAttribute("sourceRef");
-					const targetRef = el.getAttribute("targetRef");
-					if (sourceRef && targetRef) {
-						sequenceFlows.push({ sourceRef, targetRef });
-					}
-				}
-			}
-
-			console.log("SequenceFlows found:", sequenceFlows);
-
-			// 2. 获取与此 DataObject 关联的 Task IDs
-			const relatedTaskIds = info.tasks.map((t: any) => t.taskId);
-			console.log("Related Task IDs:", relatedTaskIds);
-
-			// 3. 构建 Task 之间的依赖关系图
-			const taskOrder: Map<string, number> = new Map();
-			const inDegree: Map<string, number> = new Map();
-			const adjacencyList: Map<string, string[]> = new Map();
-
-			// 初始化
-			relatedTaskIds.forEach((taskId: string) => {
-				inDegree.set(taskId, 0);
-				adjacencyList.set(taskId, []);
-			});
-
-			// 构建图：只考虑相关 Task 之间的直接或间接连接
-			sequenceFlows.forEach(({ sourceRef, targetRef }) => {
-				if (relatedTaskIds.includes(sourceRef) && relatedTaskIds.includes(targetRef)) {
-					adjacencyList.get(sourceRef)?.push(targetRef);
-					inDegree.set(targetRef, (inDegree.get(targetRef) || 0) + 1);
-				}
-			});
-
-			// 4. 拓扑排序确定执行顺序
-			const sortedTasks: string[] = [];
-			const queue: string[] = [];
-
-			// 找到入度为 0 的节点
-			relatedTaskIds.forEach((taskId: string) => {
-				if (inDegree.get(taskId) === 0) {
-					queue.push(taskId);
-				}
-			});
-
-			while (queue.length > 0) {
-				const current = queue.shift()!;
-				sortedTasks.push(current);
-				taskOrder.set(current, sortedTasks.length - 1);
-
-				const neighbors = adjacencyList.get(current) || [];
-				neighbors.forEach((neighbor) => {
-					const newDegree = (inDegree.get(neighbor) || 1) - 1;
-					inDegree.set(neighbor, newDegree);
-					if (newDegree === 0) {
-						queue.push(neighbor);
-					}
-				});
-			}
-
-			// 如果拓扑排序没有包含所有任务，说明可能存在环或者任务之间没有直接连接
-			// 此时按照原始顺序补充
-			relatedTaskIds.forEach((taskId: string) => {
-				if (!sortedTasks.includes(taskId)) {
-					sortedTasks.push(taskId);
-					taskOrder.set(taskId, sortedTasks.length - 1);
-				}
-			});
-
-			console.log("Sorted Task execution order:", sortedTasks);
-
-			// 5. 按执行顺序排列 Task 信息
-			const sortedTaskInfos = [...info.tasks].sort((a: any, b: any) => {
-				const orderA = taskOrder.get(a.taskId) ?? Number.MAX_VALUE;
-				const orderB = taskOrder.get(b.taskId) ?? Number.MAX_VALUE;
-				return orderA - orderB;
-			});
-
-			console.log("Sorted Task infos:", sortedTaskInfos);
-
-			// 6. 所有权追踪验证
-			// 初始所有者为 "none"，表示 token 尚未被铸造
-			let currentOwner: string = "none";
-			const validationErrors: string[] = [];
-
-			console.log("\n=== 开始所有权追踪验证 (Value-added NFT) ===");
-			console.log(`初始所有者: ${currentOwner}`);
-
-			for (const taskInfo of sortedTaskInfos) {
-				const { taskId, operation, documentation, isInput } = taskInfo;
-
-				// 解析 documentation 获取 caller 和 callee
-				let caller = "";
-				let callee = "";
-
-				if (documentation) {
-					try {
-						const docObj = JSON.parse(documentation);
-						// 打印完整的 docObj 以便调试
-						console.log(`  Task ${taskId} documentation 完整内容:`, docObj);
-						console.log(`  docObj 的所有字段:`, Object.keys(docObj));
-
-						// 使用 trim() 去除可能的空白字符
-						caller = (docObj.caller || docObj.from || docObj.sender || "").trim();
-
-						// callee 可能是数组或字符串，需要处理两种情况
-						let calleeValue = docObj.callee || docObj.to || docObj.recipient || docObj.receiver || "";
-						if (Array.isArray(calleeValue)) {
-							// 如果是数组，取第一个元素
-							callee = (calleeValue[0] || "").trim();
-						} else {
-							callee = (calleeValue || "").trim();
-						}
-					} catch (e) {
-						console.warn(`Failed to parse documentation for task ${taskId}:`, e);
-					}
-				}
-
-				// 确保 currentOwner 也是干净的字符串
-				currentOwner = currentOwner.trim();
-
-				console.log(`\n处理 Task: ${taskId}`);
-				console.log(`  操作: ${operation}`);
-				console.log(`  caller: "${caller}" (length: ${caller.length})`);
-				console.log(`  callee: "${callee}" (length: ${callee.length})`);
-				console.log(`  当前所有者: "${currentOwner}" (length: ${currentOwner.length})`);
-				console.log(`  isInput (Task→DataObject): ${isInput}`);
-
-				const operationLower = (operation || "").toLowerCase().trim();
-
-				if (operationLower === "branch" || operationLower === "merge") {
-					// branch/merge 操作：
-					// - 只有 Task → DataObject (isInput: true) 才能真正改变所有权
-					// - DataObject → Task (isInput: false) 只是引用，不改变所有权（类似 query）
-					if (!isInput) {
-						// DataObject → Task：只是引用输入，不改变所有权
-						console.log(`  ✓ ${operation} 操作（作为输入引用），不影响所有权`);
-					} else {
-						// Task → DataObject：创建新 token，改变所有权
-						if (currentOwner !== "none") {
-							const error = `Task ${taskId}: ${operation} 操作失败 - token 已存在，当前所有者为 ${currentOwner}`;
-							validationErrors.push(error);
-							console.error(`  ✗ ${error}`);
-						} else {
-							// branch/merge 成功，所有者变为 caller（Brancher/Merger）
-							currentOwner = (caller || "unknown").trim();
-							console.log(`  ✓ ${operation} 成功，所有者变更为: ${currentOwner}`);
-						}
-					}
-				} else if (operationLower === "transfer") {
-					// transfer 操作：先验证 caller 是当前所有者，再更改为 callee
-					if (currentOwner === "none") {
-						const error = `Task ${taskId}: transfer 操作失败 - token 尚未被铸造`;
-						validationErrors.push(error);
-						console.error(`  ✗ ${error}`);
-					} else if (caller && caller !== currentOwner) {
-						const error = `Task ${taskId}: transfer 操作失败 - caller(${caller}) 不是当前所有者(${currentOwner})`;
-						validationErrors.push(error);
-						console.error(`  ✗ ${error}`);
-					} else {
-						// transfer 成功，所有者变为 callee
-						const previousOwner = currentOwner;
-						currentOwner = (callee || "unknown").trim();
-						console.log(`  ✓ transfer 成功，所有者从 ${previousOwner} 变更为: ${currentOwner}`);
-					}
-				} else if (operationLower === "burn") {
-					// burn 操作：先验证 caller 是当前所有者，然后所有者变为 none
-					if (currentOwner === "none") {
-						const error = `Task ${taskId}: burn 操作失败 - token 尚未被铸造或已被销毁`;
-						validationErrors.push(error);
-						console.error(`  ✗ ${error}`);
-					} else if (caller && caller !== currentOwner) {
-						const error = `Task ${taskId}: burn 操作失败 - caller(${caller}) 不是当前所有者(${currentOwner})`;
-						validationErrors.push(error);
-						console.error(`  ✗ ${error}`);
-					} else {
-						// burn 成功，所有者变为 none
-						console.log(`  ✓ burn 成功，所有者从 ${currentOwner} 变更为: none`);
-						currentOwner = "none";
-					}
-				} else if (operationLower === "query") {
-					// query 操作：不影响所有权
-					console.log(`  ✓ query 操作，不影响所有权`);
-				} else {
-					console.warn(`  ? 未知操作类型: ${operation}`);
-				}
-			}
-
-			console.log("\n=== 所有权追踪验证完成 (Value-added NFT) ===");
-			console.log(`最终所有者: ${currentOwner}`);
-
-			// 7. 返回验证结果
-			if (validationErrors.length > 0) {
-				console.error("\n验证失败，发现以下错误:");
-				validationErrors.forEach((err, idx) => {
-					console.error(`  ${idx + 1}. ${err}`);
-				});
-			} else {
-				console.log("\n✓ 验证通过：所有操作的所有权转移逻辑正确");
-			}
-
-			return {
-				dataObjectId: info.dataObjectId,
-				assetType: info.assetType,
-				tokenType: info.tokenType,
-				success: validationErrors.length === 0,
-				errors: validationErrors,
-				finalOwner: currentOwner,
-			};
+			// 初始所有者为 "none"
+			currentOwner = "none";
 		}
+
+		// ========== 以下是共用的验证逻辑 ==========
+
+		// 构建 Task 执行顺序
+		// 1. 收集所有 SequenceFlow
+		const sequenceFlows: Array<{ sourceRef: string; targetRef: string }> = [];
+		const allElements = xmlDoc.getElementsByTagName("*");
+
+		for (let i = 0; i < allElements.length; i++) {
+			const el = allElements[i];
+			const tagName = el.tagName.toLowerCase();
+			if (tagName.includes("sequenceflow")) {
+				const sourceRef = el.getAttribute("sourceRef");
+				const targetRef = el.getAttribute("targetRef");
+				if (sourceRef && targetRef) {
+					sequenceFlows.push({ sourceRef, targetRef });
+				}
+			}
+		}
+
+		console.log("SequenceFlows found:", sequenceFlows);
+
+		// 2. 获取与此 DataObject 关联的 Task IDs
+		const relatedTaskIds = info.tasks.map((t: any) => t.taskId);
+		console.log("Related Task IDs:", relatedTaskIds);
+
+		// 3. 构建 Task 之间的依赖关系图
+		const taskOrder: Map<string, number> = new Map();
+		const inDegree: Map<string, number> = new Map();
+		const adjacencyList: Map<string, string[]> = new Map();
+
+		// 初始化
+		relatedTaskIds.forEach((taskId: string) => {
+			inDegree.set(taskId, 0);
+			adjacencyList.set(taskId, []);
+		});
+
+		// 构建图：只考虑相关 Task 之间的直接或间接连接
+		sequenceFlows.forEach(({ sourceRef, targetRef }) => {
+			if (relatedTaskIds.includes(sourceRef) && relatedTaskIds.includes(targetRef)) {
+				adjacencyList.get(sourceRef)?.push(targetRef);
+				inDegree.set(targetRef, (inDegree.get(targetRef) || 0) + 1);
+			}
+		});
+
+		// 4. 拓扑排序确定执行顺序
+		const sortedTasks: string[] = [];
+		const queue: string[] = [];
+
+		// 找到入度为 0 的节点
+		relatedTaskIds.forEach((taskId: string) => {
+			if (inDegree.get(taskId) === 0) {
+				queue.push(taskId);
+			}
+		});
+
+		while (queue.length > 0) {
+			const current = queue.shift()!;
+			sortedTasks.push(current);
+			taskOrder.set(current, sortedTasks.length - 1);
+
+			const neighbors = adjacencyList.get(current) || [];
+			neighbors.forEach((neighbor) => {
+				const newDegree = (inDegree.get(neighbor) || 1) - 1;
+				inDegree.set(neighbor, newDegree);
+				if (newDegree === 0) {
+					queue.push(neighbor);
+				}
+			});
+		}
+
+		// 如果拓扑排序没有包含所有任务，说明可能存在环或者任务之间没有直接连接
+		// 此时按照原始顺序补充
+		relatedTaskIds.forEach((taskId: string) => {
+			if (!sortedTasks.includes(taskId)) {
+				sortedTasks.push(taskId);
+				taskOrder.set(taskId, sortedTasks.length - 1);
+			}
+		});
+
+		console.log("Sorted Task execution order:", sortedTasks);
+
+		// 5. 按执行顺序排列 Task 信息
+		const sortedTaskInfos = [...info.tasks].sort((a: any, b: any) => {
+			const orderA = taskOrder.get(a.taskId) ?? Number.MAX_VALUE;
+			const orderB = taskOrder.get(b.taskId) ?? Number.MAX_VALUE;
+			return orderA - orderB;
+		});
+
+		console.log("Sorted Task infos:", sortedTaskInfos);
+
+		// 6. 所有权追踪验证
+		const validationErrors: string[] = [];
+
+		console.log("\n=== 开始所有权追踪验证 (Value-added NFT) ===");
+		console.log(`初始所有者: ${currentOwner}`);
+
+		for (const taskInfo of sortedTaskInfos) {
+			const { taskId, operation, documentation, isInput } = taskInfo;
+
+			// 解析 documentation 获取 caller 和 callee
+			let caller = "";
+			let callee = "";
+
+			if (documentation) {
+				try {
+					const docObj = JSON.parse(documentation);
+					// 打印完整的 docObj 以便调试
+					console.log(`  Task ${taskId} documentation 完整内容:`, docObj);
+					console.log(`  docObj 的所有字段:`, Object.keys(docObj));
+
+					// 使用 trim() 去除可能的空白字符
+					caller = (docObj.caller || docObj.from || docObj.sender || "").trim();
+
+					// callee 可能是数组或字符串，需要处理两种情况
+					let calleeValue = docObj.callee || docObj.to || docObj.recipient || docObj.receiver || "";
+					if (Array.isArray(calleeValue)) {
+						// 如果是数组，取第一个元素
+						callee = (calleeValue[0] || "").trim();
+					} else {
+						callee = (calleeValue || "").trim();
+					}
+				} catch (e) {
+					console.warn(`Failed to parse documentation for task ${taskId}:`, e);
+				}
+			}
+
+			// 确保 currentOwner 也是干净的字符串
+			currentOwner = currentOwner.trim();
+
+			console.log(`\n处理 Task: ${taskId}`);
+			console.log(`  操作: ${operation}`);
+			console.log(`  caller: "${caller}" (length: ${caller.length})`);
+			console.log(`  callee: "${callee}" (length: ${callee.length})`);
+			console.log(`  当前所有者: "${currentOwner}" (length: ${currentOwner.length})`);
+			console.log(`  isInput (Task→DataObject): ${isInput}`);
+
+			const operationLower = (operation || "").toLowerCase().trim();
+
+			if (operationLower === "branch" || operationLower === "merge") {
+				// branch/merge 操作：
+				// - 只有 Task → DataObject (isInput: true) 才能真正改变所有权
+				// - DataObject → Task (isInput: false) 只是引用，不改变所有权（类似 query）
+				if (!isInput) {
+					// DataObject → Task：只是引用输入，不改变所有权
+					console.log(`  ✓ ${operation} 操作（作为输入引用），不影响所有权`);
+				} else {
+					// Task → DataObject：创建新 token，改变所有权
+					if (currentOwner !== "none") {
+						const error = `Task ${taskId}: ${operation} 操作失败 - token 已存在，当前所有者为 ${currentOwner}`;
+						validationErrors.push(error);
+						console.error(`  ✗ ${error}`);
+					} else {
+						// branch/merge 成功，所有者变为 caller（Brancher/Merger）
+						currentOwner = (caller || "unknown").trim();
+						console.log(`  ✓ ${operation} 成功，所有者变更为: ${currentOwner}`);
+					}
+				}
+			} else if (operationLower === "transfer") {
+				// transfer 操作：先验证 caller 是当前所有者，再更改为 callee
+				if (currentOwner === "none") {
+					const error = `Task ${taskId}: transfer 操作失败 - token 尚未被铸造`;
+					validationErrors.push(error);
+					console.error(`  ✗ ${error}`);
+				} else if (caller && caller !== currentOwner) {
+					const error = `Task ${taskId}: transfer 操作失败 - caller(${caller}) 不是当前所有者(${currentOwner})`;
+					validationErrors.push(error);
+					console.error(`  ✗ ${error}`);
+				} else {
+					// transfer 成功，所有者变为 callee
+					const previousOwner = currentOwner;
+					currentOwner = (callee || "unknown").trim();
+					console.log(`  ✓ transfer 成功，所有者从 ${previousOwner} 变更为: ${currentOwner}`);
+				}
+			} else if (operationLower === "burn") {
+				// burn 操作：先验证 caller 是当前所有者，然后所有者变为 none
+				if (currentOwner === "none") {
+					const error = `Task ${taskId}: burn 操作失败 - token 尚未被铸造或已被销毁`;
+					validationErrors.push(error);
+					console.error(`  ✗ ${error}`);
+				} else if (caller && caller !== currentOwner) {
+					const error = `Task ${taskId}: burn 操作失败 - caller(${caller}) 不是当前所有者(${currentOwner})`;
+					validationErrors.push(error);
+					console.error(`  ✗ ${error}`);
+				} else {
+					// burn 成功，所有者变为 none
+					console.log(`  ✓ burn 成功，所有者从 ${currentOwner} 变更为: none`);
+					currentOwner = "none";
+				}
+			} else if (operationLower === "query") {
+				// query 操作：不影响所有权
+				console.log(`  ✓ query 操作，不影响所有权`);
+			} else {
+				console.warn(`  ? 未知操作类型: ${operation}`);
+			}
+		}
+
+		console.log("\n=== 所有权追踪验证完成 (Value-added NFT) ===");
+		console.log(`最终所有者: ${currentOwner}`);
+
+		// 7. 返回验证结果
+		if (validationErrors.length > 0) {
+			console.error("\n验证失败，发现以下错误:");
+			validationErrors.forEach((err, idx) => {
+				console.error(`  ${idx + 1}. ${err}`);
+			});
+		} else {
+			console.log("\n✓ 验证通过：所有操作的所有权转移逻辑正确");
+		}
+
+		return {
+			dataObjectId: info.dataObjectId,
+			assetType: info.assetType,
+			tokenType: info.tokenType,
+			success: validationErrors.length === 0,
+			errors: validationErrors,
+			finalOwner: currentOwner,
+		};
 	};
 
 	/**
@@ -1664,39 +1790,122 @@ export const ValidationModal: React.FC<ValidationModalProps> = ({
 
 		const tokenHasExistInERC = info.tokenHasExistInERC || false;
 
-		if (tokenHasExistInERC) {
-			console.log("Sub-branch: Token already exists in ERC contract");
-			// 子分支 4.1: Token 已存在于 ERC 合约中
-			// 逻辑: 跳过 mint 操作，假设 token 已经被铸造
-			// TODO: 添加具体的验证逻辑
-			// - 验证不应该有 mint 操作
-			// - 可以有 burn, grant usage rights, revoke usage rights, transfer, query 操作
+		// 获取 BPMN XML 用于解析 SequenceFlow
+		const bpmnData = await retrieveBPMN(bpmnId, consortiumId);
+		if (!bpmnData || !bpmnData.bpmnContent) {
+			console.error("Failed to retrieve BPMN data for task ordering");
 			return {
 				dataObjectId: info.dataObjectId,
 				assetType: info.assetType,
 				tokenType: info.tokenType,
-				success: true,
-				errors: [],
+				success: false,
+				errors: ["无法获取 BPMN 数据"],
 			};
+		}
+
+		const parser = new DOMParser();
+		const xmlDoc = parser.parseFromString(bpmnData.bpmnContent, "text/xml");
+
+		// 初始化所有者变量
+		let currentOwner: string = "none";
+
+		// 根据 tokenHasExistInERC 决定初始所有者
+		if (tokenHasExistInERC) {
+			console.log("Sub-branch: Token already exists in ERC contract");
+			// 子分支 4.1: Token 已存在于 ERC 合约中
+			// 需要查询区块链获取当前所有者
+
+			// 1. 获取 tokenId 并拼接 "_owner"
+			const baseTokenId = info.tokenId;
+			if (!baseTokenId) {
+				console.warn("[validateDistributiveNFT] tokenHasExistInERC=true 但未找到 tokenId，将使用默认所有者 none");
+			} else {
+				const tokenIdWithOwner = `${baseTokenId}_owner`;
+				console.log(`[validateDistributiveNFT] 使用 tokenId: ${tokenIdWithOwner}`);
+
+				// 2. 获取 ERC 合约名（参考 FT 的获取逻辑）
+				let ercContractName = "";
+				const ercChaincodeNames = param?.ERCChaincodeNames || {};
+				for (const task of info.tasks) {
+					if (task.taskId && ercChaincodeNames[task.taskId]) {
+						ercContractName = ercChaincodeNames[task.taskId];
+						console.log(`[validateDistributiveNFT] 从 Task ${task.taskId} 获取到 ERC 合约名: ${ercContractName}`);
+						break;
+					}
+				}
+
+				if (!ercContractName) {
+					console.warn("[validateDistributiveNFT] 未找到与此 DataObject 关联的 ERC 合约名，将使用默认所有者 none");
+				} else {
+					// 3. 遍历所有参与者，调用 DisNFTquery 查询余额
+					// 如果返回 1，则该参与者是所有者
+					console.log(`[validateDistributiveNFT] 开始遍历参与者查询所有者...`);
+
+					for (const pInfo of participantInfoList) {
+						try {
+							console.log(`[validateDistributiveNFT] 查询参与者 ${pInfo.participantId} 的余额...`);
+							console.log(`[validateDistributiveNFT] account (x509Encoded): ${pInfo.x509Encoded.substring(0, 50)}...`);
+
+							const result = await DisNFTquery(ercContractName, tokenIdWithOwner, pInfo.x509Encoded);
+
+							// 解析返回结果
+							console.log(`[validateDistributiveNFT] DisNFTquery 返回结果:`, result);
+							console.log(`[validateDistributiveNFT] 返回结果类型:`, typeof result);
+
+							let balance = 0;
+
+							// 尝试多种可能的返回格式
+							if (typeof result === "number") {
+								balance = result;
+							} else if (typeof result === "string") {
+								balance = parseInt(result, 10) || 0;
+							} else if (result?.output !== undefined) {
+								if (typeof result.output === "number") {
+									balance = result.output;
+								} else if (typeof result.output === "string") {
+									balance = parseInt(result.output, 10) || 0;
+								} else if (result.output?.balance !== undefined) {
+									balance = parseInt(result.output.balance, 10) || 0;
+								}
+							} else if (result?.balance !== undefined) {
+								balance = parseInt(result.balance, 10) || 0;
+							} else if (result?.value !== undefined) {
+								balance = parseInt(result.value, 10) || 0;
+							}
+
+							console.log(`[validateDistributiveNFT] 解析后的余额: ${balance}`);
+
+							if (balance === 1) {
+								currentOwner = pInfo.participantId;
+								console.log(`[validateDistributiveNFT] 找到所有者: ${currentOwner}`);
+								break;
+							}
+						} catch (error) {
+							console.warn(`[validateDistributiveNFT] 查询参与者 ${pInfo.participantId} 余额失败:`, error);
+							// 继续查询下一个参与者
+						}
+					}
+
+					if (currentOwner === "none") {
+						console.warn(`[validateDistributiveNFT] 未找到任何参与者拥有该 token，所有者设置为 none`);
+					} else {
+						console.log(`[validateDistributiveNFT] 初始所有者设置为: ${currentOwner}`);
+					}
+				}
+			}
 		} else {
 			console.log("Sub-branch: Token needs to be minted");
 			// 子分支 4.2: Token 需要被铸造
-			// 逻辑: 需要先执行 mint 操作，然后根据所有权和使用权追踪验证后续操作
+			// 初始所有者为 "none"
+			currentOwner = "none";
+		}
 
-			// 获取 BPMN XML 用于解析 SequenceFlow
-			const bpmnData = await retrieveBPMN(bpmnId, consortiumId);
-			if (!bpmnData || !bpmnData.bpmnContent) {
-				console.error("Failed to retrieve BPMN data for task ordering");
-				return;
-			}
+		// ========== 以下是共用的验证逻辑 ==========
 
-			const parser = new DOMParser();
-			const xmlDoc = parser.parseFromString(bpmnData.bpmnContent, "text/xml");
-
-			// 构建 Task 执行顺序
-			// 1. 收集所有 SequenceFlow
-			const sequenceFlows: Array<{ sourceRef: string; targetRef: string }> = [];
-			const allElements = xmlDoc.getElementsByTagName("*");
+		// 构建 Task 执行顺序
+		// 1. 收集所有 SequenceFlow
+		const sequenceFlows: Array<{ sourceRef: string; targetRef: string }> = [];
+		const allElements = xmlDoc.getElementsByTagName("*");
 
 			for (let i = 0; i < allElements.length; i++) {
 				const el = allElements[i];
@@ -1779,186 +1988,183 @@ export const ValidationModal: React.FC<ValidationModalProps> = ({
 				return orderA - orderB;
 			});
 
-			console.log("Sorted Task infos:", sortedTaskInfos);
+		console.log("Sorted Task infos:", sortedTaskInfos);
 
-			// 6. 所有权和使用权追踪验证
-			// 初始所有者为 "none"，表示 token 尚未被铸造
-			// 使用权用数组记录，初始为空
-			let currentOwner: string = "none";
-			let usageRights: string[] = [];  // 记录有使用权的参与者
-			const validationErrors: string[] = [];
+		// 6. 所有权和使用权追踪验证
+		// 使用权用数组记录，初始为空
+		let usageRights: string[] = [];  // 记录有使用权的参与者
+		const validationErrors: string[] = [];
 
-			console.log("\n=== 开始所有权和使用权追踪验证 ===");
-			console.log(`初始所有者: ${currentOwner}`);
-			console.log(`初始使用权: [${usageRights.join(", ")}]`);
+		console.log("\n=== 开始所有权和使用权追踪验证 ===");
+		console.log(`初始所有者: ${currentOwner}`);
+		console.log(`初始使用权: [${usageRights.join(", ")}]`);
 
-			for (const taskInfo of sortedTaskInfos) {
-				const { taskId, operation, documentation } = taskInfo;
+		for (const taskInfo of sortedTaskInfos) {
+			const { taskId, operation, documentation } = taskInfo;
 
-				// 解析 documentation 获取 caller 和 callee
-				let caller = "";
-				let callee = "";
-				let calleeArray: string[] = [];
+			// 解析 documentation 获取 caller 和 callee
+			let caller = "";
+			let callee = "";
+			let calleeArray: string[] = [];
 
-				if (documentation) {
-					try {
-						const docObj = JSON.parse(documentation);
-						// 打印完整的 docObj 以便调试
-						console.log(`  Task ${taskId} documentation 完整内容:`, docObj);
-						console.log(`  docObj 的所有字段:`, Object.keys(docObj));
+			if (documentation) {
+				try {
+					const docObj = JSON.parse(documentation);
+					// 打印完整的 docObj 以便调试
+					console.log(`  Task ${taskId} documentation 完整内容:`, docObj);
+					console.log(`  docObj 的所有字段:`, Object.keys(docObj));
 
-						// 使用 trim() 去除可能的空白字符
-						caller = (docObj.caller || docObj.from || docObj.sender || "").trim();
+					// 使用 trim() 去除可能的空白字符
+					caller = (docObj.caller || docObj.from || docObj.sender || "").trim();
 
-						// callee 可能是数组或字符串，需要处理两种情况
-						let calleeValue = docObj.callee || docObj.to || docObj.recipient || docObj.receiver || "";
-						if (Array.isArray(calleeValue)) {
-							// 保存完整的数组用于 grant/revoke 操作
-							calleeArray = calleeValue.map((v: string) => (v || "").trim());
-							// 取第一个元素作为单一 callee
-							callee = (calleeValue[0] || "").trim();
-						} else {
-							callee = (calleeValue || "").trim();
-							calleeArray = callee ? [callee] : [];
-						}
-					} catch (e) {
-						console.warn(`Failed to parse documentation for task ${taskId}:`, e);
+					// callee 可能是数组或字符串，需要处理两种情况
+					let calleeValue = docObj.callee || docObj.to || docObj.recipient || docObj.receiver || "";
+					if (Array.isArray(calleeValue)) {
+						// 保存完整的数组用于 grant/revoke 操作
+						calleeArray = calleeValue.map((v: string) => (v || "").trim());
+						// 取第一个元素作为单一 callee
+						callee = (calleeValue[0] || "").trim();
+					} else {
+						callee = (calleeValue || "").trim();
+						calleeArray = callee ? [callee] : [];
 					}
+				} catch (e) {
+					console.warn(`Failed to parse documentation for task ${taskId}:`, e);
 				}
+			}
 
-				// 确保 currentOwner 也是干净的字符串
-				currentOwner = currentOwner.trim();
+			// 确保 currentOwner 也是干净的字符串
+			currentOwner = currentOwner.trim();
 
-				console.log(`\n处理 Task: ${taskId}`);
-				console.log(`  操作: ${operation}`);
-				console.log(`  caller: "${caller}" (length: ${caller.length})`);
-				console.log(`  callee: "${callee}" (length: ${callee.length})`);
-				console.log(`  calleeArray: [${calleeArray.join(", ")}]`);
-				console.log(`  当前所有者: "${currentOwner}" (length: ${currentOwner.length})`);
-				console.log(`  当前使用权: [${usageRights.join(", ")}]`);
+			console.log(`\n处理 Task: ${taskId}`);
+			console.log(`  操作: ${operation}`);
+			console.log(`  caller: "${caller}" (length: ${caller.length})`);
+			console.log(`  callee: "${callee}" (length: ${callee.length})`);
+			console.log(`  calleeArray: [${calleeArray.join(", ")}]`);
+			console.log(`  当前所有者: "${currentOwner}" (length: ${currentOwner.length})`);
+			console.log(`  当前使用权: [${usageRights.join(", ")}]`);
 
-				const operationLower = (operation || "").toLowerCase().trim();
+			const operationLower = (operation || "").toLowerCase().trim();
 
-				if (operationLower === "mint") {
-					// mint 操作：只有当所有者为 none 时才能执行
-					if (currentOwner !== "none") {
-						const error = `Task ${taskId}: mint 操作失败 - token 已存在，当前所有者为 ${currentOwner}`;
-						validationErrors.push(error);
-						console.error(`  ✗ ${error}`);
-					} else {
-						// mint 成功，所有者变为 callee（接收者）
-						currentOwner = (callee || caller || "unknown").trim();
-						console.log(`  ✓ mint 成功，所有者变更为: ${currentOwner}`);
-					}
-				} else if (operationLower === "transfer") {
-					// transfer 操作：先验证 caller 是当前所有者，再更改为 callee
-					if (currentOwner === "none") {
-						const error = `Task ${taskId}: transfer 操作失败 - token 尚未被铸造`;
-						validationErrors.push(error);
-						console.error(`  ✗ ${error}`);
-					} else if (caller && caller !== currentOwner) {
-						const error = `Task ${taskId}: transfer 操作失败 - caller(${caller}) 不是当前所有者(${currentOwner})`;
-						validationErrors.push(error);
-						console.error(`  ✗ ${error}`);
-					} else {
-						// transfer 成功，所有者变为 callee
-						const previousOwner = currentOwner;
-						currentOwner = (callee || "unknown").trim();
-						console.log(`  ✓ transfer 成功，所有者从 ${previousOwner} 变更为: ${currentOwner}`);
-					}
-				} else if (operationLower === "burn") {
-					// burn 操作：先验证 caller 是当前所有者，然后所有者变为 none
-					if (currentOwner === "none") {
-						const error = `Task ${taskId}: burn 操作失败 - token 尚未被铸造或已被销毁`;
-						validationErrors.push(error);
-						console.error(`  ✗ ${error}`);
-					} else if (caller && caller !== currentOwner) {
-						const error = `Task ${taskId}: burn 操作失败 - caller(${caller}) 不是当前所有者(${currentOwner})`;
-						validationErrors.push(error);
-						console.error(`  ✗ ${error}`);
-					} else {
-						// burn 成功，所有者变为 none，同时清空使用权
-						console.log(`  ✓ burn 成功，所有者从 ${currentOwner} 变更为: none，使用权清空`);
-						currentOwner = "none";
-						usageRights = [];
-					}
-				} else if (operationLower === "grant usage rights") {
-					// grant usage rights 操作：caller 必须是所有者，将 callee 加入使用权数组
-					if (currentOwner === "none") {
-						const error = `Task ${taskId}: grant usage rights 操作失败 - token 尚未被铸造`;
-						validationErrors.push(error);
-						console.error(`  ✗ ${error}`);
-					} else if (caller && caller !== currentOwner) {
-						const error = `Task ${taskId}: grant usage rights 操作失败 - caller(${caller}) 不是当前所有者(${currentOwner})，无权授予使用权`;
-						validationErrors.push(error);
-						console.error(`  ✗ ${error}`);
-					} else {
-						// grant 成功，将 callee 加入使用权数组
-						const newGrantees: string[] = [];
-						calleeArray.forEach((grantee) => {
-							if (grantee && !usageRights.includes(grantee)) {
-								usageRights.push(grantee);
-								newGrantees.push(grantee);
-							}
-						});
-						console.log(`  ✓ grant usage rights 成功，新增使用权: [${newGrantees.join(", ")}]`);
-						console.log(`  当前使用权列表: [${usageRights.join(", ")}]`);
-					}
-				} else if (operationLower === "revoke usage rights") {
-					// revoke usage rights 操作：caller 必须是所有者，将 callee 从使用权数组中移除
-					if (currentOwner === "none") {
-						const error = `Task ${taskId}: revoke usage rights 操作失败 - token 尚未被铸造`;
-						validationErrors.push(error);
-						console.error(`  ✗ ${error}`);
-					} else if (caller && caller !== currentOwner) {
-						const error = `Task ${taskId}: revoke usage rights 操作失败 - caller(${caller}) 不是当前所有者(${currentOwner})，无权撤销使用权`;
-						validationErrors.push(error);
-						console.error(`  ✗ ${error}`);
-					} else {
-						// revoke 成功，将 callee 从使用权数组中移除
-						const revokedGrantees: string[] = [];
-						calleeArray.forEach((grantee) => {
-							const index = usageRights.indexOf(grantee);
-							if (index > -1) {
-								usageRights.splice(index, 1);
-								revokedGrantees.push(grantee);
-							}
-						});
-						console.log(`  ✓ revoke usage rights 成功，移除使用权: [${revokedGrantees.join(", ")}]`);
-						console.log(`  当前使用权列表: [${usageRights.join(", ")}]`);
-					}
-				} else if (operationLower === "query") {
-					// query 操作：不影响所有权和使用权
-					console.log(`  ✓ query 操作，不影响所有权和使用权`);
+			if (operationLower === "mint") {
+				// mint 操作：只有当所有者为 none 时才能执行
+				if (currentOwner !== "none") {
+					const error = `Task ${taskId}: mint 操作失败 - token 已存在，当前所有者为 ${currentOwner}`;
+					validationErrors.push(error);
+					console.error(`  ✗ ${error}`);
 				} else {
-					console.warn(`  ? 未知操作类型: ${operation}`);
+					// mint 成功，所有者变为 callee（接收者）
+					currentOwner = (callee || caller || "unknown").trim();
+					console.log(`  ✓ mint 成功，所有者变更为: ${currentOwner}`);
 				}
-			}
-
-			console.log("\n=== 所有权和使用权追踪验证完成 ===");
-			console.log(`最终所有者: ${currentOwner}`);
-			console.log(`最终使用权: [${usageRights.join(", ")}]`);
-
-			// 7. 返回验证结果
-			if (validationErrors.length > 0) {
-				console.error("\n验证失败，发现以下错误:");
-				validationErrors.forEach((err, idx) => {
-					console.error(`  ${idx + 1}. ${err}`);
-				});
+			} else if (operationLower === "transfer") {
+				// transfer 操作：先验证 caller 是当前所有者，再更改为 callee
+				if (currentOwner === "none") {
+					const error = `Task ${taskId}: transfer 操作失败 - token 尚未被铸造`;
+					validationErrors.push(error);
+					console.error(`  ✗ ${error}`);
+				} else if (caller && caller !== currentOwner) {
+					const error = `Task ${taskId}: transfer 操作失败 - caller(${caller}) 不是当前所有者(${currentOwner})`;
+					validationErrors.push(error);
+					console.error(`  ✗ ${error}`);
+				} else {
+					// transfer 成功，所有者变为 callee
+					const previousOwner = currentOwner;
+					currentOwner = (callee || "unknown").trim();
+					console.log(`  ✓ transfer 成功，所有者从 ${previousOwner} 变更为: ${currentOwner}`);
+				}
+			} else if (operationLower === "burn") {
+				// burn 操作：先验证 caller 是当前所有者，然后所有者变为 none
+				if (currentOwner === "none") {
+					const error = `Task ${taskId}: burn 操作失败 - token 尚未被铸造或已被销毁`;
+					validationErrors.push(error);
+					console.error(`  ✗ ${error}`);
+				} else if (caller && caller !== currentOwner) {
+					const error = `Task ${taskId}: burn 操作失败 - caller(${caller}) 不是当前所有者(${currentOwner})`;
+					validationErrors.push(error);
+					console.error(`  ✗ ${error}`);
+				} else {
+					// burn 成功，所有者变为 none，同时清空使用权
+					console.log(`  ✓ burn 成功，所有者从 ${currentOwner} 变更为: none，使用权清空`);
+					currentOwner = "none";
+					usageRights = [];
+				}
+			} else if (operationLower === "grant usage rights") {
+				// grant usage rights 操作：caller 必须是所有者，将 callee 加入使用权数组
+				if (currentOwner === "none") {
+					const error = `Task ${taskId}: grant usage rights 操作失败 - token 尚未被铸造`;
+					validationErrors.push(error);
+					console.error(`  ✗ ${error}`);
+				} else if (caller && caller !== currentOwner) {
+					const error = `Task ${taskId}: grant usage rights 操作失败 - caller(${caller}) 不是当前所有者(${currentOwner})，无权授予使用权`;
+					validationErrors.push(error);
+					console.error(`  ✗ ${error}`);
+				} else {
+					// grant 成功，将 callee 加入使用权数组
+					const newGrantees: string[] = [];
+					calleeArray.forEach((grantee) => {
+						if (grantee && !usageRights.includes(grantee)) {
+							usageRights.push(grantee);
+							newGrantees.push(grantee);
+						}
+					});
+					console.log(`  ✓ grant usage rights 成功，新增使用权: [${newGrantees.join(", ")}]`);
+					console.log(`  当前使用权列表: [${usageRights.join(", ")}]`);
+				}
+			} else if (operationLower === "revoke usage rights") {
+				// revoke usage rights 操作：caller 必须是所有者，将 callee 从使用权数组中移除
+				if (currentOwner === "none") {
+					const error = `Task ${taskId}: revoke usage rights 操作失败 - token 尚未被铸造`;
+					validationErrors.push(error);
+					console.error(`  ✗ ${error}`);
+				} else if (caller && caller !== currentOwner) {
+					const error = `Task ${taskId}: revoke usage rights 操作失败 - caller(${caller}) 不是当前所有者(${currentOwner})，无权撤销使用权`;
+					validationErrors.push(error);
+					console.error(`  ✗ ${error}`);
+				} else {
+					// revoke 成功，将 callee 从使用权数组中移除
+					const revokedGrantees: string[] = [];
+					calleeArray.forEach((grantee) => {
+						const index = usageRights.indexOf(grantee);
+						if (index > -1) {
+							usageRights.splice(index, 1);
+							revokedGrantees.push(grantee);
+						}
+					});
+					console.log(`  ✓ revoke usage rights 成功，移除使用权: [${revokedGrantees.join(", ")}]`);
+					console.log(`  当前使用权列表: [${usageRights.join(", ")}]`);
+				}
+			} else if (operationLower === "query") {
+				// query 操作：不影响所有权和使用权
+				console.log(`  ✓ query 操作，不影响所有权和使用权`);
 			} else {
-				console.log("\n✓ 验证通过：所有操作的所有权和使用权转移逻辑正确");
+				console.warn(`  ? 未知操作类型: ${operation}`);
 			}
-
-			return {
-				dataObjectId: info.dataObjectId,
-				assetType: info.assetType,
-				tokenType: info.tokenType,
-				success: validationErrors.length === 0,
-				errors: validationErrors,
-				finalOwner: currentOwner,
-				finalUsageRights: usageRights,
-			};
 		}
+
+		console.log("\n=== 所有权和使用权追踪验证完成 ===");
+		console.log(`最终所有者: ${currentOwner}`);
+		console.log(`最终使用权: [${usageRights.join(", ")}]`);
+
+		// 7. 返回验证结果
+		if (validationErrors.length > 0) {
+			console.error("\n验证失败，发现以下错误:");
+			validationErrors.forEach((err, idx) => {
+				console.error(`  ${idx + 1}. ${err}`);
+			});
+		} else {
+			console.log("\n✓ 验证通过：所有操作的所有权和使用权转移逻辑正确");
+		}
+
+		return {
+			dataObjectId: info.dataObjectId,
+			assetType: info.assetType,
+			tokenType: info.tokenType,
+			success: validationErrors.length === 0,
+			errors: validationErrors,
+			finalOwner: currentOwner,
+			finalUsageRights: usageRights,
+		};
 	};
 
 	const handleValidation = async () => {
