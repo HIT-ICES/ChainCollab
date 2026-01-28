@@ -1129,6 +1129,13 @@ class GoChaincodeTranslator:
                         after_all_hook=after_all_hook
                     )
                 )
+            elif token_operation=="burn":
+                temp_list.append(
+                    snippet.NFTBurn_code(
+                        activityId=task.id,
+                        after_all_hook=after_all_hook
+                    )
+                )
             elif token_operation=="query":
                 outputs = doc_data.get("outputs", {})
                 filed = self._generate_query_output_filed(outputs,"string")
