@@ -12,6 +12,7 @@ NC='\033[0m' # No Color
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 COMPOSE_FILE="$SCRIPT_DIR/docker-compose-multinode.yml"
+DMN_COMPOSE_FILE="$ROOT_DIR/features/04-dmn-ocr/docker-compose-dmn.yml"
 
 # 检查 Docker 是否正在运行
 if ! docker info &> /dev/null; then
@@ -163,6 +164,16 @@ fi
 # 步骤 5：收集所有节点信息
 echo -e "${BLUE}步骤 5：收集所有节点信息...${NC}"
 node "$SCRIPT_DIR/get-node-info.js"
+
+echo -e "${BLUE}步骤 6：启动 DMN 服务（每个节点一个实例）...${NC}"
+OCR_DEPLOYMENT="$ROOT_DIR/deployment/ocr-deployment.json"
+if [ -f "$OCR_DEPLOYMENT" ] && command -v jq &> /dev/null; then
+    OCR_AGGREGATOR_ADDRESS=$(jq -r '.contractAddress' "$OCR_DEPLOYMENT")
+fi
+if [ -z "$OCR_AGGREGATOR_ADDRESS" ] || [ "$OCR_AGGREGATOR_ADDRESS" = "null" ]; then
+    echo -e "${YELLOW}⚠️  未找到 OCR 合约地址，将以空值启动 DMN 服务${NC}"
+fi
+OCR_AGGREGATOR_ADDRESS="$OCR_AGGREGATOR_ADDRESS" docker-compose -f "$DMN_COMPOSE_FILE" up -d
 
 echo -e "${GREEN}网络启动完成！${NC}"
 echo -e "可以通过以下 URL 访问节点："

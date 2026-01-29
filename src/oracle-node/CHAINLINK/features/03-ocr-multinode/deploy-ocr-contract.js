@@ -136,7 +136,7 @@ async function deploy() {
         const decimals = 8;
         const description = 'My OCR Price Feed';
         const minAnswer = '0';
-        const maxAnswer = '1000000000000000000'; // 1 ETH
+        const maxAnswer = '340282366920938463463374607431768211455'; // 2^128 - 1
 
         // 编码构造函数参数
         const Web3EthAbi = require('web3-eth-abi');

@@ -11,6 +11,7 @@ NC='\033[0m' # No Color
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 COMPOSE_FILE="$SCRIPT_DIR/docker-compose-multinode.yml"
+DMN_COMPOSE_FILE="$SCRIPT_DIR/../04-dmn-ocr/docker-compose-dmn.yml"
 
 # 检查 Docker 是否正在运行
 if ! docker info &> /dev/null; then
@@ -22,5 +23,6 @@ echo -e "${BLUE}正在停止网络...${NC}"
 
 # 停止所有节点
 docker-compose -f "$COMPOSE_FILE" down
+docker-compose -f "$DMN_COMPOSE_FILE" down
 
 echo -e "${GREEN}网络已停止！${NC}"

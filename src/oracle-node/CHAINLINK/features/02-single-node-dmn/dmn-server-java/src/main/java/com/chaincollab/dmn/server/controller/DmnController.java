@@ -1,10 +1,12 @@
 package com.chaincollab.dmn.server.controller;
 
+import com.chaincollab.dmn.server.service.DmnCacheService;
 import com.chaincollab.dmn.server.service.DmnEngineService;
 import com.chaincollab.dmn.server.service.DmnEngineService.InputInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.web3j.crypto.Hash;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,8 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.math.BigInteger;
 
 /**
  * DMN Decision Engine API Controller
@@ -26,9 +27,10 @@ public class DmnController {
     @Autowired
     private DmnEngineService dmnEngineService;
 
+    @Autowired
+    private DmnCacheService cacheService;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final ConcurrentMap<String, CachedResult> cachedResults = new ConcurrentHashMap<>();
-    private volatile CachedResult latestResult;
 
     /**
      * 健康检查接口
@@ -138,12 +140,12 @@ public class DmnController {
             }
 
             List<Map<String, Object>> result = dmnEngineService.evaluateDecision(dmnContent, decisionId, inputData);
-            CachedResult cached = new CachedResult(requestId, decisionId, result, System.currentTimeMillis());
-
-            latestResult = cached;
-            if (requestId != null && !requestId.isEmpty()) {
-                cachedResults.put(requestId, cached);
-            }
+            String raw = objectMapper.writeValueAsString(result);
+            String hashHex = Hash.sha3String(raw);
+            BigInteger rawHash = new BigInteger(hashHex.substring(2), 16);
+            BigInteger mask = BigInteger.ONE.shiftLeft(128).subtract(BigInteger.ONE);
+            String hashDec = rawHash.and(mask).toString();
+            DmnCacheService.CachedResult cached = cacheService.store(requestId, decisionId, result, raw, hashHex, hashDec);
 
             response.put("ok", true);
             response.put("requestId", requestId);
@@ -164,12 +166,13 @@ public class DmnController {
     @GetMapping("/latest")
     public ResponseEntity<Map<String, Object>> getLatest() {
         Map<String, Object> response = new HashMap<>();
-        CachedResult cached = latestResult;
+        DmnCacheService.CachedResult cached = cacheService.latest();
 
         if (cached == null) {
             response.put("ok", true);
             response.put("ready", false);
             response.put("value", 0);
+            response.put("hashDec", 0);
             response.put("requestId", null);
             response.put("updatedAt", 0);
             return ResponseEntity.ok(response);
@@ -178,7 +181,33 @@ public class DmnController {
         response.put("ok", true);
         response.put("ready", true);
         response.put("value", cached.value);
+        response.put("raw", cached.raw);
+        response.put("hash", cached.hashHex);
+        response.put("hashDec", cached.hashDec);
         response.put("requestId", cached.requestId);
+        response.put("updatedAt", cached.updatedAt);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 按 hash 获取原始结果（用于 OCR 写回对齐）
+     *
+     * GET /api/dmn/by-hash?hash=...
+     */
+    @GetMapping("/by-hash")
+    public ResponseEntity<Map<String, Object>> getByHash(@RequestParam("hash") String hash) {
+        System.out.println("DMN /by-hash request hash=" + hash);
+        Map<String, Object> response = new HashMap<>();
+        DmnCacheService.CachedResult cached = cacheService.getByHash(hash);
+        if (cached == null) {
+            response.put("ok", false);
+            response.put("error", "not found");
+            return ResponseEntity.ok(response);
+        }
+        response.put("ok", true);
+        response.put("raw", cached.raw);
+        response.put("hash", cached.hashHex);
+        response.put("hashDec", cached.hashDec);
         response.put("updatedAt", cached.updatedAt);
         return ResponseEntity.ok(response);
     }
@@ -204,32 +233,9 @@ public class DmnController {
      */
     @PostMapping("/ack")
     public ResponseEntity<Map<String, Object>> ackAndClear(@RequestBody Map<String, Object> request) {
-        Map<String, Object> response = new HashMap<>();
-
         String requestId = normalizeRequestId(request.get("requestId"));
-        boolean removedByRequestId = false;
-        if (requestId != null && !requestId.isEmpty()) {
-            removedByRequestId = cachedResults.remove(requestId) != null;
-        }
-
-        boolean clearedLatest = false;
-        boolean skippedLatest = false;
-        CachedResult cached = latestResult;
-        if (cached != null && (requestId == null || requestId.isEmpty() || requestId.equals(cached.requestId))) {
-            Long blockTimestampMs = normalizeLong(request.get("blockTimestampMs"));
-            if (blockTimestampMs != null && cached.updatedAt > blockTimestampMs) {
-                skippedLatest = true;
-            } else {
-                latestResult = null;
-                clearedLatest = true;
-            }
-        }
-
-        response.put("ok", true);
-        response.put("clearedLatest", clearedLatest);
-        response.put("skippedLatest", skippedLatest);
-        response.put("removedByRequestId", removedByRequestId);
-        return ResponseEntity.ok(response);
+        Long blockTimestampMs = normalizeLong(request.get("blockTimestampMs"));
+        return ResponseEntity.ok(cacheService.ack(requestId, blockTimestampMs));
     }
 
     /**
@@ -331,17 +337,4 @@ public class DmnController {
         }
     }
 
-    private static class CachedResult {
-        private final String requestId;
-        private final String decisionId;
-        private final Object value;
-        private final long updatedAt;
-
-        private CachedResult(String requestId, String decisionId, Object value, long updatedAt) {
-            this.requestId = requestId;
-            this.decisionId = decisionId;
-            this.value = value;
-            this.updatedAt = updatedAt;
-        }
-    }
 }

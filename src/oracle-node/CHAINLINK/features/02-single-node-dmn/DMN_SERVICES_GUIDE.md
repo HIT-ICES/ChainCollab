@@ -110,7 +110,20 @@ curl http://localhost:8080/api/dmn/health
 }
 ```
 
-### 3. 创建 DMN Job
+### 3. 部署 Chainlink 基础设施
+
+```bash
+cd /home/shenxz-lab/code/ChainCollab/src/oracle-node/CHAINLINK
+
+# 编译合约
+./compile.sh
+
+# 部署 LinkToken / Operator
+node scripts/deploy-chainlink.js
+
+```
+
+### 4. 创建 DMN Job
 
 ```bash
 cd /home/shenxz-lab/code/ChainCollab/src/oracle-node/CHAINLINK/features/02-single-node-dmn
@@ -140,25 +153,19 @@ node create-dmn-job.js
 🚀 现在您可以使用此 Job ID 来配置合约
 ```
 
-### 4. 部署 Chainlink 基础设施与合约
+### 5. 部署 DMN 请求合约
 
 ```bash
 cd /home/shenxz-lab/code/ChainCollab/src/oracle-node/CHAINLINK
 
-# 编译合约
-./compile.sh
-
-# 部署 LinkToken / Operator
-node scripts/deploy-chainlink.js
-
-# 部署 DMN 请求合约
+# 部署 DMN 请求合约（依赖已创建的 Job ID）
 node scripts/deploy-contract.js
 
 # 充值 Chainlink 节点账户（避免回调失败）
 node scripts/fund-chainlink-node.js <nodeEthAddress>
 ```
 
-### 5. 绑定 Job ID 并测试
+### 6. 绑定 Job ID 并测试
 
 ```bash
 # 设置合约的 Job ID（externalJobID）
@@ -264,7 +271,21 @@ node check-dmn-result.js
 }
 ```
 
-### 5. OCR 写回确认并清缓存
+### 5. 按 hash 获取原始结果
+
+**GET** `/api/dmn/by-hash?hash=...`
+
+**响应示例**:
+```json
+{
+  "ok": true,
+  "raw": "[{\"result\":\"Pasta\"}]",
+  "hash": "0x...",
+  "updatedAt": 1705296340123
+}
+```
+
+### 6. OCR 写回确认并清缓存
 
 **POST** `/api/dmn/ack`
 
@@ -289,7 +310,7 @@ node check-dmn-result.js
 }
 ```
 
-### 6. 获取 DMN 输入信息
+### 7. 获取 DMN 输入信息
 
 **POST** `/api/dmn/input-info`
 

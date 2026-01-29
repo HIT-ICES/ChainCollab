@@ -153,6 +153,7 @@ async function deploy() {
             console.error('❌ 请先创建至少一个 Chainlink Job:');
             console.error('   - 普通 Job: node scripts/create-job.js');
             console.error('   - 或 DMN Job: node features/02-single-node-dmn/create-dmn-job.js');
+            console.error('   - 或 DMN directrequest 缓存 Job: node features/04-dmn-ocr/create-dmn-directrequest-job.js');
             process.exit(1);
         }
 

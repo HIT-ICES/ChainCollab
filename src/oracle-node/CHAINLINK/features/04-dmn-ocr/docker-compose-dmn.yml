@@ -1,0 +1,71 @@
+version: "3.8"
+
+services:
+  dmn-node1:
+    build:
+      context: ../02-single-node-dmn/dmn-server-java
+      dockerfile: Dockerfile
+    container_name: dmn-node1
+    restart: unless-stopped
+    environment:
+      - SERVER_PORT=8080
+      - OCR_LISTENER_ENABLED=true
+      - OCR_RPC_URL=http://mybootnode:8545
+      - OCR_AGGREGATOR_ADDRESS=${OCR_AGGREGATOR_ADDRESS}
+    ports:
+      - "8081:8080"
+    networks:
+      - existing_network
+
+  dmn-node2:
+    build:
+      context: ../02-single-node-dmn/dmn-server-java
+      dockerfile: Dockerfile
+    container_name: dmn-node2
+    restart: unless-stopped
+    environment:
+      - SERVER_PORT=8080
+      - OCR_LISTENER_ENABLED=true
+      - OCR_RPC_URL=http://mybootnode:8545
+      - OCR_AGGREGATOR_ADDRESS=${OCR_AGGREGATOR_ADDRESS}
+    ports:
+      - "8082:8080"
+    networks:
+      - existing_network
+
+  dmn-node3:
+    build:
+      context: ../02-single-node-dmn/dmn-server-java
+      dockerfile: Dockerfile
+    container_name: dmn-node3
+    restart: unless-stopped
+    environment:
+      - SERVER_PORT=8080
+      - OCR_LISTENER_ENABLED=true
+      - OCR_RPC_URL=http://mybootnode:8545
+      - OCR_AGGREGATOR_ADDRESS=${OCR_AGGREGATOR_ADDRESS}
+    ports:
+      - "8083:8080"
+    networks:
+      - existing_network
+
+  dmn-node4:
+    build:
+      context: ../02-single-node-dmn/dmn-server-java
+      dockerfile: Dockerfile
+    container_name: dmn-node4
+    restart: unless-stopped
+    environment:
+      - SERVER_PORT=8080
+      - OCR_LISTENER_ENABLED=true
+      - OCR_RPC_URL=http://mybootnode:8545
+      - OCR_AGGREGATOR_ADDRESS=${OCR_AGGREGATOR_ADDRESS}
+    ports:
+      - "8084:8080"
+    networks:
+      - existing_network
+
+networks:
+  existing_network:
+    external: true
+    name: cello-net

@@ -1,0 +1,34 @@
+type = "webhook"
+schemaVersion = 1
+name = "OCR NewTransmission -> Store Raw (webhook)"
+
+externalJobID = "<OCR_WRITER_JOB_EXTERNAL_ID>"
+
+evmChainID = "3456"   # ← 你的链 ID（字符串）
+
+externalInitiators = [
+  { name = "<EXTERNAL_INITIATOR_NAME>", spec = "{}" }
+]
+
+observationSource = """
+    parse_url   [type="jsonparse" path="data,fetchURL" data="$(jobRun.requestBody)"]
+
+    fetch_raw   [type="http"
+                 method=GET
+                 url="$(parse_url)"
+                 allowUnrestrictedNetworkAccess="true"]
+
+    parse_raw   [type="jsonparse" path="raw" data="$(fetch_raw)"]
+
+    encode_tx   [type="ethabiencode"
+                 abi="storeRawResultFromRaw(string raw)"
+                 data="{\\\"raw\\\": $(parse_raw)}"
+                 ]
+
+    submit_tx   [type="ethtx"
+                 evmChainID="3456"
+                 to="<DMN_REQUEST_CONTRACT_ADDRESS>"
+                 data="$(encode_tx)"]
+
+    parse_url -> fetch_raw -> parse_raw -> encode_tx -> submit_tx
+"""

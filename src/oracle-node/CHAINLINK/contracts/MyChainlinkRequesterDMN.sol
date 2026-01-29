@@ -17,9 +17,20 @@ contract MyChainlinkRequesterDMN is ChainlinkClient, ConfirmedOwner {
     bytes32 private jobId;
     // 支付给 Chainlink 节点的 LINK 金额（根据你的 Job 配置而定）
     uint256 private fee;
+    // OCR 聚合合约地址（用于读取最新 hash）
+    address public ocrAggregator;
+    // 允许写入 raw 结果的地址
+    address public rawWriter;
+
+    mapping(bytes32 => string) public rawResults;
+    mapping(bytes32 => bool) private rawResultExists;
+    bytes32[] private rawResultHashes;
 
     event RequestSent(bytes32 indexed requestId, uint256 timestamp);
     event DecisionFulfilled(bytes32 indexed requestId, bytes result);
+    event RawResultStored(bytes32 indexed hash, string raw);
+    event OcrAggregatorUpdated(address indexed aggregator);
+    event RawWriterUpdated(address indexed writer);
 
     constructor(
         address _linkToken,     // LINK 代币地址
@@ -72,8 +83,83 @@ contract MyChainlinkRequesterDMN is ChainlinkClient, ConfirmedOwner {
         jobId = _jobId;
     }
 
+    // 设置 OCR 聚合合约地址
+    function setOcrAggregator(address _aggregator) external onlyOwner {
+        ocrAggregator = _aggregator;
+        emit OcrAggregatorUpdated(_aggregator);
+    }
+
+    // 设置 raw 结果写入地址
+    function setRawWriter(address _writer) external onlyOwner {
+        rawWriter = _writer;
+        emit RawWriterUpdated(_writer);
+    }
+
+    function _isAuthorizedWriter() internal view returns (bool) {
+        return msg.sender == owner() || (rawWriter != address(0) && msg.sender == rawWriter);
+    }
+
+    // 写入 raw 结果（要求与 OCR 最新 hash 一致）
+    function storeRawResult(bytes32 expectedHash, string calldata raw) external {
+        require(_isAuthorizedWriter(), "Not authorized");
+        require(ocrAggregator != address(0), "OCR aggregator not set");
+        int256 latest = IOCRAggregator(ocrAggregator).latestAnswer();
+        require(latest >= 0, "Negative OCR hash");
+        uint256 ocrHash = uint256(uint192(uint256(latest)));
+        bytes32 rawHash = keccak256(bytes(raw));
+        require(uint256(rawHash) & ((uint256(1) << 128) - 1) == ocrHash, "Hash mismatch");
+        require(expectedHash == rawHash, "Expected hash mismatch");
+        rawResults[rawHash] = raw;
+        if (!rawResultExists[rawHash]) {
+            rawResultExists[rawHash] = true;
+            rawResultHashes.push(rawHash);
+        }
+        emit RawResultStored(rawHash, raw);
+    }
+
+    // 由合约内部计算 hash 并校验 OCR latestAnswer（供 job 直接传 raw）
+    function storeRawResultFromRaw(string calldata raw) external {
+        require(_isAuthorizedWriter(), "Not authorized");
+        require(ocrAggregator != address(0), "OCR aggregator not set");
+        int256 latest = IOCRAggregator(ocrAggregator).latestAnswer();
+        require(latest >= 0, "Negative OCR hash");
+        uint256 ocrHash = uint256(uint192(uint256(latest)));
+        bytes32 rawHash = keccak256(bytes(raw));
+        require(uint256(rawHash) & ((uint256(1) << 128) - 1) == ocrHash, "Hash mismatch");
+        rawResults[rawHash] = raw;
+        if (!rawResultExists[rawHash]) {
+            rawResultExists[rawHash] = true;
+            rawResultHashes.push(rawHash);
+        }
+        emit RawResultStored(rawHash, raw);
+    }
+
+    function rawResultCount() external view returns (uint256) {
+        return rawResultHashes.length;
+    }
+
+    function rawResultHashAt(uint256 index) external view returns (bytes32) {
+        return rawResultHashes[index];
+    }
+
+    function getAllRawResults() external view returns (bytes32[] memory hashes, string[] memory raws) {
+        uint256 count = rawResultHashes.length;
+        hashes = new bytes32[](count);
+        raws = new string[](count);
+        for (uint256 i = 0; i < count; i++) {
+            bytes32 hash = rawResultHashes[i];
+            hashes[i] = hash;
+            raws[i] = rawResults[hash];
+        }
+        return (hashes, raws);
+    }
+
     // 获取当前存储的结果（以字节数组形式）
     function getDMNResult() external view returns (bytes memory) {
         return dmnResult;
     }
+}
+
+interface IOCRAggregator {
+    function latestAnswer() external view returns (int256);
 }

@@ -185,7 +185,7 @@ services:
       - --http.api=admin,eth,miner,web3,personal,net,txpool
       - --ws # 启用 WebSocket
       - --ws.addr=0.0.0.0
-      - --ws.port=8545
+      - --ws.port=8546
       - --ws.api=admin,eth,miner,web3,personal,net,txpool
       - --ws.origins=*
       - --networkid=3456
@@ -199,6 +199,7 @@ services:
       - --allow-insecure-unlock
     ports:
       - "8545:8545" # RPC端口
+      - "8546:8546" # WS端口
       - "30303:30303" # P2P网络端口
     volumes:
       - ../../geth-node/datadir/keystore:/root/.ethereum/keystore
