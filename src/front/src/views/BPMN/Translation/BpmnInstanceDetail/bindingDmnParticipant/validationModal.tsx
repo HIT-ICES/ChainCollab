@@ -1454,6 +1454,31 @@ export const ValidationModal: React.FC<ValidationModalProps> = ({
 
 		const tokenHasExistInERC = info.tokenHasExistInERC || false;
 
+		// 新增校验：如果 tokenHasExistInERC 为 false，必须有 merge 或 branch 操作指向此 DataObject
+		if (!tokenHasExistInERC) {
+			console.log("[validateValueAddedNFT] tokenHasExistInERC=false，检查是否存在 merge 或 branch 创建操作...");
+
+			// 检查是否有 merge 或 branch 操作且 isInput 为 true（Task → DataObject）
+			const hasCreationOperation = info.tasks.some((task: any) => {
+				const operation = (task.operation || "").toLowerCase().trim();
+				const isInput = task.isInput === true;
+				return (operation === "merge" || operation === "branch") && isInput;
+			});
+
+			if (!hasCreationOperation) {
+				console.error(`[validateValueAddedNFT] DataObject ${info.dataObjectId} 的 tokenHasExistInERC=false，但未找到 merge 或 branch 创建操作`);
+				return {
+					dataObjectId: info.dataObjectId,
+					assetType: info.assetType,
+					tokenType: info.tokenType,
+					success: false,
+					errors: [`DataObject ${info.dataObjectId} 必须有至少一个 merge 或 branch 操作的 Task 指向它以创建 token`],
+				};
+			}
+
+			console.log("[validateValueAddedNFT] 找到创建操作，继续验证...");
+		}
+
 		// 获取 BPMN XML 用于解析 SequenceFlow
 		const bpmnData = await retrieveBPMN(bpmnId, consortiumId);
 		if (!bpmnData || !bpmnData.bpmnContent) {

@@ -7,10 +7,10 @@ import { is } from 'bpmn-js/lib/util/ModelUtil';
  * - State: EXISTS or NOT_EXISTS
  * - Initial state: determined by tokenHasExistInERC
  * - State transitions:
- *   - mint: NOT_EXISTS → EXISTS
- *   - branch: NOT_EXISTS → EXISTS (creates new derived token)
- *   - merge: NOT_EXISTS → EXISTS (creates new merged token)
- *   - burn: EXISTS → NOT_EXISTS
+ *   - mint: NOT_EXISTS → EXISTS (requires NOT_EXISTS)
+ *   - branch: NOT_EXISTS → EXISTS (requires NOT_EXISTS for value-added assets)
+ *   - merge: NOT_EXISTS → EXISTS (requires NOT_EXISTS for value-added assets)
+ *   - burn: EXISTS → NOT_EXISTS (requires EXISTS)
  *   - transfer/query/grant/revoke: requires EXISTS, no state change
  *
  * @param shape
@@ -202,6 +202,16 @@ function validateOperationWithStateTracking(currentShape, tokenId, currentOperat
 
   // Special validation for value-added assets
   if (assetType === 'value-added' && (operationLower === 'branch' || operationLower === 'merge')) {
+    // branch/merge operations require NOT_EXISTS state (similar to mint)
+    if (!possibleStates.has('NOT_EXISTS')) {
+      reporter.error(
+        currentShape,
+        `Cannot ${currentOperation} tokenId <b>${tokenId}</b> because the token already exists at this point in the execution flow. ` +
+        `Branch and merge operations require the token to not exist (similar to mint operation). ` +
+        `Possible states at this task: <b>${Array.from(possibleStates).join(', ')}</b>.`
+      );
+    }
+
     validateValueAddedOperation(currentShape, tokenId, currentOperation, tokenHasExistInERC, reporter);
   }
 }
