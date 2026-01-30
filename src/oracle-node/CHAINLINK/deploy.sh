@@ -180,14 +180,19 @@ echo ""
 
 # 步骤 4: 部署 Chainlink 请求合约
 CONTRACT_NAME="MyChainlinkRequester"
+FORCE_DMN_CONTRACT=""
 if command -v jq &> /dev/null && [ -f "$DEPLOYMENT_DIR/chainlink-deployment.json" ]; then
     DMN_JOB_ID=$(jq -r '.dmnJobId // empty' "$DEPLOYMENT_DIR/chainlink-deployment.json")
     JOB_ID=$(jq -r '.jobId // empty' "$DEPLOYMENT_DIR/chainlink-deployment.json")
     if [ -n "$DMN_JOB_ID" ] && [ -z "$JOB_ID" ]; then
         CONTRACT_NAME="MyChainlinkRequesterDMN"
+        FORCE_DMN_CONTRACT="1"
     fi
 fi
 echo -e "${YELLOW}[4/5] 部署 ${CONTRACT_NAME} 合约...${NC}"
+if [ -n "$FORCE_DMN_CONTRACT" ]; then
+    echo -e "${BLUE}ℹ️  使用 dmnJobId 部署 DMN 合约${NC}"
+fi
 
 # 检查 Node.js
 if ! command -v node &> /dev/null; then
@@ -205,7 +210,7 @@ if ! node -e "require.resolve('web3-eth-abi')" 2>/dev/null; then
 fi
 
 # 执行部署
-node scripts/deploy-contract.js
+FORCE_DMN_CONTRACT="$FORCE_DMN_CONTRACT" node scripts/deploy-contract.js
 
 # 步骤 5: 显示结果
 echo ""

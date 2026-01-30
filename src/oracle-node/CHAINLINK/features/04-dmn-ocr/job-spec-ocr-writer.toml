@@ -1,6 +1,6 @@
 type = "webhook"
 schemaVersion = 1
-name = "OCR NewTransmission -> Store Raw (webhook)"
+name = "OCR NewTransmission -> Finalize (webhook)"
 
 externalJobID = "<OCR_WRITER_JOB_EXTERNAL_ID>"
 
@@ -11,24 +11,18 @@ externalInitiators = [
 ]
 
 observationSource = """
-    parse_url   [type="jsonparse" path="data,fetchURL" data="$(jobRun.requestBody)"]
+    parse_req  [type="jsonparse" path="data,requestId" data="$(jobRun.requestBody)"]
+    parse_hash [type="jsonparse" path="data,hashLow" data="$(jobRun.requestBody)"]
 
-    fetch_raw   [type="http"
-                 method=GET
-                 url="$(parse_url)"
-                 allowUnrestrictedNetworkAccess="true"]
+    encode_tx  [type="ethabiencode"
+                abi="finalizeWithOcrAnswer(bytes32 requestId, uint128 hashLow)"
+                data="{\\\"requestId\\\": $(parse_req), \\\"hashLow\\\": $(parse_hash)}"
+                ]
 
-    parse_raw   [type="jsonparse" path="raw" data="$(fetch_raw)"]
+    submit_tx  [type="ethtx"
+                evmChainID="3456"
+                to="<DMN_REQUEST_CONTRACT_ADDRESS>"
+                data="$(encode_tx)"]
 
-    encode_tx   [type="ethabiencode"
-                 abi="storeRawResultFromRaw(string raw)"
-                 data="{\\\"raw\\\": $(parse_raw)}"
-                 ]
-
-    submit_tx   [type="ethtx"
-                 evmChainID="3456"
-                 to="<DMN_REQUEST_CONTRACT_ADDRESS>"
-                 data="$(encode_tx)"]
-
-    parse_url -> fetch_raw -> parse_raw -> encode_tx -> submit_tx
+    parse_req -> parse_hash -> encode_tx -> submit_tx
 """

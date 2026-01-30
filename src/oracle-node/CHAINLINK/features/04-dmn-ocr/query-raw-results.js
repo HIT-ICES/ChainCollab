@@ -42,6 +42,21 @@ async function main() {
   const contract = new ethers.Contract(contractAddress, abi, provider);
 
   const args = process.argv.slice(2).filter(Boolean);
+  const requestIdIndex = args.findIndex((arg) => arg === '--request-id');
+  if (requestIdIndex >= 0 && args[requestIdIndex + 1]) {
+    const requestId = args[requestIdIndex + 1];
+    if (typeof contract.baselines === 'function') {
+      const baseline = await contract.baselines(requestId);
+      console.log(`requestId=${requestId}`);
+      console.log(`exists=${baseline.exists}`);
+      console.log(`hash=${baseline.hash}`);
+      console.log(`hashLow=${baseline.hashLow}`);
+      console.log(`raw=${baseline.raw}`);
+      return;
+    }
+    console.error('Contract missing baselines(). Redeploy with updated contract.');
+    process.exit(1);
+  }
   if (args.length > 0) {
     for (const hash of args) {
       const raw = await contract.rawResults(hash);

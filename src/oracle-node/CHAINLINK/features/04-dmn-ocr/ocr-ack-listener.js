@@ -19,6 +19,10 @@ const EI_FILE =
   process.env.EI_FILE ||
   path.join(DEPLOYMENT_DIR, 'external-initiator.json');
 const DMN_RAW_BY_HASH_URL = process.env.DMN_RAW_BY_HASH_URL;
+const DMN_HTTP_TIMEOUT = Number(process.env.DMN_HTTP_TIMEOUT || 20000);
+const CL_HTTP_TIMEOUT = Number(process.env.CL_HTTP_TIMEOUT || 20000);
+const RETRY_COUNT = Number(process.env.LISTENER_RETRY_COUNT || 3);
+const RETRY_DELAY_MS = Number(process.env.LISTENER_RETRY_DELAY_MS || 2000);
 
 function readJson(filePath) {
   if (!fs.existsSync(filePath)) {
@@ -65,7 +69,7 @@ if (!EI_ACCESS_KEY || !EI_SECRET) {
   process.exit(1);
 }
 if (!DMN_RAW_BY_HASH_URL) {
-  console.error('Missing DMN_RAW_BY_HASH_URL for writer webhook payload');
+  console.error('Missing DMN_RAW_BY_HASH_URL for requestId lookup');
   process.exit(1);
 }
 
@@ -73,25 +77,48 @@ const ABI = [
   'event NewTransmission(uint32 indexed aggregatorRoundId,int192 answer,address transmitter,int192[] observations,bytes observers,bytes32 rawReportContext)',
 ];
 
-function buildFetchUrl(hash) {
+async function resolveRequestId(hash) {
   const separator = DMN_RAW_BY_HASH_URL.includes('?') ? '&' : '?';
-  return `${DMN_RAW_BY_HASH_URL}${separator}hash=${encodeURIComponent(hash)}`;
+  const url = `${DMN_RAW_BY_HASH_URL}${separator}hash=${encodeURIComponent(hash)}`;
+  const res = await axios.get(url, { timeout: DMN_HTTP_TIMEOUT });
+  return res?.data?.requestId;
 }
 
-async function triggerWebhook(hash) {
-  const fetchURL = buildFetchUrl(hash);
+async function triggerWebhook(requestId, hashLow) {
   await axios.post(
     `${CHAINLINK_URL}/v2/jobs/${OCR_WRITER_EXTERNAL_JOB_ID}/runs`,
-    { data: { hash, fetchURL } },
+    { data: { requestId, hashLow } },
     {
       headers: {
         'Content-Type': 'application/json',
         'X-Chainlink-EA-AccessKey': EI_ACCESS_KEY,
         'X-Chainlink-EA-Secret': EI_SECRET,
       },
-      timeout: 10000,
+      timeout: CL_HTTP_TIMEOUT,
     }
   );
+}
+
+async function retry(fn, label) {
+  let lastError;
+  for (let i = 0; i < RETRY_COUNT; i += 1) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+      const status = err?.response?.status;
+      const data = err?.response?.data;
+      console.error(
+        `${label} failed (attempt ${i + 1}/${RETRY_COUNT}):`,
+        status ? `status=${status}` : err.message,
+        data ? `body=${JSON.stringify(data)}` : ''
+      );
+      if (i + 1 < RETRY_COUNT) {
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+      }
+    }
+  }
+  throw lastError;
 }
 
 let shuttingDown = false;
@@ -138,8 +165,13 @@ function startListener() {
     const event = args[args.length - 1];
     try {
       const hash = event.args.answer.toString();
-      await triggerWebhook(hash);
-      console.log(`Triggered writer job for hash=${hash}`);
+      const requestId = await retry(() => resolveRequestId(hash), 'resolveRequestId');
+      if (!requestId) {
+        console.error(`Missing requestId for hash=${hash}`);
+        return;
+      }
+      await retry(() => triggerWebhook(requestId, hash), 'triggerWebhook');
+      console.log(`Triggered finalize job for requestId=${requestId}, hashLow=${hash}`);
     } catch (err) {
       const status = err?.response?.status;
       const data = err?.response?.data;

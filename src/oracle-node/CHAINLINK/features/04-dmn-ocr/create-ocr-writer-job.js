@@ -75,17 +75,11 @@ async function main() {
   const dmnRequestDeployment = readJson(path.join(ROOT_DIR, 'deployment', 'deployment.json'));
   const dmnRequestAddress =
     process.env.DMN_REQUEST_CONTRACT_ADDRESS || dmnRequestDeployment?.contractAddress;
-  const rawByHashUrl = process.env.DMN_RAW_BY_HASH_URL || process.argv[2];
   const eiInfo = readJson(EI_FILE);
   const eiName = process.env.EI_NAME || eiInfo?.name;
 
   if (!dmnRequestAddress) {
     console.error('❌ 缺少 DMN request 合约地址，请设置 DMN_REQUEST_CONTRACT_ADDRESS 或 deployment/deployment.json');
-    process.exit(1);
-  }
-  if (!rawByHashUrl) {
-    console.error('❌ 缺少 DMN raw by hash URL，请设置 DMN_RAW_BY_HASH_URL 或作为参数传入');
-    console.log('用法: DMN_RAW_BY_HASH_URL=http://dmn-node1:8080/api/dmn/by-hash node features/04-dmn-ocr/create-ocr-writer-job.js');
     process.exit(1);
   }
   if (!eiName) {
@@ -100,7 +94,6 @@ async function main() {
     jobSpecContent = jobSpecContent.replace(/^externalJobID\s*=.*\n/m, '');
   }
   jobSpecContent = jobSpecContent.replace('<DMN_REQUEST_CONTRACT_ADDRESS>', dmnRequestAddress);
-  jobSpecContent = jobSpecContent.replace('<DMN_RAW_BY_HASH_URL>', rawByHashUrl);
   jobSpecContent = jobSpecContent.replace('<EXTERNAL_INITIATOR_NAME>', eiName);
   jobSpecContent = jobSpecContent.replace(/\\"/g, '"');
 

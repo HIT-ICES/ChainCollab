@@ -24,10 +24,10 @@ const nodes = [
 ];
 
 const DMN_SERVICE_MAP = {
-  chainlink1: 'http://dmn-node1:8080',
-  chainlink2: 'http://dmn-node2:8080',
-  chainlink3: 'http://dmn-node3:8080',
-  chainlink4: 'http://dmn-node4:8080',
+  chainlink1: 'http://cdmn-node1:5000',
+  chainlink2: 'http://cdmn-node2:5000',
+  chainlink3: 'http://cdmn-node3:5000',
+  chainlink4: 'http://cdmn-node4:5000',
 };
 
 class ChainlinkJobManager {
@@ -98,6 +98,23 @@ class ChainlinkJobManager {
       throw error;
     }
   }
+
+  async listJobs() {
+    const response = await axios.get(`${this.chainlinkUrl}${API_ENDPOINTS.JOBS}`, {
+      headers: {
+        Cookie: this.authToken,
+      },
+    });
+    return response.data?.data || [];
+  }
+
+  async deleteJob(jobId) {
+    await axios.delete(`${this.chainlinkUrl}${API_ENDPOINTS.JOBS}/${jobId}`, {
+      headers: {
+        Cookie: this.authToken,
+      },
+    });
+  }
 }
 
 function resolveOperatorAddress() {
@@ -120,6 +137,15 @@ function resolveOperatorAddress() {
   }
 }
 
+function resolveDmnRequestContract() {
+  const deploymentPath = path.join(ROOT_DIR, 'deployment', 'deployment.json');
+  if (!fs.existsSync(deploymentPath)) {
+    return null;
+  }
+  const deployment = JSON.parse(fs.readFileSync(deploymentPath, 'utf8'));
+  return deployment.contractAddress || null;
+}
+
 async function main() {
   try {
     console.log('🎯 DMN directrequest 缓存 Job 创建工具');
@@ -127,6 +153,18 @@ async function main() {
     console.log('');
 
     const operatorAddress = resolveOperatorAddress();
+    let contractAddress =
+      process.env.DMN_REQUEST_CONTRACT_ADDRESS || resolveDmnRequestContract();
+    const allowEmptyContract = process.env.ALLOW_EMPTY_DMN_REQUEST_CONTRACT === '1';
+    if (!contractAddress) {
+      if (!allowEmptyContract) {
+        console.error('❌ 缺少 DMN 请求合约地址：deployment/deployment.json 或 DMN_REQUEST_CONTRACT_ADDRESS');
+        console.error('   或设置 ALLOW_EMPTY_DMN_REQUEST_CONTRACT=1 先创建 Job，部署后再重建');
+        process.exit(1);
+      }
+      contractAddress = '0x0000000000000000000000000000000000000000';
+      console.warn('⚠️  使用占位合约地址 0x0 创建 Job，部署后请重建 Job 以更新合约地址');
+    }
     const deploymentPath = path.join(ROOT_DIR, 'deployment', 'chainlink-deployment.json');
     let externalJobId =
       process.env.EXTERNAL_JOB_ID || process.argv[2] || null;
@@ -146,6 +184,7 @@ async function main() {
         throw new Error(`未找到 ${node.name} 的 DMN 服务地址`);
       }
       jobSpecContent = jobSpecContent.replace(/<DMN_CACHE_URL>/g, dmnUrl);
+      jobSpecContent = jobSpecContent.replace(/<DMN_REQUEST_CONTRACT_ADDRESS>/g, contractAddress);
       jobSpecContent = jobSpecContent.replace(/\\"/g, '"');
 
       console.log(`\n${node.name} Job Spec:`);
@@ -153,6 +192,16 @@ async function main() {
 
       const jobManager = new ChainlinkJobManager(`http://localhost:${node.port}`);
       await jobManager.login();
+      if (process.env.CLEAN_EXISTING === '1' && externalJobId) {
+        const jobs = await jobManager.listJobs();
+        const matched = jobs.filter(
+          (job) => job.attributes?.externalJobID === externalJobId
+        );
+        for (const job of matched) {
+          console.log(`🧹 删除已有 Job: ${job.id} (${job.attributes?.name || 'unnamed'})`);
+          await jobManager.deleteJob(job.id);
+        }
+      }
       const jobData = await jobManager.createJob(jobSpecContent);
       if (!externalJobId) {
         externalJobId = jobData.attributes.externalJobID;

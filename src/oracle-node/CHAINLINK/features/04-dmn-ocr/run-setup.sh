@@ -9,6 +9,10 @@ echo "== [1] 启动 OCR 多节点网络（含从节点，含 DMN 服务） =="
 cd "$FEATURES_03"
 ./start-ocr-network.sh
 
+echo "== [1.1] 启动 CDMN Python 服务 =="
+cd "$FEATURES_04"
+docker-compose -f docker-compose-cdmn.yml up -d
+
 echo "== [1.1] OCR 基础部署（首次或需重部署时执行） =="
 cd "$ROOT"
 ./compile.sh
@@ -27,31 +31,56 @@ cd "$FEATURES_03"
 go run gen-ocr-config.go
 node set-ocr-config.js
 
-echo "== [4] 创建 directrequest 缓存 Job（OCR 读取用） =="
-cd "$ROOT"
-node features/04-dmn-ocr/create-dmn-directrequest-job.js
+echo "== [3.1] 同步 OCR 合约地址到 CDMN 服务并重启 =="
+cd "$FEATURES_04"
+if [ -f "$ROOT/deployment/ocr-deployment.json" ]; then
+  OCR_AGGREGATOR_ADDRESS=$(jq -r '.contractAddress' "$ROOT/deployment/ocr-deployment.json")
+  if [ -n "$OCR_AGGREGATOR_ADDRESS" ] && [ "$OCR_AGGREGATOR_ADDRESS" != "null" ]; then
+    export OCR_AGGREGATOR_ADDRESS
+    docker-compose -f docker-compose-cdmn.yml up -d
+  else
+    echo "⚠️  ocr-deployment.json 未包含 contractAddress，跳过 CDMN 服务重启"
+  fi
+else
+  echo "⚠️  未找到 ocr-deployment.json，跳过 CDMN 服务重启"
+fi
 
-echo "== [5] 部署 DMN 事件合约 =="
+echo "== [4] 确保 DMN 请求合约已部署 =="
 cd "$ROOT"
-./deploy.sh
+if [ ! -f deployment/deployment.json ]; then
+  FORCE_DMN_CONTRACT=1 node scripts/deploy-contract.js
+fi
 
-echo "== [6] 设置 OCR aggregator / raw writer =="
+echo "== [5] 创建 directrequest 缓存 Job（使用已部署合约地址） =="
+cd "$ROOT"
+EXTERNAL_JOB_ID=$(node -e "const fs=require('fs');const path=require('path');const p=path.join(process.cwd(),'deployment','chainlink-deployment.json');const data=JSON.parse(fs.readFileSync(p,'utf8'));console.log(data.dmnJobId||'');") \
+  node features/04-dmn-ocr/create-dmn-directrequest-job.js
+
+echo "== [6] 将 DMN Job ID 写回合约 setJobId =="
+cd "$ROOT"
+node features/04-dmn-ocr/set-dmn-job-id.js
+
+echo "== [7] 设置 OCR aggregator / baseline writers =="
 cd "$ROOT"
 node features/04-dmn-ocr/set-ocr-and-writer.js
 
-echo "== [7] bootnode 写者监听（webhook Job + 轻量触发器） =="
+echo "== [8] 启用 OCR finalize webhook（External Initiator） =="
 # 创建 External Initiator（用于触发 webhook job）
 node features/04-dmn-ocr/create-external-initiator.js
 
-# DMN_RAW_BY_HASH_URL 指向任一 DMN 节点的 /api/dmn/by-hash
-DMN_RAW_BY_HASH_URL=http://dmn-node1:8080/api/dmn/by-hash \
-  node features/04-dmn-ocr/create-ocr-writer-job.js
+# 创建 finalize webhook Job（bootstrap）
+node features/04-dmn-ocr/create-ocr-writer-job.js
 
-echo "== [8] 为合约充值 LINK =="
+echo "== [9] 为合约充值 LINK =="
 cd "$ROOT"
 node scripts/fund-contract.js
 
-echo "== [9] 测试 directrequest 缓存链路 =="
-node features/04-dmn-ocr/test-dmn-ocr.js
+echo "== [10] 测试 directrequest 缓存链路 =="
+DMN_RANDOM=1 node features/04-dmn-ocr/test-dmn-ocr.js
+
+
+# 手动运行 OCR ACK 监听器
+# DMN_RAW_BY_HASH_URL=http://localhost:8081/api/dmn/by-hash \
+# node features/04-dmn-ocr/ocr-ack-listener.js
 
 # node features/03-ocr-multinode/test-ocr-network.js

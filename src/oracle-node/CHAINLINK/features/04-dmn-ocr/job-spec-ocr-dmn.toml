@@ -14,7 +14,7 @@ p2pBootstrapPeers = [
 ]
 
 observationSource = """
-    fetch  [type="http" method=GET url="<DMN_CACHE_URL>/api/dmn/latest"]
+    fetch  [type="http" method=GET url="<DMN_CACHE_URL>/api/dmn/latest?requireReady=1"]
     parse  [type="jsonparse" path="hashDec"]
     fetch -> parse
 """

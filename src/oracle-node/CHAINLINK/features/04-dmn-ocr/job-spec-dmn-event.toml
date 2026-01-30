@@ -19,6 +19,16 @@ observationSource = """
                   allowUnrestrictedNetworkAccess="true"]
 
     parse_ok     [type="jsonparse" path="ok" data="$(call_cache)"]
+    parse_raw    [type="jsonparse" path="raw" data="$(call_cache)"]
 
-    decode_log -> decode_cbor -> parse_input -> call_cache -> parse_ok
+    encode_tx    [type="ethabiencode"
+                  abi="commitBaselineFromRaw(bytes32 requestId, string raw)"
+                  data="{\\\"requestId\\\": $(decode_log.requestId), \\\"raw\\\": $(parse_raw)}"]
+
+    submit_tx    [type="ethtx"
+                  evmChainID="3456"
+                  to="<DMN_REQUEST_CONTRACT_ADDRESS>"
+                  data="$(encode_tx)"]
+
+    decode_log -> decode_cbor -> parse_input -> call_cache -> parse_ok -> parse_raw -> encode_tx -> submit_tx
 """

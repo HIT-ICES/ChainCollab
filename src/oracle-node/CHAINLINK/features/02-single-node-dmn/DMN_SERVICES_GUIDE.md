@@ -252,6 +252,9 @@ node check-dmn-result.js
   "ok": true,
   "requestId": "0x...",
   "value": [{"Decision": "Minor"}],
+  "raw": "[{\"Decision\":\"Minor\"}]",
+  "hash": "0x...",
+  "hashDec": "123456789",
   "updatedAt": 1705296340123
 }
 ```
@@ -260,7 +263,7 @@ node check-dmn-result.js
 
 **GET** `/api/dmn/latest`
 
-**响应示例**:
+**响应示例（有缓存时）**:
 ```json
 {
   "ok": true,
@@ -268,6 +271,18 @@ node check-dmn-result.js
   "value": [{"Decision": "Minor"}],
   "requestId": "0x...",
   "updatedAt": 1705296340123
+}
+```
+
+当没有缓存时默认返回 **404**。如果带 `requireReady=1`，会返回 **409**。示例（ready=false）：
+```json
+{
+  "ok": true,
+  "ready": false,
+  "value": 0,
+  "hashDec": 0,
+  "requestId": null,
+  "updatedAt": 0
 }
 ```
 

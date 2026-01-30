@@ -40,12 +40,16 @@ public class OcrTransmissionListener {
     @PostConstruct
     public void start() {
         if (!enabled) {
+            System.out.println("OCR listener disabled by config (ocr.listener.enabled=false)");
             return;
         }
         if (aggregatorAddress == null || aggregatorAddress.isEmpty()) {
             System.err.println("OCR listener disabled: aggregator address is empty");
             return;
         }
+        System.out.println("OCR listener enabled");
+        System.out.println("OCR RPC URL: " + rpcUrl);
+        System.out.println("OCR aggregator address: " + aggregatorAddress);
         web3j = Web3j.build(new HttpService(rpcUrl));
         EthFilter filter = new EthFilter(
             DefaultBlockParameterName.LATEST,
@@ -60,10 +64,12 @@ public class OcrTransmissionListener {
                 if (blockNumber == null) {
                     return;
                 }
+                System.out.println("OCR NewTransmission log received: block=" + blockNumber);
                 BigInteger timestamp = web3j.ethGetBlockByNumber(
                     new DefaultBlockParameterNumber(blockNumber), false
                 ).send().getBlock().getTimestamp();
                 Long blockTimestampMs = timestamp == null ? null : timestamp.longValue() * 1000;
+                System.out.println("OCR NewTransmission timestamp(ms): " + blockTimestampMs);
                 cacheService.ack(null, blockTimestampMs);
             } catch (Exception e) {
                 System.err.println("OCR listener error: " + e.getMessage());

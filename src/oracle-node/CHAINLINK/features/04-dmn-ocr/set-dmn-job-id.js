@@ -12,9 +12,6 @@ const deployment = JSON.parse(
 const chainlinkDeployment = JSON.parse(
   fs.readFileSync(path.join(DEPLOYMENT_DIR, 'chainlink-deployment.json'), 'utf8')
 );
-const nodeInfo = JSON.parse(
-  fs.readFileSync(path.join(DEPLOYMENT_DIR, 'node-info.json'), 'utf8')
-);
 const compiled = JSON.parse(
   fs.readFileSync(path.join(DEPLOYMENT_DIR, 'compiled.json'), 'utf8')
 );
@@ -62,16 +59,22 @@ function rpcCall(method, params) {
   });
 }
 
-function findBaselineWriters() {
-  if (!Array.isArray(nodeInfo)) return [];
-  return nodeInfo
-    .filter((node) => node.name && (node.name.startsWith('node') || node.name === 'bootstrap'))
-    .map((node) => node.ethAddress)
-    .filter(Boolean);
-}
-
 function getFunctionAbi(name) {
   return abi.find((item) => item.type === 'function' && item.name === name);
+}
+
+function normalizeJobId(id) {
+  let raw = id.toLowerCase().replace(/-/g, '');
+  if (raw.startsWith('0x')) {
+    raw = raw.slice(2);
+  }
+  if (!/^[0-9a-f]+$/.test(raw)) {
+    throw new Error(`Job ID 不是有效的十六进制字符串: ${id}`);
+  }
+  if (raw.length > 64) {
+    throw new Error(`Job ID 长度不正确: ${id}`);
+  }
+  return '0x' + raw.padEnd(64, '0');
 }
 
 async function sendTx(contractAddress, fnName, args, gas) {
@@ -97,36 +100,26 @@ async function sendTx(contractAddress, fnName, args, gas) {
 async function main() {
   const contractAddress =
     process.env.DMN_REQUEST_CONTRACT_ADDRESS || deployment.contractAddress;
-  const ocrAggregator =
-    process.env.OCR_AGGREGATOR_ADDRESS || chainlinkDeployment.ocrContract;
-  const writers = process.env.BASELINE_WRITERS
-    ? process.env.BASELINE_WRITERS.split(',').map((v) => v.trim()).filter(Boolean)
-    : findBaselineWriters();
+  const dmnJobId =
+    process.env.DMN_JOB_ID ||
+    chainlinkDeployment.dmnJobId ||
+    chainlinkDeployment.dmnJobIds?.chainlink1;
 
   if (!contractAddress) {
     console.error('缺少合约地址：deployment/deployment.json 或 DMN_REQUEST_CONTRACT_ADDRESS');
     process.exit(1);
   }
-  if (!ocrAggregator) {
-    console.error('缺少 OCR aggregator 地址：deployment/chainlink-deployment.json 或 OCR_AGGREGATOR_ADDRESS');
-    process.exit(1);
-  }
-  if (!writers || writers.length === 0) {
-    console.error('缺少 baseline writer 地址：deployment/node-info.json 或 BASELINE_WRITERS');
+  if (!dmnJobId) {
+    console.error('缺少 DMN Job ID：deployment/chainlink-deployment.json 或 DMN_JOB_ID');
     process.exit(1);
   }
 
+  const normalized = normalizeJobId(dmnJobId);
   console.log('合约地址:', contractAddress);
-  console.log('OCR aggregator:', ocrAggregator);
-  console.log('baseline writers:', writers.join(', '));
+  console.log('DMN Job ID:', normalized);
 
-  const tx1 = await sendTx(contractAddress, 'setOcrAggregator', [ocrAggregator], 200000);
-  console.log('✅ setOcrAggregator 交易已发送:', tx1);
-
-  for (const writer of writers) {
-    const tx2 = await sendTx(contractAddress, 'setBaselineWriter', [writer, true], 200000);
-    console.log(`✅ setBaselineWriter(${writer}) 交易已发送:`, tx2);
-  }
+  const tx = await sendTx(contractAddress, 'setJobId', [normalized], 200000);
+  console.log('✅ setJobId 交易已发送:', tx);
 }
 
 main().catch((err) => {

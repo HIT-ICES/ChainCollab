@@ -1,62 +1,62 @@
 version: "3.8"
 
 services:
-  dmn-node1:
+  cdmn-node1:
     build:
-      context: ../02-single-node-dmn/dmn-server-java
+      context: ./cdmn-python-server
       dockerfile: Dockerfile
-    image: chaincollab-dmn-server:latest
-    container_name: dmn-node1
+    image: chaincollab-cdmn-server:latest
+    container_name: cdmn-node1
     restart: unless-stopped
     environment:
-      - SERVER_PORT=8080
+      - FLASK_RUN_PORT=5000
       - OCR_LISTENER_ENABLED=true
       - OCR_RPC_URL=http://mybootnode:8545
       - OCR_AGGREGATOR_ADDRESS=${OCR_AGGREGATOR_ADDRESS}
     ports:
-      - "8081:8080"
+      - "8081:5000"
     networks:
       - existing_network
 
-  dmn-node2:
-    image: chaincollab-dmn-server:latest
-    container_name: dmn-node2
+  cdmn-node2:
+    image: chaincollab-cdmn-server:latest
+    container_name: cdmn-node2
     restart: unless-stopped
     environment:
-      - SERVER_PORT=8080
+      - FLASK_RUN_PORT=5000
       - OCR_LISTENER_ENABLED=true
       - OCR_RPC_URL=http://mybootnode:8545
       - OCR_AGGREGATOR_ADDRESS=${OCR_AGGREGATOR_ADDRESS}
     ports:
-      - "8082:8080"
+      - "8082:5000"
     networks:
       - existing_network
 
-  dmn-node3:
-    image: chaincollab-dmn-server:latest
-    container_name: dmn-node3
+  cdmn-node3:
+    image: chaincollab-cdmn-server:latest
+    container_name: cdmn-node3
     restart: unless-stopped
     environment:
-      - SERVER_PORT=8080
+      - FLASK_RUN_PORT=5000
       - OCR_LISTENER_ENABLED=true
       - OCR_RPC_URL=http://mybootnode:8545
       - OCR_AGGREGATOR_ADDRESS=${OCR_AGGREGATOR_ADDRESS}
     ports:
-      - "8083:8080"
+      - "8083:5000"
     networks:
       - existing_network
 
-  dmn-node4:
-    image: chaincollab-dmn-server:latest
-    container_name: dmn-node4
+  cdmn-node4:
+    image: chaincollab-cdmn-server:latest
+    container_name: cdmn-node4
     restart: unless-stopped
     environment:
-      - SERVER_PORT=8080
+      - FLASK_RUN_PORT=5000
       - OCR_LISTENER_ENABLED=true
       - OCR_RPC_URL=http://mybootnode:8545
       - OCR_AGGREGATOR_ADDRESS=${OCR_AGGREGATOR_ADDRESS}
     ports:
-      - "8084:8080"
+      - "8084:5000"
     networks:
       - existing_network
 

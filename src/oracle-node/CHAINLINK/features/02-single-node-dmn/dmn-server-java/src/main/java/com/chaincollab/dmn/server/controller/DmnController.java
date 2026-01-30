@@ -150,6 +150,9 @@ public class DmnController {
             response.put("ok", true);
             response.put("requestId", requestId);
             response.put("value", result);
+            response.put("raw", raw);
+            response.put("hash", hashHex);
+            response.put("hashDec", hashDec);
             response.put("updatedAt", cached.updatedAt);
             return ResponseEntity.ok(response);
 
@@ -164,7 +167,9 @@ public class DmnController {
      * 获取最近一次缓存结果（用于 OCR 观测）
      */
     @GetMapping("/latest")
-    public ResponseEntity<Map<String, Object>> getLatest() {
+    public ResponseEntity<Map<String, Object>> getLatest(
+        @RequestParam(value = "requireReady", required = false) String requireReady
+    ) {
         Map<String, Object> response = new HashMap<>();
         DmnCacheService.CachedResult cached = cacheService.latest();
 
@@ -175,7 +180,10 @@ public class DmnController {
             response.put("hashDec", 0);
             response.put("requestId", null);
             response.put("updatedAt", 0);
-            return ResponseEntity.ok(response);
+            if ("1".equals(requireReady) || "true".equalsIgnoreCase(requireReady)) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
         response.put("ok", true);
@@ -208,6 +216,7 @@ public class DmnController {
         response.put("raw", cached.raw);
         response.put("hash", cached.hashHex);
         response.put("hashDec", cached.hashDec);
+        response.put("requestId", cached.requestId);
         response.put("updatedAt", cached.updatedAt);
         return ResponseEntity.ok(response);
     }
@@ -233,9 +242,12 @@ public class DmnController {
      */
     @PostMapping("/ack")
     public ResponseEntity<Map<String, Object>> ackAndClear(@RequestBody Map<String, Object> request) {
-        String requestId = normalizeRequestId(request.get("requestId"));
-        Long blockTimestampMs = normalizeLong(request.get("blockTimestampMs"));
-        return ResponseEntity.ok(cacheService.ack(requestId, blockTimestampMs));
+        Map<String, Object> response = new HashMap<>();
+        response.put("ok", true);
+        response.put("clearedLatest", false);
+        response.put("skippedLatest", false);
+        response.put("removedByRequestId", false);
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -320,7 +332,37 @@ public class DmnController {
         if (requestId == null) {
             return null;
         }
-        return String.valueOf(requestId);
+        String raw = String.valueOf(requestId).trim();
+        if (raw.isEmpty()) {
+            return null;
+        }
+        if (raw.startsWith("0x") && raw.length() == 66) {
+            return raw.toLowerCase();
+        }
+        if (raw.startsWith("[") && raw.endsWith("]")) {
+            try {
+                String inner = raw.substring(1, raw.length() - 1).trim();
+                if (inner.isEmpty()) {
+                    return null;
+                }
+                String[] parts = inner.split(",");
+                if (parts.length != 32) {
+                    return raw;
+                }
+                StringBuilder sb = new StringBuilder("0x");
+                for (String part : parts) {
+                    int v = Integer.parseInt(part.trim());
+                    if (v < 0) {
+                        v += 256;
+                    }
+                    sb.append(String.format("%02x", v & 0xff));
+                }
+                return sb.toString();
+            } catch (Exception e) {
+                return raw;
+            }
+        }
+        return raw;
     }
 
     private Long normalizeLong(Object value) {

@@ -16,10 +16,10 @@ const nodes = [
 ];
 
 const DMN_SERVICE_MAP = {
-  chainlink1: 'http://dmn-node1:8080',
-  chainlink2: 'http://dmn-node2:8080',
-  chainlink3: 'http://dmn-node3:8080',
-  chainlink4: 'http://dmn-node4:8080',
+  chainlink1: 'http://cdmn-node1:5000',
+  chainlink2: 'http://cdmn-node2:5000',
+  chainlink3: 'http://cdmn-node3:5000',
+  chainlink4: 'http://cdmn-node4:5000',
 };
 
 function login(port) {

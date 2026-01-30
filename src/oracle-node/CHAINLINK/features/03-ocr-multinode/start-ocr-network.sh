@@ -12,7 +12,7 @@ NC='\033[0m' # No Color
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 COMPOSE_FILE="$SCRIPT_DIR/docker-compose-multinode.yml"
-DMN_COMPOSE_FILE="$ROOT_DIR/features/04-dmn-ocr/docker-compose-dmn.yml"
+DMN_COMPOSE_FILE="$ROOT_DIR/features/04-dmn-ocr/docker-compose-cdmn.yml"
 
 # 检查 Docker 是否正在运行
 if ! docker info &> /dev/null; then
@@ -165,7 +165,7 @@ fi
 echo -e "${BLUE}步骤 5：收集所有节点信息...${NC}"
 node "$SCRIPT_DIR/get-node-info.js"
 
-echo -e "${BLUE}步骤 6：启动 DMN 服务（每个节点一个实例）...${NC}"
+echo -e "${BLUE}步骤 6：启动 CDMN 服务...${NC}"
 OCR_DEPLOYMENT="$ROOT_DIR/deployment/ocr-deployment.json"
 if [ -f "$OCR_DEPLOYMENT" ] && command -v jq &> /dev/null; then
     OCR_AGGREGATOR_ADDRESS=$(jq -r '.contractAddress' "$OCR_DEPLOYMENT")

@@ -11,7 +11,7 @@ NC='\033[0m' # No Color
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 COMPOSE_FILE="$SCRIPT_DIR/docker-compose-multinode.yml"
-DMN_COMPOSE_FILE="$SCRIPT_DIR/../04-dmn-ocr/docker-compose-dmn.yml"
+DMN_COMPOSE_FILE="$SCRIPT_DIR/../04-dmn-ocr/docker-compose-cdmn.yml"
 
 # 检查 Docker 是否正在运行
 if ! docker info &> /dev/null; then

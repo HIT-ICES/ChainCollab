@@ -86,7 +86,11 @@ async function deploy() {
             process.exit(1);
         }
 
+        const forceDmn = process.env.FORCE_DMN_CONTRACT === '1';
         const selectContractKey = (deployment) => {
+            if (forceDmn) {
+                return 'contracts/MyChainlinkRequesterDMN.sol:MyChainlinkRequesterDMN';
+            }
             if (deployment && deployment.dmnJobId && !deployment.jobId) {
                 return 'contracts/MyChainlinkRequesterDMN.sol:MyChainlinkRequesterDMN';
             }
@@ -110,7 +114,7 @@ async function deploy() {
 
         console.log(`开始部署 ${contractKey.split(':')[1]} 合约...\n`);
 
-        const isDmnContract = contractKey.includes('MyChainlinkRequesterDMN');
+        const isDmnContract = forceDmn || contractKey.includes('MyChainlinkRequesterDMN');
 
         // 从 chainlink-deployment.json 中读取 Job ID
         let jobId;
@@ -130,31 +134,24 @@ async function deploy() {
             return '0x' + raw.padEnd(64, '0');
         };
 
-        // 检查是否有至少一个 Job ID 存在
-        if (chainlinkDeployment.jobId) {
+        // 允许没有 Job ID 时直接部署（后续可 setJobId 更新）
+        jobId = '0x' + '0'.repeat(64);
+        dmnJobId = '0x' + '0'.repeat(64);
+
+        if (!forceDmn && chainlinkDeployment.jobId) {
             jobId = chainlinkDeployment.jobId;
-            // 将 Job ID 转换为 bytes32 格式
             if (!jobId.startsWith('0x')) {
                 jobId = normalizeJobId(jobId);
             }
             console.log('✅ 使用已创建的 Job ID:', jobId);
-            // 如果没有 DMN Job ID，设置为空 bytes32
-            dmnJobId = '0x' + '0'.repeat(64);
-        } else if (chainlinkDeployment.dmnJobId) {
+        }
+
+        if (chainlinkDeployment.dmnJobId) {
             dmnJobId = chainlinkDeployment.dmnJobId;
-            // 将 Job ID 转换为 bytes32 格式
             if (!dmnJobId.startsWith('0x')) {
                 dmnJobId = normalizeJobId(dmnJobId);
             }
             console.log('✅ 使用已创建的 DMN Job ID:', dmnJobId);
-            // 如果没有普通 Job ID，设置为空 bytes32
-            jobId = '0x' + '0'.repeat(64);
-        } else {
-            console.error('❌ 请先创建至少一个 Chainlink Job:');
-            console.error('   - 普通 Job: node scripts/create-job.js');
-            console.error('   - 或 DMN Job: node features/02-single-node-dmn/create-dmn-job.js');
-            console.error('   - 或 DMN directrequest 缓存 Job: node features/04-dmn-ocr/create-dmn-directrequest-job.js');
-            process.exit(1);
         }
 
         const fee = '0x' + (BigInt('100000000000000000')).toString(16); // 0.1 LINK
