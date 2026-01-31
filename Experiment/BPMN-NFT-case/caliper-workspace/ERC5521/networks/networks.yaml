@@ -1,0 +1,40 @@
+#随便取            #工作目录为caliper-workspace
+name: ChainCollab-Network
+version: 2.0.0
+#区块链类型
+caliper:
+  blockchain: fabric
+  fabric: #xinjia
+    gateway:
+      localhost: false
+#fabric链码信息
+channels:
+  - channelName: default
+    contracts:
+      - id: ERC5521   # 你的链码名
+#定义身份信息
+organizations:
+  #组织名
+  - mspid: Mem.org.comMSP
+    identities:
+      certificates:
+        - name: 'user1'
+          clientSignedCert: 
+            path: './1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/msp/user1@Mem.org.comMSP-cert.pem'     #证书
+          clientPrivateKey: 
+            path: './1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/msp/keystore/9c1e2dad0b360fecb192dd2c4558f998414842c9c590d38719773403470ecb8b_sk'          #私钥
+        - name: user2
+          clientSignedCert: 
+            path: './1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/msp/user2@Mem.org.comMSP-cert.pem'      #证书
+          clientPrivateKey: 
+            path: './1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/msp/keystore/44e9037335d62a4f3e1c89badd3b04444bd90573bcdddc8ea347fbff0f22ac2c_sk'
+        - name: user3
+          clientSignedCert: 
+            path: './1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/msp/user3@Mem.org.comMSP-cert.pem'      #证书
+          clientPrivateKey: 
+            path: './1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/msp/keystore/f04cf02bd9c727b072406506cd8ca7f355d6a06e7ddf0fdf65c9d1bc898baf1f_sk'
+    connectionProfile:
+      path: './networks/connection-mem.yaml'
+      discover: true
+
+  
