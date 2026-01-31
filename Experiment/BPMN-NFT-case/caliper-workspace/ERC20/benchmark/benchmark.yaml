@@ -1,0 +1,98 @@
+test:
+  name: flow-a-to-b
+  description: >
+    (NOTE) Use a fresh runId each run, or delete token-pools/<runId>/ between runs.
+
+    BPMN process benchmark:
+    premint by user1/user2, mint by user1,
+    transfer by user1, burn by user2.
+    Token IDs are persisted to token-pools/<runId>/minted_ids.txt
+    and later rounds consume from that manifest (no "guessed tokenId pool").
+  workers:
+    type: local
+    number: 25     # 并发 worker 数（不是 TPS）
+
+  rounds:
+    - label: premint-pools
+      txNumber: 6000 # 总共测试数（建议 = prepTransferCount + prepBurnCount）
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 50
+      workload:
+        module: ./workload/premint.js
+        arguments:
+          channel: default
+          contractId: ERC20
+          runId: run_154658
+          prepTransferCount: 3000
+          prepBurnCount: 3000
+          batchSize: 200
+          poolBaseDir: /hyperledger/caliper/workspace
+
+    - label: mint
+      txNumber: 3000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 300
+      workload:
+        module: ./workload/mint.js
+        arguments:
+          channel: default
+          contractId: ERC20
+          runId: run_154658
+          mintCount: 3000
+          mintStart: 1000000
+          batchSize: 200
+          poolBaseDir: /hyperledger/caliper/workspace
+
+    - label: transfer
+      txNumber: 3000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 300
+      workload:
+        module: ./workload/transfer.js
+        arguments:
+          channel: default
+          contractId: ERC20
+          runId: run_154658
+          transferCount: 3000 #和txNmuber必须一致 
+          batchSize: 200
+          poolBaseDir: /hyperledger/caliper/workspace
+
+          # 可选：不写则用脚本默认值
+          # from: "x509::CN=user1,OU=client::CN=ca.mem.org.com,OU=Fabric,O=mem.org.com,ST=North Carolina,C=US"
+          # to:   "x509::CN=user2,OU=client::CN=ca.mem.org.com,OU=Fabric,O=mem.org.com,ST=North Carolina,C=US"
+
+    - label: query
+      txNumber: 3000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 300
+      workload:
+        module: ./workload/query.js
+        arguments:
+          channel: default
+          contractId: ERC20
+          runId: run_154658
+          poolBaseDir: /hyperledger/caliper/workspace
+
+    - label: burn
+      txNumber: 2500
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 300
+      workload:
+        module: ./workload/burn.js
+        arguments:
+          channel: default
+          contractId: ERC20
+          runId: run_154658
+          burnCount: 2500
+          batchSize: 200
+          poolBaseDir: /hyperledger/caliper/workspace

@@ -1,0 +1,24 @@
+version: '2'
+
+services:
+    caliper:
+        container_name: caliper
+        image: hyperledger/caliper:0.7.1
+        command:
+        - launch
+        - manager
+        - --caliper-fabric-gateway-localhost
+        - "false"
+        environment:
+        - CALIPER_BIND_SUT=fabric:2.2
+        - CALIPER_BENCHCONFIG=./benchmark/benchmark.yaml
+        - CALIPER_NETWORKCONFIG=./networks/networks.yaml
+        - DISCOVERY-AS-LOCALHOST=false
+        volumes:
+        - ./:/hyperledger/caliper/workspace
+        networks:
+        - cello-net
+
+networks:
+  cello-net:
+    external: true

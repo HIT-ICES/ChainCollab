@@ -1,0 +1,63 @@
+certificateAuthorities:
+  ca.mem.org.com:
+    grpcOptions:
+      ssl-target-name-override: ca.mem.org.com
+    registrar:
+      enrollId: admin
+      enrollSecret: adminpw
+    tlsCACerts:
+      path: ./1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/msp/tlscacerts/ca.crt
+    url: https://ca.mem.org.com:7054
+channels:
+  default:
+    orderers:
+    - fabric_orderer
+    peers:
+      fabric_peer:
+        chaincodeQuery: true
+        endorsingPeer: true
+        eventSource: true
+        ledgerQuery: true
+client:
+  BCCSP:
+    security:
+      default:
+        provider: SW
+      enabled: true
+      hashAlgorithm: SHA2
+      level: 256
+      softVerify: true
+  credentialStore:
+    cryptoStore:
+      path: ./1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/msp
+    path: ./1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/msp
+  cryptoconfig:
+    path: ./1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/msp
+  logging:
+    level: info
+  organization: mem.org.com
+  tlsCerts:
+    client:
+      cert:
+        path: ./1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/users/Admin@mem.org.com/msp/signcerts/cert.pem
+      key:
+        path: ./1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/users/Admin@mem.org.com/msp/keystore/011630655cfcacb40bd53549054aa0679cba0604657d17bb46a8db0c1ad7d756_sk
+orderers:
+  fabric_orderer:
+    tlsCACerts:
+      path: ./1_msp/Environment-system.org.com/crypto-config/ordererOrganizations/org.com/orderers/orderer10.org.com/tls/tlscacerts/tls-ca-Environment-system-org-com-18807-ca-Environment-system-org-com.pem
+    url: grpcs://orderer10.org.com:7050
+organizations:
+  mem.org.com:
+    certificateAuthorities:
+    - ca.mem.org.com
+    cryptoPath: /tmp/msp
+    mspid: Mem.org.comMSP
+    peers:
+    - fabric_peer
+peers:
+  fabric_peer:
+    tlsCACerts:
+      path: ./1_msp/mem.org.com/crypto-config/peerOrganizations/mem.org.com/peers/peer10.mem.org.com/tls/tlscacerts/tls-ca-mem-org-com-8283-ca-mem-org-com.pem
+    url: grpcs://peer10.mem.org.com:7051
+version: 1.1.0%F
