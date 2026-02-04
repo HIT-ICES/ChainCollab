@@ -145,9 +145,35 @@ class GoChaincodeTranslator:
                 "definition": output_def,
             }
 
+        # Step 4: extract parameters from Task outputs (e.g. query operation outputs)
+        task_outputs = {}
+        for task in choreography.query_element_with_type(NodeType.TASK):
+            doc_data = self._merge_task_with_dataobject(task)
+            outputs = doc_data.get("outputs", {})
+            if not isinstance(outputs, dict):
+                continue
+            for name, spec in outputs.items():
+                data_type = spec.get("dataType", "string")
+                task_outputs[name] = {
+                    "type": data_type,
+                    "task_id": (
+                        [task.id] + task_outputs[name]["task_id"]
+                        if name in task_outputs
+                        else [task.id]
+                    ),
+                    "description": "",
+                    "source_type": "task",
+                }
+
+        for output_name, output_def in task_outputs.items():
+            global_parameters[output_name] = {
+                "definition": output_def,
+            }
+
         message_properties_plus_business_rule_outputs = {
             **message_properties,
             **business_rule_outputs,
+            **task_outputs,
         }
 
         for sequence_flow in choreography.query_element_with_type(EdgeType.SEQUENCE_FLOW):
@@ -929,7 +955,7 @@ class GoChaincodeTranslator:
             snippet.EndEvent_code(
                 end_event.id,
                 after_all_hook="\n\t".join(when_triggered_code),
-            )
+            ) 
         )
         return temp_list
 

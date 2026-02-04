@@ -1,5 +1,11 @@
 import { is } from 'bpmn-js/lib/util/ModelUtil';
 
+// 全局缓存，用于存储已计算的状态结果
+// 缓存键格式: `${tokenId}:${tokenHasExistInERC}`
+// 缓存在每次验证开始时清空
+let stateCache = new Map();
+let lastValidationRun = 0;
+
 /**
  * Validates AssetTask operations by tracking token state through execution paths.
  *
@@ -17,6 +23,13 @@ import { is } from 'bpmn-js/lib/util/ModelUtil';
  * @param reporter {Reporter}
  */
 export default function assetTaskOperationConstraint(shape, reporter) {
+  // 每次验证运行时清空缓存（通过检测时间戳变化）
+  const now = Date.now();
+  if (now - lastValidationRun > 100) {
+    stateCache.clear();
+    lastValidationRun = now;
+  }
+
   // Only check Task elements
   if (!is(shape, 'bpmn:Task')) {
     return;
@@ -219,8 +232,17 @@ function validateOperationWithStateTracking(currentShape, tokenId, currentOperat
 /**
  * Get all possible token states when reaching a specific task
  * Returns a Set of possible states: 'EXISTS', 'NOT_EXISTS', or both
+ * 使用缓存优化性能
  */
 function getPossibleStatesAtTask(targetTask, tokenId, tokenHasExistInERC, elementRegistry) {
+  // 生成缓存键
+  const cacheKey = `${targetTask.id}:${tokenId}:${tokenHasExistInERC}`;
+
+  // 检查缓存
+  if (stateCache.has(cacheKey)) {
+    return stateCache.get(cacheKey);
+  }
+
   const initialState = tokenHasExistInERC ? 'EXISTS' : 'NOT_EXISTS';
   const visited = new Map(); // Map<elementId, Set<states>>
   const possibleStates = new Set();
@@ -246,8 +268,17 @@ function getPossibleStatesAtTask(targetTask, tokenId, tokenHasExistInERC, elemen
     });
   }
 
+  // 限制最大迭代次数，防止复杂图导致的性能问题
+  let iterationCount = 0;
+  const MAX_ITERATIONS = 1000;
+
   // DFS from each start event
   function dfs(element, currentState) {
+    // 防止无限循环
+    if (++iterationCount > MAX_ITERATIONS) {
+      return;
+    }
+
     // If we reached the target task, record the state
     if (element.id === targetTask.id) {
       possibleStates.add(currentState);
@@ -315,6 +346,9 @@ function getPossibleStatesAtTask(targetTask, tokenId, tokenHasExistInERC, elemen
   if (possibleStates.size === 0) {
     possibleStates.add(initialState);
   }
+
+  // 存入缓存
+  stateCache.set(cacheKey, possibleStates);
 
   return possibleStates;
 }
