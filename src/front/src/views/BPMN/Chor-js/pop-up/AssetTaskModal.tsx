@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Modal, Input, Select, message, Button, Table } from 'antd';
+import { debounce } from 'lodash';
 
 interface FixedFieldsModalProps {
   dataElementId: string;
@@ -97,7 +98,7 @@ export default function AssetTaskModal({
   const operationOptions: Record<string, string[]> = {
     'distributive': ['mint', 'burn', 'grant usage rights', 'revoke usage rights', 'transfer', 'query'],
     'transferable': ['mint', 'burn', 'Transfer', 'query'],
-    'value-added': ['branch', 'merge', 'Transfer', 'burn', 'query'],
+    'value-added': ['branch', 'Transfer', 'burn', 'query'],
   };
 
   const operationToCallerLabel: Record<string, string> = {
@@ -360,74 +361,102 @@ export default function AssetTaskModal({
   }, [shape, isModalOpen, refreshParticipantOptions]);
 
   // 监听连接变化，自动同步 refTokenIds 到输出 DataObject
-  React.useEffect(() => {
-    if (!isModalOpen || !shape) return;
+  // 使用 ref 跟踪是否正在更新，避免循环触发
+  const isUpdatingRef = React.useRef(false);
 
-    const handleConnectionChange = () => {
-      // 只在 value-added 的 branch/merge 操作时才需要同步
-      const linkedAsset = getLinkedDataObjectAsset();
-      if (!linkedAsset || linkedAsset.assetType !== 'value-added') return;
+  const handleConnectionChangeCore = React.useCallback(() => {
+    if (!shape || isUpdatingRef.current) return;
 
-      const doc = shape.businessObject.documentation;
-      if (!Array.isArray(doc) || !doc.length) return;
+    // 只在 value-added 的 branch/merge 操作时才需要同步
+    const linkedAsset = getLinkedDataObjectAsset();
+    if (!linkedAsset || linkedAsset.assetType !== 'value-added') return;
 
-      try {
-        const parsed = JSON.parse(doc[0].text);
-        if (!parsed.operation || !['branch', 'merge'].includes(parsed.operation)) return;
+    const doc = shape.businessObject.documentation;
+    if (!Array.isArray(doc) || !doc.length) return;
 
-        // 收集最新的输入 tokenIds
-        const incomingTokenIds = getIncomingDataObjectTokenIds();
+    try {
+      const parsed = JSON.parse(doc[0].text);
+      if (!parsed.operation || !['branch', 'merge'].includes(parsed.operation)) return;
 
-        // 更新 refTokenIds 状态
-        setRefTokenIds(incomingTokenIds);
+      // 收集最新的输入 tokenIds
+      const incomingTokenIds = getIncomingDataObjectTokenIds();
 
-        // 直接更新输出 DataObject 的 refTokenIds
-        const outgoing = shape.outgoing || [];
-        for (const connection of outgoing) {
-          const connBo = connection.businessObject;
-          if (connBo.$type === 'bpmn:DataOutputAssociation') {
-            const dataObjectElement = connection.target;
+      // 检查是否真的有变化
+      const currentRefTokenIds = refTokenIds;
+      const isSame = incomingTokenIds.length === currentRefTokenIds.length &&
+        incomingTokenIds.every((id, i) => currentRefTokenIds[i] === id);
 
-            if (dataObjectElement && dataObjectElement.type === 'bpmn:DataObjectReference') {
-              const docs = dataObjectElement.businessObject.documentation;
-              if (Array.isArray(docs) && docs.length) {
-                try {
-                  const parsed = JSON.parse(docs[0].text);
-                  parsed.refTokenIds = incomingTokenIds;
+      if (isSame) return;
+
+      // 更新 refTokenIds 状态
+      setRefTokenIds(incomingTokenIds);
+
+      // 直接更新输出 DataObject 的 refTokenIds
+      const outgoing = shape.outgoing || [];
+      for (const connection of outgoing) {
+        const connBo = connection.businessObject;
+        if (connBo.$type === 'bpmn:DataOutputAssociation') {
+          const dataObjectElement = connection.target;
+
+          if (dataObjectElement && dataObjectElement.type === 'bpmn:DataObjectReference') {
+            const docs = dataObjectElement.businessObject.documentation;
+            if (Array.isArray(docs) && docs.length) {
+              try {
+                const parsedDoc = JSON.parse(docs[0].text);
+
+                // 检查是否需要更新
+                const existingRefTokenIds = parsedDoc.refTokenIds || [];
+                const needsUpdate = incomingTokenIds.length !== existingRefTokenIds.length ||
+                  !incomingTokenIds.every((id, i) => existingRefTokenIds[i] === id);
+
+                if (needsUpdate) {
+                  isUpdatingRef.current = true;
+                  parsedDoc.refTokenIds = incomingTokenIds;
 
                   commandStack.execute('element.updateProperties', {
                     element: dataObjectElement,
                     properties: {
                       documentation: [
                         modeler._moddle.create('bpmn:Documentation', {
-                          text: JSON.stringify(parsed, null, 2),
+                          text: JSON.stringify(parsedDoc, null, 2),
                         }),
                       ],
                     },
                   });
-                } catch {
-                  // ignore
+                  // 延迟重置标志，避免立即触发的事件
+                  setTimeout(() => { isUpdatingRef.current = false; }, 50);
                 }
+              } catch {
+                // ignore
               }
             }
           }
         }
-      } catch {
-        // ignore
       }
-    };
+    } catch {
+      // ignore
+    }
+  }, [shape, commandStack, modeler, refTokenIds]);
+
+  // 防抖版本的连接变化处理函数
+  const debouncedHandleConnectionChange = React.useMemo(
+    () => debounce(handleConnectionChangeCore, 200),
+    [handleConnectionChangeCore]
+  );
+
+  React.useEffect(() => {
+    if (!isModalOpen || !shape) return;
 
     // 监听连接创建和删除事件
-    eventBus.on('connection.added', handleConnectionChange);
-    eventBus.on('connection.removed', handleConnectionChange);
-    eventBus.on('commandStack.changed', handleConnectionChange);
+    eventBus.on('connection.added', debouncedHandleConnectionChange);
+    eventBus.on('connection.removed', debouncedHandleConnectionChange);
 
     return () => {
-      eventBus.off('connection.added', handleConnectionChange);
-      eventBus.off('connection.removed', handleConnectionChange);
-      eventBus.off('commandStack.changed', handleConnectionChange);
+      eventBus.off('connection.added', debouncedHandleConnectionChange);
+      eventBus.off('connection.removed', debouncedHandleConnectionChange);
+      debouncedHandleConnectionChange.cancel();
     };
-  }, [isModalOpen, shape, eventBus, commandStack, modeler]);
+  }, [isModalOpen, shape, eventBus, debouncedHandleConnectionChange]);
 
   // ===== 扫描所有 FT tokenName =====
   const scanFTTokenNames = React.useCallback(() => {
@@ -449,12 +478,12 @@ export default function AssetTaskModal({
     setTokenNameOptions(Array.from(names));
   }, [elementRegistry]);
 
-  // ===== 扫描 tokenId 并清理旧 tokenId =====
-  const scanTokenIdsAndClean = React.useCallback(() => {
+  // ===== 扫描 tokenId（只读扫描，不执行清理操作避免循环触发）=====
+  const scanTokenIds = React.useCallback(() => {
     const allElements = elementRegistry.getAll();
     const newTokenIdsSet = new Set<string>();
 
-    // 收集所有 mint 操作的 tokenId
+    // 收集所有 mint/branch/merge 操作的 tokenId
     allElements.forEach((el: any) => {
       const docs = el.businessObject.documentation;
       if (Array.isArray(docs) && docs.length) {
@@ -478,50 +507,37 @@ export default function AssetTaskModal({
         newTokenIds.every(id => prevSet.has(id));
       return same ? prev : newTokenIds;
     });
-
-    // 对所有非 mint 等操作且 tokenId 不在新列表中的元素，清理 tokenId
-    allElements.forEach((el: any) => {
-      const docs = el.businessObject.documentation;
-      if (Array.isArray(docs) && docs.length) {
-        try {
-          const parsed = JSON.parse(docs[0].text);
-          if (parsed.tokenId && (parsed.operation === 'mint' || parsed.operation === 'branch' || parsed.operation === 'merge') && !newTokenIdsSet.has(parsed.tokenId)) {
-            const cleaned = { ...parsed };
-            delete cleaned.tokenId;
-            commandStack.execute('element.updateProperties', {
-              element: el,
-              properties: {
-                documentation: [
-                  modeler._moddle.create('bpmn:Documentation', {
-                    text: JSON.stringify(cleaned, null, 2),
-                  }),
-                ],
-              },
-            });
-          }
-        } catch {
-          // ignore
-        }
-      }
-    });
-  }, [elementRegistry, commandStack, modeler]);
+  }, [elementRegistry]);
 
   // 合并扫描逻辑
   const scanAll = React.useCallback(() => {
-    scanTokenIdsAndClean();
+    scanTokenIds();
     scanFTTokenNames();
-  }, [scanTokenIdsAndClean, scanFTTokenNames]);
+  }, [scanTokenIds, scanFTTokenNames]);
+
+  // 防抖版本的扫描函数
+  const debouncedScanAll = React.useMemo(
+    () => debounce(scanAll, 150),
+    [scanAll]
+  );
+
+  // 清理防抖函数
+  React.useEffect(() => {
+    return () => {
+      debouncedScanAll.cancel();
+    };
+  }, [debouncedScanAll]);
 
   React.useEffect(() => {
-    // 初次扫描
+    // 初次扫描（立即执行）
     scanAll();
-    // 监听模型变化，实时重新扫描
-    const handler = () => scanAll();
+    // 监听模型变化，使用防抖重新扫描
+    const handler = () => debouncedScanAll();
     eventBus.on('commandStack.changed', handler);
     return () => {
       eventBus.off('commandStack.changed', handler);
     };
-  }, [eventBus, scanAll]);
+  }, [eventBus, scanAll, debouncedScanAll]);
 
   // tokenId 现在从 DataObject 读取，不需要验证和清空逻辑
   // React.useEffect(() => {

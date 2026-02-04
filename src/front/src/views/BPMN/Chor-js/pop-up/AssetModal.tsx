@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Modal, Input, Select, message, Checkbox } from 'antd';
+import { debounce } from 'lodash';
 
 interface AssetModalProps {
   dataElementId: string;
@@ -97,8 +98,8 @@ export default function AssetModal({
     setTokenNameOptions(Array.from(names));
   }, [elementRegistry]);
 
-  // ===== 扫描 tokenId 并清理旧 tokenId =====
-  const scanTokenIdsAndClean = React.useCallback(() => {
+  // ===== 扫描 tokenId（只读扫描，不执行清理操作）=====
+  const scanTokenIds = React.useCallback(() => {
     const allElements = elementRegistry.getAll();
     const newTokenIdsSet = new Set<string>();
 
@@ -127,24 +128,37 @@ export default function AssetModal({
         newTokenIds.every(id => prevSet.has(id));
       return same ? prev : newTokenIds;
     });
-  }, [elementRegistry, commandStack, modeler]);
+  }, [elementRegistry]);
 
   // 合并扫描逻辑
   const scanAll = React.useCallback(() => {
-    scanTokenIdsAndClean();
+    scanTokenIds();
     scanFTTokenNames();
-  }, [scanTokenIdsAndClean, scanFTTokenNames]);
+  }, [scanTokenIds, scanFTTokenNames]);
+
+  // 防抖版本的扫描函数
+  const debouncedScanAll = React.useMemo(
+    () => debounce(scanAll, 150),
+    [scanAll]
+  );
+
+  // 清理防抖函数
+  React.useEffect(() => {
+    return () => {
+      debouncedScanAll.cancel();
+    };
+  }, [debouncedScanAll]);
 
   React.useEffect(() => {
-    // 初次扫描
+    // 初次扫描（立即执行）
     scanAll();
-    // 监听模型变化，实时重新扫描
-    const handler = () => scanAll();
+    // 监听模型变化，使用防抖重新扫描
+    const handler = () => debouncedScanAll();
     eventBus.on('commandStack.changed', handler);
     return () => {
       eventBus.off('commandStack.changed', handler);
     };
-  }, [eventBus, scanAll]);
+  }, [eventBus, scanAll, debouncedScanAll]);
 
   // 更新到 BPMN
   const updateDataToBPMN = () => {
