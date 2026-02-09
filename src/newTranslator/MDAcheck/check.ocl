@@ -1,3 +1,4 @@
+import 'platform:/resource/ocltest/b2c.ecore'
 package b2c
 
 -- ==============
@@ -114,7 +115,7 @@ inv MultiFlagConsistent:
 
 inv AttributeKeysUnique:
   self.attributes->isUnique(key)
-
+  
 -- ==============
 -- Message / Rule 约束
 -- ==============
@@ -181,7 +182,14 @@ def: parallelActions : Set(FlowAction) =
 def: gatewayThenActions : Set(FlowAction) =
   self.gatewayFlows->collect(actions)->flatten()->asSet()
 def: gatewayBranchActions : Set(FlowAction) =
-  self.gatewayFlows->collect(branches)->flatten()->collect(actions)->flatten()->asSet()
+  let branches : Bag(GatewayBranch) = self.gatewayFlows->collect(branches)->flatten() in
+  let compareBranchActions : Set(FlowAction) =
+    branches->select(oclIsKindOf(GatewayCompareBranch))->collect(oclAsType(GatewayCompareBranch).actions)->flatten()->asSet() in
+  let elseBranchActions : Set(FlowAction) =
+    branches->select(oclIsKindOf(GatewayElseBranch))->collect(oclAsType(GatewayElseBranch).actions)->flatten()->asSet() in
+  let exprBranchActions : Set(FlowAction) =
+    branches->select(oclIsKindOf(GatewayExpressionBranch))->collect(oclAsType(GatewayExpressionBranch).actions)->flatten()->asSet() in
+  compareBranchActions->union(elseBranchActions)->union(exprBranchActions)
 def: allActions : Set(FlowAction) =
   self.msgActions->union(self.ruleActions)
                  ->union(self.eventActions)
