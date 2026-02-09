@@ -25,6 +25,10 @@ OPTIONAL_ATTRIBUTE_KEYWORDS: dict[tuple[str, str], str] = {
     ("BusinessRule", "initialState"): r"\binitial\s+state\b",
 }
 
+# LiteralExpr uses mutually exclusive alternatives in grammar (stringValue | intValue | boolValue)
+# Only one should be output. We detect which one by checking for non-default values.
+LITERAL_EXPR_ATTRIBUTES = {"stringValue", "intValue", "boolValue"}
+
 
 def _span_text(source: str, obj: Any) -> str:
     start = getattr(obj, "_tx_position", None)
@@ -97,6 +101,47 @@ def _is_feature_set_in_text(source: str, obj: Any, class_name: str, feature_name
     return re.search(pattern, _span_text(source, obj)) is not None
 
 
+def _get_literal_expr_active_attr(tx_obj: Any, source: str) -> str | None:
+    """
+    Determine which attribute of a LiteralExpr was actually set in the DSL.
+    The grammar uses alternatives (stringValue | intValue | boolValue), so only one is valid.
+    """
+    # Get the source text span for this object to determine what was actually written
+    obj_span = _span_text(source, tx_obj).strip()
+
+    # Check for string literal (quoted text)
+    if obj_span.startswith('"') or obj_span.startswith("'"):
+        return "stringValue"
+
+    # Check for boolean literal
+    if obj_span.lower() in ("true", "false"):
+        return "boolValue"
+
+    # Otherwise it's an integer
+    try:
+        int(obj_span)
+        return "intValue"
+    except (ValueError, TypeError):
+        pass
+
+    # Fallback: check which attribute has a non-None value
+    sv = getattr(tx_obj, "stringValue", None)
+    iv = getattr(tx_obj, "intValue", None)
+    bv = getattr(tx_obj, "boolValue", None)
+
+    # String is set if non-None (even empty string means it was parsed as string)
+    if sv is not None:
+        return "stringValue"
+    # Bool is set if not None
+    if bv is not None:
+        return "boolValue"
+    # Int is set if not None
+    if iv is not None:
+        return "intValue"
+
+    return None
+
+
 def convert_b2c_to_xmi(
     *,
     tx_path: Path,
@@ -125,12 +170,22 @@ def convert_b2c_to_xmi(
         eobj = tx_to_eobj[id(tx_obj)]
         class_name = eobj.eClass.name
 
+        # For LiteralExpr, determine which attribute was actually set
+        literal_active_attr = None
+        if class_name == "LiteralExpr":
+            literal_active_attr = _get_literal_expr_active_attr(tx_obj, source)
+
         for feature in eobj.eClass.eAllStructuralFeatures():
             fname = feature.name
             if not hasattr(tx_obj, fname):
                 continue
 
             value = getattr(tx_obj, fname)
+
+            # Special handling for LiteralExpr: only output the active attribute
+            if class_name == "LiteralExpr" and fname in LITERAL_EXPR_ATTRIBUTES:
+                if fname != literal_active_attr:
+                    continue
 
             # Optional attributes in textX often default to ''/0/False; only set them if
             # the corresponding keyword exists in the original DSL text.

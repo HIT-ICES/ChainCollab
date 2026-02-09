@@ -1,0 +1,63 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>chaincollab.newtranslator</groupId>
+  <artifactId>ocl-runner-tycho-parent</artifactId>
+  <version>0.1.0</version>
+  <packaging>pom</packaging>
+
+  <name>newTranslator - Eclipse OCL Runner (Tycho)</name>
+
+  <properties>
+    <!-- Tycho 4.x requires Java 17+ -->
+    <tycho.version>4.0.10</tycho.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- Override via -Declipse.p2.repo=... if download.eclipse.org is slow/blocked -->
+    <eclipse.p2.repo>https://download.eclipse.org/releases/2025-12/</eclipse.p2.repo>
+  </properties>
+
+  <modules>
+    <module>runner</module>
+    <module>runner.tests</module>
+  </modules>
+
+  <repositories>
+    <!--
+      Eclipse Release train P2 repo (contains EMF + OCL + Xtext bundles).
+      With Java 17 available, we can use a newer release train.
+    -->
+    <repository>
+      <id>eclipse-2025-12</id>
+      <layout>p2</layout>
+      <url>${eclipse.p2.repo}</url>
+    </repository>
+  </repositories>
+
+  <build>
+    <!-- Tycho must be an active build extension (not only pluginManagement), otherwise
+         Maven won't recognize 'eclipse-plugin'/'eclipse-test-plugin' packaging. -->
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-maven-plugin</artifactId>
+        <version>${tycho.version}</version>
+        <extensions>true</extensions>
+      </plugin>
+    </plugins>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>target-platform-configuration</artifactId>
+          <version>${tycho.version}</version>
+          <configuration>
+            <resolver>p2</resolver>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>

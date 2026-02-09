@@ -31,6 +31,23 @@
 - 加载 `check.ocl`。
 - 打开/加载 `chaincode.xmi`，对其执行约束校验。
 
+## 4) 用脚本跑 Eclipse OCL 校验（Java Standalone）
+
+Eclipse OCL（Pivot/Complete OCL）主要以 **Eclipse Bundle（p2）** 形式发布，Maven Central 上不保证可用。
+因此本项目提供了 Tycho（p2）方式的命令行校验器：`MDAcheck/ocl-runner-tycho/`。
+
+```bash
+cd code/ChainCollab/src/newTranslator
+
+# 仅跑校验（前提：b2c.ecore/chaincode.xmi 已存在）
+mvn -q -f MDAcheck/ocl-runner-tycho/pom.xml -Dtycho.disableP2Mirrors=true \
+  -Decore=MDAcheck/b2c.ecore -Docl=MDAcheck/check.ocl -Dxmi=MDAcheck/chaincode.xmi \
+  integration-test
+
+# 一键：导出 ecore + 转换 xmi + 运行 OCL 校验
+bash MDAcheck/run_ocl_validate.sh
+```
+
 ## 2) 在 Eclipse 里使用（概要）
 
 - 导入 `b2c.ecore`（Ecore Tools / EMF）。
