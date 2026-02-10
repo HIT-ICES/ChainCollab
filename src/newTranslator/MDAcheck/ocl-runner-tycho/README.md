@@ -23,7 +23,7 @@ mvn -version
 ```bash
 mvn -f MDAcheck/ocl-runner-tycho/pom.xml \
   -Decore=MDAcheck/b2c.ecore -Docl=MDAcheck/check.ocl -Dxmi=MDAcheck/chaincode.xmi \
-  test
+  integration-test
 ```
 
 这条命令做了三件事（一次完成）：
@@ -52,7 +52,7 @@ mvn -version
 ```bash
 mvn -f MDAcheck/ocl-runner-tycho/pom.xml -U -Dtycho.disableP2Mirrors=true \
   -Decore=MDAcheck/b2c.ecore -Docl=MDAcheck/check.ocl -Dxmi=MDAcheck/chaincode.xmi \
-  test
+  integration-test
 ```
 
 3) 测试 p2 仓库是否可访问（网络/代理问题时会一直等）：
@@ -68,7 +68,7 @@ mvn -q -f MDAcheck/ocl-runner-tycho/pom.xml \
   -Declipse.p2.repo=https://download.eclipse.org/releases/2025-12/ \
   -Dtycho.disableP2Mirrors=true \
   -Decore=MDAcheck/b2c.ecore -Docl=MDAcheck/check.ocl -Dxmi=MDAcheck/chaincode.xmi \
-  test
+  integration-test
 ```
 
 ## 一键（生成 + 转换 + 校验）
@@ -76,6 +76,27 @@ mvn -q -f MDAcheck/ocl-runner-tycho/pom.xml \
 ```bash
 bash MDAcheck/run_ocl_validate.sh
 ```
+
+## 批量（对目录下所有 XMI 生成报告）
+
+对一个目录下的所有 `*.xmi` 批量跑 Complete OCL 校验，并输出 JSON 报告（默认会为每个模型也输出一个 JSON）：
+
+```bash
+bash MDAcheck/run_ocl_validate_batch.sh \
+  MDAcheck/emf-random/b2c \
+  MDAcheck/b2c.ecore \
+  MDAcheck/check.ocl \
+  MDAcheck/ocl-report
+```
+
+输出：
+
+- 汇总：`MDAcheck/ocl-report/report.json`
+- 单模型：`MDAcheck/ocl-report/models/*.json`
+- 每条 violation 会包含：
+  - `code`：约束“枚举值”（通常是 `Context::InvariantName`）
+  - `meaningZh`：从 `check.ocl` 对应 `inv` 上方的 `-- 注释` 自动提取的中文含义
+  - `message`：原始诊断信息（保留完整细节）
 
 ## 先 build，再运行（避免重复下载/便于离线）
 
@@ -92,7 +113,7 @@ mvn -f MDAcheck/ocl-runner-tycho/pom.xml -DskipTests package
 ```bash
 mvn -o -f MDAcheck/ocl-runner-tycho/pom.xml \
   -Decore=MDAcheck/b2c.ecore -Docl=MDAcheck/check.ocl -Dxmi=MDAcheck/chaincode.xmi \
-  test
+  integration-test
 ```
 
 > 说明：Tycho 构建产物里会有 `runner/target/*.jar`，但它是 **OSGi bundle**，不是“带齐依赖即可 `java -jar` 直接运行”的单体 jar。若你想要真正的可执行分发（带 Equinox/依赖的 product），需要再做一层 Tycho product/materialize（可以继续扩展实现）。

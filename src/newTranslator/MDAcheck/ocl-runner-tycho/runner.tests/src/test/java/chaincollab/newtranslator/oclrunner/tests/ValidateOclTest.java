@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.eclipse.emf.common.util.Diagnostic;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 
 import chaincollab.newtranslator.oclrunner.OclValidator;
@@ -13,6 +14,9 @@ import chaincollab.newtranslator.oclrunner.OclValidator;
 public class ValidateOclTest {
     @Test
     public void validateCompleteOclAgainstXmi() {
+        String xmiDirProp = System.getProperty("xmiDir");
+        Assume.assumeTrue("xmiDir is set; skipping single-file validation test", xmiDirProp == null || xmiDirProp.isBlank());
+
         Path cwd = Path.of("").toAbsolutePath().normalize();
         File ecore = resolveArg("ecore", cwd.resolve("MDAcheck/b2c.ecore").toFile());
         File ocl = resolveArg("ocl", cwd.resolve("MDAcheck/check.ocl").toFile());
@@ -42,7 +46,40 @@ public class ValidateOclTest {
         if (value == null || value.isBlank()) {
             return defaultFile;
         }
-        return new File(value);
+        return resolveFile(value, defaultFile);
+    }
+
+    private static File resolveFile(String value, File fallback) {
+        Path p = Path.of(value);
+        if (p.isAbsolute()) {
+            return p.toFile();
+        }
+
+        String mm = System.getProperty("maven.multiModuleProjectDirectory");
+        if (mm != null && !mm.isBlank()) {
+            Path candidate = Path.of(mm).resolve(p).toAbsolutePath().normalize();
+            if (candidate.toFile().exists()) {
+                return candidate.toFile();
+            }
+        }
+
+        Path cwd = Path.of("").toAbsolutePath().normalize();
+        Path dir = cwd;
+        for (int i = 0; i < 12; i++) {
+            Path candidate = dir.resolve(p).normalize();
+            if (candidate.toFile().exists()) {
+                return candidate.toFile();
+            }
+            dir = dir.getParent();
+            if (dir == null) {
+                break;
+            }
+        }
+
+        Path last = cwd.resolve(p).normalize();
+        if (last.toFile().exists()) {
+            return last.toFile();
+        }
+        return fallback;
     }
 }
-

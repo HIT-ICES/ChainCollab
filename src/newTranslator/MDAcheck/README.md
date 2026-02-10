@@ -46,6 +46,9 @@ mvn -q -f MDAcheck/ocl-runner-tycho/pom.xml -Dtycho.disableP2Mirrors=true \
 
 # 一键：导出 ecore + 转换 xmi + 运行 OCL 校验
 bash MDAcheck/run_ocl_validate.sh
+
+# 批量：对目录下所有 .xmi 生成 JSON 报告（默认跑 emf-random/b2c）
+bash MDAcheck/run_ocl_validate_batch.sh
 ```
 
 ## 2) 在 Eclipse 里使用（概要）

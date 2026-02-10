@@ -23,4 +23,4 @@ echo "[3/3] Validate XMI with Eclipse OCL (Complete OCL)"
 mvn -q -f "$here/ocl-runner-tycho/pom.xml" -U \
   -Dtycho.disableP2Mirrors=true \
   -Decore="$ecore" -Docl="$ocl" -Dxmi="$xmi" \
-  test
+  integration-test
