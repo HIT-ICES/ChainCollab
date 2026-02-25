@@ -88,7 +88,6 @@ const Node: React.FC = () => {
         }, 2000); // Simulating a request with 2 seconds delay
       })
       .catch((info) => {
-        console.log("Validate Failed:", info);
       });
   };
   // 取消Modal操作

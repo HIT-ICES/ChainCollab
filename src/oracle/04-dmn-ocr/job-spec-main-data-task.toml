@@ -1,0 +1,31 @@
+type = "directrequest"
+schemaVersion = 1
+name = "MainRouter data task"
+externalJobID = "<DATA_TASK_EXTERNAL_JOB_ID>"
+evmChainID = 3456
+contractAddress = "<YOUR_OPERATOR_CONTRACT_ADDRESS>"
+
+observationSource = """
+    decode_log  [type="ethabidecodelog"
+                 abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                 data="$(jobRun.logData)"
+                 topics="$(jobRun.logTopics)"]
+
+    decode_cbor [type="cborparse" data="$(decode_log.data)"]
+
+    fetch_data  [type="http"
+                 method="GET"
+                 url="$(decode_cbor.sourceUrl)"
+                 allowUnrestrictedNetworkAccess="true"]
+
+    encode_tx   [type="ethabiencode"
+                 abi="commitDataFromRaw(bytes32 requestId, string raw)"
+                 data="{\\\"requestId\\\": $(decode_log.requestId), \\\"raw\\\": $(fetch_data)}"]
+
+    submit_tx   [type="ethtx"
+                 evmChainID="3456"
+                 to="<DATA_TASK_ADAPTER_CONTRACT_ADDRESS>"
+                 data="$(encode_tx)"]
+
+    decode_log -> decode_cbor -> fetch_data -> encode_tx -> submit_tx
+"""

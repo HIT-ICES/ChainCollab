@@ -20,6 +20,8 @@ from generator.parser.choreography_parser.elements import (
     SequenceFlow,
     TerminalType,
     BusinessRuleTask,
+    ReceiveTask,
+    ScriptTask,
 )
 
 from typing import List, Optional, Tuple, Any, Protocol
@@ -56,6 +58,13 @@ class Choreography:
     def _parse_node(self, element: ET.Element):
         bpmn2prefix = "{http://www.omg.org/spec/BPMN/20100524/MODEL}"
         split_tag = element.tag.split("}")[1]
+
+        def _first_text(xpath: str) -> str:
+            found = element.findall(xpath)
+            if not found:
+                return ""
+            return found[0].text or ""
+
         match split_tag:
             case NodeType.PARTICIPANT.value:
                 participant_multiplicity = element.findall(
@@ -104,8 +113,34 @@ class Choreography:
                     self,
                     element.attrib["id"],
                     element.attrib.get("name", ""),
-                    incoming=element.findall(f"./{bpmn2prefix}incoming")[0].text,
-                    outgoing=element.findall(f"./{bpmn2prefix}outgoing")[0].text,
+                    incoming=_first_text(f"./{bpmn2prefix}incoming"),
+                    outgoing=_first_text(f"./{bpmn2prefix}outgoing"),
+                    documentation=documentation if documentation is not None else "{}",
+                )
+            case NodeType.RECEIVE_TASK.value:
+                documentation_list = element.findall(f"./{bpmn2prefix}documentation")
+                documentation = (
+                    documentation_list[0].text if documentation_list else None
+                )
+                return ReceiveTask(
+                    self,
+                    element.attrib["id"],
+                    element.attrib.get("name", ""),
+                    incoming=_first_text(f"./{bpmn2prefix}incoming"),
+                    outgoing=_first_text(f"./{bpmn2prefix}outgoing"),
+                    documentation=documentation if documentation is not None else "{}",
+                )
+            case NodeType.SCRIPT_TASK.value:
+                documentation_list = element.findall(f"./{bpmn2prefix}documentation")
+                documentation = (
+                    documentation_list[0].text if documentation_list else None
+                )
+                return ScriptTask(
+                    self,
+                    element.attrib["id"],
+                    element.attrib.get("name", ""),
+                    incoming=_first_text(f"./{bpmn2prefix}incoming"),
+                    outgoing=_first_text(f"./{bpmn2prefix}outgoing"),
                     documentation=documentation if documentation is not None else "{}",
                 )
             case NodeType.START_EVENT.value:
@@ -113,22 +148,22 @@ class Choreography:
                     self,
                     element.attrib["id"],
                     element.attrib.get("name", ""),
-                    outgoing=element.findall(f"./{bpmn2prefix}outgoing")[0].text,
+                    outgoing=_first_text(f"./{bpmn2prefix}outgoing"),
                 )
             case NodeType.END_EVENT.value:
                 return EndEvent(
                     self,
                     element.attrib["id"],
                     element.attrib.get("name", ""),
-                    incoming=element.findall(f"./{bpmn2prefix}incoming")[0].text,
+                    incoming=_first_text(f"./{bpmn2prefix}incoming"),
                 )
             case NodeType.CHOREOGRAPHY_TASK.value:
                 return ChoreographyTask(
                     self,
                     element.attrib["id"],
                     element.attrib.get("name", ""),
-                    incoming=element.findall(f"./{bpmn2prefix}incoming")[0].text,
-                    outgoing=element.findall(f"./{bpmn2prefix}outgoing")[0].text,
+                    incoming=_first_text(f"./{bpmn2prefix}incoming"),
+                    outgoing=_first_text(f"./{bpmn2prefix}outgoing"),
                     participants=[
                         element.text
                         for element in element.findall(f"./{bpmn2prefix}participantRef")

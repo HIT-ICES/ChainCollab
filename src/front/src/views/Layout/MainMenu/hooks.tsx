@@ -10,6 +10,10 @@ export const useOrgData = (): [OrgItemType[], () => void] => {
   useEffect(() => {
     let ignore = false;
     const fetchData = async () => {
+      if (!localStorage.getItem("token")) {
+        if (!ignore) setOrgList([]);
+        return;
+      }
       try {
         const res = await getOrgList();
         if (ignore) return
@@ -32,6 +36,10 @@ export const useConsortiaData = (orgId: string): [ConsortiumItemType[], () => vo
   useEffect(() => {
     let ignore = false;
     const fetchData = async (orgId: string) => {
+      if (!localStorage.getItem("token")) {
+        if (!ignore) setConsortiaList([]);
+        return;
+      }
       try {
         const res = await getConsortiumList(orgId);
         if (ignore) return [[], () => { }];
@@ -55,10 +63,16 @@ export const useEnvData = (consortiumId: string): [EnvItemType[], boolean, () =>
   const [envList, setEnvList] = useState<EnvItemType[]>([]);
   const [syncFlag, setSyncFlag] = useState<boolean>(false);
   const [ready, setReady] = useState<boolean>(false);
-  // console.log('useEnvData', consortiumId);
   useEffect(() => {
     let ignore = false;
     const fetchData = async (consortiumId: string) => {
+      if (!localStorage.getItem("token")) {
+        if (!ignore) {
+          setEnvList([]);
+          setReady(true);
+        }
+        return;
+      }
       setReady(false);
       try {
         const res = await getEnvironmentList(consortiumId);

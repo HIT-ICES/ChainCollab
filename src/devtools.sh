@@ -20,6 +20,16 @@ LOG_FILES = {
     "backend": RUNTIME_DIR / "backend.log",
     "front": RUNTIME_DIR / "front.log",
 }
+SERVICE_PORTS = {
+    "newTranslator": 9999,
+    "agent": 7001,
+    "backend": 8000,
+    "front": 3000,
+}
+SERVICE_START_ORDER = {
+    "core": ["newTranslator", "agent", "backend", "front"],
+    "research": ["newTranslator", "backend", "front"],
+}
 BACKEND_DIR = REPO_ROOT / "src" / "backend"
 DASHBOARD_DIR = REPO_ROOT / "src" / "dashboard"
 AGENT_DIR = REPO_ROOT / "src" / "agent" / "docker-rest-agent"
@@ -29,6 +39,34 @@ BACKEND_DEVTOOLS = REPO_ROOT / "src" / "backend" / "backend_devtools.sh"
 AGENT_DEVTOOLS = REPO_ROOT / "src" / "agent" / "agent_devtools.sh"
 NEW_TRANSLATOR_DEVTOOLS = REPO_ROOT / "src" / "newTranslator" / "newTranslator_devtools.sh"
 BPMN_DEVTOOLS = REPO_ROOT / "src" / "bpmn-chor-app" / "bpmn_devtools.sh"
+INSPECT_SRC = REPO_ROOT / "src" / "scripts" / "inspect_src.py"
+GOVERNANCE_CHECK = REPO_ROOT / "src" / "scripts" / "governance_check.py"
+SERVICE_DEFS = {
+    "newTranslator": {
+        "devtools": NEW_TRANSLATOR_DEVTOOLS,
+        "args": ["start"],
+        "port": 9999,
+        "env": None,
+    },
+    "agent": {
+        "devtools": AGENT_DEVTOOLS,
+        "args": ["start"],
+        "port": 7001,
+        "env": None,
+    },
+    "backend": {
+        "devtools": BACKEND_DEVTOOLS,
+        "args": ["start"],
+        "port": 8000,
+        "env": {"PYTHONUNBUFFERED": "1"},
+    },
+    "front": {
+        "devtools": FRONT_DEVTOOLS,
+        "args": ["start"],
+        "port": 3000,
+        "env": None,
+    },
+}
 PROXY_ENV_KEYS = (
     "http_proxy",
     "https_proxy",
@@ -168,9 +206,10 @@ def check_ports():
             sys.exit(1)
 
 
-def write_pid_file(pids: dict[str, int]):
+def write_pid_file(pids: dict[str, int], profile: str):
     ensure_runtime_dir()
     with PID_FILE.open("w", encoding="utf-8") as handle:
+        handle.write(f"# profile={profile}\n")
         for name, pid in pids.items():
             handle.write(f"{name} {pid}\n")
 
@@ -185,6 +224,12 @@ def archive_runtime_logs(tag: str):
             shutil.copy2(log_path, archive_dir / log_path.name)
     if PID_FILE.exists():
         shutil.copy2(PID_FILE, archive_dir / PID_FILE.name)
+    tasks_dir = RUNTIME_DIR / "tasks"
+    if tasks_dir.exists():
+        tasks_archive = archive_dir / "tasks"
+        tasks_archive.mkdir(parents=True, exist_ok=True)
+        for task_file in tasks_dir.glob("task-*.log"):
+            shutil.copy2(task_file, tasks_archive / task_file.name)
     print(f"[dev] archived logs -> {archive_dir}")
     prune_log_archives(keep=3)
 
@@ -398,10 +443,42 @@ def run_clean():
     clean_hosts()
 
 
-def start_stack(monitor: bool = True, *, debug: bool = False):
+def run_governance_check_internal(*, json_mode: bool = False) -> int:
+    if not GOVERNANCE_CHECK.exists():
+        print(f"[dev] governance script not found: {GOVERNANCE_CHECK}")
+        return 2
+    cmd = [sys.executable, str(GOVERNANCE_CHECK)]
+    if json_mode:
+        cmd.append("--json")
+    result = run_cmd(cmd, check=False)
+    return result.returncode
+
+
+def start_stack(
+    monitor: bool = True,
+    *,
+    debug: bool = False,
+    profile: str = "core",
+    skip_governance_check: bool = False,
+):
     failures: list[str] = []
     ensure_runtime_dir()
     pids: dict[str, int] = {}
+
+    profile_services = SERVICE_START_ORDER.get(profile)
+    if not profile_services:
+        print(f"[dev] Unknown profile: {profile}")
+        sys.exit(1)
+
+    if not skip_governance_check:
+        print("[dev] running governance-check before startup...")
+        governance_rc = run_governance_check_internal()
+        if governance_rc != 0:
+            print(
+                "[dev] governance-check failed. "
+                "Use '--skip-governance-check' if you need to bypass once."
+            )
+            sys.exit(governance_rc)
 
     def start_service(
         name: str,
@@ -439,19 +516,19 @@ def start_stack(monitor: bool = True, *, debug: bool = False):
         pids[name] = pid
 
     pipe_logs = monitor
-    start_service("newTranslator", NEW_TRANSLATOR_DEVTOOLS, ["start"], 9999, pipe_logs=pipe_logs)
-    start_service("agent", AGENT_DEVTOOLS, ["start"], 7001, pipe_logs=pipe_logs)
-    start_service(
-        "backend",
-        BACKEND_DEVTOOLS,
-        ["start"],
-        8000,
-        pipe_logs=pipe_logs,
-        env={"PYTHONUNBUFFERED": "1"},
-    )
-    start_service("front", FRONT_DEVTOOLS, ["start"], 3000, pipe_logs=pipe_logs)
+    print(f"[dev] startup profile: {profile}")
+    for service_name in profile_services:
+        spec = SERVICE_DEFS[service_name]
+        start_service(
+            service_name,
+            spec["devtools"],
+            spec["args"],
+            spec["port"],
+            pipe_logs=pipe_logs,
+            env=spec["env"],
+        )
 
-    write_pid_file(pids)
+    write_pid_file(pids, profile=profile)
     print(f"[dev] wrote PID file -> {PID_FILE}")
     if monitor:
         monitor_processes(pids)
@@ -506,10 +583,47 @@ def stop_stack():
         return
 
 
-def restart_stack():
+def show_status():
+    entries: dict[str, int] = {}
+    profile = "unknown"
+    if PID_FILE.exists():
+        for line in PID_FILE.read_text(encoding="utf-8").splitlines():
+            if line.startswith("# profile="):
+                profile = line.split("=", 1)[1].strip() or "unknown"
+                continue
+            parts = line.strip().split()
+            if len(parts) < 2:
+                continue
+            try:
+                entries[parts[0]] = int(parts[1])
+            except ValueError:
+                continue
+
+    print("Stack Status")
+    print("============")
+    print(f"profile: {profile}")
+    headers = ("service", "pid", "pid_alive", "port", "port_busy", "log")
+    print(f"{headers[0]:<14} {headers[1]:<8} {headers[2]:<10} {headers[3]:<6} {headers[4]:<10} {headers[5]}")
+    print(f"{'-'*14} {'-'*8} {'-'*10} {'-'*6} {'-'*10} {'-'*30}")
+    for name in ("newTranslator", "agent", "backend", "front"):
+        pid = entries.get(name)
+        pid_str = str(pid) if pid else "-"
+        alive = "yes" if (pid and pid_is_running(pid)) else "no"
+        port = SERVICE_PORTS[name]
+        port_busy = "yes" if not port_is_available(port) else "no"
+        log_path = LOG_FILES.get(name, RUNTIME_DIR / f"{name}.log")
+        print(f"{name:<14} {pid_str:<8} {alive:<10} {port:<6} {port_busy:<10} {log_path}")
+
+    tasks_dir = RUNTIME_DIR / "tasks"
+    task_count = len(list(tasks_dir.glob("task-*.log"))) if tasks_dir.exists() else 0
+    print(f"\nRuntime task logs: {task_count} ({tasks_dir})")
+    print(f"PID file: {'present' if PID_FILE.exists() else 'missing'} ({PID_FILE})")
+
+
+def restart_stack(profile: str = "core", skip_governance_check: bool = False):
     stop_stack()
     run_clean()
-    start_stack()
+    start_stack(profile=profile, skip_governance_check=skip_governance_check)
 
 
 def add_host_mapping(hosts: list[str]):
@@ -560,6 +674,22 @@ def clean_hosts():
     print(f"[dev] Cleaned {removed} host entries from /etc/hosts")
 
 
+def inspect_src(json_mode: bool, write_path: str):
+    if not INSPECT_SRC.exists():
+        print(f"[dev] inspect script not found: {INSPECT_SRC}")
+        sys.exit(1)
+    cmd = [sys.executable, str(INSPECT_SRC)]
+    if json_mode:
+        cmd.append("--json")
+    if write_path:
+        cmd.extend(["--write", write_path])
+    run_cmd(cmd, check=False)
+
+
+def governance_check(json_mode: bool):
+    return run_governance_check_internal(json_mode=json_mode)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="devtools.sh",
@@ -571,12 +701,16 @@ def build_parser() -> argparse.ArgumentParser:
         epilog=(
             "Examples:\n"
             "  devtools.sh clean\n"
-            "  devtools.sh up\n"
+            "  devtools.sh up --profile core\n"
+            "  devtools.sh up --profile research\n"
             "  devtools.sh down\n"
+            "  devtools.sh status\n"
             "  devtools.sh backend\n"
             "  devtools.sh front help\n"
             "  devtools.sh front dev -- --host 0.0.0.0\n"
             "  devtools.sh host cello.com org.com\n"
+            "  devtools.sh inspect-src --json\n"
+            "  devtools.sh governance-check\n"
         ),
     )
     sub = parser.add_subparsers(dest="command")
@@ -596,8 +730,31 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Enable startup waits for debugging.",
     )
+    up_parser.add_argument(
+        "--profile",
+        choices=sorted(SERVICE_START_ORDER.keys()),
+        default="core",
+        help="Startup profile. 'core' starts full stack; 'research' skips agent.",
+    )
+    up_parser.add_argument(
+        "--skip-governance-check",
+        action="store_true",
+        help="Skip pre-start governance validation once.",
+    )
     sub.add_parser("down", help="Stop stack using PIDs from runtime file.")
-    sub.add_parser("restart", help="Run down -> clean -> up.")
+    restart_parser = sub.add_parser("restart", help="Run down -> clean -> up.")
+    restart_parser.add_argument(
+        "--profile",
+        choices=sorted(SERVICE_START_ORDER.keys()),
+        default="core",
+        help="Startup profile used after restart.",
+    )
+    restart_parser.add_argument(
+        "--skip-governance-check",
+        action="store_true",
+        help="Skip pre-start governance validation once.",
+    )
+    sub.add_parser("status", help="Show process and port status for core stack.")
     front_parser = sub.add_parser("front", help="Proxy to front_devtools.sh.")
     front_parser.add_argument("extra", nargs=argparse.REMAINDER)
     agent_parser = sub.add_parser("agent", help="Proxy to agent_devtools.sh.")
@@ -618,6 +775,11 @@ def build_parser() -> argparse.ArgumentParser:
     new_translator_parser.add_argument("extra", nargs=argparse.REMAINDER)
     bpmn_parser = sub.add_parser("bpmn", help="Proxy to bpmn_devtools.sh.")
     bpmn_parser.add_argument("extra", nargs=argparse.REMAINDER)
+    inspect_parser = sub.add_parser("inspect-src", help="Inspect src module layout.")
+    inspect_parser.add_argument("--json", action="store_true", help="Print JSON format.")
+    inspect_parser.add_argument("--write", type=str, default="", help="Write JSON snapshot path.")
+    governance_parser = sub.add_parser("governance-check", help="Check src module manifest consistency.")
+    governance_parser.add_argument("--json", action="store_true", help="Print JSON format.")
     sub.add_parser("help", help="Show this help.")
 
     host_parser = sub.add_parser("host", help="Append hostnames to /etc/hosts.")
@@ -638,7 +800,7 @@ def main():
     dispatch = {
         "clean": run_clean,
         "down": stop_stack,
-        "restart": restart_stack,
+        "status": show_status,
     }
 
     passthrough = {
@@ -663,6 +825,17 @@ def main():
     if args.command == "help":
         parser.print_help()
         return 0
+    if args.command == "inspect-src":
+        inspect_src(args.json, args.write)
+        return 0
+    if args.command == "governance-check":
+        return governance_check(args.json)
+    if args.command == "restart":
+        restart_stack(
+            profile=args.profile,
+            skip_governance_check=args.skip_governance_check,
+        )
+        return 0
 
     if args.command in passthrough:
         script, default_args = passthrough[args.command]
@@ -673,7 +846,12 @@ def main():
         return 0
 
     if args.command == "up":
-        start_stack(monitor=not args.no_monitor, debug=args.debug or DEBUG_MODE)
+        start_stack(
+            monitor=not args.no_monitor,
+            debug=args.debug or DEBUG_MODE,
+            profile=args.profile,
+            skip_governance_check=args.skip_governance_check,
+        )
         return 0
 
     handler = dispatch.get(args.command)

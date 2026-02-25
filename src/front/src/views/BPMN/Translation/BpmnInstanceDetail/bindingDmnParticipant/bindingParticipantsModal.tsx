@@ -66,7 +66,7 @@ const AttrTable = ({ dataSource, _setShowBingParticipantValue, clickedActionInde
       render: (_, record) =>
         dataSource.length >= 1 ? (
           <Button
-            type="danger"
+            danger
             onClick={() => handleDeleteRow(record.key)}
           >
             Delete
@@ -340,4 +340,3 @@ export const BindingParticipant = ({ participants, showBindingParticipantMap, se
 
   );
 };
-

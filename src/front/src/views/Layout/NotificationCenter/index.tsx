@@ -17,6 +17,9 @@ const NotificationCenter: React.FC = () => {
 
   useEffect(() => {
     const task = setInterval(() => {
+      if (!localStorage.getItem("token")) {
+        return;
+      }
       setSync();
     }, 5000);
     return () => {

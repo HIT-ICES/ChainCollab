@@ -1,0 +1,33 @@
+type = "directrequest"
+schemaVersion = 1
+name = "MainRouter compute task"
+externalJobID = "<COMPUTE_TASK_EXTERNAL_JOB_ID>"
+evmChainID = 3456
+contractAddress = "<YOUR_OPERATOR_CONTRACT_ADDRESS>"
+
+observationSource = """
+    decode_log    [type="ethabidecodelog"
+                   abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                   data="$(jobRun.logData)"
+                   topics="$(jobRun.logTopics)"]
+
+    decode_cbor   [type="cborparse" data="$(decode_log.data)"]
+
+    call_compute  [type="http"
+                   method="POST"
+                   url="$(decode_cbor.endpoint)"
+                   requestData="{\\\"script\\\": $(decode_cbor.script), \\\"inputData\\\": $(decode_cbor.inputData)}"
+                   contentType="application/json"
+                   allowUnrestrictedNetworkAccess="true"]
+
+    encode_tx     [type="ethabiencode"
+                   abi="commitComputeFromRaw(bytes32 requestId, string raw)"
+                   data="{\\\"requestId\\\": $(decode_log.requestId), \\\"raw\\\": $(call_compute)}"]
+
+    submit_tx     [type="ethtx"
+                   evmChainID="3456"
+                   to="<COMPUTE_TASK_ADAPTER_CONTRACT_ADDRESS>"
+                   data="$(encode_tx)"]
+
+    decode_log -> decode_cbor -> call_compute -> encode_tx -> submit_tx
+"""

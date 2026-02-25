@@ -1,4 +1,3 @@
-import api from '@/api/apiConfig';
 import { useState, useEffect } from 'react';
 import { useQuery } from 'react-query';
 
@@ -74,8 +73,6 @@ export const useAvailableMembers = (envId: string): [
     }, [envId, syncFlag])
     return [members, () => setSyncFlag(!syncFlag)]
 }
-
-import { retrieveBPMN } from '@/api/externalResource'
 
 export const useParticipantsData = (bpmnId: string): [
     any[], () => void
@@ -177,7 +174,6 @@ export const useFireflyData = (
                 if (ignore) return
                 setFirefly(finalData);
             } catch (e) {
-                console.log(e);
             }
         }
         fetchData();

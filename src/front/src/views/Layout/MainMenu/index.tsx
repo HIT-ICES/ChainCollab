@@ -46,6 +46,9 @@ const MainMenu: React.FC = () => {
 
   useEffect(() => {
     const task = setInterval(() => {
+      if (!localStorage.getItem("token")) {
+        return;
+      }
       syncOrgList();
       syncConsortiaList();
       syncEnvList();
@@ -90,8 +93,6 @@ const MainMenu: React.FC = () => {
       dispatch(consumeEnvSelectRequest());
     }
   }, [orgSelectOpenRequest, consortiumSelectOpenRequest, envSelectOpenRequest, navigateTo, currentOrgId, currentConsortiumId, dispatch])
-
-  console.log(envList)
 
   // 将 URL 中的查询参数回填到 Redux
   useEffect(() => {
@@ -261,6 +262,11 @@ const MainMenu: React.FC = () => {
           >
             Node
           </Menu.Item>
+          <Menu.Item
+            key={`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/ethereum/chainlink-jobs`}
+          >
+            Chainlink Jobs
+          </Menu.Item>
         </SubMenu></>
       )}
         </>)}
@@ -307,6 +313,8 @@ const MainMenu: React.FC = () => {
       <Menu.Item key="/bpmn/drawing">DrawingBpmn</Menu.Item>
       <Menu.Item key="/bpmn/dmn">Dmns</Menu.Item>
       <Menu.Item key="/bpmn/translation">Deploy</Menu.Item>
+      <Menu.Item key="/bpmn/execution">Execution</Menu.Item>
+      <Menu.Item key="/bpmn/execution?mode=mock">Execution(Mock)</Menu.Item>
     </SubMenu>
   );
 

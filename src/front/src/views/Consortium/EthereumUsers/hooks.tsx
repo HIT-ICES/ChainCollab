@@ -28,7 +28,9 @@ export const useCreateEthereumIdentity = () => {
         ({ ethEnvironmentId, membershipId, name }) => {
             return createEthereumIdentity(ethEnvironmentId, {
                 membership_id: membershipId,
-                name
+                name,
+                address: "",
+                private_key: "",
             });
         }
     );

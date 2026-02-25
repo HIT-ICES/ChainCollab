@@ -1,0 +1,34 @@
+type = "directrequest"
+schemaVersion = 1
+name = "DMN directrequest -> Cache"
+externalJobID = "<DMN_DIRECTREQUEST_EXTERNAL_JOB_ID>"
+evmChainID = 3456
+contractAddress = "<YOUR_OPERATOR_CONTRACT_ADDRESS>"
+
+observationSource = """
+    decode_log   [type="ethabidecodelog"
+                  abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                  data="$(jobRun.logData)"
+                  topics="$(jobRun.logTopics)"]
+
+    decode_cbor  [type="cborparse" data="$(decode_log.data)"]
+    parse_input  [type="jsonparse" data="$(decode_cbor.inputData)"]
+    call_cache   [type="http" method=POST url="<DMN_CACHE_URL>/api/dmn/calc"
+                  requestData="{\\\"requestId\\\": $(decode_log.requestId), \\\"dmnContent\\\": $(decode_cbor.dmnContent), \\\"decisionId\\\": $(decode_cbor.decisionId), \\\"inputData\\\": $(parse_input)}"
+                  contentType="application/json"
+                  allowUnrestrictedNetworkAccess="true"]
+
+    parse_ok     [type="jsonparse" path="ok" data="$(call_cache)"]
+    parse_raw    [type="jsonparse" path="raw" data="$(call_cache)"]
+
+    encode_tx    [type="ethabiencode"
+                  abi="commitBaselineFromRaw(bytes32 requestId, string raw)"
+                  data="{\\\"requestId\\\": $(decode_log.requestId), \\\"raw\\\": $(parse_raw)}"]
+
+    submit_tx    [type="ethtx"
+                  evmChainID="3456"
+                  to="<DMN_REQUEST_CONTRACT_ADDRESS>"
+                  data="$(encode_tx)"]
+
+    decode_log -> decode_cbor -> parse_input -> call_cache -> parse_ok -> parse_raw -> encode_tx -> submit_tx
+"""

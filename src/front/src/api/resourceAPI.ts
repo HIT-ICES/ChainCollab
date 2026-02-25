@@ -1,5 +1,21 @@
-import { env } from 'process';
 import api from './apiConfig';
+
+const buildApiError = (error: any, fallbackMessage: string) => {
+    const message =
+        error?.response?.data?.message ||
+        error?.response?.data?.detail ||
+        error?.message ||
+        fallbackMessage;
+    const wrapped: any = new Error(message);
+    wrapped.status = error?.response?.status;
+    wrapped.data = error?.response?.data;
+    wrapped.raw = error;
+    return wrapped;
+};
+
+const throwApiError = (error: any, fallbackMessage: string): never => {
+    throw buildApiError(error, fallbackMessage);
+};
 
 // Agent
 
@@ -50,7 +66,6 @@ export const getResourceSets = async (envId: string, orgId: string = null, membe
             }
         })
     } catch (error) {
-        console.log(error);
         return [];
     }
 
@@ -75,22 +90,30 @@ export const InitEnv = async (envId: string) => {
         const response = await api.post(`/environments/${envId}/init`)
         return response.data;
     } catch (error) {
-        return error;
+        throwApiError(error, "Initialize Fabric environment failed");
     }
 }
 
 export const JoinEnv = async (envId: string, membershipId: string) => {
-    const response = await api.post(`/environments/${envId}/join`, {
-        membership_id: membershipId
-    })
-    return response.data;
+    try {
+        const response = await api.post(`/environments/${envId}/join`, {
+            membership_id: membershipId
+        })
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Join Fabric environment failed");
+    }
 }
 
 export const JoinEthEnv = async (envId: string, membershipId: string) => {
-    const response = await api.post(`/eth-environments/${envId}/join`, {
-        membership_id: membershipId
-    })
-    return response.data;
+    try {
+        const response = await api.post(`/eth-environments/${envId}/join`, {
+            membership_id: membershipId
+        })
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Join Ethereum environment failed");
+    }
 }
 
 export const StartEnv = async (envId: string) => {
@@ -98,7 +121,7 @@ export const StartEnv = async (envId: string) => {
         const response = await api.post(`/environments/${envId}/start`)
         return response.data;
     } catch (error) {
-        return error;
+        throwApiError(error, "Start Fabric environment failed");
     }
 }
 
@@ -110,7 +133,7 @@ export const ActivateEnv = async (envId: string, orgId: string) => {
             })
         return response.data;
     } catch (error) {
-        return error;
+        throwApiError(error, "Activate Fabric environment failed");
     }
 }
 
@@ -121,7 +144,7 @@ export const InstallFirefly = async (orgId: string, envId: string) => {
         })
         return response.data;
     } catch (error) {
-        return error;
+        throwApiError(error, "Install Firefly failed");
     }
 }
 
@@ -132,7 +155,7 @@ export const InstallOracle = async (orgId: string, envId: string) => {
         })
         return response.data;
     } catch (error) {
-        return error;
+        throwApiError(error, "Install Oracle failed");
     }
 }
 
@@ -143,7 +166,263 @@ export const InstallDmnEngine = async (orgId: string, envId: string) => {
         })
         return response.data;
     } catch (error) {
-        return error;
+        throwApiError(error, "Install DMN failed");
+    }
+}
+
+export const InstallChainlinkForEthEnv = async (envId: string, mode: string = "lite") => {
+    try {
+        const response = await api.post(`/eth-environments/${envId}/chainlink/install`, {
+            mode
+        })
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Install Chainlink failed");
+    }
+}
+
+export const getTask = async (taskId: string) => {
+    try {
+        const response = await api.get(`/tasks/${taskId}`)
+        return response.data?.data ?? response.data
+    } catch (error) {
+        throwApiError(error, "Get task failed");
+    }
+}
+
+export const getTasks = async (targetType: string, targetId: string, limit: number = 20) => {
+    try {
+        const response = await api.get(`/tasks`, {
+            params: { target_type: targetType, target_id: targetId, limit }
+        })
+        return response.data?.data ?? response.data
+    } catch (error) {
+        throwApiError(error, "Get tasks failed");
+    }
+}
+
+export const getChainlinkDetailForEthEnv = async (envId: string, sync: boolean = false) => {
+    try {
+        const response = await api.get(`/eth-environments/${envId}/chainlink`, {
+            params: sync ? { sync: 1 } : undefined,
+        })
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Get Chainlink detail failed");
+    }
+}
+
+export const syncChainlinkForEthEnv = async (envId: string, includeJobs: boolean = true) => {
+    try {
+        const response = await api.post(`/eth-environments/${envId}/chainlink/sync`, {
+            include_jobs: includeJobs,
+        })
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Sync Chainlink cluster failed");
+    }
+}
+
+export const getChainlinkJobsForEthEnv = async (envId: string, node?: string) => {
+    try {
+        const response = await api.get(`/eth-environments/${envId}/chainlink-jobs`, {
+            params: node ? { node } : undefined
+        })
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Get Chainlink jobs failed");
+    }
+}
+
+export const createChainlinkJobForEthEnv = async (envId: string, payload: any) => {
+    try {
+        const response = await api.post(`/eth-environments/${envId}/chainlink-jobs`, payload)
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Create Chainlink job failed");
+    }
+}
+
+export const createChainlinkPresetJobForEthEnv = async (envId: string, payload: any) => {
+    try {
+        const response = await api.post(`/eth-environments/${envId}/chainlink/create-job`, payload)
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Create preset Chainlink job failed");
+    }
+}
+
+export const getChainlinkJobForEthEnv = async (envId: string, jobId: string, node: string) => {
+    try {
+        const response = await api.get(`/eth-environments/${envId}/chainlink-jobs/${jobId}`, {
+            params: { node }
+        })
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Get Chainlink job failed");
+    }
+}
+
+export const updateChainlinkJobForEthEnv = async (envId: string, jobId: string, payload: any) => {
+    try {
+        const response = await api.patch(`/eth-environments/${envId}/chainlink-jobs/${jobId}`, payload)
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Update Chainlink job failed");
+    }
+}
+
+export const deleteChainlinkJobForEthEnv = async (envId: string, jobId: string, node: string) => {
+    try {
+        const response = await api.delete(`/eth-environments/${envId}/chainlink-jobs/${jobId}`, {
+            params: { node }
+        })
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Delete Chainlink job failed");
+    }
+}
+
+export const getEthAccountCheck = async (envId: string) => {
+    try {
+        const response = await api.get(`/eth-environments/${envId}/account-check`)
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Get Ethereum account check failed");
+    }
+}
+
+export const getDmnContractDetailForEthEnv = async (envId: string, includeAbi: boolean = false) => {
+    try {
+        const response = await api.get(`/eth-environments/${envId}/dmn-contract`, {
+            params: includeAbi ? { include_abi: 1 } : undefined
+        })
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Get DMN contract detail failed");
+    }
+}
+
+export const registerDmnContractToFireflyForEthEnv = async (envId: string) => {
+    try {
+        const response = await api.post(`/eth-environments/${envId}/dmn-contract/register-firefly`)
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Register DMN contract to Firefly failed");
+    }
+}
+
+export const callDmnContractForEthEnv = async (envId: string, payload: any) => {
+    try {
+        const response = await api.post(`/eth-environments/${envId}/dmn-contract/call`, payload)
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Call DMN contract failed");
+    }
+}
+
+export const getDataContractDetailForEthEnv = async (envId: string, includeAbi: boolean = false) => {
+    try {
+        const response = await api.get(`/eth-environments/${envId}/data-contract`, {
+            params: includeAbi ? { include_abi: 1 } : undefined
+        })
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Get data contract detail failed");
+    }
+}
+
+export const setupDataContractForEthEnv = async (envId: string) => {
+    try {
+        const response = await api.post(`/eth-environments/${envId}/data-contract/setup`)
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Setup data contract failed");
+    }
+}
+
+export const registerDataContractToFireflyForEthEnv = async (envId: string) => {
+    try {
+        const response = await api.post(`/eth-environments/${envId}/data-contract/register-firefly`)
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Register data contract to Firefly failed");
+    }
+}
+
+export const getComputeContractDetailForEthEnv = async (envId: string, includeAbi: boolean = false) => {
+    try {
+        const response = await api.get(`/eth-environments/${envId}/compute-contract`, {
+            params: includeAbi ? { include_abi: 1 } : undefined
+        })
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Get compute contract detail failed");
+    }
+}
+
+export const setupComputeContractForEthEnv = async (envId: string) => {
+    try {
+        const response = await api.post(`/eth-environments/${envId}/compute-contract/setup`)
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Setup compute contract failed");
+    }
+}
+
+export const registerComputeContractToFireflyForEthEnv = async (envId: string) => {
+    try {
+        const response = await api.post(`/eth-environments/${envId}/compute-contract/register-firefly`)
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Register compute contract to Firefly failed");
+    }
+}
+
+export const getRelayerContractDetailForEthEnv = async (envId: string, includeAbi: boolean = false) => {
+    try {
+        const response = await api.get(`/eth-environments/${envId}/relayer-contract`, {
+            params: includeAbi ? { include_abi: 1 } : undefined
+        })
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Get relayer contract detail failed");
+    }
+}
+
+export const setupRelayerContractForEthEnv = async (envId: string) => {
+    try {
+        const response = await api.post(`/eth-environments/${envId}/relayer-contract/setup`)
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Setup relayer contract failed");
+    }
+}
+
+export const registerRelayerContractToFireflyForEthEnv = async (envId: string) => {
+    try {
+        const response = await api.post(`/eth-environments/${envId}/relayer-contract/register-firefly`)
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Register relayer contract to Firefly failed");
+    }
+}
+
+export const getRelayerNodeStatusForEthEnv = async (envId: string) => {
+    try {
+        const response = await api.get(`/eth-environments/${envId}/relayer-node`)
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Get relayer node status failed");
+    }
+}
+
+export const controlRelayerNodeForEthEnv = async (envId: string, action: "start" | "stop") => {
+    try {
+        const response = await api.post(`/eth-environments/${envId}/relayer-node/${action}`)
+        return response.data;
+    } catch (error) {
+        throwApiError(error, `Relayer node ${action} failed`);
     }
 }
 
@@ -152,15 +431,16 @@ export const requestOracleFFI = async () => {
         const response = await api.get(`/environments/requestOracleFFI`)
         return response.data;
     } catch (error) {
-        return error;
+        throwApiError(error, "Get Oracle FFI failed");
     }
 }
 
 export const StartFireflyForEnv = async (envId: string) => {
     try {
         const response = await api.post(`/environments/${envId}/start_firefly`)
+        return response.data;
     } catch (error) {
-        return error;
+        throwApiError(error, "Start Firefly failed");
     }
 }
 
@@ -217,7 +497,6 @@ export const getChainCodeList = async (envId: string) => {
             }
         })
     } catch (error) {
-        console.log(error)
         return {}
     }
 }
@@ -229,7 +508,7 @@ export const InitEthEnv = async (envId: string) => {
         const response = await api.post(`/eth-environments/${envId}/init`)
         return response.data;
     } catch (error) {
-        return error;
+        throwApiError(error, "Initialize Ethereum environment failed");
     }
 }
 
@@ -238,7 +517,7 @@ export const StartEthEnv = async (envId: string) => {
         const response = await api.post(`/eth-environments/${envId}/start`)
         return response.data;
     } catch (error) {
-        return error;
+        throwApiError(error, "Start Ethereum environment failed");
     }
 }
 
@@ -247,7 +526,7 @@ export const ActivateEthEnv = async (envId: string) => {
         const response = await api.post(`/eth-environments/${envId}/activate`)
         return response.data;
     } catch (error) {
-        return error;
+        throwApiError(error, "Activate Ethereum environment failed");
     }
 }
 
@@ -257,7 +536,7 @@ export const InitFireflyForEthEnv = async (envId: string) => {
         const response = await api.post(`/eth-environments/${envId}/fireflys/init_eth`)
         return response.data;
     } catch (error) {
-        return error;
+        throwApiError(error, "Initialize Ethereum Firefly failed");
     }
 }
 
@@ -266,7 +545,7 @@ export const StartFireflyForEthEnv = async (envId: string) => {
         const response = await api.post(`/eth-environments/${envId}/fireflys/start_eth`)
         return response.data;
     } catch (error) {
-        return error;
+        throwApiError(error, "Start Ethereum Firefly failed");
     }
 }
 
@@ -275,7 +554,7 @@ export const InstallIdentityContract = async (envId: string) => {
         const response = await api.post(`/eth-environments/${envId}/identity-contract/install`)
         return response.data;
     } catch (error) {
-        return error;
+        throwApiError(error, "Install identity contract failed");
     }
 }
 
@@ -289,7 +568,7 @@ export const getIdentityContractDetail = async (envId: string, includeAbi: boole
         )
         return response.data;
     } catch (error) {
-        return error;
+        throwApiError(error, "Get identity contract detail failed");
     }
 }
 
@@ -298,7 +577,7 @@ export const redeployIdentityContract = async (envId: string) => {
         const response = await api.post(`/eth-environments/${envId}/identity-contract/redeploy`)
         return response.data;
     } catch (error) {
-        return error;
+        throwApiError(error, "Redeploy identity contract failed");
     }
 }
 
@@ -324,7 +603,6 @@ export const getPeerList = async (resId: string) => {
                 }
             })
     } catch (error) {
-        console.log(error);
     }
 }
 
@@ -347,7 +625,6 @@ export const getNodeList = async (resId: string, type?: string) => {
             createdAt: item.created_at,
         }))
     } catch (error) {
-        console.log(error);
         return [];
     }
 }
@@ -390,7 +667,6 @@ export const getChannelList = async (envId: string) => {
             }
         })
     } catch (error) {
-        console.log(error);
         return [];
     }
 }
@@ -490,7 +766,6 @@ export const getFireflyList = async (envId: string, orgId: string, membershipId:
             }
         })
     } catch (error) {
-        console.log(error);
         return [];
     }
 }
@@ -511,7 +786,6 @@ export const getFireflyDetail = async (envId: string, fireflyId: string) => {
             membershipId: item.membership_id,
         }
     } catch (error) {
-        console.log(error);
         return {};
     }
 }

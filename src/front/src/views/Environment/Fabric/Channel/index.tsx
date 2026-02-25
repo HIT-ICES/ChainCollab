@@ -136,7 +136,6 @@ const Channel: React.FC = () => {
 
   // 处理提交表单
   const handleAddFormSubmit = (values) => {
-    console.log(values);
     const newChannel: DataType = {
       key: `new_${data.length + 1}`,
       name: values.name,
@@ -210,7 +209,6 @@ const Channel: React.FC = () => {
   // Optional: Function to handle button click
   const handleAddChaincode = () => {
     // Implement action on button click
-    console.log("Add Chaincode clicked");
   };
 
   return (

@@ -8,6 +8,14 @@ export const useOrgInvitionData = (orgId: string): [invitationMsgType[], () => v
     useEffect(() => {
         let ignore = false;
         const fetchData = async (orgId: string) => {
+            if (!localStorage.getItem("token")) {
+                if (!ignore) setInvitations([]);
+                return;
+            }
+            if (!orgId) {
+                if (!ignore) setInvitations([]);
+                return;
+            }
             try {
                 const res = await getOrgInvitationList(orgId);
                 if (ignore) return;
@@ -27,8 +35,12 @@ import { useQuery, useMutation } from 'react-query'
 import { getUserInvitationList } from '@/api/platformAPI'
 
 export const useUserInvitationList = () => {
+    const hasToken = Boolean(localStorage.getItem("token"));
     const { data: invitations = [], isSuccess, isLoading, isError, refetch } = useQuery(['userInvitationData'], async () => {
         return await getUserInvitationList()
+    }, {
+        enabled: hasToken,
+        retry: false,
     })
     return [invitations, {
         isSuccess, isLoading, isError

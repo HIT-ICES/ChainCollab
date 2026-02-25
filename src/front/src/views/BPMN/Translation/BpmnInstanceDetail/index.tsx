@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { Card, Row, Col, Button, Typography, Steps, Modal, TableProps, Table, Select, Input, Tag } from "antd"
 import { useLocation, useNavigate } from "react-router-dom";
 import { BindingModal } from "./bindingModel"
-import { retrieveBPMN, packageBPMN, updateBPMNInstanceStatus, updateBPMNInstanceFireflyUrl } from "@/api/externalResource"
+import { retrieveBPMN, packageBpmnToInstance, updateBPMNInstanceStatus, updateBPMNInstanceFireflyUrl } from "@/api/externalResource"
 import { generateChaincode } from "@/api/translator"
 import { useAvailableMembers } from "./hooks"
 import axios from "axios"
@@ -97,6 +97,7 @@ const BPMNInstanceOverview = () => {
 
 
     const [instance, syncInstance] = useBPMNIntanceDetailData(bpmnInstanceId)
+    const fireflyApiBaseUrl = (import.meta.env.VITE_FIREFLY_URL as string) || `${current_ip}:5000`
     const status = instance.status;
     const currentNumber = ((status: string) => {
         switch (status) {
@@ -126,7 +127,7 @@ const BPMNInstanceOverview = () => {
     const ModifyModal = () => {
 
         const onModify = async () => {
-            await packageBPMN(chainCodeContentForModify, ffiContentForModify, bpmnInstanceId, currentOrgId);
+            await packageBpmnToInstance(chainCodeContentForModify, ffiContentForModify, bpmnInstanceId, currentOrgId);
             syncInstance()
             setButtonLoading(false);
         }
@@ -197,7 +198,6 @@ const BPMNInstanceOverview = () => {
             // syncInstance()
             // setButtonLoading(false);
         } catch (e) {
-            console.log(e);
         }
     }
 
@@ -219,7 +219,6 @@ const BPMNInstanceOverview = () => {
 
         const zip = new JSZip();
         zip.file("records.csv", csvContent);
-        console.log(record)
         zip.generateAsync({ type: "blob" }).then((content) => {
             var a = document.createElement('a');
             document.body.appendChild(a);
@@ -244,7 +243,7 @@ const BPMNInstanceOverview = () => {
             const parsedFFIContent = JSON.parse(ffiContent);
             const chaincodeIdPrefix = instance.chaincode_name + instance.chaincode_id.substring(0, 6);
             parsedFFIContent.name = chaincodeIdPrefix
-            const response = await axios.post(`${current_ip}:5000/api/v1/namespaces/default/contracts/interfaces`,
+            const response = await axios.post(`${fireflyApiBaseUrl}/api/v1/namespaces/default/contracts/interfaces`,
                 parsedFFIContent)
             const interfaceid = response.data.id;
             const location = {
@@ -259,18 +258,17 @@ const BPMNInstanceOverview = () => {
                 location: location
             };
             await new Promise(resolve => setTimeout(resolve, 4000));
-            const response2 = await axios.post(`${current_ip}:5000/api/v1/namespaces/default/apis`,
+            const response2 = await axios.post(`${fireflyApiBaseUrl}/api/v1/namespaces/default/apis`,
                 jsonData)
             const fireflyUrl = response2.data.urls.ui
             await new Promise(resolve => setTimeout(resolve, 4000));
-            const fireflyUrlForRegister = `${current_ip}:5000`
+            const fireflyUrlForRegister = fireflyApiBaseUrl
             await initLedger(fireflyUrlForRegister, chaincodeIdPrefix);
             await new Promise(resolve => setTimeout(resolve, 4000));
-            const messages = await getAllMessages(fireflyUrlForRegister, chaincodeIdPrefix);
+            const messages = await getAllMessages(fireflyUrlForRegister, chaincodeIdPrefix, bpmnInstanceId);
 
             const all_requests = messages ? messages.map(
                 (msg) => {
-                    console.log()
                     const data1 = {
                         "$id": "https://example.com/widget.schema.json",
                         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -285,7 +283,6 @@ const BPMNInstanceOverview = () => {
                             "required": data2["required"],
                         }
                     } catch (e) {
-                        console.log(e)
                         return;
                     }
 

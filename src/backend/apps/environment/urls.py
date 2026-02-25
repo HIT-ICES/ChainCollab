@@ -9,6 +9,7 @@ from apps.environment.routes.environment.views import (
     EthEnvironmentViewSet,
     EthEnvironmentOperateViewSet,
 )
+from apps.environment.routes.chainlink_job.views import ChainlinkJobViewSet
 from apps.environment.routes.resource_set.views import ResourceSetViewSet
 from apps.environment.routes.task.views import TaskViewSet
 
@@ -30,6 +31,11 @@ router.register(
     "eth-environments",
     EthEnvironmentOperateViewSet,
     basename="eth-environment-operate",
+)
+router.register(
+    "eth-environments/(?P<environment_id>[^/.]+)/chainlink-jobs",
+    ChainlinkJobViewSet,
+    basename="eth-environment-chainlink-jobs",
 )
 router.register(
     "environments/(?P<environment_id>[^/.]+)/resource_sets",

@@ -100,9 +100,7 @@ const Firefly: React.FC = () => {
       </Card.Grid>
       <Card.Grid style={gridDeleteStyle}>
         <DelFireflyNode onDelete={() => {
-          console.log(
-            "Delete Firefly Node"
-          )
+          return;
         }} />
       </Card.Grid>
     </Card>

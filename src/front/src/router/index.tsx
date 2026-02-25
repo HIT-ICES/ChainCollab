@@ -39,6 +39,7 @@ const MembershipDetailInEnv = lazy(() => import("@/views/Environment/Dashboard/O
 // const BPMNInstanceOverview = lazy(() => import("@/views/BPMN/Translation/BpmnInstanceDetail"));
 const BPMNOverview = lazy(() => import("@/views/BPMN/Translation/BpmnDetail"));
 const DmnOverview = lazy(() => import("@/views/BPMN/Dmn"));
+const ChainlinkJobs = lazy(() => import("@/views/Environment/Ethereum/ChainlinkJobs"));
 
 const withLoadingComponent = (Comp: JSX.Element) => (
   <React.Suspense fallback={<SkeletonLoading />}>{Comp}</React.Suspense>
@@ -245,6 +246,13 @@ const routes: routesType[] = [
                     element: withLoadingComponent(<FireflyDetail />),
                     meta: {
                       title: "FireflyDetail",
+                    },
+                  },
+                  {
+                    path: "/orgs/:org_id/consortia/:consortium_id/envs/:env_id/ethereum/chainlink-jobs",
+                    element: withLoadingComponent(<ChainlinkJobs />),
+                    meta: {
+                      title: "ChainlinkJobs",
                     },
                   },
                 ],

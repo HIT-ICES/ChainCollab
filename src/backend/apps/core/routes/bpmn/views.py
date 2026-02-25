@@ -1,10 +1,12 @@
 import logging
 import os
 import re
+from pathlib import Path
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.http import HttpResponse
+from django.conf import settings
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -24,13 +26,157 @@ from apps.core.models import BPMN, DMN, BPMNInstance
 from apps.fabric.models import ChainCode
 from apps.ethereum.models import EthereumContract
 from apps.environment.models import Environment, EthEnvironment
-from apps.core.models import LoleidoOrganization, Consortium
+from apps.core.models import LoleidoOrganization, Consortium, Membership
 from zipfile import ZipFile
 import json
+from xml.etree import ElementTree as ET
 
 # from api.routes.bpmn  import BpmnCreateBody
 from rest_framework import viewsets, status
 from requests import get, post
+
+
+logger = logging.getLogger(__name__)
+
+
+def _seed_bpmn_dir() -> Path:
+    configured = os.environ.get("BPMN_INITIAL_DIR", "").strip()
+    if configured:
+        return Path(configured)
+    # default: /home/.../src/deployment/initial-bpmn
+    return Path(settings.ROOT_DIR).parent / "deployment" / "initial-bpmn"
+
+
+def _extract_participants_from_bpmn(bpmn_content: str):
+    if not bpmn_content:
+        return []
+    try:
+        root = ET.fromstring(bpmn_content)
+    except ET.ParseError:
+        return []
+
+    participants = []
+    for node in root.iter():
+        if node.tag.endswith("participant"):
+            participant_id = node.attrib.get("id")
+            participant_name = node.attrib.get("name", participant_id or "")
+            if participant_id:
+                participants.append(
+                    {
+                        "id": participant_id,
+                        "name": participant_name,
+                    }
+                )
+    return participants
+
+
+def _default_svg_content(title: str) -> str:
+    safe_title = title or "BPMN"
+    return (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="960" height="140" viewBox="0 0 960 140">'
+        '<rect x="2" y="2" width="956" height="136" rx="8" ry="8" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>'
+        f'<text x="24" y="78" fill="#334155" font-size="24" font-family="Arial, sans-serif">{safe_title}</text>'
+        "</svg>"
+    )
+
+
+def _pick_seed_owner(consortium: Consortium, request_user):
+    if getattr(request_user, "is_authenticated", False):
+        membership = Membership.objects.filter(
+            consortium=consortium,
+            loleido_organization__members=request_user,
+        ).first()
+        if membership:
+            return membership.loleido_organization
+
+    membership = Membership.objects.filter(consortium=consortium).first()
+    if membership:
+        return membership.loleido_organization
+    return LoleidoOrganization.objects.first()
+
+
+def _autoload_initial_bpmns(consortium_id: str, request_user):
+    seed_dir = _seed_bpmn_dir()
+    if not seed_dir.exists() or not seed_dir.is_dir():
+        return {
+            "seed_dir": str(seed_dir),
+            "imported": 0,
+            "skipped": 0,
+            "failed": 0,
+            "total_files": 0,
+            "message": "seed directory not found",
+        }
+
+    try:
+        consortium = Consortium.objects.get(id=consortium_id)
+    except Consortium.DoesNotExist:
+        return {
+            "seed_dir": str(seed_dir),
+            "imported": 0,
+            "skipped": 0,
+            "failed": 0,
+            "total_files": 0,
+            "message": f"consortium {consortium_id} not found",
+        }
+
+    organization = _pick_seed_owner(consortium, request_user)
+    if not organization:
+        logger.warning("Skip initial BPMN load: no organization available for consortium=%s", consortium_id)
+        return {
+            "seed_dir": str(seed_dir),
+            "imported": 0,
+            "skipped": 0,
+            "failed": 0,
+            "total_files": 0,
+            "message": "no organization available",
+        }
+
+    imported = 0
+    skipped = 0
+    failed = 0
+    bpmn_files = sorted(seed_dir.glob("*.bpmn"))
+    for bpmn_path in bpmn_files:
+        name = bpmn_path.name
+        if BPMN.objects.filter(consortium=consortium, name=name).exists():
+            skipped += 1
+            continue
+        try:
+            bpmn_content = bpmn_path.read_text(encoding="utf-8")
+        except Exception:
+            logger.exception("Failed to read initial BPMN file: %s", bpmn_path)
+            failed += 1
+            continue
+        svg_path = bpmn_path.with_suffix(".svg")
+        if svg_path.exists():
+            try:
+                svg_content = svg_path.read_text(encoding="utf-8")
+            except Exception:
+                logger.exception("Failed to read SVG sidecar: %s", svg_path)
+                svg_content = _default_svg_content(name)
+        else:
+            svg_content = _default_svg_content(name)
+
+        participants = _extract_participants_from_bpmn(bpmn_content)
+        BPMN.objects.create(
+            organization=organization,
+            consortium=consortium,
+            name=name,
+            bpmnContent=bpmn_content,
+            svgContent=svg_content,
+            participants=json.dumps(participants),
+            status="Initiated",
+        )
+        imported += 1
+
+    if imported:
+        logger.info("Auto loaded %s initial BPMN files for consortium=%s from %s", imported, consortium_id, seed_dir)
+    return {
+        "seed_dir": str(seed_dir),
+        "imported": imported,
+        "skipped": skipped,
+        "failed": failed,
+        "total_files": len(bpmn_files),
+    }
 
 
 class BPMNViewsSet(viewsets.ModelViewSet):
@@ -74,10 +220,31 @@ class BPMNViewsSet(viewsets.ModelViewSet):
     @action(methods=["get"], detail=False, url_path="_list")
     def list_all(self, request, pk=None, *args, **kwargs):
         try:
-            bpmns = BPMN.objects.all()
+            consortium_id = request.parser_context["kwargs"].get("consortium_id")
+            if consortium_id:
+                bpmns = BPMN.objects.filter(consortium_id=consortium_id)
+            else:
+                bpmns = BPMN.objects.all()
             serializer = BpmnListSerializer(bpmns, many=True)
             return Response(data=ok(serializer.data), status=status.HTTP_200_OK)
 
+        except Exception as e:
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=["post"], detail=False, url_path="import-initial")
+    def import_initial(self, request, pk=None, *args, **kwargs):
+        try:
+            consortium_id = request.parser_context["kwargs"].get("consortium_id")
+            if not consortium_id:
+                return Response(
+                    data=err("consortium_id is required"),
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            result = _autoload_initial_bpmns(consortium_id, request.user)
+            return Response(
+                data=ok(result),
+                status=status.HTTP_200_OK,
+            )
         except Exception as e:
             return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
@@ -91,6 +258,21 @@ class BPMNViewsSet(viewsets.ModelViewSet):
                 bpmn.bpmn_id = request.data.get("bpmn_id")
             if "name" in request.data:
                 bpmn.name = request.data.get("name")
+            if "bpmnContent" in request.data:
+                bpmn.bpmnContent = request.data.get("bpmnContent")
+                if "participants" not in request.data:
+                    bpmn.participants = json.dumps(
+                        _extract_participants_from_bpmn(bpmn.bpmnContent)
+                    )
+            if "svgContent" in request.data:
+                bpmn.svgContent = request.data.get("svgContent")
+            if "participants" in request.data:
+                participants = request.data.get("participants")
+                bpmn.participants = (
+                    participants
+                    if isinstance(participants, str)
+                    else json.dumps(participants)
+                )
             if "status" in request.data:
                 bpmn.status = request.data.get("status")
             if "user_id" in request.data:

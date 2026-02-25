@@ -23,7 +23,7 @@ const UsersManage: React.FC = () => {
       {isSuccess && userList.map((user, index) => {
         return <UserInfoCard key={index} name={
           user.name} email={user.email}
-          onDelete={() => { console.log('delete') }}
+          onDelete={() => { return; }}
         />
       })}
     </>)

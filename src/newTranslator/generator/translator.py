@@ -36,6 +36,9 @@ BPMN_TYPE_TO_DSL = {
     "float64": "float64",
 }
 
+ORACLE_TASK_TYPE_EXTERNAL = "external-data"
+ORACLE_TASK_TYPE_COMPUTE = "compute-task"
+
 
 def map_bpmn_type(origin_type: str) -> str:
     """Translate BPMN primitive types into DSL compatible ones."""
@@ -77,6 +80,24 @@ def summarize_message_schema(message: Message) -> str:
 def escape_quotes(value: str) -> str:
     """Escape double quotes so schema strings can live inside DSL literals."""
     return value.replace("\"", "\\\"")
+
+
+def parse_json_documentation(documentation: Optional[str]) -> dict:
+    """Parse BPMN documentation JSON safely."""
+    if not documentation:
+        return {}
+    try:
+        return json.loads(documentation)
+    except (TypeError, json.JSONDecodeError):
+        return {}
+
+
+def oracle_task_type_from_doc(documentation: dict, fallback: str) -> str:
+    """Resolve oracle task type from documentation with safe defaults."""
+    task_type = (documentation.get("oracleTaskType") or fallback or "").strip().lower()
+    if task_type in {ORACLE_TASK_TYPE_EXTERNAL, ORACLE_TASK_TYPE_COMPUTE}:
+        return task_type
+    return fallback
 
 
 _B2C_METAMODEL = None
@@ -214,6 +235,10 @@ class FlowPlanner:
         if flows and business_flows:
             flows.append(dsl_snippet.DSL_EmptyLine())
         flows.extend(business_flows)
+        oracle_flows = self._oracle_task_flows()
+        if flows and oracle_flows:
+            flows.append(dsl_snippet.DSL_EmptyLine())
+        flows.extend(oracle_flows)
         return flows
 
     def _start_event_flows(self) -> List[str]:
@@ -291,6 +316,24 @@ class FlowPlanner:
                 flows.append(
                     dsl_snippet.DSL_WhenBusinessRuleDoneEnable(
                         rule=rule.id,
+                        targets=self._format_action_chain("enable", targets),
+                    )
+                )
+        return flows
+
+    def _oracle_task_flows(self) -> List[str]:
+        """Express that oracle task completion enables the next step."""
+        flows = []
+        oracle_tasks = (
+            self._choreography.query_element_with_type(NodeType.RECEIVE_TASK)
+            + self._choreography.query_element_with_type(NodeType.SCRIPT_TASK)
+        )
+        for task in oracle_tasks:
+            targets = self._successor_targets(task)
+            if targets:
+                flows.append(
+                    dsl_snippet.DSL_WhenOracleTaskDoneEnable(
+                        task=task.id,
                         targets=self._format_action_chain("enable", targets),
                     )
                 )
@@ -470,6 +513,7 @@ class DSLContractBuilder:
         gateways = self._build_gateways_section()
         events = self._build_events_section()
         businessrules = self._build_business_rules_section()
+        oracletasks = self._build_oracle_tasks_section()
         flows_section = self._build_flows_section()
         return dsl_snippet.DSL_ContractFrame(
             contract_name=contract_name,
@@ -479,6 +523,7 @@ class DSLContractBuilder:
             gateways=gateways,
             events=events,
             businessrules=businessrules,
+            oracletasks=oracletasks,
             flows=flows_section,
         )
 
@@ -580,11 +625,7 @@ class DSLContractBuilder:
         """Render business rule declarations with DMN metadata and mappings."""
         items = []
         for rule in self._choreography.query_element_with_type(NodeType.BUSINESS_RULE_TASK):
-            documentation = rule.documentation or "{}"
-            try:
-                doc = json.loads(documentation)
-            except json.JSONDecodeError:
-                doc = {}
+            doc = parse_json_documentation(rule.documentation)
             input_block = "".join(
                 dsl_snippet.DSL_BusinessRuleInputMappingItem(
                     param=entry.get("name", ""),
@@ -610,6 +651,62 @@ class DSLContractBuilder:
                 )
             )
         return dsl_snippet.DSL_BusinessRulesFrame("".join(items))
+
+    def _build_oracle_tasks_section(self) -> str:
+        """Render oracle task declarations used for external-data/compute-task steps."""
+        items = []
+        oracle_tasks = (
+            self._choreography.query_element_with_type(NodeType.RECEIVE_TASK)
+            + self._choreography.query_element_with_type(NodeType.SCRIPT_TASK)
+        )
+        for task in oracle_tasks:
+            fallback_type = (
+                ORACLE_TASK_TYPE_EXTERNAL
+                if task.type == NodeType.RECEIVE_TASK
+                else ORACLE_TASK_TYPE_COMPUTE
+            )
+            doc = parse_json_documentation(getattr(task, "documentation", ""))
+            task_type = oracle_task_type_from_doc(doc, fallback_type)
+            data_source = doc.get("dataSource", "") or ""
+            compute_script = doc.get("computeScript", "") or ""
+            output_mappings = doc.get("outputMappings") or doc.get("outputs") or []
+            if not output_mappings:
+                output_mappings = [{"name": f"{task.id}_result"}]
+
+            output_items = []
+            for entry in output_mappings:
+                if isinstance(entry, str):
+                    param_name = entry
+                    global_name = entry
+                else:
+                    param_name = entry.get("name") or entry.get("dmnParam") or ""
+                    global_name = (
+                        entry.get("global")
+                        or entry.get("globalRef")
+                        or entry.get("name")
+                        or entry.get("dmnParam")
+                        or ""
+                    )
+                if not param_name:
+                    continue
+                output_items.append(
+                    dsl_snippet.DSL_OracleTaskOutputMappingItem(
+                        param=param_name,
+                        global_var=public_the_name(global_name),
+                    )
+                )
+            output_block = "".join(output_items)
+            items.append(
+                dsl_snippet.DSL_OracleTaskItem(
+                    id=task.id,
+                    task_type=task_type,
+                    data_source=escape_quotes(data_source),
+                    compute_script=escape_quotes(compute_script),
+                    output_map=output_block,
+                    state=dsl_snippet.MapElementState("DISABLED"),
+                )
+            )
+        return dsl_snippet.DSL_OracleTasksFrame("".join(items))
 
     def _build_flows_section(self) -> str:
         """Wrap planned flow statements inside the flows frame."""
@@ -637,10 +734,12 @@ class ParameterExtractor:
 
         message_properties = self._collect_message_properties()
         business_rule_docs = list(self._business_rule_docs())
+        oracle_task_docs = list(self._oracle_task_docs())
 
         global_parameters = self._build_global_parameter_map(
             message_properties,
             business_rule_docs,
+            oracle_task_docs,
         )
 
         available_definitions = {
@@ -657,15 +756,25 @@ class ParameterExtractor:
         for business_rule in self._choreography.query_element_with_type(NodeType.BUSINESS_RULE_TASK):
             if not business_rule.documentation:
                 continue
-            try:
-                yield business_rule, json.loads(business_rule.documentation)
-            except json.JSONDecodeError:
-                continue
+            doc = parse_json_documentation(business_rule.documentation)
+            if doc:
+                yield business_rule, doc
+
+    def _oracle_task_docs(self):
+        """Yield oracle-task documentation blobs in parsed JSON form."""
+        oracle_tasks = (
+            self._choreography.query_element_with_type(NodeType.RECEIVE_TASK)
+            + self._choreography.query_element_with_type(NodeType.SCRIPT_TASK)
+        )
+        for task in oracle_tasks:
+            doc = parse_json_documentation(getattr(task, "documentation", ""))
+            yield task, doc
 
     def _build_global_parameter_map(
         self,
         message_properties: dict,
         business_rule_data: list,
+        oracle_task_data: list,
     ) -> dict:
         """
         Merge all potential parameter sources into the global catalogue.
@@ -690,6 +799,10 @@ class ParameterExtractor:
 
         business_rule_outputs = self._collect_business_rule_outputs(business_rule_data)
         for name, definition in business_rule_outputs.items():
+            self._ensure_global_definition(global_parameters, name, definition)
+
+        oracle_task_outputs = self._collect_oracle_task_outputs(oracle_task_data)
+        for name, definition in oracle_task_outputs.items():
             self._ensure_global_definition(global_parameters, name, definition)
 
         return global_parameters
@@ -741,6 +854,34 @@ class ParameterExtractor:
                     "business_rule_id": [business_rule.id],
                     "description": output_def.get("description"),
                     "source_type": "business_rule",
+                }
+        return outputs
+
+    def _collect_oracle_task_outputs(self, oracle_task_data: list) -> dict:
+        """Expose oracle-task outputs into global slots."""
+        outputs = {}
+        for task, definition in oracle_task_data:
+            output_mappings = definition.get("outputMappings") or definition.get("outputs") or []
+            if not output_mappings:
+                output_mappings = [{"name": f"{task.id}_result"}]
+            for output_def in output_mappings:
+                if isinstance(output_def, str):
+                    name = output_def
+                    global_name = output_def
+                    output_type = "string"
+                    description = None
+                else:
+                    name = output_def.get("name") or output_def.get("dmnParam")
+                    if not name:
+                        continue
+                    global_name = output_def.get("global") or output_def.get("globalRef") or name
+                    output_type = output_def.get("type", "string")
+                    description = output_def.get("description")
+                outputs[global_name] = {
+                    "type": output_type,
+                    "oracle_task_id": [task.id],
+                    "description": description,
+                    "source_type": "oracle_task",
                 }
         return outputs
 
@@ -920,6 +1061,19 @@ class GoChaincodeTranslator:
             ),
         ]
 
+    def _generate_ffi_items_for_oracle_task(self, task) -> List[Dict[str, object]]:
+        first_name = task.id
+        return [
+            self._generate_ffi_item(
+                name=first_name,
+                pathname=first_name,
+                params=[
+                    self._instance_id_param(),
+                    {"name": "result", "schema": {"type": "string"}},
+                ],
+            )
+        ]
+
     def _generate_ffi_events(self) -> List[Dict[str, object]]:
         return [{"name": "DMNContentRequired"}, {"name": "InstanceCreated"}]
 
@@ -988,6 +1142,8 @@ class GoChaincodeTranslator:
                     ffi_items.extend(self._generate_ffi_items_for_choreography_task(element))
                 case NodeType.BUSINESS_RULE_TASK:
                     ffi_items.extend(self._generate_ffi_items_for_business_rule_task(element))
+                case NodeType.RECEIVE_TASK | NodeType.SCRIPT_TASK:
+                    ffi_items.extend(self._generate_ffi_items_for_oracle_task(element))
                 case (
                     NodeType.EXCLUSIVE_GATEWAY
                     | NodeType.PARALLEL_GATEWAY

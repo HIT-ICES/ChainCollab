@@ -49,8 +49,13 @@ contract WorkflowContract {
     }
 
     enum EventKey {
-    {% if events %}
-        {{ events | map(attribute='enum_name') | join(',\n        ') }}
+    {% if events or oracle_tasks %}
+        {%- for item in events %}
+        {{ item.enum_name }}{% if not loop.last or oracle_tasks %},{% endif %}
+        {%- endfor %}
+        {%- for item in oracle_tasks %}
+        {{ item.enum_name }}{% if not loop.last %},{% endif %}
+        {%- endfor %}
     {% else %}
         PlaceholderEvent
     {% endif %}
@@ -326,6 +331,13 @@ contract WorkflowContract {
             inst,
             EventKey.{{ event.enum_name }},
             ElementState.{{ event.initial_state }}
+        );
+        {% endfor %}
+        {% for task in oracle_tasks %}
+        _createActionEvent(
+            inst,
+            EventKey.{{ task.enum_name }},
+            ElementState.{{ task.initial_state }}
         );
         {% endfor %}
 

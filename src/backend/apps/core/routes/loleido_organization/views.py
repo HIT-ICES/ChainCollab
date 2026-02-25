@@ -1,4 +1,7 @@
+import logging
+
 from rest_framework import viewsets, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.infra.models import Agent
@@ -8,15 +11,25 @@ from .serializers import (
     UserJoinOrgInvitionSerializer
 )
 from apps.api.config import DEFAULT_AGENT
+from common.utils.auth import ensure_authenticated_user
+
+LOG = logging.getLogger(__name__)
+
+
 class LoleidoOrganizationViewSet(viewsets.ViewSet):
     """
     组织管理
     """
+    permission_classes = [IsAuthenticated]
+
     def list(self, request):
         """
         获取组织列表
         """
-        user = request.user
+        auth = ensure_authenticated_user(request)
+        if not auth.ok:
+            return auth.response
+        user = auth.user
         queryset = LoleidoOrganization.objects.filter(members__in=[user])
         serializer = LoleidoOrganizationSerializer(queryset, many=True)
         return Response(serializer.data)
@@ -26,7 +39,15 @@ class LoleidoOrganizationViewSet(viewsets.ViewSet):
         创建组织
         """
         name = request.data.get("name")
-        user = request.user
+        auth = ensure_authenticated_user(request)
+        if not auth.ok:
+            return auth.response
+        user = auth.user
+        if not name:
+            return Response(
+                {"message": "name is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         try:
             loleido_organization = LoleidoOrganization.objects.create(name=name)
             loleido_organization.members.add(user)
@@ -37,7 +58,8 @@ class LoleidoOrganizationViewSet(viewsets.ViewSet):
                 urls = DEFAULT_AGENT["urls"],
                 status = "active",
             )
-        except Exception as e:
+        except Exception:
+            LOG.exception("Create organization failed name=%s user=%s", name, getattr(user, "id", None))
             return Response(status=status.HTTP_400_BAD_REQUEST)
         serializer = LoleidoOrganizationSerializer(loleido_organization)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -71,7 +93,19 @@ class LoleidoOrganizationViewSet(viewsets.ViewSet):
         """
         部分更新组织
         """
-        pass
+        try:
+            loleido_organization = LoleidoOrganization.objects.get(pk=pk)
+        except LoleidoOrganization.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = LoleidoOrganizationSerializer(
+            loleido_organization,
+            data=request.data,
+            partial=True,
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, pk=None):
         """
@@ -91,11 +125,16 @@ class UserJoinOrgInviteViewSet(viewsets.ViewSet):
     """
     用户加入组织邀请
     """
+    permission_classes = [IsAuthenticated]
+
     def list(self, request):
         """
         获取用户加入组织邀请列表
         """
-        user = request.user
+        auth = ensure_authenticated_user(request)
+        if not auth.ok:
+            return auth.response
+        user = auth.user
         queryset = UserJoinOrgInvitation.objects.filter(user=user)
         serializer = UserJoinOrgInvitionSerializer(queryset, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
@@ -106,7 +145,15 @@ class UserJoinOrgInviteViewSet(viewsets.ViewSet):
         """
         target_user_email = request.data.get("user_email")
         org_uuid = request.data.get("org_uuid")
-        invitor = request.user
+        auth = ensure_authenticated_user(request)
+        if not auth.ok:
+            return auth.response
+        invitor = auth.user
+        if not target_user_email or not org_uuid:
+            return Response(
+                {"message": "user_email and org_uuid are required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         try:
             user = UserProfile.objects.get(email=target_user_email)
         except UserProfile.DoesNotExist:
@@ -129,11 +176,14 @@ class UserJoinOrgInviteViewSet(viewsets.ViewSet):
         """
         获取用户加入组织邀请详情
         """
+        auth = ensure_authenticated_user(request)
+        if not auth.ok:
+            return auth.response
         try:
             invition = UserJoinOrgInvitation.objects.get(pk=pk)
         except UserJoinOrgInvitation.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        if (invition.user!=request.user):
+        if (invition.user != auth.user):
             return Response(status=status.HTTP_403_FORBIDDEN)
         return Response(data=UserJoinOrgInvitionSerializer(invition).data, status=status.HTTP_200_OK)
             
@@ -142,13 +192,16 @@ class UserJoinOrgInviteViewSet(viewsets.ViewSet):
         """
         更新用户加入组织邀请
         """
+        auth = ensure_authenticated_user(request)
+        if not auth.ok:
+            return auth.response
         try:
             invition = UserJoinOrgInvitation.objects.get(pk=pk)
         except UserJoinOrgInvitation.DoesNotExist:
             return Response({
                 "message": "Not found"
             },status=status.HTTP_404_NOT_FOUND)
-        if (invition.user!=request.user):
+        if (invition.user != auth.user):
             return Response(
                 {"message": "You are not the owner of the invition"},
                 status=status.HTTP_403_FORBIDDEN,
@@ -169,7 +222,6 @@ class UserJoinOrgInviteViewSet(viewsets.ViewSet):
         invition.save()
 
         if invition.status == "accept":
-            print(invition.loleido_organization)
             invition.loleido_organization.members.add(invition.user)
             invition.loleido_organization.save()
             return Response(data={"message": "Accept"}, status=status.HTTP_200_OK)

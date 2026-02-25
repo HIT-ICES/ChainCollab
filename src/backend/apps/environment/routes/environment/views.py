@@ -2,9 +2,11 @@ import json
 import logging
 import os
 import shutil
-from threading import Thread
+from pathlib import Path
 from requests import post
 from rest_framework import viewsets, status
+from django.db import transaction
+from django.utils import timezone
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
@@ -13,14 +15,14 @@ from common.enums import EthNodeType, FabricNodeType
 from .serializers import EnvironmentSerializer, EthEnvironmentSerializer
 from rest_framework.decorators import action
 
-from apps.infra.models import Agent, Firefly
+from apps.infra.models import Agent
 from apps.ethereum.models import (
     EthereumResourceSet,
     EthNode,
     IdentityDeployment,
     EthereumIdentity,
 )
-from apps.fabric.models import ResourceSet, FabricResourceSet
+from apps.fabric.models import ResourceSet, FabricResourceSet, Port
 from apps.environment.models import Environment, EthEnvironment, Task
 from apps.core.models import Consortium, Membership, LoleidoOrganization
 from apps.api.config import (
@@ -32,11 +34,21 @@ from apps.api.config import (
     DMN_CONTRACT_PATH,
     ETHEREUM_CONTRACT_STORE,
 )
-from common.lib.ethereum.identity_flow import IdentityContractFlow
 from common.lib.fabric.chaincode_flow import install_fabric_chaincode_flow
 from common.utils.test_time import timeitwithname
+from apps.environment.services.chainlink_orchestrator import ChainlinkOrchestrator
+from apps.environment.services.dmn_contract_executor import execute_dmn_contract_call
+from apps.environment.services.dmn_firefly import register_dmn_contract_to_firefly
+from apps.environment.services.firefly_orchestrator import FireflyOrchestrator
+from apps.environment.services.identity_orchestrator import IdentityOrchestrator
+from apps.environment.services.task_runtime import (
+    create_task,
+    create_task_with_status_transition,
+    _ensure_idempotent_task_request,
+    _start_task_async,
+)
 
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger("api")
 
 
 class EnvironmentViewSet(viewsets.ViewSet):
@@ -108,6 +120,43 @@ class EnvironmentViewSet(viewsets.ViewSet):
 
 class EnvironmentOperateViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
+
+    def _start_task(self, task, handler, *args, **kwargs):
+        _start_task_async(
+            task,
+            handler,
+            *args,
+            rollback_model=Environment,
+            rollback_target_type="Environment",
+            **kwargs,
+        )
+
+    def _ensure_idempotent_task(self, request, env_id: str, task_type: str, mode: str | None = None):
+        return _ensure_idempotent_task_request(request, env_id, task_type, mode)
+
+    def _run_chaincode_install(
+        self,
+        env_id: str,
+        *,
+        file_path: str,
+        chaincode_name: str,
+        auth: str,
+        org_id: str | None,
+        status_field: str,
+        language: str | None = None,
+    ):
+        env = Environment.objects.get(pk=env_id)
+        kwargs = {
+            "env": env,
+            "file_path": file_path,
+            "chaincode_name": chaincode_name,
+            "auth": auth,
+            "org_id": org_id,
+            "status_field": status_field,
+        }
+        if language:
+            kwargs["language"] = language
+        return install_fabric_chaincode_flow(**kwargs)
 
     @action(methods=["post"], detail=True, url_path="init")
     @timeitwithname("Init")
@@ -548,27 +597,48 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         except Environment.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        if env.status != "ACTIVATED":
+        if env.status not in ["ACTIVATED", "STARTED"]:
             return Response(
                 {"message": "Environment has not been activated or has started"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        idempotent = self._ensure_idempotent_task(
+            request, str(env.id), "FABRIC_FIREFLY_START"
+        )
+        if idempotent.get("response"):
+            return idempotent["response"]
+        idempotency_key = idempotent["idempotency_key"]
+
         headers = request.headers
-
-        post(
-            f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/fireflys/init",
-            headers={"Authorization": headers["Authorization"]},
+        task, _ = create_task_with_status_transition(
+            task_type="FABRIC_FIREFLY_START",
+            target_type="Environment",
+            target_id=str(env.id),
+            idempotency_key=idempotency_key,
+            target_obj=env,
+            status_field="firefly_status",
+            pending_value="PENDING",
         )
 
-        post(
-            f"http://{CURRENT_IP}:8000/api/v1/environments/{env.id}/fireflys/start",
-            headers={"Authorization": headers["Authorization"]},
-        )
-        env.firefly_status = "STARTED"
-        env.save()
+        def _start_firefly_flow(env_id: str, auth: str):
+            post(
+                f"http://{CURRENT_IP}:8000/api/v1/environments/{env_id}/fireflys/init",
+                headers={"Authorization": auth},
+            )
+            post(
+                f"http://{CURRENT_IP}:8000/api/v1/environments/{env_id}/fireflys/start",
+                headers={"Authorization": auth},
+            )
+            Environment.objects.filter(pk=env_id).update(firefly_status="STARTED")
+            return {"status": "STARTED"}
 
-        return Response(status=status.HTTP_201_CREATED)
+        self._start_task(task, _start_firefly_flow, str(env.id), headers["Authorization"])
+
+        return Response(
+            {"task_id": str(task.id), "status": task.status},
+            status=status.HTTP_202_ACCEPTED,
+        )
 
     @action(methods=["post"], detail=True, url_path="install_firefly")
     def install_firefly(self, request, pk=None, *args, **kwargs):
@@ -580,23 +650,44 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         except Environment.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        if env.status != "ACTIVATED":
+        if env.status not in ["ACTIVATED", "STARTED"]:
             return Response(
                 {"message": "Environment has not been activated or has started"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        idempotent = self._ensure_idempotent_task(
+            request, str(env.id), "FABRIC_FIREFLY_INSTALL"
+        )
+        if idempotent.get("response"):
+            return idempotent["response"]
+        idempotency_key = idempotent["idempotency_key"]
+
         headers = request.headers
         org_id = request.data.get("org_id")
-        install_fabric_chaincode_flow(
-            env,
+        task, _ = create_task_with_status_transition(
+            task_type="FABRIC_FIREFLY_INSTALL",
+            target_type="Environment",
+            target_id=str(env.id),
+            idempotency_key=idempotency_key,
+            target_obj=env,
+            status_field="firefly_status",
+            pending_value="PENDING",
+        )
+        self._start_task(
+            task,
+            self._run_chaincode_install,
+            env.id,
             file_path=FABRIC_CONFIG + "/firefly-go.zip",
             chaincode_name="Firefly",
             auth=headers["Authorization"],
             org_id=org_id,
             status_field="firefly_status",
         )
-        return Response(status=status.HTTP_200_OK)
+        return Response(
+            {"task_id": str(task.id), "status": task.status},
+            status=status.HTTP_202_ACCEPTED,
+        )
 
     @action(methods=["post"], detail=True, url_path="install_oracle")
     def install_oracle(self, request, pk=None, *args, **kwargs):
@@ -606,16 +697,34 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         except Environment.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        if env.status != "ACTIVATED":
+        if env.status not in ["ACTIVATED", "STARTED"]:
             return Response(
                 {"message": "Environment has not been activated or has started"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        idempotent = self._ensure_idempotent_task(
+            request, str(env.id), "FABRIC_ORACLE_INSTALL"
+        )
+        if idempotent.get("response"):
+            return idempotent["response"]
+        idempotency_key = idempotent["idempotency_key"]
+
         headers = request.headers
         org_id = request.data.get("org_id")
-        install_fabric_chaincode_flow(
-            env,
+        task, _ = create_task_with_status_transition(
+            task_type="FABRIC_ORACLE_INSTALL",
+            target_type="Environment",
+            target_id=str(env.id),
+            idempotency_key=idempotency_key,
+            target_obj=env,
+            status_field="Oracle_status",
+            pending_value="PENDING",
+        )
+        self._start_task(
+            task,
+            self._run_chaincode_install,
+            env.id,
             file_path=ORACLE_CONTRACT_PATH + "/oracle-go.zip",
             chaincode_name="Oracle",
             auth=headers["Authorization"],
@@ -623,7 +732,10 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
             status_field="Oracle_status",
         )
 
-        return Response(status=status.HTTP_200_OK)
+        return Response(
+            {"task_id": str(task.id), "status": task.status},
+            status=status.HTTP_202_ACCEPTED,
+        )
 
     @action(methods=["post"], detail=True, url_path="install_dmn_engine")
     def install_dmn_engine(self, request, pk=None, *args, **kwargs):
@@ -635,17 +747,34 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
         except Environment.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        if env.status != "ACTIVATED":
+        if env.status not in ["ACTIVATED", "STARTED"]:
             return Response(
                 {"message": "Environment has not been activated or has started"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        idempotent = self._ensure_idempotent_task(
+            request, str(env.id), "FABRIC_DMN_INSTALL"
+        )
+        if idempotent.get("response"):
+            return idempotent["response"]
+        idempotency_key = idempotent["idempotency_key"]
+
         headers = request.headers
         org_id = request.data.get("org_id")
-
-        install_fabric_chaincode_flow(
-            env,
+        task, _ = create_task_with_status_transition(
+            task_type="FABRIC_DMN_INSTALL",
+            target_type="Environment",
+            target_id=str(env.id),
+            idempotency_key=idempotency_key,
+            target_obj=env,
+            status_field="DMN_status",
+            pending_value="PENDING",
+        )
+        self._start_task(
+            task,
+            self._run_chaincode_install,
+            env.id,
             file_path=DMN_CONTRACT_PATH + "/dmn-engine.zip",
             chaincode_name="DMNEngine",
             auth=headers["Authorization"],
@@ -654,7 +783,10 @@ class EnvironmentOperateViewSet(viewsets.ViewSet):
             status_field="DMN_status",
         )
 
-        return Response(status=status.HTTP_200_OK)
+        return Response(
+            {"task_id": str(task.id), "status": task.status},
+            status=status.HTTP_202_ACCEPTED,
+        )
 
     @action(methods=["get"], detail=False, url_path="requestOracleFFI")
     def requestOracleFFI(self, request, pk=None, *args, **kwargs):
@@ -705,118 +837,1498 @@ class EthEnvironmentViewSet(viewsets.ModelViewSet):
 
 class EthEnvironmentOperateViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
+    ETH_SYSTEM_ACCOUNT = "0x365Acf78C44060CAF3A4789D804Df11E3B4AA17d"
+
+    def _ensure_idempotent_task(self, request, env_id: str, task_type: str, mode: str | None = None):
+        return _ensure_idempotent_task_request(request, env_id, task_type, mode)
 
     def _start_task(self, task, handler, *args, **kwargs):
-        def runner():
-            task.status = "RUNNING"
-            task.save(update_fields=["status", "updated_at"])
-            LOG.info("Task %s started (%s)", task.id, task.type)
-            try:
-                result = handler(*args, **kwargs)
-                task.status = "SUCCESS"
-                task.result = result
-                task.error = None
-                LOG.info("Task %s finished (%s)", task.id, task.type)
-            except Exception as exc:
-                LOG.exception("Task %s failed", task.id)
-                task.status = "FAILED"
-                task.error = str(exc)
-            task.save(update_fields=["status", "result", "error", "updated_at"])
+        _start_task_async(
+            task,
+            handler,
+            *args,
+            rollback_model=EthEnvironment,
+            rollback_target_type="EthEnvironment",
+            **kwargs,
+        )
 
-        thread = Thread(target=runner, daemon=True)
-        thread.start()
+    def _identity_orchestrator(self) -> IdentityOrchestrator:
+        return IdentityOrchestrator(logger=LOG)
 
-    def _identity_flow(self):
-        return IdentityContractFlow(logger=LOG)
+    def _firefly_orchestrator(self) -> FireflyOrchestrator:
+        return FireflyOrchestrator(logger=LOG)
 
-    def _resolve_identity_artifacts(self):
-        return self._identity_flow().resolve_identity_artifacts()
+    def _chainlink_orchestrator(self) -> ChainlinkOrchestrator:
+        return ChainlinkOrchestrator(
+            logger=LOG,
+            eth_system_account=self.ETH_SYSTEM_ACCOUNT,
+            set_task_step=self._set_task_step,
+            resolve_system_rpc_url=self._resolve_system_rpc_url,
+        )
 
-    def _fetch_firefly_org_admin_address(self, firefly: Firefly) -> str | None:
-        return self._identity_flow().fetch_firefly_org_admin_address(firefly)
+    def _set_task_step(self, task_id: str | None, step: str):
+        if not task_id:
+            return
+        try:
+            Task.objects.filter(pk=task_id).update(step=step, updated_at=timezone.now())
+        except Exception:
+            LOG.exception("Task %s step update failed", task_id)
 
-    def _build_identity_ffi(self, abi: list) -> dict:
-        return self._identity_flow().build_identity_ffi(abi)
-
-    def _normalize_identity_ffi(self, ffi: dict, version_suffix: str | None = None) -> dict:
-        return self._identity_flow().normalize_identity_ffi(ffi, version_suffix=version_suffix)
-
-    def _write_identity_ffi(self, ffi: dict) -> str:
-        return self._identity_flow().write_identity_ffi(ffi)
-
-    def _generate_identity_ffi(self, firefly_core_url: str, abi: list) -> dict:
-        return self._identity_flow().generate_identity_ffi(firefly_core_url, abi)
-
-    def _register_identity_ffi(self, firefly_core_url: str, abi: list) -> dict:
-        return self._identity_flow().register_identity_ffi(firefly_core_url, abi)
-
-    def _find_identity_interface_id(self, firefly_core_url: str) -> str | None:
-        return self._identity_flow().find_identity_interface_id(firefly_core_url)
-
-    def _register_identity_api(
+    def _require_started_or_activated(
         self,
-        firefly_core_url: str,
-        interface_id: str,
+        env: EthEnvironment,
+        *,
+        message: str = "Environment has not been activated or has started",
+    ):
+        if env.status not in ["ACTIVATED", "STARTED"]:
+            return Response({"message": message}, status=status.HTTP_400_BAD_REQUEST)
+        return None
+
+    def _get_eth_env_or_404(self, pk):
+        try:
+            return EthEnvironment.objects.get(pk=pk), None
+        except EthEnvironment.DoesNotExist:
+            return None, Response(status=status.HTTP_404_NOT_FOUND)
+
+    def _enqueue_eth_chaincode_install(
+        self,
+        request,
+        env: EthEnvironment,
+        *,
+        task_type: str,
+        status_field: str,
+        file_path: str,
+        chaincode_name: str,
+        org_id: str | None,
+        language: str | None = None,
+    ) -> Response:
+        idempotent = self._ensure_idempotent_task(request, str(env.id), task_type)
+        if idempotent.get("response"):
+            return idempotent["response"]
+        idempotency_key = idempotent["idempotency_key"]
+
+        headers = request.headers
+        task, _ = create_task_with_status_transition(
+            task_type=task_type,
+            target_type="EthEnvironment",
+            target_id=str(env.id),
+            idempotency_key=idempotency_key,
+            target_obj=env,
+            status_field=status_field,
+            pending_value="PENDING",
+        )
+        self._start_task(
+            task,
+            self._run_chaincode_install,
+            env.id,
+            file_path=file_path,
+            chaincode_name=chaincode_name,
+            auth=headers["Authorization"],
+            org_id=org_id,
+            language=language,
+            status_field=status_field,
+        )
+        return Response(
+            {"task_id": str(task.id), "status": task.status},
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+    def _rpc_call(self, rpc_url: str, method: str, params=None):
+        payload = {
+            "jsonrpc": "2.0",
+            "method": method,
+            "params": params or [],
+            "id": 1,
+        }
+        response = post(rpc_url, json=payload, timeout=8)
+        response.raise_for_status()
+        data = response.json()
+        if data.get("error"):
+            raise RuntimeError(data["error"])
+        return data.get("result")
+
+    def _resolve_system_rpc_url(self, env: EthEnvironment) -> str:
+        system_resource_set = env.resource_sets.filter(
+            ethereum_sub_resource_set__org_type=1
+        ).first()
+        if not system_resource_set:
+            raise ValueError("system resource set not found")
+
+        system_node = EthNode.objects.filter(
+            fabric_resource_set__resource_set=system_resource_set
+        ).first()
+        if not system_node:
+            raise ValueError("system node not found")
+
+        rpc_port = Port.objects.filter(eth_node=system_node, internal=8545).first()
+        if not rpc_port:
+            raise ValueError("system node RPC port (8545) not found")
+
+        return f"http://{CURRENT_IP}:{rpc_port.external}"
+
+    def _check_system_account_available(self, env: EthEnvironment, expected_account: str | None = None) -> dict:
+        account = (expected_account or self.ETH_SYSTEM_ACCOUNT).lower()
+        rpc_url = self._resolve_system_rpc_url(env)
+        accounts = self._rpc_call(rpc_url, "eth_accounts", []) or []
+        normalized_accounts = [a.lower() for a in accounts if isinstance(a, str)]
+        has_expected = account in normalized_accounts
+
+        result = {
+            "rpc_url": rpc_url,
+            "expected_account": account,
+            "accounts": accounts,
+            "has_expected_account": has_expected,
+            "unlock_ok": False,
+            "balance_wei": None,
+            "unlock_error": None,
+        }
+
+        if has_expected:
+            try:
+                unlocked = self._rpc_call(
+                    rpc_url,
+                    "personal_unlockAccount",
+                    [account, "", 5],
+                )
+                result["unlock_ok"] = bool(unlocked)
+            except Exception as exc:
+                result["unlock_error"] = str(exc)
+
+            try:
+                result["balance_wei"] = self._rpc_call(
+                    rpc_url,
+                    "eth_getBalance",
+                    [account, "latest"],
+                )
+            except Exception as exc:
+                result["balance_wei"] = None
+                result["balance_error"] = str(exc)
+
+        return result
+
+    def _resolve_chainlink_scripts(self) -> dict:
+        return self._chainlink_orchestrator().resolve_chainlink_scripts()
+
+    def _sync_chainlink_cluster(
+        self,
+        env: EthEnvironment,
+        persist: bool = True,
+        include_jobs: bool = True,
+    ) -> dict:
+        return self._chainlink_orchestrator().sync_chainlink_cluster(
+            env,
+            persist=persist,
+            include_jobs=include_jobs,
+        )
+
+    def _run_chainlink_setup(
+        self,
+        env_id: str,
+        mode: str = "lite",
+        task_id: str | None = None,
+    ) -> dict:
+        return self._chainlink_orchestrator().run_chainlink_setup(
+            env_id,
+            mode=mode,
+            task_id=task_id,
+        )
+
+    def _run_chainlink_create_job(
+        self,
+        env_id: str,
+        recreate: bool = False,
+        external_job_id: str | None = None,
+        sync_onchain: bool = True,
+        job_kind: str = "dmn",
+        data_source_url: str | None = None,
+        data_source_method: str = "GET",
+        task_id: str | None = None,
+    ) -> dict:
+        return self._chainlink_orchestrator().run_chainlink_create_job(
+            env_id,
+            recreate=recreate,
+            external_job_id=external_job_id,
+            sync_onchain=sync_onchain,
+            job_kind=job_kind,
+            data_source_url=data_source_url,
+            data_source_method=data_source_method,
+            task_id=task_id,
+        )
+
+    def _load_chainlink_deployments(self) -> dict:
+        return self._chainlink_orchestrator().load_chainlink_deployments()
+
+    def _get_dmn_contract_name(self) -> str:
+        return os.environ.get("DMN_CONTRACT_NAME") or (
+            "MyChainlinkRequesterDMN_Lite"
+            if os.environ.get("DMN_MODE") == "lite"
+            else "MyChainlinkRequesterDMN"
+        )
+
+    def _get_dmn_api_name(self, env: EthEnvironment) -> str:
+        return f"DMNRequest-{str(env.id)[:8]}"
+
+    def _get_data_task_api_name(self, env: EthEnvironment) -> str:
+        return f"DataTaskAdapter-{str(env.id)[:8]}"
+
+    def _get_compute_task_api_name(self, env: EthEnvironment) -> str:
+        return f"ComputeTaskAdapter-{str(env.id)[:8]}"
+
+    def _get_relayer_api_name(self, env: EthEnvironment) -> str:
+        return f"CrossChainAdapter-{str(env.id)[:8]}"
+
+    def _run_oracle_task_suite_setup(
+        self,
+        env_id: str,
+        task_id: str | None = None,
+    ) -> dict:
+        return self._chainlink_orchestrator().run_oracle_task_suite_setup(
+            env_id,
+            task_id=task_id,
+        )
+
+    def _run_relayer_setup(
+        self,
+        env_id: str,
+        task_id: str | None = None,
+    ) -> dict:
+        return self._chainlink_orchestrator().run_relayer_adapter_setup(
+            env_id,
+            task_id=task_id,
+        )
+
+    def _resolve_oracle_task_suite(
+        self,
+        env: EthEnvironment,
+        payload_detail: dict | None = None,
+    ) -> dict:
+        payload_detail = payload_detail or {}
+        chainlink_detail = env.chainlink_detail or {}
+        suite = {}
+        if isinstance(chainlink_detail, dict):
+            suite = chainlink_detail.get("oracle_task_suite") or {}
+        if not suite:
+            suite = payload_detail.get("oracle_task_suite") or {}
+        return suite if isinstance(suite, dict) else {}
+
+    def _resolve_relayer_deployment(
+        self,
+        env: EthEnvironment,
+        payload_detail: dict | None = None,
+    ) -> dict:
+        payload_detail = payload_detail or {}
+        chainlink_detail = env.chainlink_detail or {}
+        relayer = {}
+        if isinstance(chainlink_detail, dict):
+            relayer = chainlink_detail.get("relayer") or {}
+        if not relayer:
+            relayer = payload_detail.get("relayer_deployment") or {}
+        return relayer if isinstance(relayer, dict) else {}
+
+    def _register_oracle_task_adapter_firefly(
+        self,
+        *,
+        env: EthEnvironment,
+        compiled: dict,
+        contract_name: str,
         contract_address: str,
         api_name: str,
-    ) -> dict:
-        return self._identity_flow().register_identity_api(
+    ) -> dict | None:
+        if not contract_address:
+            return None
+
+        try:
+            firefly_core_url = self._identity_orchestrator().get_firefly_core_url(env)
+        except Exception as exc:
+            LOG.warning(
+                "OracleTask action=firefly_core_not_found env=%s contract=%s err=%s",
+                env.id,
+                contract_name,
+                exc,
+            )
+            return None
+
+        contract_key = f"contracts/{contract_name}.sol:{contract_name}"
+        abi = (compiled.get("contracts") or {}).get(contract_key, {}).get("abi")
+        if not abi:
+            LOG.warning(
+                "OracleTask action=firefly_missing_abi env=%s contract=%s key=%s",
+                env.id,
+                contract_name,
+                contract_key,
+            )
+            return None
+
+        ff = self._firefly_orchestrator()
+        ffi = ff.generate_ffi(
             firefly_core_url,
+            abi,
+            name=contract_name,
+            namespace="default",
+            version="1.0",
+            description=f"{contract_name} contract interface",
+            version_suffix=str(env.id)[:8],
+        )
+        interface_payload = ff.register_interface(
+            firefly_core_url,
+            ffi,
+            namespace="default",
+            confirm=True,
+        )
+        interface_id = interface_payload.get("id") or (
+            interface_payload.get("interface") or {}
+        ).get("id")
+        if not interface_id:
+            return None
+
+        api_payload = ff.register_api(
+            firefly_core_url,
+            api_name,
             interface_id,
             contract_address,
-            api_name,
+            namespace="default",
+            confirm=True,
+        )
+        return {
+            "firefly_core_url": firefly_core_url,
+            "firefly_interface_id": interface_id,
+            "firefly_api_name": api_name,
+            "firefly_api_payload": api_payload,
+        }
+
+    def _register_dmn_firefly(
+        self, env: EthEnvironment, dmn_deployment: dict, compiled: dict
+    ) -> dict | None:
+        contract_name = self._get_dmn_contract_name()
+        api_name = self._get_dmn_api_name(env)
+        return register_dmn_contract_to_firefly(
+            env=env,
+            dmn_deployment=dmn_deployment,
+            compiled=compiled,
+            contract_name=contract_name,
+            api_name=api_name,
+            identity_flow=self._identity_orchestrator(),
+            firefly_manager=self._firefly_orchestrator(),
+            logger=LOG,
         )
 
-    def _invoke_identity_api(
+    def _run_dmn_firefly_register(
         self,
-        firefly_core_url: str,
-        method: str,
-        params: dict,
-        mode: str = "invoke",
-        api_name: str = "IdentityRegistry",
+        env_id: str,
+        previous_dmn_detail: dict | None = None,
+        task_id: str | None = None,
     ) -> dict:
-        return self._identity_flow().invoke_identity_api(
-            firefly_core_url,
-            method,
-            params,
-            mode=mode,
-            api_name=api_name,
-        )
+        env = EthEnvironment.objects.get(pk=env_id)
+        self._set_task_step(task_id, "LOAD_DEPLOYMENT")
+        payload_detail = self._load_chainlink_deployments()
+        compiled = payload_detail.get("compiled") or {}
+        dmn = env.dmn_detail or {}
+        if not dmn:
+            raise RuntimeError("DMN deployment detail not found, install chainlink/dmn first")
 
-    def _ensure_org_registered(
+        if dmn.get("firefly_api_name") and dmn.get("firefly_interface_id"):
+            return {
+                "message": "DMN contract already registered to FireFly",
+                "dmn_detail": dmn,
+            }
+
+        if not dmn.get("contractAddress"):
+            raise RuntimeError("DMN contract address not found")
+
+        self._set_task_step(task_id, "REGISTER_FIREFLY")
+        firefly_payload = self._register_dmn_firefly(env, dmn, compiled)
+        if not firefly_payload:
+            raise RuntimeError("DMN FireFly registration failed")
+
+        dmn = {**dmn, **firefly_payload}
+        self._set_task_step(task_id, "SAVE_RESULT")
+        env.dmn_detail = dmn
+        env.save(update_fields=["dmn_detail"])
+        return {
+            "message": "DMN contract registered to FireFly",
+            "dmn_detail": dmn,
+        }
+
+    def _run_oracle_task_firefly_register(
         self,
-        firefly_core_url: str,
-        org_name: str,
-        org_admin_address: str,
-        api_name: str = "IdentityRegistry",
-    ) -> None:
-        return self._identity_flow().ensure_org_registered(
-            firefly_core_url,
-            org_name,
-            org_admin_address,
+        env_id: str,
+        adapter_kind: str,
+        task_id: str | None = None,
+    ) -> dict:
+        env = EthEnvironment.objects.get(pk=env_id)
+        self._set_task_step(task_id, "LOAD_DEPLOYMENT")
+        payload_detail = self._load_chainlink_deployments()
+        compiled = payload_detail.get("compiled") or {}
+        suite = self._resolve_oracle_task_suite(env, payload_detail)
+        if not suite:
+            raise RuntimeError(
+                "Oracle task suite has not been deployed, please run setup first"
+            )
+
+        contracts = suite.get("contracts") or {}
+        suite_firefly = suite.get("firefly") or {}
+        if adapter_kind == "compute":
+            contract_name = "ChainlinkComputeTaskAdapter"
+            contract_address = contracts.get("computeTaskAdapter")
+            firefly_key = "compute_task_adapter"
+            api_name = self._get_compute_task_api_name(env)
+            label = "Compute task adapter"
+        else:
+            contract_name = "ChainlinkDataTaskAdapter"
+            contract_address = contracts.get("dataTaskAdapter")
+            firefly_key = "data_task_adapter"
+            api_name = self._get_data_task_api_name(env)
+            label = "Data task adapter"
+
+        if not contract_address:
+            raise RuntimeError(f"{label} contract address not found")
+
+        existing = suite_firefly.get(firefly_key) or {}
+        if existing.get("firefly_api_name") and existing.get("firefly_interface_id"):
+            return {
+                "message": f"{label} already registered to FireFly",
+                "oracle_task_suite": suite,
+                "adapter_kind": adapter_kind,
+            }
+
+        self._set_task_step(task_id, "REGISTER_FIREFLY")
+        firefly_payload = self._register_oracle_task_adapter_firefly(
+            env=env,
+            compiled=compiled,
+            contract_name=contract_name,
+            contract_address=contract_address,
             api_name=api_name,
         )
+        if not firefly_payload:
+            raise RuntimeError(f"{label} FireFly registration failed")
 
-    def _register_memberships_for_env(self, env: EthEnvironment) -> dict:
-        return self._identity_flow().register_memberships_for_env(env)
+        next_suite_firefly = {**suite_firefly, firefly_key: firefly_payload}
+        next_suite = {**suite, "firefly": next_suite_firefly}
+        chainlink_detail = env.chainlink_detail or {}
+        if not isinstance(chainlink_detail, dict):
+            chainlink_detail = {}
+        chainlink_detail["oracle_task_suite"] = next_suite
 
-    def _sync_all_identities_for_env(self, env: EthEnvironment) -> dict:
-        return self._identity_flow().sync_all_identities_for_env(env)
+        self._set_task_step(task_id, "SAVE_RESULT")
+        env.chainlink_detail = chainlink_detail
+        env.save(update_fields=["chainlink_detail"])
+        return {
+            "message": f"{label} registered to FireFly",
+            "adapter_kind": adapter_kind,
+            "oracle_task_suite": next_suite,
+        }
 
-    def _load_identity_abi(self):
-        return self._identity_flow().load_identity_abi()
+    def _run_relayer_firefly_register(
+        self,
+        env_id: str,
+        task_id: str | None = None,
+    ) -> dict:
+        env = EthEnvironment.objects.get(pk=env_id)
+        self._set_task_step(task_id, "LOAD_DEPLOYMENT")
+        payload_detail = self._load_chainlink_deployments()
+        compiled = payload_detail.get("compiled") or {}
+        relayer = self._resolve_relayer_deployment(env, payload_detail)
+        if not relayer:
+            raise RuntimeError(
+                "Relayer contract has not been deployed, please run setup first"
+            )
 
-    def _get_firefly_core_url(self, env):
-        return self._identity_flow().get_firefly_core_url(env)
+        contract = relayer.get("contract") or {}
+        contract_address = contract.get("address") or relayer.get("contractAddress")
+        if not contract_address:
+            raise RuntimeError("Relayer contract address not found")
 
-    def _get_identity_api_name(self, env: EthEnvironment) -> str:
-        return self._identity_flow().get_identity_api_name(env)
+        existing_firefly = relayer.get("firefly") or {}
+        if existing_firefly.get("firefly_api_name") and existing_firefly.get(
+            "firefly_interface_id"
+        ):
+            return {
+                "message": "Relayer contract already registered to FireFly",
+                "relayer": relayer,
+            }
 
-    def _deploy_identity_contract(self, env_id):
-        return self._identity_flow().deploy_identity_contract(env_id)
+        self._set_task_step(task_id, "REGISTER_FIREFLY")
+        firefly_payload = self._register_oracle_task_adapter_firefly(
+            env=env,
+            compiled=compiled,
+            contract_name="CrossChainAdapter",
+            contract_address=contract_address,
+            api_name=self._get_relayer_api_name(env),
+        )
+        if not firefly_payload:
+            raise RuntimeError("Relayer contract FireFly registration failed")
 
-    def _redeploy_and_sync(self, env_id):
-        return self._identity_flow().redeploy_and_sync(env_id)
+        next_relayer = {**relayer, "firefly": firefly_payload}
+        chainlink_detail = env.chainlink_detail or {}
+        if not isinstance(chainlink_detail, dict):
+            chainlink_detail = {}
+        chainlink_detail["relayer"] = next_relayer
+
+        self._set_task_step(task_id, "SAVE_RESULT")
+        env.chainlink_detail = chainlink_detail
+        env.save(update_fields=["chainlink_detail"])
+        return {
+            "message": "Relayer contract registered to FireFly",
+            "relayer": next_relayer,
+        }
+
+    @action(methods=["get"], detail=True, url_path="chainlink")
+    def chainlink_detail(self, request, pk=None, *args, **kwargs):
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            return error_response
+
+        sync_flag = str(request.query_params.get("sync", "")).lower() in ["1", "true", "yes", "on"]
+        cluster_sync = None
+        sync_error = None
+        if sync_flag:
+            try:
+                cluster_sync = self._sync_chainlink_cluster(env, persist=True, include_jobs=True)
+            except Exception as exc:
+                sync_error = str(exc)
+                LOG.warning("Chainlink action=sync_failed env=%s error=%s", pk, exc)
+
+        payload = self._load_chainlink_deployments()
+        chainlink = env.chainlink_detail or (payload.get("chainlink_deployment") or {})
+        dmn = env.dmn_detail or (payload.get("dmn_deployment") or {})
+        relayer = self._resolve_relayer_deployment(env, payload)
+        contract_name = self._get_dmn_contract_name()
+
+        response = {
+            "chainlink_root": payload.get("chainlink_root"),
+            "link_token": chainlink.get("linkToken"),
+            "operator": chainlink.get("operator"),
+            "ocr_contract": chainlink.get("ocrContract"),
+            "dmn_job_id": chainlink.get("dmnJobId") or chainlink.get("dmnJobIds", {}).get("chainlink1"),
+            "dmn_contract": {
+                "name": contract_name,
+                "address": dmn.get("contractAddress"),
+                "deployer": dmn.get("deployer"),
+                "tx_hash": dmn.get("txHash"),
+                "firefly_api_name": dmn.get("firefly_api_name"),
+                "firefly_interface_id": dmn.get("firefly_interface_id"),
+                "firefly_core_url": dmn.get("firefly_core_url"),
+            },
+            "chainlink_ui": os.environ.get("CHAINLINK_UI", "http://127.0.0.1:6688"),
+            "cluster_sync": cluster_sync or (chainlink.get("cluster_sync") if isinstance(chainlink, dict) else None),
+            "sync_error": sync_error,
+            "relayer": relayer,
+        }
+        return Response(response, status=status.HTTP_200_OK)
+
+    @action(methods=["post"], detail=True, url_path="chainlink/sync")
+    def sync_chainlink(self, request, pk=None, *args, **kwargs):
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            return error_response
+
+        include_jobs_raw = request.data.get("include_jobs", True)
+        include_jobs = include_jobs_raw
+        if isinstance(include_jobs_raw, str):
+            include_jobs = include_jobs_raw.lower() in ["1", "true", "yes", "on"]
+        else:
+            include_jobs = bool(include_jobs_raw)
+
+        snapshot = self._sync_chainlink_cluster(env, persist=True, include_jobs=include_jobs)
+        return Response(
+            {
+                "status": env.chainlink_status,
+                "cluster_sync": snapshot,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    @action(methods=["get"], detail=True, url_path="dmn-contract")
+    def dmn_contract_detail(self, request, pk=None, *args, **kwargs):
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            return error_response
+
+        payload = self._load_chainlink_deployments()
+        chainlink = env.chainlink_detail or (payload.get("chainlink_deployment") or {})
+        dmn = env.dmn_detail or (payload.get("dmn_deployment") or {})
+        compiled = payload.get("compiled") or {}
+        contract_name = self._get_dmn_contract_name()
+        contract_key = f"contracts/{contract_name}.sol:{contract_name}"
+        abi = None
+        if request.query_params.get("include_abi") in ["1", "true", "yes"]:
+            abi = (compiled.get("contracts") or {}).get(contract_key, {}).get("abi")
+
+        response = {
+            "contract": {
+                "name": contract_name,
+                "address": dmn.get("contractAddress"),
+            },
+            "operator": chainlink.get("operator"),
+            "link_token": chainlink.get("linkToken"),
+            "dmn_job_id": chainlink.get("dmnJobId") or chainlink.get("dmnJobIds", {}).get("chainlink1"),
+            "abi": abi,
+            "firefly": {
+                "api_name": dmn.get("firefly_api_name"),
+                "interface_id": dmn.get("firefly_interface_id"),
+                "core_url": dmn.get("firefly_core_url"),
+                "registered": bool(
+                    dmn.get("firefly_api_name") and dmn.get("firefly_interface_id")
+                ),
+            },
+            "chainlink_ui": os.environ.get("CHAINLINK_UI", "http://127.0.0.1:6688"),
+        }
+        return Response(response, status=status.HTTP_200_OK)
+
+    @action(methods=["post"], detail=True, url_path="dmn-contract/call")
+    def dmn_contract_call(self, request, pk=None, *args, **kwargs):
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            return error_response
+
+        method = request.data.get("method")
+        args = request.data.get("args", [])
+        mode = request.data.get("mode", "call")
+
+        if not method:
+            return Response({"message": "method is required"}, status=status.HTTP_400_BAD_REQUEST)
+        if not isinstance(args, list):
+            return Response({"message": "args must be a list"}, status=status.HTTP_400_BAD_REQUEST)
+
+        payload = self._load_chainlink_deployments()
+        dmn_deployment = env.dmn_detail or (payload.get("dmn_deployment") or {})
+        contract_address = dmn_deployment.get("contractAddress")
+        if not contract_address:
+            return Response({"message": "DMN contract address not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        contract_name = self._get_dmn_contract_name()
+        rpc_url = os.environ.get("RPC_URL", "http://localhost:8545")
+        firefly_core_url = dmn_deployment.get("firefly_core_url")
+        firefly_api_name = dmn_deployment.get("firefly_api_name")
+
+        compiled = payload.get("compiled") or {}
+        contract_key = f"contracts/{contract_name}.sol:{contract_name}"
+        abi = (compiled.get("contracts") or {}).get(contract_key, {}).get("abi") or []
+
+        if firefly_core_url and firefly_api_name:
+            params = request.data.get("params")
+            if params is None:
+                params = {}
+            if not isinstance(params, dict):
+                return Response({"message": "params must be a dict"}, status=status.HTTP_400_BAD_REQUEST)
+            if args:
+                fn = next(
+                    (
+                        item
+                        for item in abi
+                        if item.get("type") == "function" and item.get("name") == method
+                    ),
+                    None,
+                )
+                if fn:
+                    input_names = [p.get("name") or f"arg{idx}" for idx, p in enumerate(fn.get("inputs") or [])]
+                    if len(args) != len(input_names):
+                        return Response(
+                            {"message": "args length does not match method inputs"},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+                    params = {name: value for name, value in zip(input_names, args)}
+                elif args:
+                    params = {f"arg{idx}": value for idx, value in enumerate(args)}
+
+            try:
+                firefly_mode = "invoke" if mode in ["invoke", "send"] else "query"
+                result = self._firefly_orchestrator().invoke_api(
+                    firefly_core_url,
+                    firefly_api_name,
+                    method,
+                    params,
+                    mode=firefly_mode,
+                )
+                return Response(result, status=status.HTTP_200_OK)
+            except Exception as exc:
+                return Response(
+                    {"message": "DMN contract call via FireFly failed", "error": str(exc)},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        scripts = self._resolve_chainlink_scripts()
+        compiled_path = str(Path(scripts["chainlink_root"]) / "deployment" / "compiled.json")
+        try:
+            output = execute_dmn_contract_call(
+                compiled_path=compiled_path,
+                contract_name=contract_name,
+                contract_address=contract_address,
+                method=method,
+                args=args,
+                mode=mode,
+                rpc_url=rpc_url,
+                from_address=request.data.get("from"),
+                gas=request.data.get("gas", 5000000),
+            )
+        except Exception as exc:
+            return Response(
+                {"message": "DMN contract call failed", "error": str(exc)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(output, status=status.HTTP_200_OK)
+
+    @action(methods=["post"], detail=True, url_path="dmn-contract/register-firefly")
+    def register_dmn_firefly(self, request, pk=None, *args, **kwargs):
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            return error_response
+        not_ready = self._require_started_or_activated(env)
+        if not_ready:
+            return not_ready
+
+        if env.firefly_status != "STARTED":
+            return Response(
+                {"message": "FireFly cluster has not been started"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        dmn = env.dmn_detail or {}
+        if not dmn.get("contractAddress"):
+            return Response(
+                {
+                    "message": (
+                        "DMN contract has not been deployed for current environment, "
+                        "please run DMN setup first"
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if dmn.get("firefly_api_name") and dmn.get("firefly_interface_id"):
+            return Response(
+                {
+                    "status": "STARTED",
+                    "message": "DMN contract already registered to FireFly",
+                    "dmn_detail": dmn,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        idempotent = self._ensure_idempotent_task(
+            request, str(env.id), "DMN_FIREFLY_REGISTER"
+        )
+        if idempotent.get("response"):
+            return idempotent["response"]
+        idempotency_key = idempotent["idempotency_key"]
+
+        previous_dmn_detail = dmn
+        task = create_task(
+            task_type="DMN_FIREFLY_REGISTER",
+            target_type="EthEnvironment",
+            target_id=str(env.id),
+            idempotency_key=idempotency_key,
+            rollback_info={"dmn_detail": previous_dmn_detail},
+        )
+        self._start_task(
+            task,
+            self._run_dmn_firefly_register,
+            env.id,
+            previous_dmn_detail,
+            str(task.id),
+        )
+        return Response(
+            {"task_id": str(task.id), "status": task.status},
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+    @action(methods=["get"], detail=True, url_path="data-contract")
+    def data_contract_detail(self, request, pk=None, *args, **kwargs):
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            return error_response
+
+        payload = self._load_chainlink_deployments()
+        suite = self._resolve_oracle_task_suite(env, payload)
+        contracts = suite.get("contracts") or {}
+        suite_chainlink = suite.get("chainlink") or {}
+        chainlink = env.chainlink_detail or (payload.get("chainlink_deployment") or {})
+        compiled = payload.get("compiled") or {}
+        contract_name = "ChainlinkDataTaskAdapter"
+        contract_key = f"contracts/{contract_name}.sol:{contract_name}"
+        abi = None
+        if request.query_params.get("include_abi") in ["1", "true", "yes"]:
+            abi = (compiled.get("contracts") or {}).get(contract_key, {}).get("abi")
+
+        firefly_payload = ((suite.get("firefly") or {}).get("data_task_adapter")) or {}
+        response = {
+            "contract": {
+                "name": contract_name,
+                "address": contracts.get("dataTaskAdapter"),
+            },
+            "main_router": contracts.get("mainRouter"),
+            "operator": chainlink.get("operator") or suite_chainlink.get("operator"),
+            "link_token": chainlink.get("linkToken") or suite_chainlink.get("linkToken"),
+            "job_id": suite_chainlink.get("dataJobId"),
+            "abi": abi,
+            "firefly": {
+                "api_name": firefly_payload.get("firefly_api_name"),
+                "interface_id": firefly_payload.get("firefly_interface_id"),
+                "core_url": firefly_payload.get("firefly_core_url"),
+                "registered": bool(
+                    firefly_payload.get("firefly_api_name")
+                    and firefly_payload.get("firefly_interface_id")
+                ),
+            },
+        }
+        return Response(response, status=status.HTTP_200_OK)
+
+    @action(methods=["get"], detail=True, url_path="compute-contract")
+    def compute_contract_detail(self, request, pk=None, *args, **kwargs):
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            return error_response
+
+        payload = self._load_chainlink_deployments()
+        suite = self._resolve_oracle_task_suite(env, payload)
+        contracts = suite.get("contracts") or {}
+        suite_chainlink = suite.get("chainlink") or {}
+        chainlink = env.chainlink_detail or (payload.get("chainlink_deployment") or {})
+        compiled = payload.get("compiled") or {}
+        contract_name = "ChainlinkComputeTaskAdapter"
+        contract_key = f"contracts/{contract_name}.sol:{contract_name}"
+        abi = None
+        if request.query_params.get("include_abi") in ["1", "true", "yes"]:
+            abi = (compiled.get("contracts") or {}).get(contract_key, {}).get("abi")
+
+        firefly_payload = ((suite.get("firefly") or {}).get("compute_task_adapter")) or {}
+        response = {
+            "contract": {
+                "name": contract_name,
+                "address": contracts.get("computeTaskAdapter"),
+            },
+            "main_router": contracts.get("mainRouter"),
+            "operator": chainlink.get("operator") or suite_chainlink.get("operator"),
+            "link_token": chainlink.get("linkToken") or suite_chainlink.get("linkToken"),
+            "job_id": suite_chainlink.get("computeJobId"),
+            "abi": abi,
+            "firefly": {
+                "api_name": firefly_payload.get("firefly_api_name"),
+                "interface_id": firefly_payload.get("firefly_interface_id"),
+                "core_url": firefly_payload.get("firefly_core_url"),
+                "registered": bool(
+                    firefly_payload.get("firefly_api_name")
+                    and firefly_payload.get("firefly_interface_id")
+                ),
+            },
+        }
+        return Response(response, status=status.HTTP_200_OK)
+
+    @action(methods=["post"], detail=True, url_path="data-contract/setup")
+    def setup_data_contract(self, request, pk=None, *args, **kwargs):
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            return error_response
+        not_ready = self._require_started_or_activated(env)
+        if not_ready:
+            return not_ready
+        if env.chainlink_status != "STARTED":
+            return Response(
+                {"message": "Chainlink cluster has not been started"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        suite = self._resolve_oracle_task_suite(env, self._load_chainlink_deployments())
+        if ((suite.get("contracts") or {}).get("dataTaskAdapter")):
+            return Response(
+                {
+                    "status": "STARTED",
+                    "message": "Data contract already deployed",
+                    "oracle_task_suite": suite,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        running_setup = (
+            Task.objects.filter(
+                target_type="EthEnvironment",
+                target_id=str(env.id),
+                type__in=["DATA_CONTRACT_SETUP", "COMPUTE_CONTRACT_SETUP"],
+                status__in=["PENDING", "RUNNING"],
+            )
+            .order_by("-created_at")
+            .first()
+        )
+        if running_setup:
+            return Response(
+                {"message": "Oracle task suite setup is running", "task_id": str(running_setup.id)},
+                status=status.HTTP_202_ACCEPTED,
+            )
+
+        idempotent = self._ensure_idempotent_task(
+            request, str(env.id), "DATA_CONTRACT_SETUP"
+        )
+        if idempotent.get("response"):
+            return idempotent["response"]
+        idempotency_key = idempotent["idempotency_key"]
+
+        task = create_task(
+            task_type="DATA_CONTRACT_SETUP",
+            target_type="EthEnvironment",
+            target_id=str(env.id),
+            idempotency_key=idempotency_key,
+            rollback_info={"chainlink_detail": env.chainlink_detail},
+        )
+        self._start_task(
+            task,
+            self._run_oracle_task_suite_setup,
+            env.id,
+            str(task.id),
+        )
+        return Response(
+            {"task_id": str(task.id), "status": task.status},
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+    @action(methods=["post"], detail=True, url_path="compute-contract/setup")
+    def setup_compute_contract(self, request, pk=None, *args, **kwargs):
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            return error_response
+        not_ready = self._require_started_or_activated(env)
+        if not_ready:
+            return not_ready
+        if env.chainlink_status != "STARTED":
+            return Response(
+                {"message": "Chainlink cluster has not been started"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        suite = self._resolve_oracle_task_suite(env, self._load_chainlink_deployments())
+        if ((suite.get("contracts") or {}).get("computeTaskAdapter")):
+            return Response(
+                {
+                    "status": "STARTED",
+                    "message": "Compute contract already deployed",
+                    "oracle_task_suite": suite,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        running_setup = (
+            Task.objects.filter(
+                target_type="EthEnvironment",
+                target_id=str(env.id),
+                type__in=["DATA_CONTRACT_SETUP", "COMPUTE_CONTRACT_SETUP"],
+                status__in=["PENDING", "RUNNING"],
+            )
+            .order_by("-created_at")
+            .first()
+        )
+        if running_setup:
+            return Response(
+                {"message": "Oracle task suite setup is running", "task_id": str(running_setup.id)},
+                status=status.HTTP_202_ACCEPTED,
+            )
+
+        idempotent = self._ensure_idempotent_task(
+            request, str(env.id), "COMPUTE_CONTRACT_SETUP"
+        )
+        if idempotent.get("response"):
+            return idempotent["response"]
+        idempotency_key = idempotent["idempotency_key"]
+
+        task = create_task(
+            task_type="COMPUTE_CONTRACT_SETUP",
+            target_type="EthEnvironment",
+            target_id=str(env.id),
+            idempotency_key=idempotency_key,
+            rollback_info={"chainlink_detail": env.chainlink_detail},
+        )
+        self._start_task(
+            task,
+            self._run_oracle_task_suite_setup,
+            env.id,
+            str(task.id),
+        )
+        return Response(
+            {"task_id": str(task.id), "status": task.status},
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+    @action(methods=["post"], detail=True, url_path="data-contract/register-firefly")
+    def register_data_contract_firefly(self, request, pk=None, *args, **kwargs):
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            return error_response
+        not_ready = self._require_started_or_activated(env)
+        if not_ready:
+            return not_ready
+        if env.firefly_status != "STARTED":
+            return Response(
+                {"message": "FireFly cluster has not been started"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        suite = self._resolve_oracle_task_suite(env, self._load_chainlink_deployments())
+        contracts = suite.get("contracts") or {}
+        if not contracts.get("dataTaskAdapter"):
+            return Response(
+                {"message": "Data contract has not been deployed, please run setup first"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        firefly_payload = ((suite.get("firefly") or {}).get("data_task_adapter")) or {}
+        if firefly_payload.get("firefly_api_name") and firefly_payload.get("firefly_interface_id"):
+            return Response(
+                {
+                    "status": "STARTED",
+                    "message": "Data contract already registered to FireFly",
+                    "oracle_task_suite": suite,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        idempotent = self._ensure_idempotent_task(
+            request, str(env.id), "DATA_CONTRACT_FIREFLY_REGISTER"
+        )
+        if idempotent.get("response"):
+            return idempotent["response"]
+        idempotency_key = idempotent["idempotency_key"]
+
+        task = create_task(
+            task_type="DATA_CONTRACT_FIREFLY_REGISTER",
+            target_type="EthEnvironment",
+            target_id=str(env.id),
+            idempotency_key=idempotency_key,
+            rollback_info={"chainlink_detail": env.chainlink_detail},
+        )
+        self._start_task(
+            task,
+            self._run_oracle_task_firefly_register,
+            env.id,
+            "data",
+            str(task.id),
+        )
+        return Response(
+            {"task_id": str(task.id), "status": task.status},
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+    @action(methods=["post"], detail=True, url_path="compute-contract/register-firefly")
+    def register_compute_contract_firefly(self, request, pk=None, *args, **kwargs):
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            return error_response
+        not_ready = self._require_started_or_activated(env)
+        if not_ready:
+            return not_ready
+        if env.firefly_status != "STARTED":
+            return Response(
+                {"message": "FireFly cluster has not been started"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        suite = self._resolve_oracle_task_suite(env, self._load_chainlink_deployments())
+        contracts = suite.get("contracts") or {}
+        if not contracts.get("computeTaskAdapter"):
+            return Response(
+                {"message": "Compute contract has not been deployed, please run setup first"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        firefly_payload = ((suite.get("firefly") or {}).get("compute_task_adapter")) or {}
+        if firefly_payload.get("firefly_api_name") and firefly_payload.get("firefly_interface_id"):
+            return Response(
+                {
+                    "status": "STARTED",
+                    "message": "Compute contract already registered to FireFly",
+                    "oracle_task_suite": suite,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        idempotent = self._ensure_idempotent_task(
+            request, str(env.id), "COMPUTE_CONTRACT_FIREFLY_REGISTER"
+        )
+        if idempotent.get("response"):
+            return idempotent["response"]
+        idempotency_key = idempotent["idempotency_key"]
+
+        task = create_task(
+            task_type="COMPUTE_CONTRACT_FIREFLY_REGISTER",
+            target_type="EthEnvironment",
+            target_id=str(env.id),
+            idempotency_key=idempotency_key,
+            rollback_info={"chainlink_detail": env.chainlink_detail},
+        )
+        self._start_task(
+            task,
+            self._run_oracle_task_firefly_register,
+            env.id,
+            "compute",
+            str(task.id),
+        )
+        return Response(
+            {"task_id": str(task.id), "status": task.status},
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+    @action(methods=["get"], detail=True, url_path="relayer-contract")
+    def relayer_contract_detail(self, request, pk=None, *args, **kwargs):
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            return error_response
+
+        payload = self._load_chainlink_deployments()
+        relayer = self._resolve_relayer_deployment(env, payload)
+        compiled = payload.get("compiled") or {}
+        contract_name = "CrossChainAdapter"
+        contract = relayer.get("contract") or {}
+        contract_address = contract.get("address") or relayer.get("contractAddress")
+        abi = None
+        if request.query_params.get("include_abi") in ["1", "true", "yes"]:
+            contract_key = f"contracts/{contract_name}.sol:{contract_name}"
+            abi = (compiled.get("contracts") or {}).get(contract_key, {}).get("abi")
+
+        firefly_payload = relayer.get("firefly") or {}
+        node_status = self._chainlink_orchestrator().relayer_node_status()
+        response = {
+            "contract": {
+                "name": contract_name,
+                "address": contract_address,
+                "tx_hash": contract.get("txHash") or relayer.get("tx_hash"),
+            },
+            "relayers": relayer.get("relayers") or [],
+            "threshold": relayer.get("threshold"),
+            "abi": abi,
+            "firefly": {
+                "api_name": firefly_payload.get("firefly_api_name"),
+                "interface_id": firefly_payload.get("firefly_interface_id"),
+                "core_url": firefly_payload.get("firefly_core_url"),
+                "registered": bool(
+                    firefly_payload.get("firefly_api_name")
+                    and firefly_payload.get("firefly_interface_id")
+                ),
+            },
+            "node": node_status,
+        }
+        return Response(response, status=status.HTTP_200_OK)
+
+    @action(methods=["post"], detail=True, url_path="relayer-contract/setup")
+    def setup_relayer_contract(self, request, pk=None, *args, **kwargs):
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            return error_response
+        not_ready = self._require_started_or_activated(env)
+        if not_ready:
+            return not_ready
+        if env.chainlink_status != "STARTED":
+            return Response(
+                {"message": "Chainlink cluster has not been started"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        relayer = self._resolve_relayer_deployment(env, self._load_chainlink_deployments())
+        contract = relayer.get("contract") or {}
+        contract_address = contract.get("address") or relayer.get("contractAddress")
+        if contract_address:
+            return Response(
+                {
+                    "status": "STARTED",
+                    "message": "Relayer contract already deployed",
+                    "relayer": relayer,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        idempotent = self._ensure_idempotent_task(
+            request, str(env.id), "RELAYER_CONTRACT_SETUP"
+        )
+        if idempotent.get("response"):
+            return idempotent["response"]
+        idempotency_key = idempotent["idempotency_key"]
+
+        task = create_task(
+            task_type="RELAYER_CONTRACT_SETUP",
+            target_type="EthEnvironment",
+            target_id=str(env.id),
+            idempotency_key=idempotency_key,
+            rollback_info={"chainlink_detail": env.chainlink_detail},
+        )
+        self._start_task(
+            task,
+            self._run_relayer_setup,
+            env.id,
+            str(task.id),
+        )
+        return Response(
+            {"task_id": str(task.id), "status": task.status},
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+    @action(methods=["post"], detail=True, url_path="relayer-contract/register-firefly")
+    def register_relayer_contract_firefly(self, request, pk=None, *args, **kwargs):
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            return error_response
+        not_ready = self._require_started_or_activated(env)
+        if not_ready:
+            return not_ready
+        if env.firefly_status != "STARTED":
+            return Response(
+                {"message": "FireFly cluster has not been started"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        relayer = self._resolve_relayer_deployment(env, self._load_chainlink_deployments())
+        contract = relayer.get("contract") or {}
+        contract_address = contract.get("address") or relayer.get("contractAddress")
+        if not contract_address:
+            return Response(
+                {
+                    "message": (
+                        "Relayer contract has not been deployed for current environment, "
+                        "please run relayer setup first"
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        firefly_payload = relayer.get("firefly") or {}
+        if firefly_payload.get("firefly_api_name") and firefly_payload.get(
+            "firefly_interface_id"
+        ):
+            return Response(
+                {
+                    "status": "STARTED",
+                    "message": "Relayer contract already registered to FireFly",
+                    "relayer": relayer,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        idempotent = self._ensure_idempotent_task(
+            request, str(env.id), "RELAYER_CONTRACT_FIREFLY_REGISTER"
+        )
+        if idempotent.get("response"):
+            return idempotent["response"]
+        idempotency_key = idempotent["idempotency_key"]
+
+        task = create_task(
+            task_type="RELAYER_CONTRACT_FIREFLY_REGISTER",
+            target_type="EthEnvironment",
+            target_id=str(env.id),
+            idempotency_key=idempotency_key,
+            rollback_info={"chainlink_detail": env.chainlink_detail},
+        )
+        self._start_task(
+            task,
+            self._run_relayer_firefly_register,
+            env.id,
+            str(task.id),
+        )
+        return Response(
+            {"task_id": str(task.id), "status": task.status},
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+    @action(methods=["get"], detail=True, url_path="relayer-node")
+    def relayer_node_status(self, request, pk=None, *args, **kwargs):
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            return error_response
+        not_ready = self._require_started_or_activated(env)
+        if not_ready:
+            return not_ready
+        return Response(
+            self._chainlink_orchestrator().relayer_node_status(),
+            status=status.HTTP_200_OK,
+        )
+
+    @action(methods=["post"], detail=True, url_path="relayer-node/(?P<command>[^/.]+)")
+    def relayer_node_control(self, request, pk=None, command=None, *args, **kwargs):
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            return error_response
+        not_ready = self._require_started_or_activated(env)
+        if not_ready:
+            return not_ready
+        try:
+            payload = self._chainlink_orchestrator().control_relayer_node(command or "")
+        except ValueError as exc:
+            return Response({"message": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as exc:
+            return Response(
+                {"message": f"Relayer node control failed: {exc}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(payload, status=status.HTTP_200_OK)
+
+    @action(methods=["post"], detail=True, url_path="chainlink/install")
+    def install_chainlink(self, request, pk=None, *args, **kwargs):
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            LOG.warning("Chainlink action=install_missing_env env=%s", pk)
+            return error_response
+        not_ready = self._require_started_or_activated(env)
+        if not_ready:
+            LOG.warning(
+                "Chainlink action=install_rejected env=%s status=%s",
+                env.id,
+                env.status,
+            )
+            return not_ready
+
+        mode = (request.data.get("mode") or "lite").lower()
+        if mode not in ["lite", "full"]:
+            mode = "lite"
+
+        idempotent = self._ensure_idempotent_task(
+            request, str(env.id), "CHAINLINK_INSTALL", mode
+        )
+        if idempotent.get("response"):
+            return idempotent["response"]
+        idempotency_key = idempotent["idempotency_key"]
+
+        LOG.info(
+            "Chainlink action=install_request env=%s mode=%s user=%s",
+            env.id,
+            mode,
+            getattr(request.user, "id", None),
+        )
+
+        task, _ = create_task_with_status_transition(
+            task_type="CHAINLINK_INSTALL",
+            target_type="EthEnvironment",
+            target_id=str(env.id),
+            idempotency_key=idempotency_key,
+            target_obj=env,
+            status_field="chainlink_status",
+            pending_value="SETTINGUP",
+        )
+        LOG.info(
+            "Chainlink action=install_task task=%s env=%s mode=%s status=%s",
+            task.id,
+            env.id,
+            mode,
+            task.status,
+        )
+
+        self._start_task(
+            task,
+            self._run_chainlink_setup,
+            env.id,
+            mode,
+            str(task.id),
+        )
+        return Response(
+            {"task_id": str(task.id), "status": task.status, "mode": mode},
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+    @action(methods=["post"], detail=True, url_path="chainlink/create-job")
+    def create_chainlink_job(self, request, pk=None, *args, **kwargs):
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            LOG.warning("Chainlink action=create_job_missing_env env=%s", pk)
+            return error_response
+        not_ready = self._require_started_or_activated(env)
+        if not_ready:
+            return not_ready
+        if env.chainlink_status != "STARTED":
+            return Response(
+                {"message": "Chainlink cluster has not been started"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        recreate = bool(request.data.get("recreate"))
+        job_kind_raw = request.data.get("job_kind") or request.data.get("jobKind") or "dmn"
+        job_kind = (
+            "datasource"
+            if str(job_kind_raw).lower() in ["datasource", "data_source", "source"]
+            else "dmn"
+        )
+        data_source_url = request.data.get("data_source_url") or request.data.get("dataSourceUrl")
+        data_source_method = (request.data.get("data_source_method") or request.data.get("dataSourceMethod") or "GET").upper()
+        if data_source_method not in ["GET", "POST"]:
+            return Response(
+                {"message": "data_source_method must be GET or POST"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if data_source_url and not str(data_source_url).startswith(("http://", "https://")):
+            return Response(
+                {"message": "data_source_url must start with http:// or https://"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        sync_onchain_raw = request.data.get("sync_onchain")
+        if sync_onchain_raw is None:
+            sync_onchain = job_kind == "dmn"
+        elif isinstance(sync_onchain_raw, str):
+            sync_onchain = sync_onchain_raw.lower() not in ["0", "false", "no"]
+        else:
+            sync_onchain = bool(sync_onchain_raw)
+        external_job_id = request.data.get("external_job_id") or request.data.get("externalJobId")
+
+        mode_key = (
+            f"kind={job_kind}:recreate={int(recreate)}:sync={int(sync_onchain)}:"
+            f"job={external_job_id or ''}:url={data_source_url or ''}:method={data_source_method}"
+        )
+        idempotent = self._ensure_idempotent_task(
+            request, str(env.id), "CHAINLINK_JOB_CREATE", mode_key
+        )
+        if idempotent.get("response"):
+            return idempotent["response"]
+        idempotency_key = idempotent["idempotency_key"]
+
+        task = create_task(
+            task_type="CHAINLINK_JOB_CREATE",
+            target_type="EthEnvironment",
+            target_id=str(env.id),
+            idempotency_key=idempotency_key,
+            rollback_info={
+                "chainlink_detail": env.chainlink_detail,
+                "dmn_detail": env.dmn_detail,
+            },
+        )
+        self._start_task(
+            task,
+            self._run_chainlink_create_job,
+            env.id,
+            recreate,
+            external_job_id,
+            sync_onchain,
+            job_kind,
+            data_source_url,
+            data_source_method,
+            str(task.id),
+        )
+        return Response(
+            {
+                "task_id": str(task.id),
+                "status": task.status,
+                "job_kind": job_kind,
+                "recreate": recreate,
+                "sync_onchain": sync_onchain,
+                "external_job_id": external_job_id,
+                "data_source_url": data_source_url,
+                "data_source_method": data_source_method,
+            },
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+    @action(methods=["get"], detail=True, url_path="account-check")
+    def account_check(self, request, pk=None, *args, **kwargs):
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            return error_response
+
+        try:
+            result = self._check_system_account_available(env)
+        except Exception as exc:
+            LOG.warning("Eth account check failed env=%s error=%s", pk, exc)
+            return Response(
+                {"message": "account check failed", "error": str(exc)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        http_status = (
+            status.HTTP_200_OK
+            if result.get("has_expected_account") and result.get("unlock_ok")
+            else status.HTTP_409_CONFLICT
+        )
+        return Response(result, status=http_status)
 
     @action(methods=["post"], detail=True, url_path="init")
     @timeitwithname("InitEth")
@@ -892,14 +2404,47 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
 
         env.status = "INITIALIZED"
         env.save()
+
+        # Validate the preconfigured system account right after network bootstrap.
+        try:
+            account_check = self._check_system_account_available(env)
+            LOG.info(
+                "Eth account check env=%s has_expected=%s unlock_ok=%s rpc=%s",
+                env.id,
+                account_check.get("has_expected_account"),
+                account_check.get("unlock_ok"),
+                account_check.get("rpc_url"),
+            )
+            if not account_check.get("has_expected_account"):
+                LOG.warning(
+                    "Eth account check env=%s expected account missing expected=%s accounts=%s",
+                    env.id,
+                    account_check.get("expected_account"),
+                    account_check.get("accounts"),
+                )
+        except Exception as exc:
+            LOG.warning("Eth account check env=%s failed: %s", env.id, exc)
+
         return Response(status=status.HTTP_201_CREATED)
 
     @action(methods=["post"], detail=True, url_path="identity-contract/install")
     def install_identity_contract(self, request, pk=None, *args, **kwargs):
-        try:
-            env = EthEnvironment.objects.get(pk=pk)
-        except EthEnvironment.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            return error_response
+        not_ready = self._require_started_or_activated(
+            env,
+            message="EthEnvironment has not been activated or has started",
+        )
+        if not_ready:
+            return not_ready
+
+        idempotent = self._ensure_idempotent_task(
+            request, str(env.id), "IDENTITY_CONTRACT_INSTALL"
+        )
+        if idempotent.get("response"):
+            return idempotent["response"]
+        idempotency_key = idempotent["idempotency_key"]
 
         deployment, _ = IdentityDeployment.objects.get_or_create(
             eth_environment=env
@@ -916,21 +2461,24 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
                 status=status.HTTP_200_OK,
             )
 
-        env.identity_contract_status = "PENDING"
-        env.save(update_fields=["identity_contract_status"])
-        deployment.status = "PENDING"
-        deployment.error = None
-        deployment.save(update_fields=["status", "error", "updated_at"])
-
-        task = Task.objects.create(
-            type="IDENTITY_CONTRACT_INSTALL",
-            target_type="EthEnvironment",
-            target_id=str(env.id),
-            status="PENDING",
-        )
+        with transaction.atomic():
+            previous_status = env.identity_contract_status
+            env.identity_contract_status = "PENDING"
+            env.save(update_fields=["identity_contract_status"])
+            deployment.status = "PENDING"
+            deployment.error = None
+            deployment.save(update_fields=["status", "error", "updated_at"])
+            task = create_task(
+                task_type="IDENTITY_CONTRACT_INSTALL",
+                target_type="EthEnvironment",
+                target_id=str(env.id),
+                idempotency_key=idempotency_key,
+                rollback_info={"identity_contract_status": previous_status},
+            )
         LOG.info("IdentityContract action=install_task task=%s env=%s", task.id, env.id)
 
-        self._start_task(task, self._deploy_identity_contract, env.id)
+        identity = self._identity_orchestrator()
+        self._start_task(task, identity.deploy_identity_contract, env.id)
 
         return Response(
             {"task_id": str(task.id), "status": task.status},
@@ -939,28 +2487,37 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
 
     @action(methods=["post"], detail=True, url_path="identity-contract/redeploy")
     def redeploy_identity_contract(self, request, pk=None, *args, **kwargs):
-        try:
-            env = EthEnvironment.objects.get(pk=pk)
-        except EthEnvironment.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            return error_response
 
-        env.identity_contract_status = "PENDING"
-        env.save(update_fields=["identity_contract_status"])
-        deployment, _ = IdentityDeployment.objects.get_or_create(
-            eth_environment=env
+        idempotent = self._ensure_idempotent_task(
+            request, str(env.id), "IDENTITY_CONTRACT_REDEPLOY"
         )
-        deployment.status = "PENDING"
-        deployment.error = None
-        deployment.save(update_fields=["status", "error", "updated_at"])
+        if idempotent.get("response"):
+            return idempotent["response"]
+        idempotency_key = idempotent["idempotency_key"]
 
-        task = Task.objects.create(
-            type="IDENTITY_CONTRACT_REDEPLOY",
-            target_type="EthEnvironment",
-            target_id=str(env.id),
-            status="PENDING",
-        )
+        with transaction.atomic():
+            previous_status = env.identity_contract_status
+            env.identity_contract_status = "PENDING"
+            env.save(update_fields=["identity_contract_status"])
+            deployment, _ = IdentityDeployment.objects.get_or_create(
+                eth_environment=env
+            )
+            deployment.status = "PENDING"
+            deployment.error = None
+            deployment.save(update_fields=["status", "error", "updated_at"])
+            task = create_task(
+                task_type="IDENTITY_CONTRACT_REDEPLOY",
+                target_type="EthEnvironment",
+                target_id=str(env.id),
+                idempotency_key=idempotency_key,
+                rollback_info={"identity_contract_status": previous_status},
+            )
         LOG.info("IdentityContract action=redeploy_task task=%s env=%s", task.id, env.id)
-        self._start_task(task, self._redeploy_and_sync, env.id)
+        identity = self._identity_orchestrator()
+        self._start_task(task, identity.redeploy_and_sync, env.id)
         return Response(
             {"task_id": str(task.id), "status": task.status},
             status=status.HTTP_202_ACCEPTED,
@@ -968,22 +2525,22 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
 
     @action(methods=["get"], detail=True, url_path="identity-contract")
     def identity_contract_detail(self, request, pk=None, *args, **kwargs):
-        try:
-            env = EthEnvironment.objects.get(pk=pk)
-        except EthEnvironment.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            return error_response
 
         deployment = IdentityDeployment.objects.filter(
             eth_environment=env
         ).first()
+        identity = self._identity_orchestrator()
         firefly_core_url = None
         try:
-            firefly_core_url = self._get_firefly_core_url(env)
+            firefly_core_url = identity.get_firefly_core_url(env)
         except Exception:
             firefly_core_url = None
         abi = None
         if request.query_params.get("include_abi") in ["1", "true", "yes"]:
-            abi = self._load_identity_abi()
+            abi = identity.load_identity_abi()
 
         response = {
             "environment_id": str(env.id),
@@ -1201,88 +2758,79 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
         """
         安装Firefly
         """
-        try:
-            env = EthEnvironment.objects.get(pk=pk)
-        except EthEnvironment.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        if env.status != "ACTIVATED":
-            return Response(
-                {"message": "EthEnvironment has not been activated or has started"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        headers = request.headers
-        org_id = request.data.get("org_id")
-        install_fabric_chaincode_flow(
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            return error_response
+        not_ready = self._require_started_or_activated(
             env,
+            message="EthEnvironment has not been activated or has started",
+        )
+        if not_ready:
+            return not_ready
+
+        org_id = request.data.get("org_id")
+        return self._enqueue_eth_chaincode_install(
+            request,
+            env,
+            task_type="ETH_FIREFLY_INSTALL",
+            status_field="firefly_status",
             file_path=FABRIC_CONFIG + "/firefly-go.zip",
             chaincode_name="Firefly",
-            auth=headers["Authorization"],
             org_id=org_id,
-            status_field="firefly_status",
         )
-        return Response(status=status.HTTP_200_OK)
 
     @action(methods=["post"], detail=True, url_path="install_oracle")
     def install_oracle(self, request, pk=None, *args, **kwargs):
         """
         安装Oracle
         """
-        try:
-            env = EthEnvironment.objects.get(pk=pk)
-        except EthEnvironment.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        if env.status != "ACTIVATED":
-            return Response(
-                {"message": "EthEnvironment has not been activated or has started"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        headers = request.headers
-        org_id = request.data.get("org_id")
-        install_fabric_chaincode_flow(
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            return error_response
+        not_ready = self._require_started_or_activated(
             env,
+            message="EthEnvironment has not been activated or has started",
+        )
+        if not_ready:
+            return not_ready
+
+        org_id = request.data.get("org_id")
+        return self._enqueue_eth_chaincode_install(
+            request,
+            env,
+            task_type="ETH_ORACLE_INSTALL",
+            status_field="Oracle_status",
             file_path=ORACLE_CONTRACT_PATH + "/oracle-go.zip",
             chaincode_name="Oracle",
-            auth=headers["Authorization"],
             org_id=org_id,
-            status_field="Oracle_status",
         )
-
-        return Response(status=status.HTTP_200_OK)
 
     @action(methods=["post"], detail=True, url_path="install_dmn_engine")
     def install_dmn_engine(self, request, pk=None, *args, **kwargs):
         """
         启动DMN Engine: 部署合约
         """
-        try:
-            env = EthEnvironment.objects.get(pk=pk)
-        except EthEnvironment.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        if env.status != "ACTIVATED":
-            return Response(
-                {"message": "EthEnvironment has not been activated or has started"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        headers = request.headers
-        org_id = request.data.get("org_id")
-
-        install_fabric_chaincode_flow(
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            return error_response
+        not_ready = self._require_started_or_activated(
             env,
+            message="EthEnvironment has not been activated or has started",
+        )
+        if not_ready:
+            return not_ready
+
+        org_id = request.data.get("org_id")
+        return self._enqueue_eth_chaincode_install(
+            request,
+            env,
+            task_type="ETH_DMN_INSTALL",
+            status_field="DMN_status",
             file_path=DMN_CONTRACT_PATH + "/dmn-engine.zip",
             chaincode_name="DMNEngine",
-            auth=headers["Authorization"],
             org_id=org_id,
             language="java",
-            status_field="DMN_status",
         )
-
-        return Response(status=status.HTTP_200_OK)
 
     @action(methods=["get"], detail=False, url_path="requestOracleFFI")
     def requestOracleFFI(self, request, pk=None, *args, **kwargs):

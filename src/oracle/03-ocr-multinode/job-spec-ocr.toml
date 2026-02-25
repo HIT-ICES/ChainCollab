@@ -1,0 +1,25 @@
+type            = "offchainreporting"
+schemaVersion   = 1
+name            = "OCR Node Job"
+externalJobID   = "11111111-2222-3333-4444-555555555555"
+isBootstrapPeer = false
+evmChainID      = 3456
+keyBundleID     = "<YOUR_OCR_KEY_BUNDLE_ID>"
+
+# OCR v1 使用 OffchainAggregator 合约地址
+contractAddress = "<YOUR_OCR_V1_AGGREGATOR_ADDRESS>"
+
+# OCR v1 transmitter
+transmitterAddress = "<YOUR_ONCHAIN_TRANSMITTER_ADDRESS>"
+
+# OCR v1 p2p bootstrap peers
+p2pBootstrapPeers = [
+  "<BOOTSTRAP_PEER_ADDRESS>"
+]
+
+# OCR v1 pipeline
+observationSource = """
+    fetch  [type="http" method=GET url="http://172.31.61.180:8080/value"]
+    parse  [type="jsonparse" path="value"]
+    fetch -> parse
+"""

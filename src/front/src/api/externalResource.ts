@@ -6,7 +6,6 @@ export const getBPMNList = async (consortiumId: string = '1') => {
         const response = await api.get(`/consortiums/${consortiumId}/bpmns/_list`)
         return response.data.data;
     } catch (error) {
-        console.log(error);
         return [];
     }
 }
@@ -16,7 +15,6 @@ export const retrieveBPMN = async (bpmnId: string, consortiumId: string = "1") =
         const response = await api.get(`/consortiums/${consortiumId}/bpmns/${bpmnId}`)
         return response.data;
     } catch (error) {
-        console.log(error);
         return null;
     }
 
@@ -34,7 +32,15 @@ export const addBPMN = async (consortiumId: string, name: string, orgId: string,
         })
         return response.data;
     } catch (error) {
-        console.log(error);
+        return null;
+    }
+}
+
+export const importInitialBPMNs = async (consortiumId: string) => {
+    try {
+        const response = await api.post(`/consortiums/${consortiumId}/bpmns/import-initial`)
+        return response.data;
+    } catch (error) {
         return null;
     }
 }
@@ -50,7 +56,6 @@ export const addDmn = async (consortiumId: string, name: string, orgId: string, 
         })
         return response.data;
     } catch (error) {
-        console.log(error);
         return null;
     }
 }
@@ -60,7 +65,6 @@ export const getDmnList = async (consortiumId: string) => {
         const response = await api.get(`/consortiums/${consortiumId}/dmns`)
         return response.data.data;
     } catch (error) {
-        console.log(error);
         return [];
     }
 }
@@ -70,7 +74,6 @@ export const getBPMNInstanceList = async (BPMNId: string) => {
         const response = await api.get(`/bpmns/${BPMNId}/bpmn-instances`)
         return response.data.data;
     } catch (error) {
-        console.log(error);
         return [];
     }
 }
@@ -87,7 +90,6 @@ export const addBPMNInstance = async (bpmnId: string, name: string, currentEnvId
         })
         return response.data;
     } catch (error) {
-        console.log(error);
         return null;
     }
 }
@@ -97,7 +99,6 @@ export const retrieveBPMNInstance = async (bpmnInstanceId: string, bpmnId: strin
         const response = await api.get(`/bpmns/${bpmnId}/bpmn-instances/${bpmnInstanceId}`)
         return response.data;
     } catch (error) {
-        console.log(error);
         return null;
     }
 
@@ -109,7 +110,6 @@ export const deleteBPMNInstance = async (bpmnInstanceId: string, bpmnId: string)
         const response = await api.delete(`/bpmns/${bpmnId}/bpmn-instances/${bpmnInstanceId}`)
         return response.data;
     } catch (error) {
-        console.log(error);
         return null;
     }
 }
@@ -119,7 +119,19 @@ export const updateBPMNStatus = async (bpmnId: string, newStatus: string, consor
         const response = await api.put(`/consortiums/${consortiumId}/bpmns/${bpmnId}`, { status: newStatus })
         return response.data;
     } catch (error) {
-        console.log(error);
+        return null;
+    }
+}
+
+export const updateBPMN = async (
+    bpmnId: string,
+    payload: Record<string, any>,
+    consortiumId: string = "1",
+) => {
+    try {
+        const response = await api.put(`/consortiums/${consortiumId}/bpmns/${bpmnId}`, payload);
+        return response.data;
+    } catch (error) {
         return null;
     }
 }
@@ -132,7 +144,6 @@ export const updateBpmnEnv = async (bpmnId: string, envId: string, envType: stri
         })
         return response.data;
     } catch (error) {
-        console.log(error);
         return null;
     }
 }
@@ -142,7 +153,6 @@ export const updateBPMNInstanceStatus = async (bpmnInstanceId: string, bpmnId: s
         const response = await api.put(`/bpmns/${bpmnId}/bpmn-instances/${bpmnInstanceId}`, { status: newStatus })
         return response.data;
     } catch (error) {
-        console.log(error);
         return null;
     }
 }
@@ -152,7 +162,6 @@ export const updateBPMNFireflyUrl = async (bpmnId: string, fireflyUrl: string, c
         const response = await api.put(`/consortiums/${consortiumId}/bpmns/${bpmnId}`, { firefly_url: fireflyUrl })
         return response.data;
     } catch (error) {
-        console.log(error);
         return null;
     }
 }
@@ -162,7 +171,6 @@ export const updateBpmnEvents = async (bpmnId: string, events: string, consortiu
         const response = await api.put(`/consortiums/${consortiumId}/bpmns/${bpmnId}`, { events: events })
         return response.data;
     } catch (error) {
-        console.log(error);
         return null;
     }
 }
@@ -172,7 +180,6 @@ export const updateBPMNInstanceFireflyUrl = async (bpmnInstanceId: string, bpmnI
         const response = await api.put(`/bpmns/${bpmnId}/bpmn-instances/${bpmnInstanceId}`, { firefly_url: fireflyUrl })
         return response.data;
     } catch (error) {
-        console.log(error);
         return null;
     }
 }
@@ -190,7 +197,6 @@ export const getBindingByBPMNInstance = async (bpmnInstanceId: string) => {
             }
         )
     } catch (error) {
-        console.log(error);
         return [];
     }
 }
@@ -203,7 +209,6 @@ export const Binding = async (bpmnInstanceId: string, participantId: string, mem
         })
         return response.data;
     } catch (error) {
-        console.log(error);
         return null;
     }
 }
@@ -213,7 +218,6 @@ export const getMapInfoofBPMNInstance = async (bpmnInstanceId: string, bpmnId: s
         const response = await api.get(`bpmns/${bpmnId}/bpmn-instances/${bpmnInstanceId}/bindInfo`)
         return response.data.data;
     } catch (error) {
-        console.log(error);
         return null;
     }
 }
@@ -227,7 +231,6 @@ export const packageBpmn = async (chaincodeContent: string, ffiContent: string, 
         })
         return response.data;
     } catch (error) {
-        console.log(error);
         return null;
     }
 }
@@ -251,7 +254,6 @@ export const uploadEthContract = async (contractContent: string, orgId: string, 
         const response = await api.post(`/consortiums/${consortiumId}/bpmns/${bpmnId}/upload-eth`, requestData)
         return response.data;
     } catch (error) {
-        console.log(error);
         return null;
     }
 }
@@ -264,7 +266,6 @@ export const compileEthContract = async (contractId: string, orgId: string, bpmn
         })
         return response.data;
     } catch (error) {
-        console.log(error);
         return null;
     }
 }
@@ -278,7 +279,6 @@ export const deployEthContract = async (contractId: string, envId: string, names
         })
         return response.data;
     } catch (error) {
-        console.log(error);
         return null;
     }
 }
@@ -292,21 +292,19 @@ export const packageBpmnToInstance = async (chaincodeContent: string, ffiContent
         })
         return response.data;
     } catch (error) {
-        console.log(error);
         return null;
     }
 }
 
-export const getFireflyWithMSP = async (msp) => {
+export const getFireflyWithMSP = async (msp: string, envId: string) => {
     try {
-        const response = await api.get('environments/1/fireflys/get_firefly_with_msp', {
+        const response = await api.get(`environments/${envId}/fireflys/get_firefly_with_msp`, {
             params: {
                 msp: msp
             },
         })
         return response.data;
     } catch (error) {
-        console.log(error);
         return null;
     }
 }

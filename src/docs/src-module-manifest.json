@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "description": "Source-of-truth module ownership and lifecycle for /src",
+  "modules": [
+    {
+      "name": "backend",
+      "status": "active",
+      "domain": "control-plane-backend",
+      "owner": "platform",
+      "notes": "Django APIs and orchestration entrypoints"
+    },
+    {
+      "name": "front",
+      "status": "active",
+      "domain": "control-plane-frontend",
+      "owner": "platform",
+      "notes": "Main React frontend"
+    },
+    {
+      "name": "agent",
+      "status": "active",
+      "domain": "environment-orchestrator",
+      "owner": "platform",
+      "notes": "Container/network orchestration agent"
+    },
+    {
+      "name": "deployment",
+      "status": "active",
+      "domain": "deployment-metadata",
+      "owner": "platform",
+      "notes": "Generated deployment metadata snapshots"
+    },
+    {
+      "name": "runtime",
+      "status": "runtime",
+      "domain": "runtime-state",
+      "owner": "platform",
+      "notes": "Logs, pids, task runtime files"
+    },
+    {
+      "name": "oracle",
+      "status": "active",
+      "domain": "oracle-runtime",
+      "owner": "oracle",
+      "notes": "Backend-integrated Chainlink/DMN scripts"
+    },
+    {
+      "name": "oracle-data-compute-lab",
+      "status": "experimental",
+      "domain": "oracle-data-compute-research",
+      "owner": "research",
+      "notes": "Data/compute task experiments and gas studies"
+    },
+    {
+      "name": "crosschain-relay-lab",
+      "status": "experimental",
+      "domain": "crosschain-relay-research",
+      "owner": "research",
+      "notes": "Cross-chain relay contract and relayer experiments"
+    },
+    {
+      "name": "newTranslator",
+      "status": "active",
+      "domain": "bpmn-dsl-codegen",
+      "owner": "translator",
+      "notes": "BPMN -> DSL -> Solidity/Go generation pipeline"
+    },
+    {
+      "name": "bpmn-chor-app",
+      "status": "experimental",
+      "domain": "bpmn-modeler-shell",
+      "owner": "translator",
+      "notes": "Standalone modeler shell/package"
+    },
+    {
+      "name": "oracle-node",
+      "status": "legacy",
+      "domain": "oracle-legacy-stack",
+      "owner": "legacy",
+      "notes": "Parallel oracle stack; keep frozen unless migration required"
+    },
+    {
+      "name": "relayer-node",
+      "status": "legacy",
+      "domain": "relay-legacy-stack",
+      "owner": "legacy",
+      "notes": "Legacy relayer implementation"
+    },
+    {
+      "name": "crosschain_adapter",
+      "status": "legacy",
+      "domain": "adapter-legacy",
+      "owner": "legacy",
+      "notes": "Legacy Fabric/EVM adapter contracts"
+    },
+    {
+      "name": "jsoncodeeditor",
+      "status": "legacy",
+      "domain": "editor-extension-legacy",
+      "owner": "legacy",
+      "notes": "Historical VSCode extension"
+    },
+    {
+      "name": "geth-node",
+      "status": "support",
+      "domain": "chain-local-runtime",
+      "owner": "infra",
+      "notes": "Local geth runtime assets"
+    },
+    {
+      "name": "geth_identity_contract",
+      "status": "support",
+      "domain": "identity-contract-assets",
+      "owner": "infra",
+      "notes": "Identity contract artifacts/scripts"
+    },
+    {
+      "name": "docs",
+      "status": "active",
+      "domain": "architecture-docs",
+      "owner": "platform",
+      "notes": "Architecture and governance docs"
+    },
+    {
+      "name": "scripts",
+      "status": "active",
+      "domain": "tooling-scripts",
+      "owner": "platform",
+      "notes": "Repository tooling scripts"
+    }
+  ]
+}

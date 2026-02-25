@@ -11,4 +11,5 @@ export interface OrgItemType {
 export interface EnvItemType {
     id: string;
     name: string;
+    type?: string;
   }

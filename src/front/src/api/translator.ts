@@ -36,7 +36,6 @@ export const generateChaincode = async (bpmnContent: string, target: "go" | "sol
             }
         }
     } catch (error) {
-        console.log(error);
     }
 }
 
@@ -47,7 +46,6 @@ export const getParticipantsByContent = async (bpmnContent: string) => {
         })
         return response.data;
     } catch (error) {
-        console.log(error);
         return [];
     }
 }
@@ -60,7 +58,6 @@ export const getBusinessRulesByContent = async (bpmnContent: string) => {
         return response.data;
     }
     catch (error) {
-        console.log(error);
         return [];
     }
 }
@@ -73,7 +70,6 @@ export const getMessagesByBpmnContent = async (bpmnContent: string) => {
         return response.data;
     }
     catch (error) {
-        console.log(error);
         return [];
     }
 }
@@ -85,7 +81,6 @@ export const getDecisions = async (dmnContent: string) => {
         })
         return response.data;
     } catch (error) {
-        console.log(error);
         return [];
     }
 }

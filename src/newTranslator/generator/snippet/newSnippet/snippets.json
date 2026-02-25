@@ -1,5 +1,5 @@
 {
-  "DSLContractFrame": "contract {contract_name} {\n\n{participants}\n\n{globals}\n\n{messages}\n\n{gateways}\n\n{events}\n\n{businessrules}\n\n{flows}\n}\n",
+  "DSLContractFrame": "contract {contract_name} {\n\n{participants}\n\n{globals}\n\n{messages}\n\n{gateways}\n\n{events}\n\n{businessrules}\n\n{oracletasks}\n\n{flows}\n}\n",
 
   "DSLParticipantsFrame": "    participants {\n{items}\n    }\n\n",
 
@@ -33,6 +33,14 @@
 
   "DSLBusinessRuleOutputBlockFrame": "            output mapping {\n{output_mappings}\n            }\n",
 
+  "DSLOracleTasksFrame": "    oracletasks {\n{items}\n    }\n\n",
+
+  "DSLOracleTaskItem": "        oracletask {id} {\n            type {task_type}\n            dataSource \"{data_source}\"\n            computeScript \"{compute_script}\"\n{output_block}            initial state {state}\n        }\n",
+
+  "DSLOracleTaskOutputBlockFrame": "            output mapping {\n{output_mappings}\n            }\n",
+
+  "DSLOracleTaskOutputMappingItem": "                {dmn_param} -> {global_name}\n",
+
   "DSLFlowsFrame": "    flows {\n{items}\n    }\n",
 
   "DSLStartEventEnables": "        start event {event} enables {target};\n",
@@ -52,6 +60,8 @@
   "DSLParallelGatewayAwait": "        parallel gateway {gateway} await {sources}\n        then {actions};\n",
 
   "DSLWhenBusinessRuleDoneEnable": "        when businessrule {rule} done\n        then enable {targets};\n",
+
+  "DSLWhenOracleTaskDoneEnable": "        when oracletask {task} done\n        then enable {targets};\n",
 
   "DSLWhenEventCompletedSetGlobal": "        when event {event} completed\n        then set {global_name} = {value};\n",
 
