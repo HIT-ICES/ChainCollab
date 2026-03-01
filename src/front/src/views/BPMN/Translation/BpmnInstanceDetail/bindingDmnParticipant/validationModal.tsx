@@ -2155,17 +2155,25 @@ export const ValidationModal: React.FC<ValidationModalProps> = ({
 					validationErrors.push(error);
 					console.error(`  ✗ ${error}`);
 				} else {
-					// revoke 成功，将 callee 从使用权数组中移除
-					const revokedGrantees: string[] = [];
-					calleeArray.forEach((grantee) => {
-						const index = usageRights.indexOf(grantee);
-						if (index > -1) {
-							usageRights.splice(index, 1);
-							revokedGrantees.push(grantee);
-						}
-					});
-					console.log(`  ✓ revoke usage rights 成功，移除使用权: [${revokedGrantees.join(", ")}]`);
-					console.log(`  当前使用权列表: [${usageRights.join(", ")}]`);
+					// revoke 前检查：被撤销的 callee 必须在使用权列表中
+					const notInUsageRights = calleeArray.filter((grantee) => grantee && !usageRights.includes(grantee));
+					if (notInUsageRights.length > 0) {
+						const error = `Task ${taskId}: revoke usage rights 操作失败 - callee [${notInUsageRights.join(", ")}] 尚未被授予使用权，必须先执行 grant usage rights 再执行 revoke usage rights`;
+						validationErrors.push(error);
+						console.error(`  ✗ ${error}`);
+					} else {
+						// revoke 成功，将 callee 从使用权数组中移除
+						const revokedGrantees: string[] = [];
+						calleeArray.forEach((grantee) => {
+							const index = usageRights.indexOf(grantee);
+							if (index > -1) {
+								usageRights.splice(index, 1);
+								revokedGrantees.push(grantee);
+							}
+						});
+						console.log(`  ✓ revoke usage rights 成功，移除使用权: [${revokedGrantees.join(", ")}]`);
+						console.log(`  当前使用权列表: [${usageRights.join(", ")}]`);
+					}
 				}
 			} else if (operationLower === "query") {
 				// query 操作：不影响所有权和使用权
