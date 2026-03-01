@@ -14,7 +14,7 @@ import (
 const nameKey = "name"
 const symbolKey = "symbol"
 const decimalsKey = "decimals"
-const totalSupplyKey = "totalSupply"
+const totalSupplyDeltaPrefix = "totalSupplyDelta"
 
 // Define objectType names for prefix
 const allowancePrefix = "allowance"
@@ -56,7 +56,7 @@ func (s *SmartContract) AddMintAuthority(ctx contractapi.TransactionContextInter
 
 // Mint creates new tokens and adds them to minter's account balance
 // This function triggers a Transfer event
-func (s *SmartContract) Mint(ctx contractapi.TransactionContextInterface, amount int, instanceID string) error {
+func (s *SmartContract) Mint(ctx contractapi.TransactionContextInterface, testminter string, amount int, instanceID string) error {
 
 	// Check if contract has been intilized first
 	initialized, err := checkInitialized(ctx)
@@ -95,7 +95,7 @@ func (s *SmartContract) Mint(ctx contractapi.TransactionContextInterface, amount
 	}
 
 	// Get ID of submitting client identity
-	minter, err := ctx.GetClientIdentity().GetID()
+	minter := testminter
 	if err != nil {
 		return fmt.Errorf("failed to get client id: %v", err)
 	}
@@ -127,28 +127,14 @@ func (s *SmartContract) Mint(ctx contractapi.TransactionContextInterface, amount
 		return err
 	}
 
-	// Update the totalSupply
-	totalSupplyBytes, err := ctx.GetStub().GetState(totalSupplyKey)
+	// Update the totalSupply using delta mode to avoid MVCC conflicts
+	txID := ctx.GetStub().GetTxID()
+	totalSupplyDeltaKey, err := ctx.GetStub().CreateCompositeKey(totalSupplyDeltaPrefix, []string{txID})
 	if err != nil {
-		return fmt.Errorf("failed to retrieve total token supply: %v", err)
+		return fmt.Errorf("failed to create composite key for totalSupply delta: %v", err)
 	}
 
-	var totalSupply int
-
-	// If no tokens have been minted, initialize the totalSupply
-	if totalSupplyBytes == nil {
-		totalSupply = 0
-	} else {
-		totalSupply, _ = strconv.Atoi(string(totalSupplyBytes)) // Error handling not needed since Itoa() was used when setting the totalSupply, guaranteeing it was an integer.
-	}
-
-	// Add the mint amount to the total supply and update the state
-	totalSupply, err = add(totalSupply, amount)
-	if err != nil {
-		return err
-	}
-
-	err = ctx.GetStub().PutState(totalSupplyKey, []byte(strconv.Itoa(totalSupply)))
+	err = ctx.GetStub().PutState(totalSupplyDeltaKey, []byte(strconv.Itoa(amount)))
 	if err != nil {
 		return err
 	}
@@ -171,7 +157,7 @@ func (s *SmartContract) Mint(ctx contractapi.TransactionContextInterface, amount
 
 // Burn redeems tokens the minter's account balance
 // This function triggers a Transfer event
-func (s *SmartContract) Burn(ctx contractapi.TransactionContextInterface, amount int, instanceID string) error {
+func (s *SmartContract) Burn(ctx contractapi.TransactionContextInterface, testminter string, amount int, instanceID string) error {
 
 	// Check if contract has been intilized first
 	initialized, err := checkInitialized(ctx)
@@ -210,7 +196,7 @@ func (s *SmartContract) Burn(ctx contractapi.TransactionContextInterface, amount
 	}
 
 	// Get ID of submitting client identity
-	minter, err := ctx.GetClientIdentity().GetID()
+	minter := testminter
 	if err != nil {
 		return fmt.Errorf("failed to get client id: %v", err)
 	}
@@ -243,26 +229,14 @@ func (s *SmartContract) Burn(ctx contractapi.TransactionContextInterface, amount
 		return err
 	}
 
-	// Update the totalSupply
-	totalSupplyBytes, err := ctx.GetStub().GetState(totalSupplyKey)
+	// Update the totalSupply using delta mode to avoid MVCC conflicts
+	txID := ctx.GetStub().GetTxID()
+	totalSupplyDeltaKey, err := ctx.GetStub().CreateCompositeKey(totalSupplyDeltaPrefix, []string{txID})
 	if err != nil {
-		return fmt.Errorf("failed to retrieve total token supply: %v", err)
+		return fmt.Errorf("failed to create composite key for totalSupply delta: %v", err)
 	}
 
-	// If no tokens have been minted, throw error
-	if totalSupplyBytes == nil {
-		return errors.New("totalSupply does not exist")
-	}
-
-	totalSupply, _ := strconv.Atoi(string(totalSupplyBytes)) // Error handling not needed since Itoa() was used when setting the totalSupply, guaranteeing it was an integer.
-
-	// Subtract the burn amount to the total supply and update the state
-	totalSupply, err = sub(totalSupply, amount)
-	if err != nil {
-		return err
-	}
-
-	err = ctx.GetStub().PutState(totalSupplyKey, []byte(strconv.Itoa(totalSupply)))
+	err = ctx.GetStub().PutState(totalSupplyDeltaKey, []byte(strconv.Itoa(-amount)))
 	if err != nil {
 		return err
 	}
@@ -286,7 +260,7 @@ func (s *SmartContract) Burn(ctx contractapi.TransactionContextInterface, amount
 // Transfer transfers tokens from client account to recipient account
 // recipient account must be a valid clientID as returned by the ClientID() function
 // This function triggers a Transfer event
-func (s *SmartContract) Transfer(ctx contractapi.TransactionContextInterface, recipient string, amount int, instanceID string) error {
+func (s *SmartContract) Transfer(ctx contractapi.TransactionContextInterface, testminter string, recipient string, amount int, instanceID string) error {
 
 	// Check if contract has been intilized first
 	initialized, err := checkInitialized(ctx)
@@ -298,7 +272,7 @@ func (s *SmartContract) Transfer(ctx contractapi.TransactionContextInterface, re
 	}
 
 	// Get ID of submitting client identity
-	clientID, err := ctx.GetClientIdentity().GetID()
+	clientID := testminter
 	if err != nil {
 		return fmt.Errorf("failed to get client id: %v", err)
 	}
@@ -412,19 +386,21 @@ func (s *SmartContract) TotalSupply(ctx contractapi.TransactionContextInterface)
 		return 0, fmt.Errorf("Contract options need to be set before calling any function, call Initialize() to initialize contract")
 	}
 
-	// Retrieve total supply of tokens from state of smart contract
-	totalSupplyBytes, err := ctx.GetStub().GetState(totalSupplyKey)
+	// Aggregate all totalSupply deltas to calculate total supply
+	resultsIterator, err := ctx.GetStub().GetStateByPartialCompositeKey(totalSupplyDeltaPrefix, []string{})
 	if err != nil {
-		return 0, fmt.Errorf("failed to retrieve total token supply: %v", err)
+		return 0, fmt.Errorf("failed to retrieve total token supply deltas: %v", err)
 	}
+	defer resultsIterator.Close()
 
 	var totalSupply int
-
-	// If no tokens have been minted, return 0
-	if totalSupplyBytes == nil {
-		totalSupply = 0
-	} else {
-		totalSupply, _ = strconv.Atoi(string(totalSupplyBytes)) // Error handling not needed since Itoa() was used when setting the totalSupply, guaranteeing it was an integer.
+	for resultsIterator.HasNext() {
+		response, err := resultsIterator.Next()
+		if err != nil {
+			return 0, fmt.Errorf("failed to iterate total token supply deltas: %v", err)
+		}
+		delta, _ := strconv.Atoi(string(response.Value))
+		totalSupply += delta
 	}
 
 	log.Printf("TotalSupply: %d tokens", totalSupply)
