@@ -137,10 +137,11 @@ export const ActivateEnv = async (envId: string, orgId: string) => {
     }
 }
 
-export const InstallFirefly = async (orgId: string, envId: string) => {
+export const InstallFirefly = async (orgId: string, envId: string, force: boolean = false) => {
     try {
         const response = await api.post(`/environments/${envId}/install_firefly`, {
-            org_id: orgId
+            org_id: orgId,
+            ...(force ? { force: true } : {}),
         })
         return response.data;
     } catch (error) {
@@ -148,10 +149,11 @@ export const InstallFirefly = async (orgId: string, envId: string) => {
     }
 }
 
-export const InstallOracle = async (orgId: string, envId: string) => {
+export const InstallOracle = async (orgId: string, envId: string, force: boolean = false) => {
     try {
         const response = await api.post(`/environments/${envId}/install_oracle`, {
-            org_id: orgId
+            org_id: orgId,
+            ...(force ? { force: true } : {}),
         })
         return response.data;
     } catch (error) {
@@ -159,10 +161,11 @@ export const InstallOracle = async (orgId: string, envId: string) => {
     }
 }
 
-export const InstallDmnEngine = async (orgId: string, envId: string) => {
+export const InstallDmnEngine = async (orgId: string, envId: string, force: boolean = false) => {
     try {
         const response = await api.post(`/environments/${envId}/install_dmn_engine`, {
-            org_id: orgId
+            org_id: orgId,
+            ...(force ? { force: true } : {}),
         })
         return response.data;
     } catch (error) {
@@ -170,10 +173,11 @@ export const InstallDmnEngine = async (orgId: string, envId: string) => {
     }
 }
 
-export const InstallChainlinkForEthEnv = async (envId: string, mode: string = "lite") => {
+export const InstallChainlinkForEthEnv = async (envId: string, mode: string = "lite", force: boolean = false) => {
     try {
         const response = await api.post(`/eth-environments/${envId}/chainlink/install`, {
-            mode
+            mode,
+            ...(force ? { force: true } : {}),
         })
         return response.data;
     } catch (error) {
@@ -212,10 +216,11 @@ export const getChainlinkDetailForEthEnv = async (envId: string, sync: boolean =
     }
 }
 
-export const syncChainlinkForEthEnv = async (envId: string, includeJobs: boolean = true) => {
+export const syncChainlinkForEthEnv = async (envId: string, includeJobs: boolean = true, force: boolean = false) => {
     try {
         const response = await api.post(`/eth-environments/${envId}/chainlink/sync`, {
             include_jobs: includeJobs,
+            ...(force ? { force: true } : {}),
         })
         return response.data;
     } catch (error) {
@@ -243,9 +248,12 @@ export const createChainlinkJobForEthEnv = async (envId: string, payload: any) =
     }
 }
 
-export const createChainlinkPresetJobForEthEnv = async (envId: string, payload: any) => {
+export const createChainlinkPresetJobForEthEnv = async (envId: string, payload: any, force: boolean = false) => {
     try {
-        const response = await api.post(`/eth-environments/${envId}/chainlink/create-job`, payload)
+        const response = await api.post(`/eth-environments/${envId}/chainlink/create-job`, {
+            ...payload,
+            ...(force ? { force: true } : {}),
+        })
         return response.data;
     } catch (error) {
         throwApiError(error, "Create preset Chainlink job failed");
@@ -303,9 +311,22 @@ export const getDmnContractDetailForEthEnv = async (envId: string, includeAbi: b
     }
 }
 
-export const registerDmnContractToFireflyForEthEnv = async (envId: string) => {
+export const redeployDmnContractForEthEnv = async (envId: string, force: boolean = false) => {
     try {
-        const response = await api.post(`/eth-environments/${envId}/dmn-contract/register-firefly`)
+        const response = await api.post(`/eth-environments/${envId}/dmn-contract/redeploy`, {
+            ...(force ? { force: true } : {}),
+        })
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Redeploy DMN contract failed");
+    }
+}
+
+export const registerDmnContractToFireflyForEthEnv = async (envId: string, force: boolean = false) => {
+    try {
+        const response = await api.post(`/eth-environments/${envId}/dmn-contract/register-firefly`, {
+            ...(force ? { force: true } : {}),
+        })
         return response.data;
     } catch (error) {
         throwApiError(error, "Register DMN contract to Firefly failed");
@@ -332,18 +353,22 @@ export const getDataContractDetailForEthEnv = async (envId: string, includeAbi: 
     }
 }
 
-export const setupDataContractForEthEnv = async (envId: string) => {
+export const setupDataContractForEthEnv = async (envId: string, force: boolean = false) => {
     try {
-        const response = await api.post(`/eth-environments/${envId}/data-contract/setup`)
+        const response = await api.post(`/eth-environments/${envId}/data-contract/setup`, {
+            ...(force ? { force: true } : {}),
+        })
         return response.data;
     } catch (error) {
         throwApiError(error, "Setup data contract failed");
     }
 }
 
-export const registerDataContractToFireflyForEthEnv = async (envId: string) => {
+export const registerDataContractToFireflyForEthEnv = async (envId: string, force: boolean = false) => {
     try {
-        const response = await api.post(`/eth-environments/${envId}/data-contract/register-firefly`)
+        const response = await api.post(`/eth-environments/${envId}/data-contract/register-firefly`, {
+            ...(force ? { force: true } : {}),
+        })
         return response.data;
     } catch (error) {
         throwApiError(error, "Register data contract to Firefly failed");
@@ -361,18 +386,22 @@ export const getComputeContractDetailForEthEnv = async (envId: string, includeAb
     }
 }
 
-export const setupComputeContractForEthEnv = async (envId: string) => {
+export const setupComputeContractForEthEnv = async (envId: string, force: boolean = false) => {
     try {
-        const response = await api.post(`/eth-environments/${envId}/compute-contract/setup`)
+        const response = await api.post(`/eth-environments/${envId}/compute-contract/setup`, {
+            ...(force ? { force: true } : {}),
+        })
         return response.data;
     } catch (error) {
         throwApiError(error, "Setup compute contract failed");
     }
 }
 
-export const registerComputeContractToFireflyForEthEnv = async (envId: string) => {
+export const registerComputeContractToFireflyForEthEnv = async (envId: string, force: boolean = false) => {
     try {
-        const response = await api.post(`/eth-environments/${envId}/compute-contract/register-firefly`)
+        const response = await api.post(`/eth-environments/${envId}/compute-contract/register-firefly`, {
+            ...(force ? { force: true } : {}),
+        })
         return response.data;
     } catch (error) {
         throwApiError(error, "Register compute contract to Firefly failed");
@@ -390,18 +419,22 @@ export const getRelayerContractDetailForEthEnv = async (envId: string, includeAb
     }
 }
 
-export const setupRelayerContractForEthEnv = async (envId: string) => {
+export const setupRelayerContractForEthEnv = async (envId: string, force: boolean = false) => {
     try {
-        const response = await api.post(`/eth-environments/${envId}/relayer-contract/setup`)
+        const response = await api.post(`/eth-environments/${envId}/relayer-contract/setup`, {
+            ...(force ? { force: true } : {}),
+        })
         return response.data;
     } catch (error) {
         throwApiError(error, "Setup relayer contract failed");
     }
 }
 
-export const registerRelayerContractToFireflyForEthEnv = async (envId: string) => {
+export const registerRelayerContractToFireflyForEthEnv = async (envId: string, force: boolean = false) => {
     try {
-        const response = await api.post(`/eth-environments/${envId}/relayer-contract/register-firefly`)
+        const response = await api.post(`/eth-environments/${envId}/relayer-contract/register-firefly`, {
+            ...(force ? { force: true } : {}),
+        })
         return response.data;
     } catch (error) {
         throwApiError(error, "Register relayer contract to Firefly failed");
@@ -435,9 +468,11 @@ export const requestOracleFFI = async () => {
     }
 }
 
-export const StartFireflyForEnv = async (envId: string) => {
+export const StartFireflyForEnv = async (envId: string, force: boolean = false) => {
     try {
-        const response = await api.post(`/environments/${envId}/start_firefly`)
+        const response = await api.post(`/environments/${envId}/start_firefly`, {
+            ...(force ? { force: true } : {}),
+        })
         return response.data;
     } catch (error) {
         throwApiError(error, "Start Firefly failed");
@@ -549,9 +584,11 @@ export const StartFireflyForEthEnv = async (envId: string) => {
     }
 }
 
-export const InstallIdentityContract = async (envId: string) => {
+export const InstallIdentityContract = async (envId: string, force: boolean = false) => {
     try {
-        const response = await api.post(`/eth-environments/${envId}/identity-contract/install`)
+        const response = await api.post(`/eth-environments/${envId}/identity-contract/install`, {
+            ...(force ? { force: true } : {}),
+        })
         return response.data;
     } catch (error) {
         throwApiError(error, "Install identity contract failed");
@@ -572,9 +609,11 @@ export const getIdentityContractDetail = async (envId: string, includeAbi: boole
     }
 }
 
-export const redeployIdentityContract = async (envId: string) => {
+export const redeployIdentityContract = async (envId: string, force: boolean = false) => {
     try {
-        const response = await api.post(`/eth-environments/${envId}/identity-contract/redeploy`)
+        const response = await api.post(`/eth-environments/${envId}/identity-contract/redeploy`, {
+            ...(force ? { force: true } : {}),
+        })
         return response.data;
     } catch (error) {
         throwApiError(error, "Redeploy identity contract failed");

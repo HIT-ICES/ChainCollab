@@ -5,18 +5,17 @@
 From repo root:
 
 ```bash
-./src/devtools.sh up --profile core
-./src/devtools.sh up --profile research
+./src/devtools.sh up
 ./src/devtools.sh status
 ./src/devtools.sh down
-./src/devtools.sh restart --profile core
+./src/devtools.sh restart
 ```
 
 `up/restart` runs `governance-check` by default.
 To bypass once:
 
 ```bash
-./src/devtools.sh up --profile core --skip-governance-check
+./src/devtools.sh up --skip-governance-check
 ```
 
 ### What `status` checks

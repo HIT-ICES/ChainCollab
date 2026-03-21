@@ -33,6 +33,8 @@ This folder implements a standalone mechanism for:
   - Tests aggregation consistency / robustness / cost and writes `deployments/aggregation-report.json`.
 - `scripts/experiment-compute-cost.js`
   - Compares off-chain compute path vs on-chain compute path and writes `deployments/compute-cost-report.json`.
+- `scripts/analyze-separate-results.js`
+  - Reads `aggregation-report.json` + `compute-cost-report.json` and writes `deployments/separate-analysis-report.json`.
 
 ## Why this design
 
@@ -109,6 +111,22 @@ Output:
   - off-chain path: `requestComputeTask + fulfillComputeTask` gas + local CPU time
   - on-chain direct compute gas
   - on-chain heavy compute gas (`HEAVY_LOOPS`, default `600`)
+
+## Separate analysis summary
+
+After running both experiments:
+
+```bash
+cd /home/logres/system/src/oracle-data-compute-lab
+npm run analyze:separate
+```
+
+Output:
+
+- `deployments/separate-analysis-report.json`
+- Contains:
+  - Data-task best method by clean/outlier accuracy, robustness, and gas.
+  - Compute-task off-chain vs on-chain gas and CPU summary.
 
 ## Compute Task DSL
 

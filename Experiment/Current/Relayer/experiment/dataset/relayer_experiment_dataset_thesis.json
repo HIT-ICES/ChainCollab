@@ -1,0 +1,41 @@
+{
+  "name": "relayer_split_thesis_cases_v1",
+  "description": "Thesis-oriented subset for Relayer evaluation: emphasize usable latency and positive extra gas under split execution.",
+  "chains": {
+    "source": {
+      "name": "chainA",
+      "type": "local-anvil-evm",
+      "rpcUrl": "http://127.0.0.1:8545",
+      "chainId": 31337
+    },
+    "target": {
+      "name": "chainB",
+      "type": "local-anvil-evm",
+      "rpcUrl": "http://127.0.0.1:9545",
+      "chainId": 31338
+    }
+  },
+  "bpmnCases": [
+    {
+      "path": "/home/logres/system/Experiment/CaseTest/Hotel Booking.bpmn"
+    },
+    {
+      "path": "/home/logres/system/Experiment/BPMNwithDMNexample/customer_new.bpmn"
+    },
+    {
+      "path": "/home/logres/system/Experiment/CaseTest/Blood_analysis.bpmn"
+    },
+    {
+      "path": "/home/logres/system/Experiment/CaseTest/Manufactory.bpmn"
+    },
+    {
+      "path": "/home/logres/system/Experiment/CaseTest/ManagementSystem.bpmn"
+    }
+  ],
+  "taskPolicy": {
+    "fixedTasksPerCase": 1,
+    "budgetMultiplier": 3,
+    "minTasks": 1,
+    "maxTasks": 1
+  }
+}

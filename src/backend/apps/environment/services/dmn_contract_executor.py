@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import json
 import subprocess
+from pathlib import Path
 
 NODE_CALL_SCRIPT = r"""
 const fs = require('fs');
 const http = require('http');
+const path = require('path');
 const { URL } = require('url');
 
 function rpcCall(rpcUrl, method, params) {
@@ -49,19 +51,37 @@ async function main() {
   if (!fn) {
     throw new Error(`Missing ABI for method ${input.method}`);
   }
-  const Web3EthAbi = require('web3-eth-abi');
+  const Web3EthAbi = require(path.join(input.nodeModulesRoot, 'web3-eth-abi'));
   const data = Web3EthAbi.encodeFunctionCall(fn, input.args);
   if (input.mode === 'send') {
-    const accounts = await rpcCall(input.rpcUrl, 'eth_accounts', []);
-    const from = input.from || accounts[0];
-    const txHash = await rpcCall(input.rpcUrl, 'eth_sendTransaction', [{
-      from,
+    const tx = {
       to: input.contractAddress,
       data,
       gas: '0x' + (input.gas || 5000000).toString(16),
-    }]);
-    console.log(JSON.stringify({ txHash }));
-    return;
+    };
+    if (input.from) {
+      tx.from = input.from;
+    }
+    try {
+      const txHash = await rpcCall(input.rpcUrl, 'eth_sendTransaction', [tx]);
+      console.log(JSON.stringify({ txHash }));
+      return;
+    } catch (err) {
+      if (tx.from) {
+        throw err;
+      }
+      const accounts = await rpcCall(input.rpcUrl, 'eth_accounts', []);
+      const fallbackFrom = accounts.find((account) => typeof account === 'string' && account.length > 0);
+      if (!fallbackFrom) {
+        throw err;
+      }
+      const txHash = await rpcCall(input.rpcUrl, 'eth_sendTransaction', [{
+        ...tx,
+        from: fallbackFrom,
+      }]);
+      console.log(JSON.stringify({ txHash }));
+      return;
+    }
   }
   const result = await rpcCall(input.rpcUrl, 'eth_call', [{
     to: input.contractAddress,
@@ -89,6 +109,7 @@ def execute_dmn_contract_call(
     from_address=None,
     gas=5000000,
 ) -> dict:
+    chainlink_root = Path(__file__).resolve().parents[4] / "oracle" / "CHAINLINK"
     payload = {
         "compiledPath": compiled_path,
         "contractName": contract_name,
@@ -99,6 +120,7 @@ def execute_dmn_contract_call(
         "rpcUrl": rpc_url,
         "from": from_address,
         "gas": gas,
+        "nodeModulesRoot": str(chainlink_root / "node_modules"),
     }
 
     result = subprocess.run(

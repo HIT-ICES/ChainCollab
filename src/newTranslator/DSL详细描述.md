@@ -4,7 +4,10 @@
 
 - 论文第 18–25 页指出：智能合约自动生成正在从“单合约模板化”走向多源输入协同驱动，并强调通过**DSL/元模型形成稳定中间表示**以解耦目标链平台、支撑验证/审计/跨平台部署。
 - 在 newTranslator 中，这个稳定的中间表示即 **B2CDSL**（Business‑to‑Chain DSL），用于把 BPMN/DMN 的业务语义落到可生成链码/合约的统一结构。
-- **元模型与示例位置**：\n+  - 元模型（语法定义）：`code/ChainCollab/src/newTranslator/DSL/B2CDSL/b2cdsl/b2c.tx`\n+  - 示例 DSL 文件（手工/生成样例）：\n+    - `code/ChainCollab/src/newTranslator/example/chaincode.b2c`\n+    - `code/ChainCollab/src/newTranslator/example/chaincode copy.b2c`\n+  - 生成物示例（构建产物，非手写）：`code/ChainCollab/src/newTranslator/build/b2c/chaincode.b2c`
+- **元模型与示例位置**：
+  - 元模型（语法定义）：`code/ChainCollab/src/newTranslator/DSL/B2CDSL/b2cdsl/b2c.tx`
+  - 示例 DSL 文件（手工/生成样例）：`code/ChainCollab/src/newTranslator/example/chaincode.b2c`
+  - 生成物示例（构建产物，非手写）：`code/ChainCollab/src/newTranslator/build/b2c/chaincode.b2c`
 
 > 下面的语法与元素语义以 `code/ChainCollab/src/newTranslator/DSL/B2CDSL/b2cdsl/b2c.tx` 为准，并结合 `code/ChainCollab/src/newTranslator/模型驱动原理文档.md` 中的流程与示例说明。
 

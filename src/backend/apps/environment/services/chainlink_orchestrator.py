@@ -379,6 +379,89 @@ class ChainlinkOrchestrator:
             "log_tail": _read_task_log_tail(log_path) if log_path else "",
         }
 
+    def redeploy_dmn_contract(
+        self,
+        env_id: str,
+        contract_name: str,
+        task_id: str | None = None,
+    ) -> dict:
+        env = EthEnvironment.objects.get(pk=env_id)
+        if env.chainlink_status != "STARTED":
+            raise RuntimeError("Chainlink is not started, install chainlink first")
+
+        self.set_task_step(task_id, "RESOLVE_SCRIPT")
+        log_path = _task_log_path(task_id) if task_id else None
+        scripts = self.resolve_chainlink_scripts()
+        chainlink_root = Path(scripts["chainlink_root"])
+        deploy_script = chainlink_root / "scripts" / "deploy-contract.js"
+        if not deploy_script.exists():
+            raise FileNotFoundError(f"DMN deploy script not found: {deploy_script}")
+
+        env_vars = {
+            "ORACLE_ROOT": str(scripts["oracle_root"]),
+            "CHAINLINK_ROOT": str(chainlink_root),
+            "DEPLOYER_ACCOUNT": str(self.eth_system_account),
+            "FORCE_DMN_CONTRACT": "1",
+            "DMN_CONTRACT_NAME": contract_name,
+            "LANG": "C.UTF-8",
+            "LC_ALL": "C.UTF-8",
+            "PYTHONIOENCODING": "UTF-8",
+        }
+        try:
+            env_vars["RPC_URL"] = self.resolve_system_rpc_url(env)
+        except Exception as exc:
+            self.log.warning(
+                "Chainlink action=redeploy_dmn_resolve_rpc_failed env=%s error=%s",
+                env_id,
+                exc,
+            )
+
+        self.log.info(
+            "Chainlink action=redeploy_dmn_start env=%s contract=%s script=%s",
+            env_id,
+            contract_name,
+            deploy_script,
+        )
+        self.set_task_step(task_id, "RUN_SCRIPT")
+        if log_path:
+            _append_task_log(log_path, f"run: node {deploy_script}")
+        process = subprocess.Popen(
+            ["node", str(deploy_script)],
+            cwd=str(chainlink_root),
+            env={**os.environ, **env_vars},
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            bufsize=1,
+        )
+        _stream_process_output(process, log_path)
+        returncode = process.wait()
+        if returncode != 0:
+            raise RuntimeError(
+                f"DMN contract redeploy failed (code={returncode}). "
+                f"See task log: {log_path}"
+            )
+
+        self.set_task_step(task_id, "PROCESS_RESULT")
+        payload_detail = self.load_chainlink_deployments()
+        chainlink = payload_detail.get("chainlink_deployment") or {}
+        dmn = payload_detail.get("dmn_deployment") or {}
+        previous_chainlink = env.chainlink_detail or {}
+        if not isinstance(previous_chainlink, dict):
+            previous_chainlink = {}
+        merged_chainlink = {**previous_chainlink, **chainlink} if chainlink else previous_chainlink
+        env.chainlink_detail = merged_chainlink or None
+        env.dmn_detail = dmn or None
+        env.save(update_fields=["chainlink_detail", "dmn_detail"])
+        return {
+            "contract_name": contract_name,
+            "chainlink_detail": env.chainlink_detail,
+            "dmn_detail": env.dmn_detail,
+            "log_tail": _read_task_log_tail(log_path) if log_path else "",
+        }
+
     def run_oracle_task_suite_setup(
         self,
         env_id: str,

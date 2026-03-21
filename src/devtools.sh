@@ -26,10 +26,7 @@ SERVICE_PORTS = {
     "backend": 8000,
     "front": 3000,
 }
-SERVICE_START_ORDER = {
-    "core": ["newTranslator", "agent", "backend", "front"],
-    "research": ["newTranslator", "backend", "front"],
-}
+SERVICE_START_ORDER = ["newTranslator", "agent", "backend", "front"]
 BACKEND_DIR = REPO_ROOT / "src" / "backend"
 DASHBOARD_DIR = REPO_ROOT / "src" / "dashboard"
 AGENT_DIR = REPO_ROOT / "src" / "agent" / "docker-rest-agent"
@@ -206,10 +203,9 @@ def check_ports():
             sys.exit(1)
 
 
-def write_pid_file(pids: dict[str, int], profile: str):
+def write_pid_file(pids: dict[str, int]):
     ensure_runtime_dir()
     with PID_FILE.open("w", encoding="utf-8") as handle:
-        handle.write(f"# profile={profile}\n")
         for name, pid in pids.items():
             handle.write(f"{name} {pid}\n")
 
@@ -458,17 +454,11 @@ def start_stack(
     monitor: bool = True,
     *,
     debug: bool = False,
-    profile: str = "core",
     skip_governance_check: bool = False,
 ):
     failures: list[str] = []
     ensure_runtime_dir()
     pids: dict[str, int] = {}
-
-    profile_services = SERVICE_START_ORDER.get(profile)
-    if not profile_services:
-        print(f"[dev] Unknown profile: {profile}")
-        sys.exit(1)
 
     if not skip_governance_check:
         print("[dev] running governance-check before startup...")
@@ -516,8 +506,8 @@ def start_stack(
         pids[name] = pid
 
     pipe_logs = monitor
-    print(f"[dev] startup profile: {profile}")
-    for service_name in profile_services:
+    print("[dev] startup stack")
+    for service_name in SERVICE_START_ORDER:
         spec = SERVICE_DEFS[service_name]
         start_service(
             service_name,
@@ -528,7 +518,7 @@ def start_stack(
             env=spec["env"],
         )
 
-    write_pid_file(pids, profile=profile)
+    write_pid_file(pids)
     print(f"[dev] wrote PID file -> {PID_FILE}")
     if monitor:
         monitor_processes(pids)
@@ -585,12 +575,8 @@ def stop_stack():
 
 def show_status():
     entries: dict[str, int] = {}
-    profile = "unknown"
     if PID_FILE.exists():
         for line in PID_FILE.read_text(encoding="utf-8").splitlines():
-            if line.startswith("# profile="):
-                profile = line.split("=", 1)[1].strip() or "unknown"
-                continue
             parts = line.strip().split()
             if len(parts) < 2:
                 continue
@@ -601,7 +587,6 @@ def show_status():
 
     print("Stack Status")
     print("============")
-    print(f"profile: {profile}")
     headers = ("service", "pid", "pid_alive", "port", "port_busy", "log")
     print(f"{headers[0]:<14} {headers[1]:<8} {headers[2]:<10} {headers[3]:<6} {headers[4]:<10} {headers[5]}")
     print(f"{'-'*14} {'-'*8} {'-'*10} {'-'*6} {'-'*10} {'-'*30}")
@@ -620,10 +605,10 @@ def show_status():
     print(f"PID file: {'present' if PID_FILE.exists() else 'missing'} ({PID_FILE})")
 
 
-def restart_stack(profile: str = "core", skip_governance_check: bool = False):
+def restart_stack(skip_governance_check: bool = False):
     stop_stack()
     run_clean()
-    start_stack(profile=profile, skip_governance_check=skip_governance_check)
+    start_stack(skip_governance_check=skip_governance_check)
 
 
 def add_host_mapping(hosts: list[str]):
@@ -701,8 +686,7 @@ def build_parser() -> argparse.ArgumentParser:
         epilog=(
             "Examples:\n"
             "  devtools.sh clean\n"
-            "  devtools.sh up --profile core\n"
-            "  devtools.sh up --profile research\n"
+            "  devtools.sh up\n"
             "  devtools.sh down\n"
             "  devtools.sh status\n"
             "  devtools.sh backend\n"
@@ -731,24 +715,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Enable startup waits for debugging.",
     )
     up_parser.add_argument(
-        "--profile",
-        choices=sorted(SERVICE_START_ORDER.keys()),
-        default="core",
-        help="Startup profile. 'core' starts full stack; 'research' skips agent.",
-    )
-    up_parser.add_argument(
         "--skip-governance-check",
         action="store_true",
         help="Skip pre-start governance validation once.",
     )
     sub.add_parser("down", help="Stop stack using PIDs from runtime file.")
     restart_parser = sub.add_parser("restart", help="Run down -> clean -> up.")
-    restart_parser.add_argument(
-        "--profile",
-        choices=sorted(SERVICE_START_ORDER.keys()),
-        default="core",
-        help="Startup profile used after restart.",
-    )
     restart_parser.add_argument(
         "--skip-governance-check",
         action="store_true",
@@ -832,7 +804,6 @@ def main():
         return governance_check(args.json)
     if args.command == "restart":
         restart_stack(
-            profile=args.profile,
             skip_governance_check=args.skip_governance_check,
         )
         return 0
@@ -849,7 +820,6 @@ def main():
         start_stack(
             monitor=not args.no_monitor,
             debug=args.debug or DEBUG_MODE,
-            profile=args.profile,
             skip_governance_check=args.skip_governance_check,
         )
         return 0

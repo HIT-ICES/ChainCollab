@@ -134,6 +134,10 @@ function isZeroJobId(id) {
   return raw === '' || /^0+$/.test(raw);
 }
 
+function normalizeAddress(addr) {
+  return String(addr || '').trim().toLowerCase();
+}
+
 async function getOwner(contractAddress) {
   const Web3EthAbi = require('web3-eth-abi');
   const data = Web3EthAbi.encodeFunctionCall(
@@ -260,6 +264,17 @@ async function testOracle() {
       console.warn('⚠️  读取 jobId 失败（可能未重新编译/部署）:', err.message);
     }
     if (deployment.linkToken) {
+      const currentLinkToken = chainlinkDeployment?.linkToken;
+      if (
+        currentLinkToken &&
+        normalizeAddress(currentLinkToken) !== normalizeAddress(deployment.linkToken)
+      ) {
+        console.error('❌ deployment.json 里的 LINK Token 已过期');
+        console.error('   deployment.json:', deployment.linkToken);
+        console.error('   chainlink-deployment.json:', currentLinkToken);
+        console.error('   请先重新跑 [4] 步骤确保 DMN 合约按当前 Chainlink 地址重部署');
+        return;
+      }
       const balance = await getLinkBalance(deployment.linkToken, contractAddress);
       if (balance === 0n) {
         console.error('❌ 合约 LINK 余额为 0，request 会失败');

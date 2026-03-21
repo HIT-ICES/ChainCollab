@@ -1,7 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import * as path from "path";
-import babel from 'vite-plugin-babel';
 import vitePluginRaw from 'vite-plugin-raw';
 
 // https://vitejs.dev/config/

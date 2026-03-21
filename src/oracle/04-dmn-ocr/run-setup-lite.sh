@@ -18,6 +18,29 @@ if [ ! -d "$CHAINLINK_ROOT" ]; then
   exit 1
 fi
 
+STARTED_OCR_NETWORK=0
+STARTED_CDMN=0
+
+cleanup_on_failure() {
+  local exit_code="$1"
+  if [ "$exit_code" -eq 0 ]; then
+    return
+  fi
+
+  echo "== [rollback] setup failed, tearing down containers =="
+  set +e
+
+  if [ "$STARTED_CDMN" -eq 1 ]; then
+    echo " - stopping CDMN services"
+    (cd "$FEATURES_04" && docker-compose -f docker-compose-cdmn.yml down) >/dev/null 2>&1 || true
+  fi
+
+  if [ "$STARTED_OCR_NETWORK" -eq 1 ]; then
+    echo " - stopping OCR network"
+    (cd "$FEATURES_03" && ./stop-ocr-network.sh) >/dev/null 2>&1 || true
+  fi
+}
+
 MODE="full"
 for arg in "$@"; do
   case "$arg" in
@@ -64,6 +87,8 @@ if [ "$MODE" = "smoke" ]; then
   exit 0
 fi
 
+trap 'exit_code=$?; trap - EXIT; cleanup_on_failure "$exit_code"; exit "$exit_code"' EXIT
+
 ensure_chainlink_deps() {
   local oz_vendor="$CHAINLINK_ROOT/contracts/vendor/openzeppelin/contracts/token/ERC20/ERC20.sol"
   local oz_nm="$CHAINLINK_ROOT/node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol"
@@ -91,7 +116,13 @@ ensure_chainlink_deps() {
     return 0
   fi
 
-  echo "== [deps] 缺少 Solidity 依赖，无法继续编译 =="
+  if ! command -v npm >/dev/null 2>&1; then
+    echo "== [deps] 缺少 npm，无法自动安装依赖 =="
+    echo "请先安装 Node.js / npm 后重试。"
+    exit 1
+  fi
+
+  echo "== [deps] 检测到依赖缺失，正在自动执行 npm install =="
   if [ "$oz_ok" -ne 1 ]; then
     echo " - OpenZeppelin 未就绪:"
     echo "   * vendor:      $oz_vendor"
@@ -107,8 +138,21 @@ ensure_chainlink_deps() {
     echo "   * dotenv:      $dotenv_nm"
     echo "   * web3-eth-abi $web3abi_nm"
   fi
-  echo " - 请先在 $CHAINLINK_ROOT 安装依赖后重试"
-  exit 1
+  echo " - 在 $CHAINLINK_ROOT 执行 npm install --no-fund --no-audit"
+  npm install --no-fund --no-audit
+
+  if [ ! -f "$oz_vendor" ] && [ ! -f "$oz_nm" ]; then
+    echo "❌ OpenZeppelin 依赖仍未就绪: $oz_vendor / $oz_nm"
+    exit 1
+  fi
+  if [ ! -f "$cl_nm" ]; then
+    echo "❌ Chainlink contracts 依赖仍未就绪: $cl_nm"
+    exit 1
+  fi
+  if [ ! -f "$axios_nm" ] || [ ! -f "$dotenv_nm" ] || [ ! -f "$web3abi_nm" ]; then
+    echo "❌ Node.js 运行依赖仍未就绪"
+    exit 1
+  fi
 }
 
 read_deployment_contract() {
@@ -117,6 +161,15 @@ read_deployment_contract() {
     return 0
   fi
   node -e "const fs=require('fs');const p=process.argv[1];const j=JSON.parse(fs.readFileSync(p,'utf8'));process.stdout.write(j.contractAddress||'');" "$deployment_json"
+}
+
+read_deployment_field() {
+  local deployment_json="$1"
+  local field="$2"
+  if [ ! -f "$deployment_json" ]; then
+    return 0
+  fi
+  node -e "const fs=require('fs');const p=process.argv[1];const field=process.argv[2];const j=JSON.parse(fs.readFileSync(p,'utf8'));process.stdout.write(j[field]||'');" "$deployment_json" "$field"
 }
 
 get_contract_code() {
@@ -175,17 +228,35 @@ NODE
 ensure_dmn_contract_deployed() {
   local rpc_url="${RPC_URL:-http://localhost:8545}"
   local deployment_json="$CHAINLINK_ROOT/deployment/deployment.json"
+  local chainlink_json="$CHAINLINK_ROOT/deployment/chainlink-deployment.json"
   local contract_addr=""
   local contract_code=""
+  local current_link_token=""
+  local current_oracle=""
+  local deployed_link_token=""
+  local deployed_oracle=""
   local need_redeploy=0
+
+  current_link_token="$(read_deployment_field "$chainlink_json" linkToken)"
+  current_oracle="$(read_deployment_field "$chainlink_json" operator)"
 
   if [ ! -f "$deployment_json" ]; then
     echo "ℹ️  deployment.json 不存在，准备部署 DMN 合约"
     need_redeploy=1
   else
     contract_addr="$(read_deployment_contract)"
+    deployed_link_token="$(read_deployment_field "$deployment_json" linkToken)"
+    deployed_oracle="$(read_deployment_field "$deployment_json" oracle)"
     if [ -z "$contract_addr" ]; then
       echo "⚠️  deployment.json 缺少 contractAddress，准备重新部署"
+      need_redeploy=1
+    elif [ -n "$current_link_token" ] && [ "$deployed_link_token" != "$current_link_token" ]; then
+      echo "⚠️  deployment.json 的 LINK Token 已过期: $deployed_link_token"
+      echo "   当前 Chainlink 基础设施使用: $current_link_token"
+      need_redeploy=1
+    elif [ -n "$current_oracle" ] && [ "$deployed_oracle" != "$current_oracle" ]; then
+      echo "⚠️  deployment.json 的 Oracle 地址已过期: $deployed_oracle"
+      echo "   当前 Chainlink 基础设施使用: $current_oracle"
       need_redeploy=1
     else
       if ! contract_code="$(get_contract_code "$rpc_url" "$contract_addr")"; then
@@ -218,10 +289,12 @@ ensure_dmn_contract_deployed() {
 }
 
 echo "== [1] 启动 OCR 多节点网络（仅用于 Chainlink 节点与 Operator 监听） =="
+STARTED_OCR_NETWORK=1
 cd "$FEATURES_03"
 ./start-ocr-network.sh
 
 echo "== [2] 启动 CDMN Python 服务（缓存 API + DMN 计算） =="
+STARTED_CDMN=1
 cd "$FEATURES_04"
 export COMPOSE_DOCKER_CLI_BUILD=1
 export DOCKER_BUILDKIT=1

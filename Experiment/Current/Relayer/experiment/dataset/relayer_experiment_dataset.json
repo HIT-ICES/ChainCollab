@@ -1,0 +1,61 @@
+{
+  "name": "relayer_split_industrial_cases_v3_cn10",
+  "description": "10-scenario BPMN split cases for Relayer experiments with Chinese scenario naming.",
+  "chains": {
+    "source": {
+      "name": "chainA",
+      "type": "local-anvil-evm",
+      "rpcUrl": "http://127.0.0.1:8545",
+      "chainId": 31337
+    },
+    "target": {
+      "name": "chainB",
+      "type": "local-anvil-evm",
+      "rpcUrl": "http://127.0.0.1:9545",
+      "chainId": 31338
+    }
+  },
+  "bpmnCases": [
+    {
+      "path": "/home/logres/system/Experiment/CaseTest/Hotel Booking.bpmn"
+    },
+    {
+      "path": "/home/logres/system/Experiment/BPMNwithDMNexample/customer_new.bpmn"
+    },
+    {
+      "path": "/home/logres/system/Experiment/CaseTest/SupplyChain.bpmn"
+    },
+    {
+      "path": "/home/logres/system/Experiment/CaseTest/Blood_analysis.bpmn"
+    },
+    {
+      "path": "/home/logres/system/Experiment/BPMNwithDMNcase/amazon_new2.bpmn"
+    },
+    {
+      "path": "/home/logres/system/Experiment/CaseTest/PizzaOrder.bpmn"
+    },
+    {
+      "path": "/home/logres/system/Experiment/CaseTest/Rental Claim.bpmn"
+    },
+    {
+      "path": "/home/logres/system/Experiment/CaseTest/Purchase.bpmn"
+    },
+    {
+      "path": "/home/logres/system/Experiment/CaseTest/Manufactory.bpmn"
+    },
+    {
+      "path": "/home/logres/system/Experiment/CaseTest/ManagementSystem.bpmn"
+    }
+  ],
+  "taskPolicy": {
+    "fixedTasksPerCase": 1,
+    "budgetMultiplier": 3,
+    "minTasks": 1,
+    "maxTasks": 1
+  },
+  "faultRecovery": {
+    "perSubmodelTasks": 12,
+    "phase1Ratio": 0.4,
+    "downtimeMs": 4000
+  }
+}

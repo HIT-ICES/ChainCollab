@@ -1,0 +1,94 @@
+{
+  "description": "Four compute scenario classes: simple arithmetic, floating-point nonlinear, random sampling, and complex optimization.",
+  "scenario_count": 4,
+  "scenarios": [
+    {
+      "scenario_id": "S01",
+      "scenario_class": "简单运算",
+      "scenario_name": "钢铁班次结算复核",
+      "dataset_name": "UCI Steel Industry Energy Consumption",
+      "dataset_ref": "https://archive.ics.uci.edu/dataset/851/steel+industry+energy+consumption+dataset",
+      "tasks": [
+        {
+          "task_id": "s01_settlement",
+          "task_name": "班次能耗结算",
+          "task_type": "numeric_settlement",
+          "inputs": {
+            "energy_kwh": 1280,
+            "tariff_wei_per_kwh": 1240000000,
+            "penalty_wei": 10000000000
+          },
+          "js_expression": "const amount = energyKwh * tariffWeiPerKwh + penaltyWei;"
+        }
+      ]
+    },
+    {
+      "scenario_id": "S02",
+      "scenario_class": "浮点运算",
+      "scenario_name": "水处理设备非线性健康指数",
+      "dataset_name": "SWaT",
+      "dataset_ref": "https://itrust.sutd.edu.sg/itrust-labs_datasets/dataset_info/",
+      "tasks": [
+        {
+          "task_id": "s02_nonlin_health",
+          "task_name": "非线性健康指数",
+          "task_type": "nonlinear_health_index_float",
+          "onchain_supported": false,
+          "inputs": {
+            "vibration": 12.4,
+            "temperature": 76.8,
+            "load": 83.2
+          },
+          "js_expression": "const score = 0.42*Math.log(vibration+1) + 0.35*Math.exp(temperature/100) + 0.23*Math.sqrt(load);"
+        }
+      ]
+    },
+    {
+      "scenario_id": "S03",
+      "scenario_class": "随机运算",
+      "scenario_name": "供水系统随机抽样风险估计",
+      "dataset_name": "WADI",
+      "dataset_ref": "https://itrust.sutd.edu.sg/itrust-labs_datasets/dataset_info/",
+      "tasks": [
+        {
+          "task_id": "s03_random_sampling",
+          "task_name": "随机抽样置信估计",
+          "task_type": "random_sampling_confidence",
+          "onchain_supported": false,
+          "inputs": {
+            "seed": 20260304,
+            "draws": 4000,
+            "alert_prob": 0.13
+          },
+          "js_expression": "let state=seed; let hit=0; for(let i=0;i<draws;i++){state=(state*48271)%2147483647; const u=(state%10000)/10000; if(u<alertProb) hit++;} const conf=Math.round(hit*1e6/draws);"
+        }
+      ]
+    },
+    {
+      "scenario_id": "S04",
+      "scenario_class": "复杂运算",
+      "scenario_name": "出行方案组合优化",
+      "dataset_name": "NASA C-MAPSS",
+      "dataset_ref": "https://data.nasa.gov/dataset/cmapss-jet-engine-simulated-data",
+      "tasks": [
+        {
+          "task_id": "s04_opt",
+          "task_name": "三维方案离散搜索最优化",
+          "task_type": "complex_optimization",
+          "inputs": {
+            "target_score": 700,
+            "budget": 3200,
+            "step": 1,
+            "x_min": 0,
+            "x_max": 10,
+            "y_min": 0,
+            "y_max": 10,
+            "z_min": 0,
+            "z_max": 10
+          },
+          "js_expression": "for x in [x_min..x_max..step], y in [y_min..y_max..step], z in [z_min..z_max..step]: score=60*x+25*y+15*z; cost=400*x+120*y+80*z; objective=(score-target_score)^2 + 2*(cost-budget)^2; result=min(objective)"
+        }
+      ]
+    }
+  ]
+}

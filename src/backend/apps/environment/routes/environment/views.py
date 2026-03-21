@@ -3,6 +3,7 @@ import logging
 import os
 import shutil
 from pathlib import Path
+from uuid import uuid4
 from requests import post
 from rest_framework import viewsets, status
 from django.db import transaction
@@ -37,7 +38,6 @@ from apps.api.config import (
 from common.lib.fabric.chaincode_flow import install_fabric_chaincode_flow
 from common.utils.test_time import timeitwithname
 from apps.environment.services.chainlink_orchestrator import ChainlinkOrchestrator
-from apps.environment.services.dmn_contract_executor import execute_dmn_contract_call
 from apps.environment.services.dmn_firefly import register_dmn_contract_to_firefly
 from apps.environment.services.firefly_orchestrator import FireflyOrchestrator
 from apps.environment.services.identity_orchestrator import IdentityOrchestrator
@@ -1027,11 +1027,24 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
         mode: str = "lite",
         task_id: str | None = None,
     ) -> dict:
-        return self._chainlink_orchestrator().run_chainlink_setup(
+        result = self._chainlink_orchestrator().run_chainlink_setup(
             env_id,
             mode=mode,
             task_id=task_id,
         )
+        try:
+            result["firefly_registration"] = self._auto_register_dmn_firefly_after_deploy(
+                env_id,
+                task_id=task_id,
+            )
+        except Exception as exc:
+            LOG.warning(
+                "DMNContract action=auto_register_after_chainlink_setup_failed env=%s error=%s",
+                env_id,
+                exc,
+            )
+            result["firefly_registration_error"] = str(exc)
+        return result
 
     def _run_chainlink_create_job(
         self,
@@ -1052,6 +1065,18 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
             job_kind=job_kind,
             data_source_url=data_source_url,
             data_source_method=data_source_method,
+            task_id=task_id,
+        )
+
+    def _redeploy_dmn_contract(
+        self,
+        env_id: str,
+        contract_name: str,
+        task_id: str | None = None,
+    ) -> dict:
+        return self._chainlink_orchestrator().redeploy_dmn_contract(
+            env_id,
+            contract_name=contract_name,
             task_id=task_id,
         )
 
@@ -1212,6 +1237,50 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
             logger=LOG,
         )
 
+    def _auto_register_dmn_firefly_after_deploy(
+        self,
+        env_id: str,
+        task_id: str | None = None,
+    ) -> dict:
+        env = EthEnvironment.objects.get(pk=env_id)
+        payload_detail = self._load_chainlink_deployments()
+        compiled = payload_detail.get("compiled") or {}
+        dmn = env.dmn_detail or (payload_detail.get("dmn_deployment") or {})
+        if not dmn.get("contractAddress"):
+            return {
+                "auto_registered": False,
+                "message": "DMN contract address not found",
+            }
+
+        if dmn.get("firefly_api_name") and dmn.get("firefly_interface_id"):
+            return {
+                "auto_registered": False,
+                "message": "DMN contract already registered to FireFly",
+                "dmn_detail": dmn,
+            }
+
+        if env.firefly_status != "STARTED":
+            return {
+                "auto_registered": False,
+                "message": "FireFly cluster has not been started, auto registration skipped",
+                "dmn_detail": dmn,
+            }
+
+        self._set_task_step(task_id, "REGISTER_FIREFLY")
+        firefly_payload = self._register_dmn_firefly(env, dmn, compiled)
+        if not firefly_payload:
+            raise RuntimeError("DMN FireFly registration failed")
+
+        dmn = {**dmn, **firefly_payload}
+        self._set_task_step(task_id, "SAVE_RESULT")
+        env.dmn_detail = dmn
+        env.save(update_fields=["dmn_detail"])
+        return {
+            "auto_registered": True,
+            "message": "DMN contract registered to FireFly",
+            "dmn_detail": dmn,
+        }
+
     def _run_dmn_firefly_register(
         self,
         env_id: str,
@@ -1248,6 +1317,31 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
             "message": "DMN contract registered to FireFly",
             "dmn_detail": dmn,
         }
+
+    def _run_dmn_contract_redeploy(
+        self,
+        env_id: str,
+        contract_name: str,
+        task_id: str | None = None,
+    ) -> dict:
+        result = self._chainlink_orchestrator().redeploy_dmn_contract(
+            env_id,
+            contract_name=contract_name,
+            task_id=task_id,
+        )
+        try:
+            result["firefly_registration"] = self._auto_register_dmn_firefly_after_deploy(
+                env_id,
+                task_id=task_id,
+            )
+        except Exception as exc:
+            LOG.warning(
+                "DMNContract action=auto_register_after_redeploy_failed env=%s error=%s",
+                env_id,
+                exc,
+            )
+            result["firefly_registration_error"] = str(exc)
+        return result
 
     def _run_oracle_task_firefly_register(
         self,
@@ -1475,6 +1569,68 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
         }
         return Response(response, status=status.HTTP_200_OK)
 
+    @action(methods=["post"], detail=True, url_path="dmn-contract/redeploy")
+    def redeploy_dmn_contract(self, request, pk=None, *args, **kwargs):
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            return error_response
+        not_ready = self._require_started_or_activated(env)
+        if not_ready:
+            return not_ready
+        if env.chainlink_status != "STARTED":
+            return Response(
+                {"message": "Chainlink cluster has not been started"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        contract_name = self._get_dmn_contract_name()
+        running_task = (
+            Task.objects.filter(
+                target_type="EthEnvironment",
+                target_id=str(env.id),
+                type="DMN_CONTRACT_REDEPLOY",
+                status__in=["PENDING", "RUNNING"],
+            )
+            .order_by("-created_at")
+            .first()
+        )
+        if running_task:
+            return Response(
+                {
+                    "message": "DMN contract redeploy is running",
+                    "task_id": str(running_task.id),
+                },
+                status=status.HTTP_202_ACCEPTED,
+            )
+
+        idempotency_key = f"DMN_CONTRACT_REDEPLOY:{env.id}:{contract_name}:{uuid4()}"
+
+        previous_dmn_detail = env.dmn_detail or {}
+        task = create_task(
+            task_type="DMN_CONTRACT_REDEPLOY",
+            target_type="EthEnvironment",
+            target_id=str(env.id),
+            idempotency_key=idempotency_key,
+            rollback_info={"dmn_detail": previous_dmn_detail},
+        )
+        LOG.info(
+            "DMNContract action=redeploy_task task=%s env=%s contract=%s",
+            task.id,
+            env.id,
+            contract_name,
+        )
+        self._start_task(
+            task,
+            self._run_dmn_contract_redeploy,
+            env.id,
+            contract_name,
+            str(task.id),
+        )
+        return Response(
+            {"task_id": str(task.id), "status": task.status, "contract_name": contract_name},
+            status=status.HTTP_202_ACCEPTED,
+        )
+
     @action(methods=["post"], detail=True, url_path="dmn-contract/call")
     def dmn_contract_call(self, request, pk=None, *args, **kwargs):
         env, error_response = self._get_eth_env_or_404(pk)
@@ -1497,77 +1653,63 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
             return Response({"message": "DMN contract address not found"}, status=status.HTTP_400_BAD_REQUEST)
 
         contract_name = self._get_dmn_contract_name()
-        rpc_url = os.environ.get("RPC_URL", "http://localhost:8545")
         firefly_core_url = dmn_deployment.get("firefly_core_url")
         firefly_api_name = dmn_deployment.get("firefly_api_name")
-
         compiled = payload.get("compiled") or {}
         contract_key = f"contracts/{contract_name}.sol:{contract_name}"
         abi = (compiled.get("contracts") or {}).get(contract_key, {}).get("abi") or []
 
-        if firefly_core_url and firefly_api_name:
-            params = request.data.get("params")
-            if params is None:
-                params = {}
-            if not isinstance(params, dict):
-                return Response({"message": "params must be a dict"}, status=status.HTTP_400_BAD_REQUEST)
-            if args:
-                fn = next(
-                    (
-                        item
-                        for item in abi
-                        if item.get("type") == "function" and item.get("name") == method
-                    ),
-                    None,
-                )
-                if fn:
-                    input_names = [p.get("name") or f"arg{idx}" for idx, p in enumerate(fn.get("inputs") or [])]
-                    if len(args) != len(input_names):
-                        return Response(
-                            {"message": "args length does not match method inputs"},
-                            status=status.HTTP_400_BAD_REQUEST,
-                        )
-                    params = {name: value for name, value in zip(input_names, args)}
-                elif args:
-                    params = {f"arg{idx}": value for idx, value in enumerate(args)}
-
-            try:
-                firefly_mode = "invoke" if mode in ["invoke", "send"] else "query"
-                result = self._firefly_orchestrator().invoke_api(
-                    firefly_core_url,
-                    firefly_api_name,
-                    method,
-                    params,
-                    mode=firefly_mode,
-                )
-                return Response(result, status=status.HTTP_200_OK)
-            except Exception as exc:
-                return Response(
-                    {"message": "DMN contract call via FireFly failed", "error": str(exc)},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-        scripts = self._resolve_chainlink_scripts()
-        compiled_path = str(Path(scripts["chainlink_root"]) / "deployment" / "compiled.json")
-        try:
-            output = execute_dmn_contract_call(
-                compiled_path=compiled_path,
-                contract_name=contract_name,
-                contract_address=contract_address,
-                method=method,
-                args=args,
-                mode=mode,
-                rpc_url=rpc_url,
-                from_address=request.data.get("from"),
-                gas=request.data.get("gas", 5000000),
-            )
-        except Exception as exc:
+        if not firefly_core_url or not firefly_api_name:
             return Response(
-                {"message": "DMN contract call failed", "error": str(exc)},
+                {
+                    "message": (
+                        "DMN contract is not registered to FireFly. "
+                        "Please redeploy DMN contract or run FireFly registration first."
+                    )
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        return Response(output, status=status.HTTP_200_OK)
+        params = request.data.get("params")
+        if params is None:
+            params = {}
+        if not isinstance(params, dict):
+            return Response({"message": "params must be a dict"}, status=status.HTTP_400_BAD_REQUEST)
+        if args:
+            fn = next(
+                (
+                    item
+                    for item in abi
+                    if item.get("type") == "function" and item.get("name") == method
+                ),
+                None,
+            )
+            if fn:
+                input_names = [p.get("name") or f"arg{idx}" for idx, p in enumerate(fn.get("inputs") or [])]
+                if len(args) != len(input_names):
+                    return Response(
+                        {"message": "args length does not match method inputs"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                params = {name: value for name, value in zip(input_names, args)}
+            elif args:
+                params = {f"arg{idx}": value for idx, value in enumerate(args)}
+
+        try:
+            firefly_mode = "invoke" if mode in ["invoke", "send"] else "query"
+            result = self._firefly_orchestrator().invoke_api(
+                firefly_core_url,
+                firefly_api_name,
+                method,
+                params,
+                mode=firefly_mode,
+            )
+            return Response(result, status=status.HTTP_200_OK)
+        except Exception as exc:
+            return Response(
+                {"message": "DMN contract call via FireFly failed", "error": str(exc)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     @action(methods=["post"], detail=True, url_path="dmn-contract/register-firefly")
     def register_dmn_firefly(self, request, pk=None, *args, **kwargs):
@@ -2711,13 +2853,31 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
     @timeitwithname("StartEth")
     def start(self, request, pk=None, *args, **kwargs):
         """
-        启动EthEnvironment - Only changes environment status
-        Firefly operations should be called separately from frontend
+        启动EthEnvironment - Only changes environment status.
+        This is an idempotent state transition and must not downgrade an activated env.
         """
         try:
             env = EthEnvironment.objects.get(pk=pk)
         except EthEnvironment.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if env.status == "ACTIVATED":
+            return Response(
+                {"message": "Environment already activated"},
+                status=status.HTTP_200_OK,
+            )
+
+        if env.status == "STARTED":
+            return Response(
+                {"message": "Environment already started"},
+                status=status.HTTP_200_OK,
+            )
+
+        if env.status != "INITIALIZED":
+            return Response(
+                {"message": "EthEnvironment has not been initialized"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         env.status = "STARTED"
         env.save()
@@ -2731,17 +2891,23 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
     @timeitwithname("ActivateEth")
     def activate(self, request, pk=None, *args, **kwargs):
         """
-        激活EthEnvironment - Only changes environment status
-        Firefly operations should be called separately from frontend
+        激活EthEnvironment - Only changes environment status.
+        This is the logical "ready for ecosystem deployment" marker after start.
         """
         try:
             env = EthEnvironment.objects.get(pk=pk)
         except EthEnvironment.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        if env.status != "INITIALIZED":
+        if env.status == "ACTIVATED":
             return Response(
-                {"message": "EthEnvironment has not been initialized"},
+                {"message": "Environment already activated"},
+                status=status.HTTP_200_OK,
+            )
+
+        if env.status not in ["INITIALIZED", "STARTED"]:
+            return Response(
+                {"message": "EthEnvironment has not been initialized or started"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

@@ -1,0 +1,135 @@
+{
+  "generatedAt": "2026-02-27T13:08:54.324Z",
+  "title": "Data Aggregation Benchmark under Byzantine Ratios",
+  "symbol": "AAPL",
+  "rounds": 6,
+  "maliciousRatios": [
+    0,
+    0.2,
+    0.4
+  ],
+  "errorTolerance": 50,
+  "methods": {
+    "MEAN": {
+      "ratio_0": {
+        "maliciousNodesAvgPerRound": 0,
+        "mae": 0.5,
+        "rmse": 0.9128709291752769,
+        "stddev": 0.7637626158259734,
+        "successRate": 1,
+        "avgTotalGas": 1049842.5
+      },
+      "ratio_0.2": {
+        "maliciousNodesAvgPerRound": 1,
+        "mae": 780.1666666666666,
+        "rmse": 780.1857684765426,
+        "stddev": 5.4594464513864,
+        "successRate": 0,
+        "avgTotalGas": 1044174.8333333334
+      },
+      "ratio_0.4": {
+        "maliciousNodesAvgPerRound": 2,
+        "mae": 117.16666666666667,
+        "rmse": 117.16868182240509,
+        "stddev": 0.6871842709362768,
+        "successRate": 0,
+        "avgTotalGas": 1044166.3333333334
+      }
+    },
+    "MEDIAN": {
+      "ratio_0": {
+        "maliciousNodesAvgPerRound": 0,
+        "mae": 1.1666666666666667,
+        "rmse": 1.224744871391589,
+        "stddev": 0.3726779962499649,
+        "successRate": 1,
+        "avgTotalGas": 1068126
+      },
+      "ratio_0.2": {
+        "maliciousNodesAvgPerRound": 1,
+        "mae": 1.6666666666666667,
+        "rmse": 1.8257418583505538,
+        "stddev": 0.7453559924999299,
+        "successRate": 1,
+        "avgTotalGas": 1069175.3333333333
+      },
+      "ratio_0.4": {
+        "maliciousNodesAvgPerRound": 2,
+        "mae": 1.5,
+        "rmse": 1.6832508230603465,
+        "stddev": 0.7637626158259734,
+        "successRate": 1,
+        "avgTotalGas": 1068692.8333333333
+      }
+    },
+    "WEIGHTED_MEAN": {
+      "ratio_0": {
+        "maliciousNodesAvgPerRound": 0,
+        "mae": 1,
+        "rmse": 1.1547005383792515,
+        "stddev": 0.5773502691896257,
+        "successRate": 1,
+        "avgTotalGas": 1197155.8333333333
+      },
+      "ratio_0.2": {
+        "maliciousNodesAvgPerRound": 1,
+        "mae": 1560.6666666666667,
+        "rmse": 1560.6995226500198,
+        "stddev": 10.126971687308874,
+        "successRate": 0,
+        "avgTotalGas": 1197185.1666666667
+      },
+      "ratio_0.4": {
+        "maliciousNodesAvgPerRound": 2,
+        "mae": 438.6666666666667,
+        "rmse": 438.67717819219484,
+        "stddev": 3.0368111930481,
+        "successRate": 0,
+        "avgTotalGas": 1197187.8333333333
+      }
+    },
+    "TRIMMED_MEAN": {
+      "ratio_0": {
+        "maliciousNodesAvgPerRound": 0,
+        "mae": 1,
+        "rmse": 1.1547005383792515,
+        "stddev": 0.5773502691896257,
+        "successRate": 1,
+        "avgTotalGas": 1069867
+      },
+      "ratio_0.2": {
+        "maliciousNodesAvgPerRound": 1,
+        "mae": 1.1666666666666667,
+        "rmse": 1.35400640077266,
+        "stddev": 0.6871842709362768,
+        "successRate": 1,
+        "avgTotalGas": 1070895
+      },
+      "ratio_0.4": {
+        "maliciousNodesAvgPerRound": 2,
+        "mae": 0.8333333333333334,
+        "rmse": 1.224744871391589,
+        "stddev": 0.8975274678557507,
+        "successRate": 1,
+        "avgTotalGas": 1070422.6666666667
+      }
+    }
+  },
+  "references": [
+    {
+      "key": "Yin2018",
+      "title": "Byzantine-Robust Distributed Learning: Towards Optimal Statistical Rates",
+      "url": "https://arxiv.org/abs/1803.01498"
+    },
+    {
+      "key": "Blanchard2017",
+      "title": "Machine Learning with Adversaries: Byzantine Tolerant Gradient Descent",
+      "url": "https://papers.nips.cc/paper_files/paper/2017/hash/f4b9ec30ad9f68f89b29639786cb62ef-Abstract.html"
+    },
+    {
+      "key": "ChainlinkFeeds",
+      "title": "Chainlink Data Feeds architecture",
+      "url": "https://chain.link/data-feeds"
+    }
+  ]
+}

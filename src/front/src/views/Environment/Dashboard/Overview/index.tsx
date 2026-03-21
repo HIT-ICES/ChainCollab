@@ -47,10 +47,11 @@ import {
   getIdentityContractDetail,
   redeployIdentityContract,
   getChainlinkDetailForEthEnv,
+  getChainlinkJobsForEthEnv,
   syncChainlinkForEthEnv,
   getEthAccountCheck,
   getDmnContractDetailForEthEnv,
-  registerDmnContractToFireflyForEthEnv,
+  redeployDmnContractForEthEnv,
   callDmnContractForEthEnv,
   getDataContractDetailForEthEnv,
   setupDataContractForEthEnv,
@@ -93,11 +94,10 @@ import {
   FireflyComponentCard,
   OracleComponentCard,
   DMNComponentCard,
-  DataContractComponentCard,
-  ComputeContractComponentCard,
-  RelayerComponentCard,
+  OracleDMNComponentCard,
   IdentityContractComponentCard,
   SystemAccountComponentCard,
+  StartupDependencyGraph,
 
   JoinModal,
   NaiveEthereumStepBar
@@ -155,6 +155,8 @@ const Overview: React.FC = () => {
   const [setupFireflyLoading, setSetupFireflyLoading] = useState(false)
   const [setupOracleLoading, setSetupOracleLoading] = useState(false)
   const [setupDMNLoading, setSetupDMNLoading] = useState(false)
+  const [redeployDmnLoading, setRedeployDmnLoading] = useState(false)
+  const [setupChainlinkMode, setSetupChainlinkMode] = useState<"lite" | "full" | null>(null)
   const [setupDmnFireflyLoading, setSetupDmnFireflyLoading] = useState(false)
   const [setupDataContractLoading, setSetupDataContractLoading] = useState(false)
   const [setupDataFireflyLoading, setSetupDataFireflyLoading] = useState(false)
@@ -171,6 +173,10 @@ const Overview: React.FC = () => {
   const [detailPayload, setDetailPayload] = useState(null)
   const [chainlinkDetail, setChainlinkDetail] = useState(null)
   const [chainlinkSyncLoading, setChainlinkSyncLoading] = useState(false)
+  const [oracleAction, setOracleAction] = useState<any>(null)
+  const [oracleCallLoading, setOracleCallLoading] = useState(false)
+  const [oracleCallResult, setOracleCallResult] = useState<string | null>(null)
+  const [oracleForm] = Form.useForm()
   const [dmnDetail, setDmnDetail] = useState(null)
   const [dataDetail, setDataDetail] = useState(null)
   const [computeDetail, setComputeDetail] = useState(null)
@@ -178,6 +184,7 @@ const Overview: React.FC = () => {
   const [relayerNodeStatus, setRelayerNodeStatus] = useState<any>(null)
   const [ethAccountCheck, setEthAccountCheck] = useState<any>(null)
   const [ethAccountCheckLoading, setEthAccountCheckLoading] = useState(false)
+  const ethSystemAccountReady = Boolean(ethAccountCheck?.has_expected_account && ethAccountCheck?.unlock_ok)
   const [callLoading, setCallLoading] = useState(false)
   const [callResult, setCallResult] = useState<string | null>(null)
   const [callForm] = Form.useForm()
@@ -203,6 +210,7 @@ const Overview: React.FC = () => {
     ETH_DMN_INSTALL: "ETH DMN Install",
     CHAINLINK_INSTALL: "Chainlink + DMN Install",
     CHAINLINK_JOB_CREATE: "Chainlink Job Create",
+    DMN_CONTRACT_REDEPLOY: "DMN Contract Redeploy",
     DMN_FIREFLY_REGISTER: "Register DMN to FireFly",
     DATA_CONTRACT_SETUP: "Data Contract Setup",
     DATA_CONTRACT_FIREFLY_REGISTER: "Register Data Contract to FireFly",
@@ -273,11 +281,39 @@ const Overview: React.FC = () => {
     },
   ]
 
+  const oracleQuickActions = [
+    {
+      label: "Refresh Chainlink Detail",
+      method: "refreshChainlinkDetail",
+      kind: "api",
+      params: [],
+    },
+    {
+      label: "Sync Chainlink Cluster",
+      method: "syncChainlinkCluster",
+      kind: "api",
+      params: [],
+    },
+    {
+      label: "Refresh Account Check",
+      method: "refreshAccountCheck",
+      kind: "api",
+      params: [],
+    },
+    {
+      label: "Get Chainlink Jobs",
+      method: "getChainlinkJobs",
+      kind: "api",
+      params: [{ key: "node", label: "Node", placeholder: "optional node url or name" }],
+    },
+  ]
+
   const dmnQuickActions = [
     {
       label: "requestDMNDecision",
       method: "requestDMNDecision",
       mode: "invoke",
+      kind: "contract",
       params: [
         { key: "url", label: "DMN URL", placeholder: "http://cdmn-node1:5000/api/dmn/evaluate" },
         { key: "dmnContent", label: "DMN Content", placeholder: "<DMN XML>" },
@@ -289,33 +325,39 @@ const Overview: React.FC = () => {
       label: "getRawByRequestId",
       method: "getRawByRequestId",
       mode: "call",
+      kind: "contract",
       params: [{ key: "requestId", label: "Request ID", placeholder: "0x..." }],
     },
     {
       label: "getDMNResult",
       method: "getDMNResult",
       mode: "call",
+      kind: "contract",
       params: [],
     },
     {
       label: "rawResultCount",
       method: "rawResultCount",
       mode: "call",
+      kind: "contract",
       params: [],
     },
     {
       label: "rawResultHashAt",
       method: "rawResultHashAt",
       mode: "call",
+      kind: "contract",
       params: [{ key: "index", label: "Index", placeholder: "0" }],
     },
     {
       label: "getAllRawResults",
       method: "getAllRawResults",
       mode: "call",
+      kind: "contract",
       params: [],
     },
   ]
+  const dmnContractActions = dmnQuickActions.filter((action) => action.kind === "contract")
 
   const handleSetUpFabricNetwork = async () => {
     try {
@@ -416,6 +458,19 @@ const Overview: React.FC = () => {
       .join(" ")
   }
 
+  const formatTaskLabel = (task: any) => {
+    if (task?.label) {
+      return task.label
+    }
+    const rawType = String(task?.type || "").toUpperCase()
+    const baseLabel = humanizeTaskType(rawType)
+    const mode = String(task?.result?.mode || task?.mode || "").toLowerCase()
+    if (rawType === "CHAINLINK_INSTALL" && ["lite", "full"].includes(mode)) {
+      return `${baseLabel} (${mode.toUpperCase()})`
+    }
+    return baseLabel
+  }
+
   const taskStatusColor = (statusValue: string) => {
     const normalized = String(statusValue || "").toUpperCase()
     if (normalized === "SUCCESS") return "green"
@@ -479,6 +534,7 @@ const Overview: React.FC = () => {
         "ETH_DMN_INSTALL",
         "CHAINLINK_INSTALL",
         "CHAINLINK_JOB_CREATE",
+        "DMN_CONTRACT_REDEPLOY",
         "DMN_FIREFLY_REGISTER",
         "DATA_CONTRACT_SETUP",
         "DATA_CONTRACT_FIREFLY_REGISTER",
@@ -708,6 +764,48 @@ const Overview: React.FC = () => {
     }
   }
 
+  const applyOracleQuickAction = (action: any) => {
+    setOracleAction(action)
+    oracleForm.setFieldsValue({
+      method: action.method,
+    })
+  }
+
+  const handleOracleCall = async () => {
+    try {
+      const values = await oracleForm.validateFields()
+      if (currentEnvType !== "Ethereum") {
+        message.warning("Oracle check interfaces only support Ethereum environment")
+        return
+      }
+      if (!oracleAction) {
+        message.warning("Select a quick action first")
+        return
+      }
+      setOracleCallLoading(true)
+      let result: any = null
+      if (oracleAction.method === "refreshChainlinkDetail") {
+        result = await loadChainlinkDetail(false, true)
+      } else if (oracleAction.method === "syncChainlinkCluster") {
+        result = await syncChainlinkForEthEnv(currentEnvId, true, shouldForceRetry(taskMap.oracle))
+        await Promise.all([loadChainlinkDetail(true, false), setSync()])
+      } else if (oracleAction.method === "refreshAccountCheck") {
+        result = await getEthAccountCheck(currentEnvId)
+        setEthAccountCheck(result)
+      } else if (oracleAction.method === "getChainlinkJobs") {
+        const node = String(values.node || "").trim()
+        result = await getChainlinkJobsForEthEnv(currentEnvId, node || undefined)
+      } else {
+        result = { ok: false, message: `Unsupported method: ${oracleAction.method}` }
+      }
+      setOracleCallResult(JSON.stringify(result, null, 2))
+    } catch (err: any) {
+      message.error(extractErrorMessage(err, "Oracle call failed"))
+    } finally {
+      setOracleCallLoading(false)
+    }
+  }
+
   const startTaskPolling = async (taskId: string, label: string) => {
     const seed = { id: taskId, label, status: "PENDING" }
     upsertTaskItem(seed)
@@ -729,7 +827,13 @@ const Overview: React.FC = () => {
       "CHAINLINK_INSTALL",
       "CHAINLINK_JOB_CREATE",
     ])
-    map.dmn = pickLatest(["FABRIC_DMN_INSTALL", "ETH_DMN_INSTALL", "CHAINLINK_INSTALL", "DMN_FIREFLY_REGISTER"])
+    map.dmn = pickLatest([
+      "FABRIC_DMN_INSTALL",
+      "ETH_DMN_INSTALL",
+      "CHAINLINK_INSTALL",
+      "DMN_CONTRACT_REDEPLOY",
+      "DMN_FIREFLY_REGISTER",
+    ])
     map.data = pickLatest(["DATA_CONTRACT_SETUP", "DATA_CONTRACT_FIREFLY_REGISTER"])
     map.compute = pickLatest(["COMPUTE_CONTRACT_SETUP", "COMPUTE_CONTRACT_FIREFLY_REGISTER"])
     map.relayer = pickLatest(["RELAYER_CONTRACT_SETUP", "RELAYER_CONTRACT_FIREFLY_REGISTER"])
@@ -750,6 +854,8 @@ const Overview: React.FC = () => {
     }
     return value
   }
+
+  const shouldForceRetry = (taskInfo: any) => String(taskInfo?.status || "").toUpperCase() === "FAILED"
 
   useEffect(() => {
     if (!currentEnvId || !currentEnvType) {
@@ -815,17 +921,17 @@ const Overview: React.FC = () => {
   const handleSetUpFabricComponent = async () => {
     try {
       setSetupComponentLoading(true)
-      const fireflyRes = await InstallFirefly(currentOrgId, currentEnvId)
+      const fireflyRes = await InstallFirefly(currentOrgId, currentEnvId, shouldForceRetry(taskMap.firefly))
       if (fireflyRes?.task_id) {
         await startTaskPolling(fireflyRes.task_id, "Fabric Firefly Install")
       }
       setSync()
-      const startRes = await StartFireflyForEnv(currentEnvId)
+      const startRes = await StartFireflyForEnv(currentEnvId, shouldForceRetry(taskMap.firefly))
       if (startRes?.task_id) {
         await startTaskPolling(startRes.task_id, "Fabric Firefly Start")
       }
       setSync()
-      const oracleRes = await InstallOracle(currentOrgId, currentEnvId)
+      const oracleRes = await InstallOracle(currentOrgId, currentEnvId, shouldForceRetry(taskMap.oracle))
       if (oracleRes?.task_id) {
         await startTaskPolling(oracleRes.task_id, "Fabric Oracle Install")
       }
@@ -836,7 +942,7 @@ const Overview: React.FC = () => {
       })
       await registerAPI(systemFireflyURL, "Oracle", "default", "Oracle", res.id)
       setSync()
-      const dmnRes = await InstallDmnEngine(currentOrgId, currentEnvId)
+      const dmnRes = await InstallDmnEngine(currentOrgId, currentEnvId, shouldForceRetry(taskMap.dmn))
       if (dmnRes?.task_id) {
         await startTaskPolling(dmnRes.task_id, "Fabric DMN Install")
       }
@@ -866,12 +972,12 @@ const Overview: React.FC = () => {
     try {
       setSetupFireflyLoading(true)
       if (currentEnvType === "Fabric") {
-        const installRes = await InstallFirefly(currentOrgId, currentEnvId)
+        const installRes = await InstallFirefly(currentOrgId, currentEnvId, shouldForceRetry(taskMap.firefly))
         if (installRes?.task_id) {
           await startTaskPolling(installRes.task_id, "Fabric Firefly Install")
         }
         setSync()
-        const startRes = await StartFireflyForEnv(currentEnvId)
+        const startRes = await StartFireflyForEnv(currentEnvId, shouldForceRetry(taskMap.firefly))
         if (startRes?.task_id) {
           await startTaskPolling(startRes.task_id, "Fabric Firefly Start")
         }
@@ -896,7 +1002,7 @@ const Overview: React.FC = () => {
         message.warning("Oracle only supports Fabric environment")
         return
       }
-      const oracleRes = await InstallOracle(currentOrgId, currentEnvId)
+      const oracleRes = await InstallOracle(currentOrgId, currentEnvId, shouldForceRetry(taskMap.oracle))
       if (oracleRes?.task_id) {
         await startTaskPolling(oracleRes.task_id, "Fabric Oracle Install")
       }
@@ -919,17 +1025,9 @@ const Overview: React.FC = () => {
     try {
       setSetupDMNLoading(true)
       if (currentEnvType === "Fabric") {
-        const dmnRes = await InstallDmnEngine(currentOrgId, currentEnvId)
+        const dmnRes = await InstallDmnEngine(currentOrgId, currentEnvId, shouldForceRetry(taskMap.dmn))
         if (dmnRes?.task_id) {
           await startTaskPolling(dmnRes.task_id, "Fabric DMN Install")
-        }
-        setSync()
-        return
-      }
-      if (currentEnvType === "Ethereum") {
-        const chainlinkRes = await InstallChainlinkForEthEnv(currentEnvId, "lite")
-        if (chainlinkRes?.task_id) {
-          await startTaskPolling(chainlinkRes.task_id, "Ethereum Chainlink Lite Install")
         }
         setSync()
         return
@@ -942,49 +1040,27 @@ const Overview: React.FC = () => {
     }
   }
 
-  const handleRegisterDmnToFirefly = async () => {
+  const handleSetUpChainlinkInstall = async (mode: "lite" | "full") => {
+    if (currentEnvType !== "Ethereum") {
+      message.warning("Chainlink install only supports Ethereum environment")
+      return
+    }
+    if (setupChainlinkMode && setupChainlinkMode !== mode) {
+      message.warning(`Chainlink ${setupChainlinkMode} setup is already running`)
+      return
+    }
     try {
-      setSetupDmnFireflyLoading(true)
-      if (currentEnvType !== "Ethereum") {
-        message.warning("DMN FireFly registration only supports Ethereum environment")
-        return
-      }
-      if (envInfo.chainlinkStatus !== "STARTED") {
-        message.warning("DMN contract is not deployed yet")
-        return
-      }
-      if (envInfo.fireflyStatus !== "STARTED") {
-        message.warning("FireFly cluster is not started")
-        return
-      }
-      if (envInfo.dmnFireflyRegistered) {
-        message.info("DMN contract is already registered to FireFly")
-        return
-      }
-      if (!envInfo.dmnContractAddress && !dmnDetail?.contract?.address) {
-        message.warning("DMN contract address is missing, please run DMN setup first")
-        return
-      }
-      const res = await registerDmnContractToFireflyForEthEnv(currentEnvId)
-      if (res?.task_id) {
-        await startTaskPolling(res.task_id, "Ethereum DMN FireFly Register")
-        message.success("DMN register task started")
-      } else if (res?.status === "STARTED" && res?.dmn_detail) {
-        message.success("DMN contract already registered to FireFly")
-      } else if (res?.message) {
-        message.info(res.message)
-      } else {
-        message.success("DMN contract registered to FireFly")
+      setSetupChainlinkMode(mode)
+      const chainlinkRes = await InstallChainlinkForEthEnv(currentEnvId, mode, shouldForceRetry(taskMap.dmn))
+      if (chainlinkRes?.task_id) {
+        const label = mode === "lite" ? "Ethereum Chainlink Lite Install" : "Ethereum Chainlink Full Install"
+        await startTaskPolling(chainlinkRes.task_id, label)
       }
       setSync()
-      if (detailType === "DMN") {
-        const detail = await getDmnContractDetailForEthEnv(currentEnvId, true)
-        setDmnDetail(detail)
-      }
     } catch (error: any) {
-      message.error(extractErrorMessage(error, "Failed to register DMN contract to FireFly"))
+      message.error(extractErrorMessage(error, `Setup Chainlink ${mode} failed`))
     } finally {
-      setSetupDmnFireflyLoading(false)
+      setSetupChainlinkMode(null)
     }
   }
 
@@ -999,7 +1075,7 @@ const Overview: React.FC = () => {
         message.warning("Please setup Chainlink + DMN first")
         return
       }
-      const res = await setupDataContractForEthEnv(currentEnvId)
+      const res = await setupDataContractForEthEnv(currentEnvId, shouldForceRetry(taskMap.data))
       if (res?.task_id) {
         await startTaskPolling(res.task_id, "Data Contract Setup")
         message.success("Data contract setup task started")
@@ -1038,7 +1114,7 @@ const Overview: React.FC = () => {
         message.info("Data contract already registered to FireFly")
         return
       }
-      const res = await registerDataContractToFireflyForEthEnv(currentEnvId)
+      const res = await registerDataContractToFireflyForEthEnv(currentEnvId, shouldForceRetry(taskMap.data))
       if (res?.task_id) {
         await startTaskPolling(res.task_id, "Data Contract FireFly Register")
         message.success("Data contract register task started")
@@ -1069,7 +1145,7 @@ const Overview: React.FC = () => {
         message.warning("Please setup Chainlink + DMN first")
         return
       }
-      const res = await setupComputeContractForEthEnv(currentEnvId)
+      const res = await setupComputeContractForEthEnv(currentEnvId, shouldForceRetry(taskMap.compute))
       if (res?.task_id) {
         await startTaskPolling(res.task_id, "Compute Contract Setup")
         message.success("Compute contract setup task started")
@@ -1108,7 +1184,7 @@ const Overview: React.FC = () => {
         message.info("Compute contract already registered to FireFly")
         return
       }
-      const res = await registerComputeContractToFireflyForEthEnv(currentEnvId)
+      const res = await registerComputeContractToFireflyForEthEnv(currentEnvId, shouldForceRetry(taskMap.compute))
       if (res?.task_id) {
         await startTaskPolling(res.task_id, "Compute Contract FireFly Register")
         message.success("Compute contract register task started")
@@ -1143,7 +1219,7 @@ const Overview: React.FC = () => {
         message.info("Relayer contract already deployed")
         return
       }
-      const res = await setupRelayerContractForEthEnv(currentEnvId)
+      const res = await setupRelayerContractForEthEnv(currentEnvId, shouldForceRetry(taskMap.relayer))
       if (res?.task_id) {
         await startTaskPolling(res.task_id, "Relayer Contract Setup")
       } else if (res?.status === "STARTED") {
@@ -1181,7 +1257,7 @@ const Overview: React.FC = () => {
         message.info("Relayer contract already registered to FireFly")
         return
       }
-      const res = await registerRelayerContractToFireflyForEthEnv(currentEnvId)
+      const res = await registerRelayerContractToFireflyForEthEnv(currentEnvId, shouldForceRetry(taskMap.relayer))
       if (res?.task_id) {
         await startTaskPolling(res.task_id, "Relayer Contract FireFly Register")
         message.success("Relayer contract register task started")
@@ -1224,7 +1300,7 @@ const Overview: React.FC = () => {
         message.warning("Identity contract only supports Ethereum environment")
         return
       }
-      const identityRes = await InstallIdentityContract(currentEnvId)
+      const identityRes = await InstallIdentityContract(currentEnvId, shouldForceRetry(taskMap.identity))
       if (identityRes?.task_id) {
         await startTaskPolling(identityRes.task_id, "Ethereum Identity Contract Install")
       }
@@ -1278,10 +1354,12 @@ const Overview: React.FC = () => {
     setDetailOpen(true)
     setCallResult(null)
     setDmnCallResult(null)
+    setOracleCallResult(null)
     setDataDetail(null)
     setComputeDetail(null)
     setRelayerDetail(null)
     setRelayerNodeStatus(null)
+    setOracleAction(null)
     if (type === "Identity") {
       try {
         setDetailLoading(true)
@@ -1455,12 +1533,39 @@ const Overview: React.FC = () => {
     }
     try {
       setCallLoading(true)
-      await redeployIdentityContract(currentEnvId)
+      await redeployIdentityContract(currentEnvId, shouldForceRetry(taskMap.identity))
       message.success("Redeploy triggered. Syncing users in background.")
     } catch (err) {
       message.error("Redeploy failed to start")
     } finally {
       setCallLoading(false)
+    }
+  }
+
+  const handleRedeployDmnContract = async () => {
+    if (currentEnvType !== "Ethereum") {
+      message.warning("DMN contract only supports Ethereum environment")
+      return
+    }
+    try {
+      setRedeployDmnLoading(true)
+      const res = await redeployDmnContractForEthEnv(currentEnvId, true)
+      if (res?.task_id) {
+        await startTaskPolling(res.task_id, "Ethereum DMN Contract Redeploy")
+        await Promise.all([
+          setSync(),
+          getDmnContractDetailForEthEnv(currentEnvId, true).then((detail) => setDmnDetail(detail)),
+        ])
+        message.success("DMN contract redeploy task started")
+      } else if (res?.status === "STARTED") {
+        message.success(res?.message || "DMN contract redeploy already started")
+      } else if (res?.message) {
+        message.info(res.message)
+      }
+    } catch (err) {
+      message.error(extractErrorMessage(err, "Redeploy DMN contract failed"))
+    } finally {
+      setRedeployDmnLoading(false)
     }
   }
 
@@ -1479,6 +1584,288 @@ const Overview: React.FC = () => {
       ...paramDefaults,
     })
   }
+
+  const graphNode = (
+    id: string,
+    title: string,
+    card: React.ReactNode,
+    position: { x: number; y: number },
+    options: {
+      order?: string;
+      note?: string;
+      status?: any;
+      locked?: boolean;
+      accent?: string;
+    } = {},
+  ) => ({
+    id,
+    position,
+    data: {
+      title,
+      order: options.order,
+      note: options.note,
+      status: options.status,
+      card,
+      locked: options.locked,
+      accent: options.accent,
+    },
+  })
+
+  const graphEdge = (source: string, target: string, note?: string) => ({
+    id: `${source}->${target}`,
+    source,
+    target,
+    label: note,
+    style: { stroke: "#94a3b8", strokeWidth: 2 },
+  })
+
+  const startupGraph = currentEnvType === "Fabric"
+    ? {
+        nodes: [
+          graphNode(
+            "fabric-firefly",
+            "Firefly",
+            <FireflyComponentCard
+              ChaincodeStatus={applyTaskOverlay(envInfo.fireflyStatus !== "NO", taskMap.firefly)}
+              ClusterStatus={applyTaskOverlay(envInfo.fireflyStatus === "STARTED", taskMap.firefly)}
+              taskInfo={taskMap.firefly}
+              onOpen={() => openComponentDetail("Firefly")}
+              onSetup={
+                <LoadingButton
+                  className="nodrag nopan"
+                  size="small"
+                  variant="outlined"
+                  loading={setupFireflyLoading}
+                  onClick={handleSetUpFireflyOnly}
+                  disabled={envInfo.fireflyStatus && envInfo.fireflyStatus !== "NO" && envInfo.fireflyStatus !== "FAILED"}
+                >
+                  Setup
+                </LoadingButton>
+              }
+            />,
+            { x: 280, y: 0 },
+            {
+              order: "1",
+              note: "Start first",
+              status: envInfo.fireflyStatus ?? "NO",
+              locked: false,
+              accent: "#88c100",
+            },
+          ),
+          graphNode(
+            "fabric-oracle",
+            "Oracle",
+            <OracleComponentCard
+              ChaincodeStatus={applyTaskOverlay(envInfo.oracleStatus === "CHAINCODEINSTALLED", taskMap.oracle)}
+              statusKey="ChainCode"
+              taskInfo={taskMap.oracle}
+              onOpen={() => openComponentDetail("Oracle")}
+              onSetup={
+                <LoadingButton
+                  size="small"
+                  variant="outlined"
+                  loading={setupOracleLoading}
+                  onClick={handleSetUpOracleOnly}
+                  disabled={envInfo.oracleStatus && envInfo.oracleStatus !== "NO" && envInfo.oracleStatus !== "FAILED"}
+                >
+                  Setup
+                </LoadingButton>
+              }
+            />,
+            { x: 280, y: 360 },
+            {
+              order: "2",
+              note: "After Firefly",
+              status: envInfo.oracleStatus ?? "NO",
+              locked: envInfo.fireflyStatus !== "STARTED",
+              accent: "#2790b0",
+            },
+          ),
+          graphNode(
+            "fabric-dmn",
+            "DMN",
+            <DMNComponentCard
+              ChaincodeStatus={applyTaskOverlay(envInfo.dmnStatus === "CHAINCODEINSTALLED", taskMap.dmn)}
+              statusKey="ChainCode"
+              taskInfo={taskMap.dmn}
+              onOpen={() => openComponentDetail("DMN")}
+              onSetup={
+                <LoadingButton
+                  size="small"
+                  variant="outlined"
+                  loading={setupDMNLoading}
+                  onClick={handleSetUpDMNOnly}
+                  disabled={
+                    envInfo.fireflyStatus !== "STARTED" ||
+                    envInfo.oracleStatus !== "CHAINCODEINSTALLED" ||
+                    (envInfo.dmnStatus && envInfo.dmnStatus !== "NO" && envInfo.dmnStatus !== "FAILED")
+                  }
+                >
+                  Setup
+                </LoadingButton>
+              }
+            />,
+            { x: 280, y: 720 },
+            {
+              order: "3",
+              note: "After Oracle",
+              status: envInfo.dmnStatus ?? "NO",
+              locked: envInfo.oracleStatus !== "CHAINCODEINSTALLED",
+              accent: "#ffaa00",
+            },
+          ),
+        ],
+        edges: [
+          graphEdge("fabric-firefly", "fabric-oracle"),
+          graphEdge("fabric-oracle", "fabric-dmn"),
+        ],
+      }
+    : currentEnvType === "Ethereum"
+      ? {
+          nodes: [
+            graphNode(
+              "eth-system-account",
+              "System Account",
+              <SystemAccountComponentCard
+                AccountStatus={ethSystemAccountReady ? "STARTED" : "NO"}
+                onOpen={() => openComponentDetail("Account")}
+              />,
+              { x: 280, y: 0 },
+              {
+                order: "0",
+                note: "Precheck gate",
+                status: ethSystemAccountReady ? "STARTED" : "NO",
+                locked: false,
+                accent: "#16a34a",
+              },
+            ),
+            graphNode(
+              "eth-firefly",
+              "Firefly",
+              <FireflyComponentCard
+                ChaincodeStatus={applyTaskOverlay(envInfo.fireflyStatus !== "NO", taskMap.firefly)}
+                ClusterStatus={applyTaskOverlay(envInfo.fireflyStatus === "STARTED", taskMap.firefly)}
+                taskInfo={taskMap.firefly}
+                onOpen={() => openComponentDetail("Firefly")}
+                onSetup={
+                  <LoadingButton
+                    className="nodrag nopan"
+                    size="small"
+                    variant="outlined"
+                    loading={setupFireflyLoading}
+                    onClick={handleSetUpFireflyOnly}
+                    disabled={envInfo.status !== "STARTED" && envInfo.status !== "ACTIVATED"}
+                  >
+                    Setup
+                  </LoadingButton>
+                }
+              />,
+              { x: 280, y: 360 },
+              {
+                order: "1",
+                note: "Start after account check",
+                status: envInfo.fireflyStatus ?? "NO",
+                locked: !ethSystemAccountReady,
+                accent: "#88c100",
+              },
+            ),
+            graphNode(
+              "eth-identity",
+              "Identity Contract",
+              <IdentityContractComponentCard
+                ContractStatus={applyTaskOverlay(envInfo.identityContractStatus ?? "NO", taskMap.identity)}
+                taskInfo={taskMap.identity}
+                onOpen={() => openComponentDetail("Identity")}
+                onSetup={
+                  <LoadingButton
+                    className="nodrag nopan"
+                    size="small"
+                    variant="outlined"
+                    loading={setupIdentityLoading}
+                    onClick={handleSetUpIdentityContractOnly}
+                    disabled={
+                      currentEnvType !== "Ethereum" ||
+                      !ethSystemAccountReady ||
+                      envInfo.fireflyStatus !== "STARTED" ||
+                      (envInfo.identityContractStatus && envInfo.identityContractStatus !== "NO" && envInfo.identityContractStatus !== "FAILED")
+                    }
+                  >
+                    Setup
+                  </LoadingButton>
+                }
+              />,
+              { x: 0, y: 720 },
+              {
+                order: "1.1",
+                note: "Side branch",
+                status: envInfo.identityContractStatus ?? "NO",
+                locked: envInfo.fireflyStatus !== "STARTED",
+                accent: "#8b5cf6",
+              },
+            ),
+            graphNode(
+              "eth-oracle-dmn",
+              "Oracle / DMN",
+              <OracleDMNComponentCard
+                ChainlinkStatus={applyTaskOverlay(ethChainlinkStatus, taskMap.oracle)}
+                DMNStatus={applyTaskOverlay(ethDmnContractStatus, taskMap.dmn)}
+                FireflyStatus={applyTaskOverlay(
+                  ethDmnFireflyStatus,
+                  String(taskMap.dmn?.type || "").toUpperCase() === "DMN_FIREFLY_REGISTER"
+                    ? taskMap.dmn
+                    : null
+                )}
+                taskInfo={taskMap.dmn || taskMap.oracle}
+                onOpen={() => openComponentDetail("Oracle")}
+                onOpenDMN={() => openComponentDetail("DMN")}
+                onSetup={
+                  <Space wrap size={8}>
+                    <LoadingButton
+                      className="nodrag nopan"
+                      size="small"
+                      variant="outlined"
+                      loading={setupChainlinkMode === "lite"}
+                      onClick={() => handleSetUpChainlinkInstall("lite")}
+                      disabled={
+                        setupChainlinkMode === "full" ||
+                        (envInfo.chainlinkStatus && envInfo.chainlinkStatus !== "NO" && envInfo.chainlinkStatus !== "FAILED")
+                      }
+                    >
+                      Lite Setup
+                    </LoadingButton>
+                    <LoadingButton
+                      className="nodrag nopan"
+                      size="small"
+                      variant="outlined"
+                      loading={setupChainlinkMode === "full"}
+                      onClick={() => handleSetUpChainlinkInstall("full")}
+                      disabled={
+                        setupChainlinkMode === "lite" ||
+                        (envInfo.chainlinkStatus && envInfo.chainlinkStatus !== "NO" && envInfo.chainlinkStatus !== "FAILED")
+                      }
+                    >
+                      Full Setup
+                    </LoadingButton>
+                  </Space>
+                }
+              />,
+              { x: 560, y: 720 },
+              {
+                order: "2",
+                note: "Chainlink + DMN are one stack",
+                status: ethDmnContractStatus,
+                locked: envInfo.fireflyStatus !== "STARTED",
+                accent: "#2790b0",
+              },
+            ),
+          ],
+          edges: [
+            graphEdge("eth-system-account", "eth-firefly"),
+            graphEdge("eth-firefly", "eth-identity", "identity"),
+            graphEdge("eth-firefly", "eth-oracle-dmn"),
+          ],
+        }
+      : { nodes: [], edges: [] }
 
   return (
     <>
@@ -1586,250 +1973,12 @@ const Overview: React.FC = () => {
                 </LoadingButton>
               </Col>
             </Row>
-            <Row style={{ display: "flex", justifyContent: "space-evenly" }}>
-              <FireflyComponentCard
-                ChaincodeStatus={applyTaskOverlay(envInfo.fireflyStatus !== "NO", taskMap.firefly)}
-                ClusterStatus={applyTaskOverlay(envInfo.fireflyStatus === "STARTED", taskMap.firefly)}
-                taskInfo={taskMap.firefly}
-                onOpen={() => openComponentDetail("Firefly")}
-                onSetup={
-                  <LoadingButton
-                    size="small"
-                    variant="outlined"
-                    loading={setupFireflyLoading}
-                    onClick={handleSetUpFireflyOnly}
-                    disabled={envInfo.fireflyStatus && envInfo.fireflyStatus !== "NO" && envInfo.fireflyStatus !== "FAILED"}
-                  >
-                    Setup
-                  </LoadingButton>
-                }
-              />
-              <OracleComponentCard
-                ChaincodeStatus={
-                  currentEnvType === "Ethereum"
-                    ? applyTaskOverlay(envInfo.chainlinkStatus ?? "NO", taskMap.oracle)
-                    : applyTaskOverlay(envInfo.oracleStatus === "CHAINCODEINSTALLED", taskMap.oracle)
-                }
-                statusKey={isEthereumEnv ? "Cluster" : "ChainCode"}
-                taskInfo={taskMap.oracle}
-                onOpen={() => openComponentDetail("Oracle")}
-                onSetup={
-                  currentEnvType === "Fabric" ? (
-                    <LoadingButton
-                      size="small"
-                      variant="outlined"
-                      loading={setupOracleLoading}
-                      onClick={handleSetUpOracleOnly}
-                      disabled={envInfo.oracleStatus && envInfo.oracleStatus !== "NO" && envInfo.oracleStatus !== "FAILED"}
-                    >
-                      Setup
-                    </LoadingButton>
-                  ) : null
-                }
-              />
-              <DMNComponentCard
-                ChaincodeStatus={
-                  currentEnvType === "Ethereum"
-                    ? applyTaskOverlay(ethDmnContractStatus, taskMap.dmn)
-                    : applyTaskOverlay(envInfo.dmnStatus === "CHAINCODEINSTALLED", taskMap.dmn)
-                }
-                FireflyStatus={
-                  isEthereumEnv
-                    ? applyTaskOverlay(
-                        ethDmnFireflyStatus,
-                        String(taskMap.dmn?.type || "").toUpperCase() === "DMN_FIREFLY_REGISTER"
-                          ? taskMap.dmn
-                          : null
-                      )
-                    : null
-                }
-                statusKey={isEthereumEnv ? "Contract" : "ChainCode"}
-                taskInfo={taskMap.dmn}
-                onOpen={() => openComponentDetail("DMN")}
-                onSetup={
-                  currentEnvType === "Ethereum" ? (
-                    <>
-                      <LoadingButton
-                        size="small"
-                        variant="outlined"
-                        loading={setupDMNLoading}
-                        onClick={handleSetUpDMNOnly}
-                        disabled={envInfo.chainlinkStatus && envInfo.chainlinkStatus !== "NO" && envInfo.chainlinkStatus !== "FAILED"}
-                      >
-                        Setup
-                      </LoadingButton>
-                      <LoadingButton
-                        size="small"
-                        variant="outlined"
-                        loading={setupDmnFireflyLoading}
-                        onClick={handleRegisterDmnToFirefly}
-                        disabled={
-                          envInfo.fireflyStatus !== "STARTED" ||
-                          envInfo.chainlinkStatus !== "STARTED" ||
-                          !ethDmnContractAddress ||
-                          envInfo.dmnFireflyRegistered
-                        }
-                      >
-                        Register FireFly
-                      </LoadingButton>
-                    </>
-                  ) : (
-                    <LoadingButton
-                      size="small"
-                      variant="outlined"
-                      loading={setupDMNLoading}
-                      onClick={handleSetUpDMNOnly}
-                      disabled={
-                        (currentEnvType !== "Fabric" && currentEnvType !== "Ethereum") ||
-                        (currentEnvType === "Fabric" && envInfo.dmnStatus && envInfo.dmnStatus !== "NO" && envInfo.dmnStatus !== "FAILED")
-                      }
-                    >
-                      Setup
-                    </LoadingButton>
-                  )
-                }
-              />
-              {currentEnvType === "Ethereum" ? (
-                <DataContractComponentCard
-                  ContractStatus={applyTaskOverlay(ethDataContractStatus, taskMap.data)}
-                  FireflyStatus={applyTaskOverlay(
-                    ethDataFireflyStatus,
-                    String(taskMap.data?.type || "").toUpperCase() === "DATA_CONTRACT_FIREFLY_REGISTER"
-                      ? taskMap.data
-                      : null
-                  )}
-                  taskInfo={taskMap.data}
-                  onOpen={() => openComponentDetail("Data")}
-                  onSetup={
-                    <>
-                      <LoadingButton
-                        size="small"
-                        variant="outlined"
-                        loading={setupDataContractLoading}
-                        onClick={handleSetUpDataContractOnly}
-                        disabled={envInfo.chainlinkStatus !== "STARTED" || !!ethDataContractAddress}
-                      >
-                        Setup
-                      </LoadingButton>
-                      <LoadingButton
-                        size="small"
-                        variant="outlined"
-                        loading={setupDataFireflyLoading}
-                        onClick={handleRegisterDataToFirefly}
-                        disabled={
-                          envInfo.fireflyStatus !== "STARTED" ||
-                          !ethDataContractAddress ||
-                          envInfo.dataFireflyRegistered
-                        }
-                      >
-                        Register FireFly
-                      </LoadingButton>
-                    </>
-                  }
-                />
-              ) : null}
-              {currentEnvType === "Ethereum" ? (
-                <ComputeContractComponentCard
-                  ContractStatus={applyTaskOverlay(ethComputeContractStatus, taskMap.compute)}
-                  FireflyStatus={applyTaskOverlay(
-                    ethComputeFireflyStatus,
-                    String(taskMap.compute?.type || "").toUpperCase() === "COMPUTE_CONTRACT_FIREFLY_REGISTER"
-                      ? taskMap.compute
-                      : null
-                  )}
-                  taskInfo={taskMap.compute}
-                  onOpen={() => openComponentDetail("Compute")}
-                  onSetup={
-                    <>
-                      <LoadingButton
-                        size="small"
-                        variant="outlined"
-                        loading={setupComputeContractLoading}
-                        onClick={handleSetUpComputeContractOnly}
-                        disabled={envInfo.chainlinkStatus !== "STARTED" || !!ethComputeContractAddress}
-                      >
-                        Setup
-                      </LoadingButton>
-                      <LoadingButton
-                        size="small"
-                        variant="outlined"
-                        loading={setupComputeFireflyLoading}
-                        onClick={handleRegisterComputeToFirefly}
-                        disabled={
-                          envInfo.fireflyStatus !== "STARTED" ||
-                          !ethComputeContractAddress ||
-                          envInfo.computeFireflyRegistered
-                        }
-                      >
-                        Register FireFly
-                      </LoadingButton>
-                    </>
-                  }
-                />
-              ) : null}
-              {currentEnvType === "Ethereum" ? (
-                <RelayerComponentCard
-                  ContractStatus={applyTaskOverlay(ethRelayerContractStatus, taskMap.relayer)}
-                  NodeStatus={(relayerNodeStatus?.running ? "STARTED" : "NO")}
-                  FireflyStatus={applyTaskOverlay(
-                    ethRelayerFireflyStatus,
-                    String(taskMap.relayer?.type || "").toUpperCase() === "RELAYER_CONTRACT_FIREFLY_REGISTER"
-                      ? taskMap.relayer
-                      : null
-                  )}
-                  taskInfo={taskMap.relayer}
-                  onOpen={() => openComponentDetail("Relayer")}
-                  onSetup={
-                    <>
-                      <LoadingButton
-                        size="small"
-                        variant="outlined"
-                        loading={setupRelayerContractLoading}
-                        onClick={handleSetUpRelayerContractOnly}
-                        disabled={envInfo.chainlinkStatus !== "STARTED" || !!ethRelayerContractAddress}
-                      >
-                        Setup
-                      </LoadingButton>
-                      <LoadingButton
-                        size="small"
-                        variant="outlined"
-                        loading={setupRelayerFireflyLoading}
-                        onClick={handleRegisterRelayerToFirefly}
-                        disabled={
-                          envInfo.fireflyStatus !== "STARTED" ||
-                          !ethRelayerContractAddress ||
-                          envInfo.relayerFireflyRegistered
-                        }
-                      >
-                        Register FireFly
-                      </LoadingButton>
-                    </>
-                  }
-                />
-              ) : null}
-              <IdentityContractComponentCard
-                ContractStatus={applyTaskOverlay(envInfo.identityContractStatus ?? "NO", taskMap.identity)}
-                taskInfo={taskMap.identity}
-                onOpen={() => openComponentDetail("Identity")}
-                onSetup={
-                  <LoadingButton
-                    size="small"
-                    variant="outlined"
-                    loading={setupIdentityLoading}
-                    onClick={handleSetUpIdentityContractOnly}
-                    disabled={currentEnvType !== "Ethereum" || (envInfo.identityContractStatus && envInfo.identityContractStatus !== "NO" && envInfo.identityContractStatus !== "FAILED")}
-                  >
-                    Setup
-                  </LoadingButton>
-                }
-              />
-              {currentEnvType === "Ethereum" ? (
-                <SystemAccountComponentCard
-                  AccountStatus={ethAccountCheck?.has_expected_account && ethAccountCheck?.unlock_ok ? "STARTED" : "NO"}
-                  onOpen={() => openComponentDetail("Account")}
-                />
-              ) : null}
-            </Row>
+            <StartupDependencyGraph
+              title={`${currentEnvType || "Environment"} startup graph`}
+              subtitle="Cards stay clickable. Arrows show the recommended startup order, and locked cards indicate upstream dependencies."
+              nodes={startupGraph.nodes as any}
+              edges={startupGraph.edges as any}
+            />
             <Row style={{ width: "100%", marginTop: 12 }}>
               <Col span={24}>
                 <div
@@ -1866,7 +2015,7 @@ const Overview: React.FC = () => {
                               <Tag color={taskStatusColor(task.status)}>
                                 {String(task.status || "UNKNOWN").toUpperCase()}
                               </Tag>
-                              <Text strong>{task.label || humanizeTaskType(task.type)}</Text>
+                              <Text strong>{formatTaskLabel(task)}</Text>
                               {task.step ? <Tag>{String(task.step)}</Tag> : null}
                             </Space>
                             <Text type="secondary" style={{ fontSize: 12 }}>
@@ -2071,9 +2220,9 @@ const Overview: React.FC = () => {
                   Open Firefly UI
                 </AntdButton>
               </Space>
-            )}
-          </Space>
-        ) : null}
+        )}
+      </Space>
+    ) : null}
         {detailType === "Oracle" ? (
           <Space direction="vertical" style={{ width: "100%" }}>
             <Tag color={(currentEnvType === "Ethereum" ? (envInfo.chainlinkStatus === "STARTED") : (envInfo.oracleStatus === "CHAINCODEINSTALLED")) ? "green" : "red"}>
@@ -2145,6 +2294,55 @@ const Overview: React.FC = () => {
                     >
                       Open Chainlink Jobs
                     </AntdButton>
+                    <Form form={oracleForm} layout="vertical" style={{ marginTop: 12 }}>
+                      <Form.Item label="Check Actions">
+                        <Space direction="vertical" style={{ width: "100%" }} size={8}>
+                          <div style={{ color: "#64748b", fontSize: 12 }}>
+                            Chainlink 的主要检查动作都在这里，都是 off-chain 的状态刷新、集群同步和 Job 列表查询。
+                          </div>
+                          <Space wrap>
+                            {oracleQuickActions.map((action) => (
+                              <AntdButton
+                                key={action.method}
+                                onClick={() => applyOracleQuickAction(action)}
+                              >
+                                {action.label}
+                              </AntdButton>
+                            ))}
+                          </Space>
+                        </Space>
+                      </Form.Item>
+                      <Form.Item
+                        label="Method"
+                        name="method"
+                        rules={[{ required: true, message: "Method is required" }]}
+                      >
+                        <Input placeholder="refreshChainlinkDetail / syncChainlinkCluster ..." />
+                      </Form.Item>
+                      {oracleAction?.params?.length ? (
+                        oracleAction.params.map((param: any, index: number) => (
+                          <Form.Item
+                            key={param.key || `${param.label}-${index}`}
+                            label={param.label}
+                            name={param.key}
+                          >
+                            <Input placeholder={param.placeholder} />
+                          </Form.Item>
+                        ))
+                      ) : (
+                        <Form.Item>
+                          <Input disabled placeholder="Select a quick action to auto-fill parameters." />
+                        </Form.Item>
+                      )}
+                      <AntdButton loading={oracleCallLoading} onClick={handleOracleCall}>
+                        Run Selected Action
+                      </AntdButton>
+                    </Form>
+                    {oracleCallResult ? (
+                      <pre style={{ marginTop: 12, background: "#f8fafc", padding: 12 }}>
+                        {oracleCallResult}
+                      </pre>
+                    ) : null}
                   </>
                 )}
               </>
@@ -2168,13 +2366,16 @@ const Overview: React.FC = () => {
             </Tag>
             {currentEnvType === "Ethereum" ? (
               <>
-                <div>DMN 通过 Chainlink lite 提供结果（与 Oracle 卡片共享安装流程）。</div>
+                <div>DMN 通过 Chainlink 提供结果，与 Oracle 卡片共享同一套安装栈，支持 lite / full 两种模式。</div>
                 <Space>
                   <Tag color={ethAccountCheck?.has_expected_account && ethAccountCheck?.unlock_ok ? "green" : "orange"}>
                     Account Ready: {ethAccountCheck?.has_expected_account && ethAccountCheck?.unlock_ok ? "YES" : "NO"}
                   </Tag>
                   <AntdButton size="small" loading={ethAccountCheckLoading} onClick={() => loadEthAccountCheck(false)}>
                     Refresh Account Check
+                  </AntdButton>
+                  <AntdButton danger size="small" loading={redeployDmnLoading} onClick={handleRedeployDmnContract}>
+                    Redeploy DMN Contract
                   </AntdButton>
                 </Space>
                 {detailLoading ? (
@@ -2192,25 +2393,22 @@ const Overview: React.FC = () => {
                     <div>FireFly API: {dmnDetail?.firefly?.api_name || "-"}</div>
                     <div>FireFly Interface: {dmnDetail?.firefly?.interface_id || "-"}</div>
                     <div>FireFly Core: {dmnDetail?.firefly?.core_url || "-"}</div>
-                    <AntdButton
-                      size="small"
-                      loading={setupDmnFireflyLoading}
-                      onClick={handleRegisterDmnToFirefly}
-                      disabled={envInfo.fireflyStatus !== "STARTED" || !dmnDetail?.contract?.address || !!dmnDetail?.firefly?.registered}
-                    >
-                      Register DMN To FireFly
-                    </AntdButton>
                     <Form form={dmnForm} layout="vertical">
-                      <Form.Item label="Quick Actions">
-                        <Space wrap>
-                          {dmnQuickActions.map((action) => (
-                            <AntdButton
-                              key={action.method}
-                              onClick={() => applyDmnQuickAction(action)}
-                            >
-                              {action.label}
-                            </AntdButton>
-                          ))}
+                      <Form.Item label="Check Actions">
+                        <Space direction="vertical" style={{ width: "100%" }} size={8}>
+                          <div style={{ color: "#64748b", fontSize: 12 }}>
+                            DMN 的主要检查动作都在这里，包括合约读写和 FireFly 注册。
+                          </div>
+                          <Space wrap>
+                            {dmnContractActions.map((action) => (
+                              <AntdButton
+                                key={action.method}
+                                onClick={() => applyDmnQuickAction(action)}
+                              >
+                                {action.label}
+                              </AntdButton>
+                            ))}
+                          </Space>
                         </Space>
                       </Form.Item>
                       <Form.Item
@@ -2240,7 +2438,7 @@ const Overview: React.FC = () => {
                         <Input placeholder="call / invoke" />
                       </Form.Item>
                       <AntdButton loading={dmnCallLoading} onClick={handleDmnCall}>
-                        Call DMN Contract
+                        Run Selected Action
                       </AntdButton>
                     </Form>
                     {dmnCallResult ? (
@@ -2504,7 +2702,7 @@ const Overview: React.FC = () => {
               Status: {envInfo.chainlinkStatus || "NO"}
             </Tag>
             <div>Chainlink 通过 directrequest Job 监听 Operator 合约并写回 DMN 请求合约。</div>
-            <div>安装使用 lite 模式（无 OCR 聚合）。</div>
+            <div>可选择 lite / full 两种安装模式，lite 只跑缓存闭环，full 还会补齐 OCR 联动流程。</div>
           </Space>
         ) : null}
         {detailType === "Account" ? (

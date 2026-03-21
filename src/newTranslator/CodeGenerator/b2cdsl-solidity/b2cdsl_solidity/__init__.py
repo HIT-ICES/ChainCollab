@@ -182,6 +182,9 @@ class SolidityRenderer:
         payload: List[dict] = []
         for task in self.adapter.oracle_tasks:
             enum_name = sanitize_identifier(task.name)
+            oracle_type = getattr(task, "oracleType", "external-data")
+            data_source = getattr(task, "dataSource", "") or ""
+            compute_script = getattr(task, "computeScript", "") or ""
             output_mappings = []
             for mapping in getattr(task, "outputMappings", []) or []:
                 global_ref = getattr(mapping, "globalRef", None)
@@ -195,6 +198,7 @@ class SolidityRenderer:
                 output_mappings.append(
                     {
                         "param_name": param_name,
+                        "param_literal": json.dumps(param_name),
                         "slot_name": slot_name,
                         "sol_type": SOLIDITY_TYPE.get(global_type_map.get(global_name, "string"), "string"),
                     }
@@ -204,7 +208,10 @@ class SolidityRenderer:
                     "name": task.name,
                     "enum_name": enum_name,
                     "initial_state": STATE_ALIAS.get(getattr(task, "initialState", None), "DISABLED"),
-                    "oracle_type": getattr(task, "oracleType", "external-data"),
+                    "oracle_type": oracle_type,
+                    "task_name_literal": json.dumps(task.name),
+                    "data_source_literal": json.dumps(data_source),
+                    "compute_script_literal": json.dumps(compute_script),
                     "output_mappings": output_mappings,
                 }
             )
@@ -371,9 +378,13 @@ class SolidityFlowRenderer:
         functions: List[str] = []
         for task in self.adapter.oracle_tasks:
             enum_name = self.enum_maps["oracle_task"].get(task.name, sanitize_identifier(task.name))
-            output_mappings = getattr(task, "outputMappings", []) or []
-            global_params: List[tuple[str, str, str]] = []
-            for mapping in output_mappings:
+            oracle_type = getattr(task, "oracleType", "external-data")
+            task_name_literal = json.dumps(task.name)
+            data_source_literal = json.dumps(getattr(task, "dataSource", "") or "")
+            compute_script_literal = json.dumps(getattr(task, "computeScript", "") or "")
+
+            output_mappings = []
+            for mapping in getattr(task, "outputMappings", []) or []:
                 global_ref = getattr(mapping, "globalRef", None)
                 global_name = getattr(global_ref, "name", "")
                 if not global_name:
@@ -382,29 +393,49 @@ class SolidityFlowRenderer:
                 param_name = sanitize_identifier(
                     (getattr(mapping, "dmnParam", "") or global_name).strip()
                 )
-                sol_type = SOLIDITY_TYPE.get(
-                    self.global_type_map.get(global_name, "string"),
-                    "string",
+                output_mappings.append(
+                    {
+                        "param_literal": json.dumps(param_name),
+                        "slot_name": slot_name,
+                        "sol_type": SOLIDITY_TYPE.get(
+                            self.global_type_map.get(global_name, "string"),
+                            "string",
+                        ),
+                    }
                 )
-                global_params.append((sol_type, param_name, slot_name))
 
-            extra_signature = ""
-            if global_params:
-                args = ", ".join(
-                    (
-                        f"{param_type} calldata {param_name}"
-                        if param_type == "string"
-                        else f"{param_type} {param_name}"
+            assign_lines: List[str] = []
+            for idx, mapping in enumerate(output_mappings):
+                value_var = f"oracleValue{idx}"
+                param_literal = mapping["param_literal"]
+                if oracle_type == "compute-task":
+                    source_call = (
+                        f'oracle.runComputeTask(instanceId, {task_name_literal}, '
+                        f'{compute_script_literal}, {param_literal})'
                     )
-                    for param_type, param_name, _ in global_params
-                )
-                extra_signature = f", {args}"
-
-            assign_block = ""
-            for _, param_name, slot_name in global_params:
-                assign_block += f"        inst.stateMemory.{slot_name} = {param_name};\n"
+                else:
+                    source_call = (
+                        f'oracle.getExternalData(instanceId, {task_name_literal}, '
+                        f'{data_source_literal}, {param_literal})'
+                    )
+                assign_lines.append(f"        string memory {value_var} = {source_call};")
+                if mapping["sol_type"] == "int256":
+                    assign_lines.append(
+                        f"        inst.stateMemory.{mapping['slot_name']} = _stringToInt({value_var});"
+                    )
+                elif mapping["sol_type"] == "bool":
+                    assign_lines.append(
+                        f"        inst.stateMemory.{mapping['slot_name']} = _stringToBool({value_var});"
+                    )
+                else:
+                    assign_lines.append(
+                        f"        inst.stateMemory.{mapping['slot_name']} = {value_var};"
+                    )
+            assign_block = "\n".join(assign_lines)
+            if assign_block:
+                assign_block += "\n"
             done_actions = self._indent("".join(self.oracle_actions.get((task.name, "done"), [])), 2)
-            body = f"""function {enum_name}(uint256 instanceId{extra_signature}) external onlyInitialized {{
+            body = f"""function {enum_name}(uint256 instanceId) external onlyInitialized {{
         Instance storage inst = _getInstance(instanceId);
         ActionEvent storage ev = inst.events[EventKey.{enum_name}];
         require(ev.exists, "oracle task not set");

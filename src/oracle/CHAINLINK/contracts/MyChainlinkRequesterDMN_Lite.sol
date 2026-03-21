@@ -53,7 +53,7 @@ contract MyChainlinkRequesterDMN_Lite is ChainlinkClient, ConfirmedOwner {
         string calldata dmnContent,
         string calldata decisionId,
         string calldata inputData
-    ) external onlyOwner returns (bytes32 requestId) {
+    ) external returns (bytes32 requestId) {
         Chainlink.Request memory req = _buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
 
         req._add("url", url);

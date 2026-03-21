@@ -3,7 +3,20 @@ import path from "path";
 import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
-const solc = require("hardhat/node_modules/solc");
+function loadSolc() {
+  const candidates = ["solc", "hardhat/node_modules/solc"];
+  for (const name of candidates) {
+    try {
+      return require(name);
+    } catch (_err) {
+      // Try next candidate.
+    }
+  }
+  throw new Error(
+    "solc module not found. Run `npm install` in oracle-data-compute-lab first."
+  );
+}
+const solc = loadSolc();
 
 const contractsDir = path.resolve("contracts");
 const outDir = path.resolve("build");

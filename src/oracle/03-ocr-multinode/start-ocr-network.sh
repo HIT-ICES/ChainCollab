@@ -13,6 +13,28 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 COMPOSE_FILE="$SCRIPT_DIR/docker-compose-multinode.yml"
 DMN_COMPOSE_FILE="$ROOT_DIR/features/04-dmn-ocr/docker-compose-cdmn.yml"
+STARTED_BOOTSTRAP=0
+STARTED_CHAINLINK=0
+STARTED_DMN=0
+
+cleanup_on_failure() {
+    local exit_code="$1"
+    if [ "$exit_code" -eq 0 ]; then
+        return
+    fi
+
+    echo -e "${YELLOW}检测到启动失败，开始回滚已启动容器...${NC}"
+    set +e
+
+    if [ "$STARTED_DMN" -eq 1 ]; then
+        docker-compose -f "$DMN_COMPOSE_FILE" down >/dev/null 2>&1 || true
+    fi
+    if [ "$STARTED_CHAINLINK" -eq 1 ] || [ "$STARTED_BOOTSTRAP" -eq 1 ]; then
+        docker-compose -f "$COMPOSE_FILE" down >/dev/null 2>&1 || true
+    fi
+}
+
+trap 'exit_code=$?; trap - EXIT; cleanup_on_failure "$exit_code"; exit "$exit_code"' EXIT
 
 # 检查 Docker 是否正在运行
 if ! docker info &> /dev/null; then
@@ -25,6 +47,7 @@ mkdir -p "$ROOT_DIR/deployment"
 
 # 步骤 1：启动 Bootstrap 节点和相关服务
 echo -e "${BLUE}步骤 1：启动 Bootstrap 节点和相关服务...${NC}"
+STARTED_BOOTSTRAP=1
 docker-compose -f "$COMPOSE_FILE" up -d postgres-bootstrap mybootnode chainlink-bootstrap
 
 # 等待 Bootstrap 节点启动并健康
@@ -107,6 +130,7 @@ node "$SCRIPT_DIR/get-node-info.js"
 
 # 步骤 4：启动其他四个 Chainlink 节点
 echo -e "${BLUE}步骤 4：启动其他四个 Chainlink 节点...${NC}"
+STARTED_CHAINLINK=1
 docker-compose -f "$COMPOSE_FILE" up -d chainlink1 chainlink2 chainlink3 chainlink4
 
 # 步骤 4.5：更新 AnnounceAddresses 为宿主机 IP 并重启节点
@@ -166,6 +190,7 @@ echo -e "${BLUE}步骤 5：收集所有节点信息...${NC}"
 node "$SCRIPT_DIR/get-node-info.js"
 
 echo -e "${BLUE}步骤 6：启动 CDMN 服务...${NC}"
+STARTED_DMN=1
 OCR_DEPLOYMENT="$ROOT_DIR/deployment/ocr-deployment.json"
 if [ -f "$OCR_DEPLOYMENT" ] && command -v jq &> /dev/null; then
     OCR_AGGREGATOR_ADDRESS=$(jq -r '.contractAddress' "$OCR_DEPLOYMENT")

@@ -109,11 +109,215 @@ export const NaiveEthereumStepBar = (props) => {
 
 }
 
+type StartupGraphNodeData = {
+  title: string;
+  order?: string;
+  status?: string | boolean | null;
+  note?: React.ReactNode;
+  card?: React.ReactNode;
+  locked?: boolean;
+  accent?: string;
+};
+
+type StartupGraphNodeShape = {
+  id: string;
+  position: {
+    x: number;
+    y: number;
+  };
+  data: StartupGraphNodeData;
+};
+
+type StartupGraphEdgeShape = {
+  id: string;
+  source: string;
+  target: string;
+  label?: string;
+  style?: React.CSSProperties;
+};
+
+const STARTUP_NODE_WIDTH = 230;
+const STARTUP_NODE_HEIGHT = 280;
+const resolveGraphStatus = (value: any) => {
+  if (value === null || value === undefined || value === false) {
+    return null;
+  }
+  if (value === true) {
+    return { label: "READY", color: "success" as const };
+  }
+  const normalized = String(value || "").toUpperCase();
+  if (!normalized || normalized === "NO") {
+    return null;
+  }
+  if (["STARTED", "ACTIVATED", "SUCCESS"].includes(normalized)) {
+    return { label: normalized, color: "success" as const };
+  }
+  if (["RUNNING", "INITIALIZING", "SETTINGUP", "PENDING"].includes(normalized)) {
+    return { label: normalized, color: "warning" as const };
+  }
+  if (["CHAINCODEINSTALLED", "INSTALLED", "READY"].includes(normalized)) {
+    return { label: normalized, color: "processing" as const };
+  }
+  if (["FAILED", "ERROR"].includes(normalized)) {
+    return { label: normalized, color: "error" as const };
+  }
+  return { label: normalized, color: "default" as const };
+};
+
+const StartupGraphNode = ({ data }: { data: StartupGraphNodeData }) => {
+  const status = resolveGraphStatus(data.status);
+  const hasCard = Boolean(data.card);
+  return (
+    <div style={{ width: STARTUP_NODE_WIDTH, opacity: data.locked ? 0.72 : 1, pointerEvents: "auto" }}>
+      <div
+        style={{
+          border: "1px solid #e2e8f0",
+          borderRadius: 18,
+          padding: 10,
+          background: data.locked
+            ? "linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%)"
+            : "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
+          boxShadow: "0 10px 22px rgba(15,23,42,0.08)",
+          borderTop: `4px solid ${data.accent || "#60a5fa"}`,
+          pointerEvents: "all",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 6, minWidth: 0, marginBottom: 6 }}>
+          {data.order ? (
+            <Tag color="blue" style={{ marginInlineEnd: 0, fontSize: 11 }}>
+              {data.order}
+            </Tag>
+          ) : null}
+          <Text strong style={{ color: "#0f172a", fontSize: 13 }}>
+            {data.title}
+          </Text>
+          {status ? (
+            <Tag color={status.color} style={{ marginInlineEnd: 0, fontSize: 11 }}>
+              {status.label}
+            </Tag>
+          ) : null}
+          {data.locked ? (
+            <Tag color="volcano" style={{ marginInlineEnd: 0, fontSize: 11 }}>
+              Locked
+            </Tag>
+          ) : null}
+        </div>
+        {data.note ? (
+          <Text type="secondary" style={{ fontSize: 11, display: "block", marginBottom: 6 }}>
+            {data.note}
+          </Text>
+        ) : null}
+        {hasCard ? (
+          <div className="nodrag nopan" style={{ display: "flex", justifyContent: "center", pointerEvents: "all" }}>
+            {data.card}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+};
+
+export const StartupDependencyGraph = ({
+  title = "Startup Graph",
+  subtitle,
+  nodes = [],
+  edges = [],
+}: {
+  title?: string;
+  subtitle?: string;
+  nodes?: StartupGraphNodeShape[];
+  edges?: StartupGraphEdgeShape[];
+}) => {
+  const rows = nodes
+    .reduce<Array<{ y: number; nodes: StartupGraphNodeShape[] }>>((acc, node) => {
+      const existing = acc.find((row) => row.y === node.position.y);
+      if (existing) {
+        existing.nodes.push(node);
+      } else {
+        acc.push({ y: node.position.y, nodes: [node] });
+      }
+      return acc;
+    }, [])
+    .sort((a, b) => a.y - b.y)
+    .map((row) => ({
+      ...row,
+      nodes: [...row.nodes].sort((a, b) => a.position.x - b.position.x),
+    }));
+
+  return (
+    <div
+      style={{
+        border: "1px solid #e2e8f0",
+        borderRadius: 14,
+        padding: 16,
+        background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
+        boxShadow: "0 12px 24px rgba(15,23,42,0.06)",
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginBottom: 12, flexWrap: "wrap" }}>
+        <div>
+          <Text strong style={{ color: "#0f172a", fontSize: 16 }}>
+            {title}
+          </Text>
+          {subtitle ? (
+            <div>
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                {subtitle}
+              </Text>
+            </div>
+          ) : null}
+        </div>
+      </div>
+      {nodes.length > 0 ? (
+        <div
+          style={{
+            border: "1px solid #e2e8f0",
+            borderRadius: 12,
+            padding: 14,
+            background: "linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)",
+            overflow: "hidden",
+          }}
+        >
+          <div style={{ display: "grid", gap: 18 }}>
+            {rows.map((row, idx) => (
+              <React.Fragment key={`${row.y}-${idx}`}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: row.nodes.length === 1 ? "center" : "space-evenly",
+                    alignItems: "flex-start",
+                    gap: 16,
+                    width: "100%",
+                  }}
+                >
+                  {row.nodes.map((node) => (
+                    <div key={node.id} style={{ flex: "0 0 auto" }}>
+                      <StartupGraphNode data={node.data} />
+                    </div>
+                  ))}
+                </div>
+                {idx < rows.length - 1 ? (
+                  <div style={{ display: "flex", justifyContent: "center", color: "#94a3b8", fontSize: 18, lineHeight: 1 }}>
+                    ↓
+                  </div>
+                ) : null}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <Text type="secondary">No startup graph available for the current environment.</Text>
+      )}
+    </div>
+  );
+};
+
 
 // Function Cards
 export const CustomCard = (props) => {
 
-  const { color = "#4e4d4a", logo, title, status, onSetup, onOpen, taskInfo } = props
+  const { color = "#4e4d4a", logo, title, status, onSetup, onOpen, onOpenSecondary, openLabel = "Check", openSecondaryLabel = "Check", taskInfo } = props
   const taskTypeLabelMap: Record<string, string> = {
     FABRIC_FIREFLY_INSTALL: "Firefly Install",
     FABRIC_FIREFLY_START: "Firefly Start",
@@ -149,7 +353,11 @@ export const CustomCard = (props) => {
   const resolveTaskLabel = (info: any) => {
     const rawType = String(info?.type || "").toUpperCase();
     const typeLabel = taskTypeLabelMap[rawType] || humanizeRaw(rawType) || "Task";
+    const chainlinkMode = String(info?.result?.mode || info?.mode || "").toLowerCase();
     const customLabel = String(info?.label || "").trim();
+    if (rawType === "CHAINLINK_INSTALL" && ["lite", "full"].includes(chainlinkMode)) {
+      return `${typeLabel} (${chainlinkMode.toUpperCase()})`;
+    }
     if (!customLabel) {
       return typeLabel;
     }
@@ -190,26 +398,27 @@ export const CustomCard = (props) => {
   return (
     <div
       style={{
-        width: 220,
-        minHeight: 240,
+        width: 200,
+        minHeight: 220,
         background: `linear-gradient(145deg, ${color} 0%, #ffffff 80%)`,
         border: "1px solid #e2e8f0",
         borderRadius: 16,
-        margin: "10px",
-        padding: 16,
+        margin: "8px",
+        padding: 14,
         display: "flex",
         flexDirection: "column",
-        boxShadow: "0 12px 30px rgba(15,23,42,0.12)",
+        boxShadow: "0 10px 24px rgba(15,23,42,0.10)",
         cursor: "default",
+        pointerEvents: "all",
       }}
     >
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
         {logo}
       </div>
-      <Title level={4} style={{ textAlign: "center", marginTop: 12, marginBottom: 8 }}>
+      <Title level={4} style={{ textAlign: "center", marginTop: 10, marginBottom: 6 }}>
         {title}
       </Title>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }} >
+      <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1 }} >
         {status.map((item) => {
           const resolved = resolveStatus(item.value);
           return (
@@ -229,7 +438,7 @@ export const CustomCard = (props) => {
           );
         })}
         {taskInfo ? (
-          <div style={{ marginTop: 8, padding: 8, borderRadius: 8, background: "#f8fafc", border: "1px dashed #cbd5f5" }}>
+          <div style={{ marginTop: 6, padding: 8, borderRadius: 8, background: "#f8fafc", border: "1px dashed #cbd5f5" }}>
             <Text strong style={{ color: "#0f172a", display: "block" }}>{resolveTaskLabel(taskInfo)}</Text>
             <div style={{ marginTop: 6, display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
               <Tag color={taskStatus.color} style={{ marginInlineEnd: 0 }}>
@@ -257,18 +466,21 @@ export const CustomCard = (props) => {
       </div>
       {onSetup || onOpen ? (
         <div
+          className="nodrag nopan"
           style={{
             marginTop: "auto",
             display: "flex",
             justifyContent: "center",
             flexWrap: "wrap",
             gap: 8,
+            pointerEvents: "all",
           }}
           onClick={(event) => event.stopPropagation()}
         >
           {onSetup
             ? (React.isValidElement(onSetup) ? onSetup : (
               <Button
+                className="nodrag nopan"
                 size="small"
                 variant="outlined"
                 onClick={onSetup}
@@ -280,12 +492,24 @@ export const CustomCard = (props) => {
             : null}
           {onOpen ? (
             <Button
+              className="nodrag nopan"
               size="small"
               variant="outlined"
               onClick={onOpen}
               style={{ borderRadius: 8, height: 32, textTransform: "none" }}
             >
-              Check
+              {openLabel}
+            </Button>
+          ) : null}
+          {onOpenSecondary ? (
+            <Button
+              className="nodrag nopan"
+              size="small"
+              variant="outlined"
+              onClick={onOpenSecondary}
+              style={{ borderRadius: 8, height: 32, textTransform: "none" }}
+            >
+              {openSecondaryLabel}
             </Button>
           ) : null}
         </div>
@@ -359,6 +583,43 @@ export const DMNComponentCard = ({
       taskInfo={taskInfo}
       onSetup={onSetup}
       onOpen={onOpen}
+    />
+  );
+}
+
+export const OracleDMNComponentCard = ({
+  ChainlinkStatus = "NO",
+  DMNStatus = "NO",
+  FireflyStatus = null,
+  taskInfo,
+  onSetup,
+  onOpen,
+  onOpenDMN,
+}) => {
+  const statusItems = [
+    { key: "Chainlink", value: ChainlinkStatus },
+    { key: "DMN", value: DMNStatus },
+  ];
+  if (FireflyStatus !== null && FireflyStatus !== undefined) {
+    statusItems.push({ key: "FireFly", value: FireflyStatus });
+  }
+  return (
+    <CustomCard
+      color="#4f46e5"
+      logo={
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+          <LinkIcon style={{ fontSize: 56, color: "#1e293b" }} />
+          <img src={DmnIcon} alt="dmn" style={{ width: 56, height: 56 }} />
+        </div>
+      }
+      title="Oracle / DMN"
+      status={statusItems}
+      taskInfo={taskInfo}
+      onSetup={onSetup}
+      onOpen={onOpen}
+      onOpenSecondary={onOpenDMN}
+      openLabel="Check Oracle"
+      openSecondaryLabel="Check DMN"
     />
   );
 }

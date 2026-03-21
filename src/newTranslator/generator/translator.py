@@ -669,7 +669,12 @@ class DSLContractBuilder:
             task_type = oracle_task_type_from_doc(doc, fallback_type)
             data_source = doc.get("dataSource", "") or ""
             compute_script = doc.get("computeScript", "") or ""
-            output_mappings = doc.get("outputMappings") or doc.get("outputs") or []
+            output_mappings = (
+                doc.get("outputMappings")
+                or doc.get("outputMapping")
+                or doc.get("outputs")
+                or []
+            )
             if not output_mappings:
                 output_mappings = [{"name": f"{task.id}_result"}]
 
@@ -861,7 +866,12 @@ class ParameterExtractor:
         """Expose oracle-task outputs into global slots."""
         outputs = {}
         for task, definition in oracle_task_data:
-            output_mappings = definition.get("outputMappings") or definition.get("outputs") or []
+            output_mappings = (
+                definition.get("outputMappings")
+                or definition.get("outputMapping")
+                or definition.get("outputs")
+                or []
+            )
             if not output_mappings:
                 output_mappings = [{"name": f"{task.id}_result"}]
             for output_def in output_mappings:
@@ -1067,10 +1077,7 @@ class GoChaincodeTranslator:
             self._generate_ffi_item(
                 name=first_name,
                 pathname=first_name,
-                params=[
-                    self._instance_id_param(),
-                    {"name": "result", "schema": {"type": "string"}},
-                ],
+                params=[self._instance_id_param()],
             )
         ]
 

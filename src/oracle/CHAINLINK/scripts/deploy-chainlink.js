@@ -1,12 +1,17 @@
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execSync, spawnSync } = require('child_process');
 const http = require('http');
 const axios = require('axios');
 const { URL } = require('url');
 
 const RPC_URL = process.env.RPC_URL || 'http://localhost:8545';
 const EXPECTED_DEPLOYER = (process.env.DEPLOYER_ACCOUNT || process.env.ETH_SYSTEM_ACCOUNT || '').toLowerCase();
+const CHAINLINK_ROOT = path.resolve(__dirname, '..');
+const SOLC_IMAGE = process.env.SOLC_IMAGE || 'ethereum/solc:0.8.24';
+const OPERATOR_SOLC_IMAGE = process.env.OPERATOR_SOLC_IMAGE || 'ethereum/solc:0.8.19';
+
+let cachedSolcRunner = null;
 
 function rpcOptions(postData) {
     const rpc = new URL(RPC_URL);
@@ -36,6 +41,82 @@ function pickDeployer(accounts) {
         return matched;
     }
     return accounts[0];
+}
+
+function isDockerAvailable() {
+    const probe = spawnSync('docker', ['version', '--format', '{{.Server.Version}}'], {
+        encoding: 'utf8'
+    });
+    return probe.status === 0;
+}
+
+function resolveSolcRunner() {
+    if (cachedSolcRunner) {
+        return cachedSolcRunner;
+    }
+
+    const localProbe = spawnSync('solc', ['--version'], {
+        cwd: CHAINLINK_ROOT,
+        encoding: 'utf8'
+    });
+    if (localProbe.status === 0) {
+        cachedSolcRunner = { command: 'solc', args: [] };
+        return cachedSolcRunner;
+    }
+
+    if (!isDockerAvailable()) {
+        const message = localProbe.stderr || localProbe.stdout || `solc exit code ${localProbe.status}`;
+        throw new Error(`solc 不可用，且 docker 不可用: ${message}`);
+    }
+
+    cachedSolcRunner = {
+        command: 'docker',
+        args: ['run', '--rm', '-v', `${CHAINLINK_ROOT}:/sources`, '-w', '/sources', SOLC_IMAGE]
+    };
+    return cachedSolcRunner;
+}
+
+function runSolc(args, outputPath) {
+    const runner = resolveSolcRunner();
+    return runSolcWithRunner(runner, args, outputPath);
+}
+
+function runSolcWithRunner(runner, args, outputPath) {
+    const result = spawnSync(runner.command, [...runner.args, ...args], {
+        cwd: CHAINLINK_ROOT,
+        encoding: 'utf8',
+        maxBuffer: 50 * 1024 * 1024
+    });
+
+    if (result.status !== 0) {
+        if (runner.command !== 'docker' && isDockerAvailable()) {
+            console.log(`⚠️  本机 solc 失败，改用 Docker 版 ${SOLC_IMAGE} 重试`);
+            cachedSolcRunner = {
+                command: 'docker',
+                args: ['run', '--rm', '-v', `${CHAINLINK_ROOT}:/sources`, '-w', '/sources', SOLC_IMAGE]
+            };
+            return runSolc(args, outputPath);
+        }
+
+        const detail = [result.stdout, result.stderr].filter(Boolean).join('\n').trim();
+        throw new Error(
+            `solc 编译失败${detail ? `:\n${detail}` : ` (exit ${result.status})`}`
+        );
+    }
+
+    if (outputPath) {
+        fs.writeFileSync(outputPath, result.stdout);
+    }
+
+    return result.stdout;
+}
+
+function runSolcWithImage(image, args, outputPath) {
+    const runner = {
+        command: 'docker',
+        args: ['run', '--rm', '-v', `${CHAINLINK_ROOT}:/sources`, '-w', '/sources', image]
+    };
+    return runSolcWithRunner(runner, args, outputPath);
 }
 
 // RPC 调用函数
@@ -221,9 +302,15 @@ async function main() {
         // 3. 部署 Operator 合约
         console.log('\n=== 步骤 3: 编译并部署 Operator ===');
         const operatorPath = 'node_modules/@chainlink/contracts/src/v0.8/operatorforwarder/Operator.sol';
-        execSync(`solc --optimize --base-path . --include-path node_modules --combined-json abi,bin ${operatorPath} > ${deploymentDir}/operator-compiled.json`, { stdio: 'inherit' });
+        const operatorCompiledJson = runSolcWithImage(OPERATOR_SOLC_IMAGE, [
+            '--optimize',
+            '--base-path', '.',
+            '--include-path', 'node_modules',
+            '--combined-json', 'abi,bin',
+            operatorPath
+        ], `${deploymentDir}/operator-compiled.json`);
 
-        const operatorCompiled = JSON.parse(fs.readFileSync(`${deploymentDir}/operator-compiled.json`, 'utf8'));
+        const operatorCompiled = JSON.parse(operatorCompiledJson);
         const operatorData = operatorCompiled.contracts[operatorPath + ':Operator'];
         const operatorBytecode = '0x' + operatorData.bin;
         const operatorAbi = operatorData.abi;

@@ -70,7 +70,7 @@ contract MyChainlinkRequesterDMN is ChainlinkClient, ConfirmedOwner {
         string calldata dmnContent,
         string calldata decisionId,
         string calldata inputData  // 输入数据的 JSON 字符串
-    ) external onlyOwner returns (bytes32 requestId) {
+    ) external returns (bytes32 requestId) {
         Chainlink.Request memory req = _buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
 
         // 添加参数:这是传给节点的参数,节点会根据 Job Spec 去处理

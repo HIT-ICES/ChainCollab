@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 import logging
 import re
+import stat
 from typing import Tuple, Dict, Optional
 
 logger = logging.getLogger(__name__)
@@ -25,24 +26,120 @@ class SolidityCompiler:
         """
         self.solc_path = solc_path
         self.version = version
+        self.evm_version = os.environ.get("SOLC_EVM_VERSION", "paris")
 
-        # 尝试使用 solc-select 切换到指定版本
+        preferred_versions = [os.environ.get("SOLC_VERSION"), self.version]
+        if self._ensure_local_solc_selected(preferred_versions):
+            logger.info(f"Using local Solidity compiler version {self.version}")
+        else:
+            logger.warning(
+                "Requested Solidity version is not installed locally; "
+                "Docker fallback will be used when needed"
+            )
+
+    @staticmethod
+    def _parse_versions(output: str) -> list[str]:
+        versions: list[str] = []
+        for line in output.splitlines():
+            match = re.search(r"(\d+\.\d+\.\d+)", line)
+            if match:
+                versions.append(match.group(1))
+        return versions
+
+    def _installed_solc_versions(self) -> list[str]:
         try:
-            import subprocess
             result = subprocess.run(
-                ["solc-select", "use", self.version],
+                ["solc-select", "versions"],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=10,
             )
-            if result.returncode == 0:
-                logger.info(f"Successfully switched to Solidity {self.version}")
-            else:
-                logger.warning(f"Failed to switch to Solidity {self.version}: {result.stderr}")
+            if result.returncode != 0:
+                return []
+            return self._parse_versions(result.stdout)
         except FileNotFoundError:
-            logger.warning("solc-select not found, using default solc version")
+            return []
         except Exception as e:
-            logger.warning(f"Error switching Solidity version: {str(e)}")
+            logger.warning(f"Failed to list installed solc versions: {str(e)}")
+            return []
+
+    def _ensure_local_solc_selected(self, preferred_versions: list[str]) -> bool:
+        installed_versions = self._installed_solc_versions()
+        candidates = []
+        for version in preferred_versions:
+            if version and version not in candidates:
+                candidates.append(version)
+        for version in installed_versions:
+            if version not in candidates:
+                candidates.append(version)
+
+        for version in candidates:
+            if version not in installed_versions:
+                continue
+            try:
+                result = subprocess.run(
+                    ["solc-select", "use", version],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
+                if result.returncode != 0:
+                    continue
+                self.version = version
+                artifact = os.path.expanduser(
+                    f"~/.solc-select/artifacts/solc-{version}/solc-{version}"
+                )
+                if os.path.exists(artifact):
+                    try:
+                        mode = os.stat(artifact).st_mode
+                        if not (mode & stat.S_IXUSR):
+                            os.chmod(
+                                artifact,
+                                mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH,
+                            )
+                    except Exception as chmod_error:
+                        logger.warning(
+                            f"Failed to adjust solc artifact permissions for {version}: {chmod_error}"
+                        )
+                verify = subprocess.run(
+                    [self.solc_path, "--version"],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
+                if verify.returncode == 0:
+                    return True
+            except FileNotFoundError:
+                return False
+            except Exception as e:
+                logger.warning(f"Failed to activate local solc {version}: {str(e)}")
+        return False
+
+    def _run_docker_solc(self, contract_path: str):
+        workdir = os.path.abspath(os.path.dirname(contract_path) or ".")
+        filename = os.path.basename(contract_path)
+        cmd = [
+            "docker",
+            "run",
+            "--rm",
+            "-v",
+            f"{workdir}:/workspace",
+            "-w",
+            "/workspace",
+            os.environ.get("SOLC_DOCKER_IMAGE", "ethereum/solc:stable"),
+            filename,
+            "--evm-version",
+            self.evm_version,
+            "--combined-json",
+            "abi,bin,metadata",
+        ]
+        logger.info(f"Falling back to docker solc: {' '.join(cmd)}")
+        return subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
 
     @staticmethod
     def extract_pragma_version(source_code: str) -> Optional[str]:
@@ -79,6 +176,9 @@ class SolidityCompiler:
         Returns:
             True if successful, False otherwise
         """
+        if version not in self._installed_solc_versions():
+            logger.warning(f"Solidity {version} is not installed")
+            return False
         try:
             result = subprocess.run(
                 ["solc-select", "use", version],
@@ -107,21 +207,44 @@ class SolidityCompiler:
         Returns:
             Tuple of (success: bool, version or error message: str)
         """
+        preferred_versions = [self.version]
+        env_version = os.environ.get("SOLC_VERSION")
+        if env_version:
+            preferred_versions.insert(0, env_version)
+        if self._ensure_local_solc_selected(preferred_versions):
+            try:
+                result = subprocess.run(
+                    [self.solc_path, "--version"],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
+                if result.returncode == 0:
+                    version_line = result.stdout.split("\n")[0] if result.stdout else "Unknown"
+                    return True, version_line
+            except Exception as e:
+                logger.warning(f"Local solc version check failed: {str(e)}")
         try:
             result = subprocess.run(
-                [self.solc_path, "--version"],
+                [
+                    "docker",
+                    "run",
+                    "--rm",
+                    os.environ.get("SOLC_DOCKER_IMAGE", "ethereum/solc:stable"),
+                    "--version",
+                ],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=30,
             )
             if result.returncode == 0:
-                # Extract version from output
-                version_line = result.stdout.split('\n')[0] if result.stdout else "Unknown"
-                return True, version_line
-            else:
-                return False, result.stderr
+                version_line = result.stdout.split("\n")[0] if result.stdout else "Docker solc"
+                return True, f"docker:{version_line}"
+            return False, result.stderr or "docker solc unavailable"
         except FileNotFoundError:
-            return False, "solc not found. Please install Solidity compiler."
+            return False, "solc not found and docker fallback is unavailable"
+        except subprocess.TimeoutExpired:
+            return False, "solc and docker fallback timed out"
         except Exception as e:
             return False, str(e)
 
@@ -143,53 +266,68 @@ class SolidityCompiler:
         if not os.path.exists(contract_path):
             return 1, {}, f"Contract file not found: {contract_path}"
 
+        preferred_versions = [self.version]
+        env_version = os.environ.get("SOLC_VERSION")
+        if env_version:
+            preferred_versions.insert(0, env_version)
+        source_version = None
+        try:
+            with open(contract_path, "r") as source_file:
+                source_version = self.extract_pragma_version(source_file.read())
+        except Exception:
+            source_version = None
+        if source_version and source_version not in preferred_versions:
+            preferred_versions.insert(0, source_version)
+
         try:
             # 确保使用指定版本的 Solidity 编译器
-            logger.info(f"Switching to Solidity version: {self.version}")
-            try:
-                result = subprocess.run(
-                    ["solc-select", "use", self.version],
-                    capture_output=True,
-                    text=True,
-                    timeout=10
-                )
-                if result.returncode == 0:
-                    logger.info(f"✓ Successfully switched to Solidity {self.version}")
-                    # 验证切换后的版本
-                    verify_result = subprocess.run(
-                        [self.solc_path, "--version"],
-                        capture_output=True,
-                        text=True,
-                        timeout=5
-                    )
-                    if verify_result.returncode == 0:
-                        lines = verify_result.stdout.split('\n')
-                        actual_version = lines[1] if len(lines) > 1 else lines[0]
-                        logger.info(f"✓ Verified solc version: {actual_version}")
-                else:
-                    logger.warning(f"✗ Failed to switch to Solidity {self.version}: {result.stderr}")
-            except FileNotFoundError:
-                logger.warning("✗ solc-select not found, using default solc version")
-            except Exception as e:
-                logger.warning(f"✗ Error switching Solidity version: {str(e)}")
+            logger.info(
+                "Switching to Solidity version candidates: %s",
+                ", ".join([v for v in preferred_versions if v]),
+            )
+            local_solc_ready = self._ensure_local_solc_selected(preferred_versions)
 
             # Compile with combined-json output for ABI and bytecode
             cmd = [
                 self.solc_path,
                 contract_path,
+                "--evm-version",
+                self.evm_version,
                 "--combined-json", "abi,bin,metadata"
             ]
 
             logger.info(f"Compiling contract: {contract_path}")
             logger.info(f"Command: {' '.join(cmd)}")
 
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=30,
-                cwd=os.path.dirname(contract_path) or "."
-            )
+            result = None
+            compile_errors = []
+            if local_solc_ready:
+                try:
+                    result = subprocess.run(
+                        cmd,
+                        capture_output=True,
+                        text=True,
+                        timeout=60,
+                        cwd=os.path.dirname(contract_path) or "."
+                    )
+                except PermissionError as exc:
+                    compile_errors.append(str(exc))
+                    logger.warning(f"Local solc permission error: {exc}")
+                except subprocess.TimeoutExpired as exc:
+                    compile_errors.append("local solc timed out")
+                    logger.warning("Local solc compilation timed out")
+                except Exception as exc:
+                    compile_errors.append(str(exc))
+                    logger.warning(f"Local solc compile failed: {exc}")
+
+            if result is None or result.returncode != 0:
+                if result is not None and result.returncode != 0:
+                    compile_errors.append(result.stderr or "local solc returned non-zero")
+                try:
+                    result = self._run_docker_solc(contract_path)
+                except Exception as exc:
+                    compile_errors.append(f"docker fallback failed: {exc}")
+                    return 1, {}, "; ".join([err for err in compile_errors if err])
 
             # 只在出错时打印详细输出
             if result.returncode != 0:
@@ -197,7 +335,7 @@ class SolidityCompiler:
                 logger.error(f"Stderr: {result.stderr}")
                 if result.stdout:
                     logger.error(f"Stdout: {result.stdout}")
-                return result.returncode, {}, result.stderr
+                return result.returncode, {}, result.stderr or "; ".join(compile_errors)
 
             logger.info("✓ Compilation successful")
 
