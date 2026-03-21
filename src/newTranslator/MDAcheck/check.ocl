@@ -1,0 +1,371 @@
+import 'platform:/resource/ocltest/b2c.ecore'
+package b2c
+
+-- ==============
+-- Model / Contract 结构与命名
+-- ==============
+
+context Model
+inv AtLeastOneContract:
+  self.contracts->size() >= 1
+
+inv UniqueContractNames:
+  self.contracts->isUnique(name)
+
+context Contract
+-- 收集各 section（语法允许出现多次，但代码生成器是“拼接收集”，通常希望每类最多一个）
+def: participantSections : Set(ParticipantSection) =
+  self.sections->select(oclIsKindOf(ParticipantSection))
+               ->collect(oclAsType(ParticipantSection))->asSet()
+def: globalSections : Set(GlobalSection) =
+  self.sections->select(oclIsKindOf(GlobalSection))
+               ->collect(oclAsType(GlobalSection))->asSet()
+def: messageSections : Set(MessageSection) =
+  self.sections->select(oclIsKindOf(MessageSection))
+               ->collect(oclAsType(MessageSection))->asSet()
+def: gatewaySections : Set(GatewaySection) =
+  self.sections->select(oclIsKindOf(GatewaySection))
+               ->collect(oclAsType(GatewaySection))->asSet()
+def: eventSections : Set(EventSection) =
+  self.sections->select(oclIsKindOf(EventSection))
+               ->collect(oclAsType(EventSection))->asSet()
+def: ruleSections : Set(BusinessRuleSection) =
+  self.sections->select(oclIsKindOf(BusinessRuleSection))
+               ->collect(oclAsType(BusinessRuleSection))->asSet()
+def: flowSections : Set(FlowSection) =
+  self.sections->select(oclIsKindOf(FlowSection))
+               ->collect(oclAsType(FlowSection))->asSet()
+
+-- 汇总元素集合（便于做“引用必须指向本合约内元素”的校验）
+def: participants : Set(Participant) =
+  self.participantSections.participants->flatten()->asSet()
+def: globals : Set(GlobalVar) =
+  self.globalSections.globals->flatten()->asSet()
+def: messages : Set(Message) =
+  self.messageSections.messages->flatten()->asSet()
+def: gateways : Set(Gateway) =
+  self.gatewaySections.gateways->flatten()->asSet()
+def: events : Set(Event) =
+  self.eventSections.events->flatten()->asSet()
+def: businessRules : Set(BusinessRule) =
+  self.ruleSections.rules->flatten()->asSet()
+
+-- 合约内所有可在 flows 中被引用的元素集合
+def: flowElements : Set(FlowElement) =
+  self.messages->union(self.gateways)
+               ->union(self.events)
+               ->union(self.businessRules)
+
+inv SectionAtMostOnceEachKind:
+  self.participantSections->size() <= 1 and
+  self.globalSections->size() <= 1 and
+  self.messageSections->size() <= 1 and
+  self.gatewaySections->size() <= 1 and
+  self.eventSections->size() <= 1 and
+  self.ruleSections->size() <= 1 and
+  self.flowSections->size() <= 1
+
+-- 对生成/执行更友好：要求合约包含且仅包含一个 flows 区块
+inv HasExactlyOneFlowSection:
+  self.flowSections->size() = 1
+
+-- 如果定义了 message，则 participant 至少 2 个（否则必然出现 sender=receiver 或无法建模通信）
+inv MessagesRequireAtLeastTwoParticipants:
+  self.messages->isEmpty() or self.participants->size() >= 2
+
+inv UniqueNamesPerKind:
+  self.participants->isUnique(name) and
+  self.globals->isUnique(name) and
+  self.messages->isUnique(name) and
+  self.gateways->isUnique(name) and
+  self.events->isUnique(name) and
+  self.businessRules->isUnique(name)
+
+-- Message 的 sender/receiver 必须来自本合约 participants（避免跨 contract 串引用）
+inv MessageParticipantsInContract:
+  self.messages->forAll(m |
+    self.participants->includes(m.sender) and
+    self.participants->includes(m.receiver)
+  )
+
+-- ==============
+-- Participant 约束
+-- ==============
+
+context Participant
+inv MspX509Paired:
+  (self.msp.oclIsUndefined() and self.x509.oclIsUndefined()) or
+  (not self.msp.oclIsUndefined() and not self.x509.oclIsUndefined())
+
+inv MultiBoundsPaired:
+  self.multiMin.oclIsUndefined() = self.multiMax.oclIsUndefined()
+
+inv MultiBoundsOrder:
+  self.multiMin.oclIsUndefined() or (self.multiMin >= 0 and self.multiMax >= self.multiMin)
+
+inv MultiFlagConsistent:
+  if self.isMulti = true then
+    not self.multiMin.oclIsUndefined() and
+    not self.multiMax.oclIsUndefined() and
+    self.multiMin >= 1 and
+    self.multiMax > 1
+  else
+    true
+  endif
+
+inv AttributeKeysUnique:
+  self.attributes->isUnique(key)
+  
+-- ==============
+-- Message / Rule 约束
+-- ==============
+
+context Message
+inv SenderNotReceiver:
+  self.sender <> self.receiver
+
+context BusinessRule
+inv InputMappingParamUnique:
+  self.inputMappings->isUnique(dmnParam)
+
+inv OutputMappingParamUnique:
+  self.outputMappings->isUnique(dmnParam)
+
+-- 至少要有一个输入映射（否则业务规则无法从合约状态拿到参数）
+inv HasAtLeastOneInputMapping:
+  self.inputMappings->size() >= 1
+
+-- 业务规则映射必须引用“本合约 globals”里的变量（避免跨 contract 串引用）
+context Contract
+inv RuleMappingsReferenceOwnGlobals:
+  self.businessRules->forAll(r |
+    r.inputMappings.globalRef->forAll(g | self.globals->includes(g)) and
+    r.outputMappings.globalRef->forAll(g | self.globals->includes(g))
+  )
+
+-- ==============
+-- Flow 约束（与代码生成器行为强相关）
+-- ==============
+
+context Contract
+def: flowItems : Set(FlowItem) =
+  self.flowSections.flowItems->flatten()->asSet()
+
+def: startFlows : Set(StartFlow) =
+  self.flowItems->select(oclIsKindOf(StartFlow))
+                ->collect(oclAsType(StartFlow))->asSet()
+def: messageFlows : Set(MessageFlow) =
+  self.flowItems->select(oclIsKindOf(MessageFlow))
+                ->collect(oclAsType(MessageFlow))->asSet()
+def: gatewayFlows : Set(GatewayFlow) =
+  self.flowItems->select(oclIsKindOf(GatewayFlow))
+                ->collect(oclAsType(GatewayFlow))->asSet()
+def: ruleFlows : Set(RuleFlow) =
+  self.flowItems->select(oclIsKindOf(RuleFlow))
+                ->collect(oclAsType(RuleFlow))->asSet()
+def: eventFlows : Set(EventFlow) =
+  self.flowItems->select(oclIsKindOf(EventFlow))
+                ->collect(oclAsType(EventFlow))->asSet()
+def: parallelJoins : Set(ParallelJoin) =
+  self.flowItems->select(oclIsKindOf(ParallelJoin))
+                ->collect(oclAsType(ParallelJoin))->asSet()
+
+-- flows 中 action 引用做统一校验用的便捷集合
+def: msgActions : Set(FlowAction) =
+  self.messageFlows->collect(actions)->flatten()->asSet()
+def: ruleActions : Set(FlowAction) =
+  self.ruleFlows->collect(actions)->flatten()->asSet()
+def: eventActions : Set(FlowAction) =
+  self.eventFlows->collect(actions)->flatten()->asSet()
+def: parallelActions : Set(FlowAction) =
+  self.parallelJoins->collect(actions)->flatten()->asSet()
+def: gatewayThenActions : Set(FlowAction) =
+  self.gatewayFlows->collect(actions)->flatten()->asSet()
+def: gatewayBranchActions : Set(FlowAction) =
+  let branches : Bag(GatewayBranch) = self.gatewayFlows->collect(branches)->flatten() in
+  let compareBranchActions : Set(FlowAction) =
+    branches->select(oclIsKindOf(GatewayCompareBranch))->collect(oclAsType(GatewayCompareBranch).actions)->flatten()->asSet() in
+  let elseBranchActions : Set(FlowAction) =
+    branches->select(oclIsKindOf(GatewayElseBranch))->collect(oclAsType(GatewayElseBranch).actions)->flatten()->asSet() in
+  let exprBranchActions : Set(FlowAction) =
+    branches->select(oclIsKindOf(GatewayExpressionBranch))->collect(oclAsType(GatewayExpressionBranch).actions)->flatten()->asSet() in
+  compareBranchActions->union(elseBranchActions)->union(exprBranchActions)
+def: allActions : Set(FlowAction) =
+  self.msgActions->union(self.ruleActions)
+                 ->union(self.eventActions)
+                 ->union(self.parallelActions)
+                 ->union(self.gatewayThenActions)
+                 ->union(self.gatewayBranchActions)
+
+inv FlowSectionNotEmpty:
+  self.flowItems->size() >= 1
+
+-- textX 默认作用域可能跨 contract；这里强制“本合约内自洽”
+inv FlowRefsStayInSameContract:
+  self.startFlows.start->forAll(e | self.events->includes(e)) and
+  self.messageFlows.msg->forAll(m | self.messages->includes(m)) and
+  self.gatewayFlows.gtw->forAll(g | self.gateways->includes(g)) and
+  self.ruleFlows.rule->forAll(r | self.businessRules->includes(r)) and
+  self.eventFlows.ev->forAll(e | self.events->includes(e)) and
+  self.parallelJoins.gtw->forAll(g | self.gateways->includes(g)) and
+  self.parallelJoins.sources->flatten()->forAll(x |
+     self.messages->includes(x) or self.gateways->includes(x) or self.events->includes(x) or self.businessRules->includes(x)
+  )
+
+-- 只允许 1 个起点；并要求 start event 显式 READY（与你示例/生成器取 start_event 的逻辑一致）
+inv ExactlyOneStartFlow:
+  self.startFlows->size() = 1
+
+inv StartEventMustBeReady:
+  self.startFlows->forAll(sf | sf.start.initialState = ElementState::READY)
+
+inv StartDoesNotEnableItself:
+  self.startFlows->forAll(sf | sf.target.target <> sf.start)
+
+-- READY 的事件只能有一个，并且必须等于 start flow 的 start event
+inv ExactlyOneReadyEventAndMatchesStart:
+  self.events->select(e | e.initialState = ElementState::READY)->size() = 1 and
+  self.startFlows->forAll(sf |
+    self.events->select(e | e.initialState = ElementState::READY)->includes(sf.start)
+  )
+
+-- StartFlow 的 target 也必须是本合约内元素
+inv StartFlowTargetInContract:
+  self.startFlows->forAll(sf | self.flowElements->includes(sf.target.target))
+
+-- 所有 enable/disable 的目标必须在本合约内；所有 set 的 var 必须在本合约 globals 内
+inv ActionsReferenceOwnElementsAndGlobals:
+  self.allActions->forAll(a |
+    if a.oclIsKindOf(EnableAction) then
+      let t : FlowElement = a.oclAsType(EnableAction).target in
+        self.flowElements->includes(t)
+    else if a.oclIsKindOf(DisableAction) then
+      let t : FlowElement = a.oclAsType(DisableAction).target in
+        self.flowElements->includes(t)
+    else if a.oclIsKindOf(SetGlobalAction) then
+      self.globals->includes(a.oclAsType(SetGlobalAction).var)
+    else
+      true
+    endif endif endif
+  )
+
+-- 并行汇聚语义：parallel join 只能绑定 parallel gateway；sources 至少两个且不重复
+context ParallelJoin
+inv ParallelGatewayTypeRequired:
+  self.gtw.gatewayType = GatewayType::parallel
+
+inv SourcesAtLeastTwoAndDistinct:
+  self.sources->size() >= 2 and self.sources->asSet()->size() = self.sources->size()
+
+inv SourcesNotContainJoinGateway:
+  not self.sources->includes(self.gtw)
+
+-- choose 分支：else 最多一个且必须放最后；并且（当前 Go/Sol 生成器）不支持 GatewayExpressionBranch
+context GatewayFlow
+inv ChooseImpliesExclusiveGateway:
+  self.branches->isEmpty() or self.gtw.gatewayType = GatewayType::exclusive
+
+-- 语法是二选一：要么 then actions，要么 choose branches（不能两者都有/都没有）
+inv ExactlyOneGatewayFlowMode:
+  (self.actions->isEmpty() xor self.branches->isEmpty())
+
+inv ElseBranchUniqueAndLast:
+  (self.branches->select(oclIsKindOf(GatewayElseBranch))->size() <= 1 and
+   (self.branches->select(oclIsKindOf(GatewayElseBranch))->isEmpty() or
+    self.branches->last().oclIsKindOf(GatewayElseBranch)))
+
+-- compare 分支不能出现完全重复条件（避免生成冗余/不可达分支）
+inv CompareBranchesNoDuplicateConditions:
+  let keys : Bag(String) =
+    self.branches->select(oclIsKindOf(GatewayCompareBranch))
+                 ->collect(oclAsType(GatewayCompareBranch).conditionKey)
+  in
+    keys->asSet()->size() = keys->size()
+
+context GatewayExpressionBranch
+inv NotSupportedByCurrentCodeGen:
+  false
+
+context GatewayCompareBranch
+-- relation 仅允许 6 种比较运算符
+inv RelationOperatorAllowed:
+  Set{'==','!=','>=','<=','>','<'}->includes(self.relation)
+
+-- SetGlobal / Compare 的“类型-字面量”匹配（float 当前用 intValue 承载）
+context SetGlobalAction
+inv SetLiteralTypeMatchesGlobalType:
+  (self.var.type = ScalarType::string implies not self.expr.stringValue.oclIsUndefined()) and
+  (self.var.type = ScalarType::bool   implies not self.expr.boolValue.oclIsUndefined()) and
+  ((self.var.type = ScalarType::int or self.var.type = ScalarType::float) implies not self.expr.intValue.oclIsUndefined())
+
+context GatewayCompareBranch
+inv CompareLiteralTypeMatchesGlobalType:
+  (self.var.type = ScalarType::string implies not self.value.stringValue.oclIsUndefined()) and
+  (self.var.type = ScalarType::bool   implies not self.value.boolValue.oclIsUndefined()) and
+  ((self.var.type = ScalarType::int or self.var.type = ScalarType::float) implies not self.value.intValue.oclIsUndefined())
+
+def: literalKey : String =
+  if not self.value.stringValue.oclIsUndefined() then
+    self.value.stringValue
+  else if not self.value.intValue.oclIsUndefined() then
+    self.value.intValue.toString()
+  else
+    self.value.boolValue.toString()
+  endif endif
+
+def: conditionKey : String =
+  self.var.name.concat('|').concat(self.relation).concat('|').concat(self.literalKey)
+
+-- LiteralExpr 是“互斥选择”，三个字段只能出现一个
+context LiteralExpr
+inv ExactlyOneLiteralKind:
+  (
+    not self.stringValue.oclIsUndefined() and self.intValue.oclIsUndefined() and self.boolValue.oclIsUndefined()
+  ) or (
+    self.stringValue.oclIsUndefined() and not self.intValue.oclIsUndefined() and self.boolValue.oclIsUndefined()
+  ) or (
+    self.stringValue.oclIsUndefined() and self.intValue.oclIsUndefined() and not self.boolValue.oclIsUndefined()
+  )
+
+-- 同一条 flow 里，不要对同一 target 同时 enable+disable（对生成代码/可读性更安全）
+context MessageFlow
+inv NoEnableDisableConflict:
+  let en : Set(FlowElement) =
+    self.actions->select(oclIsKindOf(EnableAction))->collect(oclAsType(EnableAction).target)->asSet()
+  in
+  let dis : Set(FlowElement) =
+    self.actions->select(oclIsKindOf(DisableAction))->collect(oclAsType(DisableAction).target)->asSet()
+  in
+    en->intersection(dis)->isEmpty()
+
+context RuleFlow
+inv NoEnableDisableConflict:
+  let en : Set(FlowElement) =
+    self.actions->select(oclIsKindOf(EnableAction))->collect(oclAsType(EnableAction).target)->asSet()
+  in
+  let dis : Set(FlowElement) =
+    self.actions->select(oclIsKindOf(DisableAction))->collect(oclAsType(DisableAction).target)->asSet()
+  in
+    en->intersection(dis)->isEmpty()
+
+context EventFlow
+inv NoEnableDisableConflict:
+  let en : Set(FlowElement) =
+    self.actions->select(oclIsKindOf(EnableAction))->collect(oclAsType(EnableAction).target)->asSet()
+  in
+  let dis : Set(FlowElement) =
+    self.actions->select(oclIsKindOf(DisableAction))->collect(oclAsType(DisableAction).target)->asSet()
+  in
+    en->intersection(dis)->isEmpty()
+
+context ParallelJoin
+inv NoEnableDisableConflict:
+  let en : Set(FlowElement) =
+    self.actions->select(oclIsKindOf(EnableAction))->collect(oclAsType(EnableAction).target)->asSet()
+  in
+  let dis : Set(FlowElement) =
+    self.actions->select(oclIsKindOf(DisableAction))->collect(oclAsType(DisableAction).target)->asSet()
+  in
+    en->intersection(dis)->isEmpty()
+
+endpackage
