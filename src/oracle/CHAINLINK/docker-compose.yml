@@ -1,0 +1,92 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: chainlink-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: chainlink
+      POSTGRES_PASSWORD: ChainlinkPostgresPass123!
+      POSTGRES_DB: chainlink
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - existing_network
+  
+
+  chainlink:
+    image: smartcontract/chainlink:2.12.0
+    container_name: chainlink-node
+    depends_on:
+      - postgres
+      - mybootnode
+    restart: unless-stopped
+    ports:
+      - "6688:6688"
+    volumes:
+      - ./chainlink:/chainlink
+    command: >
+      node --config /chainlink/config.toml --secrets /chainlink/secrets.toml start --api /chainlink/.api --password /chainlink/.password
+    networks:
+      - existing_network
+  
+  mybootnode:
+    hostname: mybootnode
+    build:
+      context: ./geth-node
+      dockerfile: Dockerfile
+    command:
+      - --http # 对于较新版本的Geth，使用--http代替--rpc
+      - --http.addr=0.0.0.0
+      - --http.port=8545
+      - --http.api=admin,eth,miner,web3,personal,net,txpool
+      - --ws # 启用 WebSocket
+      - --ws.addr=0.0.0.0
+      - --ws.port=8546
+      - --ws.api=admin,eth,miner,web3,personal,net,txpool
+      - --ws.origins=*
+      - --networkid=3456
+      - --http.corsdomain="*"
+      - --http.vhosts=*
+      - --nodiscover
+      - --mine
+      - --miner.threads=1
+      - --miner.etherbase=0x365acf78c44060caf3a4789d804df11e3b4aa17d
+      - --miner.gasprice=0
+      - --allow-insecure-unlock
+    ports:
+      - "8545:8545" # RPC端口
+      - "8546:8546" # WS端口
+      - "30303:30303" # P2P网络端口
+    volumes:
+      - ./geth-node/datadir/keystore:/root/.ethereum/keystore
+    networks:
+      - existing_network
+  
+  # anvil:
+  #   image: ghcr.io/foundry-rs/foundry:latest
+  #   container_name: chainlink-anvil
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8545:8545"
+  #   entrypoint:
+  #     - anvil
+  #   command:
+  #     - --host
+  #     - 0.0.0.0
+  #     - --ws
+  #     - --chain-id
+  #     - "31337"
+  #     - --mnemonic
+  #     - test test test test test test test test test test test junk
+
+volumes:
+  pgdata:
+
+networks:
+  existing_network:
+    external: true
+    name: cello-net

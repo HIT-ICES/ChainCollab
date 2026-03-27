@@ -1,22 +1,10 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Card, Row, Col, Typography } from "antd";
-import { useState } from "react";
 import { DeploymentUnitOutlined } from "@ant-design/icons";
-import DoneIcon from "@mui/icons-material/Done";
-import Chip from "@mui/material/Chip";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
-import ClearIcon from "@mui/icons-material/Clear";
 import Icon from "@mdi/react";
 import { mdiGamepadCircleOutline } from "@mdi/js";
 const { Text } = Typography;
-
-let startIcon = <DoneIcon />;
-let pauseIcon = <ClearIcon />;
-interface chipProps {
-  icon: JSX.Element;
-  label: string;
-  sx: React.CSSProperties;
-}
 
 const customColStyle: React.CSSProperties = {
   display: "flex",
@@ -39,13 +27,7 @@ import { usePeerData } from "./hooks";
 import { useAppSelector } from "@/redux/hooks";
 const Peer: React.FC = () => {
   const currentEnvId = useAppSelector(state => state.env.currentEnvId)
-  const [
-    peerList,
-    peerListLoaing,
-    syncPeerList,
-  ] = usePeerData(currentEnvId);
-
-  console.log(peerList, peerListLoaing, syncPeerList)
+  const [peerList, peerListLoaing] = usePeerData(currentEnvId);
 
   return (
     <>
@@ -54,7 +36,6 @@ const Peer: React.FC = () => {
           {peerList?.map((peerNode) => (
             <Card.Grid
               style={{ width: "100%", height: "100%", cursor: "pointer" }}
-              onClick={() => console.log("clicked")}
             >
               <Row style={{ width: "100%", height: "100%" }}>
                 <Col span={2} style={customColStyle}>

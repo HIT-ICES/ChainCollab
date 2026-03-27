@@ -106,8 +106,9 @@ nt-sol-build() {
 
 nt-bpmn-to-b2c() {
   nt-activate
-  local bpmn_file="$1"
-  local output_file="${2:-"$NT_B2C_DIR/chaincode.b2c"}"
+  local bpmn_file="${1:-}"
+  shift || true
+  local output_file="$NT_B2C_DIR/chaincode.b2c"
 
   if [ -z "$bpmn_file" ]; then
     local candidates=("$NT_BPMN_DIR"/*.bpmn)
@@ -126,6 +127,11 @@ nt-bpmn-to-b2c() {
     done
   fi
 
+  if [ $# -gt 0 ] && [[ "${1:-}" != --* ]]; then
+    output_file="$1"
+    shift || true
+  fi
+
   if [ ! -f "$bpmn_file" ]; then
     echo "BPMN file '$bpmn_file' not found. Provide a valid path."
     return 1
@@ -133,9 +139,9 @@ nt-bpmn-to-b2c() {
 
   mkdir -p "$(dirname "$output_file")"
   if command -v python3 >/dev/null 2>&1; then
-    python3 -m generator.bpmn_to_dsl "$bpmn_file" -o "$output_file"
+    python3 -m generator.bpmn_to_dsl "$bpmn_file" -o "$output_file" "$@"
   else
-    python -m generator.bpmn_to_dsl "$bpmn_file" -o "$output_file"
+    python -m generator.bpmn_to_dsl "$bpmn_file" -o "$output_file" "$@"
   fi
 }
 

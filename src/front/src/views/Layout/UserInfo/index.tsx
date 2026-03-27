@@ -51,7 +51,6 @@ const UserInfo: React.FC = () => {
       key: "3",
     },
   ];
-  console.log(userInfo, "userInfo")
 
   return (
     <Dropdown menu={{ items }} trigger={["click"]} arrow={true}>

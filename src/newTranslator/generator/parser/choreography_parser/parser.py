@@ -20,6 +20,8 @@ from generator.parser.choreography_parser.elements import (
     SequenceFlow,
     TerminalType,
     BusinessRuleTask,
+    ReceiveTask,
+    ScriptTask,
 )
 
 from typing import List, Optional, Tuple, Any, Protocol
@@ -56,6 +58,13 @@ class Choreography:
     def _parse_node(self, element: ET.Element):
         bpmn2prefix = "{http://www.omg.org/spec/BPMN/20100524/MODEL}"
         split_tag = element.tag.split("}")[1]
+
+        def _first_text(xpath: str) -> str:
+            found = element.findall(xpath)
+            if not found:
+                return ""
+            return found[0].text or ""
+
         match split_tag:
             case NodeType.PARTICIPANT.value:
                 participant_multiplicity = element.findall(
@@ -104,31 +113,80 @@ class Choreography:
                     self,
                     element.attrib["id"],
                     element.attrib.get("name", ""),
-                    incoming=element.findall(f"./{bpmn2prefix}incoming")[0].text,
-                    outgoing=element.findall(f"./{bpmn2prefix}outgoing")[0].text,
+                    incoming=_first_text(f"./{bpmn2prefix}incoming"),
+                    outgoing=_first_text(f"./{bpmn2prefix}outgoing"),
                     documentation=documentation if documentation is not None else "{}",
+                )
+            case NodeType.RECEIVE_TASK.value:
+                documentation_list = element.findall(f"./{bpmn2prefix}documentation")
+                documentation = (
+                    documentation_list[0].text if documentation_list else None
+                )
+                return ReceiveTask(
+                    self,
+                    element.attrib["id"],
+                    element.attrib.get("name", ""),
+                    incoming=_first_text(f"./{bpmn2prefix}incoming"),
+                    outgoing=_first_text(f"./{bpmn2prefix}outgoing"),
+                    documentation=documentation if documentation is not None else "{}",
+                )
+            case NodeType.SCRIPT_TASK.value:
+                documentation_list = element.findall(f"./{bpmn2prefix}documentation")
+                documentation = (
+                    documentation_list[0].text if documentation_list else None
+                )
+                if documentation is None:
+                    script_body = _first_text(f"./{bpmn2prefix}script")
+                    if script_body:
+                        documentation = json.dumps(
+                            {
+                                "oracleTaskType": "compute-task",
+                                "dataSource": "",
+                                "computeScript": script_body,
+                            },
+                            ensure_ascii=False,
+                        )
+                return ScriptTask(
+                    self,
+                    element.attrib["id"],
+                    element.attrib.get("name", ""),
+                    incoming=_first_text(f"./{bpmn2prefix}incoming"),
+                    outgoing=_first_text(f"./{bpmn2prefix}outgoing"),
+                    documentation=documentation if documentation is not None else "{}",
+                )
+            case "DataTask":
+                # Compatibility fallback for front-end custom oracle:DataTask elements.
+                # These elements are treated as external-data oracle tasks.
+                documentation = self._extract_oracle_data_task_doc(element)
+                return ReceiveTask(
+                    self,
+                    element.attrib["id"],
+                    element.attrib.get("name", ""),
+                    incoming=_first_text(f"./{bpmn2prefix}incoming"),
+                    outgoing=_first_text(f"./{bpmn2prefix}outgoing"),
+                    documentation=documentation,
                 )
             case NodeType.START_EVENT.value:
                 return StartEvent(
                     self,
                     element.attrib["id"],
                     element.attrib.get("name", ""),
-                    outgoing=element.findall(f"./{bpmn2prefix}outgoing")[0].text,
+                    outgoing=_first_text(f"./{bpmn2prefix}outgoing"),
                 )
             case NodeType.END_EVENT.value:
                 return EndEvent(
                     self,
                     element.attrib["id"],
                     element.attrib.get("name", ""),
-                    incoming=element.findall(f"./{bpmn2prefix}incoming")[0].text,
+                    incoming=_first_text(f"./{bpmn2prefix}incoming"),
                 )
             case NodeType.CHOREOGRAPHY_TASK.value:
                 return ChoreographyTask(
                     self,
                     element.attrib["id"],
                     element.attrib.get("name", ""),
-                    incoming=element.findall(f"./{bpmn2prefix}incoming")[0].text,
-                    outgoing=element.findall(f"./{bpmn2prefix}outgoing")[0].text,
+                    incoming=_first_text(f"./{bpmn2prefix}incoming"),
+                    outgoing=_first_text(f"./{bpmn2prefix}outgoing"),
                     participants=[
                         element.text
                         for element in element.findall(f"./{bpmn2prefix}participantRef")
@@ -182,6 +240,36 @@ class Choreography:
                     ],
                 )
 
+    def _extract_oracle_data_task_doc(self, element: ET.Element) -> str:
+        bpmn2prefix = "{http://www.omg.org/spec/BPMN/20100524/MODEL}"
+
+        documentation_list = element.findall(f"./{bpmn2prefix}documentation")
+        if documentation_list and documentation_list[0].text:
+            return documentation_list[0].text
+
+        payload = {
+            "oracleTaskType": "external-data",
+            "dataSource": "",
+            "computeScript": "",
+        }
+
+        for attr_name, attr_value in element.attrib.items():
+            if attr_name.endswith("}dataSource") or attr_name == "dataSource":
+                payload["dataSource"] = attr_value
+
+        extension_elements = element.find(f"./{bpmn2prefix}extensionElements")
+        if extension_elements is not None:
+            for child in list(extension_elements):
+                tag_name = child.tag.split("}", 1)[-1].lower()
+                if tag_name == "dataconfig":
+                    value = child.attrib.get("value", "")
+                    if value:
+                        payload.setdefault("dataConfig", value)
+                        if not payload.get("dataSource"):
+                            payload["dataSource"] = value
+
+        return json.dumps(payload, ensure_ascii=False)
+
     def _parse_edge(self, element):
         bpmn2prefix = "{http://www.omg.org/spec/BPMN/20100524/MODEL}"
         match element.tag.split("}")[1]:
@@ -217,7 +305,7 @@ class Choreography:
         split_tag = element.tag.split("}")[1]
         if split_tag in [member.value for member in TerminalType.__members__.values()]:
             return
-        if split_tag in [member.value for member in NodeType.__members__.values()]:
+        if split_tag in [member.value for member in NodeType.__members__.values()] or split_tag == "DataTask":
             self.nodes.append(self._parse_node(element))
             self._id2nodes[self.nodes[-1].id] = self.nodes[-1]
             return

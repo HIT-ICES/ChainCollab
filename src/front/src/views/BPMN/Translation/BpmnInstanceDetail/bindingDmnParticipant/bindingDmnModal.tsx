@@ -336,9 +336,6 @@ export const BindingDmnModal = ({
 
 
     const setActivity = (businessRuleId, dmnId, decisionId, paramMapping, content) => {
-        console.log(
-            dmnId, content, decisionId
-        )
         setDmnBindingInfo({
             ...DmnBindingInfo,
             [businessRuleId]: {
@@ -370,18 +367,17 @@ export const BindingDmnModal = ({
         setCurrentBusinessRuleId("")
     }
 
-    const data = Object.entries(businessRules).map(([businessRuleId, value]) => {
+    const data = Object.entries(businessRules as Record<string, any>).map(([businessRuleId, value]) => {
         return {
-            businessRuleName: value.name,
+            businessRuleName: value?.name,
             businessRuleId: businessRuleId,
-            documentation: value.documentation,
+            documentation: value?.documentation,
         }
     })
 
     const itemToHandle = data.find((item) => item.businessRuleId === currentBusinessRuleId)
 
     const isHandle = itemToHandle ? true : false
-    console.log(DmnBindingInfo)
     return (
         <>
             <TableContainer component={Paper} variant="outlined" sx={{ mb: 3 }}>

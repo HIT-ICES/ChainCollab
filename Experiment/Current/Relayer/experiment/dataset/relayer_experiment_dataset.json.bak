@@ -1,0 +1,46 @@
+{
+  "name": "relayer_split_industrial_cases_v2",
+  "description": "Industrial BPMN split cases and execution profile for Relayer experiments.",
+  "chains": {
+    "source": {
+      "name": "chainA",
+      "type": "local-anvil-evm",
+      "rpcUrl": "http://127.0.0.1:8545",
+      "chainId": 31337
+    },
+    "target": {
+      "name": "chainB",
+      "type": "local-anvil-evm",
+      "rpcUrl": "http://127.0.0.1:9545",
+      "chainId": 31338
+    }
+  },
+  "bpmnCases": [
+    {
+      "path": "/home/logres/system/Experiment/CaseTest/SupplyChain.bpmn"
+    },
+    {
+      "path": "/home/logres/system/Experiment/CaseTest/Manufactory.bpmn"
+    },
+    {
+      "path": "/home/logres/system/Experiment/CaseTest/ManagementSystem.bpmn"
+    },
+    {
+      "path": "/home/logres/system/Experiment/CaseTest/Purchase.bpmn"
+    },
+    {
+      "path": "/home/logres/system/Experiment/CaseTest/IncidentManagement.bpmn"
+    }
+  ],
+  "taskPolicy": {
+    "fixedTasksPerCase": 40,
+    "budgetMultiplier": 3,
+    "minTasks": 20,
+    "maxTasks": 60
+  },
+  "faultRecovery": {
+    "perSubmodelTasks": 12,
+    "phase1Ratio": 0.4,
+    "downtimeMs": 4000
+  }
+}

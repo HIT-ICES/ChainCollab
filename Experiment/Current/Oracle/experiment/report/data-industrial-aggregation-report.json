@@ -1,0 +1,515 @@
+{
+  "generatedAt": "2026-03-03T14:12:17.252Z",
+  "datasetFile": "industrial_data_aggregation_scenarios.json",
+  "profileNames": [
+    "轻微噪声场景",
+    "单节点异常值场景",
+    "存在缺失值场景"
+  ],
+  "profileMeta": [
+    {
+      "name": "轻微噪声场景",
+      "desc": "同一指标多传感器常规观测（轻微高斯噪声）"
+    },
+    {
+      "name": "单节点异常值场景",
+      "desc": "单个节点出现显著偏离值（上冲或下冲）"
+    },
+    {
+      "name": "存在缺失值场景",
+      "desc": "部分节点缺失上报，部分节点上报陈旧值"
+    }
+  ],
+  "modes": [
+    "MEAN",
+    "MEDIAN",
+    "WEIGHTED_MEAN",
+    "TRIMMED_MEAN"
+  ],
+  "scenarios": [
+    {
+      "uciId": 864,
+      "datasetName": "Room Occupancy Estimation",
+      "datasetRef": "https://archive.ics.uci.edu/dataset/864/room+occupancy+estimation",
+      "metricCol": "Temp",
+      "roundCount": 90,
+      "profiles": {
+        "轻微噪声场景": {
+          "MEAN": {
+            "validRounds": 90,
+            "mae": 2.433333333333333,
+            "rmse": 3.1322693228889356,
+            "mape": 0.0009547095622582792,
+            "stddev": 1.972308292331603,
+            "avgTotalGas": 876022.9333333333,
+            "avgRegisterGas": 292678.6666666667,
+            "avgSubmitGas": 583344.2666666667
+          },
+          "MEDIAN": {
+            "validRounds": 90,
+            "mae": 2.7111111111111112,
+            "rmse": 3.3763886032268267,
+            "mape": 0.001064433861205428,
+            "stddev": 2.012430506429944,
+            "avgTotalGas": 898367.3222222222,
+            "avgRegisterGas": 312400.6666666667,
+            "avgSubmitGas": 585966.6555555556
+          },
+          "WEIGHTED_MEAN": {
+            "validRounds": 90,
+            "mae": 2.433333333333333,
+            "rmse": 3.1322693228889356,
+            "mape": 0.0009547095622582792,
+            "stddev": 1.972308292331603,
+            "avgTotalGas": 1001682.5666666667,
+            "avgRegisterGas": 401494.6666666667,
+            "avgSubmitGas": 600187.9
+          },
+          "TRIMMED_MEAN": {
+            "validRounds": 90,
+            "mae": 2.7111111111111112,
+            "rmse": 3.3763886032268267,
+            "mape": 0.001064433861205428,
+            "stddev": 2.012430506429944,
+            "avgTotalGas": 899148.4,
+            "avgRegisterGas": 312400.6666666667,
+            "avgSubmitGas": 586747.7333333333
+          }
+        },
+        "单节点异常值场景": {
+          "MEAN": {
+            "validRounds": 90,
+            "mae": 270.1333333333333,
+            "rmse": 270.8518250097479,
+            "mape": 0.10613383665655769,
+            "stddev": 19.71530708189282,
+            "avgTotalGas": 875761.1777777778,
+            "avgRegisterGas": 292560.6666666667,
+            "avgSubmitGas": 583200.5111111111
+          },
+          "MEDIAN": {
+            "validRounds": 90,
+            "mae": 10.055555555555555,
+            "rmse": 12.491330326804,
+            "mape": 0.003944745649777837,
+            "stddev": 7.410744618624309,
+            "avgTotalGas": 898711.3,
+            "avgRegisterGas": 312472.6666666667,
+            "avgSubmitGas": 586238.6333333333
+          },
+          "WEIGHTED_MEAN": {
+            "validRounds": 90,
+            "mae": 270.1333333333333,
+            "rmse": 270.8518250097479,
+            "mape": 0.10613383665655769,
+            "stddev": 19.71530708189282,
+            "avgTotalGas": 1001794.411111111,
+            "avgRegisterGas": 401566.6666666667,
+            "avgSubmitGas": 600227.7444444444
+          },
+          "TRIMMED_MEAN": {
+            "validRounds": 90,
+            "mae": 10.055555555555555,
+            "rmse": 12.491330326804,
+            "mape": 0.003944745649777837,
+            "stddev": 7.410744618624309,
+            "avgTotalGas": 899446.9444444445,
+            "avgRegisterGas": 312472.6666666667,
+            "avgSubmitGas": 586974.2777777778
+          }
+        },
+        "存在缺失值场景": {
+          "MEAN": {
+            "validRounds": 90,
+            "mae": 9.055555555555555,
+            "rmse": 11.583992786983636,
+            "mape": 0.0035520611843606275,
+            "stddev": 7.223974146488606,
+            "avgTotalGas": 847610.7444444444,
+            "avgRegisterGas": 292524.6666666667,
+            "avgSubmitGas": 555086.0777777778
+          },
+          "MEDIAN": {
+            "validRounds": 90,
+            "mae": 10.922222222222222,
+            "rmse": 14.148812278381847,
+            "mape": 0.004285840249136273,
+            "stddev": 8.994106437956134,
+            "avgTotalGas": 870174.088888889,
+            "avgRegisterGas": 312436.6666666667,
+            "avgSubmitGas": 557737.4222222222
+          },
+          "WEIGHTED_MEAN": {
+            "validRounds": 90,
+            "mae": 9.055555555555555,
+            "rmse": 11.583992786983636,
+            "mape": 0.0035520611843606275,
+            "stddev": 7.223974146488606,
+            "avgTotalGas": 972549.3666666667,
+            "avgRegisterGas": 401530.6666666667,
+            "avgSubmitGas": 571018.7
+          },
+          "TRIMMED_MEAN": {
+            "validRounds": 90,
+            "mae": 10.166666666666666,
+            "rmse": 13.281147875424356,
+            "mape": 0.003989558193998576,
+            "stddev": 8.54562916219618,
+            "avgTotalGas": 871042.8555555556,
+            "avgRegisterGas": 312436.6666666667,
+            "avgSubmitGas": 558606.1888888889
+          }
+        }
+      },
+      "rankingByProfile": {
+        "轻微噪声场景": [
+          {
+            "mode": "MEAN",
+            "mae": 2.433333333333333,
+            "rmse": 3.1322693228889356,
+            "avgTotalGas": 876022.9333333333
+          },
+          {
+            "mode": "WEIGHTED_MEAN",
+            "mae": 2.433333333333333,
+            "rmse": 3.1322693228889356,
+            "avgTotalGas": 1001682.5666666667
+          },
+          {
+            "mode": "MEDIAN",
+            "mae": 2.7111111111111112,
+            "rmse": 3.3763886032268267,
+            "avgTotalGas": 898367.3222222222
+          },
+          {
+            "mode": "TRIMMED_MEAN",
+            "mae": 2.7111111111111112,
+            "rmse": 3.3763886032268267,
+            "avgTotalGas": 899148.4
+          }
+        ],
+        "单节点异常值场景": [
+          {
+            "mode": "MEDIAN",
+            "mae": 10.055555555555555,
+            "rmse": 12.491330326804,
+            "avgTotalGas": 898711.3
+          },
+          {
+            "mode": "TRIMMED_MEAN",
+            "mae": 10.055555555555555,
+            "rmse": 12.491330326804,
+            "avgTotalGas": 899446.9444444445
+          },
+          {
+            "mode": "MEAN",
+            "mae": 270.1333333333333,
+            "rmse": 270.8518250097479,
+            "avgTotalGas": 875761.1777777778
+          },
+          {
+            "mode": "WEIGHTED_MEAN",
+            "mae": 270.1333333333333,
+            "rmse": 270.8518250097479,
+            "avgTotalGas": 1001794.411111111
+          }
+        ],
+        "存在缺失值场景": [
+          {
+            "mode": "MEAN",
+            "mae": 9.055555555555555,
+            "rmse": 11.583992786983636,
+            "avgTotalGas": 847610.7444444444
+          },
+          {
+            "mode": "WEIGHTED_MEAN",
+            "mae": 9.055555555555555,
+            "rmse": 11.583992786983636,
+            "avgTotalGas": 972549.3666666667
+          },
+          {
+            "mode": "TRIMMED_MEAN",
+            "mae": 10.166666666666666,
+            "rmse": 13.281147875424356,
+            "avgTotalGas": 871042.8555555556
+          },
+          {
+            "mode": "MEDIAN",
+            "mae": 10.922222222222222,
+            "rmse": 14.148812278381847,
+            "avgTotalGas": 870174.088888889
+          }
+        ]
+      }
+    },
+    {
+      "uciId": 864,
+      "datasetName": "Room Occupancy Estimation",
+      "datasetRef": "https://archive.ics.uci.edu/dataset/864/room+occupancy+estimation",
+      "metricCol": "Light",
+      "roundCount": 90,
+      "profiles": {
+        "轻微噪声场景": {
+          "MEAN": {
+            "validRounds": 90,
+            "mae": 0.25555555555555554,
+            "rmse": 0.6236095644623235,
+            "mape": 0.0010935611884844297,
+            "stddev": 0.5688411438297876,
+            "avgTotalGas": 820363.411111111,
+            "avgRegisterGas": 292500.6666666667,
+            "avgSubmitGas": 527862.7444444444
+          },
+          "MEDIAN": {
+            "validRounds": 90,
+            "mae": 0.23333333333333334,
+            "rmse": 0.6411794687223782,
+            "mape": 0.0007105386817406514,
+            "stddev": 0.5972157622389648,
+            "avgTotalGas": 842422.9,
+            "avgRegisterGas": 312412.6666666667,
+            "avgSubmitGas": 530010.2333333333
+          },
+          "WEIGHTED_MEAN": {
+            "validRounds": 90,
+            "mae": 0.25555555555555554,
+            "rmse": 0.6236095644623235,
+            "mape": 0.0010935611884844297,
+            "stddev": 0.5688411438297876,
+            "avgTotalGas": 946396.0333333333,
+            "avgRegisterGas": 401506.6666666667,
+            "avgSubmitGas": 544889.3666666667
+          },
+          "TRIMMED_MEAN": {
+            "validRounds": 90,
+            "mae": 0.23333333333333334,
+            "rmse": 0.6411794687223782,
+            "mape": 0.0007105386817406514,
+            "stddev": 0.5972157622389648,
+            "avgTotalGas": 843154.9444444445,
+            "avgRegisterGas": 312412.6666666667,
+            "avgSubmitGas": 530742.2777777778
+          }
+        },
+        "单节点异常值场景": {
+          "MEAN": {
+            "validRounds": 90,
+            "mae": 26.655555555555555,
+            "rmse": 54.90203396353666,
+            "mape": 0.1061415628179245,
+            "stddev": 47.997027942967684,
+            "avgTotalGas": 820433.7555555556,
+            "avgRegisterGas": 292572.6666666667,
+            "avgSubmitGas": 527861.088888889
+          },
+          "MEDIAN": {
+            "validRounds": 90,
+            "mae": 1.0888888888888888,
+            "rmse": 2.5647178748895127,
+            "mape": 0.004016917865075144,
+            "stddev": 2.3220893103909916,
+            "avgTotalGas": 842722.1888888889,
+            "avgRegisterGas": 312484.6666666667,
+            "avgSubmitGas": 530237.5222222222
+          },
+          "WEIGHTED_MEAN": {
+            "validRounds": 90,
+            "mae": 26.655555555555555,
+            "rmse": 54.90203396353666,
+            "mape": 0.1061415628179245,
+            "stddev": 47.997027942967684,
+            "avgTotalGas": 946470.3666666667,
+            "avgRegisterGas": 401578.6666666667,
+            "avgSubmitGas": 544891.7
+          },
+          "TRIMMED_MEAN": {
+            "validRounds": 90,
+            "mae": 1.0888888888888888,
+            "rmse": 2.5647178748895127,
+            "mape": 0.004016917865075144,
+            "stddev": 2.3220893103909916,
+            "avgTotalGas": 843458.4666666667,
+            "avgRegisterGas": 312484.6666666667,
+            "avgSubmitGas": 530973.8
+          }
+        },
+        "存在缺失值场景": {
+          "MEAN": {
+            "validRounds": 90,
+            "mae": 6.066666666666666,
+            "rmse": 31.70383783287653,
+            "mape": 0.10700024492349484,
+            "stddev": 31.11798336796403,
+            "avgTotalGas": 794500.6666666666,
+            "avgRegisterGas": 292536.6666666667,
+            "avgSubmitGas": 501964
+          },
+          "MEDIAN": {
+            "validRounds": 90,
+            "mae": 0.9555555555555556,
+            "rmse": 2.494438257849294,
+            "mape": 0.003366250547803329,
+            "stddev": 2.3041562018381345,
+            "avgTotalGas": 816480.0333333333,
+            "avgRegisterGas": 312448.6666666667,
+            "avgSubmitGas": 504031.36666666664
+          },
+          "WEIGHTED_MEAN": {
+            "validRounds": 90,
+            "mae": 6.066666666666666,
+            "rmse": 31.70383783287653,
+            "mape": 0.10700024492349484,
+            "stddev": 31.11798336796403,
+            "avgTotalGas": 919436.3444444444,
+            "avgRegisterGas": 401542.6666666667,
+            "avgSubmitGas": 517893.6777777778
+          },
+          "TRIMMED_MEAN": {
+            "validRounds": 90,
+            "mae": 0.9777777777777777,
+            "rmse": 2.5516878945339516,
+            "mape": 0.003217039886165663,
+            "stddev": 2.3569178450669575,
+            "avgTotalGas": 817353.2777777778,
+            "avgRegisterGas": 312448.6666666667,
+            "avgSubmitGas": 504904.6111111111
+          }
+        }
+      },
+      "rankingByProfile": {
+        "轻微噪声场景": [
+          {
+            "mode": "MEDIAN",
+            "mae": 0.23333333333333334,
+            "rmse": 0.6411794687223782,
+            "avgTotalGas": 842422.9
+          },
+          {
+            "mode": "TRIMMED_MEAN",
+            "mae": 0.23333333333333334,
+            "rmse": 0.6411794687223782,
+            "avgTotalGas": 843154.9444444445
+          },
+          {
+            "mode": "MEAN",
+            "mae": 0.25555555555555554,
+            "rmse": 0.6236095644623235,
+            "avgTotalGas": 820363.411111111
+          },
+          {
+            "mode": "WEIGHTED_MEAN",
+            "mae": 0.25555555555555554,
+            "rmse": 0.6236095644623235,
+            "avgTotalGas": 946396.0333333333
+          }
+        ],
+        "单节点异常值场景": [
+          {
+            "mode": "MEDIAN",
+            "mae": 1.0888888888888888,
+            "rmse": 2.5647178748895127,
+            "avgTotalGas": 842722.1888888889
+          },
+          {
+            "mode": "TRIMMED_MEAN",
+            "mae": 1.0888888888888888,
+            "rmse": 2.5647178748895127,
+            "avgTotalGas": 843458.4666666667
+          },
+          {
+            "mode": "MEAN",
+            "mae": 26.655555555555555,
+            "rmse": 54.90203396353666,
+            "avgTotalGas": 820433.7555555556
+          },
+          {
+            "mode": "WEIGHTED_MEAN",
+            "mae": 26.655555555555555,
+            "rmse": 54.90203396353666,
+            "avgTotalGas": 946470.3666666667
+          }
+        ],
+        "存在缺失值场景": [
+          {
+            "mode": "MEDIAN",
+            "mae": 0.9555555555555556,
+            "rmse": 2.494438257849294,
+            "avgTotalGas": 816480.0333333333
+          },
+          {
+            "mode": "TRIMMED_MEAN",
+            "mae": 0.9777777777777777,
+            "rmse": 2.5516878945339516,
+            "avgTotalGas": 817353.2777777778
+          },
+          {
+            "mode": "MEAN",
+            "mae": 6.066666666666666,
+            "rmse": 31.70383783287653,
+            "avgTotalGas": 794500.6666666666
+          },
+          {
+            "mode": "WEIGHTED_MEAN",
+            "mae": 6.066666666666666,
+            "rmse": 31.70383783287653,
+            "avgTotalGas": 919436.3444444444
+          }
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "overallByMode": {
+      "MEAN": {
+        "meanMAE": 52.43333333333333,
+        "meanRMSE": 62.13292808008267,
+        "meanMAPE": 0.0541459960555134,
+        "meanAvgTotalGas": 839115.4481481481
+      },
+      "MEDIAN": {
+        "meanMAE": 4.327777777777778,
+        "meanRMSE": 5.952811134978976,
+        "meanMAPE": 0.002898121142456444,
+        "meanAvgTotalGas": 861479.638888889
+      },
+      "WEIGHTED_MEAN": {
+        "meanMAE": 52.43333333333333,
+        "meanRMSE": 62.13292808008267,
+        "meanMAPE": 0.0541459960555134,
+        "meanAvgTotalGas": 964721.5148148149
+      },
+      "TRIMMED_MEAN": {
+        "meanMAE": 4.205555555555555,
+        "meanRMSE": 5.817742007266837,
+        "meanMAPE": 0.0028238723563272163,
+        "meanAvgTotalGas": 862267.4814814815
+      }
+    },
+    "overallRanking": [
+      {
+        "mode": "TRIMMED_MEAN",
+        "mae": 4.205555555555555,
+        "rmse": 5.817742007266837,
+        "avgTotalGas": 862267.4814814815
+      },
+      {
+        "mode": "MEDIAN",
+        "mae": 4.327777777777778,
+        "rmse": 5.952811134978976,
+        "avgTotalGas": 861479.638888889
+      },
+      {
+        "mode": "MEAN",
+        "mae": 52.43333333333333,
+        "rmse": 62.13292808008267,
+        "avgTotalGas": 839115.4481481481
+      },
+      {
+        "mode": "WEIGHTED_MEAN",
+        "mae": 52.43333333333333,
+        "rmse": 62.13292808008267,
+        "avgTotalGas": 964721.5148148149
+      }
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+[Log]
+Level = "debug"
+
+[WebServer]
+AllowOrigins = "*"
+SecureCookies = false
+
+[WebServer.TLS]
+HTTPSPort = 0
+
+[Database]
+MaxIdleConns = 10
+MaxOpenConns = 20
+
+[Feature]
+LogPoller = true
+
+[[EVM]]
+ChainID = "3456"
+Enabled = true
+
+[[EVM.Nodes]]
+Name = "mybootnode"
+HTTPURL = "http://mybootnode:8545"
+WSURL = "ws://mybootnode:8545"

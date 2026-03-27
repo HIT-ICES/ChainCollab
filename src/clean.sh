@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import argparse
 import re
 import shutil
 import subprocess
@@ -79,6 +80,13 @@ def list_docker_images() -> list[str]:
     return [line.strip() for line in output.splitlines() if line.strip()]
 
 
+def list_docker_volumes() -> list[str]:
+    if not cmd_exists("docker"):
+        return []
+    output = run_output(["docker", "volume", "ls", "--format", "{{.Name}}"])
+    return [line.strip() for line in output.splitlines() if line.strip()]
+
+
 def stop_remove_container(name: str):
     if not cmd_exists("docker"):
         return
@@ -99,7 +107,31 @@ def remove_firefly():
         run_cmd(["ff", "remove", stack], check=False, input_text="y\n")
 
 
+def remove_oracle_related_volumes():
+    print("Remove Docker Volumes (oracle/chainlink/cdmn)")
+    # 仅清理本项目会创建的卷，避免误删其他业务卷。
+    pattern = re.compile(
+        r"^(03-ocr-multinode_pgdata[1-4]|03-ocr-multinode_pgdatabootstrap|chainlink_pgdata|cello-.*|cello_.*)$"
+    )
+    for volume in list_docker_volumes():
+        if not pattern.search(volume):
+            continue
+        print(f"Removing volume: {volume}")
+        run_cmd(["docker", "volume", "rm", "-f", volume], check=False)
+
+
 def main():
+    parser = argparse.ArgumentParser(
+        description="Project clean script",
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
+    parser.add_argument(
+        "--keep-volumes",
+        action="store_true",
+        help="Keep docker volumes created by Chainlink/CDMN stack.",
+    )
+    args = parser.parse_args()
+
     print("Remove Storage")
     storage_dir = AGENT_DIR / "storage"
     ca_storage = AGENT_DIR / "CA_related" / "storage" / "fabric-ca-servers"
@@ -148,9 +180,12 @@ def main():
                 path.unlink()
             except FileNotFoundError:
                 continue
+        remove_contents(runtime_dir / "tasks")
 
     print("Remove Docker Container")
-    pattern = re.compile(r"(com$|edu\.cn$|tech\.cn$|org\.com$|geth|ethereum)")
+    pattern = re.compile(
+        r"(com$|edu\.cn$|tech\.cn$|org\.com$|geth|ethereum|chainlink|cdmn|oracle|mybootnode|bootnode)"
+    )
     for name in list_docker_containers():
         if pattern.search(name):
             print(f"Stopping and removing container: {name}")
@@ -167,6 +202,11 @@ def main():
 
     print("Remove Redis")
     stop_remove_container("cello-redis")
+
+    if not args.keep_volumes:
+        remove_oracle_related_volumes()
+    else:
+        print("Skip Docker volume cleanup (--keep-volumes)")
 
     print("Finished cleaning")
 

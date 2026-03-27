@@ -881,6 +881,9 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 {% for end_event in create_instance.end_events %}
 	cc.CreateActionEvent(ctx, &instance, "{{ end_event }}", DISABLED)
 {% endfor %}
+{% for oracle_task in create_instance.oracle_tasks %}
+	cc.CreateActionEvent(ctx, &instance, "{{ oracle_task }}", DISABLED)
+{% endfor %}
 {% for message in create_instance.messages %}
 	cc.CreateMessage(ctx, &instance, "{{ message.name }}", "{{ message.sender }}", "{{ message.receiver }}", "", DISABLED, `{{ message.properties }}`)
 {% endfor %}

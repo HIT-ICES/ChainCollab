@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Input, Table, TableProps, Modal } from "antd";
+import { Button, Input, Table, TableProps, Modal, message } from "antd";
 import { useAppSelector } from "@/redux/hooks.ts";
 import { useNavigate } from "react-router-dom";
 import ParticipantDmnBindingModal from "./BpmnInstanceDetail/bindingDmnParticipant/bingingModal-ParticiapantDmn.tsx";
@@ -30,7 +30,6 @@ const ExpandedRowRender = ({ record }) => {
 
   const onClickExecute = (record: expendDataType) => {
     navigate(`/bpmn/execution/${record.id}`);
-    // console.log("click execute", record);
   }
 
   const [data, syncData] = useBPMNInstanceListData(record.id);
@@ -92,9 +91,11 @@ const ExpandedRowRender = ({ record }) => {
 }
 
 import { useBPMNListData } from './hooks.ts';
+import { importInitialBPMNs, updateBPMN } from "@/api/externalResource.ts";
 
 const Translation: React.FC = () => {
   const [bpmnData, syncBpmnData] = useBPMNListData();
+  const currentConsortiumId = useAppSelector((state) => state.consortium.currentConsortiumId);
 
   const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
   const currenEnvName = useAppSelector((state) => state.env.currentEnvName);
@@ -103,6 +104,73 @@ const Translation: React.FC = () => {
 
 
   const [currentBpmnId, setCurrentBpmnId] = useState("");
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<DataType | null>(null);
+  const [editingName, setEditingName] = useState("");
+  const [editingContent, setEditingContent] = useState("");
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [isImportingSeed, setIsImportingSeed] = useState(false);
+
+  const openEditModal = (record: DataType) => {
+    setEditingRecord(record);
+    setEditingName(record.name || "");
+    setEditingContent(record.bpmnContent || "");
+    setIsEditOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingRecord) return;
+    if (!editingName.trim()) {
+      message.error("BPMN name is required");
+      return;
+    }
+    if (!editingContent.trim()) {
+      message.error("BPMN content is required");
+      return;
+    }
+    setIsSavingEdit(true);
+    try {
+      const res = await updateBPMN(
+        editingRecord.id,
+        {
+          name: editingName.trim(),
+          bpmnContent: editingContent,
+        },
+        currentConsortiumId || "1",
+      );
+      if (!res) {
+        message.error("Failed to update BPMN");
+        return;
+      }
+      message.success("BPMN updated");
+      setIsEditOpen(false);
+      syncBpmnData();
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
+  const handleImportInitial = async () => {
+    if (!currentConsortiumId) {
+      message.warning("Please select a consortium first");
+      return;
+    }
+    setIsImportingSeed(true);
+    try {
+      const res = await importInitialBPMNs(currentConsortiumId);
+      if (!res?.data) {
+        message.error("Failed to import initial BPMN files");
+        return;
+      }
+      const info = res.data;
+      message.success(
+        `Initial BPMN loaded: imported=${info.imported}, skipped=${info.skipped}, failed=${info.failed}`,
+      );
+      syncBpmnData();
+    } finally {
+      setIsImportingSeed(false);
+    }
+  };
 
 
   const columns: TableProps<DataType>["columns"] = [
@@ -141,7 +209,6 @@ const Translation: React.FC = () => {
             <Button
               type="primary"
               onClick={() => {
-                console.log("click bpmn detail", record);
                 navigate(`/bpmn/translation/${record.id}`);
               }}
             >
@@ -177,6 +244,15 @@ const Translation: React.FC = () => {
             >
               Export BPMN
             </Button>
+            <Button
+              type="default"
+              style={{ marginLeft: 10 }}
+              onClick={() => {
+                openEditModal(record);
+              }}
+            >
+              Edit BPMN
+            </Button>
           </div>
         );
       },
@@ -187,6 +263,15 @@ const Translation: React.FC = () => {
 
   return (
     <div>
+      <div style={{ marginBottom: 12 }}>
+        <Button
+          type="primary"
+          loading={isImportingSeed}
+          onClick={handleImportInitial}
+        >
+          Load Initial BPMN From Folder
+        </Button>
+      </div>
       <Table
         columns={columns}
         dataSource={bpmnData.map((item) => { return { ...item, key: item.id } })}
@@ -206,6 +291,33 @@ const Translation: React.FC = () => {
         }}
       />
       <ParticipantDmnBindingModal open={isBindingOpen} setOpen={setIsBindingOpen} bpmnId={currentBpmnId} />
+      <Modal
+        title={editingRecord ? `Edit BPMN: ${editingRecord.name}` : "Edit BPMN"}
+        open={isEditOpen}
+        onCancel={() => setIsEditOpen(false)}
+        onOk={handleSaveEdit}
+        confirmLoading={isSavingEdit}
+        width={980}
+        okText="Save"
+      >
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ marginBottom: 6 }}>Name</div>
+          <Input
+            value={editingName}
+            onChange={(e) => setEditingName(e.target.value)}
+            placeholder="BPMN Name"
+          />
+        </div>
+        <div>
+          <div style={{ marginBottom: 6 }}>BPMN XML Content</div>
+          <Input.TextArea
+            value={editingContent}
+            onChange={(e) => setEditingContent(e.target.value)}
+            rows={22}
+            style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}
+          />
+        </div>
+      </Modal>
     </div>
   );
 };

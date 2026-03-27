@@ -39,7 +39,7 @@ export default class TestPaletteProvider{
       const taskShape = elementFactory.create(
         'shape',
         {
-          type: 'bpmn:DataObject',
+          type: 'bpmn:ScriptTask',
         }
       )
       taskShape.businessObject.name = '计算任务元素'

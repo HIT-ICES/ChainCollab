@@ -25,6 +25,8 @@ class NodeType(Enum):
     PARALLEL_GATEWAY = "parallelGateway"
     EVENT_BASED_GATEWAY = "eventBasedGateway"
     BUSINESS_RULE_TASK = "businessRuleTask"
+    RECEIVE_TASK = "receiveTask"
+    SCRIPT_TASK = "scriptTask"
 
 
 class EdgeType(Enum):
@@ -310,6 +312,40 @@ class BusinessRuleTask(Element):
         self._documentation = documentation
         self._incoming: dict = initObjectProperties(incoming)
         self._outgoing: dict = initObjectProperties(outgoing)
+
+
+class OracleTask(Element):
+    _properties: List[str] = [
+        "id",
+        "name",
+        "type",
+        "incoming",
+        "outgoing",
+        "documentation",
+    ]
+    _object_properties: List[str] = ["incoming", "outgoing"]
+
+    def __init__(
+        self,
+        graph,
+        id: str,
+        name: str = "",
+        incoming: str = "",
+        outgoing: str = "",
+        documentation: str = "",
+    ):
+        super().__init__(graph, id, name)
+        self._documentation = documentation
+        self._incoming: dict = initObjectProperties(incoming)
+        self._outgoing: dict = initObjectProperties(outgoing)
+
+
+class ReceiveTask(OracleTask):
+    _type: NodeType = NodeType.RECEIVE_TASK
+
+
+class ScriptTask(OracleTask):
+    _type: NodeType = NodeType.SCRIPT_TASK
 
 
 # Edge Types

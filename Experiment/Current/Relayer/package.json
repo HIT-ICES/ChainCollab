@@ -1,0 +1,29 @@
+{
+  "name": "relayer-experiment-lab",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "chain:up": "bash experiment/scripts/devnet-up.sh",
+    "chain:down": "bash experiment/scripts/devnet-down.sh",
+    "deploy": "hardhat run experiment/scripts/deploy-multichain.js",
+    "deploy:split": "hardhat run experiment/scripts/deploy-split-generated.js",
+    "relayer:start": "node src/relayer-node/worker.js",
+    "relayer:split:start": "node src/relayer-node/split-worker.js",
+    "prepare:bpmn:split": "node experiment/scripts/prepare-bpmn-split-cases.js",
+    "experiment:correctness": "node experiment/scripts/experiment-correctness.js",
+    "experiment:correctness:scaled": "node experiment/scripts/experiment-correctness-scaled.js",
+    "experiment:correctness:split-latency": "node experiment/scripts/experiment-correctness-split-latency.js",
+    "experiment:latency:full-vs-split": "node experiment/scripts/experiment-latency-full-vs-split.js",
+    "experiment:fault-recovery": "node experiment/scripts/experiment-fault-recovery.js",
+    "experiment:correctness:full": "bash experiment/scripts/run-correctness-full.sh",
+    "experiment:1-3:full": "bash experiment/scripts/run-experiment-1-3-full.sh",
+    "experiment:split:main": "bash experiment/scripts/run-experiment-split-main.sh",
+    "experiment:report": "node experiment/scripts/export-unified-report.js",
+    "experiment:relayer:full": "bash experiment/scripts/run-experiment-relayer-full.sh"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^3.0.8",
+    "hardhat": "^2.22.10"
+  }
+}

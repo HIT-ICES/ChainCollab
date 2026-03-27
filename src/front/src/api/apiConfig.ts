@@ -1,8 +1,16 @@
 import axios from "axios";
+import { localStorageGetItem } from "@/utils/localStorage";
 
-const backendUrl = import.meta.env.MODE === "local_mode" ? "http://127.0.0.1:8000" : "http://192.168.1.177:8000";
-const translatorUrl = import.meta.env.MODE === "local_mode" ? "http://127.0.0.1:9999" : "http://192.168.1.177:9999";
-export const current_ip = import.meta.env.MODE === "local_mode" ? "http://127.0.0.1" : "http://192.168.1.177"
+const defaultBackendUrl =
+  import.meta.env.MODE === "local_mode" ? "http://127.0.0.1:8000" : "http://192.168.1.177:8000";
+const defaultTranslatorUrl =
+  import.meta.env.MODE === "local_mode" ? "http://127.0.0.1:9999" : "http://192.168.1.177:9999";
+const defaultHostBase =
+  import.meta.env.MODE === "local_mode" ? "http://127.0.0.1" : "http://192.168.1.177";
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL || defaultBackendUrl;
+const translatorUrl = import.meta.env.VITE_TRANSLATOR_URL || defaultTranslatorUrl;
+export const current_ip = import.meta.env.VITE_HOST_BASE_URL || defaultHostBase;
 export const backendBaseUrl = backendUrl;
 export const translatorBaseUrl = translatorUrl;
 export const translatorAPI = axios.create({
@@ -29,33 +37,67 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     //pre request logic
-    // exclude register and login
-    if (
-      config.url.includes("/register") ||
-      config.url.includes("login") ||
-      config.url.includes("/auth/refresh")
-    ) {
+    // exclude auth endpoints only (do not exclude arbitrary URLs containing "register")
+    const rawUrl = String(config.url || "");
+    const normalizedUrl = rawUrl.startsWith("http")
+      ? new URL(rawUrl).pathname
+      : rawUrl;
+    const isAuthEndpoint =
+      /^\/register(?:\/|$)/.test(normalizedUrl) ||
+      /^\/login(?:\/|$)/.test(normalizedUrl) ||
+      /^\/login\/refresh(?:\/|$)/.test(normalizedUrl) ||
+      /^\/auth\/refresh(?:\/|$)/.test(normalizedUrl) ||
+      /^\/token-verify(?:\/|$)/.test(normalizedUrl);
+
+    if (isAuthEndpoint) {
       return config;
     }
 
-    const token = localStorage.getItem("token");
-    if (token) {
-      const cleanToken = token.replace(/^"(.*)"$/, '\$1');
-      config.headers["Authorization"] = `JWT ${cleanToken}`;
+    const token = localStorageGetItem("token");
+    if (!token) {
+      return Promise.reject(new axios.Cancel("Missing auth token"));
     }
+    const cleanToken = String(token).trim();
+    if (!cleanToken) {
+      return Promise.reject(new axios.Cancel("Missing auth token"));
+    }
+    config.headers["Authorization"] = `JWT ${cleanToken}`;
+    (config as any).__tokenSnapshot = cleanToken;
     return config;
   },
   (error) => {
-    if (error?.response?.status === 401) {
-      localStorage.removeItem("token");
-    }
     return Promise.reject(error);
   }
 );
 
-api.interceptors.response.use((response) => {
-  // pre response logic
-  return response;
-});
+api.interceptors.response.use(
+  (response) => {
+    // pre response logic
+    return response;
+  },
+  (error) => {
+    if (error?.response?.status === 401) {
+      const reqConfig: any = error?.config || {};
+      const headerTokenRaw =
+        reqConfig?.headers?.Authorization || reqConfig?.headers?.authorization || "";
+      const headerToken = String(headerTokenRaw)
+        .replace(/^JWT\s+/i, "")
+        .replace(/^c\s+/i, "")
+        .trim();
+      const tokenSnapshot = String(reqConfig?.__tokenSnapshot || "").trim();
+
+      const currentToken = String(localStorageGetItem("token") || "").trim();
+
+      const usedToken = tokenSnapshot || headerToken;
+
+      // Only clear token when this 401 comes from the same token currently in storage.
+      // This prevents stale in-flight 401 responses from wiping a freshly logged-in token.
+      if (usedToken && currentToken && usedToken === currentToken) {
+        localStorage.removeItem("token");
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default api;

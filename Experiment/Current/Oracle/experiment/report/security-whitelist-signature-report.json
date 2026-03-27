@@ -1,0 +1,113 @@
+{
+  "generatedAt": "2026-03-03T16:58:06.183Z",
+  "config": {
+    "roundsCompute": 12,
+    "roundsData": 12,
+    "registeredOracles": 5,
+    "allowedPerTask": 3,
+    "thresholdOrMinResponses": 3
+  },
+  "compute": {
+    "attackVectors": [
+      {
+        "vector": "replay_same_sender",
+        "attempts": 12,
+        "blocked": 12,
+        "blockRate": 1,
+        "sampleReasons": [
+          "VM Exception while processing transaction: reverted with reason string 'oracle already submitted'",
+          "VM Exception while processing transaction: reverted with reason string 'oracle already submitted'",
+          "VM Exception while processing transaction: reverted with reason string 'oracle already submitted'",
+          "VM Exception while processing transaction: reverted with reason string 'oracle already submitted'",
+          "VM Exception while processing transaction: reverted with reason string 'oracle already submitted'"
+        ]
+      },
+      {
+        "vector": "unauthorized_submission",
+        "attempts": 12,
+        "blocked": 12,
+        "blockRate": 1,
+        "sampleReasons": [
+          "VM Exception while processing transaction: reverted with reason string 'oracle not allowed'",
+          "VM Exception while processing transaction: reverted with reason string 'oracle not allowed'",
+          "VM Exception while processing transaction: reverted with reason string 'oracle not allowed'",
+          "VM Exception while processing transaction: reverted with reason string 'oracle not allowed'",
+          "VM Exception while processing transaction: reverted with reason string 'oracle not allowed'"
+        ]
+      },
+      {
+        "vector": "invalid_signature",
+        "attempts": 12,
+        "blocked": 12,
+        "blockRate": 1,
+        "sampleReasons": [
+          "VM Exception while processing transaction: reverted with reason string 'invalid signature'",
+          "VM Exception while processing transaction: reverted with reason string 'invalid signature'",
+          "VM Exception while processing transaction: reverted with reason string 'invalid signature'",
+          "VM Exception while processing transaction: reverted with reason string 'invalid signature'",
+          "VM Exception while processing transaction: reverted with reason string 'invalid signature'"
+        ]
+      }
+    ],
+    "attempts": 36,
+    "blocked": 36,
+    "blockRate": 1,
+    "finalizeSuccessRate": 1,
+    "integrityRate": 1,
+    "avgLegitGas": 465715.0833333333
+  },
+  "data": {
+    "attackVectors": [
+      {
+        "vector": "replay_same_sender",
+        "attempts": 12,
+        "blocked": 12,
+        "blockRate": 1,
+        "sampleReasons": [
+          "VM Exception while processing transaction: reverted with reason string 'oracle already submitted'",
+          "VM Exception while processing transaction: reverted with reason string 'oracle already submitted'",
+          "VM Exception while processing transaction: reverted with reason string 'oracle already submitted'",
+          "VM Exception while processing transaction: reverted with reason string 'oracle already submitted'",
+          "VM Exception while processing transaction: reverted with reason string 'oracle already submitted'"
+        ]
+      },
+      {
+        "vector": "unauthorized_submission",
+        "attempts": 12,
+        "blocked": 12,
+        "blockRate": 1,
+        "sampleReasons": [
+          "VM Exception while processing transaction: reverted with reason string 'oracle not allowed'",
+          "VM Exception while processing transaction: reverted with reason string 'oracle not allowed'",
+          "VM Exception while processing transaction: reverted with reason string 'oracle not allowed'",
+          "VM Exception while processing transaction: reverted with reason string 'oracle not allowed'",
+          "VM Exception while processing transaction: reverted with reason string 'oracle not allowed'"
+        ]
+      },
+      {
+        "vector": "invalid_signature",
+        "attempts": 12,
+        "blocked": 12,
+        "blockRate": 1,
+        "sampleReasons": [
+          "VM Exception while processing transaction: reverted with reason string 'invalid signature'",
+          "VM Exception while processing transaction: reverted with reason string 'invalid signature'",
+          "VM Exception while processing transaction: reverted with reason string 'invalid signature'",
+          "VM Exception while processing transaction: reverted with reason string 'invalid signature'",
+          "VM Exception while processing transaction: reverted with reason string 'invalid signature'"
+        ]
+      }
+    ],
+    "attempts": 36,
+    "blocked": 36,
+    "blockRate": 1,
+    "finalizeSuccessRate": 1,
+    "integrityRate": 1,
+    "avgLegitGas": 729142.0833333334
+  },
+  "overall": {
+    "attempts": 72,
+    "blocked": 72,
+    "blockRate": 1
+  }
+}

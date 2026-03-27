@@ -1,0 +1,38 @@
+{
+  "name": "relayer_split_acceptance_cn3_v1",
+  "description": "Focused dataset for thesis conclusion: keep positive split gas overhead with acceptable latency growth.",
+  "chains": {
+    "source": {
+      "name": "chainA",
+      "type": "local-anvil-evm",
+      "rpcUrl": "http://127.0.0.1:8545",
+      "chainId": 31337
+    },
+    "target": {
+      "name": "chainB",
+      "type": "local-anvil-evm",
+      "rpcUrl": "http://127.0.0.1:9545",
+      "chainId": 31338
+    }
+  },
+  "bpmnCases": [
+    {
+      "path": "/home/logres/system/Experiment/BPMNwithDMNexample/customer_new.bpmn",
+      "splitPointIds": ["Gateway_04h9e6e"]
+    },
+    {
+      "path": "/home/logres/system/Experiment/CaseTest/Manufactory.bpmn",
+      "splitPointIds": ["Gateway_0fkskz5"]
+    },
+    {
+      "path": "/home/logres/system/Experiment/CaseTest/ManagementSystem.bpmn",
+      "splitPointIds": ["Gateway_067p6u8"]
+    }
+  ],
+  "taskPolicy": {
+    "fixedTasksPerCase": 10,
+    "budgetMultiplier": 3,
+    "minTasks": 10,
+    "maxTasks": 10
+  }
+}

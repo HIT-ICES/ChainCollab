@@ -1,0 +1,20 @@
+{
+  "name": "crosschain-relay-lab",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build-solc.js",
+    "anvil:up": "bash scripts/start-anvil.sh",
+    "anvil:down": "bash scripts/stop-anvil.sh",
+    "deploy": "npm run build && node scripts/deploy.js",
+    "relay": "node relay-server/index.js",
+    "experiment": "node experiments/run-experiment.js",
+    "experiment:iiot": "node experiments/run-iiot-experiment.js",
+    "up": "bash scripts/up.sh",
+    "down": "bash scripts/down.sh"
+  },
+  "dependencies": {
+    "ethers": "^6.13.2",
+    "solc": "^0.8.30"
+  }
+}

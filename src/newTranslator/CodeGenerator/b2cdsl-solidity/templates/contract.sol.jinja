@@ -2,9 +2,18 @@
 pragma solidity ^0.8.19;
 
 interface IOracle {
-    function getDataItem(
+    function getExternalData(
         uint256 instanceId,
-        string calldata activityId
+        string calldata activityId,
+        string calldata dataSource,
+        string calldata outputKey
+    ) external view returns (string memory value);
+
+    function runComputeTask(
+        uint256 instanceId,
+        string calldata activityId,
+        string calldata computeScript,
+        string calldata outputKey
     ) external view returns (string memory value);
 }
 
@@ -49,8 +58,13 @@ contract WorkflowContract {
     }
 
     enum EventKey {
-    {% if events %}
-        {{ events | map(attribute='enum_name') | join(',\n        ') }}
+    {% if events or oracle_tasks %}
+        {%- for item in events %}
+        {{ item.enum_name }}{% if not loop.last or oracle_tasks %},{% endif %}
+        {%- endfor %}
+        {%- for item in oracle_tasks %}
+        {{ item.enum_name }}{% if not loop.last %},{% endif %}
+        {%- endfor %}
     {% else %}
         PlaceholderEvent
     {% endif %}
@@ -276,6 +290,38 @@ contract WorkflowContract {
         });
     }
 
+    function _stringToInt(string memory value) internal pure returns (int256) {
+        bytes memory data = bytes(value);
+        if (data.length == 0) {
+            return 0;
+        }
+
+        bool negative = false;
+        uint256 index = 0;
+        if (data[0] == bytes1("-")) {
+            negative = true;
+            index = 1;
+        }
+
+        int256 result = 0;
+        for (; index < data.length; index++) {
+            uint8 c = uint8(data[index]);
+            require(c >= 48 && c <= 57, "invalid int string");
+            result = (result * 10) + int256(uint256(c - 48));
+        }
+
+        return negative ? -result : result;
+    }
+
+    function _stringToBool(string memory value) internal pure returns (bool) {
+        bytes32 hashValue = keccak256(bytes(value));
+        return (
+            hashValue == keccak256(bytes("true")) ||
+            hashValue == keccak256(bytes("TRUE")) ||
+            hashValue == keccak256(bytes("1"))
+        );
+    }
+
     // ------------------------------------------------------------------
     // Instance creation
     // ------------------------------------------------------------------
@@ -326,6 +372,13 @@ contract WorkflowContract {
             inst,
             EventKey.{{ event.enum_name }},
             ElementState.{{ event.initial_state }}
+        );
+        {% endfor %}
+        {% for task in oracle_tasks %}
+        _createActionEvent(
+            inst,
+            EventKey.{{ task.enum_name }},
+            ElementState.{{ task.initial_state }}
         );
         {% endfor %}
 

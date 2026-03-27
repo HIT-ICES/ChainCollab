@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { css } from "@emotion/css";
+import { useLocation } from "react-router-dom";
 import {
 	Button,
 	Input,
@@ -7,21 +8,22 @@ import {
 	Upload,
 	Tag,
 	Typography,
-	Table,
 	Select,
+	Space,
+	Switch,
+	Alert,
+	Slider,
+	Progress,
+	message,
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
-import { useLocation } from "react-router-dom";
 import {
 	useBPMNIntanceDetailData,
 	useBPMNDetailData,
-	useFireflyIdentity,
 } from "./hook";
 import {
 	getFireflyIdentity,
-	getFireflyWithMSP,
 } from "@/api/externalResource.ts";
-import { useSelector } from "react-redux";
 import TestComponentV2 from "./testComponent.jsx";
 
 import {
@@ -30,8 +32,6 @@ import {
 	getOperationWithId,
 	getEventWithTX,
 } from "@/api/fireflyAPI.ts";
-
-const TestMode = false;
 
 // 定义Flex容器样式
 const flexContainerStyle = css`
@@ -55,17 +55,108 @@ import {
 	invokeMessageAction,
 } from "@/api/executionAPI.ts";
 
+type ActionPhase = "start" | "success" | "error";
+type ActionKind = "event" | "gateway" | "message" | "businessRule";
+
+type ActionRecordEvent = {
+	traceId: string;
+	phase: ActionPhase;
+	type: ActionKind;
+	action: string;
+	elementId: string;
+	detail?: string;
+	timestamp?: string;
+	txId?: string;
+	fireflyId?: string;
+	error?: string;
+	payload?: any;
+};
+
+type ActionRecord = {
+	traceId: string;
+	type: ActionKind;
+	action: string;
+	elementId: string;
+	status: "running" | "success" | "failed";
+	startedAt: string;
+	endedAt: string | null;
+	detail: string;
+	txId?: string;
+	fireflyId?: string;
+	error?: string;
+	payload?: any;
+};
+
+type ExecutionMode = "real" | "mock";
+
+const getElementId = (element: any): string =>
+	element?.EventID ||
+	element?.GatewayID ||
+	element?.MessageID ||
+	element?.BusinessRuleID ||
+	"";
+
+const parseMockElementsFromSvg = (svgContent?: string) => {
+	if (!svgContent) return [];
+	const seen = new Set<string>();
+	const matches = Array.from(svgContent.matchAll(/data-element-id="([^"]+)"/g));
+	const ids = matches
+		.map((match) => match?.[1] || "")
+		.filter((id) => {
+			if (!id || id.endsWith("_label")) return false;
+			if (
+				id.startsWith("Message_") ||
+				id.startsWith("Gateway_") ||
+				id.startsWith("Event_") ||
+				id.startsWith("StartEvent_") ||
+				id.startsWith("EndEvent_") ||
+				id.startsWith("Intermediate") ||
+				id.startsWith("Activity_")
+			) {
+				if (seen.has(id)) return false;
+				seen.add(id);
+				return true;
+			}
+			return false;
+		});
+	return ids.map((id, index) => {
+		const type = id.startsWith("Message_")
+			? "message"
+			: id.startsWith("Gateway_")
+			? "gateway"
+			: id.startsWith("Activity_")
+			? "businessRule"
+			: "event";
+		const field =
+			type === "message"
+				? "MessageID"
+				: type === "gateway"
+				? "GatewayID"
+				: type === "businessRule"
+				? "BusinessRuleID"
+				: "EventID";
+		return {
+			type,
+			state: index === 0 ? 1 : 0,
+			[field]: id,
+		};
+	});
+};
+
+const createTraceId = (prefix: string) =>
+	`${prefix}-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
+
 const InputComponentForMessage = ({
 	currentElement,
 	contractName,
 	coreURL,
 	bpmnName,
-	Identity,
 	contractMethodDes,
 	bpmn,
 	bpmnInstance,
 	instanceId,
 	the_identity,
+	onActionRecord,
 }) => {
 	const format = JSON.parse(currentElement.Format);
 
@@ -82,14 +173,48 @@ const InputComponentForMessage = ({
 		currentElement.MessageID + (isSender ? "_Send" : "_Complete");
 
 	const confirmMessage = async () => {
-		invokeMessageAction(
-			coreURL,
-			contractName,
-			methodName,
-			{},
-			instanceId,
-			the_identity.identity.data[0].value,
-		);
+		const traceId = createTraceId("message-confirm");
+		onActionRecord?.({
+			traceId,
+			phase: "start",
+			type: "message",
+			action: methodName,
+			elementId: currentElement.MessageID,
+			detail: "Confirm message",
+		});
+		try {
+			const res = await invokeMessageAction(
+				coreURL,
+				contractName,
+				methodName,
+				{},
+				instanceId,
+				the_identity.identity.data[0].value,
+			);
+			onActionRecord?.({
+				traceId,
+				phase: "success",
+				type: "message",
+				action: methodName,
+				elementId: currentElement.MessageID,
+				detail: "Message confirmed",
+				fireflyId: currentElement.FireflyTranID,
+				txId: res?.tx,
+				payload: res,
+			});
+			message.success("Message confirmed");
+		} catch (error: any) {
+			onActionRecord?.({
+				traceId,
+				phase: "error",
+				type: "message",
+				action: methodName,
+				elementId: currentElement.MessageID,
+				detail: "Confirm failed",
+				error: String(error?.message || error || "Unknown error"),
+			});
+			message.error(error?.message || "Message confirm failed");
+		}
 	};
 	const [messageToConfirm, setMessageToConfirm] = useState([]);
 
@@ -150,21 +275,25 @@ const InputComponentForMessage = ({
 		}
 		const fetchData = async () => {
 			//http://127.0.0.1:5000/api/v1/namespaces/default/messages/{currentElement.fireflyTranID}/data
-
-			const res = await axios.get(
-				`${coreURL}/api/v1/namespaces/default/messages/${currentElement.FireflyTranID}/data`,
-			);
-			const messageToShow = res.data
-				.map((item) => {
-					return Object.keys(item.value).map((key) => ({
-						name: key,
-						value: item.value[key],
-					}));
-				})
-				.reduce((acc, cur) => {
-					return [...acc, ...cur];
-				});
-			setMessageToConfirm(messageToShow);
+			try {
+				const res = await axios.get(
+					`${coreURL}/api/v1/namespaces/default/messages/${currentElement.FireflyTranID}/data`,
+				);
+				const messageToShow = res.data
+					.map((item) => {
+						return Object.keys(item.value).map((key) => ({
+							name: key,
+							value: item.value[key],
+						}));
+					})
+					.reduce((acc, cur) => {
+						return [...acc, ...cur];
+					}, []);
+				setMessageToConfirm(messageToShow);
+			} catch (error: any) {
+				message.error(error?.message || "Failed to load message data");
+				setMessageToConfirm([]);
+			}
 		};
 		fetchData();
 	}, [currentElement]);
@@ -179,13 +308,13 @@ const InputComponentForMessage = ({
 			>
 				{/* Status */}
 				<Typography.Text>
-					{messageToConfirm.map((item) => {
-						return (
-							<Tag color="green">
-								{item.name}: {item.value.toString()}
-							</Tag>
-						);
-					})}
+						{messageToConfirm.map((item) => {
+							return (
+								<Tag key={`${item.name}-${item.value}`} color="green">
+									{item.name}: {item.value.toString()}
+								</Tag>
+							);
+						})}
 				</Typography.Text>
 				<Button
 					style={{ backgroundColor: "mediumspringgreen", marginTop: "10px" }}
@@ -200,115 +329,140 @@ const InputComponentForMessage = ({
 	}
 
 	const onHandleMessage = async (values, output_obj = {}) => {
-		// 0. get Identity to send message
-
-		// const msp = currentElement.ReceiveMspID
-		// const mspData = await getFireflyWithMSP(msp)
-
-		const Identity = "did:firefly:" + the_identity?.name;
-
-		// 1. check type
-		// 2. upload file if exists
-		let file_ids = [];
-		for (let key in format.files) {
-			const file = values[key];
-			if (file) {
-				const res = await TimeDecorator(
-					fireflyFileTransfer,
-					"File",
-					"default/data",
-				)(coreURL, file.file);
-				file_ids.push(res.id);
-			}
-		}
-		if (file_ids) {
-			await new Promise((resolve) => setTimeout(resolve, 2000));
-		}
-		// // 3. send firefly message if exists
-
-		const datatype = {
-			name: bpmnName.split(".")[0] + "_" + currentElement.MessageID,
-			version: "1",
-		};
-		let value = {};
-		for (let key in format.properties) {
-			value[key] = transValue(key, values[key]);
-		}
-		const dataItem1 = {
-			datatype: datatype,
-			value: value,
-			validator: "json",
-		};
-		let dataItem2 = file_ids.map((id) => {
-			return {
-				id: id,
-			};
+		const traceId = createTraceId("message-send");
+		onActionRecord?.({
+			traceId,
+			phase: "start",
+			type: "message",
+			action: methodName,
+			elementId: currentElement.MessageID,
+			detail: "Send message and invoke contract",
 		});
-		const data = {
-			data: [dataItem1, ...dataItem2],
-			group: {
-				members: [
-					{
-						identity: Identity,
-					},
-				],
-			},
-			header: {
-				tag: "private",
-				topics: [bpmnName + "_" + currentElement.MessageID],
-			},
-		};
-		const res = await TimeDecorator(
-			fireflyDataTransfer,
-			"Data",
-			"default/messages",
-			output_obj,
-		)(coreURL, data);
-		console.log("SENDDATA");
-		console.log(res);
-		output_obj["message_id"] = res.header.id;
-		output_obj["message_create_time"] = res.header.created;
-		const fireflyMessageID = res.header.id;
-		// // 4. use firefly message id to send contract message
-		// const fireflyMessageID = "534a8bd7-4d3f-42a9-86b4-8248a2c3164e"
-		const methodParams = contractMethodDes.methods
-			.find((item) => {
-				return item.name === methodName;
-			})
-			.params.filter((item) => {
-				return item.name !== "fireflyTranID";
-			});
-		const otherKeyValuePair = methodParams
-			.map((item) => {
+		try {
+			const Identity = "did:firefly:" + the_identity?.name;
+
+			let file_ids = [];
+			for (let key in format.files) {
+				const file = values[key];
+				if (file) {
+					const res = await TimeDecorator(
+						fireflyFileTransfer,
+						"File",
+						"default/data",
+					)(coreURL, file.file);
+					file_ids.push(res.id);
+				}
+			}
+			if (file_ids.length > 0) {
+				await new Promise((resolve) => setTimeout(resolve, 2000));
+			}
+
+			const datatype = {
+				name: bpmnName.split(".")[0] + "_" + currentElement.MessageID,
+				version: "1",
+			};
+			let value = {};
+			for (let key in format.properties) {
+				value[key] = transValue(key, values[key]);
+			}
+			const dataItem1 = {
+				datatype: datatype,
+				value: value,
+				validator: "json",
+			};
+			let dataItem2 = file_ids.map((id) => {
 				return {
-					[item.name]: transValue(item.name, values[item.name]),
+					id: id,
 				};
-			})
-			.reduce((acc, cur) => {
-				return { ...acc, ...cur };
-			}, {});
-		const res2 = await TimeDecorator(
-			invokeMessageAction,
-			"Message",
-			"invoke/Message",
-			output_obj,
-		)(
-			coreURL,
-			contractName,
-			methodName,
-			{
-				input: {
-					...otherKeyValuePair,
-					FireFlyTran: fireflyMessageID,
+			});
+			const data = {
+				data: [dataItem1, ...dataItem2],
+				group: {
+					members: [
+						{
+							identity: Identity,
+						},
+					],
 				},
-			},
-			instanceId,
-			the_identity.identity.data[0].value,
-		);
-		console.log("SENDDATA");
-		console.log(res2);
-		output_obj["invoke_id"] = res2.id;
-		output_obj["invoke_start_time"] = res2.created;
+				header: {
+					tag: "private",
+					topics: [bpmnName + "_" + currentElement.MessageID],
+				},
+			};
+			const res = await TimeDecorator(
+				fireflyDataTransfer,
+				"Data",
+				"default/messages",
+				output_obj,
+			)(coreURL, data);
+			output_obj["message_id"] = res.header.id;
+			output_obj["message_create_time"] = res.header.created;
+			const fireflyMessageID = res.header.id;
+
+			const methodParams = (contractMethodDes.methods || [])
+				.find((item) => {
+					return item.name === methodName;
+				})
+				?.params?.filter((item) => {
+					return item.name !== "fireflyTranID";
+				}) || [];
+			const otherKeyValuePair = methodParams
+				.map((item) => {
+					return {
+						[item.name]: transValue(item.name, values[item.name]),
+					};
+				})
+				.reduce((acc, cur) => {
+					return { ...acc, ...cur };
+				}, {});
+			const res2 = await TimeDecorator(
+				invokeMessageAction,
+				"Message",
+				"invoke/Message",
+				output_obj,
+			)(
+				coreURL,
+				contractName,
+				methodName,
+				{
+					input: {
+						...otherKeyValuePair,
+						FireFlyTran: fireflyMessageID,
+					},
+				},
+				instanceId,
+				the_identity.identity.data[0].value,
+			);
+			output_obj["invoke_id"] = res2.id;
+			output_obj["invoke_start_time"] = res2.created;
+			onActionRecord?.({
+				traceId,
+				phase: "success",
+				type: "message",
+				action: methodName,
+				elementId: currentElement.MessageID,
+				detail: "Message sent and contract invoked",
+				fireflyId: fireflyMessageID,
+				txId: res2?.tx,
+				payload: {
+					message: res,
+					invoke: res2,
+				},
+			});
+			message.success("Message sent and contract invoked");
+		} catch (error: any) {
+			onActionRecord?.({
+				traceId,
+				phase: "error",
+				type: "message",
+				action: methodName,
+				elementId: currentElement.MessageID,
+				detail: "Message invoke failed",
+				error: String(error?.message || error || "Unknown error"),
+			});
+			message.error(error?.message || "Message action failed");
+			throw error;
+		}
 	};
 
 	return (
@@ -318,11 +472,15 @@ const InputComponentForMessage = ({
 				flexDirection: "column",
 			}}
 		>
-			<TestComponentV2
-				processFunc={async () => {
-					const output_obj = {};
-					await onHandleMessage(formRef.current.getFieldsValue(), output_obj);
-					const core_url = coreURL;
+				<TestComponentV2
+					processFunc={async () => {
+						const output_obj = {};
+						try {
+							await onHandleMessage(formRef.current.getFieldsValue(), output_obj);
+						} catch (error) {
+							return {};
+						}
+						const core_url = coreURL;
 					await sleep(3000);
 					const message = await getMessageWithId(
 						core_url,
@@ -383,7 +541,6 @@ const InputComponentForMessage = ({
 			>
 				<h1>LOGRES</h1>
 				{Object.keys(format.properties).map((key) => {
-					console.log("format.properties", format.properties);
 					return (
 						<Form.Item
 							label={key}
@@ -446,11 +603,12 @@ const TimeDecorator = (func, label, url_pattern, output_obj = {}) => {
 		const theRes = {};
 		const observer = new PerformanceObserver((list) => {
 			for (const entry of list.getEntries()) {
-				if (entry.name.includes(url_pattern)) {
+				const resourceEntry = entry as PerformanceResourceTiming;
+				if (resourceEntry.name.includes(url_pattern)) {
 					const navigationStart = performance.timing.navigationStart;
-					theRes["start_time"] = navigationStart + entry.fetchStart;
-					theRes["timeCost"] = entry.responseStart - entry.requestStart;
-					theRes["end_time"] = navigationStart + entry.responseEnd;
+					theRes["start_time"] = navigationStart + resourceEntry.fetchStart;
+					theRes["timeCost"] = resourceEntry.responseStart - resourceEntry.requestStart;
+					theRes["end_time"] = navigationStart + resourceEntry.responseEnd;
 				}
 			}
 		});
@@ -458,7 +616,6 @@ const TimeDecorator = (func, label, url_pattern, output_obj = {}) => {
 		const res = await func(...args);
 		await sleep(300);
 		observer.disconnect();
-		// console.log(`Execution details for ${label}:`, theRes);
 		output_obj[`${label}_start_time`] = theRes["start_time"];
 		output_obj[`${label}_end_time`] = theRes["end_time"];
 		return res;
@@ -481,44 +638,103 @@ const ControlPanel = ({
 	bpmn,
 	instanceId,
 	identity,
+	onActionRecord,
+	executionMode,
+	onMockAction,
+	mockProcessingElementId,
 }) => {
-	const location = useLocation();
-	const queryParams = new URLSearchParams(location.search);
-	const msp = queryParams.get("msp");
 	const type = currentElement?.type;
-	const Identity = queryParams.get("identity");
+	const elementId = getElementId(currentElement);
 	const isYourTurn = (() => {
-		if (type === "event") return currentElement?.EventState === 1;
-		if (type === "gateway") return currentElement?.GatewayState === 1;
+		if (type === "event" || type === "gateway" || type === "businessRule")
+			return currentElement?.state === 1;
 		if (type === "message")
 			return (
-				currentElement?.MsgState === 1 ||
-				// currentElement?.sendMspID === msp ||
-				currentElement?.MsgState === 2
+				currentElement?.state === 1 ||
+				currentElement?.state === 2
 			);
-		// currentElement?.receiveMspID === msp;
-		if (type === "businessRule") return currentElement?.State === 1;
 	})();
-	// debugger
-	const showTransactionId = (() => {
-		if (type === "message")
-			return (
-				currentElement?.msgState === 2 && currentElement?.receiveMspID === msp
-			);
-		return false;
-	})();
+	const showTransactionId = type === "message" && currentElement?.state === 2;
 
 	if (!isYourTurn) return null;
 
+	if (executionMode === "mock") {
+		const isMessageConfirm = type === "message" && currentElement?.state === 2;
+		const isProcessing = mockProcessingElementId === elementId;
+		return (
+			<div
+				style={{
+					display: "flex",
+					flexDirection: "column",
+					border: "1px solid #dbeafe",
+					borderRadius: 10,
+					padding: 12,
+					background: "#f8fafc",
+					minWidth: 220,
+					gap: 8,
+				}}
+			>
+				<Typography.Text strong>
+					{type} · {elementId}
+				</Typography.Text>
+				<Tag color={isMessageConfirm ? "orange" : "blue"}>
+					{isMessageConfirm ? "WAIT_CONFIRM" : "READY"}
+				</Tag>
+				<Button
+					type="primary"
+					loading={isProcessing}
+					onClick={() =>
+						onMockAction?.(currentElement, isMessageConfirm ? "confirm" : "execute")
+					}
+				>
+					{isMessageConfirm ? "Mock Confirm" : "Mock Execute"}
+				</Button>
+			</div>
+		);
+	}
+
 	// EVENT
 
-	const onHandleEvent = () => {
-		TimeDecorator(invokeEventAction, "Event", "invoke/Event")(
-			coreURL,
-			contractName,
-			currentElement.EventID,
-			instanceId,
-		);
+	const onHandleEvent = async () => {
+		const traceId = createTraceId("event");
+		onActionRecord?.({
+			traceId,
+			phase: "start",
+			type: "event",
+			action: "invokeEvent",
+			elementId: currentElement.EventID,
+			detail: "Invoke event",
+		});
+		try {
+			const res = await TimeDecorator(invokeEventAction, "Event", "invoke/Event")(
+				coreURL,
+				contractName,
+				currentElement.EventID,
+				instanceId,
+			);
+			onActionRecord?.({
+				traceId,
+				phase: "success",
+				type: "event",
+				action: "invokeEvent",
+				elementId: currentElement.EventID,
+				detail: "Event invoked",
+				txId: res?.tx,
+				payload: res,
+			});
+			message.success("Event invoked");
+		} catch (error: any) {
+			onActionRecord?.({
+				traceId,
+				phase: "error",
+				type: "event",
+				action: "invokeEvent",
+				elementId: currentElement.EventID,
+				detail: "Event invoke failed",
+				error: String(error?.message || error || "Unknown error"),
+			});
+			message.error(error?.message || "Event invoke failed");
+		}
 	};
 
 	if (type === "event")
@@ -540,13 +756,46 @@ const ControlPanel = ({
 			</div>
 		);
 
-	const onHandleGateway = () => {
-		TimeDecorator(invokeGatewayAction, "Gateway", "invoke/Gateway")(
-			coreURL,
-			contractName,
-			currentElement.GatewayID,
-			instanceId,
-		);
+	const onHandleGateway = async () => {
+		const traceId = createTraceId("gateway");
+		onActionRecord?.({
+			traceId,
+			phase: "start",
+			type: "gateway",
+			action: "invokeGateway",
+			elementId: currentElement.GatewayID,
+			detail: "Invoke gateway",
+		});
+		try {
+			const res = await TimeDecorator(invokeGatewayAction, "Gateway", "invoke/Gateway")(
+				coreURL,
+				contractName,
+				currentElement.GatewayID,
+				instanceId,
+			);
+			onActionRecord?.({
+				traceId,
+				phase: "success",
+				type: "gateway",
+				action: "invokeGateway",
+				elementId: currentElement.GatewayID,
+				detail: "Gateway invoked",
+				txId: res?.tx,
+				payload: res,
+			});
+			message.success("Gateway invoked");
+		} catch (error: any) {
+			onActionRecord?.({
+				traceId,
+				phase: "error",
+				type: "gateway",
+				action: "invokeGateway",
+				elementId: currentElement.GatewayID,
+				detail: "Gateway invoke failed",
+				error: String(error?.message || error || "Unknown error"),
+			});
+			message.error(error?.message || "Gateway invoke failed");
+		}
 	};
 
 	if (type === "gateway")
@@ -569,14 +818,45 @@ const ControlPanel = ({
 		);
 
 	const onHandleBusinessRule = async (output={}) => {
-		const res = await TimeDecorator(invokeBusinessRuleAction, "BusinessRule", "invoke/Activity", output)(
-			coreURL,
-			contractName,
-			currentElement.BusinessRuleID,
-			instanceId,
-		);
-
-		return res
+		const traceId = createTraceId("business-rule");
+		onActionRecord?.({
+			traceId,
+			phase: "start",
+			type: "businessRule",
+			action: "invokeBusinessRule",
+			elementId: currentElement.BusinessRuleID,
+			detail: "Invoke business rule",
+		});
+		try {
+			const res = await TimeDecorator(invokeBusinessRuleAction, "BusinessRule", "invoke/Activity", output)(
+				coreURL,
+				contractName,
+				currentElement.BusinessRuleID,
+				instanceId,
+			);
+			onActionRecord?.({
+				traceId,
+				phase: "success",
+				type: "businessRule",
+				action: "invokeBusinessRule",
+				elementId: currentElement.BusinessRuleID,
+				detail: "Business rule invoked",
+				txId: res?.tx,
+				payload: res,
+			});
+			return res;
+		} catch (error: any) {
+			onActionRecord?.({
+				traceId,
+				phase: "error",
+				type: "businessRule",
+				action: "invokeBusinessRule",
+				elementId: currentElement.BusinessRuleID,
+				detail: "Business rule invoke failed",
+				error: String(error?.message || error || "Unknown error"),
+			});
+			throw error;
+		}
 	};
 
 	if (type === "businessRule")
@@ -590,7 +870,9 @@ const ControlPanel = ({
 				<Button
 					style={{ backgroundColor: "mediumspringgreen" }}
 					onClick={() => {
-						onHandleBusinessRule();
+						onHandleBusinessRule().catch((error: any) => {
+							message.error(error?.message || "Business rule invoke failed");
+						});
 					}}
 				>
 					Next
@@ -613,9 +895,9 @@ const ControlPanel = ({
 						output["executor_ipfsStart"] = await readFromRedis("executor_ipfsStart");
 						output["executor_invokeStart"] = await readFromRedis("executor_invokeStart");
 						const executor_op = await readFromRedis("executor_op");
-						const operation = await getOperationWithId("http://127.0.0.1:5000", executor_op);
+						const operation = await getOperationWithId(coreURL, executor_op);
 						const executor_tx = operation.tx;
-						const events2 = await getEventWithTX("http://127.0.0.1:5000", executor_tx);
+						const events2 = await getEventWithTX(coreURL, executor_tx);
 						output["event_time_2"] =  events2[0].created
 						for (const key in output) {
 							output[key] = TimeStampHandler(output[key]);
@@ -623,7 +905,6 @@ const ControlPanel = ({
 						return output;
 					}}
 					calcFunc={(time_obj) => {
-						console.log(time_obj);
 						// API Invoker, BPMN SC, Event Bus, Executor, IPFS, API Invoker, DMN SC
 						const res = [
 							{
@@ -675,17 +956,17 @@ const ControlPanel = ({
 					<div>Transaction ID: {currentElement.FireflyTranID}</div>
 				) : null}
 				{currentElement.Format && currentElement.Format !== "{}" ? (
-					<InputComponentForMessage
-						currentElement={currentElement}
-						contractName={contractName}
-						coreURL={coreURL}
-						bpmnName={bpmnName}
-						Identity={Identity}
-						contractMethodDes={contractMethodDes}
-						bpmn={bpmn}
-						bpmnInstance={bpmnInstance}
+						<InputComponentForMessage
+							currentElement={currentElement}
+							contractName={contractName}
+							coreURL={coreURL}
+							bpmnName={bpmnName}
+							contractMethodDes={contractMethodDes}
+							bpmn={bpmn}
+							bpmnInstance={bpmnInstance}
 						instanceId={instanceId}
 						the_identity={identity}
+						onActionRecord={onActionRecord}
 					/>
 				) : null}
 			</div>
@@ -698,28 +979,11 @@ const IdentitySelector = ({ identity, setIdentity }) => {
 	// 1. get all membership and participant based on user identity
 	const [currentMembership, setCurrentMembership] = useState("");
 	const [availableIdentities, isLoading, refetch] = useAvailableIdentity();
-	const identities_example = [
-		{
-			memebership_id: "123",
-			membership_name: "123",
-			identities: [
-				{
-					core_url: "127.0.0.1:5001",
-					firefly_identity_id: "dfc4",
-					identity_id: "6e",
-					name: "name",
-				},
-			],
-		},
-	];
-	// console.log(availableIdentities)
-	// console.log(currentMembership)
 
 	if (isLoading || !availableIdentities) {
 		return <div>Loading</div>;
 	}
 
-	// console.log(availableIdentities.find((item) => item.membership_id === currentMembership))
 
 	return (
 		<div>
@@ -783,10 +1047,10 @@ const IdentitySelector = ({ identity, setIdentity }) => {
 
 import { useAllFireflyData } from "./hook";
 import axios from "axios";
-import { time } from "console";
 
 const ExecutionPage = (props) => {
 	const bpmnInstanceId = window.location.pathname.split("/").pop();
+	const location = useLocation();
 
 	// 1. get BPMN Content by bpmnInstanceId
 	// 2. get BPMN Detail by bpmnId
@@ -799,6 +1063,25 @@ const ExecutionPage = (props) => {
 		core_url: "",
 		identity: "",
 	});
+	const [autoRefresh, setAutoRefresh] = useState(true);
+	const [refreshIntervalMs, setRefreshIntervalMs] = useState(5000);
+	const [isRefreshing, setIsRefreshing] = useState(false);
+	const [lastManualRefreshAt, setLastManualRefreshAt] = useState<string | null>(null);
+	const [actionRecords, setActionRecords] = useState<ActionRecord[]>([]);
+	const [executionMode, setExecutionMode] = useState<ExecutionMode>(() => {
+		const mode = new URLSearchParams(window.location.search).get("mode");
+		return mode === "mock" ? "mock" : "real";
+	});
+	const [mockElements, setMockElements] = useState<any[]>([]);
+	const [mockProcessingElementId, setMockProcessingElementId] = useState<string>("");
+	const [mockAutoRunning, setMockAutoRunning] = useState(false);
+	const [mockFailureRate, setMockFailureRate] = useState(0);
+	const [mockDelayRange, setMockDelayRange] = useState<[number, number]>([300, 900]);
+	const [mockForceFailElements, setMockForceFailElements] = useState<string[]>([]);
+	const mockElementsRef = useRef<any[]>([]);
+	const [actionElementFilter, setActionElementFilter] = useState<string>("ALL");
+	const [autoScrollTimeline, setAutoScrollTimeline] = useState(true);
+	const timelineRef = useRef<HTMLDivElement | null>(null);
 	const [bpmnInstance, bpmnInstanceReady, syncBpmnInstance] =
 		useBPMNIntanceDetailData(bpmnInstanceId);
 	const [bpmnData, bpmnReady, syncBpmn] = useBPMNDetailData(bpmnInstance.bpmn);
@@ -830,90 +1113,392 @@ const ExecutionPage = (props) => {
 		allBusinessRules,
 		fireflyDataReady,
 		syncFireflyData,
+		fireflyMeta,
 	] = useAllFireflyData(
 		full_core_url,
 		contractName,
 		bpmnInstance.instance_chaincode_id,
 	);
-	const currentElements = [
+	const realElements = [
 		...allMessages,
 		...allEvents,
 		...allGateways,
 		...allBusinessRules,
+	];
+	const executionElements = executionMode === "mock" ? mockElements : realElements;
+	const stateCounter = executionElements.reduce(
+		(acc, item) => {
+			const state = Number(item?.state ?? 0);
+			if (state === 1) acc.ready += 1;
+			else if (state === 2) acc.confirm += 1;
+			else if (state === 3) acc.done += 1;
+			else acc.disabled += 1;
+			return acc;
+		},
+		{ disabled: 0, ready: 0, confirm: 0, done: 0 },
+	);
+	const currentElements = [
+		...executionElements,
 	].filter((msg) => {
 		return msg.state === 1 || msg.state === 2;
 	});
+	const mockElementOptions = executionElements.reduce((acc, item) => {
+		const id = getElementId(item);
+		if (!id) return acc;
+		acc.push({
+			label: `${item.type}:${id}`,
+			value: id,
+		});
+		return acc;
+	}, [] as Array<{ label: string; value: string }>);
+	const mockDonePercent = executionElements.length
+		? Math.round((stateCounter.done / executionElements.length) * 100)
+		: 0;
+	const actionCounter = actionRecords.reduce(
+		(acc, item) => {
+			if (item.status === "running") acc.running += 1;
+			else if (item.status === "success") acc.success += 1;
+			else acc.failed += 1;
+			return acc;
+		},
+		{ running: 0, success: 0, failed: 0 },
+	);
+	const actionElementOptions = [
+		{ label: "All elements", value: "ALL" },
+		...Array.from(new Set(actionRecords.map((item) => item.elementId).filter(Boolean))).map((item) => ({
+			label: item,
+			value: item,
+		})),
+	];
+	const filteredActionRecords =
+		actionElementFilter === "ALL"
+			? actionRecords
+			: actionRecords.filter((item) => item.elementId === actionElementFilter);
+	const latestAction = filteredActionRecords.length > 0 ? filteredActionRecords[0] : null;
+
+	const copyToClipboard = async (value: string, label: string) => {
+		if (!value) return;
+		try {
+			if (navigator?.clipboard?.writeText) {
+				await navigator.clipboard.writeText(value);
+			} else {
+				throw new Error("Clipboard API unavailable");
+			}
+			message.success(`${label} copied`);
+		} catch (error) {
+			message.error(`Failed to copy ${label}`);
+		}
+	};
+
+	const onActionRecord = (event: ActionRecordEvent) => {
+		const timestamp = event.timestamp || new Date().toISOString();
+		setActionRecords((prev) => {
+			const idx = prev.findIndex((item) => item.traceId === event.traceId);
+			const current = idx >= 0 ? prev[idx] : null;
+			const nextRecord: ActionRecord = {
+				traceId: event.traceId,
+				type: event.type,
+				action: event.action,
+				elementId: event.elementId,
+				status:
+					event.phase === "start"
+						? "running"
+						: event.phase === "success"
+						? "success"
+						: "failed",
+				startedAt: current?.startedAt || timestamp,
+				endedAt:
+					event.phase === "start"
+						? current?.endedAt || null
+						: timestamp,
+				detail: event.detail || current?.detail || "",
+				txId: event.txId || current?.txId,
+				fireflyId: event.fireflyId || current?.fireflyId,
+				error: event.phase === "error"
+					? event.error || current?.error || "Unknown error"
+					: current?.error,
+				payload: event.payload || current?.payload,
+			};
+			if (idx === -1) {
+				return [nextRecord, ...prev].slice(0, 40);
+			}
+			const next = [...prev];
+			next[idx] = nextRecord;
+			next.sort((a, b) => {
+				return new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime();
+			});
+			return next.slice(0, 40);
+		});
+	};
+
+	const resetMockElements = () => {
+		const parsed = parseMockElementsFromSvg(bpmnData?.svgContent);
+		setMockElements(parsed);
+		setMockProcessingElementId("");
+	};
+
+	const getNextMockActionable = (): {
+		element: any;
+		op: "execute" | "confirm";
+	} | null => {
+		const actionable = mockElementsRef.current.find(
+			(item) => item.state === 1 || item.state === 2,
+		);
+		if (!actionable) return null;
+		const op =
+			actionable.type === "message" && actionable.state === 2
+				? "confirm"
+				: "execute";
+		return { element: actionable, op };
+	};
+
+	const runMockAction = async (
+		element: any,
+		op: "execute" | "confirm",
+	): Promise<boolean> => {
+		const elementId = getElementId(element);
+		if (!elementId) return false;
+		const traceId = createTraceId("mock");
+		setMockProcessingElementId(elementId);
+		const [delayMin, delayMax] = mockDelayRange;
+		const normalizedMin = Math.max(0, Math.min(delayMin, delayMax));
+		const normalizedMax = Math.max(0, Math.max(delayMin, delayMax));
+		const delayMs =
+			normalizedMin === normalizedMax
+				? normalizedMin
+				: normalizedMin +
+				  Math.round(Math.random() * (normalizedMax - normalizedMin));
+		const injectedFail =
+			mockForceFailElements.includes(elementId) ||
+			Math.random() < mockFailureRate / 100;
+		onActionRecord({
+			traceId,
+			phase: "start",
+			type: element.type as ActionKind,
+			action: op === "confirm" ? "mockConfirm" : "mockExecute",
+			elementId,
+			detail: `Mock ${op} started (delay=${delayMs}ms)`,
+		});
+		try {
+			await sleep(delayMs);
+			if (injectedFail) {
+				throw new Error(
+					mockForceFailElements.includes(elementId)
+						? "Mock forced failure"
+						: `Mock random failure (${mockFailureRate}%)`,
+				);
+			}
+			setMockElements((prev) => {
+				const idx = prev.findIndex((item) => getElementId(item) === elementId);
+				if (idx < 0) return prev;
+				const next = prev.map((item) => ({ ...item }));
+				const current = next[idx];
+				if (current.type === "message" && current.state === 1 && op === "execute") {
+					current.state = 2;
+					return next;
+				}
+				current.state = 3;
+				let nextIdx = next.findIndex((item, index) => index > idx && item.state === 0);
+				if (nextIdx < 0) {
+					nextIdx = next.findIndex((item) => item.state === 0);
+				}
+				if (nextIdx >= 0) {
+					next[nextIdx].state = 1;
+				}
+				return next;
+			});
+			onActionRecord({
+				traceId,
+				phase: "success",
+				type: element.type as ActionKind,
+				action: op === "confirm" ? "mockConfirm" : "mockExecute",
+				elementId,
+				detail: `Mock ${op} completed`,
+				payload: {
+					mode: "mock",
+					op,
+					elementId,
+					delayMs,
+				},
+			});
+			return true;
+		} catch (error: any) {
+			onActionRecord({
+				traceId,
+				phase: "error",
+				type: element.type as ActionKind,
+				action: op === "confirm" ? "mockConfirm" : "mockExecute",
+				elementId,
+				detail: `Mock ${op} failed`,
+				error: String(error?.message || error || "Unknown error"),
+			});
+			return false;
+		} finally {
+			setMockProcessingElementId("");
+		}
+	};
+
+	const runMockNextStep = async () => {
+		const next = getNextMockActionable();
+		if (!next) {
+			message.info("No actionable element in mock mode");
+			return;
+		}
+		await runMockAction(next.element, next.op);
+	};
+
+	const runMockAutoDemo = async () => {
+		if (mockAutoRunning) return;
+		setMockAutoRunning(true);
+		try {
+			let guard = 0;
+			let consecutiveFailures = 0;
+			while (guard < 200) {
+				guard += 1;
+				const next = getNextMockActionable();
+				if (!next) break;
+				const ok = await runMockAction(next.element, next.op);
+				if (ok) {
+					consecutiveFailures = 0;
+				} else {
+					consecutiveFailures += 1;
+					if (consecutiveFailures >= 5) {
+						message.warning("Auto demo stopped after consecutive failures");
+						break;
+					}
+				}
+				await sleep(220);
+			}
+		} finally {
+			setMockAutoRunning(false);
+		}
+	};
+
+	useEffect(() => {
+		mockElementsRef.current = mockElements;
+		setMockForceFailElements((prev) => {
+			const allowed = new Set(mockElements.map((item) => getElementId(item)));
+			return prev.filter((id) => allowed.has(id));
+		});
+	}, [mockElements]);
+
+	useEffect(() => {
+		if (executionMode !== "mock") return;
+		resetMockElements();
+		setActionRecords([]);
+	}, [executionMode, bpmnData?.svgContent]);
+
+	useEffect(() => {
+		const mode = new URLSearchParams(location.search).get("mode");
+		if (mode === "mock") {
+			setExecutionMode("mock");
+		} else if (mode === "real") {
+			setExecutionMode("real");
+		}
+	}, [location.search]);
+
+	useEffect(() => {
+		if (executionMode === "mock") return;
+		setMockAutoRunning(false);
+		setMockProcessingElementId("");
+	}, [executionMode]);
 
 	const renderSvg = () => {
-		const updatedMsgList = [
-			...allMessages,
-			...allEvents,
-			...allGateways,
-			...allBusinessRules,
-		].map((msg) => {
-			let color = "";
-			// msgState, gatewayState, eventState;
-			// State: 0: disabled, 1: enabled, 2: wait for confirm, 3: completed
-			switch (msg.state) {
-				case 0:
-					color = "unColored";
-					break;
-				case 1:
-					color = "green";
-					break;
-				case 2:
-					color = "red";
-					break;
-				case 3:
-					color = "blue";
-					break;
-				default:
-					color = "";
-			}
-			return { ...msg, color };
-		});
+		const elementList =
+			executionMode === "mock"
+				? mockElements
+				: [...allMessages, ...allEvents, ...allGateways, ...allBusinessRules];
+		const latestActionStatus = actionRecords.reduce((acc, item) => {
+			if (!item.elementId || acc[item.elementId]) return acc;
+			acc[item.elementId] = item.status;
+			return acc;
+		}, {} as Record<string, string>);
+		const palette = {
+			0: { fill: "#f1f5f9", stroke: "#cbd5e1", opacity: 0.65 },
+			1: { fill: "#dbeafe", stroke: "#2563eb", opacity: 0.95 },
+			2: { fill: "#fef3c7", stroke: "#d97706", opacity: 0.95 },
+			3: { fill: "#dcfce7", stroke: "#16a34a", opacity: 0.95 },
+		} as Record<number, { fill: string; stroke: string; opacity: number }>;
 
 		const generateStylesWithMsgList = (msgList) => {
-			let styles = { "& svg": {} };
+			const styles = { "& svg": {} as Record<string, any> };
 			msgList.forEach((msg) => {
-				if (msg.color === "unColored" && msg.color === "") return;
-
-				const selector = (() => {
-					console.log(msg);
-					if (msg.type === "event")
-						return `& g[data-element-id="${msg.EventID}"]`;
-					if (msg.type === "gateway")
-						return `& g[data-element-id="${msg.GatewayID}"]`;
-					if (msg.type === "message")
-						return `& g[data-element-id="${msg.MessageID}"]`;
-					if (msg.type === "businessRule") {
-						return `& g[data-element-id="${msg.BusinessRuleID}"]`;
-					}
-				})();
+				const elementId = getElementId(msg);
+				if (!elementId) return;
+				const selector = `& g[data-element-id="${elementId}"]`;
+				const stateStyle = palette[msg.state] || palette[0];
+				const actionStyle = latestActionStatus[elementId];
+				const fill =
+					actionStyle === "failed"
+						? "#fee2e2"
+						: actionStyle === "running"
+						? "#e0f2fe"
+						: stateStyle.fill;
+				const stroke =
+					actionStyle === "failed"
+						? "#dc2626"
+						: actionStyle === "running"
+						? "#0284c7"
+						: stateStyle.stroke;
 				styles["& svg"][selector] = {
-					"& path": {
-						fill: `${msg.color} !important`,
+					"& path, & polygon, & circle, & rect, & ellipse": {
+						fill: `${fill} !important`,
+						stroke: `${stroke} !important`,
+						strokeWidth: actionStyle === "running" ? "3px" : "2px",
+						opacity: stateStyle.opacity,
+						transition: "all 180ms ease",
+						filter:
+							actionStyle === "running"
+								? "drop-shadow(0 0 8px rgba(14,165,233,0.35))"
+								: actionStyle === "failed"
+								? "drop-shadow(0 0 8px rgba(220,38,38,0.25))"
+								: "none",
+						strokeDasharray: actionStyle === "running" ? "5 3" : "none",
 					},
-					"& polygon": {
-						fill: `${msg.color} !important`,
+					"& text": {
+						fontWeight: msg.state === 1 || msg.state === 2 ? 600 : 500,
 					},
-					"& circle": {
-						fill: `${msg.color} !important`,
-					},
-					// "& rect": {
-					//     fill: `${msg.color} !important`,
-					// }
 				};
 			});
 			return styles;
 		};
-		const newStyles = generateStylesWithMsgList(updatedMsgList);
+		const newStyles = generateStylesWithMsgList(elementList);
 		setSvgStyle(newStyles);
 	};
 
 	useEffect(() => {
 		renderSvg();
+	}, [fireflyDataReady, executionMode, mockElements, actionRecords.length]);
+
+	useEffect(() => {
+		if (fireflyDataReady) {
+			setIsRefreshing(false);
+		}
 	}, [fireflyDataReady]);
+
+	useEffect(() => {
+		if (!autoScrollTimeline) return;
+		if (!timelineRef.current) return;
+		timelineRef.current.scrollTo({ top: 0, behavior: "smooth" });
+	}, [actionRecords.length, autoScrollTimeline]);
+
+	useEffect(() => {
+		if (
+			executionMode !== "real" ||
+			!autoRefresh ||
+			!full_core_url ||
+			full_core_url === "http://"
+		) {
+			return;
+		}
+		const loop = window.setInterval(() => {
+			setIsRefreshing(true);
+			syncFireflyData();
+		}, document.visibilityState === "visible" ? refreshIntervalMs : Math.max(refreshIntervalMs, 15000));
+		return () => {
+			window.clearInterval(loop);
+		};
+	}, [executionMode, autoRefresh, full_core_url, refreshIntervalMs]);
 
 	// useEffect(() => {
 	//     const task = setInterval(() => {
@@ -927,7 +1512,337 @@ const ExecutionPage = (props) => {
 
 	return (
 		<div className="Execution">
-			<IdentitySelector identity={identity} setIdentity={setIdentity} />
+			<div
+				style={{
+					marginTop: 12,
+					marginBottom: 12,
+					padding: 12,
+					border: "1px solid #e2e8f0",
+					borderRadius: 10,
+					background: "#ffffff",
+				}}
+			>
+				<Space wrap size={12}>
+					<Typography.Text strong>Execution Mode</Typography.Text>
+					<Switch
+						checked={executionMode === "mock"}
+						onChange={(checked) => setExecutionMode(checked ? "mock" : "real")}
+						checkedChildren="Mock"
+						unCheckedChildren="Real"
+					/>
+					<Tag color={executionMode === "mock" ? "gold" : "green"}>
+						{executionMode === "mock" ? "MOCK EXECUTION" : "REAL EXECUTION"}
+					</Tag>
+					{executionMode === "mock" ? (
+						<>
+							<Button onClick={resetMockElements}>Reset Scenario</Button>
+							<Button onClick={runMockNextStep}>Run Next Step</Button>
+							<Button loading={mockAutoRunning} type="primary" onClick={runMockAutoDemo}>
+								Run Auto Demo
+							</Button>
+						</>
+					) : null}
+				</Space>
+				{executionMode === "mock" ? (
+					<div
+						style={{
+							marginTop: 10,
+							padding: 10,
+							border: "1px dashed #cbd5e1",
+							borderRadius: 8,
+							background: "#f8fafc",
+						}}
+					>
+						<Space wrap size={16} align="start">
+							<div style={{ minWidth: 260 }}>
+								<Typography.Text type="secondary">
+									Failure Rate: {mockFailureRate}%
+								</Typography.Text>
+								<Slider
+									min={0}
+									max={100}
+									value={mockFailureRate}
+									onChange={(value) => setMockFailureRate(Number(value))}
+								/>
+							</div>
+							<div style={{ minWidth: 320 }}>
+								<Typography.Text type="secondary">
+									Delay Range (ms): {mockDelayRange[0]} - {mockDelayRange[1]}
+								</Typography.Text>
+								<Slider
+									range
+									min={0}
+									max={5000}
+									step={50}
+									value={mockDelayRange}
+									onChange={(value) =>
+										setMockDelayRange([
+											Number((value as [number, number])[0]),
+											Number((value as [number, number])[1]),
+										])
+									}
+								/>
+							</div>
+							<div style={{ minWidth: 340 }}>
+								<Typography.Text type="secondary">
+									Force Fail Elements
+								</Typography.Text>
+								<Select
+									mode="multiple"
+									value={mockForceFailElements}
+									style={{ width: "100%" }}
+									placeholder="Choose element IDs to always fail"
+									options={mockElementOptions}
+									onChange={(values) => setMockForceFailElements(values as string[])}
+								/>
+							</div>
+						</Space>
+					</div>
+				) : null}
+			</div>
+
+			{executionMode === "real" ? (
+				<IdentitySelector identity={identity} setIdentity={setIdentity} />
+			) : (
+				<Alert
+					type="info"
+					showIcon
+					message="Mock mode enabled"
+					description="Actions update BPMN execution state locally for experiment validation. No chain contract / FireFly call is sent."
+					style={{ marginBottom: 12 }}
+				/>
+			)}
+			<div
+				style={{
+					marginTop: 12,
+					marginBottom: 12,
+					padding: 12,
+					border: "1px solid #e2e8f0",
+					borderRadius: 10,
+					background: "#f8fafc",
+				}}
+			>
+				<Space wrap size={8}>
+					<Tag color={fireflyMeta?.connected ? "green" : "red"}>
+						FireFly: {executionMode === "mock" ? "SKIPPED (MOCK)" : fireflyMeta?.connected ? "CONNECTED" : "DISCONNECTED"}
+					</Tag>
+					<Tag color="blue">Ready: {stateCounter.ready}</Tag>
+					<Tag color="orange">Wait Confirm: {stateCounter.confirm}</Tag>
+					<Tag color="default">Disabled: {stateCounter.disabled}</Tag>
+					<Tag color="purple">Done: {stateCounter.done}</Tag>
+					<Tag color="cyan">Actionable: {currentElements.length}</Tag>
+				</Space>
+				<Space wrap size={12} style={{ marginTop: 8 }}>
+					<Typography.Text type="secondary">
+						Core URL: {executionMode === "mock" ? "-" : full_core_url && full_core_url !== "http://" ? full_core_url : "-"}
+					</Typography.Text>
+					<Typography.Text type="secondary">
+						Identity: {executionMode === "mock" ? "-" : identity?.name || "-"}
+					</Typography.Text>
+					<Typography.Text type="secondary">
+						Last Sync: {executionMode === "mock" ? "-" : fireflyMeta?.lastSyncAt ? new Date(fireflyMeta.lastSyncAt).toLocaleTimeString() : "-"}
+					</Typography.Text>
+					<Typography.Text type="secondary">
+						Last Manual Refresh: {lastManualRefreshAt ? new Date(lastManualRefreshAt).toLocaleTimeString() : "-"}
+					</Typography.Text>
+				</Space>
+				{executionMode === "real" ? (
+					<Space wrap size={12} style={{ marginTop: 8 }}>
+						<Switch
+							checked={autoRefresh}
+							onChange={setAutoRefresh}
+							checkedChildren="Auto Refresh"
+							unCheckedChildren="Manual"
+						/>
+						<Select
+							value={refreshIntervalMs}
+							style={{ width: 160 }}
+							onChange={(value) => setRefreshIntervalMs(value)}
+							options={[
+								{ label: "2s interval", value: 2000 },
+								{ label: "5s interval", value: 5000 },
+								{ label: "10s interval", value: 10000 },
+							]}
+						/>
+						<Button
+							loading={isRefreshing}
+							onClick={() => {
+								setIsRefreshing(true);
+								setLastManualRefreshAt(new Date().toISOString());
+								syncFireflyData();
+								renderSvg();
+							}}
+						>
+							Refresh
+						</Button>
+					</Space>
+				) : (
+					<div style={{ marginTop: 8 }}>
+						<Space wrap size={12}>
+							<Tag color="purple">Mock Steps: {executionElements.length}</Tag>
+							<Tag color="success">Completed: {stateCounter.done}</Tag>
+							<Tag color="processing">Actionable: {currentElements.length}</Tag>
+							<Tag color={mockForceFailElements.length ? "error" : "default"}>
+								Forced Fail Targets: {mockForceFailElements.length}
+							</Tag>
+						</Space>
+						<Progress
+							percent={mockDonePercent}
+							size="small"
+							strokeColor="#16a34a"
+							trailColor="#e2e8f0"
+							style={{ marginTop: 8, maxWidth: 360 }}
+						/>
+					</div>
+				)}
+				{executionMode === "real" && fireflyMeta?.error ? (
+					<Alert
+						style={{ marginTop: 8 }}
+						type="warning"
+						showIcon
+						message="FireFly interaction warning"
+						description={String(fireflyMeta.error)}
+					/>
+				) : null}
+				<div
+					style={{
+						marginTop: 8,
+						padding: 8,
+						borderRadius: 8,
+						background: "#f8fafc",
+						border: "1px dashed #cbd5f5",
+					}}
+				>
+					<Space wrap size={8}>
+						<Tag color="processing">Running: {actionCounter.running}</Tag>
+						<Tag color="success">Success: {actionCounter.success}</Tag>
+						<Tag color="error">Failed: {actionCounter.failed}</Tag>
+						<Tag color="default">Total: {actionRecords.length}</Tag>
+					</Space>
+					<Space wrap size={12} style={{ marginTop: 8 }}>
+						<Select
+							value={actionElementFilter}
+							style={{ minWidth: 240 }}
+							options={actionElementOptions}
+							onChange={(value) => setActionElementFilter(value)}
+						/>
+						<Switch
+							checked={autoScrollTimeline}
+							onChange={setAutoScrollTimeline}
+							checkedChildren="Auto Scroll"
+							unCheckedChildren="Manual Scroll"
+						/>
+					</Space>
+					<div
+						ref={timelineRef}
+						style={{
+							marginTop: 8,
+							maxHeight: 220,
+							overflowY: "auto",
+							borderRadius: 6,
+							padding: 8,
+							background: "#fff",
+							border: "1px solid #e2e8f0",
+						}}
+					>
+						{filteredActionRecords.length === 0 ? (
+							<Typography.Text type="secondary">
+								No records for current filter.
+							</Typography.Text>
+						) : (
+							filteredActionRecords.slice(0, 12).map((record) => (
+								<div
+									key={record.traceId}
+									style={{
+										padding: "6px 0",
+										borderBottom: "1px dashed #e2e8f0",
+									}}
+								>
+									<Space wrap size={6}>
+										<Tag
+											color={
+												record.status === "running"
+													? "processing"
+													: record.status === "success"
+													? "success"
+													: "error"
+											}
+										>
+											{record.status.toUpperCase()}
+										</Tag>
+										<Tag color="blue">{record.type}</Tag>
+										<Typography.Text>
+											{record.action} ({record.elementId})
+										</Typography.Text>
+											<Typography.Text type="secondary">
+												{new Date(record.startedAt).toLocaleTimeString()}
+											</Typography.Text>
+											{record.txId ? (
+												<Button
+													size="small"
+													type="link"
+													onClick={() => copyToClipboard(record.txId!, "tx")}
+												>
+													Copy tx
+												</Button>
+											) : null}
+											{record.fireflyId ? (
+												<Button
+													size="small"
+													type="link"
+													onClick={() => copyToClipboard(record.fireflyId!, "message id")}
+												>
+													Copy msg
+												</Button>
+											) : null}
+										</Space>
+									{record.detail ? (
+										<div>
+											<Typography.Text type="secondary">
+												{record.detail}
+											</Typography.Text>
+										</div>
+									) : null}
+									{record.txId || record.fireflyId ? (
+										<div>
+											<Typography.Text type="secondary">
+												{record.txId ? `tx=${record.txId}` : ""}
+												{record.txId && record.fireflyId ? " | " : ""}
+												{record.fireflyId ? `message=${record.fireflyId}` : ""}
+											</Typography.Text>
+										</div>
+									) : null}
+									{record.error ? (
+										<div>
+											<Typography.Text type="danger">
+												{record.error}
+											</Typography.Text>
+										</div>
+									) : null}
+								</div>
+							))
+						)}
+					</div>
+					{latestAction ? (
+						<details style={{ marginTop: 8 }}>
+							<summary>Latest Action Result</summary>
+							<pre
+								style={{
+									marginTop: 6,
+									maxHeight: 220,
+									overflow: "auto",
+									background: "#0f172a",
+									color: "#e2e8f0",
+									padding: 8,
+									borderRadius: 6,
+								}}
+							>
+								{JSON.stringify(latestAction.payload || latestAction, null, 2)}
+							</pre>
+						</details>
+					) : null}
+				</div>
+			</div>
 
 			<div
 				dangerouslySetInnerHTML={{ __html: svgContent }}
@@ -937,10 +1852,22 @@ const ExecutionPage = (props) => {
 
 			{/* <Tag color="blue">Participant: {" " + getParticipantName(participant)}</Tag> */}
 
-			<div style={{ display: "flex", marginTop: "20px" }}>
+			<div
+				style={{
+					display: "flex",
+					flexWrap: "wrap",
+					gap: 12,
+					marginTop: 20,
+					padding: 12,
+					border: "1px solid #e2e8f0",
+					borderRadius: 10,
+					background: "#ffffff",
+				}}
+			>
 				{currentElements.map((currentElement) => {
 					return (
 						<ControlPanel
+							key={`${currentElement.type}-${currentElement.EventID || currentElement.GatewayID || currentElement.MessageID || currentElement.BusinessRuleID}`}
 							currentElement={currentElement}
 							contractName={contractName}
 							coreURL={full_core_url}
@@ -950,18 +1877,14 @@ const ExecutionPage = (props) => {
 							bpmnInstance={bpmnInstance}
 							instanceId={bpmnInstance.instance_chaincode_id}
 							identity={identity}
+							onActionRecord={onActionRecord}
+							executionMode={executionMode}
+							onMockAction={runMockAction}
+							mockProcessingElementId={mockProcessingElementId}
 						/>
 					);
 				})}
 			</div>
-			<Button
-				onClick={() => {
-					syncFireflyData();
-					renderSvg();
-				}}
-			>
-				Refresh
-			</Button>
 		</div>
 	);
 };

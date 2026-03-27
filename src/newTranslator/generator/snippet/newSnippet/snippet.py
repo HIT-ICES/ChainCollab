@@ -25,7 +25,7 @@ def _render(template: str, **params) -> str:
 
 def DSL_ContractFrame(contract_name: str, participants: str, globals_: str,
                        messages: str, gateways: str, events: str,
-                       businessrules: str, flows: str) -> str:
+                       businessrules: str, oracletasks: str, flows: str) -> str:
     return _render(
         DSL["DSLContractFrame"],
         contract_name=contract_name,
@@ -35,6 +35,7 @@ def DSL_ContractFrame(contract_name: str, participants: str, globals_: str,
         gateways=gateways,
         events=events,
         businessrules=businessrules,
+        oracletasks=oracletasks,
         flows=flows,
     )
 
@@ -166,6 +167,45 @@ def DSL_BusinessRuleOutputMappingItem(param: str, global_var: str) -> str:
     )
 
 
+# ========== Oracle Tasks ==========
+
+def DSL_OracleTasksFrame(items: str) -> str:
+    return _render(DSL["DSLOracleTasksFrame"], items=items)
+
+
+def DSL_OracleTaskItem(
+    id: str,
+    task_type: str,
+    data_source: str,
+    compute_script: str,
+    output_map: str,
+    state: str,
+) -> str:
+    output_block = ""
+    if output_map.strip():
+        output_block = _render(
+            DSL["DSLOracleTaskOutputBlockFrame"],
+            output_mappings=output_map,
+        )
+    return _render(
+        DSL["DSLOracleTaskItem"],
+        id=id,
+        task_type=task_type,
+        data_source=data_source,
+        compute_script=compute_script,
+        output_block=output_block,
+        state=state,
+    )
+
+
+def DSL_OracleTaskOutputMappingItem(param: str, global_var: str) -> str:
+    return _render(
+        DSL["DSLOracleTaskOutputMappingItem"],
+        dmn_param=param,
+        global_name=global_var,
+    )
+
+
 # ========== Flows ==========
 
 def DSL_FlowsFrame(items: str) -> str:
@@ -205,6 +245,13 @@ def DSL_WhenBusinessRuleDoneEnable(rule: str, targets: str) -> str:
     return _render(
         DSL["DSLWhenBusinessRuleDoneEnable"],
         rule=rule,
+        targets=targets,
+    )
+
+def DSL_WhenOracleTaskDoneEnable(task: str, targets: str) -> str:
+    return _render(
+        DSL["DSLWhenOracleTaskDoneEnable"],
+        task=task,
         targets=targets,
     )
 

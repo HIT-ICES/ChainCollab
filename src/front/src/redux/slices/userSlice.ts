@@ -147,7 +147,6 @@ export const registerUserAction = (name: string, email: string, password: string
         dispatch(
             registerSuccess()
         )
-        console.log("Register Success")
     } else {
         dispatch(
             registerFailed()

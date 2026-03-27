@@ -15,6 +15,7 @@ ContractSection:
     | GatewaySection
     | EventSection
     | BusinessRuleSection
+    | OracleTaskSection
     | FlowSection
 ;
 
@@ -145,6 +146,31 @@ ParamMapping:
     dmnParam=ID '->' globalRef=[GlobalVar]
 ;
 
+/* oracle tasks */
+
+OracleTaskSection:
+    'oracletasks' '{'
+        tasks+=OracleTask*
+    '}'
+;
+
+OracleTask:
+    'oracletask' name=ID '{'
+        'type' oracleType=OracleTaskType
+        ('dataSource' dataSource=STRING)?
+        ('computeScript' computeScript=STRING)?
+        ('output' 'mapping' '{'
+            outputMappings+=ParamMapping*
+        '}')?
+        ('initial' 'state' initialState=ElementState)?
+    '}'
+;
+
+OracleTaskType:
+      'external-data'
+    | 'compute-task'
+;
+
 /* common super type for flow targets */
 
 FlowElement:
@@ -152,6 +178,7 @@ FlowElement:
     | Gateway
     | Event
     | BusinessRule
+    | OracleTask
 ;
 
 /* flows */
@@ -167,6 +194,7 @@ FlowItem:
     | MessageFlow
     | GatewayFlow
     | RuleFlow
+    | OracleTaskFlow
     | EventFlow
     | ParallelJoin
 ;
@@ -246,6 +274,13 @@ RuleCondition:
       'ready'
     | 'waiting'
     | 'done'
+;
+
+/* oracle-task-driven flow */
+
+OracleTaskFlow:
+    'when' 'oracletask' task=[OracleTask] 'done'
+    'then' actions+=FlowAction (',' actions+=FlowAction)* ';'
 ;
 
 /* event-driven flow */

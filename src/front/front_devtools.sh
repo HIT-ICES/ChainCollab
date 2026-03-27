@@ -45,7 +45,8 @@ def install_deps():
 
 
 def ensure_deps():
-    if (PROJECT_DIR / "node_modules").exists():
+    vite_bin = PROJECT_DIR / "node_modules" / ".bin" / "vite"
+    if (PROJECT_DIR / "node_modules").exists() and vite_bin.exists():
         return
     install_deps()
 

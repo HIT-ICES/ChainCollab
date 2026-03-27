@@ -1,0 +1,28 @@
+type = "webhook"
+schemaVersion = 1
+name = "OCR NewTransmission -> Finalize (webhook)"
+
+externalJobID = "<OCR_WRITER_JOB_EXTERNAL_ID>"
+
+evmChainID = "3456"   # ← 你的链 ID（字符串）
+
+externalInitiators = [
+  { name = "<EXTERNAL_INITIATOR_NAME>", spec = "{}" }
+]
+
+observationSource = """
+    parse_req  [type="jsonparse" path="data,requestId" data="$(jobRun.requestBody)"]
+    parse_hash [type="jsonparse" path="data,hashLow" data="$(jobRun.requestBody)"]
+
+    encode_tx  [type="ethabiencode"
+                abi="finalizeWithOcrAnswer(bytes32 requestId, uint128 hashLow)"
+                data="{\\\"requestId\\\": $(parse_req), \\\"hashLow\\\": $(parse_hash)}"
+                ]
+
+    submit_tx  [type="ethtx"
+                evmChainID="3456"
+                to="<DMN_REQUEST_CONTRACT_ADDRESS>"
+                data="$(encode_tx)"]
+
+    parse_req -> parse_hash -> encode_tx -> submit_tx
+"""

@@ -1,0 +1,114 @@
+{
+  "description": "DMN-like decision computation cases for on-chain complexity benchmarking in industrial IoT settings.",
+  "cases": [
+    {
+      "case_id": "D01",
+      "scenario_name": "钢铁产线质量放行",
+      "dataset_name": "UCI SECOM",
+      "dataset_ref": "https://archive.ics.uci.edu/dataset/179/secom",
+      "model_type": "table_first",
+      "rule_count": 20,
+      "input_x": 97,
+      "input_y": 135,
+      "dmn_expression": "FIRST hit policy over quality rules (x,y -> release decision)"
+    },
+    {
+      "case_id": "D02",
+      "scenario_name": "钢铁产线质量放行（高规则数）",
+      "dataset_name": "UCI SECOM",
+      "dataset_ref": "https://archive.ics.uci.edu/dataset/179/secom",
+      "model_type": "table_first",
+      "rule_count": 60,
+      "input_x": 297,
+      "input_y": 415,
+      "dmn_expression": "FIRST hit policy with larger decision table"
+    },
+    {
+      "case_id": "D03",
+      "scenario_name": "SWaT 多维告警聚合",
+      "dataset_name": "SWaT",
+      "dataset_ref": "https://itrust.sutd.edu.sg/itrust-labs_datasets/dataset_info/",
+      "model_type": "table_collect",
+      "rule_count": 30,
+      "input_x": 100,
+      "input_y": 110,
+      "dmn_expression": "COLLECT SUM over alarm rules"
+    },
+    {
+      "case_id": "D04",
+      "scenario_name": "WADI 漏损告警聚合（高规则数）",
+      "dataset_name": "WADI",
+      "dataset_ref": "https://itrust.sutd.edu.sg/itrust-labs_datasets/dataset_info/",
+      "model_type": "table_collect",
+      "rule_count": 80,
+      "input_x": 100,
+      "input_y": 110,
+      "dmn_expression": "COLLECT SUM with dense rule set"
+    },
+    {
+      "case_id": "D05",
+      "scenario_name": "SECOM 评分卡判定",
+      "dataset_name": "UCI SECOM",
+      "dataset_ref": "https://archive.ics.uci.edu/dataset/179/secom",
+      "model_type": "scorecard",
+      "feature_count": 16,
+      "base_score": 200,
+      "dmn_expression": "Scorecard aggregation over 16 indicators"
+    },
+    {
+      "case_id": "D06",
+      "scenario_name": "SECOM 评分卡判定（高维）",
+      "dataset_name": "UCI SECOM",
+      "dataset_ref": "https://archive.ics.uci.edu/dataset/179/secom",
+      "model_type": "scorecard",
+      "feature_count": 48,
+      "base_score": 200,
+      "dmn_expression": "Scorecard aggregation over 48 indicators"
+    },
+    {
+      "case_id": "D07",
+      "scenario_name": "BATADAL 决策图推理",
+      "dataset_name": "BATADAL",
+      "dataset_ref": "https://www.batadal.net/data.html",
+      "model_type": "decision_graph",
+      "feature_count": 8,
+      "node_count": 12,
+      "iterations": 10,
+      "dmn_expression": "Decision-graph iterative evaluation (8x12x10)"
+    },
+    {
+      "case_id": "D08",
+      "scenario_name": "BATADAL 决策图推理（中高复杂）",
+      "dataset_name": "BATADAL",
+      "dataset_ref": "https://www.batadal.net/data.html",
+      "model_type": "decision_graph",
+      "feature_count": 10,
+      "node_count": 20,
+      "iterations": 14,
+      "dmn_expression": "Decision-graph iterative evaluation (10x20x14)"
+    },
+    {
+      "case_id": "D09",
+      "scenario_name": "C-MAPSS 退化决策图推理",
+      "dataset_name": "NASA C-MAPSS",
+      "dataset_ref": "https://data.nasa.gov/dataset/cmapss-jet-engine-simulated-data",
+      "model_type": "decision_graph",
+      "feature_count": 12,
+      "node_count": 28,
+      "iterations": 18,
+      "dmn_expression": "Decision-graph iterative evaluation (12x28x18)"
+    },
+    {
+      "case_id": "D10",
+      "scenario_name": "C-MAPSS 退化决策图推理（高复杂）",
+      "dataset_name": "NASA C-MAPSS",
+      "dataset_ref": "https://data.nasa.gov/dataset/cmapss-jet-engine-simulated-data",
+      "model_type": "decision_graph",
+      "feature_count": 14,
+      "node_count": 36,
+      "iterations": 24,
+      "dmn_expression": "Decision-graph iterative evaluation (14x36x24)"
+    }
+  ]
+}
+

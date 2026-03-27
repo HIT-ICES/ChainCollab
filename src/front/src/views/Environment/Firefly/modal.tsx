@@ -62,7 +62,6 @@ const NewFireflyNode: React.FC<Props> = ({ onSubmit }) => {
   };
 
   const handleChange = (value: string) => {
-    console.log(`selected ${value}`);
   };
 
   const showModal = () => {
@@ -79,12 +78,10 @@ const NewFireflyNode: React.FC<Props> = ({ onSubmit }) => {
 
   // Form相关
   const onFinish = (values: any) => {
-    console.log("Success:", values);
     onSubmit(values);
   };
 
   const onFinishFailed = (errorInfo: any) => {
-    console.log("Failed:", errorInfo);
   };
 
   // type FieldType = {

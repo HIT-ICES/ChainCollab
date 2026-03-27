@@ -2,7 +2,7 @@ import json
 import logging
 from typing import Any
 
-import requests
+from common.utils.http_client import post_json
 
 LOG = logging.getLogger(__name__)
 
@@ -30,10 +30,7 @@ def _log_response(action: str, status: int, body: dict) -> None:
 
 
 def _response_payload(response) -> dict:
-    try:
-        payload = response.json()
-    except Exception:
-        payload = {}
+    payload = response
     if isinstance(payload, list):
         return payload[0] if payload else {}
     if isinstance(payload, dict):
@@ -81,19 +78,16 @@ def generate_ffi(
     }
     endpoint = f"http://{core_url}/api/v1/namespaces/{namespace}/contracts/interfaces/generate"
     _log_request("generate_ffi", core_url, endpoint, {"name": name, "namespace": namespace, "version": version})
-    response = requests.post(
+    status_code, body = post_json(
         endpoint,
         headers={"Content-Type": "application/json"},
-        data=json.dumps(payload),
+        body=payload,
         timeout=60,
+        expected_status=(200, 201, 202),
     )
-    _log_response("generate_ffi", response.status_code, _response_payload(response))
-    if response.status_code not in [200, 201, 202]:
-        raise Exception(
-            f"FireFly FFI generate failed with status {response.status_code}: "
-            f"{response.text[:500]}"
-        )
-    return _response_payload(response)
+    body_payload = _response_payload(body)
+    _log_response("generate_ffi", status_code, body_payload)
+    return body_payload
 
 
 def register_interface(
@@ -105,15 +99,20 @@ def register_interface(
     suffix = "?confirm=true" if confirm else ""
     endpoint = f"http://{core_url}/api/v1/namespaces/{namespace}/contracts/interfaces{suffix}"
     _log_request("register_interface", core_url, endpoint, {"name": ffi.get("name"), "namespace": namespace})
-    response = requests.post(
-        endpoint,
-        headers={"Content-Type": "application/json"},
-        data=json.dumps(ffi),
-        timeout=60,
-    )
-    body = _response_payload(response)
-    _log_response("register_interface", response.status_code, body)
-    return response.status_code, body
+    try:
+        status_code, body = post_json(
+            endpoint,
+            headers={"Content-Type": "application/json"},
+            body=ffi,
+            timeout=60,
+            expected_status=(200, 201, 202),
+        )
+    except RuntimeError as exc:
+        LOG.warning("[FF] action=register_interface failed core=%s err=%s", core_url, exc)
+        return 500, {"error": str(exc)}
+    body_payload = _response_payload(body)
+    _log_response("register_interface", status_code, body_payload)
+    return status_code, body_payload
 
 
 def register_api(
@@ -132,15 +131,20 @@ def register_api(
     suffix = "?confirm=true" if confirm else ""
     endpoint = f"http://{core_url}/api/v1/namespaces/{namespace}/apis{suffix}"
     _log_request("register_api", core_url, endpoint, {"name": api_name, "namespace": namespace})
-    response = requests.post(
-        endpoint,
-        headers={"Content-Type": "application/json"},
-        data=json.dumps(payload),
-        timeout=60,
-    )
-    body = _response_payload(response)
-    _log_response("register_api", response.status_code, body)
-    return response.status_code, body
+    try:
+        status_code, body = post_json(
+            endpoint,
+            headers={"Content-Type": "application/json"},
+            body=payload,
+            timeout=60,
+            expected_status=(200, 201, 202),
+        )
+    except RuntimeError as exc:
+        LOG.warning("[FF] action=register_api failed core=%s err=%s", core_url, exc)
+        return 500, {"error": str(exc)}
+    body_payload = _response_payload(body)
+    _log_response("register_api", status_code, body_payload)
+    return status_code, body_payload
 
 
 def deploy_contract(
@@ -160,19 +164,16 @@ def deploy_contract(
     suffix = "?confirm=true" if confirm else ""
     endpoint = f"http://{core_url}/api/v1/namespaces/{namespace}/contracts/deploy{suffix}"
     _log_request("deploy_contract", core_url, endpoint, {"namespace": namespace})
-    response = requests.post(
+    status_code, body = post_json(
         endpoint,
         headers={"Content-Type": "application/json"},
-        data=json.dumps(payload),
+        body=payload,
         timeout=timeout,
+        expected_status=(200, 201, 202),
     )
-    _log_response("deploy_contract", response.status_code, _response_payload(response))
-    if response.status_code not in [200, 202]:
-        raise Exception(
-            f"FireFly deployment failed with status {response.status_code}: "
-            f"{response.text[:500]}"
-        )
-    return _response_payload(response)
+    body_payload = _response_payload(body)
+    _log_response("deploy_contract", status_code, body_payload)
+    return body_payload
 
 
 def api_base(core_url: str, api_name: str, namespace: str = "default") -> str:

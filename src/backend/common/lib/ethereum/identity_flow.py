@@ -58,6 +58,7 @@ class IdentityContractFlow:
         abi_path = os.path.join(contract_dir, "IdentityRegistry.abi")
         bin_path = os.path.join(contract_dir, "IdentityRegistry.bin")
         sol_copy_path = os.path.join(contract_dir, "IdentityRegistry.sol")
+        meta_path = os.path.join(contract_dir, "IdentityRegistry.solc.meta.json")
 
         if not os.path.exists(sol_copy_path):
             candidate_paths = [
@@ -92,8 +93,24 @@ class IdentityContractFlow:
                 )
             shutil.copyfile(source_path, sol_copy_path)
 
-        if not os.path.exists(abi_path) or not os.path.exists(bin_path):
-            compiler = SolidityCompiler()
+        compiler = SolidityCompiler()
+        expected_meta = {
+            "compiler_version": compiler.version,
+            "evm_version": compiler.evm_version,
+        }
+        existing_meta = None
+        if os.path.exists(meta_path):
+            try:
+                with open(meta_path, "r") as meta_file:
+                    existing_meta = json.load(meta_file)
+            except Exception:
+                existing_meta = None
+
+        if (
+            not os.path.exists(abi_path)
+            or not os.path.exists(bin_path)
+            or existing_meta != expected_meta
+        ):
             is_installed, version_or_error = compiler.check_installation()
             if not is_installed:
                 raise Exception(
@@ -112,6 +129,8 @@ class IdentityContractFlow:
                 json.dump(contract_info["definition"], abi_file, indent=2)
             with open(bin_path, "w") as bin_file:
                 bin_file.write(contract_info["contract"])
+            with open(meta_path, "w") as meta_file:
+                json.dump(expected_meta, meta_file, indent=2)
         with open(abi_path, "r") as abi_file:
             abi = json.load(abi_file)
         with open(bin_path, "r") as bin_file:

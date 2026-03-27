@@ -75,6 +75,7 @@ const BPMNOverview = () => {
     const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
     const currentConsortiumId = useAppSelector((state) => state.consortium.currentConsortiumId);
     const currentEnvType = useAppSelector((state) => state.env.currentEnvType);
+    const fireflyApiBaseUrl = (import.meta.env.VITE_FIREFLY_URL as string) || `${current_ip}:5000`;
 
     const status = bpmn.status;
 
@@ -185,7 +186,6 @@ const BPMNOverview = () => {
             // syncInstance()
             // setButtonLoading(false);
         } catch (e) {
-            console.log(e);
             setButtonLoading(false);
         }
     }
@@ -195,7 +195,6 @@ const BPMNOverview = () => {
             setButtonLoading(true);
             setIsEnvModalOpen(true);
         } catch (e) {
-            console.log(e);
         }
     }
 
@@ -203,7 +202,6 @@ const BPMNOverview = () => {
         try {
             setButtonLoading(true);
             const bpmn = await retrieveBPMN(bpmnId)
-            console.log("BPMN data:", bpmn);
 
             const contractName = bpmn.name.replace(".bpmn", "")
 
@@ -215,7 +213,6 @@ const BPMNOverview = () => {
 
             // For Ethereum, generate FFI if not already present
             if (isEthereum && (!ffiContent || ffiContent.trim() === '')) {
-                console.log("FFI content is empty for Ethereum, generating FFI...");
 
                 // Get contract ABI
                 const contractAbi = bpmn.ethereum_contract?.abi;
@@ -224,7 +221,7 @@ const BPMNOverview = () => {
                 }
 
                 // Call FireFly API to generate FFI
-                const fireflyUrlForRegister = `${current_ip}:5000`;
+                const fireflyUrlForRegister = fireflyApiBaseUrl;
                 const generateUrl = `${fireflyUrlForRegister}/api/v1/namespaces/default/contracts/interfaces/generate`;
 
                 const payload = {
@@ -235,19 +232,16 @@ const BPMNOverview = () => {
                     }
                 };
 
-                console.log("Calling FireFly to generate FFI:", generateUrl);
                 const ffiResponse = await axios.post(generateUrl, payload);
 
                 if (ffiResponse.status === 200) {
                     parsedFFIContent = ffiResponse.data;
                     ffiContent = JSON.stringify(parsedFFIContent, null, 2);
-                    console.log("FFI generated successfully:", parsedFFIContent);
 
                     // Save FFI content to backend using api instance
-                    await api.put(`/consortiums/1/bpmns/${bpmnId}`, {
+                    await api.put(`/consortiums/${currentConsortiumId || "1"}/bpmns/${bpmnId}`, {
                         ffiContent: ffiContent
                     });
-                    console.log("FFI content saved to backend");
                 } else {
                     throw new Error(`Failed to generate FFI: ${ffiResponse.statusText}`);
                 }
@@ -259,7 +253,6 @@ const BPMNOverview = () => {
                 parsedFFIContent = JSON.parse(ffiContent);
             }
 
-            console.log("FFI Content:", parsedFFIContent);
 
             // For Ethereum, use contract address; for Fabric, use chaincode ID
             let contractIdPrefix;
@@ -272,31 +265,27 @@ const BPMNOverview = () => {
             }
 
             parsedFFIContent.name = contractIdPrefix;
-            const fireflyUrlForRegister = `${current_ip}:5000`
+            const fireflyUrlForRegister = fireflyApiBaseUrl
 
             // register interface
-            const response = await axios.post(`${current_ip}:5000/api/v1/namespaces/default/contracts/interfaces`,
+            const response = await axios.post(`${fireflyApiBaseUrl}/api/v1/namespaces/default/contracts/interfaces`,
                 parsedFFIContent)
             const interfaceid = response.data.id;
-            console.log("Interface registered with ID:", interfaceid);
 
             // Wait for interface to be fully created (FireFly processes this asynchronously)
-            console.log("Waiting for interface to be fully created...");
             let interfaceReady = false;
             let retries = 0;
             const maxRetries = 10;
 
             while (!interfaceReady && retries < maxRetries) {
                 try {
-                    const checkResponse = await axios.get(
-                        `${current_ip}:5000/api/v1/namespaces/default/contracts/interfaces/${interfaceid}`
+                        const checkResponse = await axios.get(
+                        `${fireflyApiBaseUrl}/api/v1/namespaces/default/contracts/interfaces/${interfaceid}`
                     );
                     if (checkResponse.status === 200 && checkResponse.data) {
                         interfaceReady = true;
-                        console.log("Interface is ready:", checkResponse.data);
                     }
                 } catch (error) {
-                    console.log(`Interface not ready yet, retry ${retries + 1}/${maxRetries}`);
                     retries++;
                     await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retry
                 }
@@ -340,7 +329,7 @@ const BPMNOverview = () => {
             };
 
             await new Promise(resolve => setTimeout(resolve, 4000));
-            const response2 = await axios.post(`${current_ip}:5000/api/v1/namespaces/default/apis`,
+            const response2 = await axios.post(`${fireflyApiBaseUrl}/api/v1/namespaces/default/apis`,
                 jsonData)
             const fireflyUrl = response2.data.urls.ui
 
@@ -376,7 +365,6 @@ const BPMNOverview = () => {
             const events = parsedFFIContent.events;
 
             // 输出 events 字段
-            console.log(events);
 
             // 获取合约地址（仅用于 Ethereum）
             const contractAddress = isEthereum ? bpmn.ethereum_contract?.contract_address : undefined;
@@ -404,7 +392,7 @@ const BPMNOverview = () => {
         async function _registerDatatypes(bpmn: any, chaincodeName: any, fireflyUrlForRegister: string) {
             const messages = await getMessagesByBpmnContent(bpmn.bpmnContent);
             // 目前无法通过getAllMessage获取所有的message,因为需要实例ID查询消息。此处应该通过BPMN内容提取出所有消息的properties字段
-            const all_requests = messages ? Object.entries(messages).map(
+            const all_requests = messages ? Object.entries(messages as Record<string, any>).map(
                 ([key, msg]) => {
                     const data1 = {
                         "$id": "https://example.com/widget.schema.json",
@@ -414,13 +402,12 @@ const BPMNOverview = () => {
                     };
                     let data2 = {};
                     try {
-                        data2 = JSON.parse(msg.documentation);
+                        data2 = JSON.parse(msg?.documentation || "{}");
                         data2 = {
                             "properties": data2["properties"],
                             "required": data2["required"],
                         };
                     } catch (e) {
-                        console.log(e);
                         return;
                     }
 

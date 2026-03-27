@@ -105,7 +105,6 @@ export const useFireflyData = (
                 const filterData = data.filter((item: any) => item.membership === membershipId);
                 setFirefly(filterData[0]);
             } catch (e) {
-                console.log(e);
             }
         }
         fetchData();
@@ -128,7 +127,12 @@ export const useAllFireflyData = (
         any[],
         any[],
         boolean,
-        () => void
+        () => void,
+        {
+            connected: boolean,
+            lastSyncAt: string | null,
+            error: string | null,
+        }
     ] => {
     const [events, setEvents] = useState<any[]>([]);
     const [gateways, setGateways] = useState<any[]>([]);
@@ -136,66 +140,130 @@ export const useAllFireflyData = (
     const [businessRules, setBusinessRules] = useState<any[]>([]);
     const [syncFlag, setSyncFlag] = useState(false);
     const [ready, setReady] = useState(false);
+    const [meta, setMeta] = useState({
+        connected: false,
+        lastSyncAt: null as string | null,
+        error: null as string | null,
+    });
+
+    const normalizeState = (item: any, keys: string[]) => {
+        for (const key of keys) {
+            if (typeof item?.[key] === "number") {
+                return item[key];
+            }
+        }
+        if (typeof item?.state === "number") {
+            return item.state;
+        }
+        return 0;
+    };
 
     useEffect(() => {
         let ignore = false;
         const fetchData = async () => {
             setReady(false);
-            if (!coreUrl || !contractName || coreUrl === "http://") return;
-            const events = await getAllEvents(coreUrl, contractName, bpmnInstanceId);
-            const gateways = await getAllGateways(coreUrl, contractName, bpmnInstanceId);
-            const messages = await getAllMessages(coreUrl, contractName, bpmnInstanceId);
-            const businessRules = await getAllBusinessRules(coreUrl, contractName, bpmnInstanceId);
-            if (ignore) return
-            if (events) {
-                setEvents(events.map((item: any) => {
-                    return {
-                        ...item,
-                        type: "event",
-                        state: item.EventState
-                    }
-                }));
+            if (!coreUrl || !contractName || !bpmnInstanceId || coreUrl === "http://") {
+                if (!ignore) {
+                    setEvents([]);
+                    setGateways([]);
+                    setMessages([]);
+                    setBusinessRules([]);
+                    setMeta({
+                        connected: false,
+                        lastSyncAt: null,
+                        error: "Execution context not ready",
+                    });
+                    setReady(true);
+                }
+                return;
             }
-            if (gateways) {
-                setGateways(gateways.map(
-                    (item: any) => {
-                        return {
-                            ...item,
-                            type: "gateway",
-                            state: item.GatewayState
-                        }
-                    }
-                ));
-            }
-            if (messages) {
-                setMessages(messages.map(
-                    (item: any) => {
-                        return {
-                            ...item,
-                            type: "message",
-                            state: item.MsgState
-                        }
-                    }
+            try {
+                const [healthRes, eventsRes, gatewaysRes, messagesRes, businessRulesRes] = await Promise.allSettled([
+                    axios.get(`${coreUrl}/api/v1/status`, { timeout: 4000 }),
+                    getAllEvents(coreUrl, contractName, bpmnInstanceId),
+                    getAllGateways(coreUrl, contractName, bpmnInstanceId),
+                    getAllMessages(coreUrl, contractName, bpmnInstanceId),
+                    getAllBusinessRules(coreUrl, contractName, bpmnInstanceId),
+                ]);
+                if (ignore) return;
 
-                ));
+                const eventsRaw = eventsRes.status === "fulfilled" && Array.isArray(eventsRes.value)
+                    ? eventsRes.value
+                    : [];
+                const gatewaysRaw = gatewaysRes.status === "fulfilled" && Array.isArray(gatewaysRes.value)
+                    ? gatewaysRes.value
+                    : [];
+                const messagesRaw = messagesRes.status === "fulfilled" && Array.isArray(messagesRes.value)
+                    ? messagesRes.value
+                    : [];
+                const businessRulesRaw = businessRulesRes.status === "fulfilled" && Array.isArray(businessRulesRes.value)
+                    ? businessRulesRes.value
+                    : [];
+
+                setEvents(eventsRaw.map((item: any) => ({
+                    ...item,
+                    type: "event",
+                    state: normalizeState(item, ["EventState", "eventState"]),
+                })));
+                setGateways(gatewaysRaw.map((item: any) => ({
+                    ...item,
+                    type: "gateway",
+                    state: normalizeState(item, ["GatewayState", "gatewayState"]),
+                })));
+                setMessages(messagesRaw.map((item: any) => ({
+                    ...item,
+                    type: "message",
+                    state: normalizeState(item, ["MsgState", "msgState"]),
+                })));
+                setBusinessRules(businessRulesRaw.map((item: any) => ({
+                    ...item,
+                    type: "businessRule",
+                    state: normalizeState(item, ["State", "state"]),
+                })));
+
+                const connected = healthRes.status === "fulfilled";
+                const firstError = [
+                    healthRes,
+                    eventsRes,
+                    gatewaysRes,
+                    messagesRes,
+                    businessRulesRes,
+                ].find((res: any) => res.status === "rejected") as PromiseRejectedResult | undefined;
+
+                setMeta({
+                    connected,
+                    lastSyncAt: new Date().toISOString(),
+                    error: firstError ? String(firstError.reason || "Unknown error") : null,
+                });
+            } catch (error: any) {
+                if (ignore) return;
+                setEvents([]);
+                setGateways([]);
+                setMessages([]);
+                setBusinessRules([]);
+                setMeta({
+                    connected: false,
+                    lastSyncAt: new Date().toISOString(),
+                    error: String(error?.message || error || "Sync failed"),
+                });
+            } finally {
+                if (!ignore) {
+                    setReady(true);
+                }
             }
-            if (businessRules) {
-                setBusinessRules(businessRules.map(
-                    (item: any) => {
-                        return {
-                            ...item,
-                            type: "businessRule",
-                            state: item.State
-                        }
-                    }
-                ));
-            }
-            setReady(true);
         }
         fetchData();
         return () => { ignore = true; }
-    }, [syncFlag, coreUrl, contractName]);
-    return [events, gateways, messages, businessRules, ready, () => { setSyncFlag(syncFlag => !syncFlag) }];
+    }, [syncFlag, coreUrl, contractName, bpmnInstanceId]);
+    return [
+        events,
+        gateways,
+        messages,
+        businessRules,
+        ready,
+        () => { setSyncFlag(syncFlag => !syncFlag); },
+        meta,
+    ];
 }
 
 import { useQuery } from 'react-query'

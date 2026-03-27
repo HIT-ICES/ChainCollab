@@ -51,6 +51,7 @@ solc --optimize \
   --combined-json abi,bin \
   contracts/MyChainlinkRequester.sol \
   contracts/MyChainlinkRequesterDMN.sol \
+  contracts/MyChainlinkRequesterDMN_Lite.sol \
   contracts/LinkToken-v0.6-fix/LinkToken.sol \
   contracts/LinkToken-v0.6-fix/ERC677.sol \
   contracts/LinkToken-v0.6-fix/ITypeAndVersion.sol \

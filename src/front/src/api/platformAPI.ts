@@ -1,6 +1,4 @@
-import { result } from "lodash";
 import api from "./apiConfig";
-import { env } from "process";
 
 export const createOrg = async (orgName: string) => {
   const response = await api.post("/organizations", {
@@ -19,7 +17,6 @@ export const getOrgs = async () => {
       })),
     };
   } catch (err) {
-    console.log(err);
   }
 };
 
@@ -319,10 +316,10 @@ export const getEnvironmentList = async (consortiumId: string) => {
         oracleStatus: env.Oracle_status,
         dmnStatus: env.DMN_status,
         identityContractStatus: env.identity_contract_status ?? "NO",
+        chainlinkStatus: env.chainlink_status ?? "NO",
         type: "Ethereum",
       }));
     } catch (err) {
-      console.log("No Ethereum environments or endpoint not available");
     }
 
     // 合并两种环境
@@ -343,6 +340,12 @@ export const getEnvironment = async (environmentId: string, consortiumId: string
       : `/consortium/${consortiumId}/environments/${environmentId}`;
 
     const res = await api.get(endpoint);
+    const oracleTaskSuite = res.data.chainlink_detail?.oracle_task_suite || {};
+    const oracleTaskContracts = oracleTaskSuite?.contracts || {};
+    const oracleTaskFirefly = oracleTaskSuite?.firefly || {};
+    const relayerDetail = res.data.chainlink_detail?.relayer || {};
+    const relayerContract = relayerDetail?.contract || {};
+    const relayerFirefly = relayerDetail?.firefly || {};
     return {
       name: res.data.name,
       id: res.data.id,
@@ -352,6 +355,27 @@ export const getEnvironment = async (environmentId: string, consortiumId: string
       oracleStatus: res.data.Oracle_status ?? "NO",
       dmnStatus: res.data.DMN_status ?? "NO",
       identityContractStatus: res.data.identity_contract_status ?? "NO",
+      chainlinkStatus: res.data.chainlink_status ?? "NO",
+      dmnContractAddress: res.data.dmn_detail?.contractAddress ?? null,
+      dmnFireflyRegistered: Boolean(
+        res.data.dmn_detail?.firefly_api_name &&
+        res.data.dmn_detail?.firefly_interface_id
+      ),
+      dataContractAddress: oracleTaskContracts?.dataTaskAdapter ?? null,
+      computeContractAddress: oracleTaskContracts?.computeTaskAdapter ?? null,
+      dataFireflyRegistered: Boolean(
+        oracleTaskFirefly?.data_task_adapter?.firefly_api_name &&
+        oracleTaskFirefly?.data_task_adapter?.firefly_interface_id
+      ),
+      computeFireflyRegistered: Boolean(
+        oracleTaskFirefly?.compute_task_adapter?.firefly_api_name &&
+        oracleTaskFirefly?.compute_task_adapter?.firefly_interface_id
+      ),
+      relayerContractAddress: relayerContract?.address ?? relayerDetail?.contractAddress ?? null,
+      relayerFireflyRegistered: Boolean(
+        relayerFirefly?.firefly_api_name &&
+        relayerFirefly?.firefly_interface_id
+      ),
       type: envType,
     }
   } catch (err) {

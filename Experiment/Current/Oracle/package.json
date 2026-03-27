@@ -1,0 +1,27 @@
+{
+  "name": "oracle-experiment-lab",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "experiment:data": "hardhat run experiment/scripts/experiment-data-stock.js",
+    "experiment:data-benchmark": "hardhat run experiment/scripts/experiment-data-aggregation-benchmark.js",
+    "data:prepare-industrial": "python3 experiment/scripts/prepare-industrial-data-aggregation.py",
+    "experiment:data-industrial": "hardhat run experiment/scripts/experiment-data-industrial-aggregation.js",
+    "report:data-industrial": "node experiment/scripts/generate-data-industrial-report.js",
+    "experiment:data-industrial-report": "npm run data:prepare-industrial && npm run experiment:data-industrial && npm run report:data-industrial",
+    "experiment:overall-bft": "hardhat run experiment/scripts/experiment-overall-bft.js",
+    "experiment:compute-10-scenarios": "hardhat run experiment/scripts/experiment-compute-10-scenarios.js",
+    "experiment:dmn-complexity": "hardhat run experiment/scripts/experiment-dmn-complexity.js",
+    "experiment:security-whitelist-signature": "hardhat run experiment/scripts/experiment-security-whitelist-signature.js",
+    "report:compute-unified": "node experiment/scripts/generate-compute-unified-report.js",
+    "report:compute-task": "node experiment/scripts/generate-compute-task-report.js",
+    "experiment:compute-unified": "npm run experiment:compute-10-scenarios && npm run experiment:dmn-complexity && npm run report:compute-unified",
+    "experiment:three": "npm run experiment:overall-bft && npm run experiment:data-benchmark && npm run experiment:compute-10-scenarios",
+    "experiment:all": "npm run experiment:data && npm run experiment:three"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^3.0.8",
+    "hardhat": "^2.22.10"
+  }
+}

@@ -28,9 +28,9 @@ export const fireflyFileTransfer = async (coreUrl: string, uploadedFile: any) =>
             }
         });
         return res.data;
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error occurred while making post request:", error);
-        return [];
+        throw new Error(error?.response?.data?.message || error?.message || "Firefly file upload failed");
     }
 }
 
@@ -48,9 +48,9 @@ export const fireflyDataTransfer = async (coreUrl: string, data: any) => {
     try {
         const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/messages/private`, data);
         return res.data;
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error occurred while making post request:", error);
-        return [];
+        throw new Error(error?.response?.data?.message || error?.message || "Firefly data transfer failed");
     }
 }
 
@@ -146,9 +146,9 @@ export const invokeEventAction = async (coreUrl: string, contractName: string, e
             }
         });
         return res.data;
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error occurred while making post request:", error);
-        return [];
+        throw new Error(error?.response?.data?.message || error?.message || "Invoke event failed");
     }
 }
 
@@ -160,9 +160,9 @@ export const invokeGatewayAction = async (coreUrl: string, contractName: string,
             }
         });
         return res.data;
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error occurred while making post request:", error);
-        return [];
+        throw new Error(error?.response?.data?.message || error?.message || "Invoke gateway failed");
     }
 }
 
@@ -174,9 +174,9 @@ export const invokeBusinessRuleAction = async (coreUrl: string, contractName: st
             }
         });
         return res.data;
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error occurred while making post request:", error);
-        return [];
+        throw new Error(error?.response?.data?.message || error?.message || "Invoke business rule failed");
     }
 }
 
@@ -191,9 +191,9 @@ export const invokeMessageAction = async (coreUrl: string, contractName: string,
             "key": identity,
         });
         return res.data;
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error occurred while making post request:", error);
-        return [];
+        throw new Error(error?.response?.data?.message || error?.message || "Invoke message failed");
     }
 }
 
@@ -222,11 +222,6 @@ export const callFireflyContract = async (
 }
 
 export const invokeCreateInstance = async (chaincodeUrl: string, data: any) => {
-    console.log("chaincodeUrl", chaincodeUrl);
-    console.log(data)
-
-    // return
-
     try {
         const res = await fireflyAPI.post(`${chaincodeUrl.slice(0, -4)}/invoke/CreateInstance`, {
             "input": {

@@ -1,0 +1,22 @@
+SplitWorkflow  = "split_workflow", Identifier, "{",
+                 MainContract, SplitPoint, Submodel, Submodel, "}" ;
+
+MainContract   = "main_contract", Identifier, ";" ;
+
+SplitPoint     = "split_point", Identifier, "{",
+                 "from_submodel", Identifier, ";",
+                 "to_submodel", Identifier, ";",
+                 "handoff_event", Identifier, ";",
+                 "}" ;
+
+Submodel       = "submodel", Identifier, "{",
+                 "start_node", String, ";",
+                 "end_node", String, ";",
+                 "node_count", Number, ";",
+                 "}" ;
+
+Identifier     = Letter, { Letter | Digit | "_" } ;
+String         = "\"", { ? any char except quote ? }, "\"" ;
+Number         = Digit, { Digit } ;
+Letter         = "A".."Z" | "a".."z" ;
+Digit          = "0".."9" ;

@@ -38,7 +38,6 @@ const InviteMembership: React.FC<Props> = ({ onSubmit }) => {
   };
 
   const onFinishFailed = (errorInfo: any) => {
-    console.log("Failed:", errorInfo);
   };
 
   type FieldType = {

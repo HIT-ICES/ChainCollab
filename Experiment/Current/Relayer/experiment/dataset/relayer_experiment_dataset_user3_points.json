@@ -1,0 +1,41 @@
+{
+  "name": "relayer_split_user3_points_v1",
+  "description": "Three user-specified BPMN cases with explicit split points; merge points kept as documentation.",
+  "chains": {
+    "source": {
+      "name": "chainA",
+      "type": "local-anvil-evm",
+      "rpcUrl": "http://127.0.0.1:8545",
+      "chainId": 31337
+    },
+    "target": {
+      "name": "chainB",
+      "type": "local-anvil-evm",
+      "rpcUrl": "http://127.0.0.1:9545",
+      "chainId": 31338
+    }
+  },
+  "bpmnCases": [
+    {
+      "path": "/home/logres/system/Experiment/CaseTest/BikeRental.bpmn",
+      "splitPointIds": ["ChoreographyTask_141gqps"],
+      "mergePointId": "ChoreographyTask_141gqps"
+    },
+    {
+      "path": "/home/logres/system/Experiment/CaseTest/Hotel Booking.bpmn",
+      "splitPointIds": ["ChoreographyTask_177ikw5"],
+      "mergePointId": "ChoreographyTask_177ikw5"
+    },
+    {
+      "path": "/home/logres/system/Experiment/CaseTest/IncidentManagement.bpmn",
+      "splitPointIds": ["Gateway_1lr7zva"],
+      "mergePointId": "ChoreographyTask_02opmn4"
+    }
+  ],
+  "taskPolicy": {
+    "fixedTasksPerCase": 10,
+    "budgetMultiplier": 3,
+    "minTasks": 10,
+    "maxTasks": 10
+  }
+}

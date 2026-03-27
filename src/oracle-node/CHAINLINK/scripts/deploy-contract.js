@@ -87,12 +87,17 @@ async function deploy() {
         }
 
         const forceDmn = process.env.FORCE_DMN_CONTRACT === '1';
+        const dmnContractName =
+            process.env.DMN_CONTRACT_NAME ||
+            (process.env.DMN_MODE === 'lite'
+                ? 'MyChainlinkRequesterDMN_Lite'
+                : 'MyChainlinkRequesterDMN');
         const selectContractKey = (deployment) => {
             if (forceDmn) {
-                return 'contracts/MyChainlinkRequesterDMN.sol:MyChainlinkRequesterDMN';
+                return `contracts/${dmnContractName}.sol:${dmnContractName}`;
             }
             if (deployment && deployment.dmnJobId && !deployment.jobId) {
-                return 'contracts/MyChainlinkRequesterDMN.sol:MyChainlinkRequesterDMN';
+                return `contracts/${dmnContractName}.sol:${dmnContractName}`;
             }
             return 'contracts/MyChainlinkRequester.sol:MyChainlinkRequester';
         };

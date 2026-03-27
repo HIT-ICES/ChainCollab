@@ -55,7 +55,7 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({ name, email, onDelete }) =>
         />
       </Card.Grid>
       <Card.Grid style={gridDetailStyle}>
-        <Link strong onClick={() => console.log("View Details")} disabled={true}  >
+        <Link strong disabled={true}  >
           VIEW DETAILS
         </Link>
       </Card.Grid>

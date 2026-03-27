@@ -1,0 +1,806 @@
+{
+  "generatedAt": "2026-03-03T20:17:35.975Z",
+  "datasetConfig": {
+    "path": "/home/logres/system/Experiment/Current/Relayer/datasets/relayer_experiment_dataset.json",
+    "loaded": true,
+    "taskPolicy": {
+      "fixedTasksPerCase": 1,
+      "budgetMultiplier": 3,
+      "minTasks": 1,
+      "maxTasks": 1
+    }
+  },
+  "translator": {
+    "root": "/home/logres/system/src/newTranslator",
+    "python": "/home/logres/system/src/newTranslator/.venv/bin/python",
+    "splitModeEntry": "/home/logres/system/src/newTranslator/.venv/bin/python -m generator.bpmn_to_dsl --split-mode"
+  },
+  "cases": [
+    {
+      "caseId": "Hotel_Booking",
+      "bpmnPath": "/home/logres/system/Experiment/CaseTest/Hotel Booking.bpmn",
+      "generatedArtifacts": {
+        "splitPlanPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Hotel_Booking/split-plan.json",
+        "sesePath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Hotel_Booking/split/Hotel_Booking.sese.json",
+        "b2cPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Hotel_Booking.b2c",
+        "solidityPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Hotel_Booking/full_solidity/Hotel_Booking.sol",
+        "splitDslPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Hotel_Booking/split/Hotel_Booking.split.dsl",
+        "splitContracts": {
+          "sourceContractName": "Hotel_BookingSubmodelA",
+          "sourceContractPath": "/home/logres/system/Experiment/Current/Relayer/contracts/generated/Hotel_BookingSubmodelA.sol",
+          "targetContractName": "Hotel_BookingSubmodelB",
+          "targetContractPath": "/home/logres/system/Experiment/Current/Relayer/contracts/generated/Hotel_BookingSubmodelB.sol"
+        }
+      },
+      "split": {
+        "model": "dual-submodel",
+        "selectedMarker": "UNKNOWN",
+        "selectedMerge": "UNKNOWN",
+        "submodels": [
+          {
+            "submodelId": "Hotel_Booking_sub_1",
+            "entryNodes": [
+              "StartEvent_1jtgn3j"
+            ],
+            "exitNodes": [
+              "EndEvent_146eii4"
+            ],
+            "nodeIds": [
+              "StartEvent_1jtgn3j",
+              "ChoreographyTask_1jv6c24",
+              "ExclusiveGateway_106je4z",
+              "ChoreographyTask_13nkbkb",
+              "ExclusiveGateway_0hs3ztq",
+              "EventBasedGateway_1fxpmyn",
+              "ChoreographyTask_177ikw5",
+              "ChoreographyTask_09lf521",
+              "EndEvent_0366pfz",
+              "ChoreographyTask_0suxm4u",
+              "ExclusiveGateway_0nzwv7v",
+              "EndEvent_08edp7f",
+              "ChoreographyTask_1iimt7t",
+              "EndEvent_146eii4"
+            ],
+            "nodeCount": 14,
+            "condensedSize": 14
+          },
+          {
+            "submodelId": "Hotel_Booking_sub_2",
+            "entryNodes": [
+              "UNKNOWN"
+            ],
+            "exitNodes": [
+              "UNKNOWN"
+            ],
+            "nodeIds": [
+              "UNKNOWN"
+            ],
+            "nodeCount": 1,
+            "condensedSize": 1
+          }
+        ],
+        "taskBudget": 1
+      },
+      "crossChainPlan": {
+        "sourceChain": "chainA",
+        "targetChain": "chainB",
+        "routing": [
+          {
+            "submodelId": "Hotel_Booking_sub_1",
+            "route": "chainA->relayer->chainB"
+          },
+          {
+            "submodelId": "Hotel_Booking_sub_2",
+            "route": "chainA->relayer->chainB"
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "customer_new",
+      "bpmnPath": "/home/logres/system/Experiment/BPMNwithDMNexample/customer_new.bpmn",
+      "generatedArtifacts": {
+        "splitPlanPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/customer_new/split-plan.json",
+        "sesePath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/customer_new/split/customer_new.sese.json",
+        "b2cPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/customer_new.b2c",
+        "solidityPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/customer_new/full_solidity/customer_new.sol",
+        "splitDslPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/customer_new/split/customer_new.split.dsl",
+        "splitContracts": {
+          "sourceContractName": "customer_newSubmodelA",
+          "sourceContractPath": "/home/logres/system/Experiment/Current/Relayer/contracts/generated/customer_newSubmodelA.sol",
+          "targetContractName": "customer_newSubmodelB",
+          "targetContractPath": "/home/logres/system/Experiment/Current/Relayer/contracts/generated/customer_newSubmodelB.sol"
+        }
+      },
+      "split": {
+        "model": "dual-submodel",
+        "selectedMarker": "UNKNOWN",
+        "selectedMerge": "UNKNOWN",
+        "submodels": [
+          {
+            "submodelId": "customer_new_sub_1",
+            "entryNodes": [
+              "Event_1jtgn3j"
+            ],
+            "exitNodes": [
+              "Event_143ykco"
+            ],
+            "nodeIds": [
+              "Event_1jtgn3j",
+              "ChoreographyTask_1jv6c24",
+              "ExclusiveGateway_106je4z",
+              "ChoreographyTask_13nkbkb",
+              "ExclusiveGateway_0hs3ztq",
+              "EventBasedGateway_1fxpmyn",
+              "ChoreographyTask_177ikw5",
+              "ChoreographyTask_09lf521",
+              "Event_0366pfz",
+              "ChoreographyTask_0suxm4u",
+              "ExclusiveGateway_0nzwv7v",
+              "ChoreographyTask_1iimt7t",
+              "Event_146eii4",
+              "ChoreographyTask_1khafgk",
+              "Gateway_1bhtapl",
+              "Gateway_04h9e6e",
+              "ChoreographyTask_1c9swul",
+              "Activity_1yl9tfp",
+              "Activity_0ibsbry",
+              "Event_143ykco"
+            ],
+            "nodeCount": 20,
+            "condensedSize": 20
+          },
+          {
+            "submodelId": "customer_new_sub_2",
+            "entryNodes": [
+              "UNKNOWN"
+            ],
+            "exitNodes": [
+              "UNKNOWN"
+            ],
+            "nodeIds": [
+              "UNKNOWN"
+            ],
+            "nodeCount": 1,
+            "condensedSize": 1
+          }
+        ],
+        "taskBudget": 1
+      },
+      "crossChainPlan": {
+        "sourceChain": "chainA",
+        "targetChain": "chainB",
+        "routing": [
+          {
+            "submodelId": "customer_new_sub_1",
+            "route": "chainA->relayer->chainB"
+          },
+          {
+            "submodelId": "customer_new_sub_2",
+            "route": "chainA->relayer->chainB"
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "SupplyChain",
+      "bpmnPath": "/home/logres/system/Experiment/CaseTest/SupplyChain.bpmn",
+      "generatedArtifacts": {
+        "splitPlanPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/SupplyChain/split-plan.json",
+        "sesePath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/SupplyChain/split/SupplyChain.sese.json",
+        "b2cPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/SupplyChain.b2c",
+        "solidityPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/SupplyChain/full_solidity/SupplyChain.sol",
+        "splitDslPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/SupplyChain/split/SupplyChain.split.dsl",
+        "splitContracts": {
+          "sourceContractName": "SupplyChainSubmodelA",
+          "sourceContractPath": "/home/logres/system/Experiment/Current/Relayer/contracts/generated/SupplyChainSubmodelA.sol",
+          "targetContractName": "SupplyChainSubmodelB",
+          "targetContractPath": "/home/logres/system/Experiment/Current/Relayer/contracts/generated/SupplyChainSubmodelB.sol"
+        }
+      },
+      "split": {
+        "model": "dual-submodel",
+        "selectedMarker": "UNKNOWN",
+        "selectedMerge": "UNKNOWN",
+        "submodels": [
+          {
+            "submodelId": "SupplyChain_sub_1",
+            "entryNodes": [
+              "Event_06sexe6"
+            ],
+            "exitNodes": [
+              "Event_13pbqdz"
+            ],
+            "nodeIds": [
+              "Event_06sexe6",
+              "ChoreographyTask_0tyax7p",
+              "ChoreographyTask_0m4d50p",
+              "Gateway_0onpe6x",
+              "ChoreographyTask_0i0ht39",
+              "ChoreographyTask_145bktk",
+              "Gateway_1fbifca",
+              "ChoreographyTask_1cceq4q",
+              "ChoreographyTask_1tkm8jm",
+              "ChoreographyTask_0q1fvry",
+              "ChoreographyTask_0p8dcch",
+              "ChoreographyTask_0s4ig1m",
+              "ChoreographyTask_1q3p8t2",
+              "Event_13pbqdz"
+            ],
+            "nodeCount": 14,
+            "condensedSize": 14
+          },
+          {
+            "submodelId": "SupplyChain_sub_2",
+            "entryNodes": [
+              "UNKNOWN"
+            ],
+            "exitNodes": [
+              "UNKNOWN"
+            ],
+            "nodeIds": [
+              "UNKNOWN"
+            ],
+            "nodeCount": 1,
+            "condensedSize": 1
+          }
+        ],
+        "taskBudget": 1
+      },
+      "crossChainPlan": {
+        "sourceChain": "chainA",
+        "targetChain": "chainB",
+        "routing": [
+          {
+            "submodelId": "SupplyChain_sub_1",
+            "route": "chainA->relayer->chainB"
+          },
+          {
+            "submodelId": "SupplyChain_sub_2",
+            "route": "chainA->relayer->chainB"
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "Blood_analysis",
+      "bpmnPath": "/home/logres/system/Experiment/CaseTest/Blood_analysis.bpmn",
+      "generatedArtifacts": {
+        "splitPlanPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Blood_analysis/split-plan.json",
+        "sesePath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Blood_analysis/split/Blood_analysis.sese.json",
+        "b2cPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Blood_analysis.b2c",
+        "solidityPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Blood_analysis/full_solidity/Blood_analysis.sol",
+        "splitDslPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Blood_analysis/split/Blood_analysis.split.dsl",
+        "splitContracts": {
+          "sourceContractName": "Blood_analysisSubmodelA",
+          "sourceContractPath": "/home/logres/system/Experiment/Current/Relayer/contracts/generated/Blood_analysisSubmodelA.sol",
+          "targetContractName": "Blood_analysisSubmodelB",
+          "targetContractPath": "/home/logres/system/Experiment/Current/Relayer/contracts/generated/Blood_analysisSubmodelB.sol"
+        }
+      },
+      "split": {
+        "model": "dual-submodel",
+        "selectedMarker": "UNKNOWN",
+        "selectedMerge": "UNKNOWN",
+        "submodels": [
+          {
+            "submodelId": "Blood_analysis_sub_1",
+            "entryNodes": [
+              "StartEvent_0m7hz56"
+            ],
+            "exitNodes": [
+              "EndEvent_110myff"
+            ],
+            "nodeIds": [
+              "StartEvent_0m7hz56",
+              "ParallelGateway_1pgjqtw",
+              "ChoreographyTask_10lckh7",
+              "ChoreographyTask_131v44n",
+              "ChoreographyTask_1732eky",
+              "ParallelGateway_16ab76f",
+              "ChoreographyTask_1bkb191",
+              "EndEvent_110myff"
+            ],
+            "nodeCount": 8,
+            "condensedSize": 8
+          },
+          {
+            "submodelId": "Blood_analysis_sub_2",
+            "entryNodes": [
+              "UNKNOWN"
+            ],
+            "exitNodes": [
+              "UNKNOWN"
+            ],
+            "nodeIds": [
+              "UNKNOWN"
+            ],
+            "nodeCount": 1,
+            "condensedSize": 1
+          }
+        ],
+        "taskBudget": 1
+      },
+      "crossChainPlan": {
+        "sourceChain": "chainA",
+        "targetChain": "chainB",
+        "routing": [
+          {
+            "submodelId": "Blood_analysis_sub_1",
+            "route": "chainA->relayer->chainB"
+          },
+          {
+            "submodelId": "Blood_analysis_sub_2",
+            "route": "chainA->relayer->chainB"
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "amazon_new2",
+      "bpmnPath": "/home/logres/system/Experiment/BPMNwithDMNcase/amazon_new2.bpmn",
+      "generatedArtifacts": {
+        "splitPlanPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/amazon_new2/split-plan.json",
+        "sesePath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/amazon_new2/split/amazon_new2.sese.json",
+        "b2cPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/amazon_new2.b2c",
+        "solidityPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/amazon_new2/full_solidity/amazon_new2.sol",
+        "splitDslPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/amazon_new2/split/amazon_new2.split.dsl",
+        "splitContracts": {
+          "sourceContractName": "amazon_new2SubmodelA",
+          "sourceContractPath": "/home/logres/system/Experiment/Current/Relayer/contracts/generated/amazon_new2SubmodelA.sol",
+          "targetContractName": "amazon_new2SubmodelB",
+          "targetContractPath": "/home/logres/system/Experiment/Current/Relayer/contracts/generated/amazon_new2SubmodelB.sol"
+        }
+      },
+      "split": {
+        "model": "dual-submodel",
+        "selectedMarker": "UNKNOWN",
+        "selectedMerge": "UNKNOWN",
+        "submodels": [
+          {
+            "submodelId": "amazon_new2_sub_1",
+            "entryNodes": [
+              "Event_0ojehz6"
+            ],
+            "exitNodes": [
+              "Gateway_0ivv4vg"
+            ],
+            "nodeIds": [
+              "Event_0ojehz6",
+              "ChoreographyTask_15hdy0f",
+              "Gateway_0jgq0a6",
+              "ChoreographyTask_0qvin75",
+              "ChoreographyTask_0qv0nys",
+              "ChoreographyTask_1xe5w82",
+              "ChoreographyTask_08v8azc",
+              "Gateway_0auc3he",
+              "ChoreographyTask_14x309o",
+              "Activity_0tya4bp",
+              "ChoreographyTask_0wtdaho",
+              "ChoreographyTask_09o0tby",
+              "Event_0ci2gl8",
+              "Event_0dyp0ut",
+              "Gateway_0ivv4vg"
+            ],
+            "nodeCount": 15,
+            "condensedSize": 15
+          },
+          {
+            "submodelId": "amazon_new2_sub_2",
+            "entryNodes": [
+              "UNKNOWN"
+            ],
+            "exitNodes": [
+              "UNKNOWN"
+            ],
+            "nodeIds": [
+              "UNKNOWN"
+            ],
+            "nodeCount": 1,
+            "condensedSize": 1
+          }
+        ],
+        "taskBudget": 1
+      },
+      "crossChainPlan": {
+        "sourceChain": "chainA",
+        "targetChain": "chainB",
+        "routing": [
+          {
+            "submodelId": "amazon_new2_sub_1",
+            "route": "chainA->relayer->chainB"
+          },
+          {
+            "submodelId": "amazon_new2_sub_2",
+            "route": "chainA->relayer->chainB"
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "PizzaOrder",
+      "bpmnPath": "/home/logres/system/Experiment/CaseTest/PizzaOrder.bpmn",
+      "generatedArtifacts": {
+        "splitPlanPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/PizzaOrder/split-plan.json",
+        "sesePath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/PizzaOrder/split/PizzaOrder.sese.json",
+        "b2cPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/PizzaOrder.b2c",
+        "solidityPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/PizzaOrder/full_solidity/PizzaOrder.sol",
+        "splitDslPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/PizzaOrder/split/PizzaOrder.split.dsl",
+        "splitContracts": {
+          "sourceContractName": "PizzaOrderSubmodelA",
+          "sourceContractPath": "/home/logres/system/Experiment/Current/Relayer/contracts/generated/PizzaOrderSubmodelA.sol",
+          "targetContractName": "PizzaOrderSubmodelB",
+          "targetContractPath": "/home/logres/system/Experiment/Current/Relayer/contracts/generated/PizzaOrderSubmodelB.sol"
+        }
+      },
+      "split": {
+        "model": "dual-submodel",
+        "selectedMarker": "UNKNOWN",
+        "selectedMerge": "UNKNOWN",
+        "submodels": [
+          {
+            "submodelId": "PizzaOrder_sub_1",
+            "entryNodes": [
+              "Event_1a62z0q"
+            ],
+            "exitNodes": [
+              "Event_04u53jh"
+            ],
+            "nodeIds": [
+              "Event_1a62z0q",
+              "ChoreographyTask_1w7glmc",
+              "Gateway_0nafkvy",
+              "ChoreographyTask_1jx2djv",
+              "ChoreographyTask_16rozc7",
+              "ChoreographyTask_0zxgisv",
+              "ChoreographyTask_0fdwpvb",
+              "ChoreographyTask_18fddae",
+              "Gateway_1pguang",
+              "Event_04u53jh"
+            ],
+            "nodeCount": 10,
+            "condensedSize": 10
+          },
+          {
+            "submodelId": "PizzaOrder_sub_2",
+            "entryNodes": [
+              "UNKNOWN"
+            ],
+            "exitNodes": [
+              "UNKNOWN"
+            ],
+            "nodeIds": [
+              "UNKNOWN"
+            ],
+            "nodeCount": 1,
+            "condensedSize": 1
+          }
+        ],
+        "taskBudget": 1
+      },
+      "crossChainPlan": {
+        "sourceChain": "chainA",
+        "targetChain": "chainB",
+        "routing": [
+          {
+            "submodelId": "PizzaOrder_sub_1",
+            "route": "chainA->relayer->chainB"
+          },
+          {
+            "submodelId": "PizzaOrder_sub_2",
+            "route": "chainA->relayer->chainB"
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "Rental_Claim",
+      "bpmnPath": "/home/logres/system/Experiment/CaseTest/Rental Claim.bpmn",
+      "generatedArtifacts": {
+        "splitPlanPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Rental_Claim/split-plan.json",
+        "sesePath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Rental_Claim/split/Rental_Claim.sese.json",
+        "b2cPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Rental_Claim.b2c",
+        "solidityPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Rental_Claim/full_solidity/Rental_Claim.sol",
+        "splitDslPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Rental_Claim/split/Rental_Claim.split.dsl",
+        "splitContracts": {
+          "sourceContractName": "Rental_ClaimSubmodelA",
+          "sourceContractPath": "/home/logres/system/Experiment/Current/Relayer/contracts/generated/Rental_ClaimSubmodelA.sol",
+          "targetContractName": "Rental_ClaimSubmodelB",
+          "targetContractPath": "/home/logres/system/Experiment/Current/Relayer/contracts/generated/Rental_ClaimSubmodelB.sol"
+        }
+      },
+      "split": {
+        "model": "dual-submodel",
+        "selectedMarker": "UNKNOWN",
+        "selectedMerge": "UNKNOWN",
+        "submodels": [
+          {
+            "submodelId": "Rental_Claim_sub_1",
+            "entryNodes": [
+              "Event_19zgkxm"
+            ],
+            "exitNodes": [
+              "Event_0fzlrii"
+            ],
+            "nodeIds": [
+              "Event_19zgkxm",
+              "Gateway_10ut9pb",
+              "ChoreographyTask_0s00q5x",
+              "ChoreographyTask_1klnbrq",
+              "ChoreographyTask_1bq32w6",
+              "Gateway_1v1x25n",
+              "ChoreographyTask_037mvh7",
+              "ChoreographyTask_022o4en",
+              "ChoreographyTask_1ebjrqa",
+              "ChoreographyTask_00q9tuv",
+              "Event_1pjpbaw",
+              "Event_120hui7",
+              "ChoreographyTask_1hbf1v1",
+              "Event_0fzlrii"
+            ],
+            "nodeCount": 14,
+            "condensedSize": 14
+          },
+          {
+            "submodelId": "Rental_Claim_sub_2",
+            "entryNodes": [
+              "UNKNOWN"
+            ],
+            "exitNodes": [
+              "UNKNOWN"
+            ],
+            "nodeIds": [
+              "UNKNOWN"
+            ],
+            "nodeCount": 1,
+            "condensedSize": 1
+          }
+        ],
+        "taskBudget": 1
+      },
+      "crossChainPlan": {
+        "sourceChain": "chainA",
+        "targetChain": "chainB",
+        "routing": [
+          {
+            "submodelId": "Rental_Claim_sub_1",
+            "route": "chainA->relayer->chainB"
+          },
+          {
+            "submodelId": "Rental_Claim_sub_2",
+            "route": "chainA->relayer->chainB"
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "Purchase",
+      "bpmnPath": "/home/logres/system/Experiment/CaseTest/Purchase.bpmn",
+      "generatedArtifacts": {
+        "splitPlanPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Purchase/split-plan.json",
+        "sesePath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Purchase/split/Purchase.sese.json",
+        "b2cPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Purchase.b2c",
+        "solidityPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Purchase/full_solidity/Purchase.sol",
+        "splitDslPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Purchase/split/Purchase.split.dsl",
+        "splitContracts": {
+          "sourceContractName": "PurchaseSubmodelA",
+          "sourceContractPath": "/home/logres/system/Experiment/Current/Relayer/contracts/generated/PurchaseSubmodelA.sol",
+          "targetContractName": "PurchaseSubmodelB",
+          "targetContractPath": "/home/logres/system/Experiment/Current/Relayer/contracts/generated/PurchaseSubmodelB.sol"
+        }
+      },
+      "split": {
+        "model": "dual-submodel",
+        "selectedMarker": "UNKNOWN",
+        "selectedMerge": "UNKNOWN",
+        "submodels": [
+          {
+            "submodelId": "Purchase_sub_1",
+            "entryNodes": [
+              "Event_0ehnwwz"
+            ],
+            "exitNodes": [
+              "Event_194zr5n"
+            ],
+            "nodeIds": [
+              "Event_0ehnwwz",
+              "ChoreographyTask_1d8axmm",
+              "Gateway_1ltys0e",
+              "ChoreographyTask_01rdy6m",
+              "ChoreographyTask_0huz12d",
+              "Gateway_025uwvp",
+              "ChoreographyTask_13g05bg",
+              "ChoreographyTask_1k9vb6k",
+              "Event_0e3j88g",
+              "ChoreographyTask_1yl8kdd",
+              "Event_1o9guxu",
+              "Event_194zr5n"
+            ],
+            "nodeCount": 12,
+            "condensedSize": 12
+          },
+          {
+            "submodelId": "Purchase_sub_2",
+            "entryNodes": [
+              "UNKNOWN"
+            ],
+            "exitNodes": [
+              "UNKNOWN"
+            ],
+            "nodeIds": [
+              "UNKNOWN"
+            ],
+            "nodeCount": 1,
+            "condensedSize": 1
+          }
+        ],
+        "taskBudget": 1
+      },
+      "crossChainPlan": {
+        "sourceChain": "chainA",
+        "targetChain": "chainB",
+        "routing": [
+          {
+            "submodelId": "Purchase_sub_1",
+            "route": "chainA->relayer->chainB"
+          },
+          {
+            "submodelId": "Purchase_sub_2",
+            "route": "chainA->relayer->chainB"
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "Manufactory",
+      "bpmnPath": "/home/logres/system/Experiment/CaseTest/Manufactory.bpmn",
+      "generatedArtifacts": {
+        "splitPlanPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Manufactory/split-plan.json",
+        "sesePath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Manufactory/split/Manufactory.sese.json",
+        "b2cPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Manufactory.b2c",
+        "solidityPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Manufactory/full_solidity/Manufactory.sol",
+        "splitDslPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/Manufactory/split/Manufactory.split.dsl",
+        "splitContracts": {
+          "sourceContractName": "ManufactorySubmodelA",
+          "sourceContractPath": "/home/logres/system/Experiment/Current/Relayer/contracts/generated/ManufactorySubmodelA.sol",
+          "targetContractName": "ManufactorySubmodelB",
+          "targetContractPath": "/home/logres/system/Experiment/Current/Relayer/contracts/generated/ManufactorySubmodelB.sol"
+        }
+      },
+      "split": {
+        "model": "dual-submodel",
+        "selectedMarker": "UNKNOWN",
+        "selectedMerge": "UNKNOWN",
+        "submodels": [
+          {
+            "submodelId": "Manufactory_sub_1",
+            "entryNodes": [
+              "Event_1kw6wq7"
+            ],
+            "exitNodes": [
+              "Event_1tsex1f"
+            ],
+            "nodeIds": [
+              "Event_1kw6wq7",
+              "ChoreographyTask_1uikhp7",
+              "ChoreographyTask_0jqf1hd",
+              "Gateway_0fkskz5",
+              "ChoreographyTask_1i5kfjn",
+              "ChoreographyTask_1qfx43c",
+              "ChoreographyTask_0vs79p0",
+              "Event_0k561h7",
+              "Event_1tsex1f"
+            ],
+            "nodeCount": 9,
+            "condensedSize": 9
+          },
+          {
+            "submodelId": "Manufactory_sub_2",
+            "entryNodes": [
+              "UNKNOWN"
+            ],
+            "exitNodes": [
+              "UNKNOWN"
+            ],
+            "nodeIds": [
+              "UNKNOWN"
+            ],
+            "nodeCount": 1,
+            "condensedSize": 1
+          }
+        ],
+        "taskBudget": 1
+      },
+      "crossChainPlan": {
+        "sourceChain": "chainA",
+        "targetChain": "chainB",
+        "routing": [
+          {
+            "submodelId": "Manufactory_sub_1",
+            "route": "chainA->relayer->chainB"
+          },
+          {
+            "submodelId": "Manufactory_sub_2",
+            "route": "chainA->relayer->chainB"
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "ManagementSystem",
+      "bpmnPath": "/home/logres/system/Experiment/CaseTest/ManagementSystem.bpmn",
+      "generatedArtifacts": {
+        "splitPlanPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/ManagementSystem/split-plan.json",
+        "sesePath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/ManagementSystem/split/ManagementSystem.sese.json",
+        "b2cPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/ManagementSystem.b2c",
+        "solidityPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/ManagementSystem/full_solidity/ManagementSystem.sol",
+        "splitDslPath": "/home/logres/system/Experiment/Current/Relayer/runtime/translator_split_mode/ManagementSystem/split/ManagementSystem.split.dsl",
+        "splitContracts": {
+          "sourceContractName": "ManagementSystemSubmodelA",
+          "sourceContractPath": "/home/logres/system/Experiment/Current/Relayer/contracts/generated/ManagementSystemSubmodelA.sol",
+          "targetContractName": "ManagementSystemSubmodelB",
+          "targetContractPath": "/home/logres/system/Experiment/Current/Relayer/contracts/generated/ManagementSystemSubmodelB.sol"
+        }
+      },
+      "split": {
+        "model": "dual-submodel",
+        "selectedMarker": "UNKNOWN",
+        "selectedMerge": "UNKNOWN",
+        "submodels": [
+          {
+            "submodelId": "ManagementSystem_sub_1",
+            "entryNodes": [
+              "Event_1y0sgtz"
+            ],
+            "exitNodes": [
+              "Event_03qnwuo"
+            ],
+            "nodeIds": [
+              "Event_1y0sgtz",
+              "Gateway_1ufqfso",
+              "Gateway_0e7k79c",
+              "ChoreographyTask_1xoz3od",
+              "ChoreographyTask_0p0fmsg",
+              "ChoreographyTask_0gryre6",
+              "Gateway_067p6u8",
+              "Gateway_1m5huw8",
+              "ChoreographyTask_00l67sg",
+              "Event_03qnwuo"
+            ],
+            "nodeCount": 10,
+            "condensedSize": 10
+          },
+          {
+            "submodelId": "ManagementSystem_sub_2",
+            "entryNodes": [
+              "UNKNOWN"
+            ],
+            "exitNodes": [
+              "UNKNOWN"
+            ],
+            "nodeIds": [
+              "UNKNOWN"
+            ],
+            "nodeCount": 1,
+            "condensedSize": 1
+          }
+        ],
+        "taskBudget": 1
+      },
+      "crossChainPlan": {
+        "sourceChain": "chainA",
+        "targetChain": "chainB",
+        "routing": [
+          {
+            "submodelId": "ManagementSystem_sub_1",
+            "route": "chainA->relayer->chainB"
+          },
+          {
+            "submodelId": "ManagementSystem_sub_2",
+            "route": "chainA->relayer->chainB"
+          }
+        ]
+      }
+    }
+  ]
+}

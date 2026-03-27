@@ -22,6 +22,19 @@ class Task(models.Model):
         max_length=16,
         default="PENDING",
     )
+    idempotency_key = models.CharField(
+        help_text="Idempotency key for safe retries",
+        max_length=255,
+        null=True,
+        blank=True,
+        db_index=True,
+    )
+    step = models.CharField(
+        help_text="Current task step",
+        max_length=64,
+        null=True,
+        blank=True,
+    )
     target_type = models.CharField(
         help_text="Target model name",
         max_length=64,
@@ -36,6 +49,11 @@ class Task(models.Model):
     )
     result = models.JSONField(
         help_text="Task result payload",
+        null=True,
+        blank=True,
+    )
+    rollback_info = models.JSONField(
+        help_text="Rollback context payload",
         null=True,
         blank=True,
     )
@@ -145,6 +163,21 @@ class EthEnvironment(models.Model):
         help_text="status of identity contract,can be NO|PENDING|SETTINGUP|STARTED|FAILED",
         max_length=32,
         default="NO",
+    )
+    chainlink_status = models.CharField(
+        help_text="status of chainlink,can be NO|SETTINGUP|STARTED|FAILED",
+        max_length=32,
+        default="NO",
+    )
+    chainlink_detail = models.JSONField(
+        help_text="chainlink deployment detail cache",
+        null=True,
+        blank=True,
+    )
+    dmn_detail = models.JSONField(
+        help_text="dmn deployment detail cache",
+        null=True,
+        blank=True,
     )
     create_at = models.DateTimeField(
         help_text="create time of environment", auto_now_add=True

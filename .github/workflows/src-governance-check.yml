@@ -1,0 +1,23 @@
+name: src-governance-check
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Run governance check
+        run: |
+          python3 ./src/scripts/governance_check.py

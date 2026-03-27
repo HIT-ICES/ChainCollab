@@ -13,6 +13,7 @@ if not __package__:
         sys.path.insert(0, str(PACKAGE_ROOT))
 
 from generator.translator import GoChaincodeTranslator  # type: ignore
+from generator.split_mode import SplitModeConfig, generate_split_mode_artifacts  # type: ignore
 
 
 def parse_args() -> argparse.Namespace:
@@ -42,6 +43,43 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Print the generated DSL to stdout instead of writing it to disk.",
     )
+    parser.add_argument(
+        "--split-mode",
+        action="store_true",
+        help=(
+            "Enable split generation mode. If disabled (default), split markers are ignored."
+        ),
+    )
+    parser.add_argument(
+        "--split-point-id",
+        action="append",
+        default=[],
+        help="Manually specify BPMN node id(s) as split markers (repeatable).",
+    )
+    parser.add_argument(
+        "--merge-point-id",
+        default="",
+        help="Optional BPMN node id used as merge/end boundary for closed-interval extraction.",
+    )
+    parser.add_argument(
+        "--split-marker-key",
+        default="splitPoint",
+        help="BPMN documentation JSON key used for split marker detection.",
+    )
+    parser.add_argument(
+        "--split-output-dir",
+        type=Path,
+        default=Path("build/split"),
+        help="Split mode output root directory.",
+    )
+    parser.add_argument(
+        "--split-contracts-dir",
+        type=Path,
+        default=None,
+        help=(
+            "Optional output directory for split contracts; defaults to <split-output-dir>/<case>/split/contracts."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -66,6 +104,23 @@ def main() -> int:
             contract_name=args.contract_name,
         )
         print(f"DSL contract written to {output_path}")
+
+        if args.split_mode:
+            split_cfg = SplitModeConfig(
+                bpmn_path=args.bpmn_file.resolve(),
+                b2c_output_path=output_path.resolve(),
+                translator_root=Path(__file__).resolve().parent.parent,
+                split_output_dir=args.split_output_dir.resolve(),
+                split_contract_dir=args.split_contracts_dir.resolve()
+                if args.split_contracts_dir
+                else None,
+                split_point_ids=args.split_point_id,
+                merge_point_id=(args.merge_point_id.strip() or None),
+                split_marker_key=args.split_marker_key,
+                contract_name=args.contract_name,
+            )
+            result = generate_split_mode_artifacts(split_cfg)
+            print(f"Split plan written to {result.get('planPath')}")
 
     return 0
 

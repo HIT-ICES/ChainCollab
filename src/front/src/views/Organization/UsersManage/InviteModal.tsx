@@ -14,7 +14,6 @@ const InviteModal: React.FC = () => {
     const [inviteUser, inviteResult] = useInviteUser()
 
     const onFinish = (values: any) => {
-        console.log('Success:', values);
         inviteUser({
             orgId: currentOrgId,
             email: values.email

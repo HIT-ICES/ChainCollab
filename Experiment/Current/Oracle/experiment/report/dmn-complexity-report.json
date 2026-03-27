@@ -1,0 +1,157 @@
+{
+  "generatedAt": "2026-03-03T14:40:06.276Z",
+  "caseCount": 10,
+  "rows": [
+    {
+      "seq": 1,
+      "caseId": "D01",
+      "scenarioName": "钢铁产线质量放行",
+      "datasetName": "UCI SECOM",
+      "datasetRef": "https://archive.ics.uci.edu/dataset/179/secom",
+      "modelType": "DecisionTable-FIRST",
+      "modelRaw": "table_first",
+      "complexityScale": 20,
+      "onchainGas": 77791,
+      "expression": "FIRST hit policy over quality rules (x,y -> release decision)"
+    },
+    {
+      "seq": 2,
+      "caseId": "D02",
+      "scenarioName": "钢铁产线质量放行（高规则数）",
+      "datasetName": "UCI SECOM",
+      "datasetRef": "https://archive.ics.uci.edu/dataset/179/secom",
+      "modelType": "DecisionTable-FIRST",
+      "modelRaw": "table_first",
+      "complexityScale": 60,
+      "onchainGas": 129510,
+      "expression": "FIRST hit policy with larger decision table"
+    },
+    {
+      "seq": 3,
+      "caseId": "D03",
+      "scenarioName": "SWaT 多维告警聚合",
+      "datasetName": "SWaT",
+      "datasetRef": "https://itrust.sutd.edu.sg/itrust-labs_datasets/dataset_info/",
+      "modelType": "DecisionTable-COLLECT",
+      "modelRaw": "table_collect",
+      "complexityScale": 30,
+      "onchainGas": 79649,
+      "expression": "COLLECT SUM over alarm rules"
+    },
+    {
+      "seq": 4,
+      "caseId": "D04",
+      "scenarioName": "WADI 漏损告警聚合（高规则数）",
+      "datasetName": "WADI",
+      "datasetRef": "https://itrust.sutd.edu.sg/itrust-labs_datasets/dataset_info/",
+      "modelType": "DecisionTable-COLLECT",
+      "modelRaw": "table_collect",
+      "complexityScale": 80,
+      "onchainGas": 163861,
+      "expression": "COLLECT SUM with dense rule set"
+    },
+    {
+      "seq": 5,
+      "caseId": "D05",
+      "scenarioName": "SECOM 评分卡判定",
+      "datasetName": "UCI SECOM",
+      "datasetRef": "https://archive.ics.uci.edu/dataset/179/secom",
+      "modelType": "Scorecard",
+      "modelRaw": "scorecard",
+      "complexityScale": 16,
+      "onchainGas": 46770,
+      "expression": "Scorecard aggregation over 16 indicators"
+    },
+    {
+      "seq": 6,
+      "caseId": "D06",
+      "scenarioName": "SECOM 评分卡判定（高维）",
+      "datasetName": "UCI SECOM",
+      "datasetRef": "https://archive.ics.uci.edu/dataset/179/secom",
+      "modelType": "Scorecard",
+      "modelRaw": "scorecard",
+      "complexityScale": 48,
+      "onchainGas": 91570,
+      "expression": "Scorecard aggregation over 48 indicators"
+    },
+    {
+      "seq": 7,
+      "caseId": "D07",
+      "scenarioName": "BATADAL 决策图推理",
+      "datasetName": "BATADAL",
+      "datasetRef": "https://www.batadal.net/data.html",
+      "modelType": "DecisionGraph",
+      "modelRaw": "decision_graph",
+      "complexityScale": 960,
+      "onchainGas": 487777,
+      "expression": "Decision-graph iterative evaluation (8x12x10)"
+    },
+    {
+      "seq": 8,
+      "caseId": "D08",
+      "scenarioName": "BATADAL 决策图推理（中高复杂）",
+      "datasetName": "BATADAL",
+      "datasetRef": "https://www.batadal.net/data.html",
+      "modelType": "DecisionGraph",
+      "modelRaw": "decision_graph",
+      "complexityScale": 2800,
+      "onchainGas": 1311865,
+      "expression": "Decision-graph iterative evaluation (10x20x14)"
+    },
+    {
+      "seq": 9,
+      "caseId": "D09",
+      "scenarioName": "C-MAPSS 退化决策图推理",
+      "datasetName": "NASA C-MAPSS",
+      "datasetRef": "https://data.nasa.gov/dataset/cmapss-jet-engine-simulated-data",
+      "modelType": "DecisionGraph",
+      "modelRaw": "decision_graph",
+      "complexityScale": 6048,
+      "onchainGas": 2728373,
+      "expression": "Decision-graph iterative evaluation (12x28x18)"
+    },
+    {
+      "seq": 10,
+      "caseId": "D10",
+      "scenarioName": "C-MAPSS 退化决策图推理（高复杂）",
+      "datasetName": "NASA C-MAPSS",
+      "datasetRef": "https://data.nasa.gov/dataset/cmapss-jet-engine-simulated-data",
+      "modelType": "DecisionGraph",
+      "modelRaw": "decision_graph",
+      "complexityScale": 12096,
+      "onchainGas": 5323135,
+      "expression": "Decision-graph iterative evaluation (14x36x24)"
+    }
+  ],
+  "summary": {
+    "avgGas": 1044030.1,
+    "minGas": 46770,
+    "maxGas": 5323135,
+    "byModel": [
+      {
+        "modelType": "DecisionTable-FIRST",
+        "avgGas": 103650.5,
+        "minGas": 77791,
+        "maxGas": 129510
+      },
+      {
+        "modelType": "DecisionTable-COLLECT",
+        "avgGas": 121755,
+        "minGas": 79649,
+        "maxGas": 163861
+      },
+      {
+        "modelType": "Scorecard",
+        "avgGas": 69170,
+        "minGas": 46770,
+        "maxGas": 91570
+      },
+      {
+        "modelType": "DecisionGraph",
+        "avgGas": 2462787.5,
+        "minGas": 487777,
+        "maxGas": 5323135
+      }
+    ]
+  }
+}

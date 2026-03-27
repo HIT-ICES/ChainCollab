@@ -1,0 +1,151 @@
+contract GeneratedContract {
+
+    participants {
+        participant Participant_0ykkst0 {
+            msp "CustomerMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Customer"
+
+            }
+        }
+        participant Participant_1be5jmm {
+            msp "ManufacturerMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Manufacturer"
+
+            }
+        }
+
+    }
+
+
+
+    globals {
+        ConcelAck: string
+        InvoiceContent: string
+        OrderContent: string
+        QuoteContent: string
+        QuoteRequest: string
+        Cancelation: string
+        Confirm_message: string
+        PayRecord: string
+
+    }
+
+
+
+    messages {
+        message Message_03avvjh from Participant_0ykkst0 to Participant_1be5jmm {
+            initial state INACTIVE
+            schema "cancelation"
+        }
+        message Message_05o1aax from Participant_0ykkst0 to Participant_1be5jmm {
+            initial state INACTIVE
+            schema "payRecord"
+        }
+        message Message_08gg8ej from Participant_1be5jmm to Participant_0ykkst0 {
+            initial state INACTIVE
+            schema "{}"
+        }
+        message Message_0vzhrso from Participant_0ykkst0 to Participant_1be5jmm {
+            initial state INACTIVE
+            schema "OrderContent"
+        }
+        message Message_1b9cl8r from Participant_1be5jmm to Participant_0ykkst0 {
+            initial state INACTIVE
+            schema "ConcelAck"
+        }
+        message Message_1br1kb3 from Participant_1be5jmm to Participant_0ykkst0 {
+            initial state INACTIVE
+            schema "QuoteContent"
+        }
+        message Message_1f5hev8 from Participant_0ykkst0 to Participant_1be5jmm {
+            initial state INACTIVE
+            schema "confirm message"
+        }
+        message Message_1nq7msq from Participant_0ykkst0 to Participant_1be5jmm {
+            initial state INACTIVE
+            schema "QuoteRequest"
+        }
+        message Message_1vlpo12 from Participant_1be5jmm to Participant_0ykkst0 {
+            initial state INACTIVE
+            schema "InvoiceContent"
+        }
+
+    }
+
+
+
+    gateways {
+        gateway Gateway_0fkskz5 {
+            type event
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    events {
+        event Event_1kw6wq7 {
+            initial state READY
+        }
+        event Event_0k561h7 {
+            initial state INACTIVE
+        }
+        event Event_1tsex1f {
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    businessrules {
+
+    }
+
+
+
+    oracletasks {
+
+    }
+
+
+
+    flows {
+        start event Event_1kw6wq7 enables Message_1nq7msq;
+
+        when message Message_1nq7msq completed
+        then enable Message_1br1kb3;
+        when message Message_1br1kb3 completed
+        then enable Message_0vzhrso;
+        when message Message_0vzhrso completed
+        then enable Message_08gg8ej;
+        when message Message_08gg8ej completed
+        then enable Gateway_0fkskz5;
+        when message Message_03avvjh completed
+        then disable Message_1f5hev8, enable Message_1b9cl8r;
+        when message Message_1b9cl8r completed
+        then enable Event_1tsex1f;
+        when message Message_1f5hev8 completed
+        then disable Message_03avvjh, enable Message_1vlpo12;
+        when message Message_1vlpo12 completed
+        then enable Message_05o1aax;
+        when message Message_05o1aax completed
+        then enable Event_0k561h7;
+
+        when gateway Gateway_0fkskz5 completed
+        then enable Message_03avvjh, enable Message_1f5hev8;
+
+    }
+
+}

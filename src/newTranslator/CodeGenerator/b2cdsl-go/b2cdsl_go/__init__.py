@@ -68,6 +68,7 @@ class DSLContractAdapter:
         self.gateways: List[Any] = []
         self.events: List[Any] = []
         self.business_rules: List[Any] = []
+        self.oracle_tasks: List[Any] = []
         self.flow_items: List[Any] = []
         self._collect_sections()
 
@@ -86,6 +87,8 @@ class DSLContractAdapter:
                 self.events.extend(getattr(section, "events", []))
             elif cls_name == "BusinessRuleSection":
                 self.business_rules.extend(getattr(section, "rules", []))
+            elif cls_name == "OracleTaskSection":
+                self.oracle_tasks.extend(getattr(section, "tasks", []))
             elif cls_name == "FlowSection":
                 self.flow_items.extend(getattr(section, "flowItems", []))
 
@@ -124,6 +127,7 @@ class FlowRenderer:
         self.parallel_requirements: dict[str, dict[str, Any]] = {}
         self.event_actions: dict[str, List[str]] = {}
         self.rule_actions: dict[tuple[str, str], List[str]] = {}
+        self.oracle_actions: dict[tuple[str, str], List[str]] = {}
         self._collect_flow_actions()
 
     def render_blocks(self) -> List[str]:
@@ -131,6 +135,7 @@ class FlowRenderer:
         codes.extend(self._render_start_events())
         codes.extend(self._render_messages())
         codes.extend(self._render_gateways())
+        codes.extend(self._render_oracle_tasks())
         codes.extend(self._render_events())
         return [code.strip() for code in codes if code.strip()]
 
@@ -174,6 +179,9 @@ class FlowRenderer:
                 actions = self._join_actions(getattr(flow, "actions", []))
                 condition = getattr(flow, "ruleCond", "done")
                 self._append_action(self.rule_actions, (flow.rule.name, condition), actions)
+            elif cls_name == "OracleTaskFlow":
+                actions = self._join_actions(getattr(flow, "actions", []))
+                self._append_action(self.oracle_actions, (flow.task.name, "done"), actions)
             elif cls_name == "EventFlow":
                 actions = self._join_actions(getattr(flow, "actions", []))
                 self._append_action(self.event_actions, flow.ev.name, actions)
@@ -239,6 +247,75 @@ class FlowRenderer:
                     parallel_guard=join_guard,
                 )
             )
+        return blocks
+
+    def _render_oracle_tasks(self) -> List[str]:
+        blocks: List[str] = []
+        for task in self.adapter.oracle_tasks:
+            output_mappings = getattr(task, "outputMappings", []) or []
+            params: List[tuple[str, str, str]] = []
+            assignments: List[dict[str, str]] = []
+            for mapping in output_mappings:
+                global_ref = getattr(mapping, "globalRef", None)
+                global_name = getattr(global_ref, "name", "")
+                if not global_name:
+                    continue
+                param_name = public_the_name(
+                    (getattr(mapping, "dmnParam", "") or global_name).strip()
+                )
+                go_type = B2C_TO_GO_TYPE.get(
+                    self.global_type_map.get(global_name, "string"),
+                    "string",
+                )
+                params.append((go_type, param_name, global_name))
+                assignments.append(
+                    {
+                        "name": public_the_name(global_name),
+                        "value": param_name,
+                    }
+                )
+
+            param_sig = ""
+            if params:
+                param_sig = ", " + ", ".join(f"{name} {go_type}" for go_type, name, _ in params)
+
+            set_globals = ""
+            if assignments:
+                set_globals = self._render_template(
+                    SET_GLOBAL_TEMPLATE,
+                    assignments=assignments,
+                )
+
+            done_actions = "".join(self.oracle_actions.get((task.name, "done"), []))
+            body = f"""func (cc *SmartContract) {task.name}(ctx contractapi.TransactionContextInterface, instanceID string{param_sig}) error {{
+    stub := ctx.GetStub()
+
+    instance, err := cc.GetInstance(ctx, instanceID)
+    if err != nil {{
+        return err
+    }}
+
+    oracleTask, err := cc.ReadEvent(ctx, instanceID, "{task.name}")
+    if err != nil {{
+        return err
+    }}
+
+    if oracleTask.EventState != ENABLED {{
+        errorMessage := fmt.Sprintf("Oracle task state %s is not allowed", oracleTask.EventID)
+        fmt.Println(errorMessage)
+        return fmt.Errorf(errorMessage)
+    }}
+
+    cc.ChangeEventState(ctx, instance, "{task.name}", COMPLETED)
+{self._indent(set_globals, 1)}{self._indent(done_actions, 1)}    stub.SetEvent("{task.name}", []byte("Oracle task has been completed"))
+    err = cc.SetInstance(ctx, instance)
+    if err != nil {{
+        return err
+    }}
+
+    return nil
+}}"""
+            blocks.append(body)
         return blocks
 
     def _render_events(self) -> List[str]:
@@ -353,6 +430,8 @@ class FlowRenderer:
             return f'instance.InstanceActionEvents["{name}"].EventState == COMPLETED'
         if cls_name == "BusinessRule":
             return f'instance.InstanceBusinessRules["{name}"].State == COMPLETED'
+        if cls_name == "OracleTask":
+            return f'instance.InstanceActionEvents["{name}"].EventState == COMPLETED'
         return None
 
     def _indent(self, code: str, depth: int = 1) -> str:
@@ -446,6 +525,8 @@ class FlowRenderer:
             return f"\tcc.ChangeEventState(ctx, instance, \"{element.name}\", {state})\n"
         if cls_name == "BusinessRule":
             return f"\tcc.ChangeBusinessRuleState(ctx, instance, \"{element.name}\", {state})\n"
+        if cls_name == "OracleTask":
+            return f"\tcc.ChangeEventState(ctx, instance, \"{element.name}\", {state})\n"
         return ""
 
     def _render_template(self, template_name: str, **context: Any) -> str:
@@ -518,6 +599,7 @@ class GoChaincodeRenderer:
         return {
             "start_event": start_event,
             "end_events": end_events,
+            "oracle_tasks": [task.name for task in self.adapter.oracle_tasks],
             "messages": [
                 {
                     "name": message.name,

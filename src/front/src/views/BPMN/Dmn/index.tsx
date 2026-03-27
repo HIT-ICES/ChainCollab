@@ -63,7 +63,6 @@ const DmnList: React.FC = () => {
             <Button
               type="primary"
               onClick={() => {
-                console.log("click dmn detail", record);
               }}
             >
               Detail

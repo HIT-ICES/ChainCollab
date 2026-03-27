@@ -1,0 +1,57 @@
+{
+  "generatedAt": "2026-03-01T15:22:50.916375Z",
+  "input": {
+    "bpmn": "/home/logres/system/src/newTranslator/build/bpmn/BikeRental.bpmn"
+  },
+  "splitMarkers": {
+    "manual": [],
+    "autoDetected": [],
+    "selected": "ParallelGateway_0himv1h",
+    "markerKey": "splitPoint"
+  },
+  "fullArtifacts": {
+    "b2cPath": "/home/logres/system/src/newTranslator/build/split_toggle_test/on.b2c",
+    "solidityDir": "/home/logres/system/src/newTranslator/build/split_toggle_test/split/BikeRental/full_solidity",
+    "solidityPath": "."
+  },
+  "splitArtifacts": {
+    "sesePath": "/home/logres/system/src/newTranslator/build/split_toggle_test/split/BikeRental/split/BikeRental.sese.json",
+    "splitDslPath": "/home/logres/system/src/newTranslator/build/split_toggle_test/split/BikeRental/split/BikeRental.split.dsl",
+    "submodels": [
+      {
+        "submodelId": "BikeRental_sub_1",
+        "entryNodes": [
+          "ChoreographyTask_0v7d1xd",
+          "ChoreographyTask_1tcylad",
+          "ExclusiveGateway_0uhgcse",
+          "ExclusiveGateway_1e98v4d"
+        ],
+        "exitNodes": [
+          "ParallelGateway_0himv1h"
+        ],
+        "nodeCount": 24,
+        "condensedSize": 21
+      },
+      {
+        "submodelId": "BikeRental_sub_2",
+        "entryNodes": [
+          "ChoreographyTask_0v7d1xd",
+          "ChoreographyTask_1tcylad",
+          "ExclusiveGateway_0uhgcse",
+          "ExclusiveGateway_1e98v4d"
+        ],
+        "exitNodes": [
+          "ParallelGateway_0yw95j2"
+        ],
+        "nodeCount": 21,
+        "condensedSize": 18
+      }
+    ],
+    "contracts": {
+      "sourceContractName": "BikeRentalSubmodelA",
+      "sourceContractPath": "/home/logres/system/src/newTranslator/build/split_toggle_test/split/BikeRental/split/contracts/BikeRentalSubmodelA.sol",
+      "targetContractName": "BikeRentalSubmodelB",
+      "targetContractPath": "/home/logres/system/src/newTranslator/build/split_toggle_test/split/BikeRental/split/contracts/BikeRentalSubmodelB.sol"
+    }
+  }
+}

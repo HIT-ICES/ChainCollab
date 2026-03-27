@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { TableProps, Table, Tag, Button, Card } from "antd";
 import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
-import { log } from "console";
 
 interface Props {
   chaincodeId: string;
@@ -22,7 +21,6 @@ interface DataType {
 
 import { useChannelData } from './hooks.ts';
 import { useAppSelector } from "@/redux/hooks.ts";
-import { channel } from "diagnostics_channel";
 
 import { retriveChaincode, approveChaincode, commitChaincode } from '@/api/resourceAPI'
 
@@ -33,11 +31,10 @@ const DeployedChannels: React.FC<Props> = ({ chaincodeId }) => {
   const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
   const currentOrgId = useAppSelector((state) => state.org.currentOrgId);
   const [channelList, syncChannelList] = useChannelData(currentEnvId, chaincodeId);
-  console.log(channelList)
 
   const handleChangeApproval = async (channelName: string, resourceSetId: string) => {
     const chaincode = await retriveChaincode(currentEnvId, chaincodeId);
-    const res = await approveChaincode(
+    await approveChaincode(
       chaincode.name, chaincode.version, channelName, currentEnvId, resourceSetId
     )
     syncChannelList();
@@ -45,7 +42,7 @@ const DeployedChannels: React.FC<Props> = ({ chaincodeId }) => {
 
   const handleCommit = async (channelName: string, resourceSetId: string) => {
     const chaincode = await retriveChaincode(currentEnvId, chaincodeId);
-    const res = await commitChaincode(
+    await commitChaincode(
       chaincode.name, chaincode.version, channelName, currentEnvId, resourceSetId
     )
     syncChannelList();
@@ -85,7 +82,6 @@ const DeployedChannels: React.FC<Props> = ({ chaincodeId }) => {
           key: "status",
           align: "center",
           render: (membershipApprovals, record) => {
-            console.log("membershipApprovals:", membershipApprovals)
             return (
               <>
                 {/* {membershipApprovals.filter((item) => item.orgId === currentOrgId).map((approval) => { */}

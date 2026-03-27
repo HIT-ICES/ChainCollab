@@ -162,7 +162,6 @@ export const useFireflyData = (
                 if (ignore) return
                 setFirefly(finalData);
             } catch (e) {
-                console.log(e);
             }
         }
         fetchData();

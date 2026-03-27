@@ -39,6 +39,31 @@ from common.lib.firefly.firefly import Firefly_cli
 LOG = logging.getLogger(__name__)
 
 
+def _runtime_dir() -> str:
+    from pathlib import Path
+    here = Path(__file__).resolve()
+    for parent in here.parents:
+        if parent.name == "src":
+            runtime = parent / "runtime" / "tasks"
+            runtime.mkdir(parents=True, exist_ok=True)
+            return str(runtime)
+    runtime = Path("/tmp") / "runtime" / "tasks"
+    runtime.mkdir(parents=True, exist_ok=True)
+    return str(runtime)
+
+
+def _task_log_path(task_id: str) -> str:
+    from pathlib import Path
+    return str(Path(_runtime_dir()) / f"task-{task_id}.log")
+
+
+def _append_task_log(path: str, message: str):
+    from django.utils import timezone
+    timestamp = timezone.now().isoformat()
+    with open(path, "a", encoding="utf-8") as handle:
+        handle.write(f"[{timestamp}] {message}\n")
+
+
 class FireflyViewSet(viewsets.ModelViewSet):
     permission_classes = [
         IsAuthenticated,
@@ -47,14 +72,27 @@ class FireflyViewSet(viewsets.ModelViewSet):
 
     def _start_task(self, task, handler, *args, **kwargs):
         def runner():
+            log_path = _task_log_path(str(task.id))
+            _append_task_log(log_path, f"task start type={task.type} target={task.target_type}:{task.target_id}")
             task.status = "RUNNING"
-            task.save(update_fields=["status", "updated_at"])
+            task.result = (task.result or {})
+            if isinstance(task.result, dict):
+                task.result.setdefault("log_path", log_path)
+            else:
+                task.result = {"log_path": log_path}
+            task.save(update_fields=["status", "result", "updated_at"])
             try:
                 result = handler(*args, **kwargs)
+                _append_task_log(log_path, "task handler finished")
                 task.status = "SUCCESS"
-                task.result = result
+                if isinstance(result, dict):
+                    result.setdefault("log_path", log_path)
+                    task.result = result
+                else:
+                    task.result = {"result": result, "log_path": log_path}
                 task.error = None
             except Exception as exc:
+                _append_task_log(log_path, f"task failed: {exc}")
                 LOG.exception("Task %s failed", task.id)
                 task.status = "FAILED"
                 task.error = str(exc)

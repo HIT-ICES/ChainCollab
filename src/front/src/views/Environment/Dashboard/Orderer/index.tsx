@@ -72,7 +72,7 @@ const Overview: React.FC = () => {
       <>
         <Col span={12}>
           <Card title="Orderer Nodes" style={{ width: "100%", height: "100%" }}>
-            <Card.Grid style={{ width: "100%", height: "100%", cursor: "pointer" }} onClick={() => console.log("clicked")}>
+            <Card.Grid style={{ width: "100%", height: "100%", cursor: "pointer" }}>
               <Row style={{ width: "100%", height: "100%" }}>
                 <Col span={2} style={customColStyle}>
                   <DeploymentUnitOutlined style={{ fontSize: 32 }} />

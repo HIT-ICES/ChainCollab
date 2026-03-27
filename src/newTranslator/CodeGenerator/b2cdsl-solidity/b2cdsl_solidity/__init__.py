@@ -51,6 +51,7 @@ class DSLContractAdapter:
         self.gateways: List[Any] = []
         self.events: List[Any] = []
         self.business_rules: List[Any] = []
+        self.oracle_tasks: List[Any] = []
         self.flow_items: List[Any] = []
         self._collect_sections()
 
@@ -69,6 +70,8 @@ class DSLContractAdapter:
                 self.events.extend(getattr(section, "events", []))
             elif cls_name == "BusinessRuleSection":
                 self.business_rules.extend(getattr(section, "rules", []))
+            elif cls_name == "OracleTaskSection":
+                self.oracle_tasks.extend(getattr(section, "tasks", []))
             elif cls_name == "FlowSection":
                 self.flow_items.extend(getattr(section, "flowItems", []))
 
@@ -91,6 +94,7 @@ class SolidityRenderer:
             "messages": self._message_payload(),
             "gateways": self._simple_payload(self.adapter.gateways),
             "events": self._simple_payload(self.adapter.events),
+            "oracle_tasks": self._oracle_task_payload(),
             "globals": self._global_variables(),
             "business_rules": self._business_rule_payload(rule_done_actions),
             "flow_functions": flow_functions,
@@ -112,6 +116,9 @@ class SolidityRenderer:
             },
             "rule": {
                 item.name: sanitize_identifier(item.name) for item in self.adapter.business_rules
+            },
+            "oracle_task": {
+                item.name: sanitize_identifier(item.name) for item in self.adapter.oracle_tasks
             },
         }
 
@@ -170,6 +177,46 @@ class SolidityRenderer:
             for global_var in self.adapter.globals
         ]
 
+    def _oracle_task_payload(self) -> List[dict]:
+        global_type_map = self._global_type_map()
+        payload: List[dict] = []
+        for task in self.adapter.oracle_tasks:
+            enum_name = sanitize_identifier(task.name)
+            oracle_type = getattr(task, "oracleType", "external-data")
+            data_source = getattr(task, "dataSource", "") or ""
+            compute_script = getattr(task, "computeScript", "") or ""
+            output_mappings = []
+            for mapping in getattr(task, "outputMappings", []) or []:
+                global_ref = getattr(mapping, "globalRef", None)
+                global_name = getattr(global_ref, "name", "")
+                if not global_name:
+                    continue
+                slot_name = sanitize_identifier(public_the_name(global_name))
+                param_name = sanitize_identifier(
+                    (getattr(mapping, "dmnParam", "") or global_name).strip()
+                )
+                output_mappings.append(
+                    {
+                        "param_name": param_name,
+                        "param_literal": json.dumps(param_name),
+                        "slot_name": slot_name,
+                        "sol_type": SOLIDITY_TYPE.get(global_type_map.get(global_name, "string"), "string"),
+                    }
+                )
+            payload.append(
+                {
+                    "name": task.name,
+                    "enum_name": enum_name,
+                    "initial_state": STATE_ALIAS.get(getattr(task, "initialState", None), "DISABLED"),
+                    "oracle_type": oracle_type,
+                    "task_name_literal": json.dumps(task.name),
+                    "data_source_literal": json.dumps(data_source),
+                    "compute_script_literal": json.dumps(compute_script),
+                    "output_mappings": output_mappings,
+                }
+            )
+        return payload
+
     def _business_rule_payload(self, rule_done_actions: dict[str, str]) -> List[dict]:
         payload: List[dict] = []
         for rule in self.adapter.business_rules:
@@ -204,6 +251,7 @@ class SolidityFlowRenderer:
         self.parallel_requirements: dict[str, dict[str, Any]] = {}
         self.event_actions: dict[str, List[str]] = {}
         self.rule_actions: dict[tuple[str, str], List[str]] = {}
+        self.oracle_actions: dict[tuple[str, str], List[str]] = {}
         self._collect_flow_actions()
 
     def render_blocks(self) -> List[str]:
@@ -211,6 +259,7 @@ class SolidityFlowRenderer:
         blocks.extend(self._render_start_events())
         blocks.extend(self._render_messages())
         blocks.extend(self._render_gateways())
+        blocks.extend(self._render_oracle_tasks())
         blocks.extend(self._render_events())
         return [block for block in blocks if block.strip()]
 
@@ -254,6 +303,9 @@ class SolidityFlowRenderer:
                 actions = self._join_actions(getattr(flow, "actions", []))
                 condition = getattr(flow, "ruleCond", "done")
                 self._append_action(self.rule_actions, (flow.rule.name, condition), actions)
+            elif cls_name == "OracleTaskFlow":
+                actions = self._join_actions(getattr(flow, "actions", []))
+                self._append_action(self.oracle_actions, (flow.task.name, "done"), actions)
             elif cls_name == "EventFlow":
                 actions = self._join_actions(getattr(flow, "actions", []))
                 self._append_action(self.event_actions, flow.ev.name, actions)
@@ -318,6 +370,80 @@ class SolidityFlowRenderer:
         g.state = ElementState.COMPLETED;
         emit GatewayDone(instanceId, GatewayKey.{enum_name});
 {action_block}
+    }}"""
+            functions.append(body)
+        return functions
+
+    def _render_oracle_tasks(self) -> List[str]:
+        functions: List[str] = []
+        for task in self.adapter.oracle_tasks:
+            enum_name = self.enum_maps["oracle_task"].get(task.name, sanitize_identifier(task.name))
+            oracle_type = getattr(task, "oracleType", "external-data")
+            task_name_literal = json.dumps(task.name)
+            data_source_literal = json.dumps(getattr(task, "dataSource", "") or "")
+            compute_script_literal = json.dumps(getattr(task, "computeScript", "") or "")
+
+            output_mappings = []
+            for mapping in getattr(task, "outputMappings", []) or []:
+                global_ref = getattr(mapping, "globalRef", None)
+                global_name = getattr(global_ref, "name", "")
+                if not global_name:
+                    continue
+                slot_name = sanitize_identifier(public_the_name(global_name))
+                param_name = sanitize_identifier(
+                    (getattr(mapping, "dmnParam", "") or global_name).strip()
+                )
+                output_mappings.append(
+                    {
+                        "param_literal": json.dumps(param_name),
+                        "slot_name": slot_name,
+                        "sol_type": SOLIDITY_TYPE.get(
+                            self.global_type_map.get(global_name, "string"),
+                            "string",
+                        ),
+                    }
+                )
+
+            assign_lines: List[str] = []
+            for idx, mapping in enumerate(output_mappings):
+                value_var = f"oracleValue{idx}"
+                param_literal = mapping["param_literal"]
+                if oracle_type == "compute-task":
+                    source_call = (
+                        f'oracle.runComputeTask(instanceId, {task_name_literal}, '
+                        f'{compute_script_literal}, {param_literal})'
+                    )
+                else:
+                    source_call = (
+                        f'oracle.getExternalData(instanceId, {task_name_literal}, '
+                        f'{data_source_literal}, {param_literal})'
+                    )
+                assign_lines.append(f"        string memory {value_var} = {source_call};")
+                if mapping["sol_type"] == "int256":
+                    assign_lines.append(
+                        f"        inst.stateMemory.{mapping['slot_name']} = _stringToInt({value_var});"
+                    )
+                elif mapping["sol_type"] == "bool":
+                    assign_lines.append(
+                        f"        inst.stateMemory.{mapping['slot_name']} = _stringToBool({value_var});"
+                    )
+                else:
+                    assign_lines.append(
+                        f"        inst.stateMemory.{mapping['slot_name']} = {value_var};"
+                    )
+            assign_block = "\n".join(assign_lines)
+            if assign_block:
+                assign_block += "\n"
+            done_actions = self._indent("".join(self.oracle_actions.get((task.name, "done"), [])), 2)
+            body = f"""function {enum_name}(uint256 instanceId) external onlyInitialized {{
+        Instance storage inst = _getInstance(instanceId);
+        ActionEvent storage ev = inst.events[EventKey.{enum_name}];
+        require(ev.exists, "oracle task not set");
+        require(ev.state == ElementState.ENABLED, "oracle task state not allowed");
+
+{assign_block}        ev.state = ElementState.COMPLETED;
+        emit ActionEventDone(instanceId, EventKey.{enum_name});
+{done_actions}
     }}"""
             functions.append(body)
         return functions
@@ -505,6 +631,9 @@ class SolidityFlowRenderer:
         if cls_name == "BusinessRule":
             enum_name = self.enum_maps["rule"].get(name, sanitize_identifier(name))
             return f"inst.businessRules[BusinessRuleKey.{enum_name}].state == ElementState.COMPLETED"
+        if cls_name == "OracleTask":
+            enum_name = self.enum_maps["oracle_task"].get(name, sanitize_identifier(name))
+            return f"inst.events[EventKey.{enum_name}].state == ElementState.COMPLETED"
         return None
 
     def _change_state_code(self, element: Any, state: str) -> str:
@@ -521,6 +650,9 @@ class SolidityFlowRenderer:
         if cls_name == "BusinessRule":
             enum_name = self.enum_maps["rule"].get(element.name, sanitize_identifier(element.name))
             return f"inst.businessRules[BusinessRuleKey.{enum_name}].state = ElementState.{state};\n"
+        if cls_name == "OracleTask":
+            enum_name = self.enum_maps["oracle_task"].get(element.name, sanitize_identifier(element.name))
+            return f"inst.events[EventKey.{enum_name}].state = ElementState.{state};\n"
         return ""
 
     def _indent(self, text: str, level: int = 1) -> str:

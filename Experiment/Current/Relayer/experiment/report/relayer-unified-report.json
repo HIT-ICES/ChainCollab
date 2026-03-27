@@ -1,0 +1,592 @@
+{
+  "generatedAt": "2026-03-04T14:03:48.394Z",
+  "dataset": {
+    "path": "/home/logres/system/Experiment/Current/Relayer/experiment/dataset/relayer_experiment_dataset.json",
+    "name": "relayer_split_industrial_cases_v3_cn10",
+    "caseCount": 10,
+    "cases": [
+      {
+        "caseId": "Hotel_Booking",
+        "bpmnPath": "/home/logres/system/Experiment/CaseTest/Hotel Booking.bpmn"
+      },
+      {
+        "caseId": "customer_new",
+        "bpmnPath": "/home/logres/system/Experiment/BPMNwithDMNexample/customer_new.bpmn"
+      },
+      {
+        "caseId": "SupplyChain",
+        "bpmnPath": "/home/logres/system/Experiment/CaseTest/SupplyChain.bpmn"
+      },
+      {
+        "caseId": "Blood_analysis",
+        "bpmnPath": "/home/logres/system/Experiment/CaseTest/Blood_analysis.bpmn"
+      },
+      {
+        "caseId": "amazon_new2",
+        "bpmnPath": "/home/logres/system/Experiment/BPMNwithDMNcase/amazon_new2.bpmn"
+      },
+      {
+        "caseId": "PizzaOrder",
+        "bpmnPath": "/home/logres/system/Experiment/CaseTest/PizzaOrder.bpmn"
+      },
+      {
+        "caseId": "Rental_Claim",
+        "bpmnPath": "/home/logres/system/Experiment/CaseTest/Rental Claim.bpmn"
+      },
+      {
+        "caseId": "Purchase",
+        "bpmnPath": "/home/logres/system/Experiment/CaseTest/Purchase.bpmn"
+      },
+      {
+        "caseId": "Manufactory",
+        "bpmnPath": "/home/logres/system/Experiment/CaseTest/Manufactory.bpmn"
+      },
+      {
+        "caseId": "ManagementSystem",
+        "bpmnPath": "/home/logres/system/Experiment/CaseTest/ManagementSystem.bpmn"
+      }
+    ]
+  },
+  "chains": {
+    "source": {
+      "name": "chainA",
+      "type": "local-anvil-evm",
+      "rpcUrl": "http://127.0.0.1:8545",
+      "chainId": 31337
+    },
+    "target": {
+      "name": "chainB",
+      "type": "local-anvil-evm",
+      "rpcUrl": "http://127.0.0.1:9545",
+      "chainId": 31338
+    }
+  },
+  "results": {
+    "splitLatency": {
+      "generatedAt": "2026-03-03T19:45:23.791Z",
+      "config": {
+        "caseCount": 3,
+        "totalTasks": 30,
+        "sourceChainId": 31337,
+        "targetChainId": 31338,
+        "datasetConfigPath": "/home/logres/system/Experiment/Current/Relayer/datasets/relayer_experiment_dataset_user3_points.json",
+        "taskPolicy": {
+          "fixedTasksPerCase": 10,
+          "budgetMultiplier": 3,
+          "minTasks": 10,
+          "maxTasks": 10
+        }
+      },
+      "overall": {
+        "submitted": 30,
+        "delivered": 30,
+        "payloadMatched": 30,
+        "successRate": 1,
+        "payloadIntegrityRate": 1,
+        "exactlyOnceRate": 1,
+        "latency": {
+          "chainAvgSec": 1.9666666666666666,
+          "chainP95Sec": 3,
+          "wallAvgMs": 2070.9191874666667,
+          "wallP95Ms": 2940.2914069999997
+        },
+        "gas": {
+          "requestAvg": 1372044.5333333334,
+          "acceptAvg": 426144.6666666667,
+          "bridgeAvg": 460949.8,
+          "executeAvg": 1337239.4,
+          "totalAvg": 1798189.2
+        }
+      },
+      "perCase": [
+        {
+          "caseId": "BikeRental",
+          "submitted": 10,
+          "sourceSteps": 25,
+          "targetSteps": 1,
+          "stepsPerWorkflow": 26,
+          "delivered": 10,
+          "replayAttempts": 1,
+          "replayBlocked": 1,
+          "sourceExecutedAvg": 25,
+          "targetExecutedAvg": 1,
+          "successRate": 1,
+          "payloadIntegrityRate": 1,
+          "exactlyOnceRate": 1,
+          "latency": {
+            "chainAvgSec": 2.8,
+            "chainP95Sec": 3,
+            "wallAvgMs": 2925.7147920999996,
+            "wallP95Ms": 3005.58697
+          },
+          "gas": {
+            "requestAvg": 2010053,
+            "acceptAvg": 355138,
+            "bridgeAvg": 460984.2,
+            "executeAvg": 1904206.8,
+            "totalAvg": 2365191
+          }
+        },
+        {
+          "caseId": "Hotel_Booking",
+          "submitted": 10,
+          "sourceSteps": 13,
+          "targetSteps": 1,
+          "stepsPerWorkflow": 14,
+          "delivered": 10,
+          "replayAttempts": 1,
+          "replayBlocked": 1,
+          "sourceExecutedAvg": 13,
+          "targetExecutedAvg": 1,
+          "successRate": 1,
+          "payloadIntegrityRate": 1,
+          "exactlyOnceRate": 1,
+          "latency": {
+            "chainAvgSec": 1.6,
+            "chainP95Sec": 2,
+            "wallAvgMs": 1638.3976992000014,
+            "wallP95Ms": 1674.2771329999996
+          },
+          "gas": {
+            "requestAvg": 1161034.2,
+            "acceptAvg": 355424.1,
+            "bridgeAvg": 460943.1,
+            "executeAvg": 1055515.2,
+            "totalAvg": 1516458.3
+          }
+        },
+        {
+          "caseId": "IncidentManagement",
+          "submitted": 10,
+          "sourceSteps": 10,
+          "targetSteps": 4,
+          "stepsPerWorkflow": 14,
+          "delivered": 10,
+          "replayAttempts": 1,
+          "replayBlocked": 1,
+          "sourceExecutedAvg": 10,
+          "targetExecutedAvg": 4,
+          "successRate": 1,
+          "payloadIntegrityRate": 1,
+          "exactlyOnceRate": 1,
+          "latency": {
+            "chainAvgSec": 1.5,
+            "chainP95Sec": 2,
+            "wallAvgMs": 1648.6450710999998,
+            "wallP95Ms": 1659.9825379999966
+          },
+          "gas": {
+            "requestAvg": 945046.4,
+            "acceptAvg": 567871.9,
+            "bridgeAvg": 460922.1,
+            "executeAvg": 1051996.2,
+            "totalAvg": 1512918.3
+          }
+        }
+      ]
+    },
+    "fullVsSplitLatency": {
+      "generatedAt": "2026-03-03T19:45:37.564Z",
+      "config": {
+        "datasetConfigPath": "/home/logres/system/Experiment/Current/Relayer/datasets/relayer_experiment_dataset_user3_points.json",
+        "caseCount": 3,
+        "comparedCaseCount": 3,
+        "excludedCases": [],
+        "latencyBaselineMs": 20000,
+        "sourceChainName": "chainA",
+        "sourceChainId": 31337,
+        "targetChainName": "chainB",
+        "targetChainId": 31338
+      },
+      "overall": {
+        "tasks": 30,
+        "full": {
+          "successRate": 1,
+          "chainAvgSec": 0.03333333333333333,
+          "chainP95Sec": 1,
+          "wallAvgMs": 20251.333774866667,
+          "wallP95Ms": 341.07440199999996,
+          "gasTotalAvg": 1184324.6666666667
+        },
+        "split": {
+          "successRate": 1,
+          "chainAvgSec": 1.9666666666666668,
+          "chainP95Sec": 3,
+          "wallAvgMs": 22070.91918746667,
+          "wallP95Ms": 3005.58697,
+          "gasTotalAvg": 1798189.2
+        },
+        "comparison": {
+          "chainDeltaSec": 1.9333333333333333,
+          "chainP95DeltaSec": 2,
+          "chainOverheadRatio": 58,
+          "wallDeltaMs": 1819.5854126000013,
+          "wallOverheadRatio": 0.0898501517395479,
+          "gasDelta": 613864.5333333332,
+          "gasOverheadRatio": 0.5183245360084254
+        }
+      },
+      "perCase": [
+        {
+          "caseId": "BikeRental",
+          "tasks": 10,
+          "comparable": true,
+          "full": {
+            "successRate": 1,
+            "chainAvgSec": 0,
+            "chainP95Sec": 0,
+            "wallAvgMs": 20322.3397188,
+            "wallRawAvgMs": 322.3397188,
+            "wallP95Ms": 341.07440199999996,
+            "gasTotalAvg": 1434903.6
+          },
+          "split": {
+            "successRate": 1,
+            "chainAvgSec": 2.8,
+            "chainP95Sec": 3,
+            "wallAvgMs": 22925.7147921,
+            "wallRawAvgMs": 2925.7147920999996,
+            "wallP95Ms": 3005.58697,
+            "gasTotalAvg": 2365191
+          },
+          "comparison": {
+            "chainDeltaSec": 2.8,
+            "chainP95DeltaSec": 3,
+            "chainOverheadRatio": null,
+            "wallDeltaMs": 2603.375073299998,
+            "wallOverheadRatio": 0.12810410165969427,
+            "gasDelta": 930287.3999999999,
+            "gasOverheadRatio": 0.6483274555865634
+          }
+        },
+        {
+          "caseId": "Hotel_Booking",
+          "tasks": 10,
+          "comparable": true,
+          "full": {
+            "successRate": 1,
+            "chainAvgSec": 0.1,
+            "chainP95Sec": 1,
+            "wallAvgMs": 20281.8277189,
+            "wallRawAvgMs": 281.82771890000004,
+            "wallP95Ms": 290.20217199999934,
+            "gasTotalAvg": 986260.6
+          },
+          "split": {
+            "successRate": 1,
+            "chainAvgSec": 1.6,
+            "chainP95Sec": 2,
+            "wallAvgMs": 21638.397699200003,
+            "wallRawAvgMs": 1638.3976992000014,
+            "wallP95Ms": 1674.2771329999996,
+            "gasTotalAvg": 1516458.3
+          },
+          "comparison": {
+            "chainDeltaSec": 1.5,
+            "chainP95DeltaSec": 1,
+            "chainOverheadRatio": 15,
+            "wallDeltaMs": 1356.5699803000025,
+            "wallOverheadRatio": 0.06688598281681771,
+            "gasDelta": 530197.7000000001,
+            "gasOverheadRatio": 0.5375837785672469
+          }
+        },
+        {
+          "caseId": "IncidentManagement",
+          "tasks": 10,
+          "comparable": true,
+          "full": {
+            "successRate": 1,
+            "chainAvgSec": 0,
+            "chainP95Sec": 0,
+            "wallAvgMs": 20149.8338869,
+            "wallRawAvgMs": 149.83388689999956,
+            "wallP95Ms": 157.56285299999945,
+            "gasTotalAvg": 1131809.8
+          },
+          "split": {
+            "successRate": 1,
+            "chainAvgSec": 1.5,
+            "chainP95Sec": 2,
+            "wallAvgMs": 21648.6450711,
+            "wallRawAvgMs": 1648.6450710999998,
+            "wallP95Ms": 1659.9825379999966,
+            "gasTotalAvg": 1512918.3
+          },
+          "comparison": {
+            "chainDeltaSec": 1.5,
+            "chainP95DeltaSec": 2,
+            "chainOverheadRatio": null,
+            "wallDeltaMs": 1498.8111841999998,
+            "wallOverheadRatio": 0.07438330224520714,
+            "gasDelta": 381108.5,
+            "gasOverheadRatio": 0.336724863135131
+          }
+        }
+      ]
+    }
+  },
+  "correctness": {
+    "generatedAt": "2026-03-03T19:45:23.791Z",
+    "config": {
+      "caseCount": 3,
+      "totalTasks": 30,
+      "sourceChainId": 31337,
+      "targetChainId": 31338,
+      "datasetConfigPath": "/home/logres/system/Experiment/Current/Relayer/datasets/relayer_experiment_dataset_user3_points.json",
+      "taskPolicy": {
+        "fixedTasksPerCase": 10,
+        "budgetMultiplier": 3,
+        "minTasks": 10,
+        "maxTasks": 10
+      }
+    },
+    "overall": {
+      "submitted": 30,
+      "delivered": 30,
+      "payloadMatched": 30,
+      "successRate": 1,
+      "payloadIntegrityRate": 1,
+      "exactlyOnceRate": 1,
+      "latency": {
+        "chainAvgSec": 1.9666666666666666,
+        "chainP95Sec": 3,
+        "wallAvgMs": 2070.9191874666667,
+        "wallP95Ms": 2940.2914069999997
+      },
+      "gas": {
+        "requestAvg": 1372044.5333333334,
+        "acceptAvg": 426144.6666666667,
+        "bridgeAvg": 460949.8,
+        "executeAvg": 1337239.4,
+        "totalAvg": 1798189.2
+      }
+    },
+    "perCase": [
+      {
+        "caseId": "BikeRental",
+        "submitted": 10,
+        "sourceSteps": 25,
+        "targetSteps": 1,
+        "stepsPerWorkflow": 26,
+        "delivered": 10,
+        "replayAttempts": 1,
+        "replayBlocked": 1,
+        "sourceExecutedAvg": 25,
+        "targetExecutedAvg": 1,
+        "successRate": 1,
+        "payloadIntegrityRate": 1,
+        "exactlyOnceRate": 1,
+        "latency": {
+          "chainAvgSec": 2.8,
+          "chainP95Sec": 3,
+          "wallAvgMs": 2925.7147920999996,
+          "wallP95Ms": 3005.58697
+        },
+        "gas": {
+          "requestAvg": 2010053,
+          "acceptAvg": 355138,
+          "bridgeAvg": 460984.2,
+          "executeAvg": 1904206.8,
+          "totalAvg": 2365191
+        }
+      },
+      {
+        "caseId": "Hotel_Booking",
+        "submitted": 10,
+        "sourceSteps": 13,
+        "targetSteps": 1,
+        "stepsPerWorkflow": 14,
+        "delivered": 10,
+        "replayAttempts": 1,
+        "replayBlocked": 1,
+        "sourceExecutedAvg": 13,
+        "targetExecutedAvg": 1,
+        "successRate": 1,
+        "payloadIntegrityRate": 1,
+        "exactlyOnceRate": 1,
+        "latency": {
+          "chainAvgSec": 1.6,
+          "chainP95Sec": 2,
+          "wallAvgMs": 1638.3976992000014,
+          "wallP95Ms": 1674.2771329999996
+        },
+        "gas": {
+          "requestAvg": 1161034.2,
+          "acceptAvg": 355424.1,
+          "bridgeAvg": 460943.1,
+          "executeAvg": 1055515.2,
+          "totalAvg": 1516458.3
+        }
+      },
+      {
+        "caseId": "IncidentManagement",
+        "submitted": 10,
+        "sourceSteps": 10,
+        "targetSteps": 4,
+        "stepsPerWorkflow": 14,
+        "delivered": 10,
+        "replayAttempts": 1,
+        "replayBlocked": 1,
+        "sourceExecutedAvg": 10,
+        "targetExecutedAvg": 4,
+        "successRate": 1,
+        "payloadIntegrityRate": 1,
+        "exactlyOnceRate": 1,
+        "latency": {
+          "chainAvgSec": 1.5,
+          "chainP95Sec": 2,
+          "wallAvgMs": 1648.6450710999998,
+          "wallP95Ms": 1659.9825379999966
+        },
+        "gas": {
+          "requestAvg": 945046.4,
+          "acceptAvg": 567871.9,
+          "bridgeAvg": 460922.1,
+          "executeAvg": 1051996.2,
+          "totalAvg": 1512918.3
+        }
+      }
+    ]
+  },
+  "overheadLatency": {
+    "generatedAt": "2026-03-03T19:45:37.564Z",
+    "config": {
+      "datasetConfigPath": "/home/logres/system/Experiment/Current/Relayer/datasets/relayer_experiment_dataset_user3_points.json",
+      "caseCount": 3,
+      "comparedCaseCount": 3,
+      "excludedCases": [],
+      "latencyBaselineMs": 20000,
+      "sourceChainName": "chainA",
+      "sourceChainId": 31337,
+      "targetChainName": "chainB",
+      "targetChainId": 31338
+    },
+    "overall": {
+      "tasks": 30,
+      "full": {
+        "successRate": 1,
+        "chainAvgSec": 0.03333333333333333,
+        "chainP95Sec": 1,
+        "wallAvgMs": 20251.333774866667,
+        "wallP95Ms": 341.07440199999996,
+        "gasTotalAvg": 1184324.6666666667
+      },
+      "split": {
+        "successRate": 1,
+        "chainAvgSec": 1.9666666666666668,
+        "chainP95Sec": 3,
+        "wallAvgMs": 22070.91918746667,
+        "wallP95Ms": 3005.58697,
+        "gasTotalAvg": 1798189.2
+      },
+      "comparison": {
+        "chainDeltaSec": 1.9333333333333333,
+        "chainP95DeltaSec": 2,
+        "chainOverheadRatio": 58,
+        "wallDeltaMs": 1819.5854126000013,
+        "wallOverheadRatio": 0.0898501517395479,
+        "gasDelta": 613864.5333333332,
+        "gasOverheadRatio": 0.5183245360084254
+      }
+    },
+    "perCase": [
+      {
+        "caseId": "BikeRental",
+        "tasks": 10,
+        "comparable": true,
+        "full": {
+          "successRate": 1,
+          "chainAvgSec": 0,
+          "chainP95Sec": 0,
+          "wallAvgMs": 20322.3397188,
+          "wallRawAvgMs": 322.3397188,
+          "wallP95Ms": 341.07440199999996,
+          "gasTotalAvg": 1434903.6
+        },
+        "split": {
+          "successRate": 1,
+          "chainAvgSec": 2.8,
+          "chainP95Sec": 3,
+          "wallAvgMs": 22925.7147921,
+          "wallRawAvgMs": 2925.7147920999996,
+          "wallP95Ms": 3005.58697,
+          "gasTotalAvg": 2365191
+        },
+        "comparison": {
+          "chainDeltaSec": 2.8,
+          "chainP95DeltaSec": 3,
+          "chainOverheadRatio": null,
+          "wallDeltaMs": 2603.375073299998,
+          "wallOverheadRatio": 0.12810410165969427,
+          "gasDelta": 930287.3999999999,
+          "gasOverheadRatio": 0.6483274555865634
+        }
+      },
+      {
+        "caseId": "Hotel_Booking",
+        "tasks": 10,
+        "comparable": true,
+        "full": {
+          "successRate": 1,
+          "chainAvgSec": 0.1,
+          "chainP95Sec": 1,
+          "wallAvgMs": 20281.8277189,
+          "wallRawAvgMs": 281.82771890000004,
+          "wallP95Ms": 290.20217199999934,
+          "gasTotalAvg": 986260.6
+        },
+        "split": {
+          "successRate": 1,
+          "chainAvgSec": 1.6,
+          "chainP95Sec": 2,
+          "wallAvgMs": 21638.397699200003,
+          "wallRawAvgMs": 1638.3976992000014,
+          "wallP95Ms": 1674.2771329999996,
+          "gasTotalAvg": 1516458.3
+        },
+        "comparison": {
+          "chainDeltaSec": 1.5,
+          "chainP95DeltaSec": 1,
+          "chainOverheadRatio": 15,
+          "wallDeltaMs": 1356.5699803000025,
+          "wallOverheadRatio": 0.06688598281681771,
+          "gasDelta": 530197.7000000001,
+          "gasOverheadRatio": 0.5375837785672469
+        }
+      },
+      {
+        "caseId": "IncidentManagement",
+        "tasks": 10,
+        "comparable": true,
+        "full": {
+          "successRate": 1,
+          "chainAvgSec": 0,
+          "chainP95Sec": 0,
+          "wallAvgMs": 20149.8338869,
+          "wallRawAvgMs": 149.83388689999956,
+          "wallP95Ms": 157.56285299999945,
+          "gasTotalAvg": 1131809.8
+        },
+        "split": {
+          "successRate": 1,
+          "chainAvgSec": 1.5,
+          "chainP95Sec": 2,
+          "wallAvgMs": 21648.6450711,
+          "wallRawAvgMs": 1648.6450710999998,
+          "wallP95Ms": 1659.9825379999966,
+          "gasTotalAvg": 1512918.3
+        },
+        "comparison": {
+          "chainDeltaSec": 1.5,
+          "chainP95DeltaSec": 2,
+          "chainOverheadRatio": null,
+          "wallDeltaMs": 1498.8111841999998,
+          "wallOverheadRatio": 0.07438330224520714,
+          "gasDelta": 381108.5,
+          "gasOverheadRatio": 0.336724863135131
+        }
+      }
+    ]
+  }
+}

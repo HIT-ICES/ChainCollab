@@ -145,7 +145,7 @@ class EthereumNodeTemplate:
             "--http",
             "--http.addr=0.0.0.0",
             "--http.port=8545",
-            "--http.api=eth,net,web3,txpool",
+            "--http.api=admin,eth,net,web3,txpool,personal",
             "--http.corsdomain=*",
             "--http.vhosts=*",
             # Unlock fixed account (only for dev/internal network)

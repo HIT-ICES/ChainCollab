@@ -68,6 +68,17 @@ newTranslator/
 - `nt-bootstrap` — 一键创建/安装本地环境（.venv + 依赖）; 例：`source newtranslator_env.sh && nt-bootstrap`
 - `nt-clean-env` — 清理本地虚拟环境; 例：`source newtranslator_env.sh && nt-clean-env`
 - `nt-bpmn-to-b2c` — BPMN → B2C DSL; 例：`source newtranslator_env.sh && nt-bpmn-to-b2c ./build/bpmn/BikeRental.bpmn ./build/b2c/BikeRental.b2c`
+  - 可选 split 模式：`source nt.sh && nt-bpmn-to-b2c ./build/bpmn/BikeRental.bpmn ./build/b2c/BikeRental.b2c --split-mode`
+  - split 模式默认关闭；关闭时会忽略 BPMN `documentation` 中的 `{"splitPoint": true}` 标记。
+  - Oracle 任务兼容：
+    - `bpmn:ReceiveTask` 视为 `external-data`。
+    - `bpmn:ScriptTask` 视为 `compute-task`。
+    - `documentation` 支持：
+      - `oracleTaskType` (`external-data`/`compute-task`)
+      - `dataSource`
+      - `computeScript`
+      - `outputMappings`（或 `outputMapping` / `outputs`）
+    - 生成 Solidity 时会为 Oracle 任务函数生成 `oracle.getExternalData(...)` / `oracle.runComputeTask(...)` 调用。
 - `nt-go-gen` — B2C → Go 链码; 例：`source newtranslator_env.sh && nt-go-gen ./build/b2c/BikeRental.b2c`
 - `nt-go-fmt` — 格式化 Go 输出; 例：`source newtranslator_env.sh && nt-go-fmt`
 - `nt-go-build` — 构建 Go 链码; 例：`source newtranslator_env.sh && nt-go-build`

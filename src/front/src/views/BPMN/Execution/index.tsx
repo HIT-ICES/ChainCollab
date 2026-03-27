@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { TableProps, Table, Tag, Button, Form, Select, Modal, Typography } from "antd";
+import { TableProps, Table, Tag, Button, Modal } from "antd";
 import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {useAppSelector} from "@/redux/hooks.ts";
 import { getBPMNInstanceList, getBPMNList } from "@/api/externalResource";
-import { current_ip } from "@/api/apiConfig";
-const { Link } = Typography;
+import { getFireflyList } from "@/api/resourceAPI";
 
 interface DataType {
     id: string;
@@ -47,8 +46,12 @@ interface BpmnInstanceDataType {
 
 const Execution: React.FC = () => {
       const navigate = useNavigate();
+      const [searchParams] = useSearchParams();
+      const isMockMode = searchParams.get("mode") === "mock";
       const [bpmnData, setBpmnData] = useState<DataType[]>([]);
-        const currentConsortiumId = useAppSelector((state) => state.consortium).currentConsortiumId;
+      const currentConsortiumId = useAppSelector((state) => state.consortium).currentConsortiumId;
+      const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
+      const currentOrgId = useAppSelector((state) => state.org.currentOrgId);
     const [selectedDataTypeId, setSelectedDataTypeId] = useState<string | null>(null);      //改为instanceid
     const [visible, setVisible] = useState(false);
     const [instanceDataList, setInstanceDataList] = useState<BpmnInstanceDataType[]>([]);
@@ -93,6 +96,10 @@ const Execution: React.FC = () => {
 
 
     const handleClickDeploy = (id: string) => {
+        if (isMockMode) {
+            navigate(`./${id}?mode=mock`, { state: { id } });
+            return;
+        }
         setSelectedDataTypeId(id);
         setVisible(true);
         fetchFireflyData();
@@ -104,20 +111,17 @@ const Execution: React.FC = () => {
         setVisible(false);
     };
 
-  const handleClick = (id: string) => {
-    // const id = new Date().getTime(); // 使用当前时间作为id
-    navigate(`./${id}`, {state :{id : id }}); // 导航到对应的页面
-  };
-
-
-
     const fetchFireflyData = async () => {
         try {
-            const res = await fetch(`${current_ip}:8000/api/v1/fireflys/1/start`);
-            const data = await res.json();
+            if (!currentEnvId) {
+                setFireflyData([]);
+                return;
+            }
+            const data = await getFireflyList(currentEnvId, currentOrgId || null);
             setFireflyData(data); // 保存从API返回的数据到状态中
         } catch (error) {
             console.error("Error fetching firefly data:", error);
+            setFireflyData([]);
         }
     };
 
@@ -173,7 +177,7 @@ const Execution: React.FC = () => {
             //     onClick={() => handleClick(record.id)}
             // >
             <Button type="primary" onClick={() => handleClickDeploy(record.id)}>
-              Deploy
+              {isMockMode ? "Mock Execute" : "Deploy"}
             </Button>
         );
         // }
@@ -190,14 +194,16 @@ const Execution: React.FC = () => {
             pagination={{ pageSize: 50 }}
             scroll={{ y: 640 }}
         />
-          <Modal
-              title="Select Firefly"
-              open={visible}
-              onCancel={() => setVisible(false)}
-              footer={null}
-          >
-              <FireflyTable data={fireflyData} onSelect={handleSelectFirefly} />
-          </Modal>
+          {isMockMode ? null : (
+            <Modal
+                title="Select Firefly"
+                open={visible}
+                onCancel={() => setVisible(false)}
+                footer={null}
+            >
+                <FireflyTable data={fireflyData} onSelect={handleSelectFirefly} />
+            </Modal>
+          )}
       </div>
   );
 };
