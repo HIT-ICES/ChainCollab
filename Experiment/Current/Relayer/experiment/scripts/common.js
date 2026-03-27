@@ -31,6 +31,38 @@ function relayerStatePath() {
   return path.join(RUNTIME_DIR, "relayer-state.json");
 }
 
+function contractArtifactPath(contractName, sourcePath = null) {
+  const targetName = String(contractName || "").trim();
+  if (!targetName) {
+    throw new Error("contractArtifactPath requires a contract name");
+  }
+  const candidates = [];
+  if (sourcePath) {
+    const normSource = String(sourcePath).replace(/\\/g, "/");
+    const base = normSource
+      .replace(/^.*\/src\/contract\//, "")
+      .replace(/^.*\/contracts\//, "");
+    if (base.endsWith(".sol")) {
+      candidates.push(path.join(ROOT, "artifacts", "src", "contract", base, `${targetName}.json`));
+      candidates.push(path.join(ROOT, "artifacts", "contracts", base, `${targetName}.json`));
+    }
+  }
+  candidates.push(
+    path.join(ROOT, "artifacts", "src", "contract", "generated", `${targetName}.sol`, `${targetName}.json`)
+  );
+  candidates.push(
+    path.join(ROOT, "artifacts", "contracts", "generated", `${targetName}.sol`, `${targetName}.json`)
+  );
+  candidates.push(path.join(ROOT, "artifacts", "src", "contract", `${targetName}.sol`, `${targetName}.json`));
+  candidates.push(path.join(ROOT, "artifacts", "contracts", `${targetName}.sol`, `${targetName}.json`));
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  return candidates[0];
+}
+
 function datasetConfigPath() {
   const fromEnv = process.env.RELAYER_DATASET_CONFIG;
   if (fromEnv && fromEnv.trim()) {
@@ -87,6 +119,7 @@ module.exports = {
   devnetConfigPath,
   deploymentPath,
   relayerStatePath,
+  contractArtifactPath,
   loadDevnetConfig,
   loadDeployment,
   datasetConfigPath,

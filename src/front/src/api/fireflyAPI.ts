@@ -152,6 +152,13 @@ export const getEventWithTX = async (url:string, tx: string, type = "blockchain_
     return events.filter((event) => event.type === type);
 }
 
+export const getEventsWithTX = async (url: string, tx: string) => {
+    const normalizedUrl = /^https?:\/\//i.test(url) ? url.replace(/\/$/, "") : `http://${url.replace(/\/$/, "")}`;
+    const response = await fetch(`${normalizedUrl}/api/v1/events?fetchreferences=true&fetchreference=true&tx=${tx}`);
+    const events = await response.json();
+    return Array.isArray(events) ? events : [];
+}
+
 // [
 //     {
 //       "id": "34bae580-7915-4a33-b768-484d06fa4247",

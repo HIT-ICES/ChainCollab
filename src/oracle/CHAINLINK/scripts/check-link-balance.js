@@ -1,6 +1,8 @@
 const fs = require('fs');
 const http = require('http');
+const { URL } = require('url');
 
+const RPC_URL = process.env.RPC_URL || 'http://localhost:8545';
 const deployment = JSON.parse(fs.readFileSync('deployment/deployment.json', 'utf8'));
 const chainlinkDeployment = JSON.parse(fs.readFileSync('deployment/chainlink-deployment.json', 'utf8'));
 
@@ -16,10 +18,11 @@ function rpcCall(method, params) {
             id: 1
         });
 
+        const rpc = new URL(RPC_URL);
         const options = {
-            hostname: 'localhost',
-            port: 8545,
-            path: '/',
+            hostname: rpc.hostname,
+            port: rpc.port || (rpc.protocol === 'https:' ? 443 : 80),
+            path: rpc.pathname === '' ? '/' : rpc.pathname,
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -45,6 +48,7 @@ function rpcCall(method, params) {
 
 async function checkLinkBalance() {
     try {
+        console.log('RPC URL:', RPC_URL);
         const Web3EthAbi = require('web3-eth-abi');
         const balanceData = Web3EthAbi.encodeFunctionCall({
             name: 'balanceOf',

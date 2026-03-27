@@ -10,9 +10,12 @@ from apps.api.config import ETHEREUM_CONTRACT_STORE
 from common.lib.ethereum.convert_contract import extract_contract_info
 from common.lib.ethereum.firefly_contracts import (
     api_base as firefly_api_base,
+    abi_event_names,
     deploy_contract as firefly_deploy_contract,
+    build_listener_payload,
     generate_ffi as firefly_generate_ffi,
     normalize_ffi as firefly_normalize_ffi,
+    register_listener as firefly_register_listener,
     register_api as firefly_register_api,
     register_interface as firefly_register_interface,
 )
@@ -586,6 +589,38 @@ class IdentityContractFlow:
             payload = payload[0] if payload else {}
         return payload
 
+    def register_identity_listeners(
+        self,
+        firefly_core_url: str,
+        interface_id: str,
+        contract_address: str,
+        api_name: str,
+        abi: list,
+    ) -> list[dict]:
+        listeners: list[dict] = []
+        for event_name in abi_event_names(abi):
+            listener_name = f"{api_name}-{event_name}"
+            listener_payload = build_listener_payload(
+                listener_name=listener_name,
+                interface_id=interface_id,
+                contract_address=contract_address,
+                event_name=event_name,
+            )
+            registered = firefly_register_listener(
+                firefly_core_url,
+                listener_payload,
+                namespace="default",
+                confirm=True,
+            )
+            listeners.append(
+                {
+                    "name": listener_name,
+                    "event_path": event_name,
+                    "payload": registered[1] if isinstance(registered, tuple) else registered,
+                }
+            )
+        return listeners
+
     def ensure_org_registered(
         self,
         firefly_core_url: str,
@@ -1024,6 +1059,7 @@ class IdentityContractFlow:
                     ffi_response.get("id")
                     or ffi_response.get("interface", {}).get("id")
                 )
+                listeners: list[dict] = []
                 self._log_action(
                     "info",
                     "deploy_register_interface",
@@ -1037,6 +1073,13 @@ class IdentityContractFlow:
                             interface_id,
                             contract_address,
                             api_name,
+                        )
+                        listeners = self.register_identity_listeners(
+                            firefly.core_url,
+                            interface_id,
+                            contract_address,
+                            api_name,
+                            abi,
                         )
                     except Exception as exc:
                         error_text = str(exc)
@@ -1060,6 +1103,13 @@ class IdentityContractFlow:
                                 contract_address,
                                 api_name,
                             )
+                            listeners = self.register_identity_listeners(
+                                firefly.core_url,
+                                interface_id,
+                                contract_address,
+                                api_name,
+                                abi,
+                            )
                         else:
                             raise
                     self._log_action(
@@ -1075,12 +1125,14 @@ class IdentityContractFlow:
                     deployment.api_address = firefly_api_base(
                         firefly.core_url, api_name, namespace="default"
                     )
+                    deployment.firefly_listeners = listeners
                     deployment.save(
                         update_fields=[
                             "interface_id",
                             "api_id",
                             "api_name",
                             "api_address",
+                            "firefly_listeners",
                             "updated_at",
                         ]
                     )

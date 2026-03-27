@@ -444,6 +444,32 @@ class ChainlinkOrchestrator:
                 f"See task log: {log_path}"
             )
 
+        fund_script = chainlink_root / "scripts" / "fund-contract.js"
+        if not fund_script.exists():
+            raise FileNotFoundError(f"DMN fund script not found: {fund_script}")
+
+        self.set_task_step(task_id, "FUND_CONTRACT")
+        if log_path:
+            _append_task_log(log_path, f"run: node {fund_script}")
+        fund_process = subprocess.Popen(
+            ["node", str(fund_script)],
+            cwd=str(chainlink_root),
+            env={**os.environ, **env_vars},
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            bufsize=1,
+        )
+        _stream_process_output(fund_process, log_path)
+        fund_returncode = fund_process.wait()
+        if fund_returncode != 0:
+            raise RuntimeError(
+                f"DMN contract funding failed (code={fund_returncode}). "
+                f"See task log: {log_path}"
+            )
+
         self.set_task_step(task_id, "PROCESS_RESULT")
         payload_detail = self.load_chainlink_deployments()
         chainlink = payload_detail.get("chainlink_deployment") or {}

@@ -1,0 +1,139 @@
+{
+  "generatedAt": "2026-03-22T18:50:39.259Z",
+  "threshold": 1,
+  "mode": "lite_single_submit",
+  "warmup": {
+    "enabled": true,
+    "gasUsed": 71589
+  },
+  "scenarioCount": 4,
+  "atomicTaskCount": 4,
+  "scenarios": [
+    {
+      "scenarioId": "S01",
+      "scenarioClass": "简单运算",
+      "scenarioName": "钢铁班次结算复核",
+      "datasetName": "UCI Steel Industry Energy Consumption",
+      "datasetRef": "https://archive.ics.uci.edu/dataset/851/steel+industry+energy+consumption+dataset"
+    },
+    {
+      "scenarioId": "S02",
+      "scenarioClass": "浮点运算",
+      "scenarioName": "水处理设备非线性健康指数",
+      "datasetName": "SWaT",
+      "datasetRef": "https://itrust.sutd.edu.sg/itrust-labs_datasets/dataset_info/"
+    },
+    {
+      "scenarioId": "S03",
+      "scenarioClass": "随机运算",
+      "scenarioName": "供水系统随机抽样风险估计",
+      "datasetName": "WADI",
+      "datasetRef": "https://itrust.sutd.edu.sg/itrust-labs_datasets/dataset_info/"
+    },
+    {
+      "scenarioId": "S04",
+      "scenarioClass": "复杂运算",
+      "scenarioName": "出行方案组合优化",
+      "datasetName": "NASA C-MAPSS",
+      "datasetRef": "https://data.nasa.gov/dataset/cmapss-jet-engine-simulated-data"
+    }
+  ],
+  "rows": [
+    {
+      "seq": 1,
+      "scenarioId": "S01",
+      "scenarioClass": "简单运算",
+      "scenarioName": "钢铁班次结算复核",
+      "datasetName": "UCI Steel Industry Energy Consumption",
+      "datasetRef": "https://archive.ics.uci.edu/dataset/851/steel+industry+energy+consumption+dataset",
+      "taskCount": 1,
+      "taskNames": [
+        "班次能耗结算"
+      ],
+      "jsExpressions": [
+        "const amount = energyKwh * tariffWeiPerKwh + penaltyWei;"
+      ],
+      "directGas": 46183,
+      "offchainGas": 54933,
+      "optimizationRatio": -18.946365545763594,
+      "directComparable": true,
+      "unsupportedTasks": [],
+      "recommendedRoute": "direct"
+    },
+    {
+      "seq": 2,
+      "scenarioId": "S02",
+      "scenarioClass": "浮点运算",
+      "scenarioName": "水处理设备非线性健康指数",
+      "datasetName": "SWaT",
+      "datasetRef": "https://itrust.sutd.edu.sg/itrust-labs_datasets/dataset_info/",
+      "taskCount": 1,
+      "taskNames": [
+        "非线性健康指数"
+      ],
+      "jsExpressions": [
+        "const score = 0.42*Math.log(vibration+1) + 0.35*Math.exp(temperature/100) + 0.23*Math.sqrt(load);"
+      ],
+      "directGas": null,
+      "offchainGas": 54933,
+      "optimizationRatio": null,
+      "directComparable": false,
+      "unsupportedTasks": [
+        "s02_nonlin_health"
+      ],
+      "recommendedRoute": "offchain_required"
+    },
+    {
+      "seq": 3,
+      "scenarioId": "S03",
+      "scenarioClass": "随机运算",
+      "scenarioName": "供水系统随机抽样风险估计",
+      "datasetName": "WADI",
+      "datasetRef": "https://itrust.sutd.edu.sg/itrust-labs_datasets/dataset_info/",
+      "taskCount": 1,
+      "taskNames": [
+        "随机抽样置信估计"
+      ],
+      "jsExpressions": [
+        "let state=seed; let hit=0; for(let i=0;i<draws;i++){state=(state*48271)%2147483647; const u=(state%10000)/10000; if(u<alertProb) hit++;} const conf=Math.round(hit*1e6/draws);"
+      ],
+      "directGas": null,
+      "offchainGas": 54933,
+      "optimizationRatio": null,
+      "directComparable": false,
+      "unsupportedTasks": [
+        "s03_random_sampling"
+      ],
+      "recommendedRoute": "offchain_required"
+    },
+    {
+      "seq": 4,
+      "scenarioId": "S04",
+      "scenarioClass": "复杂运算",
+      "scenarioName": "出行方案组合优化",
+      "datasetName": "NASA C-MAPSS",
+      "datasetRef": "https://data.nasa.gov/dataset/cmapss-jet-engine-simulated-data",
+      "taskCount": 1,
+      "taskNames": [
+        "三维方案离散搜索最优化"
+      ],
+      "jsExpressions": [
+        "for x in [x_min..x_max..step], y in [y_min..y_max..step], z in [z_min..z_max..step]: score=60*x+25*y+15*z; cost=400*x+120*y+80*z; objective=(score-target_score)^2 + 2*(cost-budget)^2; result=min(objective)"
+      ],
+      "directGas": 2263134,
+      "offchainGas": 54933,
+      "optimizationRatio": 97.57270227922872,
+      "directComparable": true,
+      "unsupportedTasks": [],
+      "recommendedRoute": "offchain"
+    }
+  ],
+  "summary": {
+    "avgDirectGas": 1154658.5,
+    "avgOffchainGas": 54933,
+    "avgOptimizationRatio": 39.31316836673256,
+    "offchainBetterCount": 1,
+    "onchainUnsupportedCount": 2,
+    "comparableScenarioCount": 2
+  }
+}

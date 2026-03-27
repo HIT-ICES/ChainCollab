@@ -4,6 +4,8 @@ const hre = require("hardhat");
 const { mean, writeJson } = require("./common");
 
 const COMPUTE_DOMAIN = hre.ethers.id("COMPUTE");
+const COMPUTE_LITE_WARMUP = process.env.COMPUTE_LITE_WARMUP === "1";
+const REPORT_SUFFIX = String(process.env.COMPUTE_REPORT_SUFFIX || "").trim();
 
 function encodeComputeType(str) {
   const b = Buffer.from(str, "utf8");
@@ -224,6 +226,9 @@ function toMarkdown(report) {
   lines.push("# 工业计算场景开销对比实验报告");
   lines.push("");
   lines.push(`生成时间：${report.generatedAt}`);
+  if (report.warmup?.enabled) {
+    lines.push(`预热模式：已启用（warmup gas: ${report.warmup.gasUsed ?? "N/A"}）`);
+  }
   lines.push("");
   lines.push(`场景数：${report.scenarioCount}，原子任务总数：${report.atomicTaskCount}`);
   lines.push("");
@@ -260,6 +265,19 @@ async function main() {
   const oracle = await OracleFactory.connect(owner).deploy();
   await oracle.waitForDeployment();
   await (await oracle.connect(owner).registerOracle(oracleAddress)).wait();
+
+  let warmupGas = null;
+  if (COMPUTE_LITE_WARMUP) {
+    const warmupTx = await oracle
+      .connect(oracleSigner)
+      .submitComputeResultLite(
+        encodeComputeType("warmup_compute_lite"),
+        hre.ethers.keccak256(hre.ethers.toUtf8Bytes("warmup_compute_lite_payload")),
+        hre.ethers.ZeroHash
+      );
+    const warmupRc = await warmupTx.wait();
+    warmupGas = Number(warmupRc.gasUsed);
+  }
 
   const DirectFactory = await hre.ethers.getContractFactory("IndustrialComputeDirect");
   const direct = await DirectFactory.connect(owner).deploy();
@@ -342,6 +360,10 @@ async function main() {
     generatedAt: new Date().toISOString(),
     threshold: 1,
     mode: "lite_single_submit",
+    warmup: {
+      enabled: COMPUTE_LITE_WARMUP,
+      gasUsed: warmupGas
+    },
     scenarioCount: dataset.scenarios.length,
     atomicTaskCount,
     scenarios: dataset.scenarios.map((s) => ({
@@ -362,8 +384,9 @@ async function main() {
     }
   };
 
-  const jsonPath = path.join(root, "report", "compute-10-scenarios-report.json");
-  const mdPath = path.join(root, "report", "COMPUTE_10_SCENARIOS_REPORT.md");
+  const suffix = REPORT_SUFFIX ? `.${REPORT_SUFFIX}` : "";
+  const jsonPath = path.join(root, "report", `compute-10-scenarios-report${suffix}.json`);
+  const mdPath = path.join(root, "report", `COMPUTE_10_SCENARIOS_REPORT${suffix}.md`);
   writeJson(jsonPath, report);
   fs.writeFileSync(mdPath, toMarkdown(report), "utf8");
   console.log(`json report -> ${jsonPath}`);

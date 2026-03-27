@@ -7,13 +7,15 @@ const {
   writeJson,
   relayerStatePath,
   loadDeployment,
+  contractArtifactPath,
   deriveWallet
 } = require("../../experiment/scripts/common");
 
 const RELAY_DOMAIN = ethers.id("RELAY_EXECUTION_V1");
 
 function loadArtifact(relativePath) {
-  const full = path.join(ROOT, "artifacts", relativePath);
+  const contractName = path.basename(relativePath, ".json");
+  const full = contractArtifactPath(contractName);
   if (!fs.existsSync(full)) {
     throw new Error(`artifact not found: ${full}. run npm run compile`);
   }

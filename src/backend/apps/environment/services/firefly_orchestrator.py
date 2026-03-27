@@ -18,5 +18,8 @@ class FireflyOrchestrator:
     def register_api(self, *args, **kwargs):
         return self._manager.register_api(*args, **kwargs)
 
+    def register_listener(self, *args, **kwargs):
+        return self._manager.register_listener(*args, **kwargs)
+
     def invoke_api(self, *args, **kwargs):
         return self._manager.invoke_api(*args, **kwargs)

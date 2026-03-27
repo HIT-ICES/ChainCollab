@@ -226,6 +226,8 @@ async function deploy() {
         // 保存部署信息
         const deploymentInfo = {
             contractAddress: receipt.contractAddress,
+            contractName: contractKey.split(':')[1],
+            contractKey: contractKey,
             deployer: deployer,
             timestamp: new Date().toISOString(),
             txHash: txHash,

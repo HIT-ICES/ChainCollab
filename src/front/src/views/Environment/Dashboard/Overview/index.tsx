@@ -52,7 +52,6 @@ import {
   getEthAccountCheck,
   getDmnContractDetailForEthEnv,
   redeployDmnContractForEthEnv,
-  callDmnContractForEthEnv,
   getDataContractDetailForEthEnv,
   setupDataContractForEthEnv,
   registerDataContractToFireflyForEthEnv,
@@ -71,13 +70,47 @@ import {
 import {
   registerInterface,
   registerAPI,
-  callFireflyContract
+  callFireflyContract,
 } from "@/api/executionAPI"
+
+import {
+  getEventsWithTX,
+} from "@/api/fireflyAPI"
 
 const systemFireflyURL = (import.meta.env.VITE_FIREFLY_URL as string) || "http://127.0.0.1:5000"
 const fireflyBaseUrl = systemFireflyURL.replace(/\/$/, "")
 const fireflyUiUrl = `${fireflyBaseUrl}/ui`
 const fireflyApiDocUrl = `${fireflyBaseUrl}/api`
+
+const requestDmnDecisionTestSample = {
+  method: "requestDMNDecision",
+  mode: "invoke",
+  url: "http://cdmn-node1:5000/api/dmn/evaluate",
+  dmnContent: `<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" id="SampleDecision" name="Decisions">
+  <decision id="Decision_Eligibility" name="Eligibility">
+    <variable id="var" name="Eligibility" typeRef="string" />
+    <decisionTable>
+      <input id="Input_Age">
+        <inputExpression typeRef="number">
+          <text>applicant.age</text>
+        </inputExpression>
+      </input>
+      <output id="Output_Result" typeRef="string" />
+      <rule>
+        <inputEntry>
+          <text>&gt;=18</text>
+        </inputEntry>
+        <outputEntry>
+          <text>"Approved"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>`,
+  decisionId: "Decision_Eligibility",
+  inputData: JSON.stringify({ applicant: { age: 20 } }),
+};
 
 
 import { useEnvInfo, useMembershipListData } from './hooks'
@@ -192,6 +225,10 @@ const Overview: React.FC = () => {
   const [dmnAction, setDmnAction] = useState(null)
   const [dmnCallLoading, setDmnCallLoading] = useState(false)
   const [dmnCallResult, setDmnCallResult] = useState<string | null>(null)
+  const [lastDmnRequestId, setLastDmnRequestId] = useState<string | null>(null)
+  const [lastDmnRequestStatus, setLastDmnRequestStatus] = useState<any>(null)
+  const [lastDmnTxHash, setLastDmnTxHash] = useState<string | null>(null)
+  const [lastDmnRelatedEvents, setLastDmnRelatedEvents] = useState<any[]>([])
   const [dmnForm] = Form.useForm()
   const [taskItems, setTaskItems] = useState<any[]>([])
   const [taskMap, setTaskMap] = useState<Record<string, any>>({})
@@ -230,6 +267,124 @@ const Overview: React.FC = () => {
       error?.message ||
       fallback
     )
+  }
+  const extractDmnRequestId = (payload: any): string | null => {
+    const normalize = (value: any): string | null => {
+      if (typeof value !== "string") {
+        return null
+      }
+      const raw = value.trim()
+      if (!raw) {
+        return null
+      }
+      if (/^0x[0-9a-fA-F]{64}$/.test(raw)) {
+        return raw.toLowerCase()
+      }
+      if (/^[0-9a-fA-F]{64}$/.test(raw)) {
+        return `0x${raw.toLowerCase()}`
+      }
+      return null
+    }
+    if (!payload || typeof payload !== "object") {
+      return null
+    }
+    const direct = normalize(payload.requestId || payload.request_id)
+    if (direct) {
+      return direct
+    }
+    const output = payload?.output
+    if (output && typeof output === "object") {
+      for (const key of ["result", "body", "data", "response", "value"]) {
+        const nested = extractDmnRequestId(output[key])
+        if (nested) {
+          return nested
+        }
+      }
+      const outputRequestId = normalize(output?.headers?.requestId || output?.headers?.request_id)
+      if (outputRequestId) {
+        return outputRequestId
+      }
+    }
+    const nestedCandidates = [payload.headers, payload.result, payload.data, payload.response, payload.body, payload.value]
+    for (const candidate of nestedCandidates) {
+      const nested = extractDmnRequestId(candidate)
+      if (nested) {
+        return nested
+      }
+    }
+    return null
+  }
+  const extractDmnRequestStatus = (payload: any): any => {
+    if (!payload || typeof payload !== "object") {
+      return null
+    }
+    const direct = payload.state ?? payload.status ?? payload.exists
+    if (direct !== undefined) {
+      return payload
+    }
+    const output = payload?.output
+    if (output && typeof output === "object") {
+      for (const key of ["result", "body", "data", "response", "value"]) {
+        const nested = extractDmnRequestStatus(output[key])
+        if (nested) {
+          return nested
+        }
+      }
+    }
+    const nestedCandidates = [payload.headers, payload.result, payload.data, payload.response, payload.body, payload.value]
+    for (const candidate of nestedCandidates) {
+      const nested = extractDmnRequestStatus(candidate)
+      if (nested) {
+        return nested
+      }
+    }
+    return null
+  }
+  const extractDmnTransactionHash = (payload: any): string | null => {
+    const normalize = (value: any): string | null => {
+      if (typeof value !== "string") {
+        return null
+      }
+      const raw = value.trim()
+      if (!raw) {
+        return null
+      }
+      if (/^0x[0-9a-fA-F]{64}$/.test(raw)) {
+        return raw.toLowerCase()
+      }
+      if (/^[0-9a-fA-F]{64}$/.test(raw)) {
+        return `0x${raw.toLowerCase()}`
+      }
+      return null
+    }
+    if (!payload || typeof payload !== "object") {
+      return null
+    }
+    const direct = normalize(payload.transactionHash || payload.tx || payload.hash)
+    if (direct) {
+      return direct
+    }
+    const output = payload?.output
+    if (output && typeof output === "object") {
+      const outputDirect = normalize(output.transactionHash || output.tx || output.hash)
+      if (outputDirect) {
+        return outputDirect
+      }
+      for (const key of ["result", "body", "data", "response", "value", "headers"]) {
+        const nested = extractDmnTransactionHash(output[key])
+        if (nested) {
+          return nested
+        }
+      }
+    }
+    const nestedCandidates = [payload.headers, payload.result, payload.data, payload.response, payload.body, payload.value]
+    for (const candidate of nestedCandidates) {
+      const nested = extractDmnTransactionHash(candidate)
+      if (nested) {
+        return nested
+      }
+    }
+    return null
   }
   const isUnauthorizedError = (error: any) => {
     return (
@@ -322,42 +477,100 @@ const Overview: React.FC = () => {
       ],
     },
     {
+      label: "getRequestStatus",
+      method: "getRequestStatus",
+      mode: "query",
+      kind: "contract",
+      params: [{ key: "requestId", label: "Request ID", placeholder: "0x..." }],
+    },
+    {
       label: "getRawByRequestId",
       method: "getRawByRequestId",
-      mode: "call",
+      mode: "query",
       kind: "contract",
+      scope: "lite",
+      params: [{ key: "requestId", label: "Request ID", placeholder: "0x..." }],
+    },
+    {
+      label: "getFinalizedRaw",
+      method: "getFinalizedRaw",
+      mode: "query",
+      kind: "contract",
+      scope: "full",
       params: [{ key: "requestId", label: "Request ID", placeholder: "0x..." }],
     },
     {
       label: "getDMNResult",
       method: "getDMNResult",
-      mode: "call",
+      mode: "query",
       kind: "contract",
       params: [],
     },
     {
       label: "rawResultCount",
       method: "rawResultCount",
-      mode: "call",
+      mode: "query",
       kind: "contract",
       params: [],
     },
     {
       label: "rawResultHashAt",
       method: "rawResultHashAt",
-      mode: "call",
+      mode: "query",
       kind: "contract",
       params: [{ key: "index", label: "Index", placeholder: "0" }],
     },
     {
       label: "getAllRawResults",
       method: "getAllRawResults",
-      mode: "call",
+      mode: "query",
+      kind: "contract",
+      params: [],
+    },
+    {
+      label: "getAllRequests",
+      method: "getAllRequests",
+      mode: "query",
       kind: "contract",
       params: [],
     },
   ]
-  const dmnContractActions = dmnQuickActions.filter((action) => action.kind === "contract")
+  const dmnContractName = (dmnDetail as any)?.contract?.name || (dmnDetail as any)?.contractName || (dmnDetail as any)?.name || ""
+  const dmnContractMode = dmnContractName
+    ? dmnContractName.toLowerCase().includes("lite")
+      ? "lite"
+      : "full"
+    : "unknown"
+  const dmnContractActions = dmnQuickActions.filter((action) => {
+    if (action.kind !== "contract") {
+      return false
+    }
+    if (dmnContractMode === "unknown" || !action.scope) {
+      return true
+    }
+    if (action.scope === "lite") {
+      return dmnContractMode === "lite"
+    }
+    if (action.scope === "full") {
+      return dmnContractMode === "full"
+    }
+    return true
+  })
+  const dmnMethodPlaceholder =
+    dmnContractActions.map((item) => item.method).join(" / ") ||
+    "requestDMNDecision / getDMNResult"
+  const chainlinkFireflyRelatedContracts = ((chainlinkDetail as any)?.firefly?.firefly_related_contracts || {}) as Record<string, any>
+  const chainlinkFireflyListenerCount = Object.values(chainlinkFireflyRelatedContracts).reduce(
+    (acc: number, item: any) => acc + (Array.isArray(item?.firefly_listeners) ? item.firefly_listeners.length : 0),
+    0
+  )
+  const openFireflyApiPage = (apiBase?: string | null) => {
+    if (!apiBase) {
+      return
+    }
+    const normalized = apiBase.replace(/\/$/, "")
+    window.open(`${normalized}/api`, "_blank")
+  }
 
   const handleSetUpFabricNetwork = async () => {
     try {
@@ -1384,11 +1597,13 @@ const Overview: React.FC = () => {
     } else if (type === "DMN" && currentEnvType === "Ethereum") {
       try {
         setDetailLoading(true)
-        const [detail] = await Promise.all([
+        const [detail, chainlink] = await Promise.all([
           getDmnContractDetailForEthEnv(currentEnvId, true),
+          getChainlinkDetailForEthEnv(currentEnvId, true),
           loadEthAccountCheck(true),
         ])
         setDmnDetail(detail)
+        setChainlinkDetail(chainlink)
       } catch (error: any) {
         message.error(extractErrorMessage(error, "Load DMN detail failed"))
       } finally {
@@ -1508,6 +1723,54 @@ const Overview: React.FC = () => {
       method: action.method,
       mode: action.mode,
     })
+    if (
+      (action.method === "getRequestStatus" ||
+        action.method === "getRawByRequestId" ||
+        action.method === "getFinalizedRaw") &&
+      lastDmnRequestId
+    ) {
+      dmnForm.setFieldsValue({
+        requestId: lastDmnRequestId,
+      })
+    }
+  }
+
+  const loadDmnRelatedEvents = async (txHash: string | null) => {
+    if (!txHash) {
+      setLastDmnRelatedEvents([])
+      setLastDmnTxHash(null)
+      return
+    }
+    const coreUrl = dmnDetail?.firefly?.core_url
+    if (!coreUrl) {
+      setLastDmnRelatedEvents([])
+      setLastDmnTxHash(txHash)
+      return
+    }
+    try {
+      const events = await getEventsWithTX(coreUrl, txHash)
+      setLastDmnRelatedEvents(Array.isArray(events) ? events : [])
+      setLastDmnTxHash(txHash)
+    } catch (error) {
+      setLastDmnRelatedEvents([])
+      setLastDmnTxHash(txHash)
+    }
+  }
+
+  const fillRequestDmnDecisionTest = () => {
+    const action = dmnQuickActions.find((item) => item.method === "requestDMNDecision")
+    if (action) {
+      setDmnAction(action)
+    }
+    dmnForm.setFieldsValue({
+      method: requestDmnDecisionTestSample.method,
+      mode: requestDmnDecisionTestSample.mode,
+      url: requestDmnDecisionTestSample.url,
+      dmnContent: requestDmnDecisionTestSample.dmnContent,
+      decisionId: requestDmnDecisionTestSample.decisionId,
+      inputData: requestDmnDecisionTestSample.inputData,
+    })
+    message.success("已填充 requestDMNDecision 测试参数")
   }
 
   const handleDmnCall = async () => {
@@ -1515,10 +1778,54 @@ const Overview: React.FC = () => {
       const values = await dmnForm.validateFields()
       setDmnCallLoading(true)
       const method = values.method
-      const mode = values.mode || "call"
-      const args = (dmnAction?.params || []).map((param) => values[param.key])
-      const res = await callDmnContractForEthEnv(currentEnvId, { method, mode, args })
+      const mode = values.mode || (method === "requestDMNDecision" ? "invoke" : "query")
+      const apiBase = dmnDetail?.firefly?.api_base
+      if (!apiBase) {
+        message.error("DMN FireFly API base is not available")
+        return
+      }
+      const statusHint = lastDmnRequestStatus?.state ?? lastDmnRequestStatus?.status
+      if (
+        (method === "getFinalizedRaw" || method === "getRawByRequestId") &&
+        lastDmnRequestId &&
+        statusHint !== undefined &&
+        String(statusHint) !== "2" &&
+        String(statusHint).toLowerCase() !== "fulfilled"
+        ) {
+        message.warning("当前请求仍未完成回写，请先执行 getRequestStatus 确认已完成后再查询结果")
+        return
+      }
+      const params = (dmnAction?.params || []).reduce((acc, param) => {
+        const value = values[param.key]
+        if (value !== undefined) {
+          acc[param.key] = value
+        }
+        return acc
+      }, {} as Record<string, any>)
+      const res = await callFireflyContract(apiBase, method, params, mode)
       setDmnCallResult(JSON.stringify(res, null, 2))
+      if (method === "requestDMNDecision") {
+        const requestId = extractDmnRequestId(res)
+        const txHash = extractDmnTransactionHash(res)
+        if (requestId) {
+          setLastDmnRequestId(requestId)
+          dmnForm.setFieldsValue({
+            requestId,
+          })
+          message.success(`已捕获 requestId: ${requestId}`)
+        } else {
+          setLastDmnRequestId(null)
+        }
+        setLastDmnRequestStatus(null)
+        await loadDmnRelatedEvents(txHash)
+      } else if (method === "getRequestStatus") {
+        setLastDmnRequestStatus(extractDmnRequestStatus(res))
+      } else {
+        const txHash = extractDmnTransactionHash(res)
+        if (txHash) {
+          await loadDmnRelatedEvents(txHash)
+        }
+      }
     } catch (err) {
       message.error("DMN call failed")
     } finally {
@@ -2381,9 +2688,14 @@ const Overview: React.FC = () => {
                 {detailLoading ? (
                   <div>Loading...</div>
                 ) : (
-                  <>
-                    <div>Install Pipeline: {envInfo.chainlinkStatus || "-"}</div>
-                    <div>Contract Address: {dmnDetail?.contract?.address || "-"}</div>
+                <>
+                  <div>Install Pipeline: {envInfo.chainlinkStatus || "-"}</div>
+                  <div>Contract Address: {dmnDetail?.contract?.address || "-"}</div>
+                  <div>Contract Name: {dmnDetail?.contract?.name || dmnContractName || "-"}</div>
+                  <div>Last Request ID: {lastDmnRequestId || "-"}</div>
+                  <div>
+                    Last Request Status: {lastDmnRequestStatus ? JSON.stringify(lastDmnRequestStatus) : "-"}
+                  </div>
                     <div>Operator: {dmnDetail?.operator || "-"}</div>
                     <div>LinkToken: {dmnDetail?.link_token || "-"}</div>
                     <div>DMN Job ID: {dmnDetail?.dmn_job_id || "-"}</div>
@@ -2391,15 +2703,24 @@ const Overview: React.FC = () => {
                       FireFly Registered: {dmnDetail?.firefly?.registered ? "YES" : "NO"}
                     </div>
                     <div>FireFly API: {dmnDetail?.firefly?.api_name || "-"}</div>
+                    <div>FireFly API Base: {dmnDetail?.firefly?.api_base || "-"}</div>
                     <div>FireFly Interface: {dmnDetail?.firefly?.interface_id || "-"}</div>
                     <div>FireFly Core: {dmnDetail?.firefly?.core_url || "-"}</div>
+                    <Space style={{ marginTop: 8 }} wrap>
+                      <AntdButton size="small" onClick={() => openFireflyApiPage(dmnDetail?.firefly?.api_base)}>
+                        Open DMN API
+                      </AntdButton>
+                    </Space>
                     <Form form={dmnForm} layout="vertical">
-                      <Form.Item label="Check Actions">
+                      <Form.Item label="Direct FireFly Actions">
                         <Space direction="vertical" style={{ width: "100%" }} size={8}>
                           <div style={{ color: "#64748b", fontSize: 12 }}>
-                            DMN 的主要检查动作都在这里，包括合约读写和 FireFly 注册。
+                            DMN 的主要操作都在这里，直接通过 FireFly 发起请求、查询结果，以及测试相关接口。
                           </div>
                           <Space wrap>
+                            <AntdButton type="dashed" onClick={fillRequestDmnDecisionTest}>
+                              Test requestDMNDecision
+                            </AntdButton>
                             {dmnContractActions.map((action) => (
                               <AntdButton
                                 key={action.method}
@@ -2416,7 +2737,7 @@ const Overview: React.FC = () => {
                         name="method"
                         rules={[{ required: true, message: "Method is required" }]}
                       >
-                        <Input placeholder="requestDMNDecision / getRawByRequestId ..." />
+                        <Input placeholder={dmnMethodPlaceholder} />
                       </Form.Item>
                       {dmnAction ? (
                         dmnAction.params.map((param, index) => (
@@ -2434,13 +2755,35 @@ const Overview: React.FC = () => {
                           <Input disabled placeholder="Select a quick action to auto-fill parameters." />
                         </Form.Item>
                       )}
-                      <Form.Item label="Mode" name="mode" initialValue="call">
-                        <Input placeholder="call / invoke" />
+                      <Form.Item label="Mode" name="mode" initialValue="invoke">
+                        <Input placeholder="invoke / query" />
                       </Form.Item>
                       <AntdButton loading={dmnCallLoading} onClick={handleDmnCall}>
-                        Run Selected Action
+                        Call via FireFly
                       </AntdButton>
                     </Form>
+                    {lastDmnTxHash ? (
+                      <div style={{ marginTop: 12 }}>
+                        <div style={{ fontWeight: 600 }}>Related Events</div>
+                        <div style={{ color: "#64748b", fontSize: 12, marginBottom: 8 }}>
+                          TX: {lastDmnTxHash}
+                        </div>
+                        {Array.isArray(lastDmnRelatedEvents) && lastDmnRelatedEvents.length ? (
+                          <Space direction="vertical" style={{ width: "100%" }} size={6}>
+                            {lastDmnRelatedEvents.map((event: any) => (
+                              <div key={event?.id || `${event?.type || "event"}-${event?.created || ""}`} style={{ padding: "8px 12px", border: "1px solid #e5e7eb", borderRadius: 8 }}>
+                                <div style={{ fontWeight: 600 }}>{event?.type || "-"}</div>
+                                <div>Created: {event?.created || "-"}</div>
+                                <div>Reference: {event?.reference || "-"}</div>
+                                <div>Sequence: {event?.sequence ?? "-"}</div>
+                              </div>
+                            ))}
+                          </Space>
+                        ) : (
+                          <div>-</div>
+                        )}
+                      </div>
+                    ) : null}
                     {dmnCallResult ? (
                       <pre style={{ marginTop: 12, background: "#f8fafc", padding: 12 }}>
                         {dmnCallResult}
@@ -2576,6 +2919,7 @@ const Overview: React.FC = () => {
                 <div>FireFly Registered: {relayerDetail?.firefly?.registered ? "YES" : "NO"}</div>
                 <div>FireFly API: {relayerDetail?.firefly?.api_name || "-"}</div>
                 <div>FireFly Interface: {relayerDetail?.firefly?.interface_id || "-"}</div>
+                <div>FireFly Listeners: {Array.isArray(relayerDetail?.firefly?.listeners) ? relayerDetail.firefly.listeners.length : 0}</div>
                 <div>Relayer Node URL: {relayerNodeStatus?.node_url || relayerDetail?.node?.node_url || "-"}</div>
                 <div>Relayer Node UI: {relayerNodeStatus?.ui_url || relayerDetail?.node?.ui_url || "-"}</div>
                 <Space wrap>
@@ -2703,6 +3047,12 @@ const Overview: React.FC = () => {
             </Tag>
             <div>Chainlink 通过 directrequest Job 监听 Operator 合约并写回 DMN 请求合约。</div>
             <div>可选择 lite / full 两种安装模式，lite 只跑缓存闭环，full 还会补齐 OCR 联动流程。</div>
+            <div>FireFly 监管总览：</div>
+            <div>DMN: {dmnDetail?.firefly?.api_name || "-"}</div>
+            <div>Operator: {chainlinkFireflyRelatedContracts.Operator ? "YES" : "-"}</div>
+            <div>LinkToken: {chainlinkFireflyRelatedContracts.LinkToken ? "YES" : "-"}</div>
+            <div>OCR: {chainlinkFireflyRelatedContracts.AccessControlledOffchainAggregator ? "YES" : "-"}</div>
+            <div>FireFly 监听器数量: {chainlinkFireflyListenerCount}</div>
           </Space>
         ) : null}
         {detailType === "Account" ? (

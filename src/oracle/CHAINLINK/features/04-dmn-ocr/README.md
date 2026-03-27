@@ -37,6 +37,13 @@ cd /home/shenxz-lab/code/ChainCollab/src/oracle-node/CHAINLINK
 ./features/04-dmn-ocr/run-setup.sh
 ```
 
+如需只保留 DMN directrequest 链路、跳过 OCR Job / finalize 配置，可使用根目录下的 lite 入口：
+
+```bash
+cd /home/shenxz-lab/code/ChainCollab/src/oracle-node/CHAINLINK
+./run-setup-lite.sh
+```
+
 如需从已有部署中继续，可先检查 `deployment/chainlink-deployment.json` 与 `deployment/deployment.json` 是否存在并包含 OCR/合约地址。
 
 ## 1) 合约请求入口

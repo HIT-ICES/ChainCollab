@@ -8,6 +8,12 @@ contract MyChainlinkRequesterDMN is ChainlinkClient, ConfirmedOwner {
 
     using Chainlink for Chainlink.Request;
 
+    enum RequestState {
+        None,
+        Pending,
+        Fulfilled
+    }
+
     // 返回值存储（存储 DMN 决策结果的字节数组）
     bytes public dmnResult;
 
@@ -31,6 +37,12 @@ contract MyChainlinkRequesterDMN is ChainlinkClient, ConfirmedOwner {
 
     // requestId -> baseline
     mapping(bytes32 => BaselineResult) public baselines;
+    mapping(bytes32 => RequestState) private requestStates;
+    mapping(bytes32 => address) private requestRequesters;
+    mapping(bytes32 => uint256) private requestCreatedAt;
+    mapping(bytes32 => uint256) private requestFulfilledAt;
+    mapping(bytes32 => bool) private requestListed;
+    bytes32[] private requestIds;
     // requestId -> OCR hashLow
     mapping(bytes32 => uint128) public ocrHashByRequestId;
     mapping(bytes32 => bool) public ocrHashExists;
@@ -51,6 +63,8 @@ contract MyChainlinkRequesterDMN is ChainlinkClient, ConfirmedOwner {
     event OcrAggregatorUpdated(address indexed aggregator);
     event BaselineWriterUpdated(address indexed writer, bool allowed);
     event OcrAnswerSet(bytes32 indexed requestId, uint128 hashLow);
+    event RequestPending(bytes32 indexed requestId, address indexed requester, uint256 timestamp);
+    event RequestFulfilled(bytes32 indexed requestId, uint256 timestamp);
 
     constructor(
         address _linkToken,     // LINK 代币地址
@@ -81,6 +95,11 @@ contract MyChainlinkRequesterDMN is ChainlinkClient, ConfirmedOwner {
 
         // 发出请求
         requestId = _sendChainlinkRequestTo(oracle, req, fee);
+        requestStates[requestId] = RequestState.Pending;
+        requestRequesters[requestId] = msg.sender;
+        requestCreatedAt[requestId] = block.timestamp;
+        _trackRequestId(requestId);
+        emit RequestPending(requestId, msg.sender, block.timestamp);
 
         emit RequestSent(requestId, block.timestamp);
         return requestId;
@@ -89,6 +108,7 @@ contract MyChainlinkRequesterDMN is ChainlinkClient, ConfirmedOwner {
     // Chainlink 节点执行完成后回调这个函数
     function fulfill(bytes32 _requestId, bytes memory _data) public recordChainlinkFulfillment(_requestId) {
         dmnResult = _data;
+        _markRequestFulfilled(_requestId);
         emit DecisionFulfilled(_requestId, _data);
     }
 
@@ -182,6 +202,13 @@ contract MyChainlinkRequesterDMN is ChainlinkClient, ConfirmedOwner {
             rawResultHashes.push(rawHash);
         }
 
+        if (requestStates[requestId] == RequestState.None) {
+            requestStates[requestId] = RequestState.Pending;
+            requestCreatedAt[requestId] = block.timestamp;
+        }
+        _trackRequestId(requestId);
+        _markRequestFulfilled(requestId);
+
         emit BaselineCommitted(requestId, rawHash, hashLow, raw);
     }
 
@@ -232,6 +259,24 @@ contract MyChainlinkRequesterDMN is ChainlinkClient, ConfirmedOwner {
         return finalizedRaw[requestId];
     }
 
+    function getRequestStatus(bytes32 requestId)
+        external
+        view
+        returns (
+            RequestState state,
+            address requester,
+            uint256 createdAt,
+            uint256 fulfilledAt,
+            bool exists
+        )
+    {
+        state = requestStates[requestId];
+        requester = requestRequesters[requestId];
+        createdAt = requestCreatedAt[requestId];
+        fulfilledAt = requestFulfilledAt[requestId];
+        exists = state != RequestState.None;
+    }
+
     function rawResultCount() external view returns (uint256) {
         return rawResultHashes.length;
     }
@@ -252,9 +297,52 @@ contract MyChainlinkRequesterDMN is ChainlinkClient, ConfirmedOwner {
         return (hashes, raws);
     }
 
+    function getAllRequests()
+        external
+        view
+        returns (
+            bytes32[] memory ids,
+            uint8[] memory states,
+            address[] memory requesters,
+            uint256[] memory createdAts,
+            uint256[] memory fulfilledAts
+        )
+    {
+        uint256 count = requestIds.length;
+        ids = new bytes32[](count);
+        states = new uint8[](count);
+        requesters = new address[](count);
+        createdAts = new uint256[](count);
+        fulfilledAts = new uint256[](count);
+        for (uint256 i = 0; i < count; i++) {
+            bytes32 requestId = requestIds[i];
+            ids[i] = requestId;
+            states[i] = uint8(requestStates[requestId]);
+            requesters[i] = requestRequesters[requestId];
+            createdAts[i] = requestCreatedAt[requestId];
+            fulfilledAts[i] = requestFulfilledAt[requestId];
+        }
+        return (ids, states, requesters, createdAts, fulfilledAts);
+    }
+
     // 获取当前存储的结果（以字节数组形式）
     function getDMNResult() external view returns (bytes memory) {
         return dmnResult;
+    }
+
+    function _markRequestFulfilled(bytes32 requestId) internal {
+        requestStates[requestId] = RequestState.Fulfilled;
+        if (requestFulfilledAt[requestId] == 0) {
+            requestFulfilledAt[requestId] = block.timestamp;
+        }
+        emit RequestFulfilled(requestId, requestFulfilledAt[requestId]);
+    }
+
+    function _trackRequestId(bytes32 requestId) internal {
+        if (!requestListed[requestId]) {
+            requestListed[requestId] = true;
+            requestIds.push(requestId);
+        }
     }
 }
 
