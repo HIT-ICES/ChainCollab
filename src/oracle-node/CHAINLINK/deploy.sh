@@ -203,8 +203,8 @@ fi
 # 检查并安装依赖
 echo "检查项目依赖..."
 if ! node -e "require.resolve('web3-eth-abi')" 2>/dev/null; then
-    echo -e "${YELLOW}⚠️  缺少依赖 web3-eth-abi，正在安装...${NC}"
-    npm install web3-eth-abi
+    echo -e "${YELLOW}⚠️  缺少依赖 web3-eth-abi，正在安装（使用 npmmirror）...${NC}"
+    npm install web3-eth-abi --registry=https://registry.npmmirror.com
     echo -e "${GREEN}✅ 依赖安装完成${NC}"
     echo ""
 fi

@@ -27,7 +27,7 @@ if ! command -v solc &> /dev/null; then
     exit 1
 fi
 
-SOLC_IMAGE="${SOLC_IMAGE:-ethereum/solc:0.8.24}"
+SOLC_IMAGE="${SOLC_IMAGE:-ethereum/solc:0.8.19}"
 SOLC_MODE="local"
 
 if ! solc --version >/dev/null 2>&1; then
@@ -73,8 +73,8 @@ ensure_node_dependencies() {
     fi
 
     echo -e "${YELLOW}⚠️  检测到 Chainlink 依赖缺失: ${missing[*]}${NC}"
-    echo -e "${YELLOW}正在在 ${BLUE}$(pwd)${YELLOW} 执行 npm install...${NC}"
-    npm install --no-fund --no-audit
+    echo -e "${YELLOW}正在在 ${BLUE}$(pwd)${YELLOW} 执行 npm install（使用 npmmirror）...${NC}"
+    npm install --registry=https://registry.npmmirror.com --no-fund --no-audit
 
     if [ ! -f "$chainlink_contracts_file" ]; then
         echo -e "${RED}❌ npm install 后仍未找到 $chainlink_contracts_file${NC}"
