@@ -8,7 +8,28 @@ if [ "$(basename "$ORACLE_ROOT")" = "04-dmn-ocr" ]; then
 fi
 CHAINLINK_ROOT="${CHAINLINK_ROOT:-$ORACLE_ROOT/CHAINLINK}"
 FEATURES_04="$ORACLE_ROOT/04-dmn-ocr"
-FEATURES_03="$CHAINLINK_ROOT/features/03-ocr-multinode"
+FEATURES_03="$ORACLE_ROOT/03-ocr-multinode"
+export OCR_RPC_URL="${OCR_RPC_URL:-http://system-geth-node:8545}"
+SYSTEM_GETH_CONTAINER="${SYSTEM_GETH_CONTAINER:-system-geth-node}"
+
+resolve_host_rpc_url() {
+  if [ -n "${RPC_URL:-}" ]; then
+    printf '%s\n' "$RPC_URL"
+    return 0
+  fi
+
+  local mapped
+  mapped="$(docker port "$SYSTEM_GETH_CONTAINER" 8545/tcp 2>/dev/null | head -n 1 || true)"
+  if [ -n "$mapped" ]; then
+    printf 'http://127.0.0.1:%s\n' "${mapped##*:}"
+    return 0
+  fi
+
+  printf 'http://localhost:8545\n'
+}
+
+export RPC_URL="${RPC_URL:-$(resolve_host_rpc_url)}"
+echo "== [rpc] host RPC: ${RPC_URL} =="
 
 echo "== [1] 启动 OCR 多节点网络（含从节点，含 DMN 服务） =="
 cd "$FEATURES_03"
@@ -16,6 +37,7 @@ cd "$FEATURES_03"
 
 echo "== [1.1] 启动 CDMN Python 服务 =="
 cd "$FEATURES_04"
+echo "   OCR_RPC_URL=${OCR_RPC_URL}"
 docker-compose -f docker-compose-cdmn.yml up -d
 
 echo "== [1.1] OCR 基础部署（首次或需重部署时执行） =="
@@ -23,9 +45,9 @@ cd "$CHAINLINK_ROOT"
 ./compile.sh
 ./unlock-account.sh
 node scripts/deploy-chainlink.js
-node features/03-ocr-multinode/deploy-ocr-contract.js
+node "$FEATURES_03/deploy-ocr-contract.js"
 node scripts/fund-chainlink-node.js --all --min 1 --amount 10
-node features/03-ocr-multinode/fund-ocr-contract.js --amount 100
+node "$FEATURES_03/fund-ocr-contract.js" --amount 100
 
 echo "== [2] 创建 OCR Jobs（多节点） =="
 cd "$CHAINLINK_ROOT"

@@ -11,7 +11,7 @@ services:
     environment:
       - SERVER_PORT=8080
       - OCR_LISTENER_ENABLED=true
-      - OCR_RPC_URL=http://mybootnode:8545
+      - OCR_RPC_URL=${OCR_RPC_URL:-http://system-geth-node:8545}
       - OCR_AGGREGATOR_ADDRESS=${OCR_AGGREGATOR_ADDRESS}
     ports:
       - "8081:8080"
@@ -25,7 +25,7 @@ services:
     environment:
       - SERVER_PORT=8080
       - OCR_LISTENER_ENABLED=true
-      - OCR_RPC_URL=http://mybootnode:8545
+      - OCR_RPC_URL=${OCR_RPC_URL:-http://system-geth-node:8545}
       - OCR_AGGREGATOR_ADDRESS=${OCR_AGGREGATOR_ADDRESS}
     ports:
       - "8082:8080"
@@ -39,7 +39,7 @@ services:
     environment:
       - SERVER_PORT=8080
       - OCR_LISTENER_ENABLED=true
-      - OCR_RPC_URL=http://mybootnode:8545
+      - OCR_RPC_URL=${OCR_RPC_URL:-http://system-geth-node:8545}
       - OCR_AGGREGATOR_ADDRESS=${OCR_AGGREGATOR_ADDRESS}
     ports:
       - "8083:8080"
@@ -53,7 +53,7 @@ services:
     environment:
       - SERVER_PORT=8080
       - OCR_LISTENER_ENABLED=true
-      - OCR_RPC_URL=http://mybootnode:8545
+      - OCR_RPC_URL=${OCR_RPC_URL:-http://system-geth-node:8545}
       - OCR_AGGREGATOR_ADDRESS=${OCR_AGGREGATOR_ADDRESS}
     ports:
       - "8084:8080"

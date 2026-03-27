@@ -1,8 +1,10 @@
 const fs = require('fs');
 const http = require('http');
 const path = require('path');
+const { URL } = require('url');
 
 const ROOT_DIR = path.resolve(__dirname, '..', '..');
+const RPC_URL = process.env.RPC_URL || 'http://localhost:8545';
 
 // RPC 调用函数
 function rpcCall(method, params) {
@@ -14,10 +16,11 @@ function rpcCall(method, params) {
             id: 1
         });
 
+        const rpc = new URL(RPC_URL);
         const options = {
-            hostname: 'localhost',
-            port: 8545,
-            path: '/',
+            hostname: rpc.hostname,
+            port: rpc.port || (rpc.protocol === 'https:' ? 443 : 80),
+            path: rpc.pathname === '' ? '/' : rpc.pathname,
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -110,6 +113,7 @@ function getGeneratedOCRConfig() {
 
 async function main() {
     try {
+        console.log('RPC URL:', RPC_URL);
         // 读取节点信息和合约部署信息
         const nodeInfo = getNodeInfo();
         const ocrDeployment = getOCRDeployment();
@@ -254,7 +258,7 @@ async function main() {
 
         // 获取最新配置详情
         const { Web3 } = require('web3');
-        const web3 = new Web3('http://localhost:8545');
+        const web3 = new Web3(RPC_URL);
 
         const contract = new web3.eth.Contract(contractABI, contractAddress);
         const latestConfig = await contract.methods.latestConfigDetails().call();

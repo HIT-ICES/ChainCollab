@@ -12,7 +12,8 @@ NC='\033[0m' # No Color
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 COMPOSE_FILE="$SCRIPT_DIR/docker-compose-multinode.yml"
-DMN_COMPOSE_FILE="$ROOT_DIR/features/04-dmn-ocr/docker-compose-cdmn.yml"
+DMN_COMPOSE_FILE="$SCRIPT_DIR/../04-dmn-ocr/docker-compose-cdmn.yml"
+SYSTEM_GETH_CONTAINER="${SYSTEM_GETH_CONTAINER:-system-geth-node}"
 STARTED_BOOTSTRAP=0
 STARTED_CHAINLINK=0
 STARTED_DMN=0
@@ -36,19 +37,42 @@ cleanup_on_failure() {
 
 trap 'exit_code=$?; trap - EXIT; cleanup_on_failure "$exit_code"; exit "$exit_code"' EXIT
 
+ensure_system_geth_ready() {
+    local container="$1"
+
+    if ! docker ps --filter "name=^/${container}$" --format '{{.Names}}' | grep -qx "$container"; then
+        echo -e "${RED}错误：未找到运行中的 system geth 容器 ${container}${NC}"
+        exit 1
+    fi
+
+    if ! docker exec "$container" geth attach http://127.0.0.1:8545 --exec 'eth.blockNumber' >/dev/null 2>&1; then
+        echo -e "${RED}错误：${container} 的 HTTP RPC(8545) 不可用${NC}"
+        exit 1
+    fi
+
+    if ! docker exec "$container" geth attach ws://127.0.0.1:8546 --exec 'eth.blockNumber' >/dev/null 2>&1; then
+        echo -e "${RED}错误：${container} 的 WS RPC(8546) 不可用${NC}"
+        exit 1
+    fi
+}
+
 # 检查 Docker 是否正在运行
 if ! docker info &> /dev/null; then
     echo -e "${RED}错误：Docker 未运行，请先启动 Docker。${NC}"
     exit 1
 fi
 
+echo -e "${BLUE}检查外部系统链节点 ${SYSTEM_GETH_CONTAINER}...${NC}"
+ensure_system_geth_ready "$SYSTEM_GETH_CONTAINER"
+echo -e "${GREEN}system geth 节点已就绪，将复用其 RPC/WS。${NC}"
+
 # 创建部署目录
 mkdir -p "$ROOT_DIR/deployment"
 
 # 步骤 1：启动 Bootstrap 节点和相关服务
-echo -e "${BLUE}步骤 1：启动 Bootstrap 节点和相关服务...${NC}"
+echo -e "${BLUE}步骤 1：启动 Bootstrap 节点和相关服务（复用外部 system-geth-node）...${NC}"
 STARTED_BOOTSTRAP=1
-docker-compose -f "$COMPOSE_FILE" up -d postgres-bootstrap mybootnode chainlink-bootstrap
+docker-compose -f "$COMPOSE_FILE" up -d postgres-bootstrap chainlink-bootstrap
 
 # 等待 Bootstrap 节点启动并健康
 echo -e "${YELLOW}等待 Bootstrap 节点启动和健康检查...${NC}"

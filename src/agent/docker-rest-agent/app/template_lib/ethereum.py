@@ -87,10 +87,10 @@ class EthereumNodeTemplate:
     def create_system_node(self, form_data: ImmutableMultiDict) -> Tuple[ContainerSpec, ProvisionContext]:
         """
         Create a system geth node based on docker-compose.sys.yml template.
-        This node acts as a bootnode with HTTP RPC enabled.
+        This node acts as a bootnode with HTTP/WS RPC enabled.
         """
-        node_name = form_data.get("name", "sys_geth")
-        raw_port_map = form_data.get("port_map", '{"8545": 8545, "30303": 30303}')
+        node_name = form_data.get("name", "system-geth-node")
+        raw_port_map = form_data.get("port_map", '{"8545": 8545, "8546": 8546, "30303": 30303}')
         port_map = parse_port_map(raw_port_map)
         if not port_map:
             raise ValueError("port_map is required for system node")
@@ -130,6 +130,7 @@ class EthereumNodeTemplate:
 
         ports = {
             "8545/tcp": port_map.get("8545", 8545),
+            "8546/tcp": port_map.get("8546", 8546),
             "30303/tcp": port_map.get("30303", 30303),
         }
 
@@ -145,9 +146,15 @@ class EthereumNodeTemplate:
             "--http",
             "--http.addr=0.0.0.0",
             "--http.port=8545",
-            "--http.api=admin,eth,net,web3,txpool,personal",
+            "--http.api=admin,eth,miner,net,web3,txpool,personal",
             "--http.corsdomain=*",
             "--http.vhosts=*",
+            # WS RPC for Chainlink log subscriptions
+            "--ws",
+            "--ws.addr=0.0.0.0",
+            "--ws.port=8546",
+            "--ws.api=admin,eth,miner,net,web3,txpool,personal",
+            "--ws.origins=*",
             # Unlock fixed account (only for dev/internal network)
             "--unlock=0x365acf78c44060caf3a4789d804df11e3b4aa17d",
             "--password=/root/password.txt",

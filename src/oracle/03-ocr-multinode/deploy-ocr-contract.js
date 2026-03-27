@@ -1,10 +1,12 @@
 const fs = require('fs');
 const http = require('http');
 const path = require('path');
+const { URL } = require('url');
 
 // 读取编译后的合约
 const ROOT_DIR = path.resolve(__dirname, '..', '..');
 const deploymentDir = path.join(ROOT_DIR, 'deployment');
+const RPC_URL = process.env.RPC_URL || 'http://localhost:8545';
 
 // RPC 调用函数
 function rpcCall(method, params) {
@@ -16,10 +18,11 @@ function rpcCall(method, params) {
             id: 1
         });
 
+        const rpc = new URL(RPC_URL);
         const options = {
-            hostname: 'localhost',
-            port: 8545,
-            path: '/',
+            hostname: rpc.hostname,
+            port: rpc.port || (rpc.protocol === 'https:' ? 443 : 80),
+            path: rpc.pathname === '' ? '/' : rpc.pathname,
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -48,6 +51,7 @@ function rpcCall(method, params) {
 
 async function deploy() {
     try {
+        console.log('RPC URL:', RPC_URL);
         // 检查是否已编译合约
         if (!fs.existsSync(`${deploymentDir}/compiled.json`)) {
             console.error('❌ 合约未编译，请先运行 compile.sh');

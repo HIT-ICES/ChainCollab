@@ -1,5 +1,41 @@
 const fs = require('fs');
 const http = require('http');
+const { URL } = require('url');
+const { exec, spawnSync } = require('child_process');
+
+const RPC_URL = process.env.RPC_URL || 'http://localhost:8545';
+
+function rpcOptions(postData) {
+    const rpc = new URL(RPC_URL);
+    return {
+        hostname: rpc.hostname,
+        port: rpc.port || (rpc.protocol === 'https:' ? 443 : 80),
+        path: rpc.pathname === '' ? '/' : rpc.pathname,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(postData)
+        }
+    };
+}
+
+function resolveChainlinkLogContainer() {
+    const explicit = process.env.CHAINLINK_LOG_CONTAINER;
+    if (explicit) {
+        return explicit;
+    }
+
+    const candidates = ['chainlink-node', 'chainlink-node1', 'chainlink-bootstrap'];
+    for (const name of candidates) {
+        const probe = spawnSync('docker', ['ps', '--filter', `name=^/${name}$`, '--format', '{{.Names}}'], {
+            encoding: 'utf8'
+        });
+        if (probe.status === 0 && probe.stdout.trim()) {
+            return probe.stdout.trim().split('\n')[0];
+        }
+    }
+    return 'chainlink-node1';
+}
 
 function rpcCall(method, params) {
     return new Promise((resolve, reject) => {
@@ -10,16 +46,7 @@ function rpcCall(method, params) {
             id: 1
         });
 
-        const options = {
-            hostname: 'localhost',
-            port: 8545,
-            path: '/',
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Content-Length': Buffer.byteLength(postData)
-            }
-        };
+        const options = rpcOptions(postData);
 
         const req = http.request(options, (res) => {
             let data = '';
@@ -39,10 +66,9 @@ function rpcCall(method, params) {
 
 async function getChainlinkNodeAddress() {
     try {
-        const { exec } = require('child_process');
-
         return new Promise((resolve, reject) => {
-            exec('docker logs chainlink-node 2>&1 | grep -i "Created EVM key with ID" | head -1', (error, stdout, stderr) => {
+            const container = resolveChainlinkLogContainer();
+            exec(`docker logs ${container} 2>&1 | grep -i "Created EVM key with ID" | head -1`, (error, stdout, stderr) => {
                 if (error) {
                     console.error('❌ 获取 Chainlink 节点账户失败:', error.message);
                     reject(error);
@@ -205,6 +231,7 @@ async function isNodeAuthorized(operatorAddress, nodeAddress) {
 async function authorizeChainlinkNode() {
     try {
         console.log('🔐 检查 Chainlink 节点授权状态...');
+        console.log('RPC URL:', RPC_URL);
         console.log('');
 
         // 读取部署信息

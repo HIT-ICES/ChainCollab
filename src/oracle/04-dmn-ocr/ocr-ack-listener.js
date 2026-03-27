@@ -7,13 +7,17 @@ const ROOT_DIR = path.resolve(__dirname, '..', '..');
 const DEPLOYMENT_DIR = path.join(ROOT_DIR, 'deployment');
 
 const RPC_URL = process.env.RPC_URL || 'http://localhost:8545';
-const DEFAULT_WS_URL = 'ws://localhost:8546';
-const RPC_WS_URL =
-  process.env.RPC_WS_URL ||
-  DEFAULT_WS_URL ||
-  (RPC_URL.startsWith('https://')
-    ? RPC_URL.replace('https://', 'wss://')
-    : RPC_URL.replace('http://', 'ws://'));
+function deriveWsUrl(rpcUrl) {
+  if (rpcUrl.startsWith('https://')) {
+    return rpcUrl.replace('https://', 'wss://');
+  }
+  if (rpcUrl.startsWith('http://')) {
+    return rpcUrl.replace('http://', 'ws://');
+  }
+  return rpcUrl;
+}
+const DEFAULT_WS_URL = deriveWsUrl(RPC_URL);
+const RPC_WS_URL = process.env.RPC_WS_URL || DEFAULT_WS_URL;
 const CHAINLINK_URL = process.env.CHAINLINK_URL || 'http://localhost:6687';
 const EI_FILE =
   process.env.EI_FILE ||

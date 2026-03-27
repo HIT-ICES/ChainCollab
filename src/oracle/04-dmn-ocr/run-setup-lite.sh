@@ -20,6 +20,8 @@ fi
 
 STARTED_OCR_NETWORK=0
 STARTED_CDMN=0
+export OCR_RPC_URL="${OCR_RPC_URL:-http://system-geth-node:8545}"
+SYSTEM_GETH_CONTAINER="${SYSTEM_GETH_CONTAINER:-system-geth-node}"
 
 cleanup_on_failure() {
   local exit_code="$1"
@@ -82,10 +84,29 @@ smoke_check() {
   echo "== [smoke] done =="
 }
 
+resolve_host_rpc_url() {
+  if [ -n "${RPC_URL:-}" ]; then
+    printf '%s\n' "$RPC_URL"
+    return 0
+  fi
+
+  local mapped
+  mapped="$(docker port "$SYSTEM_GETH_CONTAINER" 8545/tcp 2>/dev/null | head -n 1 || true)"
+  if [ -n "$mapped" ]; then
+    printf 'http://127.0.0.1:%s\n' "${mapped##*:}"
+    return 0
+  fi
+
+  printf 'http://localhost:8545\n'
+}
+
 if [ "$MODE" = "smoke" ]; then
   smoke_check
   exit 0
 fi
+
+export RPC_URL="${RPC_URL:-$(resolve_host_rpc_url)}"
+echo "== [rpc] host RPC: ${RPC_URL} =="
 
 trap 'exit_code=$?; trap - EXIT; cleanup_on_failure "$exit_code"; exit "$exit_code"' EXIT
 
@@ -299,6 +320,7 @@ cd "$FEATURES_04"
 export COMPOSE_DOCKER_CLI_BUILD=1
 export DOCKER_BUILDKIT=1
 export COMPOSE_BUILD_PULL_POLICY=never
+echo "   OCR_RPC_URL=${OCR_RPC_URL}"
 docker-compose -f docker-compose-cdmn.yml up -d --build --pull=never
 
 echo "== [3] Chainlink 基础部署（LinkToken/Operator） =="
@@ -309,6 +331,7 @@ export NODE_PATH="$CHAINLINK_ROOT/node_modules${NODE_PATH:+:$NODE_PATH}"
 ./compile.sh
 ./unlock-account.sh
 node scripts/deploy-chainlink.js
+node scripts/fund-chainlink-node.js --all --min 1 --amount 10
 
 echo "== [4] 确保 DMN 请求合约已部署 =="
 cd "$CHAINLINK_ROOT"
@@ -323,11 +346,15 @@ echo "== [6] 将 DMN Job ID 写回合约 setJobId =="
 cd "$CHAINLINK_ROOT"
 DMN_MODE=lite node "$FEATURES_04/set-dmn-job-id.js"
 
-echo "== [7] 为 DMN 合约充值 LINK =="
+echo "== [7] 设置 baseline writers =="
+cd "$CHAINLINK_ROOT"
+DMN_MODE=lite node "$FEATURES_04/set-ocr-and-writer.js"
+
+echo "== [8] 为 DMN 合约充值 LINK =="
 cd "$CHAINLINK_ROOT"
 node scripts/fund-contract.js
 
-echo "== [8] 测试 directrequest 缓存链路 =="
+echo "== [9] 测试 directrequest 缓存链路 =="
 DMN_RANDOM=1 node "$FEATURES_04/test-dmn-ocr.js"
 
 echo "== 完成：已启用 Operator 监听 + DMN 直写链路（无 OCR 聚合） =="

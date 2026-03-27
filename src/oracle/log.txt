@@ -1,0 +1,989 @@
+./features/04-dmn-ocr/run-setup.sh
+== [1] 启动 OCR 多节点网络（含从节点，含 DMN 服务） ==
+步骤 1：启动 Bootstrap 节点和相关服务...
+WARN[0000] /home/shenxz-lab/code/ChainCollab/src/oracle/CHAINLINK/features/03-ocr-multinode/docker-compose-multinode.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
+[+] up 4/4
+ ✔ Volume 03-ocr-multinode_pgdatabootstrap Created                                                                                                0.0s
+ ✔ Container chainlink-postgres-bootstrap  Created                                                                                                0.1s
+ ✔ Container 03-ocr-multinode-mybootnode-1 Created                                                                                                0.1s
+ ✔ Container chainlink-bootstrap           Created                                                                                                0.0s
+等待 Bootstrap 节点启动和健康检查...
+Bootstrap 节点未就绪，第 1/60 次重试...
+Bootstrap 节点未就绪，第 2/60 次重试...
+Bootstrap 节点未就绪，第 3/60 次重试...
+Bootstrap 节点未就绪，第 4/60 次重试...
+Bootstrap 节点未就绪，第 5/60 次重试...
+Bootstrap 节点已就绪！
+步骤 2：获取 Bootstrap 节点的 P2P ID...
+Bootstrap 节点 P2P ID：12D3KooWAd6zi7cUqSRgGU76ZTZhrvywYvRUM1BPpgohLwDSkkDL
+步骤 3：更新其他节点的配置，使用 Bootstrap 节点的 P2P ID...
+步骤 3.5：获取所有节点的 OCR Key Bundle ID...
+开始收集所有 Chainlink 节点的信息
+
+=== 获取 bootstrap 信息 ===
+ETH Address: 0x88CDBF9fFE32AA50C86EE00e9FcA3Bf3E1AcA7D7
+OCR Key Bundle ID: c24e6401d631b0ab49871e9128ba227f6d59403137c9d2a3dcbec2b603da08d9
+OCR Signer Address: ocrsad_0xda92D46D8cf2127ba9A50C5cbe7AB98d88B767B1
+OCR Offchain Public Key: ocroff_5f787b3cd787ff4c85b216d4b8425640c0656b06ea080fa7f17dbb9bc73f4808
+OCR Config Public Key: ocrcfg_ce86e93e5a0d60caadf97a16679195867442fdf5bd438bb3a09635cc4bbf4f0b
+P2P Peer ID: 12D3KooWAd6zi7cUqSRgGU76ZTZhrvywYvRUM1BPpgohLwDSkkDL
+P2P Address: /ip4/172.31.61.180/tcp/6690/p2p/12D3KooWAd6zi7cUqSRgGU76ZTZhrvywYvRUM1BPpgohLwDSkkDL
+
+=== 获取 node1 信息 ===
+获取 node1 信息失败: connect ECONNREFUSED 127.0.0.1:6688
+=== 获取 node2 信息 ===
+获取 node2 信息失败: connect ECONNREFUSED 127.0.0.1:6689
+=== 获取 node3 信息 ===
+获取 node3 信息失败: connect ECONNREFUSED 127.0.0.1:6691
+=== 获取 node4 信息 ===
+获取 node4 信息失败: connect ECONNREFUSED 127.0.0.1:6692
+✅ 所有节点信息已保存到 /home/shenxz-lab/code/ChainCollab/src/oracle/CHAINLINK/deployment/node-info.json
+
+=== OCR 网络配置信息 ===
+1. P2P Bootstrap Peers:
+   - /ip4/172.31.61.180/tcp/6690/p2p/12D3KooWAd6zi7cUqSRgGU76ZTZhrvywYvRUM1BPpgohLwDSkkDL
+2. 节点 ETH 地址 (用于 setConfig):
+   - bootstrap: 0x88CDBF9fFE32AA50C86EE00e9FcA3Bf3E1AcA7D7
+
+3. 节点 OCR Key Bundle IDs (用于 setConfig):
+   - bootstrap: c24e6401d631b0ab49871e9128ba227f6d59403137c9d2a3dcbec2b603da08d9
+
+4. 节点 OCR Signer Addresses (用于 setConfig):
+   - bootstrap: ocrsad_0xda92D46D8cf2127ba9A50C5cbe7AB98d88B767B1
+
+5. 节点 OCR Offchain Public Keys:
+   - bootstrap: ocroff_5f787b3cd787ff4c85b216d4b8425640c0656b06ea080fa7f17dbb9bc73f4808
+
+6. 节点 OCR Config Public Keys:
+   - bootstrap: ocrcfg_ce86e93e5a0d60caadf97a16679195867442fdf5bd438bb3a09635cc4bbf4f0b
+步骤 4：启动其他四个 Chainlink 节点...
+WARN[0000] /home/shenxz-lab/code/ChainCollab/src/oracle/CHAINLINK/features/03-ocr-multinode/docker-compose-multinode.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
+[+] up 15/15
+ ✔ Volume 03-ocr-multinode_pgdata4         Created                                                                                                0.0s
+ ✔ Volume 03-ocr-multinode_pgdata1         Created                                                                                                0.0s
+ ✔ Volume 03-ocr-multinode_pgdata3         Created                                                                                                0.0s
+ ✔ Volume 03-ocr-multinode_pgdata2         Created                                                                                                0.0s
+ ✔ Container 03-ocr-multinode-mybootnode-1 Running                                                                                                0.0s
+ ✔ Container chainlink-postgres-bootstrap  Running                                                                                                0.0s
+ ✔ Container chainlink-bootstrap           Running                                                                                                0.0s
+ ✔ Container chainlink-postgres4           Created                                                                                                0.6s
+ ✔ Container chainlink-postgres1           Created                                                                                                0.6s
+ ✔ Container chainlink-postgres2           Created                                                                                                0.6s
+ ✔ Container chainlink-postgres3           Created                                                                                                0.6s
+ ✔ Container chainlink-node4               Created                                                                                                0.1s
+ ✔ Container chainlink-node3               Created                                                                                                0.1s
+ ✔ Container chainlink-node2               Created                                                                                                0.1s
+ ✔ Container chainlink-node1               Created                                                                                                0.1s
+步骤 4.5：更新 AnnounceAddresses 为宿主机 IP...
+WARN[0000] /home/shenxz-lab/code/ChainCollab/src/oracle/CHAINLINK/features/03-ocr-multinode/docker-compose-multinode.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
+[+] restart 0/4
+ ⠏ Container chainlink-node3 Restarting                                                                                                           2.9s
+ ⠏ Container chainlink-node2 Restarting                                                                                                           2.9s
+ ⠏ Container chainlink-node4 Restarting                                                                                                           2.9s
+ ⠏ Container chainlink-node1 Restarting                                                                                                           2.9s
+等待其他节点启动和健康检查...
+chainlink-node1 未就绪，第 1/60 次重试...
+chainlink-node1 未就绪，第 2/60 次重试...
+chainlink-node1 未就绪，第 3/60 次重试...
+chainlink-node1 已就绪！
+chainlink-node2 已就绪！
+chainlink-node3 已就绪！
+chainlink-node4 已就绪！
+步骤 5：收集所有节点信息...
+开始收集所有 Chainlink 节点的信息
+
+=== 获取 bootstrap 信息 ===
+ETH Address: 0x88CDBF9fFE32AA50C86EE00e9FcA3Bf3E1AcA7D7
+OCR Key Bundle ID: c24e6401d631b0ab49871e9128ba227f6d59403137c9d2a3dcbec2b603da08d9
+OCR Signer Address: ocrsad_0xda92D46D8cf2127ba9A50C5cbe7AB98d88B767B1
+OCR Offchain Public Key: ocroff_5f787b3cd787ff4c85b216d4b8425640c0656b06ea080fa7f17dbb9bc73f4808
+OCR Config Public Key: ocrcfg_ce86e93e5a0d60caadf97a16679195867442fdf5bd438bb3a09635cc4bbf4f0b
+P2P Peer ID: 12D3KooWAd6zi7cUqSRgGU76ZTZhrvywYvRUM1BPpgohLwDSkkDL
+P2P Address: /ip4/172.31.61.180/tcp/6690/p2p/12D3KooWAd6zi7cUqSRgGU76ZTZhrvywYvRUM1BPpgohLwDSkkDL
+
+=== 获取 node1 信息 ===
+ETH Address: 0x2F70646948C228c85659280f1515b26702dDfEDd
+OCR Key Bundle ID: 2ef8d4bcf8e8c5a0a96acff18262bad1cbb0cb11d33190205ba1bbe55f3b11d6
+OCR Signer Address: ocrsad_0xdbBe3445d0DD0AE20bB95F204549AD890Fc225B9
+OCR Offchain Public Key: ocroff_744a55730ea398309ee372575413cbeb0d52b9be9ac46b948016fd55a0f416e1
+OCR Config Public Key: ocrcfg_9214c37562dbd9e878025d4d518582afd2fa6cd3ad491362716a19c013456e2f
+P2P Peer ID: 12D3KooWQL2WJmzwpyq1R99dfvuxTwLGpYHCnVSt53AMX7ycHmKS
+P2P Address: /ip4/172.31.61.180/tcp/6698/p2p/12D3KooWQL2WJmzwpyq1R99dfvuxTwLGpYHCnVSt53AMX7ycHmKS
+
+=== 获取 node2 信息 ===
+ETH Address: 0xD0129Ce4f491F92E222E2E5a70AB43C41121bCf0
+OCR Key Bundle ID: cee05d8f538c7f73a6eb26c7c2f9a466ce9f6f424f6f0015943423f4007223b7
+OCR Signer Address: ocrsad_0xD08922f110892A48936b126685C053316280790F
+OCR Offchain Public Key: ocroff_a7ca002940fe157437dc99ee0825eb7ae3d178726922601a822b37b3245b068b
+OCR Config Public Key: ocrcfg_90c888238f26ad0e2e3f83bcee4b90a78b61f4b57d065dc7e76bbb1a035fa42d
+P2P Peer ID: 12D3KooWC7qkiH7uAKHNaWsa16BtUovryMnYdXFUXaXRXzPd5BAz
+P2P Address: /ip4/172.31.61.180/tcp/6699/p2p/12D3KooWC7qkiH7uAKHNaWsa16BtUovryMnYdXFUXaXRXzPd5BAz
+
+=== 获取 node3 信息 ===
+ETH Address: 0x72bC5733589FD6BdE33f2dCAc493aCDa01Ab3676
+OCR Key Bundle ID: 1b326f7d3938a2ec01d2629819b24d6062048be2700c4e79224282f12a93383e
+OCR Signer Address: ocrsad_0xED57a12eaC46bD8a549aEC88Ce48E1FD64e37B76
+OCR Offchain Public Key: ocroff_7fdfea7c8e884ecd2e4b877ee3ee8e196351ed27a6b9e09363a45348d903ce4b
+OCR Config Public Key: ocrcfg_2a71555095e9c8049015220ec6d119f33bea980a0167060e979a1e1afba28a1a
+P2P Peer ID: 12D3KooWF9pVBHbpNvEuD5HCeKyYtye98JX6dqZJvidSeZTZ3FtR
+P2P Address: /ip4/172.31.61.180/tcp/6697/p2p/12D3KooWF9pVBHbpNvEuD5HCeKyYtye98JX6dqZJvidSeZTZ3FtR
+
+=== 获取 node4 信息 ===
+ETH Address: 0xe98Ce6dc299f788D679cF414FCB8249294927e59
+OCR Key Bundle ID: a1ccf98117e946b4af926dc05f9847a033e94cc107f03cce3e0ee54dfac0a09d
+OCR Signer Address: ocrsad_0xB2aeB2Fc16570906C6620E1F9c8Fe5Eee1981b37
+OCR Offchain Public Key: ocroff_dbb8045e6b574307c77b3c2fcc5f96a0bb508af3a74aebcb6f17b8c8c68943cf
+OCR Config Public Key: ocrcfg_9aa826e9abe45ade6224f8ba7d697db2597eb626ed51c1a6060fb857cf1e0912
+P2P Peer ID: 12D3KooWSuosM1VZVvUWtH37p9smd2WM9eNGHCva9ykjnPT6hwjZ
+P2P Address: /ip4/172.31.61.180/tcp/6696/p2p/12D3KooWSuosM1VZVvUWtH37p9smd2WM9eNGHCva9ykjnPT6hwjZ
+
+✅ 所有节点信息已保存到 /home/shenxz-lab/code/ChainCollab/src/oracle/CHAINLINK/deployment/node-info.json
+
+=== OCR 网络配置信息 ===
+1. P2P Bootstrap Peers:
+   - /ip4/172.31.61.180/tcp/6690/p2p/12D3KooWAd6zi7cUqSRgGU76ZTZhrvywYvRUM1BPpgohLwDSkkDL
+   - /ip4/172.31.61.180/tcp/6698/p2p/12D3KooWQL2WJmzwpyq1R99dfvuxTwLGpYHCnVSt53AMX7ycHmKS
+   - /ip4/172.31.61.180/tcp/6699/p2p/12D3KooWC7qkiH7uAKHNaWsa16BtUovryMnYdXFUXaXRXzPd5BAz
+   - /ip4/172.31.61.180/tcp/6697/p2p/12D3KooWF9pVBHbpNvEuD5HCeKyYtye98JX6dqZJvidSeZTZ3FtR
+   - /ip4/172.31.61.180/tcp/6696/p2p/12D3KooWSuosM1VZVvUWtH37p9smd2WM9eNGHCva9ykjnPT6hwjZ
+2. 节点 ETH 地址 (用于 setConfig):
+   - bootstrap: 0x88CDBF9fFE32AA50C86EE00e9FcA3Bf3E1AcA7D7
+   - node1: 0x2F70646948C228c85659280f1515b26702dDfEDd
+   - node2: 0xD0129Ce4f491F92E222E2E5a70AB43C41121bCf0
+   - node3: 0x72bC5733589FD6BdE33f2dCAc493aCDa01Ab3676
+   - node4: 0xe98Ce6dc299f788D679cF414FCB8249294927e59
+
+3. 节点 OCR Key Bundle IDs (用于 setConfig):
+   - bootstrap: c24e6401d631b0ab49871e9128ba227f6d59403137c9d2a3dcbec2b603da08d9
+   - node1: 2ef8d4bcf8e8c5a0a96acff18262bad1cbb0cb11d33190205ba1bbe55f3b11d6
+   - node2: cee05d8f538c7f73a6eb26c7c2f9a466ce9f6f424f6f0015943423f4007223b7
+   - node3: 1b326f7d3938a2ec01d2629819b24d6062048be2700c4e79224282f12a93383e
+   - node4: a1ccf98117e946b4af926dc05f9847a033e94cc107f03cce3e0ee54dfac0a09d
+
+4. 节点 OCR Signer Addresses (用于 setConfig):
+   - bootstrap: ocrsad_0xda92D46D8cf2127ba9A50C5cbe7AB98d88B767B1
+   - node1: ocrsad_0xdbBe3445d0DD0AE20bB95F204549AD890Fc225B9
+   - node2: ocrsad_0xD08922f110892A48936b126685C053316280790F
+   - node3: ocrsad_0xED57a12eaC46bD8a549aEC88Ce48E1FD64e37B76
+   - node4: ocrsad_0xB2aeB2Fc16570906C6620E1F9c8Fe5Eee1981b37
+
+5. 节点 OCR Offchain Public Keys:
+   - bootstrap: ocroff_5f787b3cd787ff4c85b216d4b8425640c0656b06ea080fa7f17dbb9bc73f4808
+   - node1: ocroff_744a55730ea398309ee372575413cbeb0d52b9be9ac46b948016fd55a0f416e1
+   - node2: ocroff_a7ca002940fe157437dc99ee0825eb7ae3d178726922601a822b37b3245b068b
+   - node3: ocroff_7fdfea7c8e884ecd2e4b877ee3ee8e196351ed27a6b9e09363a45348d903ce4b
+   - node4: ocroff_dbb8045e6b574307c77b3c2fcc5f96a0bb508af3a74aebcb6f17b8c8c68943cf
+
+6. 节点 OCR Config Public Keys:
+   - bootstrap: ocrcfg_ce86e93e5a0d60caadf97a16679195867442fdf5bd438bb3a09635cc4bbf4f0b
+   - node1: ocrcfg_9214c37562dbd9e878025d4d518582afd2fa6cd3ad491362716a19c013456e2f
+   - node2: ocrcfg_90c888238f26ad0e2e3f83bcee4b90a78b61f4b57d065dc7e76bbb1a035fa42d
+   - node3: ocrcfg_2a71555095e9c8049015220ec6d119f33bea980a0167060e979a1e1afba28a1a
+   - node4: ocrcfg_9aa826e9abe45ade6224f8ba7d697db2597eb626ed51c1a6060fb857cf1e0912
+步骤 6：启动 CDMN 服务...
+⚠️  未找到 OCR 合约地址，将以空值启动 DMN 服务
+WARN[0000] /home/shenxz-lab/code/ChainCollab/src/oracle/CHAINLINK/features/04-dmn-ocr/docker-compose-cdmn.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
+[+] up 4/4
+ ✔ Container cdmn-node1 Running                                                                                                                   0.0s
+ ✔ Container cdmn-node2 Running                                                                                                                   0.0s
+ ✔ Container cdmn-node3 Running                                                                                                                   0.0s
+ ✔ Container cdmn-node4 Running                                                                                                                   0.0s
+网络启动完成！
+可以通过以下 URL 访问节点：
+  Bootstrap 节点：http://localhost:6687
+  Node 1：http://localhost:6688
+  Node 2：http://localhost:6689
+  Node 3：http://localhost:6691
+  Node 4：http://localhost:6692
+用户名：admin@chain.link
+密码：change-me-strong
+== [1.1] 启动 CDMN Python 服务 ==
+WARN[0000] The "OCR_AGGREGATOR_ADDRESS" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "OCR_AGGREGATOR_ADDRESS" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "OCR_AGGREGATOR_ADDRESS" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "OCR_AGGREGATOR_ADDRESS" variable is not set. Defaulting to a blank string. 
+WARN[0000] /home/shenxz-lab/code/ChainCollab/src/oracle/CHAINLINK/features/04-dmn-ocr/docker-compose-cdmn.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
+[+] up 4/4
+ ✔ Container cdmn-node1 Running                                                                                                                   0.0s
+ ✔ Container cdmn-node3 Running                                                                                                                   0.0s
+ ✔ Container cdmn-node2 Running                                                                                                                   0.0s
+ ✔ Container cdmn-node4 Running                                                                                                                   0.0s
+== [1.1] OCR 基础部署（首次或需重部署时执行） ==
+================================================
+  合约编译脚本
+================================================
+
+⚠️  检测到 Chainlink 依赖缺失: web3-eth-abi
+正在在 /home/shenxz-lab/code/ChainCollab/src/oracle/CHAINLINK 执行 npm install（使用 npmmirror）...
+
+up to date in 369ms
+Solidity 版本:
+solc, the solidity compiler commandline interface
+
+正在编译 MyChainlinkRequester / MyChainlinkRequesterDMN 合约...
+Warning: This declaration shadows an existing declaration.
+   --> contracts/ocr/OffchainAggregator.sol:529:7:
+    |
+529 |       int192 latestAnswer,
+    |       ^^^^^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+   --> contracts/ocr/OffchainAggregator.sol:721:3:
+    |
+721 |   function latestAnswer()
+    |   ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning: This declaration shadows an existing declaration.
+   --> contracts/ocr/OffchainAggregator.sol:530:7:
+    |
+530 |       uint64 latestTimestamp
+    |       ^^^^^^^^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+   --> contracts/ocr/OffchainAggregator.sol:734:3:
+    |
+734 |   function latestTimestamp()
+    |   ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning: This declaration shadows an existing declaration.
+  --> contracts/ocr/AccessControlledOffchainAggregator.sol:24:5:
+   |
+24 |     string memory description
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+   --> contracts/ocr/AccessControlledOffchainAggregator.sol:121:3:
+    |
+121 |   function description()
+    |   ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning: This declaration shadows an existing declaration.
+   --> contracts/ocr/OffchainAggregator_Allequal.sol:529:7:
+    |
+529 |       int192 latestAnswer,
+    |       ^^^^^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+   --> contracts/ocr/OffchainAggregator_Allequal.sol:725:3:
+    |
+725 |   function latestAnswer()
+    |   ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning: This declaration shadows an existing declaration.
+   --> contracts/ocr/OffchainAggregator_Allequal.sol:530:7:
+    |
+530 |       uint64 latestTimestamp
+    |       ^^^^^^^^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+   --> contracts/ocr/OffchainAggregator_Allequal.sol:738:3:
+    |
+738 |   function latestTimestamp()
+    |   ^ (Relevant source part starts here and spans across multiple lines).
+
+✅ 合约编译成功
+
+生成的文件:
+  deployment/compiled.json - 合约 ABI 和字节码
+
+合约信息:
+  合约数量: 50
+  合约名称: contracts/ChainlinkComputeTaskAdapter.sol:ChainlinkComputeTaskAdapter
+contracts/ChainlinkComputeTaskAdapter.sol:IMainComputeTaskCallback
+contracts/ChainlinkDataTaskAdapter.sol:ChainlinkDataTaskAdapter
+contracts/ChainlinkDataTaskAdapter.sol:IMainDataTaskCallback
+contracts/CrossChainAdapter.sol:CrossChainAdapter
+contracts/LinkToken-v0.6-fix/ERC677.sol:ERC677
+contracts/LinkToken-v0.6-fix/ITypeAndVersion.sol:ITypeAndVersion
+contracts/LinkToken-v0.6-fix/LinkToken.sol:LinkToken
+contracts/LinkToken-v0.6-fix/token/IERC677.sol:IERC677
+contracts/LinkToken-v0.6-fix/token/IERC677Receiver.sol:IERC677Receiver
+contracts/LinkToken-v0.6-fix/token/LinkERC20.sol:LinkERC20
+contracts/MainOracleRouter.sol:IComputeTaskAdapter
+contracts/MainOracleRouter.sol:IDataTaskAdapter
+contracts/MainOracleRouter.sol:MainOracleRouter
+contracts/MyChainlinkRequester.sol:MyChainlinkRequester
+contracts/MyChainlinkRequesterDMN.sol:IOCRAggregator
+contracts/MyChainlinkRequesterDMN.sol:MyChainlinkRequesterDMN
+contracts/MyChainlinkRequesterDMN_Lite.sol:MyChainlinkRequesterDMN_Lite
+contracts/ocr/AccessControlledOffchainAggregator.sol:AccessControlledOffchainAggregator
+contracts/ocr/AccessControllerInterface.sol:AccessControllerInterface
+contracts/ocr/AggregatorInterface.sol:AggregatorInterface
+contracts/ocr/AggregatorV2V3Interface.sol:AggregatorV2V3Interface
+contracts/ocr/AggregatorV3Interface.sol:AggregatorV3Interface
+contracts/ocr/AggregatorValidatorInterface.sol:AggregatorValidatorInterface
+contracts/ocr/LinkTokenInterface.sol:LinkTokenInterface
+contracts/ocr/OffchainAggregator.sol:OffchainAggregator
+contracts/ocr/OffchainAggregatorBilling.sol:OffchainAggregatorBilling
+contracts/ocr/OffchainAggregator_Allequal.sol:OffchainAggregator
+contracts/ocr/Owned.sol:Owned
+contracts/ocr/SimpleReadAccessController.sol:SimpleReadAccessController
+contracts/ocr/SimpleWriteAccessController.sol:SimpleWriteAccessController
+contracts/ocr/TypeAndVersionInterface.sol:TypeAndVersionInterface
+contracts/vendor/openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20
+contracts/vendor/openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20
+contracts/vendor/openzeppelin/contracts/token/ERC20/IERC20Metadata.sol:IERC20Metadata
+contracts/vendor/openzeppelin/contracts/utils/Context.sol:Context
+node_modules/@chainlink/contracts/src/v0.8/operatorforwarder/Chainlink.sol:Chainlink
+node_modules/@chainlink/contracts/src/v0.8/operatorforwarder/ChainlinkClient.sol:ChainlinkClient
+node_modules/@chainlink/contracts/src/v0.8/operatorforwarder/interfaces/ChainlinkRequestInterface.sol:ChainlinkRequestInterface
+node_modules/@chainlink/contracts/src/v0.8/operatorforwarder/interfaces/ENSInterface.sol:ENSInterface
+node_modules/@chainlink/contracts/src/v0.8/operatorforwarder/interfaces/OperatorInterface.sol:OperatorInterface
+node_modules/@chainlink/contracts/src/v0.8/operatorforwarder/interfaces/OracleInterface.sol:OracleInterface
+node_modules/@chainlink/contracts/src/v0.8/operatorforwarder/interfaces/PointerInterface.sol:PointerInterface
+node_modules/@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol:ConfirmedOwner
+node_modules/@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwnerWithProposal.sol:ConfirmedOwnerWithProposal
+node_modules/@chainlink/contracts/src/v0.8/shared/interfaces/IOwnable.sol:IOwnable
+node_modules/@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol:LinkTokenInterface
+node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol:BufferChainlink
+node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol:CBORChainlink
+node_modules/@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol:ENSResolver
+
+现在可以部署合约了:
+  ./unlock-account.sh
+  node scripts/deploy-contract.js
+
+================================================
+================================================
+  Geth 账户解锁脚本
+================================================
+
+RPC_URL: http://localhost:8545
+正在解锁账户: 0x365Acf78C44060CAF3A4789D804Df11E3B4AA17d
+
+
+✅ 账户解锁成功！
+
+账户信息:
+  地址: 0x365Acf78C44060CAF3A4789D804Df11E3B4AA17d
+
+查询账户余额...
+  余额: 10018 ETH
+
+================================================
+
+现在可以部署合约了:
+  node scripts/deploy-contract.js
+
+开始部署 Chainlink 基础设施...
+
+RPC URL: http://localhost:8545
+=== 步骤 1: 合约已编译 ===
+
+=== 步骤 2: 部署 LinkToken ===
+
+正在部署 LinkToken...
+交易哈希: 0x2ecce82c394c5ce78c53c85adb2694b8afaa9c70b5588ad7245fea3af9763c12
+等待确认...
+✅ LinkToken 部署成功!
+合约地址: 0xa83d77252f0ecf90e486310a01f44aa7f9a7402e
+
+=== 步骤 3: 编译并部署 Operator ===
+
+正在部署 Operator...
+交易哈希: 0x10bfae97ff5566791f182710ee5c3121ec01047171c3c7ab7464d273971f226f
+等待确认...
+✅ Operator 部署成功!
+合约地址: 0x6f4e6fc791fd2bceec7899840bc7d77fa8136486
+
+========================================
+✅ 所有合约部署完成!
+========================================
+LINK Token 地址: 0xa83d77252f0ecf90e486310a01f44aa7f9a7402e
+Operator 地址: 0x6f4e6fc791fd2bceec7899840bc7d77fa8136486
+Owner 地址: 0x365acf78c44060caf3a4789d804df11e3b4aa17d
+Chainlink 节点地址: 0x2F70646948C228c85659280f1515b26702dDfEDd
+
+部署信息已保存到 deployment/chainlink-deployment.json
+Operator ABI 已保存到 deployment/operator-abi.json
+
+========================================
+下一步: 创建 Chainlink Job
+========================================
+1. 访问 Chainlink 节点 UI: http://localhost:6688
+2. 使用以下 Operator 地址创建 Job: 0x6f4e6fc791fd2bceec7899840bc7d77fa8136486
+部署账户: 0x365acf78c44060caf3a4789d804df11e3b4aa17d
+账户余额: 10090 ETH
+开始部署 OffchainAggregator 合约...
+
+✅ 使用已部署的 LinkToken 地址: 0xa83d77252f0ecf90e486310a01f44aa7f9a7402e
+交易哈希: 0x563d301d54b6e32381d333e1264526266568719478de2d859e869b3447b4fb5e
+等待交易确认...
+
+✅ 合约部署成功!
+合约地址: 0x279534f73799e1476905c9ef7ef8dce18f43c29b
+Gas 使用: 5382973
+
+部署信息已保存到 deployment/ocr-deployment.json
+
+📦 检查节点账户: 0x88CDBF9fFE32AA50C86EE00e9FcA3Bf3E1AcA7D7
+Chainlink 节点 ETH 余额: 0.000000 ETH
+⚠️  节点余额低于 1 ETH，需要充值
+正在向 Chainlink 节点账户转账 10 ETH...
+✅ 转账交易发送成功
+交易哈希: 0xaf62c4cb5597802aea3af2259cd30acc9bbae45d82fc46e079e7b3aa8c7ac194
+等待交易确认...
+✅ 交易确认成功
+Chainlink 节点 ETH 余额: 10.000000 ETH
+✅ 充值成功！新的余额: 10.000000 ETH
+
+📦 检查节点账户: 0x2F70646948C228c85659280f1515b26702dDfEDd
+Chainlink 节点 ETH 余额: 0.000000 ETH
+⚠️  节点余额低于 1 ETH，需要充值
+正在向 Chainlink 节点账户转账 10 ETH...
+✅ 转账交易发送成功
+交易哈希: 0x48770dd3c1d92e3ea2c5a680c1791df1b31516427733f762b0e627ff8e2274e4
+等待交易确认...
+✅ 交易确认成功
+Chainlink 节点 ETH 余额: 10.000000 ETH
+✅ 充值成功！新的余额: 10.000000 ETH
+
+📦 检查节点账户: 0xD0129Ce4f491F92E222E2E5a70AB43C41121bCf0
+Chainlink 节点 ETH 余额: 0.000000 ETH
+⚠️  节点余额低于 1 ETH，需要充值
+正在向 Chainlink 节点账户转账 10 ETH...
+✅ 转账交易发送成功
+交易哈希: 0xbf1a19a49e16708a6dfec645bf281835da56e775718a0b96416b7a009d1f0870
+等待交易确认...
+✅ 交易确认成功
+Chainlink 节点 ETH 余额: 10.000000 ETH
+✅ 充值成功！新的余额: 10.000000 ETH
+
+📦 检查节点账户: 0x72bC5733589FD6BdE33f2dCAc493aCDa01Ab3676
+Chainlink 节点 ETH 余额: 0.000000 ETH
+⚠️  节点余额低于 1 ETH，需要充值
+正在向 Chainlink 节点账户转账 10 ETH...
+✅ 转账交易发送成功
+交易哈希: 0x81d55087916aa9e48735392f040f2a3d18f8240f486f26915b27dd2013fc69b6
+等待交易确认...
+✅ 交易确认成功
+Chainlink 节点 ETH 余额: 10.000000 ETH
+✅ 充值成功！新的余额: 10.000000 ETH
+
+📦 检查节点账户: 0xe98Ce6dc299f788D679cF414FCB8249294927e59
+Chainlink 节点 ETH 余额: 0.000000 ETH
+⚠️  节点余额低于 1 ETH，需要充值
+正在向 Chainlink 节点账户转账 10 ETH...
+✅ 转账交易发送成功
+交易哈希: 0xec6846f559e1844aa5e6f4c6fc2eafd701e9b8db6c36671a5fff4dbb52c6bae6
+等待交易确认...
+✅ 交易确认成功
+Chainlink 节点 ETH 余额: 10.000000 ETH
+✅ 充值成功！新的余额: 10.000000 ETH
+正在向 OCR 合约转账 100 LINK...
+交易哈希: 0xdf0abb62d4eedc31e1c84c6ec66fa28f336aace0b62319bc626874d685b5fa44
+等待交易确认...
+✅ LINK Token 转账成功！
+== [2] 创建 OCR Jobs（多节点） ==
+========================================
+开始为所有 Chainlink 节点创建 OCR Job (DMN 观测)
+========================================
+
+正在连接到 Chainlink chainlink-bootstrap (端口: 6687)...
+✅ chainlink-bootstrap 登录成功
+
+chainlink-bootstrap Job Spec:
+type               = "offchainreporting"
+schemaVersion      = 1
+name               = "OCR Bootstrap Job"
+externalJobID      = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+isBootstrapPeer    = true
+evmChainID         = 3456
+keyBundleID        = "c24e6401d631b0ab49871e9128ba227f6d59403137c9d2a3dcbec2b603da08d9"
+
+# OCR v1 使用 OffchainAggregator 合约地址
+contractAddress    = "0x279534f73799E1476905c9ef7eF8dce18F43C29b"
+
+# OCR v1 p2p bootstrap peers (bootstrap 节点自身不需要 bootstrap 地址)
+p2pBootstrapPeers = []
+
+正在为 chainlink-bootstrap 创建 OCR Job...
+
+✅ chainlink-bootstrap OCR Job 创建成功!
+Job ID: 1
+Job External Job ID: aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
+
+正在连接到 Chainlink chainlink1 (端口: 6688)...
+✅ chainlink1 登录成功
+
+chainlink1 Job Spec:
+type            = "offchainreporting"
+schemaVersion   = 1
+name            = "OCR DMN Cache Job"
+externalJobID   = "11111111-2222-3333-4444-555555555555"
+isBootstrapPeer = false
+evmChainID      = 3456
+keyBundleID     = "2ef8d4bcf8e8c5a0a96acff18262bad1cbb0cb11d33190205ba1bbe55f3b11d6"
+
+contractAddress    = "0x279534f73799E1476905c9ef7eF8dce18F43C29b"
+transmitterAddress = "0x2F70646948C228c85659280f1515b26702dDfEDd"
+
+p2pBootstrapPeers = ["/ip4/172.31.61.180/tcp/6690/p2p/12D3KooWAd6zi7cUqSRgGU76ZTZhrvywYvRUM1BPpgohLwDSkkDL"]
+
+observationSource = """
+    fetch  [type="http" method=GET url="http://cdmn-node1:5000/api/dmn/latest?requireReady=1"]
+    parse  [type="jsonparse" path="hashDec"]
+    fetch -> parse
+"""
+
+
+正在为 chainlink1 创建 OCR Job...
+
+✅ chainlink1 OCR Job 创建成功!
+Job ID: 1
+Job External Job ID: 11111111-2222-3333-4444-555555555555
+
+正在连接到 Chainlink chainlink2 (端口: 6689)...
+✅ chainlink2 登录成功
+
+chainlink2 Job Spec:
+type            = "offchainreporting"
+schemaVersion   = 1
+name            = "OCR DMN Cache Job"
+externalJobID   = "11111111-2222-3333-4444-555555555555"
+isBootstrapPeer = false
+evmChainID      = 3456
+keyBundleID     = "cee05d8f538c7f73a6eb26c7c2f9a466ce9f6f424f6f0015943423f4007223b7"
+
+contractAddress    = "0x279534f73799E1476905c9ef7eF8dce18F43C29b"
+transmitterAddress = "0xD0129Ce4f491F92E222E2E5a70AB43C41121bCf0"
+
+p2pBootstrapPeers = ["/ip4/172.31.61.180/tcp/6690/p2p/12D3KooWAd6zi7cUqSRgGU76ZTZhrvywYvRUM1BPpgohLwDSkkDL"]
+
+observationSource = """
+    fetch  [type="http" method=GET url="http://cdmn-node2:5000/api/dmn/latest?requireReady=1"]
+    parse  [type="jsonparse" path="hashDec"]
+    fetch -> parse
+"""
+
+
+正在为 chainlink2 创建 OCR Job...
+
+✅ chainlink2 OCR Job 创建成功!
+Job ID: 1
+Job External Job ID: 11111111-2222-3333-4444-555555555555
+
+正在连接到 Chainlink chainlink3 (端口: 6691)...
+✅ chainlink3 登录成功
+
+chainlink3 Job Spec:
+type            = "offchainreporting"
+schemaVersion   = 1
+name            = "OCR DMN Cache Job"
+externalJobID   = "11111111-2222-3333-4444-555555555555"
+isBootstrapPeer = false
+evmChainID      = 3456
+keyBundleID     = "1b326f7d3938a2ec01d2629819b24d6062048be2700c4e79224282f12a93383e"
+
+contractAddress    = "0x279534f73799E1476905c9ef7eF8dce18F43C29b"
+transmitterAddress = "0x72bC5733589FD6BdE33f2dCAc493aCDa01Ab3676"
+
+p2pBootstrapPeers = ["/ip4/172.31.61.180/tcp/6690/p2p/12D3KooWAd6zi7cUqSRgGU76ZTZhrvywYvRUM1BPpgohLwDSkkDL"]
+
+observationSource = """
+    fetch  [type="http" method=GET url="http://cdmn-node3:5000/api/dmn/latest?requireReady=1"]
+    parse  [type="jsonparse" path="hashDec"]
+    fetch -> parse
+"""
+
+
+正在为 chainlink3 创建 OCR Job...
+
+✅ chainlink3 OCR Job 创建成功!
+Job ID: 1
+Job External Job ID: 11111111-2222-3333-4444-555555555555
+
+正在连接到 Chainlink chainlink4 (端口: 6692)...
+✅ chainlink4 登录成功
+
+chainlink4 Job Spec:
+type            = "offchainreporting"
+schemaVersion   = 1
+name            = "OCR DMN Cache Job"
+externalJobID   = "11111111-2222-3333-4444-555555555555"
+isBootstrapPeer = false
+evmChainID      = 3456
+keyBundleID     = "a1ccf98117e946b4af926dc05f9847a033e94cc107f03cce3e0ee54dfac0a09d"
+
+contractAddress    = "0x279534f73799E1476905c9ef7eF8dce18F43C29b"
+transmitterAddress = "0xe98Ce6dc299f788D679cF414FCB8249294927e59"
+
+p2pBootstrapPeers = ["/ip4/172.31.61.180/tcp/6690/p2p/12D3KooWAd6zi7cUqSRgGU76ZTZhrvywYvRUM1BPpgohLwDSkkDL"]
+
+observationSource = """
+    fetch  [type="http" method=GET url="http://cdmn-node4:5000/api/dmn/latest?requireReady=1"]
+    parse  [type="jsonparse" path="hashDec"]
+    fetch -> parse
+"""
+
+
+正在为 chainlink4 创建 OCR Job...
+
+✅ chainlink4 OCR Job 创建成功!
+Job ID: 1
+Job External Job ID: 11111111-2222-3333-4444-555555555555
+
+========================================
+OCR Job 创建结果:
+========================================
+chainlink-bootstrap: aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
+chainlink1: 11111111-2222-3333-4444-555555555555
+chainlink2: 11111111-2222-3333-4444-555555555555
+chainlink3: 11111111-2222-3333-4444-555555555555
+chainlink4: 11111111-2222-3333-4444-555555555555
+== [3] 配置 OCR 合约 ==
+generated OCR config: ../../deployment/ocr-config-gen.json
+OCR 合约地址: 0x279534f73799e1476905c9ef7ef8dce18f43c29b
+部署账户: 0x365acf78c44060caf3a4789d804df11e3b4aa17d
+发送 setPayees 交易...
+setPayees 交易哈希: 0xb4657cd7430e2295b40f98745510a2de64dc7a29195e5096255acfcd235506bf
+等待 setPayees 交易确认...
+检查 setConfig 预执行...
+发送 setConfig 交易...
+交易哈希: 0xd58e4570e689025fcba1f03ef14a73ed61bb0903eba23978e232e6a46a627e25
+等待交易确认...
+
+✅ setConfig 成功!
+Gas 使用: 542578
+
+配置信息已保存到 deployment/ocr-config.json
+== [3.1] 同步 OCR 合约地址到 CDMN 服务并重启 ==
+WARN[0000] /home/shenxz-lab/code/ChainCollab/src/oracle/CHAINLINK/features/04-dmn-ocr/docker-compose-cdmn.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
+[+] up 4/4
+ ✔ Container cdmn-node2 Recreated                                                                                                                 1.8s
+ ✔ Container cdmn-node3 Recreated                                                                                                                 2.2s
+ ✔ Container cdmn-node1 Recreated                                                                                                                 2.0s
+ ✔ Container cdmn-node4 Recreated                                                                                                                 1.3s
+== [4] 确保 DMN 请求合约已部署 ==
+RPC URL: http://localhost:8545
+部署账户: 0x365acf78c44060caf3a4789d804df11e3b4aa17d
+账户余额: 10083.999999999998 ETH
+✅ 使用已部署的 LinkToken 地址: 0xa83d77252f0ecf90e486310a01f44aa7f9a7402e
+✅ 使用已部署的 Operator 地址: 0x6f4e6fc791fd2bceec7899840bc7d77fa8136486
+开始部署 MyChainlinkRequesterDMN 合约...
+
+
+部署参数:
+- LINK Token: 0xa83d77252f0ecf90e486310a01f44aa7f9a7402e
+- Oracle: 0x6f4e6fc791fd2bceec7899840bc7d77fa8136486
+- DMN Job ID: 0x0000000000000000000000000000000000000000000000000000000000000000
+- Fee: 0.1 LINK
+
+正在部署合约...
+交易哈希: 0xe94ddb2eda2fcdf4a10c7153bcf7cf25669dad15cc0b0395525ef5bb563252c7
+等待交易确认...
+
+✅ 合约部署成功!
+合约地址: 0xb0646d4e6cf14bb724c12d0f863075646bbb31c0
+Gas 使用: 2987078
+
+部署信息已保存到 deployment/deployment.json
+== [5] 创建 directrequest 缓存 Job（使用已部署合约地址） ==
+[dotenv@17.3.1] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
+🎯 DMN directrequest 缓存 Job 创建工具
+==================================================
+
+
+📄 正在为 chainlink1 读取 Job 配置文件...
+
+chainlink1 Job Spec:
+type = "directrequest"
+schemaVersion = 1
+name = "DMN directrequest -> Cache"
+evmChainID = 3456
+contractAddress = "0x6f4e6FC791fD2bCEEc7899840bC7D77Fa8136486"
+
+observationSource = """
+    decode_log   [type="ethabidecodelog"
+                  abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                  data="$(jobRun.logData)"
+                  topics="$(jobRun.logTopics)"]
+
+    decode_cbor  [type="cborparse" data="$(decode_log.data)"]
+    parse_input  [type="jsonparse" data="$(decode_cbor.inputData)"]
+    call_cache   [type="http" method=POST url="http://cdmn-node1:5000/api/dmn/calc"
+                  requestData="{\\"requestId\\": $(decode_log.requestId), \\"dmnContent\\": $(decode_cbor.dmnContent), \\"decisionId\\": $(decode_cbor.decisionId), \\"inputData\\": $(parse_input)}"
+                  contentType="application/json"
+                  allowUnrestrictedNetworkAccess="true"]
+
+    parse_ok     [type="jsonparse" path="ok" data="$(call_cache)"]
+    parse_raw    [type="jsonparse" path="raw" data="$(call_cache)"]
+
+    encode_tx    [type="ethabiencode"
+                  abi="commitBaselineFromRaw(bytes32 requestId, string raw)"
+                  data="{\\"requestId\\": $(decode_log.requestId), \\"raw\\": $(parse_raw)}"]
+
+    submit_tx    [type="ethtx"
+                  evmChainID="3456"
+                  to="0xb0646d4e6cf14bb724c12d0f863075646bbb31c0"
+                  data="$(encode_tx)"]
+
+    decode_log -> decode_cbor -> parse_input -> call_cache -> parse_ok -> parse_raw -> encode_tx -> submit_tx
+"""
+
+🔐 正在登录 Chainlink 节点...
+📍 节点地址: http://localhost:6688
+✅ 登录成功
+📝 正在创建 DMN directrequest 缓存 Job...
+✅ Job 创建成功!
+
+📋 Job 信息:
+   Job ID: 2
+   外部 Job ID: f3b47d10-34bd-4159-b90e-3da239ad4e29
+   名称: DMN directrequest -> Cache
+   类型: jobs
+   状态: undefined
+✅ 使用第一个节点生成的 externalJobID: f3b47d10-34bd-4159-b90e-3da239ad4e29
+
+📄 正在为 chainlink2 读取 Job 配置文件...
+
+chainlink2 Job Spec:
+type = "directrequest"
+schemaVersion = 1
+name = "DMN directrequest -> Cache"
+externalJobID = "f3b47d10-34bd-4159-b90e-3da239ad4e29"
+evmChainID = 3456
+contractAddress = "0x6f4e6FC791fD2bCEEc7899840bC7D77Fa8136486"
+
+observationSource = """
+    decode_log   [type="ethabidecodelog"
+                  abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                  data="$(jobRun.logData)"
+                  topics="$(jobRun.logTopics)"]
+
+    decode_cbor  [type="cborparse" data="$(decode_log.data)"]
+    parse_input  [type="jsonparse" data="$(decode_cbor.inputData)"]
+    call_cache   [type="http" method=POST url="http://cdmn-node2:5000/api/dmn/calc"
+                  requestData="{\\"requestId\\": $(decode_log.requestId), \\"dmnContent\\": $(decode_cbor.dmnContent), \\"decisionId\\": $(decode_cbor.decisionId), \\"inputData\\": $(parse_input)}"
+                  contentType="application/json"
+                  allowUnrestrictedNetworkAccess="true"]
+
+    parse_ok     [type="jsonparse" path="ok" data="$(call_cache)"]
+    parse_raw    [type="jsonparse" path="raw" data="$(call_cache)"]
+
+    encode_tx    [type="ethabiencode"
+                  abi="commitBaselineFromRaw(bytes32 requestId, string raw)"
+                  data="{\\"requestId\\": $(decode_log.requestId), \\"raw\\": $(parse_raw)}"]
+
+    submit_tx    [type="ethtx"
+                  evmChainID="3456"
+                  to="0xb0646d4e6cf14bb724c12d0f863075646bbb31c0"
+                  data="$(encode_tx)"]
+
+    decode_log -> decode_cbor -> parse_input -> call_cache -> parse_ok -> parse_raw -> encode_tx -> submit_tx
+"""
+
+🔐 正在登录 Chainlink 节点...
+📍 节点地址: http://localhost:6689
+✅ 登录成功
+📝 正在创建 DMN directrequest 缓存 Job...
+✅ Job 创建成功!
+
+📋 Job 信息:
+   Job ID: 2
+   外部 Job ID: f3b47d10-34bd-4159-b90e-3da239ad4e29
+   名称: DMN directrequest -> Cache
+   类型: jobs
+   状态: undefined
+
+📄 正在为 chainlink3 读取 Job 配置文件...
+
+chainlink3 Job Spec:
+type = "directrequest"
+schemaVersion = 1
+name = "DMN directrequest -> Cache"
+externalJobID = "f3b47d10-34bd-4159-b90e-3da239ad4e29"
+evmChainID = 3456
+contractAddress = "0x6f4e6FC791fD2bCEEc7899840bC7D77Fa8136486"
+
+observationSource = """
+    decode_log   [type="ethabidecodelog"
+                  abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                  data="$(jobRun.logData)"
+                  topics="$(jobRun.logTopics)"]
+
+    decode_cbor  [type="cborparse" data="$(decode_log.data)"]
+    parse_input  [type="jsonparse" data="$(decode_cbor.inputData)"]
+    call_cache   [type="http" method=POST url="http://cdmn-node3:5000/api/dmn/calc"
+                  requestData="{\\"requestId\\": $(decode_log.requestId), \\"dmnContent\\": $(decode_cbor.dmnContent), \\"decisionId\\": $(decode_cbor.decisionId), \\"inputData\\": $(parse_input)}"
+                  contentType="application/json"
+                  allowUnrestrictedNetworkAccess="true"]
+
+    parse_ok     [type="jsonparse" path="ok" data="$(call_cache)"]
+    parse_raw    [type="jsonparse" path="raw" data="$(call_cache)"]
+
+    encode_tx    [type="ethabiencode"
+                  abi="commitBaselineFromRaw(bytes32 requestId, string raw)"
+                  data="{\\"requestId\\": $(decode_log.requestId), \\"raw\\": $(parse_raw)}"]
+
+    submit_tx    [type="ethtx"
+                  evmChainID="3456"
+                  to="0xb0646d4e6cf14bb724c12d0f863075646bbb31c0"
+                  data="$(encode_tx)"]
+
+    decode_log -> decode_cbor -> parse_input -> call_cache -> parse_ok -> parse_raw -> encode_tx -> submit_tx
+"""
+
+🔐 正在登录 Chainlink 节点...
+📍 节点地址: http://localhost:6691
+✅ 登录成功
+📝 正在创建 DMN directrequest 缓存 Job...
+✅ Job 创建成功!
+
+📋 Job 信息:
+   Job ID: 2
+   外部 Job ID: f3b47d10-34bd-4159-b90e-3da239ad4e29
+   名称: DMN directrequest -> Cache
+   类型: jobs
+   状态: undefined
+
+📄 正在为 chainlink4 读取 Job 配置文件...
+
+chainlink4 Job Spec:
+type = "directrequest"
+schemaVersion = 1
+name = "DMN directrequest -> Cache"
+externalJobID = "f3b47d10-34bd-4159-b90e-3da239ad4e29"
+evmChainID = 3456
+contractAddress = "0x6f4e6FC791fD2bCEEc7899840bC7D77Fa8136486"
+
+observationSource = """
+    decode_log   [type="ethabidecodelog"
+                  abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                  data="$(jobRun.logData)"
+                  topics="$(jobRun.logTopics)"]
+
+    decode_cbor  [type="cborparse" data="$(decode_log.data)"]
+    parse_input  [type="jsonparse" data="$(decode_cbor.inputData)"]
+    call_cache   [type="http" method=POST url="http://cdmn-node4:5000/api/dmn/calc"
+                  requestData="{\\"requestId\\": $(decode_log.requestId), \\"dmnContent\\": $(decode_cbor.dmnContent), \\"decisionId\\": $(decode_cbor.decisionId), \\"inputData\\": $(parse_input)}"
+                  contentType="application/json"
+                  allowUnrestrictedNetworkAccess="true"]
+
+    parse_ok     [type="jsonparse" path="ok" data="$(call_cache)"]
+    parse_raw    [type="jsonparse" path="raw" data="$(call_cache)"]
+
+    encode_tx    [type="ethabiencode"
+                  abi="commitBaselineFromRaw(bytes32 requestId, string raw)"
+                  data="{\\"requestId\\": $(decode_log.requestId), \\"raw\\": $(parse_raw)}"]
+
+    submit_tx    [type="ethtx"
+                  evmChainID="3456"
+                  to="0xb0646d4e6cf14bb724c12d0f863075646bbb31c0"
+                  data="$(encode_tx)"]
+
+    decode_log -> decode_cbor -> parse_input -> call_cache -> parse_ok -> parse_raw -> encode_tx -> submit_tx
+"""
+
+🔐 正在登录 Chainlink 节点...
+📍 节点地址: http://localhost:6692
+✅ 登录成功
+📝 正在创建 DMN directrequest 缓存 Job...
+✅ Job 创建成功!
+
+📋 Job 信息:
+   Job ID: 2
+   外部 Job ID: f3b47d10-34bd-4159-b90e-3da239ad4e29
+   名称: DMN directrequest -> Cache
+   类型: jobs
+   状态: undefined
+✅ 已写入 dmnJobIds/dmnJobId 到 deployment/chainlink-deployment.json
+
+🎉 DMN directrequest 缓存 Job 创建成功！
+== [6] 将 DMN Job ID 写回合约 setJobId ==
+合约地址: 0xb0646d4e6cf14bb724c12d0f863075646bbb31c0
+DMN Job ID: 0xf3b47d1034bd4159b90e3da239ad4e2900000000000000000000000000000000
+✅ setJobId 交易已发送: 0xf5fbcdb9d0bd14cdd5d26d546535ef0222912b150dfb1f8dacf4aec81222e0b5
+== [7] 设置 OCR aggregator / baseline writers ==
+合约地址: 0xb0646d4e6cf14bb724c12d0f863075646bbb31c0
+OCR aggregator: 0x279534f73799e1476905c9ef7ef8dce18f43c29b
+baseline writers: 0x88CDBF9fFE32AA50C86EE00e9FcA3Bf3E1AcA7D7, 0x2F70646948C228c85659280f1515b26702dDfEDd, 0xD0129Ce4f491F92E222E2E5a70AB43C41121bCf0, 0x72bC5733589FD6BdE33f2dCAc493aCDa01Ab3676, 0xe98Ce6dc299f788D679cF414FCB8249294927e59
+✅ setOcrAggregator 交易已发送: 0xa95b23074404a28dc3292288347cd6d14cf8606b58477221c384bf1005b63787
+✅ setBaselineWriter(0x88CDBF9fFE32AA50C86EE00e9FcA3Bf3E1AcA7D7) 交易已发送: 0x20fa8d9c0550d35f03707141e9969ea9bce8f9a6123334a67c9b1d2ebad13245
+✅ setBaselineWriter(0x2F70646948C228c85659280f1515b26702dDfEDd) 交易已发送: 0x7f4e30fbf96e00f7aea15c73f21a52e123aa2505be89652e35710f560f99e90d
+✅ setBaselineWriter(0xD0129Ce4f491F92E222E2E5a70AB43C41121bCf0) 交易已发送: 0x104c2d716548dc91229ac6abf2555b1d90090e0118616614fcaa3eee797a821c
+✅ setBaselineWriter(0x72bC5733589FD6BdE33f2dCAc493aCDa01Ab3676) 交易已发送: 0xc3e3d3ec0d21e2135a4b9827b8f5f77bf175720b6e93aa8f4952048168fe5ac2
+✅ setBaselineWriter(0xe98Ce6dc299f788D679cF414FCB8249294927e59) 交易已发送: 0xd59c3bdf35d09fb9615bf70ced3639ec55d631710f70dcc1c1dbd6f5670290e8
+== [8] 启用 OCR finalize webhook（External Initiator） ==
+✅ External Initiator created:
+{
+  "data": {
+    "type": "external initiators",
+    "id": "dmn-ocr-ei",
+    "attributes": {
+      "name": "dmn-ocr-ei",
+      "url": "http://localhost:8089",
+      "incomingAccessKey": "d13c64ca0d1242b0a45edf505e8f5d05",
+      "incomingSecret": "d/1R32wnKI68IKg/BwpAfLuuyCkdlZa7rURbiJEG6jO5YhT+0oghLGru0soOI+GF",
+      "outgoingToken": "7Sce4CdXENgp9GX4QHRO8QtWRHifUDtG8xF//XIT97L/V8qAuSXBrCcgG6+R3Gqn",
+      "outgoingSecret": "y0fNPgagNRNYLmiWsH/+RwE1nHUe5ueCUjN+cOyRnuhBVEMj+wBWXb0XLpBGeQ0z"
+    }
+  }
+}
+✅ Saved external initiator to /home/shenxz-lab/code/ChainCollab/src/oracle/CHAINLINK/deployment/external-initiator.json
+[dotenv@17.3.1] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+🔐 正在登录 Chainlink 节点...
+📍 节点地址: http://localhost:6687
+✅ 登录成功
+--- Final Job Spec ---
+type = "webhook"
+schemaVersion = 1
+name = "OCR NewTransmission -> Finalize (webhook)"
+
+
+evmChainID = "3456"   # ← 你的链 ID（字符串）
+
+externalInitiators = [
+  { name = "dmn-ocr-ei", spec = "{}" }
+]
+
+observationSource = """
+    parse_req  [type="jsonparse" path="data,requestId" data="$(jobRun.requestBody)"]
+    parse_hash [type="jsonparse" path="data,hashLow" data="$(jobRun.requestBody)"]
+
+    encode_tx  [type="ethabiencode"
+                abi="finalizeWithOcrAnswer(bytes32 requestId, uint128 hashLow)"
+                data="{\\"requestId\\": $(parse_req), \\"hashLow\\": $(parse_hash)}"
+                ]
+
+    submit_tx  [type="ethtx"
+                evmChainID="3456"
+                to="0xb0646d4e6cf14bb724c12d0f863075646bbb31c0"
+                data="$(encode_tx)"]
+
+    parse_req -> parse_hash -> encode_tx -> submit_tx
+"""
+
+--- End Job Spec ---
+📝 正在创建 OCR Writer Job...
+✅ Job 创建成功!
+Job ID: 2
+External Job ID: f46f2fdb-a2d3-4133-ac2c-1afdcec3599a
+✅ 已写入 ocrWriterJobId 到 deployment/chainlink-deployment.json
+== [9] 为合约充值 LINK ==
+RPC URL: http://localhost:8545
+正在向合约转账 1 LINK...
+交易哈希: 0x08500bbf375ce8cfe3bcd253d08734be504ad85a06874f3941208924dbd32505
+等待交易确认...
+✅ LINK Token 转账成功！
+== [10] 测试 directrequest 缓存链路 ==
+📋 测试 DMN OCR 流程（directrequest 缓存）...
+合约地址: 0xb0646d4e6cf14bb724c12d0f863075646bbb31c0
+RPC URL: http://localhost:8545
+
+contract code: 0x...(21010)
+dmnJobId: f3b47d10-34bd-4159-b90e-3da239ad4e29
+oracle: 0x6f4e6fc791fd2bceec7899840bc7d77fa8136486
+oracle code: 0x...(22172)
+link token: 0xa83d77252f0ecf90e486310a01f44aa7f9a7402e
+link code: 0x...(7612)
+合约 owner: 0x365Acf78C44060CAF3A4789D804Df11E3B4AA17d
+测试账户: 0x365acf78c44060caf3a4789d804df11e3b4aa17d
+jobId(onchain): 0xf3b47d1034bd4159b90e3da239ad4e2900000000000000000000000000000000
+合约 LINK 余额: 1000000000000000000
+DMN 输入: { temperature: 8, dayType: 'Weekday' }
+预计 DMN 输出: Soup
+
+🚀 发起 DMN Oracle 请求...
+交易哈希: 0x3b69ad51e728c4fb3653713f438794d88ee2ba81c53dc86f16daa95686eebedb
+等待交易确认...
+✅ 请求已发送，开始检查各 DMN 缓存节点...
+✅ http://localhost:8081 缓存已更新: [ { result: 'Soup' } ]
+✅ http://localhost:8082 缓存已更新: [ { result: 'Soup' } ]
+✅ http://localhost:8083 缓存已更新: [ { result: 'Soup' } ]
+✅ http://localhost:8084 缓存已更新: [ { result: 'Soup' } ]

@@ -82,7 +82,6 @@ services:
     container_name: chainlink-bootstrap
     depends_on:
       - postgres-bootstrap
-      - mybootnode
     restart: unless-stopped
     ports:
       - "6687:6688"         # Node HTTP/API
@@ -99,7 +98,6 @@ services:
     container_name: chainlink-node1
     depends_on:
       - postgres1
-      - mybootnode
       - chainlink-bootstrap
     restart: unless-stopped
     ports:
@@ -119,7 +117,6 @@ services:
     container_name: chainlink-node2
     depends_on:
       - postgres2
-      - mybootnode
       - chainlink-bootstrap
     restart: unless-stopped
     ports:
@@ -139,7 +136,6 @@ services:
     container_name: chainlink-node3
     depends_on:
       - postgres3
-      - mybootnode
       - chainlink-bootstrap
     restart: unless-stopped
     ports:
@@ -159,7 +155,6 @@ services:
     container_name: chainlink-node4
     depends_on:
       - postgres4
-      - mybootnode
       - chainlink-bootstrap
     restart: unless-stopped
     ports:
@@ -173,39 +168,6 @@ services:
       - existing_network
     environment:
       - CHAINLINK_P2P_PORT=6696
-
-  mybootnode:
-    hostname: mybootnode
-    build:
-      context: ../../geth-node
-      dockerfile: Dockerfile
-    command:
-      - --http # 对于较新版本的Geth，使用--http代替--rpc
-      - --http.addr=0.0.0.0
-      - --http.port=8545
-      - --http.api=admin,eth,miner,web3,personal,net,txpool
-      - --ws # 启用 WebSocket
-      - --ws.addr=0.0.0.0
-      - --ws.port=8546
-      - --ws.api=admin,eth,miner,web3,personal,net,txpool
-      - --ws.origins=*
-      - --networkid=3456
-      - --http.corsdomain="*"
-      - --http.vhosts=*
-      - --nodiscover
-      - --mine
-      - --miner.threads=1
-      - --miner.etherbase=0x365acf78c44060caf3a4789d804df11e3b4aa17d
-      - --miner.gasprice=0
-      - --allow-insecure-unlock
-    ports:
-      - "8545:8545" # RPC端口
-      - "8546:8546" # WS端口
-      - "30303:30303" # P2P网络端口
-    volumes:
-      - ../../geth-node/datadir/keystore:/root/.ethereum/keystore
-    networks:
-      - existing_network
 
   # anvil:
   #   image: ghcr.io/foundry-rs/foundry:latest

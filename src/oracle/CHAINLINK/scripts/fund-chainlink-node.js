@@ -1,7 +1,25 @@
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
+const { URL } = require('url');
+const { exec, spawnSync } = require('child_process');
 const axios = require('axios');
+const RPC_URL = process.env.RPC_URL || 'http://localhost:8545';
+const EXPECTED_DEPLOYER = (process.env.DEPLOYER_ACCOUNT || process.env.ETH_SYSTEM_ACCOUNT || '').toLowerCase();
+
+function rpcOptions(postData) {
+    const rpc = new URL(RPC_URL);
+    return {
+        hostname: rpc.hostname,
+        port: rpc.port || (rpc.protocol === 'https:' ? 443 : 80),
+        path: rpc.pathname === '' ? '/' : rpc.pathname,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(postData)
+        }
+    };
+}
 
 function rpcCall(method, params) {
     return new Promise((resolve, reject) => {
@@ -12,16 +30,7 @@ function rpcCall(method, params) {
             id: 1
         });
 
-        const options = {
-            hostname: 'localhost',
-            port: 8545,
-            path: '/',
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Content-Length': Buffer.byteLength(postData)
-            }
-        };
+        const options = rpcOptions(postData);
 
         const req = http.request(options, (res) => {
             let data = '';
@@ -37,6 +46,40 @@ function rpcCall(method, params) {
         req.write(postData);
         req.end();
     });
+}
+
+function pickDeployer(accounts) {
+    if (!Array.isArray(accounts) || accounts.length === 0) {
+        throw new Error(`eth_accounts returned empty on ${RPC_URL}`);
+    }
+    if (EXPECTED_DEPLOYER) {
+        const matched = accounts.find((a) => String(a).toLowerCase() === EXPECTED_DEPLOYER);
+        if (!matched) {
+            throw new Error(
+                `expected deployer ${EXPECTED_DEPLOYER} not found on ${RPC_URL}; got ${accounts.join(', ')}`
+            );
+        }
+        return matched;
+    }
+    return accounts[0];
+}
+
+function resolveChainlinkLogContainer() {
+    const explicit = process.env.CHAINLINK_LOG_CONTAINER;
+    if (explicit) {
+        return explicit;
+    }
+
+    const candidates = ['chainlink-node', 'chainlink-node1', 'chainlink-bootstrap'];
+    for (const name of candidates) {
+        const probe = spawnSync('docker', ['ps', '--filter', `name=^/${name}$`, '--format', '{{.Names}}'], {
+            encoding: 'utf8'
+        });
+        if (probe.status === 0 && probe.stdout.trim()) {
+            return probe.stdout.trim().split('\n')[0];
+        }
+    }
+    return 'chainlink-node1';
 }
 
 function readChainlinkApiCredentials() {
@@ -91,6 +134,20 @@ function persistChainlinkNodeAddress(address) {
 
 async function getChainlinkNodeAddress() {
     try {
+        // Highest priority: explicit caller override.
+        if (arguments.length && arguments[0]) {
+            console.log('✅ 使用命令行参数提供的地址:', arguments[0]);
+            persistChainlinkNodeAddress(arguments[0]);
+            return arguments[0];
+        }
+
+        const fromEnv = process.env.CHAINLINK_NODE_ADDRESS;
+        if (fromEnv) {
+            console.log('✅ 使用环境变量 CHAINLINK_NODE_ADDRESS:', fromEnv);
+            persistChainlinkNodeAddress(fromEnv);
+            return fromEnv;
+        }
+
         const deploymentPath = path.resolve(__dirname, '../deployment/chainlink-deployment.json');
         if (fs.existsSync(deploymentPath)) {
             const deployment = JSON.parse(fs.readFileSync(deploymentPath, 'utf8'));
@@ -98,19 +155,6 @@ async function getChainlinkNodeAddress() {
                 console.log('✅ 使用部署文件中的 chainlinkNodeAddress:', deployment.chainlinkNodeAddress);
                 return deployment.chainlinkNodeAddress;
             }
-        }
-
-        const fromEnv = process.env.CHAINLINK_NODE_ADDRESS;
-        if (fromEnv) {
-            console.log('✅ 使用环境变量 CHAINLINK_NODE_ADDRESS:', fromEnv);
-            return fromEnv;
-        }
-
-        // Allow an explicit address override from the caller.
-        if (arguments.length && arguments[0]) {
-            console.log('✅ 使用命令行参数提供的地址:', arguments[0]);
-            persistChainlinkNodeAddress(arguments[0]);
-            return arguments[0];
         }
 
         try {
@@ -124,11 +168,9 @@ async function getChainlinkNodeAddress() {
             // Ignore API failures; fallback to docker logs.
         }
 
-        // 使用 Docker 命令获取 Chainlink 节点的 ETH 账户地址
-        const { exec } = require('child_process');
-
         return new Promise((resolve, reject) => {
-            exec('docker logs chainlink-node 2>&1 | grep -i "Unlocked .*ETH keys" | head -1', (error, stdout, stderr) => {
+            const container = resolveChainlinkLogContainer();
+            exec(`docker logs ${container} 2>&1 | grep -i "Unlocked .*ETH keys" | head -1`, (error, stdout, stderr) => {
                 if (error) {
                     console.error('❌ 获取 Chainlink 节点账户失败:', error.message);
                     reject(error);
@@ -178,7 +220,7 @@ async function getBalance(address) {
 async function transferEth(toAddress, amountEth) {
     try {
         const accounts = await rpcCall('eth_accounts', []);
-        const deployer = accounts[0];
+        const deployer = pickDeployer(accounts);
 
         const valueWei = '0x' + (BigInt(Math.floor(amountEth * 1e18))).toString(16);
 
@@ -266,6 +308,10 @@ async function fundAddresses(addresses, minBalance, transferAmount) {
 async function fundChainlinkNode(addressOverride, minBalance, transferAmount) {
     try {
         console.log('📦 检查 Chainlink 节点账户状态...');
+        console.log('RPC URL:', RPC_URL);
+        if (EXPECTED_DEPLOYER) {
+            console.log('Expected deployer:', EXPECTED_DEPLOYER);
+        }
         console.log('');
 
         // 获取 Chainlink 节点地址

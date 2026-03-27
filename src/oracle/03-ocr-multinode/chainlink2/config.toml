@@ -24,15 +24,15 @@ ChainID = "3456"
 Enabled = true
 
 [[EVM.Nodes]]
-Name = "mybootnode"
-HTTPURL = "http://mybootnode:8545"
-WSURL = "ws://mybootnode:8546"
+Name = "system-geth-node"
+HTTPURL = "http://system-geth-node:8545"
+WSURL = "ws://system-geth-node:8546"
 
 [P2P.V2]
 Enabled = true
 # 宣告（其他节点能访问到的地址；同一 docker network 内用容器 IP/别名都行）
 AnnounceAddresses = ["172.31.61.180:6699"]
-DefaultBootstrappers = ["12D3KooWC71dZQmJeTb7MSdHoD5qM9xbZZbBCEnMMSo3ri6i6ZQN@172.31.61.180:6690"]
+DefaultBootstrappers = ["12D3KooWCibwkB5avEYqLQUBx7GdKEvhqx11V9d3KHjuQ2uticrF@172.31.61.180:6690"]
 
 DeltaDial = "15s"
 DeltaReconcile = "1m0s"

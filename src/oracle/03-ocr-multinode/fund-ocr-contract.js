@@ -1,8 +1,10 @@
 const fs = require('fs');
 const http = require('http');
 const path = require('path');
+const { URL } = require('url');
 
 const ROOT_DIR = path.resolve(__dirname, '..', '..');
+const RPC_URL = process.env.RPC_URL || 'http://localhost:8545';
 
 function rpcCall(method, params) {
     return new Promise((resolve, reject) => {
@@ -13,10 +15,11 @@ function rpcCall(method, params) {
             id: 1
         });
 
+        const rpc = new URL(RPC_URL);
         const req = http.request({
-            hostname: 'localhost',
-            port: 8545,
-            path: '/',
+            hostname: rpc.hostname,
+            port: rpc.port || (rpc.protocol === 'https:' ? 443 : 80),
+            path: rpc.pathname === '' ? '/' : rpc.pathname,
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -40,6 +43,7 @@ function rpcCall(method, params) {
 
 async function fundOcrContract() {
     try {
+        console.log('RPC URL:', RPC_URL);
         let amount = 1;
         const amountIndex = process.argv.indexOf('--amount');
         if (amountIndex !== -1 && process.argv[amountIndex + 1]) {

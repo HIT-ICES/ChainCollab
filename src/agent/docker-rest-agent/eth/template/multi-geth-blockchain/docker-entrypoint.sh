@@ -22,7 +22,7 @@ IP="$(hostname -i | awk '{print $1}')"
 echo "[entrypoint] container IP for nat extip: $IP"
 
 # 如果用户没有显式传 --nat=...，则自动追加 --nat=extip:<IP>
-# 这样 sys_geth 的 ENR 里就不会出现 127.0.0.1
+# 这样 system-geth-node 的 ENR 里就不会出现 127.0.0.1
 case " $* " in
   *" --nat="*)  # 已显式设置 nat，就不动
     ;;

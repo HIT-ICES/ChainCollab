@@ -13,6 +13,24 @@ const OPERATOR_SOLC_IMAGE = process.env.OPERATOR_SOLC_IMAGE || 'ethereum/solc:0.
 
 let cachedSolcRunner = null;
 
+function resolveChainlinkLogContainer() {
+    const explicit = process.env.CHAINLINK_LOG_CONTAINER;
+    if (explicit) {
+        return explicit;
+    }
+
+    const candidates = ['chainlink-node', 'chainlink-node1', 'chainlink-bootstrap'];
+    for (const name of candidates) {
+        const probe = spawnSync('docker', ['ps', '--filter', `name=^/${name}$`, '--format', '{{.Names}}'], {
+            encoding: 'utf8'
+        });
+        if (probe.status === 0 && probe.stdout.trim()) {
+            return probe.stdout.trim().split('\n')[0];
+        }
+    }
+    return 'chainlink-node1';
+}
+
 function rpcOptions(postData) {
     const rpc = new URL(RPC_URL);
     return {
@@ -249,7 +267,8 @@ async function getChainlinkNodeAddress(existingDeployment) {
     }
 
     try {
-        const stdout = execSync('docker logs chainlink-node 2>&1 | grep -i "Unlocked .*ETH keys" | head -1', { encoding: 'utf8' });
+        const container = resolveChainlinkLogContainer();
+        const stdout = execSync(`docker logs ${container} 2>&1 | grep -i "Unlocked .*ETH keys" | head -1`, { encoding: 'utf8' });
         const match = stdout.match(/0x[a-fA-F0-9]{40}/);
         if (match) {
             return match[0];
