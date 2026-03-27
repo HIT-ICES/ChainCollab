@@ -8,7 +8,8 @@ const {
   writeJson,
   deriveWallet,
   loadDatasetConfig,
-  datasetConfigPath
+  datasetConfigPath,
+  contractArtifactPath
 } = require("./common");
 
 const RELAY_DOMAIN = ethers.id("BPMN_SPLIT_RELAY_V1");
@@ -453,22 +454,8 @@ async function main() {
     const plan = casePlanByCase.get(caseId);
     const sourceName = dep.source.contractName;
     const targetName = dep.target.contractName;
-    const sourceArtifactPath = path.join(
-      ROOT,
-      "artifacts",
-      "contracts",
-      "generated",
-      `${sourceName}.sol`,
-      `${sourceName}.json`
-    );
-    const targetArtifactPath = path.join(
-      ROOT,
-      "artifacts",
-      "contracts",
-      "generated",
-      `${targetName}.sol`,
-      `${targetName}.json`
-    );
+    const sourceArtifactPath = contractArtifactPath(sourceName, dep.source?.contractPath || dep.source?.sourcePath);
+    const targetArtifactPath = contractArtifactPath(targetName, dep.target?.contractPath || dep.target?.sourcePath);
     const sourceArtifact = JSON.parse(fs.readFileSync(sourceArtifactPath, "utf8"));
     const targetArtifact = JSON.parse(fs.readFileSync(targetArtifactPath, "utf8"));
 
@@ -546,7 +533,7 @@ async function main() {
         const relaySignatures = [relaySig];
         const relayTx = await target
           .connect(relayerWallet)
-          .acceptHandoff(
+          ["acceptHandoff(bytes32,bytes32,uint256,address,uint256,bytes[])"](
             taskId,
             payloadHash,
             Number(dep.source.chainId),

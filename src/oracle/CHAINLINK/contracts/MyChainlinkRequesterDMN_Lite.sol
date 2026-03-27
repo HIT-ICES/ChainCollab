@@ -8,6 +8,12 @@ import "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
 contract MyChainlinkRequesterDMN_Lite is ChainlinkClient, ConfirmedOwner {
     using Chainlink for Chainlink.Request;
 
+    enum RequestState {
+        None,
+        Pending,
+        Fulfilled
+    }
+
     bytes public dmnResult;
 
     address private oracle;
@@ -25,6 +31,12 @@ contract MyChainlinkRequesterDMN_Lite is ChainlinkClient, ConfirmedOwner {
     mapping(bytes32 => BaselineResult) public baselines;
     mapping(bytes32 => string) private rawByRequestId;
     mapping(bytes32 => bool) private rawByRequestExists;
+    mapping(bytes32 => RequestState) private requestStates;
+    mapping(bytes32 => address) private requestRequesters;
+    mapping(bytes32 => uint256) private requestCreatedAt;
+    mapping(bytes32 => uint256) private requestFulfilledAt;
+    mapping(bytes32 => bool) private requestListed;
+    bytes32[] private requestIds;
 
     mapping(bytes32 => string) public rawResults;
     mapping(bytes32 => bool) private rawResultExists;
@@ -35,6 +47,8 @@ contract MyChainlinkRequesterDMN_Lite is ChainlinkClient, ConfirmedOwner {
     event RawResultStored(bytes32 indexed hash, string raw);
     event BaselineCommitted(bytes32 indexed requestId, bytes32 hash, string raw);
     event BaselineWriterUpdated(address indexed writer, bool allowed);
+    event RequestPending(bytes32 indexed requestId, address indexed requester, uint256 timestamp);
+    event RequestFulfilled(bytes32 indexed requestId, uint256 timestamp);
 
     constructor(
         address _linkToken,
@@ -62,6 +76,11 @@ contract MyChainlinkRequesterDMN_Lite is ChainlinkClient, ConfirmedOwner {
         req._add("inputData", inputData);
 
         requestId = _sendChainlinkRequestTo(oracle, req, fee);
+        requestStates[requestId] = RequestState.Pending;
+        requestRequesters[requestId] = msg.sender;
+        requestCreatedAt[requestId] = block.timestamp;
+        _trackRequestId(requestId);
+        emit RequestPending(requestId, msg.sender, block.timestamp);
         emit RequestSent(requestId, block.timestamp);
         return requestId;
     }
@@ -71,6 +90,7 @@ contract MyChainlinkRequesterDMN_Lite is ChainlinkClient, ConfirmedOwner {
         recordChainlinkFulfillment(_requestId)
     {
         dmnResult = _data;
+        _markRequestFulfilled(_requestId);
         emit DecisionFulfilled(_requestId, _data);
     }
 
@@ -114,6 +134,12 @@ contract MyChainlinkRequesterDMN_Lite is ChainlinkClient, ConfirmedOwner {
 
         rawByRequestId[requestId] = raw;
         rawByRequestExists[requestId] = true;
+        if (requestStates[requestId] == RequestState.None) {
+            requestStates[requestId] = RequestState.Pending;
+            requestCreatedAt[requestId] = block.timestamp;
+        }
+        _trackRequestId(requestId);
+        _markRequestFulfilled(requestId);
 
         rawResults[rawHash] = raw;
         if (!rawResultExists[rawHash]) {
@@ -126,8 +152,27 @@ contract MyChainlinkRequesterDMN_Lite is ChainlinkClient, ConfirmedOwner {
     }
 
     function getRawByRequestId(bytes32 requestId) external view returns (string memory) {
-        require(rawByRequestExists[requestId], "Result not found");
+        require(requestStates[requestId] != RequestState.None, "Request not found");
+        require(rawByRequestExists[requestId], "Result not ready");
         return rawByRequestId[requestId];
+    }
+
+    function getRequestStatus(bytes32 requestId)
+        external
+        view
+        returns (
+            RequestState state,
+            address requester,
+            uint256 createdAt,
+            uint256 fulfilledAt,
+            bool exists
+        )
+    {
+        state = requestStates[requestId];
+        requester = requestRequesters[requestId];
+        createdAt = requestCreatedAt[requestId];
+        fulfilledAt = requestFulfilledAt[requestId];
+        exists = state != RequestState.None;
     }
 
     function rawResultCount() external view returns (uint256) {
@@ -150,7 +195,50 @@ contract MyChainlinkRequesterDMN_Lite is ChainlinkClient, ConfirmedOwner {
         return (hashes, raws);
     }
 
+    function getAllRequests()
+        external
+        view
+        returns (
+            bytes32[] memory ids,
+            uint8[] memory states,
+            address[] memory requesters,
+            uint256[] memory createdAts,
+            uint256[] memory fulfilledAts
+        )
+    {
+        uint256 count = requestIds.length;
+        ids = new bytes32[](count);
+        states = new uint8[](count);
+        requesters = new address[](count);
+        createdAts = new uint256[](count);
+        fulfilledAts = new uint256[](count);
+        for (uint256 i = 0; i < count; i++) {
+            bytes32 requestId = requestIds[i];
+            ids[i] = requestId;
+            states[i] = uint8(requestStates[requestId]);
+            requesters[i] = requestRequesters[requestId];
+            createdAts[i] = requestCreatedAt[requestId];
+            fulfilledAts[i] = requestFulfilledAt[requestId];
+        }
+        return (ids, states, requesters, createdAts, fulfilledAts);
+    }
+
     function getDMNResult() external view returns (bytes memory) {
         return dmnResult;
+    }
+
+    function _markRequestFulfilled(bytes32 requestId) internal {
+        requestStates[requestId] = RequestState.Fulfilled;
+        if (requestFulfilledAt[requestId] == 0) {
+            requestFulfilledAt[requestId] = block.timestamp;
+        }
+        emit RequestFulfilled(requestId, requestFulfilledAt[requestId]);
+    }
+
+    function _trackRequestId(bytes32 requestId) internal {
+        if (!requestListed[requestId]) {
+            requestListed[requestId] = true;
+            requestIds.push(requestId);
+        }
     }
 }

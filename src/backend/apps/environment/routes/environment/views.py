@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import re
 import shutil
 from pathlib import Path
 from uuid import uuid4
@@ -38,7 +39,13 @@ from apps.api.config import (
 from common.lib.fabric.chaincode_flow import install_fabric_chaincode_flow
 from common.utils.test_time import timeitwithname
 from apps.environment.services.chainlink_orchestrator import ChainlinkOrchestrator
-from apps.environment.services.dmn_firefly import register_dmn_contract_to_firefly
+from apps.environment.services.dmn_firefly import (
+    dmn_abi_fingerprint,
+    contract_event_names,
+    build_listener_payload,
+    register_dmn_contract_to_firefly,
+    register_related_chainlink_contracts_to_firefly,
+)
 from apps.environment.services.firefly_orchestrator import FireflyOrchestrator
 from apps.environment.services.identity_orchestrator import IdentityOrchestrator
 from apps.environment.services.task_runtime import (
@@ -1090,7 +1097,179 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
             else "MyChainlinkRequesterDMN"
         )
 
-    def _get_dmn_api_name(self, env: EthEnvironment) -> str:
+    def _resolve_dmn_contract_name(self, dmn_deployment: dict | None = None) -> str:
+        dmn_deployment = dmn_deployment or {}
+        contract_name = (
+            dmn_deployment.get("contractName")
+            or dmn_deployment.get("contract_name")
+            or dmn_deployment.get("name")
+        )
+        if contract_name:
+            return str(contract_name)
+        return self._get_dmn_contract_name()
+
+    def _resolve_dmn_contract_abi_hash(
+        self,
+        compiled: dict,
+        contract_name: str,
+    ) -> str | None:
+        _, abi_hash = dmn_abi_fingerprint(compiled, contract_name)
+        return abi_hash
+
+    def _extract_request_id(self, payload: dict | None) -> str | None:
+        if not isinstance(payload, dict):
+            return None
+        def normalize(candidate: object) -> str | None:
+            if not isinstance(candidate, str):
+                return None
+            raw = candidate.strip()
+            if not raw:
+                return None
+            if raw.startswith("0x") and len(raw) == 66:
+                return raw.lower()
+            if len(raw) == 64:
+                try:
+                    int(raw, 16)
+                    return f"0x{raw.lower()}"
+                except Exception:
+                    return None
+            return None
+
+        direct = normalize(payload.get("requestId") or payload.get("request_id"))
+        if direct:
+            return direct
+        output = payload.get("output")
+        if isinstance(output, dict):
+            for key in ("result", "body", "data", "response", "value"):
+                nested = self._extract_request_id(output.get(key))
+                if nested:
+                    return nested
+            headers = output.get("headers")
+            if isinstance(headers, dict):
+                request_id = normalize(headers.get("requestId") or headers.get("request_id"))
+                if request_id:
+                    return request_id
+        for key in ("headers", "result", "data", "response", "body", "value"):
+            value = payload.get(key)
+            if isinstance(value, dict):
+                nested = self._extract_request_id(value)
+                if nested:
+                    return nested
+            elif isinstance(value, str):
+                normalized = normalize(value)
+                if normalized:
+                    return normalized
+        return None
+
+    def _extract_transaction_hash(self, payload: dict | None) -> str | None:
+        if not isinstance(payload, dict):
+            return None
+
+        def normalize(candidate: object) -> str | None:
+            if not isinstance(candidate, str):
+                return None
+            raw = candidate.strip()
+            if not raw:
+                return None
+            if raw.startswith("0x") and len(raw) == 66:
+                return raw.lower()
+            if len(raw) == 64:
+                try:
+                    int(raw, 16)
+                    return f"0x{raw.lower()}"
+                except Exception:
+                    return None
+            return None
+
+        direct = normalize(
+            payload.get("transactionHash")
+            or payload.get("transaction_hash")
+            or payload.get("tx")
+        )
+        if direct:
+            return direct
+
+        output = payload.get("output")
+        if isinstance(output, dict):
+            for key in ("result", "body", "data", "response", "value", "headers"):
+                nested = self._extract_transaction_hash(output.get(key))
+                if nested:
+                    return nested
+            nested = normalize(output.get("transactionHash") or output.get("transaction_hash"))
+            if nested:
+                return nested
+
+        for key in ("headers", "result", "data", "response", "body", "value"):
+            value = payload.get(key)
+            if isinstance(value, dict):
+                nested = self._extract_transaction_hash(value)
+                if nested:
+                    return nested
+            elif isinstance(value, str):
+                normalized = normalize(value)
+                if normalized:
+                    return normalized
+        return None
+
+    def _extract_request_id_from_receipt(
+        self,
+        receipt: dict | None,
+        contract_address: str,
+    ) -> str | None:
+        if not isinstance(receipt, dict):
+            return None
+        target_address = str(contract_address or "").strip().lower()
+        logs = receipt.get("logs") or []
+        if not isinstance(logs, list):
+            return None
+
+        def normalize_topic(candidate: object) -> str | None:
+            if not isinstance(candidate, str):
+                return None
+            raw = candidate.strip()
+            if not raw:
+                return None
+            if raw.startswith("0x") and len(raw) == 66:
+                return raw.lower()
+            if len(raw) == 64:
+                try:
+                    int(raw, 16)
+                    return f"0x{raw.lower()}"
+                except Exception:
+                    return None
+            return None
+
+        for log in logs:
+            if not isinstance(log, dict):
+                continue
+            log_address = str(log.get("address") or "").strip().lower()
+            if target_address and log_address != target_address:
+                continue
+            topics = log.get("topics") or []
+            if not isinstance(topics, list) or len(topics) < 2:
+                continue
+            request_id = normalize_topic(topics[1])
+            if request_id:
+                return request_id
+        return None
+
+    def _get_dmn_api_name(
+        self,
+        env: EthEnvironment,
+        compiled: dict | None = None,
+        dmn_deployment: dict | None = None,
+    ) -> str:
+        dmn_deployment = dmn_deployment or {}
+        contract_address = dmn_deployment.get("contractAddress")
+        contract_name = self._resolve_dmn_contract_name(dmn_deployment)
+        abi_suffix = None
+        if compiled:
+            abi_suffix = self._resolve_dmn_contract_abi_hash(compiled, contract_name)
+        if contract_address:
+            base = f"DMNRequest-{str(contract_address)[-6:]}"
+            if abi_suffix:
+                return f"{base}-{abi_suffix[:6]}"
+            return base
         return f"DMNRequest-{str(env.id)[:8]}"
 
     def _get_data_task_api_name(self, env: EthEnvironment) -> str:
@@ -1214,18 +1393,45 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
             namespace="default",
             confirm=True,
         )
+        listeners: list[dict] = []
+        for event_name in contract_event_names(abi):
+            listener_name = f"{api_name}-{event_name}"
+            listener_payload = build_listener_payload(
+                listener_name=listener_name,
+                interface_id=interface_id,
+                contract_address=contract_address,
+                event_name=event_name,
+                first_event="newest",
+            )
+            registered_listener = ff.register_listener(
+                firefly_core_url,
+                listener_payload,
+                namespace="default",
+                confirm=True,
+            )
+            listeners.append(
+                {
+                    "name": listener_name,
+                    "event_path": event_name,
+                    "payload": registered_listener,
+                }
+            )
         return {
             "firefly_core_url": firefly_core_url,
             "firefly_interface_id": interface_id,
             "firefly_api_name": api_name,
             "firefly_api_payload": api_payload,
+            "firefly_listeners": listeners,
         }
 
     def _register_dmn_firefly(
-        self, env: EthEnvironment, dmn_deployment: dict, compiled: dict
+        self,
+        env: EthEnvironment,
+        dmn_deployment: dict,
+        compiled: dict,
     ) -> dict | None:
-        contract_name = self._get_dmn_contract_name()
-        api_name = self._get_dmn_api_name(env)
+        contract_name = self._resolve_dmn_contract_name(dmn_deployment)
+        api_name = self._get_dmn_api_name(env, compiled, dmn_deployment)
         return register_dmn_contract_to_firefly(
             env=env,
             dmn_deployment=dmn_deployment,
@@ -1237,6 +1443,60 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
             logger=LOG,
         )
 
+    def _dmn_firefly_registration_is_current(
+        self,
+        dmn: dict,
+        compiled: dict,
+        chainlink_detail: dict | None = None,
+    ) -> bool:
+        if not dmn.get("firefly_api_name") or not dmn.get("firefly_interface_id"):
+            return False
+        firefly_core_url = dmn.get("firefly_core_url")
+        if not firefly_core_url:
+            return False
+        contract_name = self._resolve_dmn_contract_name(dmn)
+        current_abi_hash = self._resolve_dmn_contract_abi_hash(compiled, contract_name)
+        stored_abi_hash = dmn.get("firefly_abi_hash")
+        if not current_abi_hash or not stored_abi_hash:
+            return False
+        listeners = dmn.get("firefly_listeners") or []
+        if not isinstance(listeners, list) or not listeners:
+            return False
+        firefly = self._firefly_orchestrator()
+        if not firefly.find_api(firefly_core_url, str(dmn.get("firefly_api_name"))):
+            return False
+        for listener in listeners:
+            if not isinstance(listener, dict):
+                return False
+            listener_name = listener.get("name")
+            if not listener_name or not firefly.find_listener(firefly_core_url, str(listener_name)):
+                return False
+        chainlink_firefly = {}
+        if isinstance(chainlink_detail, dict):
+            chainlink_firefly = chainlink_detail.get("firefly") or {}
+        related_contracts = chainlink_firefly.get("firefly_related_contracts") or {}
+        if not isinstance(related_contracts, dict) or not related_contracts:
+            return False
+        for contract_payload in related_contracts.values():
+            if not isinstance(contract_payload, dict):
+                return False
+            related_core_url = contract_payload.get("firefly_core_url") or firefly_core_url
+            related_api_name = contract_payload.get("firefly_api_name")
+            if not related_core_url or not related_api_name:
+                return False
+            if not firefly.find_api(str(related_core_url), str(related_api_name)):
+                return False
+            listeners = contract_payload.get("firefly_listeners") or []
+            if not isinstance(listeners, list) or not listeners:
+                return False
+            for listener in listeners:
+                if not isinstance(listener, dict):
+                    return False
+                listener_name = listener.get("name")
+                if not listener_name or not firefly.find_listener(str(related_core_url), str(listener_name)):
+                    return False
+        return str(stored_abi_hash) == str(current_abi_hash)
+
     def _auto_register_dmn_firefly_after_deploy(
         self,
         env_id: str,
@@ -1246,23 +1506,17 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
         payload_detail = self._load_chainlink_deployments()
         compiled = payload_detail.get("compiled") or {}
         dmn = env.dmn_detail or (payload_detail.get("dmn_deployment") or {})
+        chainlink_detail = env.chainlink_detail or (payload_detail.get("chainlink_deployment") or {})
         if not dmn.get("contractAddress"):
             return {
                 "auto_registered": False,
                 "message": "DMN contract address not found",
             }
 
-        if dmn.get("firefly_api_name") and dmn.get("firefly_interface_id"):
+        if self._dmn_firefly_registration_is_current(dmn, compiled, chainlink_detail):
             return {
                 "auto_registered": False,
                 "message": "DMN contract already registered to FireFly",
-                "dmn_detail": dmn,
-            }
-
-        if env.firefly_status != "STARTED":
-            return {
-                "auto_registered": False,
-                "message": "FireFly cluster has not been started, auto registration skipped",
                 "dmn_detail": dmn,
             }
 
@@ -1272,13 +1526,29 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
             raise RuntimeError("DMN FireFly registration failed")
 
         dmn = {**dmn, **firefly_payload}
+        related_payload = register_related_chainlink_contracts_to_firefly(
+            env=env,
+            chainlink_detail=chainlink_detail if isinstance(chainlink_detail, dict) else {},
+            compiled=compiled,
+            identity_flow=self._identity_orchestrator(),
+            firefly_manager=self._firefly_orchestrator(),
+            logger=LOG,
+        )
+        if related_payload:
+            chainlink_detail = (
+                {**chainlink_detail, **related_payload}
+                if isinstance(chainlink_detail, dict)
+                else related_payload
+            )
         self._set_task_step(task_id, "SAVE_RESULT")
         env.dmn_detail = dmn
-        env.save(update_fields=["dmn_detail"])
+        env.chainlink_detail = chainlink_detail
+        env.save(update_fields=["dmn_detail", "chainlink_detail"])
         return {
             "auto_registered": True,
             "message": "DMN contract registered to FireFly",
             "dmn_detail": dmn,
+            "chainlink_detail": chainlink_detail,
         }
 
     def _run_dmn_firefly_register(
@@ -1295,7 +1565,8 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
         if not dmn:
             raise RuntimeError("DMN deployment detail not found, install chainlink/dmn first")
 
-        if dmn.get("firefly_api_name") and dmn.get("firefly_interface_id"):
+        chainlink_detail = env.chainlink_detail or (payload_detail.get("chainlink_deployment") or {})
+        if self._dmn_firefly_registration_is_current(dmn, compiled, chainlink_detail):
             return {
                 "message": "DMN contract already registered to FireFly",
                 "dmn_detail": dmn,
@@ -1310,12 +1581,28 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
             raise RuntimeError("DMN FireFly registration failed")
 
         dmn = {**dmn, **firefly_payload}
+        related_payload = register_related_chainlink_contracts_to_firefly(
+            env=env,
+            chainlink_detail=chainlink_detail if isinstance(chainlink_detail, dict) else {},
+            compiled=compiled,
+            identity_flow=self._identity_orchestrator(),
+            firefly_manager=self._firefly_orchestrator(),
+            logger=LOG,
+        )
+        if related_payload:
+            chainlink_detail = (
+                {**chainlink_detail, **related_payload}
+                if isinstance(chainlink_detail, dict)
+                else related_payload
+            )
         self._set_task_step(task_id, "SAVE_RESULT")
         env.dmn_detail = dmn
-        env.save(update_fields=["dmn_detail"])
+        env.chainlink_detail = chainlink_detail
+        env.save(update_fields=["dmn_detail", "chainlink_detail"])
         return {
             "message": "DMN contract registered to FireFly",
             "dmn_detail": dmn,
+            "chainlink_detail": chainlink_detail,
         }
 
     def _run_dmn_contract_redeploy(
@@ -1378,7 +1665,11 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
             raise RuntimeError(f"{label} contract address not found")
 
         existing = suite_firefly.get(firefly_key) or {}
-        if existing.get("firefly_api_name") and existing.get("firefly_interface_id"):
+        if (
+            existing.get("firefly_api_name")
+            and existing.get("firefly_interface_id")
+            and existing.get("firefly_listeners")
+        ):
             return {
                 "message": f"{label} already registered to FireFly",
                 "oracle_task_suite": suite,
@@ -1433,8 +1724,10 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
             raise RuntimeError("Relayer contract address not found")
 
         existing_firefly = relayer.get("firefly") or {}
-        if existing_firefly.get("firefly_api_name") and existing_firefly.get(
-            "firefly_interface_id"
+        if (
+            existing_firefly.get("firefly_api_name")
+            and existing_firefly.get("firefly_interface_id")
+            and existing_firefly.get("firefly_listeners")
         ):
             return {
                 "message": "Relayer contract already registered to FireFly",
@@ -1486,7 +1779,7 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
         chainlink = env.chainlink_detail or (payload.get("chainlink_deployment") or {})
         dmn = env.dmn_detail or (payload.get("dmn_deployment") or {})
         relayer = self._resolve_relayer_deployment(env, payload)
-        contract_name = self._get_dmn_contract_name()
+        contract_name = self._resolve_dmn_contract_name(dmn)
 
         response = {
             "chainlink_root": payload.get("chainlink_root"),
@@ -1494,6 +1787,7 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
             "operator": chainlink.get("operator"),
             "ocr_contract": chainlink.get("ocrContract"),
             "dmn_job_id": chainlink.get("dmnJobId") or chainlink.get("dmnJobIds", {}).get("chainlink1"),
+            "firefly": chainlink.get("firefly") or {},
             "dmn_contract": {
                 "name": contract_name,
                 "address": dmn.get("contractAddress"),
@@ -1502,6 +1796,8 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
                 "firefly_api_name": dmn.get("firefly_api_name"),
                 "firefly_interface_id": dmn.get("firefly_interface_id"),
                 "firefly_core_url": dmn.get("firefly_core_url"),
+                "firefly_api_base": dmn.get("firefly_api_base"),
+                "firefly_listeners": dmn.get("firefly_listeners") or [],
             },
             "chainlink_ui": os.environ.get("CHAINLINK_UI", "http://127.0.0.1:6688"),
             "cluster_sync": cluster_sync or (chainlink.get("cluster_sync") if isinstance(chainlink, dict) else None),
@@ -1542,7 +1838,7 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
         chainlink = env.chainlink_detail or (payload.get("chainlink_deployment") or {})
         dmn = env.dmn_detail or (payload.get("dmn_deployment") or {})
         compiled = payload.get("compiled") or {}
-        contract_name = self._get_dmn_contract_name()
+        contract_name = self._resolve_dmn_contract_name(dmn)
         contract_key = f"contracts/{contract_name}.sol:{contract_name}"
         abi = None
         if request.query_params.get("include_abi") in ["1", "true", "yes"]:
@@ -1561,10 +1857,15 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
                 "api_name": dmn.get("firefly_api_name"),
                 "interface_id": dmn.get("firefly_interface_id"),
                 "core_url": dmn.get("firefly_core_url"),
+                "api_base": dmn.get("firefly_api_base"),
+                "listeners": dmn.get("firefly_listeners") or [],
                 "registered": bool(
-                    dmn.get("firefly_api_name") and dmn.get("firefly_interface_id")
+                    dmn.get("firefly_api_name")
+                    and dmn.get("firefly_interface_id")
+                    and dmn.get("firefly_listeners")
                 ),
             },
+            "firefly_related": chainlink.get("firefly") or {},
             "chainlink_ui": os.environ.get("CHAINLINK_UI", "http://127.0.0.1:6688"),
         }
         return Response(response, status=status.HTTP_200_OK)
@@ -1583,7 +1884,7 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        contract_name = self._get_dmn_contract_name()
+        contract_name = self._resolve_dmn_contract_name(env.dmn_detail or {})
         running_task = (
             Task.objects.filter(
                 target_type="EthEnvironment",
@@ -1631,86 +1932,6 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
             status=status.HTTP_202_ACCEPTED,
         )
 
-    @action(methods=["post"], detail=True, url_path="dmn-contract/call")
-    def dmn_contract_call(self, request, pk=None, *args, **kwargs):
-        env, error_response = self._get_eth_env_or_404(pk)
-        if error_response:
-            return error_response
-
-        method = request.data.get("method")
-        args = request.data.get("args", [])
-        mode = request.data.get("mode", "call")
-
-        if not method:
-            return Response({"message": "method is required"}, status=status.HTTP_400_BAD_REQUEST)
-        if not isinstance(args, list):
-            return Response({"message": "args must be a list"}, status=status.HTTP_400_BAD_REQUEST)
-
-        payload = self._load_chainlink_deployments()
-        dmn_deployment = env.dmn_detail or (payload.get("dmn_deployment") or {})
-        contract_address = dmn_deployment.get("contractAddress")
-        if not contract_address:
-            return Response({"message": "DMN contract address not found"}, status=status.HTTP_400_BAD_REQUEST)
-
-        contract_name = self._get_dmn_contract_name()
-        firefly_core_url = dmn_deployment.get("firefly_core_url")
-        firefly_api_name = dmn_deployment.get("firefly_api_name")
-        compiled = payload.get("compiled") or {}
-        contract_key = f"contracts/{contract_name}.sol:{contract_name}"
-        abi = (compiled.get("contracts") or {}).get(contract_key, {}).get("abi") or []
-
-        if not firefly_core_url or not firefly_api_name:
-            return Response(
-                {
-                    "message": (
-                        "DMN contract is not registered to FireFly. "
-                        "Please redeploy DMN contract or run FireFly registration first."
-                    )
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        params = request.data.get("params")
-        if params is None:
-            params = {}
-        if not isinstance(params, dict):
-            return Response({"message": "params must be a dict"}, status=status.HTTP_400_BAD_REQUEST)
-        if args:
-            fn = next(
-                (
-                    item
-                    for item in abi
-                    if item.get("type") == "function" and item.get("name") == method
-                ),
-                None,
-            )
-            if fn:
-                input_names = [p.get("name") or f"arg{idx}" for idx, p in enumerate(fn.get("inputs") or [])]
-                if len(args) != len(input_names):
-                    return Response(
-                        {"message": "args length does not match method inputs"},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-                params = {name: value for name, value in zip(input_names, args)}
-            elif args:
-                params = {f"arg{idx}": value for idx, value in enumerate(args)}
-
-        try:
-            firefly_mode = "invoke" if mode in ["invoke", "send"] else "query"
-            result = self._firefly_orchestrator().invoke_api(
-                firefly_core_url,
-                firefly_api_name,
-                method,
-                params,
-                mode=firefly_mode,
-            )
-            return Response(result, status=status.HTTP_200_OK)
-        except Exception as exc:
-            return Response(
-                {"message": "DMN contract call via FireFly failed", "error": str(exc)},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
     @action(methods=["post"], detail=True, url_path="dmn-contract/register-firefly")
     def register_dmn_firefly(self, request, pk=None, *args, **kwargs):
         env, error_response = self._get_eth_env_or_404(pk)
@@ -1720,13 +1941,9 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
         if not_ready:
             return not_ready
 
-        if env.firefly_status != "STARTED":
-            return Response(
-                {"message": "FireFly cluster has not been started"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
         dmn = env.dmn_detail or {}
+        payload_detail = self._load_chainlink_deployments()
+        compiled = payload_detail.get("compiled") or {}
         if not dmn.get("contractAddress"):
             return Response(
                 {
@@ -1737,7 +1954,8 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        if dmn.get("firefly_api_name") and dmn.get("firefly_interface_id"):
+        chainlink_detail = env.chainlink_detail or (payload_detail.get("chainlink_deployment") or {})
+        if self._dmn_firefly_registration_is_current(dmn, compiled, chainlink_detail):
             return Response(
                 {
                     "status": "STARTED",
@@ -1807,9 +2025,11 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
                 "api_name": firefly_payload.get("firefly_api_name"),
                 "interface_id": firefly_payload.get("firefly_interface_id"),
                 "core_url": firefly_payload.get("firefly_core_url"),
+                "listeners": firefly_payload.get("firefly_listeners") or [],
                 "registered": bool(
                     firefly_payload.get("firefly_api_name")
                     and firefly_payload.get("firefly_interface_id")
+                    and firefly_payload.get("firefly_listeners")
                 ),
             },
         }
@@ -1848,9 +2068,11 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
                 "api_name": firefly_payload.get("firefly_api_name"),
                 "interface_id": firefly_payload.get("firefly_interface_id"),
                 "core_url": firefly_payload.get("firefly_core_url"),
+                "listeners": firefly_payload.get("firefly_listeners") or [],
                 "registered": bool(
                     firefly_payload.get("firefly_api_name")
                     and firefly_payload.get("firefly_interface_id")
+                    and firefly_payload.get("firefly_listeners")
                 ),
             },
         }
@@ -2011,7 +2233,11 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
             )
 
         firefly_payload = ((suite.get("firefly") or {}).get("data_task_adapter")) or {}
-        if firefly_payload.get("firefly_api_name") and firefly_payload.get("firefly_interface_id"):
+        if (
+            firefly_payload.get("firefly_api_name")
+            and firefly_payload.get("firefly_interface_id")
+            and firefly_payload.get("firefly_listeners")
+        ):
             return Response(
                 {
                     "status": "STARTED",
@@ -2070,7 +2296,11 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
             )
 
         firefly_payload = ((suite.get("firefly") or {}).get("compute_task_adapter")) or {}
-        if firefly_payload.get("firefly_api_name") and firefly_payload.get("firefly_interface_id"):
+        if (
+            firefly_payload.get("firefly_api_name")
+            and firefly_payload.get("firefly_interface_id")
+            and firefly_payload.get("firefly_listeners")
+        ):
             return Response(
                 {
                     "status": "STARTED",
@@ -2138,9 +2368,11 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
                 "api_name": firefly_payload.get("firefly_api_name"),
                 "interface_id": firefly_payload.get("firefly_interface_id"),
                 "core_url": firefly_payload.get("firefly_core_url"),
+                "listeners": firefly_payload.get("firefly_listeners") or [],
                 "registered": bool(
                     firefly_payload.get("firefly_api_name")
                     and firefly_payload.get("firefly_interface_id")
+                    and firefly_payload.get("firefly_listeners")
                 ),
             },
             "node": node_status,
@@ -2228,8 +2460,10 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
             )
 
         firefly_payload = relayer.get("firefly") or {}
-        if firefly_payload.get("firefly_api_name") and firefly_payload.get(
-            "firefly_interface_id"
+        if (
+            firefly_payload.get("firefly_api_name")
+            and firefly_payload.get("firefly_interface_id")
+            and firefly_payload.get("firefly_listeners")
         ):
             return Response(
                 {
@@ -2710,6 +2944,7 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
                 "api_id": deployment.api_id,
                 "api_name": api_name,
                 "api_address": deployment.api_address,
+                "firefly_listeners": deployment.firefly_listeners or [],
                 "status": deployment.status,
                 "error": deployment.error,
                 "updated_at": deployment.updated_at,

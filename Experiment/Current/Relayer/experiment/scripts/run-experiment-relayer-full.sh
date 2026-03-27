@@ -10,7 +10,9 @@ fi
 
 TIMING_PROFILE="${RELAYER_TIMING_PROFILE:-default}"
 if [[ "$TIMING_PROFILE" == "realistic" ]]; then
-  export ANVIL_BLOCK_TIME="${ANVIL_BLOCK_TIME:-1}"
+  # Use a moderate fixed block time to keep the run realistic without
+  # stretching the end-to-end latency too aggressively.
+  export ANVIL_BLOCK_TIME="${ANVIL_BLOCK_TIME:-3}"
   export ANVIL_MIXED_MINING="${ANVIL_MIXED_MINING:-0}"
   export RELAYER_FIXED_TASKS_PER_CASE="${RELAYER_FIXED_TASKS_PER_CASE:-0}"
   export RELAYER_RUNS_PER_CASE="${RELAYER_RUNS_PER_CASE:-10}"

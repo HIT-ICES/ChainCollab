@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const REPORT_SUFFIX = String(process.env.COMPUTE_REPORT_SUFFIX || "").trim();
 
 function readJson(p) {
   return JSON.parse(fs.readFileSync(p, "utf8"));
@@ -224,14 +225,15 @@ function toMarkdown(computeReport, dmnReport) {
 
 function main() {
   const root = path.join(__dirname, "..");
-  const computePath = path.join(root, "report", "compute-10-scenarios-report.json");
+  const suffix = REPORT_SUFFIX ? `.${REPORT_SUFFIX}` : "";
+  const computePath = path.join(root, "report", `compute-10-scenarios-report${suffix}.json`);
   const dmnPath = path.join(root, "report", "dmn-complexity-report.json");
 
   const computeReport = readJson(computePath);
   const dmnReport = readJson(dmnPath);
 
   const md = toMarkdown(computeReport, dmnReport);
-  const outPath = path.join(root, "report", "COMPUTE_UNIFIED_EXPERIMENT_REPORT.md");
+  const outPath = path.join(root, "report", `COMPUTE_UNIFIED_EXPERIMENT_REPORT${suffix}.md`);
   fs.writeFileSync(outPath, md, "utf8");
   console.log(`markdown report -> ${outPath}`);
 }

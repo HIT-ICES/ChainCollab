@@ -5,6 +5,7 @@ const {
   ROOT,
   DEPLOYMENTS_DIR,
   RUNTIME_DIR,
+  contractArtifactPath,
   loadJson,
   writeJson,
   deriveWallet
@@ -21,14 +22,7 @@ function splitRelayerStatePath() {
 }
 
 function loadArtifact(contractName) {
-  const p = path.join(
-    ROOT,
-    "artifacts",
-    "contracts",
-    "generated",
-    `${contractName}.sol`,
-    `${contractName}.json`
-  );
+  const p = contractArtifactPath(contractName);
   if (!fs.existsSync(p)) {
     throw new Error(`artifact not found: ${p}. run npm run compile`);
   }
@@ -166,14 +160,9 @@ async function relayCase({
         payloadHash
       });
       const signatures = [sig];
-      const tx = await target.acceptHandoff(
-        taskId,
-        payloadHash,
-        sourceChainId,
-        sourceContract,
-        Number(meta.target.chainId),
-        signatures
-      );
+      const tx = await target[
+        "acceptHandoff(bytes32,bytes32,uint256,address,uint256,bytes[])"
+      ](taskId, payloadHash, sourceChainId, sourceContract, Number(meta.target.chainId), signatures);
       const rc = await tx.wait();
       caseState.relayedTasks[key] = {
         relayedAt: new Date().toISOString(),

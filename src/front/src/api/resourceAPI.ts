@@ -333,15 +333,6 @@ export const registerDmnContractToFireflyForEthEnv = async (envId: string, force
     }
 }
 
-export const callDmnContractForEthEnv = async (envId: string, payload: any) => {
-    try {
-        const response = await api.post(`/eth-environments/${envId}/dmn-contract/call`, payload)
-        return response.data;
-    } catch (error) {
-        throwApiError(error, "Call DMN contract failed");
-    }
-}
-
 export const getDataContractDetailForEthEnv = async (envId: string, includeAbi: boolean = false) => {
     try {
         const response = await api.get(`/eth-environments/${envId}/data-contract`, {

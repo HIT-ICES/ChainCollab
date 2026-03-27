@@ -8,6 +8,7 @@ from common.lib.ethereum.firefly_contracts import (
     generate_ffi as firefly_generate_ffi,
     normalize_ffi as firefly_normalize_ffi,
     register_api as firefly_register_api,
+    register_listener as firefly_register_listener,
     register_interface as firefly_register_interface,
 )
 from common.utils.http_client import get_json, request_json
@@ -112,6 +113,86 @@ class FireflyContractManager:
         first = items[0]
         return first if isinstance(first, dict) else None
 
+    def find_api(
+        self, core_url: str, api_name: str, namespace: str = "default"
+    ) -> dict | None:
+        return self._find_api(core_url, api_name, namespace=namespace)
+
+    def _find_listener(
+        self, core_url: str, listener_name: str, namespace: str = "default"
+    ) -> dict | None:
+        try:
+            _, payload = get_json(
+                f"http://{core_url}/api/v1/namespaces/{namespace}/contracts/listeners",
+                timeout=30,
+                expected_status=(200,),
+                params={"name": listener_name},
+            )
+        except Exception as exc:
+            self._log(
+                "warning",
+                "listener_lookup_failed",
+                core=core_url,
+                listener=listener_name,
+                error=str(exc),
+            )
+            return None
+        if isinstance(payload, list):
+            items = payload
+        elif isinstance(payload, dict):
+            items = payload.get("listeners") or payload.get("items") or []
+        else:
+            items = []
+        if not items:
+            return None
+        first = items[0]
+        return first if isinstance(first, dict) else None
+
+    def find_listener(
+        self, core_url: str, listener_name: str, namespace: str = "default"
+    ) -> dict | None:
+        return self._find_listener(core_url, listener_name, namespace=namespace)
+
+    @staticmethod
+    def _listener_interface_id(listener: dict) -> str | None:
+        interface = listener.get("interface") or {}
+        if isinstance(interface, dict) and interface.get("id"):
+            return str(interface.get("id"))
+        filters = listener.get("filters") or []
+        if isinstance(filters, list) and filters:
+            first = filters[0] or {}
+            interface = first.get("interface") or {}
+            if isinstance(interface, dict) and interface.get("id"):
+                return str(interface.get("id"))
+        return None
+
+    @staticmethod
+    def _listener_contract_address(listener: dict) -> str | None:
+        location = listener.get("location") or {}
+        if isinstance(location, dict) and location.get("address"):
+            return str(location.get("address"))
+        filters = listener.get("filters") or []
+        if isinstance(filters, list) and filters:
+            first = filters[0] or {}
+            location = first.get("location") or {}
+            if isinstance(location, dict) and location.get("address"):
+                return str(location.get("address"))
+        return None
+
+    @staticmethod
+    def _listener_event_name(listener: dict) -> str | None:
+        event = listener.get("event") or {}
+        if isinstance(event, dict) and event.get("name"):
+            return str(event.get("name"))
+        if listener.get("eventPath"):
+            return str(listener.get("eventPath"))
+        filters = listener.get("filters") or []
+        if isinstance(filters, list) and filters:
+            first = filters[0] or {}
+            if first.get("eventPath"):
+                return str(first.get("eventPath"))
+        return None
+
     def register_api(
         self,
         core_url: str,
@@ -173,6 +254,66 @@ class FireflyContractManager:
             last_error = payload
         raise Exception(
             f"FireFly api registration failed: {str(last_error)[:500]}"
+        )
+
+    def register_listener(
+        self,
+        core_url: str,
+        listener: dict,
+        namespace: str = "default",
+        confirm: bool = True,
+    ) -> dict:
+        listener_name = listener.get("name") or ""
+        existing = self._find_listener(core_url, listener_name, namespace=namespace)
+        if existing:
+            existing_interface_id = self._listener_interface_id(existing)
+            existing_address = self._listener_contract_address(existing)
+            existing_event_path = self._listener_event_name(existing)
+            if (
+                existing_interface_id == self._listener_interface_id(listener)
+                and existing_address == self._listener_contract_address(listener)
+                and existing_event_path == self._listener_event_name(listener)
+            ):
+                return {"id": existing.get("id"), "existing": True}
+            existing_id = existing.get("id")
+            if existing_id:
+                self._log(
+                    "info",
+                    "listener_delete",
+                    core=core_url,
+                    listener=listener_name,
+                    listener_id=existing_id,
+                )
+                try:
+                    request_json(
+                        "DELETE",
+                        f"http://{core_url}/api/v1/namespaces/{namespace}/contracts/listeners/{existing_id}",
+                        timeout=30,
+                        expected_status=(200, 202, 204),
+                    )
+                except Exception as exc:
+                    self._log(
+                        "warning",
+                        "listener_delete_failed",
+                        core=core_url,
+                        listener=listener_name,
+                        listener_id=existing_id,
+                        error=str(exc),
+                    )
+
+        status, payload = firefly_register_listener(
+            core_url,
+            listener,
+            namespace=namespace,
+            confirm=confirm,
+        )
+        if status in [200, 201, 202]:
+            return payload
+        existing = self._find_listener(core_url, listener_name, namespace=namespace)
+        if existing:
+            return {"id": existing.get("id"), "existing": True}
+        raise Exception(
+            f"FireFly listener registration failed (status {status}): {str(payload)[:500]}"
         )
 
     def invoke_api(

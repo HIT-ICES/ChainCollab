@@ -38,6 +38,40 @@ def _response_payload(response) -> dict:
     return {}
 
 
+def abi_event_names(abi: list, ignore: set[str] | None = None) -> list[str]:
+    ignore = ignore or {
+        "OwnershipTransferRequested",
+        "OwnershipTransferred",
+    }
+    event_names: list[str] = []
+    for item in abi or []:
+        if not isinstance(item, dict) or item.get("type") != "event":
+            continue
+        name = item.get("name")
+        if not name or name in ignore:
+            continue
+        event_names.append(str(name))
+    return event_names
+
+
+def build_listener_payload(
+    *,
+    listener_name: str,
+    interface_id: str,
+    contract_address: str,
+    event_name: str,
+    first_event: str = "newest",
+) -> dict:
+    return {
+        "name": listener_name,
+        "interface": {"id": interface_id},
+        "location": {"address": contract_address},
+        "event": {"name": event_name},
+        "options": {"firstEvent": first_event},
+        "topic": listener_name,
+    }
+
+
 def normalize_ffi(ffi: dict, version_suffix: str | None = None) -> dict:
     methods = ffi.get("methods", [])
     for method in methods:
@@ -144,6 +178,36 @@ def register_api(
         return 500, {"error": str(exc)}
     body_payload = _response_payload(body)
     _log_response("register_api", status_code, body_payload)
+    return status_code, body_payload
+
+
+def register_listener(
+    core_url: str,
+    listener: dict,
+    namespace: str = "default",
+    confirm: bool = True,
+) -> tuple[int, dict]:
+    suffix = "?confirm=true" if confirm else ""
+    endpoint = f"http://{core_url}/api/v1/namespaces/{namespace}/contracts/listeners{suffix}"
+    _log_request(
+        "register_listener",
+        core_url,
+        endpoint,
+        {"name": listener.get("name"), "namespace": namespace},
+    )
+    try:
+        status_code, body = post_json(
+            endpoint,
+            headers={"Content-Type": "application/json"},
+            body=listener,
+            timeout=60,
+            expected_status=(200, 201, 202),
+        )
+    except RuntimeError as exc:
+        LOG.warning("[FF] action=register_listener failed core=%s err=%s", core_url, exc)
+        return 500, {"error": str(exc)}
+    body_payload = _response_payload(body)
+    _log_response("register_listener", status_code, body_payload)
     return status_code, body_payload
 
 

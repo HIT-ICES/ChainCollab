@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const REPORT_SUFFIX = String(process.env.COMPUTE_REPORT_SUFFIX || "").trim();
 
 function readJson(p) {
   return JSON.parse(fs.readFileSync(p, "utf8"));
@@ -89,6 +90,9 @@ function toMarkdown(computeReport, dataset) {
   lines.push("# Oracle 计算任务实验报告");
   lines.push("");
   lines.push(`生成时间：${new Date().toISOString()}`);
+  if (computeReport.warmup?.enabled) {
+    lines.push(`- 预热模式：已启用（warmup gas: ${computeReport.warmup.gasUsed ?? "N/A"}）`);
+  }
   lines.push("");
   lines.push("## 1. 实验目标");
   lines.push("");
@@ -133,9 +137,10 @@ function toMarkdown(computeReport, dataset) {
 
 function main() {
   const root = path.join(__dirname, "..");
-  const computePath = path.join(root, "report", "compute-10-scenarios-report.json");
+  const suffix = REPORT_SUFFIX ? `.${REPORT_SUFFIX}` : "";
+  const computePath = path.join(root, "report", `compute-10-scenarios-report${suffix}.json`);
   const datasetPath = path.join(root, "dataset", "compute_tasks_10_scenarios.json");
-  const outPath = path.join(root, "report", "COMPUTE_TASK_EXPERIMENT_REPORT.md");
+  const outPath = path.join(root, "report", `COMPUTE_TASK_EXPERIMENT_REPORT${suffix}.md`);
 
   const computeReport = readJson(computePath);
   const dataset = readJson(datasetPath);

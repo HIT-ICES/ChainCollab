@@ -237,6 +237,11 @@ class IdentityDeployment(models.Model):
         null=True,
         blank=True,
     )
+    firefly_listeners = models.JSONField(
+        help_text="FireFly listeners registered for identity contract",
+        null=True,
+        blank=True,
+    )
     status = models.CharField(
         help_text="status of identity deployment",
         max_length=32,
