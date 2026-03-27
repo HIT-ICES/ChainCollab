@@ -8,7 +8,7 @@ const { URL } = require('url');
 const RPC_URL = process.env.RPC_URL || 'http://localhost:8545';
 const EXPECTED_DEPLOYER = (process.env.DEPLOYER_ACCOUNT || process.env.ETH_SYSTEM_ACCOUNT || '').toLowerCase();
 const CHAINLINK_ROOT = path.resolve(__dirname, '..');
-const SOLC_IMAGE = process.env.SOLC_IMAGE || 'ethereum/solc:0.8.24';
+const SOLC_IMAGE = process.env.SOLC_IMAGE || 'ethereum/solc:0.8.19';
 const OPERATOR_SOLC_IMAGE = process.env.OPERATOR_SOLC_IMAGE || 'ethereum/solc:0.8.19';
 
 let cachedSolcRunner = null;
