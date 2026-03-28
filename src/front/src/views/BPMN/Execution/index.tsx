@@ -14,6 +14,8 @@ interface DataType {
     participants: string;
     bpmnContent: string;
     svgContent: string;
+    eth_environment_id?: string | null;
+    ethereum_contract_id?: string | null;
 }
 
 interface FireflyDataType {
@@ -27,6 +29,7 @@ interface FireflyDataType {
 
 interface BpmnInstanceDataType {
     id: string;
+    bpmn?: string;
     bpmn_id: string;
     status: string;
     name: string;
@@ -95,9 +98,24 @@ const Execution: React.FC = () => {
 }, [bpmnData]);
 
 
-    const handleClickDeploy = (id: string) => {
+    const resolveBpmnForInstance = (record: BpmnInstanceDataType) => {
+        const bpmnId = (record as any).bpmn || record.bpmn_id;
+        return bpmnData.find((item: any) => item.id === bpmnId) || null;
+    };
+
+    const isEthereumInstance = (record: BpmnInstanceDataType) => {
+        const bpmn = resolveBpmnForInstance(record);
+        return Boolean(bpmn?.eth_environment_id || bpmn?.ethereum_contract_id);
+    };
+
+    const handleClickDeploy = (record: BpmnInstanceDataType) => {
+        const id = record.id;
         if (isMockMode) {
             navigate(`./${id}?mode=mock`, { state: { id } });
+            return;
+        }
+        if (isEthereumInstance(record)) {
+            navigate(`./${id}`, { state: { id, executionEnv: "ethereum" } });
             return;
         }
         setSelectedDataTypeId(id);
@@ -176,8 +194,8 @@ const Execution: React.FC = () => {
             //     type="primary"
             //     onClick={() => handleClick(record.id)}
             // >
-            <Button type="primary" onClick={() => handleClickDeploy(record.id)}>
-              {isMockMode ? "Mock Execute" : "Deploy"}
+            <Button type="primary" onClick={() => handleClickDeploy(record)}>
+              {isMockMode ? "Mock Execute" : isEthereumInstance(record) ? "Execute" : "Deploy"}
             </Button>
         );
         // }

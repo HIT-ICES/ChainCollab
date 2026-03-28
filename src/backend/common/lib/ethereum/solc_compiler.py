@@ -27,6 +27,12 @@ class SolidityCompiler:
         self.solc_path = solc_path
         self.version = version
         self.evm_version = os.environ.get("SOLC_EVM_VERSION", "paris")
+        optimize_env = os.environ.get("SOLC_OPTIMIZE", "true").strip().lower()
+        self.optimize = optimize_env not in {"0", "false", "no", "off"}
+        try:
+            self.optimize_runs = int(os.environ.get("SOLC_OPTIMIZE_RUNS", "1"))
+        except ValueError:
+            self.optimize_runs = 1
 
         preferred_versions = [os.environ.get("SOLC_VERSION"), self.version]
         if self._ensure_local_solc_selected(preferred_versions):
@@ -136,6 +142,14 @@ class SolidityCompiler:
                 "--combined-json",
                 "abi,bin,metadata",
             ]
+            if self.optimize:
+                cmd.extend(
+                    [
+                        "--optimize",
+                        "--optimize-runs",
+                        str(self.optimize_runs),
+                    ]
+                )
             logger.info(f"Falling back to docker solc: {' '.join(cmd)}")
             try:
                 result = subprocess.run(
@@ -165,12 +179,7 @@ class SolidityCompiler:
         if env_image:
             candidates.append(env_image)
         if self.version:
-            candidates.extend(
-                [
-                    f"ethereum/solc:{self.version}",
-                    f"ethereum/solc:v{self.version}",
-                ]
-            )
+            candidates.append(f"ethereum/solc:{self.version}")
         candidates.append("ethereum/solc:stable")
         deduped: list[str] = []
         for candidate in candidates:
@@ -335,9 +344,22 @@ class SolidityCompiler:
                 self.evm_version,
                 "--combined-json", "abi,bin,metadata"
             ]
+            if self.optimize:
+                cmd.extend(
+                    [
+                        "--optimize",
+                        "--optimize-runs",
+                        str(self.optimize_runs),
+                    ]
+                )
 
             logger.info(f"Compiling contract: {contract_path}")
             logger.info(f"Command: {' '.join(cmd)}")
+            logger.info(
+                "Solidity optimizer enabled=%s runs=%s",
+                self.optimize,
+                self.optimize_runs,
+            )
 
             result = None
             compile_errors = []

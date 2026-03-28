@@ -43,6 +43,7 @@ import {
   ActivateEthEnv,
   InitFireflyForEthEnv,
   StartFireflyForEthEnv,
+  InstallIdentityContract,
   getIdentityContractDetail,
   redeployIdentityContract,
   getChainlinkDetailForEthEnv,
@@ -195,6 +196,7 @@ const Overview: React.FC = () => {
   const [setupComputeFireflyLoading, setSetupComputeFireflyLoading] = useState(false)
   const [setupRelayerContractLoading, setSetupRelayerContractLoading] = useState(false)
   const [setupRelayerFireflyLoading, setSetupRelayerFireflyLoading] = useState(false)
+  const [setupIdentityContractLoading, setSetupIdentityContractLoading] = useState(false)
   const [relayerNodeActionLoading, setRelayerNodeActionLoading] = useState(false)
 
   const [detailOpen, setDetailOpen] = useState(false)
@@ -1838,6 +1840,36 @@ const Overview: React.FC = () => {
     }
   }
 
+  const handleSetupIdentityContract = async () => {
+    if (currentEnvType !== "Ethereum") {
+      message.warning("Identity contract only supports Ethereum environment")
+      return
+    }
+    try {
+      setSetupIdentityContractLoading(true)
+      const res = await InstallIdentityContract(currentEnvId, {
+        force: shouldForceRetry(taskMap.identity),
+      })
+      if (res?.task_id) {
+        await startTaskPolling(res.task_id, "Identity Contract Install")
+        message.success("Identity contract install task started")
+      } else if (res?.status === "STARTED") {
+        message.success(res?.message || "Identity contract already deployed")
+      } else if (res?.message) {
+        message.info(res.message)
+      }
+      await setSync()
+      if (detailType === "Identity") {
+        const detail = await getIdentityContractDetail(currentEnvId, true)
+        setDetailPayload(detail)
+      }
+    } catch (error: any) {
+      message.error(extractErrorMessage(error, "Install identity contract failed"))
+    } finally {
+      setSetupIdentityContractLoading(false)
+    }
+  }
+
   const handleRedeployDmnContract = async () => {
     if (currentEnvType !== "Ethereum") {
       message.warning("DMN contract only supports Ethereum environment")
@@ -2077,8 +2109,8 @@ const Overview: React.FC = () => {
                     className="nodrag nopan"
                     size="small"
                     variant="outlined"
-                    loading={false}
-                    onClick={() => navigate(`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/ethereum/smartcontract`)}
+                    loading={setupIdentityContractLoading}
+                    onClick={handleSetupIdentityContract}
                     disabled={
                       currentEnvType !== "Ethereum" ||
                       !ethSystemAccountReady ||

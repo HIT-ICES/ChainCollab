@@ -29,6 +29,42 @@ from apps.ethereum.models import EthereumIdentity, IdentityDeployment
 from apps.fabric.models import ResourceSet
 
 
+def resolve_identity_api_name(
+    contract_name: str | None = "IdentityRegistry",
+    contract_address: str | None = None,
+    api_name: str | None = None,
+) -> str:
+    explicit = (api_name or "").strip()
+    if explicit:
+        return explicit
+    base_name = (contract_name or "").strip() or "IdentityRegistry"
+    normalized_address = (contract_address or "").strip()
+    if normalized_address and len(normalized_address) >= 6:
+        return f"{base_name}-{normalized_address[-6:]}"
+    return base_name
+
+
+def resolve_identity_api_base(
+    firefly_core_url: str | None,
+    contract_name: str | None = "IdentityRegistry",
+    contract_address: str | None = None,
+    api_name: str | None = None,
+    api_address: str | None = None,
+    namespace: str = "default",
+) -> str | None:
+    explicit = (api_address or "").strip()
+    if explicit:
+        return explicit
+    core = (firefly_core_url or "").strip()
+    if not core:
+        return None
+    return firefly_api_base(
+        core,
+        resolve_identity_api_name(contract_name, contract_address, api_name),
+        namespace=namespace,
+    )
+
+
 class IdentityContractFlow:
     def __init__(self, logger: logging.Logger | None = None):
         self.log = logger or logging.getLogger(__name__)
@@ -254,14 +290,15 @@ class IdentityContractFlow:
         if not selected_source_path:
             selected_source_path = sol_copy_path
 
-        compiler = SolidityCompiler(version=compiler_version or "0.8.19")
+        fixed_compiler_version = os.environ.get("ETHEREUM_FIXED_SOLC_VERSION", "0.8.19")
+        compiler = SolidityCompiler(version=fixed_compiler_version)
         source_hash = (
             self._hash_solidity_tree(uploaded_source_root)
             if source_mode == "archive"
             else self._hash_file(selected_source_path)
         )
         expected_meta = {
-            "compiler_version": compiler.version,
+            "compiler_version": fixed_compiler_version,
             "evm_version": compiler.evm_version,
             "source_mode": source_mode,
             "source_file": os.path.relpath(selected_source_path, contract_dir).replace("\\", "/"),

@@ -44,10 +44,15 @@ def extract_contract_info(
 
     # 查找匹配的合约
     contract_info = None
+    normalized_target = str(contract_name).strip()
+    exact_matches = []
     for name, info in contracts.items():
-        if contract_name in name or name.endswith(f":{contract_name}"):
-            contract_info = info
-            break
+        logical_name = name.split(":")[-1]
+        if logical_name == normalized_target:
+            exact_matches.append(info)
+
+    if exact_matches:
+        contract_info = exact_matches[0]
 
     if contract_info is None:
         available = ", ".join(contracts.keys())

@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Card, Row, Col, Button, Steps, Modal, Select, Tag, Collapse, Typography, Tabs } from "antd"
 import { useLocation, useNavigate } from "react-router-dom";
-import { retrieveBPMN, packageBpmn, uploadEthContract, compileEthContract, deployEthContract, updateBPMNStatus, updateBpmnEnv, updateBPMNFireflyUrl, updateBpmnEvents, generateBpmnArtifacts } from "@/api/externalResource"
+import { retrieveBPMN, packageBpmn, installBpmnEthContract, registerBpmnEthContract, updateBPMNStatus, updateBPMN, updateBpmnEnv, updateBPMNFireflyUrl, updateBpmnEvents, generateBpmnArtifacts } from "@/api/externalResource"
 import { getMessagesByBpmnContent } from "@/api/translator"
 import { useAvaliableEnvs, useBpmnDetailData } from "./hooks"
 import axios from "axios"
@@ -202,6 +202,18 @@ const BPMNOverview = () => {
     const onRegister = async () => {
         try {
             setButtonLoading(true);
+            if (currentEnvType === 'Ethereum') {
+                const res = await registerBpmnEthContract(
+                    bpmnId,
+                    currentConsortiumId || "1"
+                );
+                if (!res) {
+                    throw new Error("BPMN Ethereum register failed");
+                }
+                refetchBpmn();
+                setButtonLoading(false);
+                return;
+            }
             const bpmn = await retrieveBPMN(bpmnId)
 
             const contractName = bpmn.name.replace(".bpmn", "")
@@ -440,11 +452,9 @@ const BPMNOverview = () => {
         else if (status == 'Initiated') {
             return 'Deploy to Env';
         } else if (status == 'Compiled') {
-            // Compiled 状态显示 Install 按钮
-            return 'Install';
+            return 'Retry Install';
         } else if (status == 'Generated') {
-            // Generated 状态：Fabric 显示 Install，Ethereum 显示 Upload & Compile
-            return currentEnvType === 'Ethereum' ? 'Upload & Compile' : 'Install'
+            return 'Install'
         } else if (status == 'DeployEnved') {
             return 'Generate';
         }
@@ -454,25 +464,20 @@ const BPMNOverview = () => {
         setButtonLoading(true);
         try {
             if (currentEnvType === 'Ethereum') {
-                // Ethereum环境：上传并编译合约
-                // 1. 先上传合约
-                const uploadResult = await uploadEthContract(
-                    chainCodeContentForModify, // 传递合约代码内容
-                    currentOrgId,
+                await updateBPMN(
                     bpmnId,
+                    {
+                        chaincodeContent: chainCodeContentForModify,
+                        ffiContent: ffiContentForModify,
+                    },
                     currentConsortiumId || "1"
                 );
-
-                if (uploadResult && uploadResult.data) {
-                    // 2. 上传成功后立即编译
-                    const contractId = uploadResult.data.contract_id;
-                    await compileEthContract(
-                        contractId,
-                        currentOrgId,
-                        bpmnId,
-                        currentConsortiumId || "1"
-                    );
-                }
+                await installBpmnEthContract(
+                    bpmnId,
+                    currentOrgId,
+                    currentConsortiumId || "1",
+                    "default"
+                );
             } else {
                 // Fabric环境：打包链码
                 await packageBpmn(
@@ -485,7 +490,7 @@ const BPMNOverview = () => {
             }
             refetchBpmn();
         } catch (error) {
-            console.error('Package/Upload/Compile failed:', error);
+            console.error('Install/package failed:', error);
         } finally {
             setButtonLoading(false);
         }
@@ -633,36 +638,31 @@ const BPMNOverview = () => {
                                         // disabled={status == 'Initiated'}
                                         loading={buttonLoading}
                                         onClick={async () => {
-                                            if (status == 'Compiled') {
-                                                // Compiled 状态：调用部署方法
+                                            if (currentEnvType === 'Ethereum' && (status == 'Compiled' || status == 'Generated')) {
                                                 try {
                                                     setButtonLoading(true);
-                                                    const contractId = bpmn.ethereum_contract?.id;
-                                                    if (contractId) {
-                                                        await deployEthContract(
-                                                            contractId,
-                                                            currentEnvId,
-                                                            "default", // namespace
-                                                            [] // constructor_args
-                                                        );
-                                                        // 部署成功后更新 BPMN 状态为 Installed
-                                                        await updateBPMNStatus(bpmnId, "Installed");
-                                                        refetchBpmn();
-                                                    } else {
-                                                        console.error('Contract not found for this BPMN');
-                                                    }
+                                                    await updateBPMN(
+                                                        bpmnId,
+                                                        {
+                                                            chaincodeContent: chainCodeContentForModify || bpmn.chaincode_content,
+                                                            ffiContent: ffiContentForModify || bpmn.ffiContent,
+                                                        },
+                                                        currentConsortiumId || "1"
+                                                    );
+                                                    await installBpmnEthContract(
+                                                        bpmnId,
+                                                        currentOrgId,
+                                                        currentConsortiumId || "1",
+                                                        "default"
+                                                    );
+                                                    refetchBpmn();
                                                 } catch (error) {
                                                     console.error('Deploy failed:', error);
                                                 } finally {
                                                     setButtonLoading(false);
                                                 }
                                             } else if (status == 'Generated') {
-                                                // Generated 状态：根据环境类型执行不同操作
-                                                if (currentEnvType === 'Ethereum') {
-                                                    // Ethereum 环境：上传并编译（不部署）
-                                                    // 这部分逻辑已经在 handlePackage 中处理
-                                                    handlePackage();
-                                                } else {
+                                                if (currentEnvType !== 'Ethereum') {
                                                     // Fabric环境跳转到Package页面
                                                     navigate(`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/fabric/chaincode`)
                                                 }
@@ -702,14 +702,14 @@ const BPMNOverview = () => {
                     extra={
                         status !== 'Generated' && status !== 'Installed' && status !== 'Registered' ? (
                             <Button type="primary" onClick={handlePackage} loading={buttonLoading}>
-                                {currentEnvType === 'Ethereum' ? 'Upload & Compile' : 'Package'}
+                                {currentEnvType === 'Ethereum' ? 'Install' : 'Package'}
                             </Button>
                         ) : null
                     }
                 >
                     <Text type="secondary">
                         {currentEnvType === 'Ethereum'
-                            ? '生成动作已通过 backend 调用 NewTranslator。当前产物包含 DSL、Solidity 合约和 FFI；下一步需要 Upload & Compile。'
+                            ? '生成动作已通过 backend 调用 NewTranslator。当前产物包含 DSL、Solidity 合约和 FFI；下一步 Install 会走后端统一的上传、编译和 FireFly 部署链路。'
                             : '生成动作已通过 backend 调用 NewTranslator。当前产物包含 DSL、Go 链码和 FFI；下一步是 Package。'}
                     </Text>
                     <Tabs

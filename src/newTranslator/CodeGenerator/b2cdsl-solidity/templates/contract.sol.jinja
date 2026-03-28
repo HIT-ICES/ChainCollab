@@ -143,7 +143,6 @@ contract {{ contract_name }} {
 
     struct BusinessRule {
         bool exists;
-        string dmnContent;
         bytes32 hashOfDmn;
         string decisionId;
         bool callerRestricted;
@@ -204,6 +203,13 @@ contract {{ contract_name }} {
         uint256 indexed instanceId,
         BusinessRuleKey indexed ruleKey,
         bytes32 indexed requestId
+    );
+    event BusinessRuleDispatchRequested(
+        uint256 indexed instanceId,
+        BusinessRuleKey indexed ruleKey,
+        bytes32 indexed dmnHash,
+        string decisionId,
+        string inputData
     );
     event BusinessRuleCompleted(
         uint256 indexed instanceId,
@@ -330,7 +336,6 @@ contract {{ contract_name }} {
     ) internal {
         inst.businessRules[key] = BusinessRule({
             exists: true,
-            dmnContent: config.dmnContent,
             hashOfDmn: keccak256(bytes(config.dmnContent)),
             decisionId: config.decisionId,
             callerRestricted: config.callerRestricted,
@@ -341,6 +346,26 @@ contract {{ contract_name }} {
             fulfilledAt: 0,
             lastRawResult: ""
         });
+    }
+
+    // TODO: Replace dmnContent init payload with a registry/CID lookup so createInstance no longer
+    // needs to carry the full DMN XML in calldata. The off-chain worker should resolve hashOfDmn,
+    // call DMN_lite, and then bind the returned requestId through recordBusinessRuleRequest().
+    function recordBusinessRuleRequest(
+        uint256 instanceId,
+        BusinessRuleKey key,
+        bytes32 requestId
+    ) external onlyOwner onlyInitialized {
+        Instance storage inst = _getInstance(instanceId);
+        BusinessRule storage br = inst.businessRules[key];
+        require(br.exists, "business rule not set");
+        require(br.state == ElementState.WAITING_FOR_CONFIRMATION, "business rule not waiting");
+        require(requestId != bytes32(0), "request id not set");
+        require(br.requestId == bytes32(0), "business rule request already bound");
+
+        br.requestId = requestId;
+
+        emit BusinessRuleRequested(instanceId, key, requestId);
     }
 
     function _stringToInt(string memory value) internal pure returns (int256) {
@@ -636,6 +661,64 @@ contract {{ contract_name }} {
         currentInstanceId += 1;
     }
 
+    function getExecutionSnapshot(uint256 instanceId)
+        external
+        view
+        returns (
+            uint8[] memory messageStates,
+            string[] memory messageFireflyTranIds,
+            uint8[] memory gatewayStates,
+            uint8[] memory eventStates,
+            uint8[] memory businessRuleStates,
+            bytes32[] memory businessRuleRequestIds
+        )
+    {
+        Instance storage inst = _getInstance(instanceId);
+
+        messageStates = new uint8[]({{ messages|length if messages else 0 }});
+        messageFireflyTranIds = new string[]({{ messages|length if messages else 0 }});
+        {% for message in messages %}
+        {
+            Message storage m = inst.messages[MessageKey.{{ message.enum_name }}];
+            messageStates[{{ loop.index0 }}] = uint8(m.state);
+            messageFireflyTranIds[{{ loop.index0 }}] = m.fireflyTranId;
+        }
+        {% endfor %}
+
+        gatewayStates = new uint8[]({{ gateways|length if gateways else 0 }});
+        {% for gateway in gateways %}
+        {
+            Gateway storage g = inst.gateways[GatewayKey.{{ gateway.enum_name }}];
+            gatewayStates[{{ loop.index0 }}] = uint8(g.state);
+        }
+        {% endfor %}
+
+        eventStates = new uint8[]({{ (events|length if events else 0) + (oracle_tasks|length if oracle_tasks else 0) }});
+        {% for event in events %}
+        {
+            ActionEvent storage ev = inst.events[EventKey.{{ event.enum_name }}];
+            eventStates[{{ loop.index0 }}] = uint8(ev.state);
+        }
+        {% endfor %}
+        {% set event_count = events|length if events else 0 %}
+        {% for task in oracle_tasks %}
+        {
+            ActionEvent storage ev = inst.events[EventKey.{{ task.enum_name }}];
+            eventStates[{{ event_count + loop.index0 }}] = uint8(ev.state);
+        }
+        {% endfor %}
+
+        businessRuleStates = new uint8[]({{ business_rules|length if business_rules else 0 }});
+        businessRuleRequestIds = new bytes32[]({{ business_rules|length if business_rules else 0 }});
+        {% for rule in business_rules %}
+        {
+            BusinessRule storage br = inst.businessRules[BusinessRuleKey.{{ rule.enum_name }}];
+            businessRuleStates[{{ loop.index0 }}] = uint8(br.state);
+            businessRuleRequestIds[{{ loop.index0 }}] = br.requestId;
+        }
+        {% endfor %}
+    }
+
 {% if business_rules %}
 {% for rule in business_rules %}
     function {{ rule.enum_name }}(uint256 instanceId) external onlyInitialized {
@@ -645,7 +728,6 @@ contract {{ contract_name }} {
         require(br.state == ElementState.ENABLED, "business rule not enabled");
         _checkBusinessRuleCaller(inst, br);
 
-        IDmnLite dmnLite = IDmnLite(inst.dmnLiteAddress);
         string memory inputData = "{";
         {% for mapping in rule.input_mappings %}
         inputData = string.concat(
@@ -663,21 +745,19 @@ contract {{ contract_name }} {
         );
         {% endfor %}
         inputData = string.concat(inputData, "}");
-
-        bytes32 requestId = dmnLite.requestDMNDecision(
-            inst.dmnEvalUrl,
-            br.dmnContent,
-            br.decisionId,
-            inputData
-        );
-
-        br.requestId = requestId;
+        br.requestId = bytes32(0);
         br.requestedAt = block.timestamp;
         br.fulfilledAt = 0;
         br.lastRawResult = "";
         br.state = ElementState.WAITING_FOR_CONFIRMATION;
 
-        emit BusinessRuleRequested(instanceId, BusinessRuleKey.{{ rule.enum_name }}, requestId);
+        emit BusinessRuleDispatchRequested(
+            instanceId,
+            BusinessRuleKey.{{ rule.enum_name }},
+            br.hashOfDmn,
+            br.decisionId,
+            inputData
+        );
     }
 
     function {{ rule.enum_name }}_Continue(uint256 instanceId) external onlyInitialized {

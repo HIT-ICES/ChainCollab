@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from typing import Any
 
 from common.utils.http_client import post_json
@@ -225,14 +226,21 @@ def deploy_contract(
         "definition": abi,
         "input": constructor_args or [],
     }
+    effective_timeout = timeout or int(
+        os.environ.get("FIREFLY_CONTRACT_DEPLOY_TIMEOUT_SECONDS", "300")
+    )
+    request_timeout = os.environ.get("FIREFLY_REQUEST_TIMEOUT", "5m0s").strip()
+    headers = {"Content-Type": "application/json"}
+    if request_timeout:
+        headers["Request-Timeout"] = request_timeout
     suffix = "?confirm=true" if confirm else ""
     endpoint = f"http://{core_url}/api/v1/namespaces/{namespace}/contracts/deploy{suffix}"
     _log_request("deploy_contract", core_url, endpoint, {"namespace": namespace})
     status_code, body = post_json(
         endpoint,
-        headers={"Content-Type": "application/json"},
+        headers=headers,
         body=payload,
-        timeout=timeout,
+        timeout=effective_timeout,
         expected_status=(200, 201, 202),
     )
     body_payload = _response_payload(body)

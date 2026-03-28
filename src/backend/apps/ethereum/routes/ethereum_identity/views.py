@@ -14,6 +14,7 @@ from apps.infra.models import Firefly
 from apps.ethereum.models import EthereumIdentity, IdentityDeployment
 from apps.fabric.models import ResourceSet
 from apps.environment.models import EthEnvironment
+from common.lib.ethereum.identity_flow import resolve_identity_api_base
 from common.utils.test_time import timeitwithname
 from rest_framework.decorators import authentication_classes, permission_classes
 
@@ -32,10 +33,16 @@ class EthereumIdentityViewSet(viewsets.ViewSet):
         deployment = IdentityDeployment.objects.filter(
             eth_environment=eth_environment
         ).first()
-        if deployment and deployment.api_address:
-            return deployment.api_address
-        api_name = deployment.api_name if deployment and deployment.api_name else "IdentityRegistry"
-        return f"http://{system_firefly.core_url}/api/v1/namespaces/default/apis/{api_name}"
+        api_base = resolve_identity_api_base(
+            system_firefly.core_url,
+            deployment.contract_name if deployment else "IdentityRegistry",
+            deployment.contract_address if deployment else None,
+            deployment.api_name if deployment else None,
+            deployment.api_address if deployment else None,
+        )
+        if not api_base:
+            raise Exception("Identity API base is not available")
+        return api_base
 
     def _ensure_org_registered(
         self, api_base: str, org_name: str, org_admin_address: str

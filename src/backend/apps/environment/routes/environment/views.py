@@ -55,6 +55,10 @@ from apps.environment.services.task_runtime import (
     _ensure_idempotent_task_request,
     _start_task_async,
 )
+from common.lib.ethereum.identity_flow import (
+    resolve_identity_api_base,
+    resolve_identity_api_name,
+)
 
 LOG = logging.getLogger("api")
 
@@ -2979,14 +2983,18 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
             "firefly_core_url": firefly_core_url,
         }
         if deployment:
-            api_name = deployment.api_name or deployment.contract_name or "IdentityRegistry"
-            api_base = None
-            if deployment.api_address:
-                api_base = deployment.api_address
-            elif firefly_core_url:
-                api_base = (
-                    f"http://{firefly_core_url}/api/v1/namespaces/default/apis/{api_name}"
-                )
+            api_name = resolve_identity_api_name(
+                deployment.contract_name,
+                deployment.contract_address,
+                deployment.api_name,
+            )
+            api_base = resolve_identity_api_base(
+                firefly_core_url,
+                deployment.contract_name,
+                deployment.contract_address,
+                deployment.api_name,
+                deployment.api_address,
+            )
             response["deployment"] = {
                 "id": str(deployment.id),
                 "contract_name": deployment.contract_name,

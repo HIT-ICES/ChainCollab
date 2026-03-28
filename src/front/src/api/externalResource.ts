@@ -88,7 +88,7 @@ export const addBPMNInstance = async (bpmnId: string, name: string, currentEnvId
             name: name,
             env_id: currentEnvId
         })
-        return response.data;
+        return response.data?.data ?? response.data;
     } catch (error) {
         return null;
     }
@@ -179,6 +179,19 @@ export const updateBPMNInstanceFireflyUrl = async (bpmnInstanceId: string, bpmnI
     try {
         const response = await api.put(`/bpmns/${bpmnId}/bpmn-instances/${bpmnInstanceId}`, { firefly_url: fireflyUrl })
         return response.data;
+    } catch (error) {
+        return null;
+    }
+}
+
+export const updateBPMNInstance = async (
+    bpmnInstanceId: string,
+    bpmnId: string,
+    payload: Record<string, any>,
+) => {
+    try {
+        const response = await api.patch(`/bpmns/${bpmnId}/bpmn-instances/${bpmnInstanceId}`, payload)
+        return response.data?.data ?? response.data;
     } catch (error) {
         return null;
     }
@@ -281,6 +294,35 @@ export const compileEthContract = async (contractId: string, orgId: string, bpmn
             contractId: contractId,
             orgId: orgId
         })
+        return response.data;
+    } catch (error) {
+        return null;
+    }
+}
+
+export const installBpmnEthContract = async (
+    bpmnId: string,
+    orgId: string,
+    consortiumId: string = '1',
+    namespace: string = 'default',
+) => {
+    try {
+        const response = await api.post(`/consortiums/${consortiumId}/bpmns/${bpmnId}/install-eth`, {
+            orgId,
+            namespace,
+        })
+        return response.data;
+    } catch (error) {
+        return null;
+    }
+}
+
+export const registerBpmnEthContract = async (
+    bpmnId: string,
+    consortiumId: string = '1',
+) => {
+    try {
+        const response = await api.post(`/consortiums/${consortiumId}/bpmns/${bpmnId}/register-eth`)
         return response.data;
     } catch (error) {
         return null;

@@ -180,16 +180,18 @@ export const invokeBusinessRuleAction = async (coreUrl: string, contractName: st
     }
 }
 
-export const invokeMessageAction = async (coreUrl: string, contractName: string, methodName: any, data: any, instanceId: string, identity: string) => {
-    // debugger
+export const invokeMessageAction = async (coreUrl: string, contractName: string, methodName: any, data: any, instanceId: string, identity?: string) => {
     try {
-        const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/apis/${contractName}/invoke/${methodName}`, {
+        const payload: any = {
             "input": {
                 ...data.input,
                 "InstanceID": `${instanceId}`,
             },
-            "key": identity,
-        });
+        };
+        if (identity) {
+            payload.key = identity;
+        }
+        const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/apis/${contractName}/invoke/${methodName}`, payload);
         return res.data;
     } catch (error: any) {
         console.error("Error occurred while making post request:", error);

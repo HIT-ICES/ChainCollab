@@ -15,6 +15,8 @@ import shutil
 import zipfile
 
 logger = logging.getLogger(__name__)
+DEPLOY_TIMEOUT_SECONDS = int(os.environ.get("FIREFLY_CONTRACT_DEPLOY_TIMEOUT_SECONDS", "300"))
+FIXED_SOLC_VERSION = os.environ.get("ETHEREUM_FIXED_SOLC_VERSION", "0.8.19")
 
 from drf_yasg.utils import swagger_auto_schema
 from apps.api.config import ETHEREUM_CONTRACT_STORE
@@ -292,7 +294,7 @@ class EthereumContractViewSet(viewsets.ViewSet):
         version = str(request.data.get("version") or "").strip()
         language = str(request.data.get("language") or "solidity").strip() or "solidity"
         org_id = request.data.get("org_id")
-        compiler_version = str(request.data.get("compiler_version") or "").strip() or None
+        requested_compiler_version = str(request.data.get("compiler_version") or "").strip() or None
         requested_contract_name = str(request.data.get("contract_name") or "").strip() or None
         namespace = str(request.data.get("namespace") or "default").strip() or "default"
         constructor_args = request.data.get("constructor_args") or []
@@ -359,7 +361,7 @@ class EthereumContractViewSet(viewsets.ViewSet):
                 status="uploaded",
             )
 
-            compiler = SolidityCompiler(version=compiler_version or "0.8.19")
+            compiler = SolidityCompiler(version=FIXED_SOLC_VERSION)
             is_installed, version_or_error = compiler.check_installation()
             if not is_installed:
                 return Response(
@@ -410,7 +412,7 @@ class EthereumContractViewSet(viewsets.ViewSet):
                     namespace=namespace,
                     constructor_args=constructor_args,
                     confirm=True,
-                    timeout=120,
+                    timeout=DEPLOY_TIMEOUT_SECONDS,
                 )
             except RuntimeError as exc:
                 contract.status = "failed"
@@ -463,7 +465,7 @@ class EthereumContractViewSet(viewsets.ViewSet):
                         "contract_id": str(contract.id),
                         "name": contract.name,
                         "contract_name": requested_contract_name or compiled_contract_name,
-                        "compiler_version": compiler.version,
+                        "compiler_version": FIXED_SOLC_VERSION,
                         "contract_address": contract_address,
                         "transaction_hash": tx_hash,
                         "deployment_id": deployment_id,
@@ -539,7 +541,7 @@ class EthereumContractViewSet(viewsets.ViewSet):
                 )
 
             # Compile the contract using solc
-            compiler = SolidityCompiler()
+            compiler = SolidityCompiler(version=FIXED_SOLC_VERSION)
 
             # Check if solc is installed
             is_installed, version_or_error = compiler.check_installation()
@@ -1009,3 +1011,9 @@ class EthereumContractViewSet(viewsets.ViewSet):
             logger.error(f"Traceback: {traceback.format_exc()}")
             traceback.print_exc()
             return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
+        if requested_compiler_version and requested_compiler_version != FIXED_SOLC_VERSION:
+            logger.warning(
+                "Ignoring requested compiler version %s, fixed Solidity version is %s",
+                requested_compiler_version,
+                FIXED_SOLC_VERSION,
+            )

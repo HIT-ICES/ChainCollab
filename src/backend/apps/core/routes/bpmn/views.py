@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import time
 from pathlib import Path
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
@@ -34,8 +35,16 @@ from xml.etree import ElementTree as ET
 
 # from api.routes.bpmn  import BpmnCreateBody
 from rest_framework import viewsets, status
-from requests import get, post
+from requests import delete, get, post
 from apps.core.services import NewTranslatorClient, NewTranslatorError
+from common.lib.ethereum.identity_flow import IdentityContractFlow
+from common.lib.ethereum.firefly_contracts import (
+    abi_event_names,
+    api_base as firefly_api_base,
+    generate_ffi as firefly_generate_ffi,
+    normalize_ffi as firefly_normalize_ffi,
+    register_interface as firefly_register_interface,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -90,6 +99,29 @@ def _default_artifact_name(name: str) -> str:
     if sanitized[0].isdigit():
         sanitized = f"WorkflowContract_{sanitized}"
     return sanitized
+
+
+def _build_ff_datatype_payload(datatype_name: str, documentation: str) -> dict | None:
+    try:
+        data = json.loads(documentation or "{}")
+        properties = data.get("properties")
+        required = data.get("required")
+        if not properties:
+            return None
+        return {
+            "name": datatype_name,
+            "version": "1",
+            "value": {
+                "$id": "https://example.com/widget.schema.json",
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "title": "Widget",
+                "type": "object",
+                "properties": properties,
+                "required": required,
+            },
+        }
+    except Exception:
+        return None
 
 
 def _pick_seed_owner(consortium: Consortium, request_user):
@@ -761,8 +793,458 @@ class BPMNViewsSet(viewsets.ModelViewSet):
             logger.error(f"Stack trace: {traceback.format_exc()}")
             return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
+    @action(methods=["post"], detail=True, url_path="install-eth")
+    def install_eth(self, request, pk, *args, **kwargs):
+        """
+        Install an Ethereum BPMN contract via the unified eth-environment contracts/install flow:
+        upload source -> compile -> FireFly deploy.
+        """
+        import logging
+        import tempfile
+
+        logger = logging.getLogger(__name__)
+
+        try:
+            bpmn = BPMN.objects.get(pk=pk)
+            orgid = request.data.get("orgId")
+            namespace = request.data.get("namespace", "default")
+
+            if not orgid:
+                return Response(
+                    err("orgId is required"),
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            env_id = request.parser_context["kwargs"].get("environment_id")
+            if not env_id:
+                env_id = bpmn.eth_environment.id if bpmn.eth_environment else None
+            if not env_id:
+                env_id = bpmn.environment.id if bpmn.environment else None
+            if not env_id:
+                return Response(
+                    err("BPMN is not associated with any environment"),
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            contract_content = bpmn.chaincode_content
+            if not contract_content:
+                return Response(
+                    err("No generated Solidity contract content found for this BPMN."),
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            headers = request.headers
+            env_prefix = "eth-environments"
+            try:
+                if EthEnvironment.objects.filter(id=env_id).exists():
+                    env_prefix = "eth-environments"
+                elif Environment.objects.filter(id=env_id).exists():
+                    env_prefix = "environments"
+            except Exception as exc:
+                logger.warning("install_eth env type check failed: %s", exc)
+
+            contract_name = _default_artifact_name(bpmn.name)
+            contract_filename = f"{contract_name}.sol"
+            fixed_compiler_version = os.environ.get("ETHEREUM_FIXED_SOLC_VERSION", "0.8.19")
+
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                suffix=".sol",
+                delete=False,
+                encoding="utf-8",
+            ) as temp_file:
+                temp_file.write(contract_content)
+                temp_file_path = temp_file.name
+
+            try:
+                with open(temp_file_path, "rb") as file_obj:
+                    files = {"file": (contract_filename, file_obj, "text/plain")}
+                    response = post(
+                        f"http://{CURRENT_IP}:8000/api/v1/{env_prefix}/{env_id}/contracts/install",
+                        data={
+                            "name": Path(bpmn.name).stem,
+                            "version": "1.0",
+                            "language": "solidity",
+                            "compiler_version": fixed_compiler_version,
+                            "org_id": orgid,
+                            "namespace": namespace,
+                            "contract_name": contract_name,
+                            "constructor_args": json.dumps(
+                                ["0x0000000000000000000000000000000000000000"]
+                            ),
+                        },
+                        files=files,
+                        headers={"Authorization": headers["Authorization"]},
+                    )
+            finally:
+                if os.path.exists(temp_file_path):
+                    os.unlink(temp_file_path)
+
+            if response.status_code != 200:
+                logger.error("Failed to install BPMN ethereum contract: %s", response.text)
+                return Response(
+                    err(f"Failed to install ethereum contract: {response.text}"),
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            payload = response.json().get("data", {})
+            contract_id = payload.get("contract_id")
+            if not contract_id:
+                return Response(
+                    err("Missing contract_id from install response"),
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            eth_contract = EthereumContract.objects.get(id=contract_id)
+            bpmn.ethereum_contract = eth_contract
+            bpmn.chaincode_content = eth_contract.contract_content
+            bpmn.ffiContent = bpmn.ffiContent or "{}"
+            bpmn.status = "Installed" if eth_contract.contract_address else "Compiled"
+            bpmn.save()
+
+            return Response(
+                data=ok(
+                    {
+                        "message": "Ethereum contract installed successfully",
+                        "contract_id": contract_id,
+                        "contract_address": eth_contract.contract_address,
+                        "deployment_tx_hash": eth_contract.deployment_tx_hash,
+                        "status": bpmn.status,
+                    }
+                ),
+                status=status.HTTP_200_OK,
+            )
+        except BPMN.DoesNotExist:
+            return Response(err("BPMN not found"), status=status.HTTP_404_NOT_FOUND)
+        except EthereumContract.DoesNotExist:
+            return Response(err("Contract not found"), status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error in install_eth for BPMN {pk}: {str(e)}")
+            import traceback
+            logger.error(f"Stack trace: {traceback.format_exc()}")
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=["post"], detail=True, url_path="register-eth")
+    def register_eth(self, request, pk, *args, **kwargs):
+        """
+        Register an installed BPMN Ethereum contract with FireFly via backend orchestration.
+        This reuses the same backend-side FireFly registration approach as the identity contract flow.
+        """
+        try:
+            bpmn = BPMN.objects.get(pk=pk)
+            eth_env = bpmn.eth_environment
+            eth_contract = bpmn.ethereum_contract
+
+            if not eth_env:
+                return Response(
+                    err("BPMN is not associated with an Ethereum environment"),
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            if not eth_contract:
+                return Response(
+                    err("BPMN has no deployed Ethereum contract"),
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            if not eth_contract.contract_address:
+                return Response(
+                    err("Ethereum contract is not deployed yet"),
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            if not eth_contract.abi:
+                return Response(
+                    err("Ethereum contract ABI is missing"),
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            flow = IdentityContractFlow(logger=logger)
+            firefly_core_url = flow.get_firefly_core_url(eth_env)
+            contract_name = _default_artifact_name(bpmn.name)
+            # Use contract id + BPMN id + deployed address suffix so a redeploy creates a
+            # fresh FireFly API name instead of reusing an old registration bound to a stale address.
+            address_suffix = (
+                str(eth_contract.contract_address)[-6:]
+                if eth_contract.contract_address
+                else "pending"
+            )
+            unique_name = (
+                f"{contract_name}-{str(eth_contract.id)[:6]}-{str(bpmn.id)[:6]}-{address_suffix}"
+            )
+            expected_methods = {
+                item.get("name")
+                for item in (eth_contract.abi or [])
+                if isinstance(item, dict) and item.get("type") == "function" and item.get("name")
+            }
+
+            def _delete_existing_api_and_interface() -> None:
+                try:
+                    existing_apis = get(
+                        f"http://{firefly_core_url}/api/v1/namespaces/default/apis",
+                        params={"name": unique_name},
+                        timeout=30,
+                    )
+                    if existing_apis.status_code == 200:
+                        api_payload = existing_apis.json()
+                        api_items = (
+                            api_payload
+                            if isinstance(api_payload, list)
+                            else api_payload.get("apis") or api_payload.get("items") or []
+                        )
+                        for item in api_items:
+                            api_id = item.get("id")
+                            if not api_id:
+                                continue
+                            delete(
+                                f"http://{firefly_core_url}/api/v1/namespaces/default/apis/{api_id}",
+                                timeout=30,
+                            )
+                except Exception as exc:
+                    logger.warning("Failed to delete existing FireFly API for BPMN %s: %s", pk, exc)
+
+                interface_id = flow.find_identity_interface_id(firefly_core_url, unique_name)
+                if interface_id:
+                    try:
+                        delete(
+                            f"http://{firefly_core_url}/api/v1/namespaces/default/contracts/interfaces/{interface_id}",
+                            timeout=30,
+                        )
+                    except Exception as exc:
+                        logger.warning(
+                            "Failed to delete existing FireFly interface for BPMN %s: %s",
+                            pk,
+                            exc,
+                        )
+
+            try:
+                api_swagger = get(
+                    f"http://{firefly_core_url}/api/v1/namespaces/default/apis/{unique_name}/api/swagger.json",
+                    timeout=30,
+                )
+                if api_swagger.status_code == 200:
+                    swagger_payload = api_swagger.json()
+                    paths = swagger_payload.get("paths") or {}
+                    registered_methods = {
+                        path.split("/")[-1]
+                        for path in paths.keys()
+                        if path.startswith("/invoke/") or path.startswith("/query/")
+                    }
+                    if expected_methods and not expected_methods.issubset(registered_methods):
+                        logger.warning(
+                            "FireFly API methods mismatch for BPMN %s api=%s expected=%s actual=%s; recreating registration",
+                            pk,
+                            unique_name,
+                            sorted(expected_methods),
+                            sorted(registered_methods),
+                        )
+                        _delete_existing_api_and_interface()
+            except Exception as exc:
+                logger.warning("Failed to inspect existing FireFly API for BPMN %s: %s", pk, exc)
+
+            # Translator-produced FFI is useful for UI display, but it is not guaranteed to
+            # satisfy FireFly's stricter schema requirements for Solidity parameters. For
+            # Ethereum registration, always regenerate FFI from ABI and only fall back to a
+            # local ABI->schema conversion if FireFly generation fails.
+            try:
+                ffi = firefly_generate_ffi(
+                    firefly_core_url,
+                    eth_contract.abi,
+                    name=unique_name,
+                    namespace="default",
+                    version="1.0",
+                    description=f"{unique_name} contract interface",
+                )
+            except Exception:
+                ffi = flow.build_identity_ffi(eth_contract.abi, unique_name)
+
+            ffi["name"] = unique_name
+            ffi["namespace"] = "default"
+            ffi["version"] = ffi.get("version") or "1.0"
+            ffi = firefly_normalize_ffi(ffi, version_suffix="1")
+
+            interface_id = flow.find_identity_interface_id(firefly_core_url, unique_name)
+            if not interface_id:
+                status_code, payload = firefly_register_interface(
+                    firefly_core_url,
+                    ffi,
+                    namespace="default",
+                    confirm=True,
+                )
+                if status_code not in [200, 201, 202]:
+                    if isinstance(payload, dict) and str(payload.get("error", "")).startswith("FF10127"):
+                        interface_id = flow.find_identity_interface_id(firefly_core_url, unique_name)
+                    if not interface_id:
+                        raise Exception(
+                            f"FireFly FFI registration failed with status {status_code}: {str(payload)[:500]}"
+                        )
+                else:
+                    interface_id = payload.get("id") or (payload.get("interface") or {}).get("id")
+
+            if not interface_id:
+                raise Exception("Unable to resolve FireFly interface id")
+
+            api_response = flow.register_identity_api(
+                firefly_core_url,
+                interface_id,
+                eth_contract.contract_address,
+                unique_name,
+            )
+
+            def _extract_ff_scalar(payload):
+                if isinstance(payload, dict):
+                    if "output" in payload:
+                        return _extract_ff_scalar(payload.get("output"))
+                    if "ret0" in payload:
+                        return payload.get("ret0")
+                    if len(payload) == 1:
+                        return _extract_ff_scalar(next(iter(payload.values())))
+                return payload
+
+            def _ensure_contract_initialized() -> None:
+                query_url = (
+                    f"http://{firefly_core_url}/api/v1/namespaces/default/apis/"
+                    f"{unique_name}/query/isInited"
+                )
+                invoke_url = (
+                    f"http://{firefly_core_url}/api/v1/namespaces/default/apis/"
+                    f"{unique_name}/invoke/initLedger"
+                )
+                headers = {"Content-Type": "application/json"}
+
+                last_error = None
+                for _ in range(5):
+                    try:
+                        query_response = post(
+                            query_url,
+                            headers=headers,
+                            data=json.dumps({"input": {}}),
+                            timeout=30,
+                        )
+                        if query_response.status_code == 200:
+                            payload = query_response.json()
+                            if bool(_extract_ff_scalar(payload)) is True:
+                                return
+                        invoke_response = post(
+                            invoke_url,
+                            headers=headers,
+                            data=json.dumps({"input": {}}),
+                            timeout=30,
+                        )
+                        if invoke_response.status_code in [200, 201, 202]:
+                            return
+                        error_text = invoke_response.text[:500]
+                        if "already initialized" in error_text:
+                            return
+                        last_error = error_text
+                    except Exception as exc:
+                        last_error = str(exc)
+                    time.sleep(1)
+                raise Exception(
+                    f"Failed to initialize BPMN Ethereum contract via initLedger: {last_error}"
+                )
+
+            _ensure_contract_initialized()
+            listeners = flow.register_identity_listeners(
+                firefly_core_url,
+                interface_id,
+                eth_contract.contract_address,
+                unique_name,
+                eth_contract.abi,
+            )
+
+            for listener in listeners:
+                payload = listener.get("payload") or {}
+                listener_id = payload.get("id")
+                listener_name = listener.get("name")
+                if not listener_id or not listener_name:
+                    continue
+                subscription_response = post(
+                    f"http://{firefly_core_url}/api/v1/namespaces/default/subscriptions",
+                    headers={"Content-Type": "application/json"},
+                    data=json.dumps(
+                        {
+                            "namespace": "default",
+                            "name": listener_name,
+                            "transport": "websockets",
+                            "filter": {
+                                "events": "blockchain_event_received",
+                                "blockchainevent": {"listener": listener_id},
+                            },
+                            "options": {"firstEvent": "oldest"},
+                        }
+                    ),
+                    timeout=30,
+                )
+                if subscription_response.status_code not in [200, 201, 202, 409]:
+                    logger.warning(
+                        "Failed to create FireFly subscription for BPMN %s listener %s: %s",
+                        bpmn.id,
+                        listener_name,
+                        subscription_response.text[:300],
+                    )
+
+            try:
+                messages = NewTranslatorClient().get_messages(bpmn.bpmnContent)
+            except NewTranslatorError:
+                messages = {}
+            if isinstance(messages, dict):
+                for key, msg in messages.items():
+                    documentation = ""
+                    if isinstance(msg, dict):
+                        documentation = msg.get("documentation") or ""
+                    datatype_payload = _build_ff_datatype_payload(
+                        f"{contract_name}_{key}",
+                        documentation,
+                    )
+                    if not datatype_payload:
+                        continue
+                    datatype_response = post(
+                        f"http://{firefly_core_url}/api/v1/namespaces/default/datatypes",
+                        headers={"Content-Type": "application/json"},
+                        data=json.dumps(datatype_payload),
+                        timeout=30,
+                    )
+                    if datatype_response.status_code not in [200, 201, 202, 409]:
+                        logger.warning(
+                            "Failed to register datatype for BPMN %s message %s: %s",
+                            bpmn.id,
+                            key,
+                            datatype_response.text[:300],
+                        )
+
+            firefly_url = firefly_api_base(firefly_core_url, unique_name, namespace="default")
+            event_names = abi_event_names(eth_contract.abi)
+
+            bpmn.ffiContent = json.dumps(ffi, indent=2)
+            bpmn.firefly_url = firefly_url
+            bpmn.events = ",".join(event_names)
+            bpmn.status = "Registered"
+            bpmn.save(update_fields=["ffiContent", "firefly_url", "events", "status"])
+
+            return Response(
+                data=ok(
+                    {
+                        "interface_id": interface_id,
+                        "api_id": api_response.get("id"),
+                        "api_name": unique_name,
+                        "firefly_url": firefly_url,
+                        "listeners": listeners,
+                        "events": event_names,
+                        "status": bpmn.status,
+                    }
+                ),
+                status=status.HTTP_200_OK,
+            )
+        except BPMN.DoesNotExist:
+            return Response(err("BPMN not found"), status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error("Error in register_eth for BPMN %s: %s", pk, e)
+            import traceback
+            logger.error("Stack trace: %s", traceback.format_exc())
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
+
 
 class BPMNInstanceViewSet(viewsets.ModelViewSet):
+    queryset = BPMNInstance.objects.all()
+    serializer_class = BpmnInstanceSerializer
 
     def create(self, request, *args, **kwargs):
         """

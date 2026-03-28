@@ -53,6 +53,7 @@ import {
 	fireflyFileTransfer,
 	fireflyDataTransfer,
 	invokeMessageAction,
+	callFireflyContract,
 } from "@/api/executionAPI.ts";
 
 type ActionPhase = "start" | "success" | "error";
@@ -189,7 +190,7 @@ const InputComponentForMessage = ({
 				methodName,
 				{},
 				instanceId,
-				the_identity.identity.data[0].value,
+				the_identity?.identity?.data?.[0]?.value,
 			);
 			onActionRecord?.({
 				traceId,
@@ -431,7 +432,7 @@ const InputComponentForMessage = ({
 					},
 				},
 				instanceId,
-				the_identity.identity.data[0].value,
+				the_identity?.identity?.data?.[0]?.value,
 			);
 			output_obj["invoke_id"] = res2.id;
 			output_obj["invoke_start_time"] = res2.created;
@@ -979,8 +980,17 @@ const IdentitySelector = ({ identity, setIdentity }) => {
 	// 1. get all membership and participant based on user identity
 	const [currentMembership, setCurrentMembership] = useState("");
 	const [availableIdentities, isLoading, refetch] = useAvailableIdentity();
+	const normalizedIdentities = Array.isArray(availableIdentities)
+		? availableIdentities
+		: [];
 
-	if (isLoading || !availableIdentities) {
+	useEffect(() => {
+		if (!currentMembership && normalizedIdentities.length > 0) {
+			setCurrentMembership(normalizedIdentities[0].membership_id);
+		}
+	}, [currentMembership, normalizedIdentities]);
+
+	if (isLoading) {
 		return <div>Loading</div>;
 	}
 
@@ -997,9 +1007,9 @@ const IdentitySelector = ({ identity, setIdentity }) => {
 				value={currentMembership}
 				style={{ width: 200 }}
 			>
-				{availableIdentities.map((item) => {
+				{normalizedIdentities.map((item) => {
 					return (
-						<Select.Option key={item.membership_id} value={item.memebership_id}>
+						<Select.Option key={item.membership_id} value={item.membership_id}>
 							{item.membership_name}
 						</Select.Option>
 					);
@@ -1010,9 +1020,12 @@ const IdentitySelector = ({ identity, setIdentity }) => {
 				style={{ width: 200 }}
 				value={identity.idInFirefly}
 				onChange={async (value) => {
-					const the_one = availableIdentities
+					const the_one = normalizedIdentities
 						.find((item) => item.membership_id === currentMembership)
 						?.identities.find((item) => item.firefly_identity_id === value);
+					if (!the_one) {
+						return;
+					}
 					const identity = await getFireflyIdentity(
 						"http://" + the_one.core_url,
 						value,
@@ -1028,7 +1041,7 @@ const IdentitySelector = ({ identity, setIdentity }) => {
 					});
 				}}
 			>
-				{availableIdentities
+				{normalizedIdentities
 					.find((item) => item.membership_id === currentMembership)
 					?.identities.map((item) => {
 						return (
@@ -1041,6 +1054,725 @@ const IdentitySelector = ({ identity, setIdentity }) => {
 						);
 					})}
 			</Select>
+		</div>
+	);
+};
+
+const inferEthereumParamType = (param: any) => {
+	const raw = String(
+		param?.schema?.details?.type ||
+			param?.schema?.type ||
+			param?.type ||
+			param?.internalType ||
+			"",
+	).toLowerCase();
+	if (raw.includes("bool")) return "boolean";
+	if (raw.includes("int")) return "number";
+	return "string";
+};
+
+const buildEthereumMethodPayload = (method: any, instanceId: any) => {
+	const payload: Record<string, any> = {};
+	for (const param of method?.params || []) {
+		const name = param?.name;
+		if (!name) continue;
+		if (name === "instanceId" || name === "InstanceID") {
+			payload[name] = Number(instanceId || 0);
+			continue;
+		}
+		if (name.toLowerCase().includes("fireflytran")) {
+			payload[name] = `ff-${Date.now()}`;
+			continue;
+		}
+		const kind = inferEthereumParamType(param);
+		payload[name] = kind === "number" ? 0 : kind === "boolean" ? false : "";
+	}
+	return payload;
+};
+
+const getEthereumEnumIds = (methods: any[]) => {
+	const messageIds = methods
+		.filter((method: any) => /^Message_.+_Send$/.test(method?.name || ""))
+		.map((method: any) => String(method.name).replace(/_Send$/, ""));
+	const gatewayIds = methods
+		.filter((method: any) => /^Gateway_/.test(method?.name || ""))
+		.map((method: any) => String(method.name));
+	const eventIds = methods
+		.filter((method: any) => /^Event_/.test(method?.name || ""))
+		.map((method: any) => String(method.name));
+	const businessRuleIds = methods
+		.filter(
+			(method: any) =>
+				/^Activity_/.test(method?.name || "") &&
+				!String(method.name).endsWith("_Continue"),
+		)
+		.map((method: any) => String(method.name));
+	return {
+		messageIds,
+		gatewayIds,
+		eventIds,
+		businessRuleIds,
+	};
+};
+
+const normalizeArray = (value: any): any[] => {
+	if (Array.isArray(value)) {
+		return value;
+	}
+	if (value == null) {
+		return [];
+	}
+	if (typeof value === "object") {
+		if (Array.isArray(value.value)) {
+			return value.value;
+		}
+		if (Array.isArray(value.items)) {
+			return value.items;
+		}
+	}
+	return [];
+};
+
+const extractSnapshotOutput = (response: any) => {
+	const output = response?.output ?? response?.data?.output ?? response?.data ?? response ?? {};
+	return {
+		messageStates: normalizeArray(
+			output?.messageStates ?? output?.MessageStates ?? output?.ret0,
+		),
+		messageFireflyTranIds: normalizeArray(
+			output?.messageFireflyTranIds ??
+				output?.MessageFireflyTranIds ??
+				output?.ret1,
+		),
+		gatewayStates: normalizeArray(
+			output?.gatewayStates ?? output?.GatewayStates ?? output?.ret2,
+		),
+		eventStates: normalizeArray(
+			output?.eventStates ?? output?.EventStates ?? output?.ret3,
+		),
+		businessRuleStates: normalizeArray(
+			output?.businessRuleStates ?? output?.BusinessRuleStates ?? output?.ret4,
+		),
+		businessRuleRequestIds: normalizeArray(
+			output?.businessRuleRequestIds ??
+				output?.BusinessRuleRequestIds ??
+				output?.ret5,
+		),
+	};
+};
+
+const toNumericState = (value: any) => {
+	if (typeof value === "number") return value;
+	if (typeof value === "string" && value !== "") {
+		const parsed = Number(value);
+		return Number.isNaN(parsed) ? 0 : parsed;
+	}
+	return 0;
+};
+
+const buildEthereumExecutionElements = (
+	methods: any[],
+	snapshot: ReturnType<typeof extractSnapshotOutput>,
+) => {
+	const enumIds = getEthereumEnumIds(methods);
+	const messageElements = enumIds.messageIds.map((id, index) => ({
+		type: "message",
+		MessageID: id,
+		state: toNumericState(snapshot.messageStates[index]),
+		FireflyTranID: String(snapshot.messageFireflyTranIds[index] ?? ""),
+	}));
+	const gatewayElements = enumIds.gatewayIds.map((id, index) => ({
+		type: "gateway",
+		GatewayID: id,
+		state: toNumericState(snapshot.gatewayStates[index]),
+	}));
+	const eventElements = enumIds.eventIds.map((id, index) => ({
+		type: "event",
+		EventID: id,
+		state: toNumericState(snapshot.eventStates[index]),
+	}));
+	const businessRuleElements = enumIds.businessRuleIds.map((id, index) => ({
+		type: "businessRule",
+		BusinessRuleID: id,
+		state: toNumericState(snapshot.businessRuleStates[index]),
+		RequestID: String(snapshot.businessRuleRequestIds[index] ?? ""),
+	}));
+	return [
+		...messageElements,
+		...eventElements,
+		...gatewayElements,
+		...businessRuleElements,
+	];
+};
+
+const buildSvgStyleForElements = (
+	elementList: any[],
+	actionRecords: ActionRecord[],
+) => {
+	const latestActionStatus = actionRecords.reduce((acc, item) => {
+		if (!item.elementId || acc[item.elementId]) return acc;
+		acc[item.elementId] = item.status;
+		return acc;
+	}, {} as Record<string, string>);
+	const palette = {
+		0: { fill: "#f1f5f9", stroke: "#cbd5e1", opacity: 0.65 },
+		1: { fill: "#dbeafe", stroke: "#2563eb", opacity: 0.95 },
+		2: { fill: "#fef3c7", stroke: "#d97706", opacity: 0.95 },
+		3: { fill: "#dcfce7", stroke: "#16a34a", opacity: 0.95 },
+	} as Record<number, { fill: string; stroke: string; opacity: number }>;
+
+	const styles = { "& svg": {} as Record<string, any> };
+	elementList.forEach((item) => {
+		const elementId = getElementId(item);
+		if (!elementId) return;
+		const selector = `& g[data-element-id="${elementId}"]`;
+		const stateStyle = palette[item.state] || palette[0];
+		const actionStyle = latestActionStatus[elementId];
+		const fill =
+			actionStyle === "failed"
+				? "#fee2e2"
+				: actionStyle === "running"
+				? "#e0f2fe"
+				: stateStyle.fill;
+		const stroke =
+			actionStyle === "failed"
+				? "#dc2626"
+				: actionStyle === "running"
+				? "#0284c7"
+				: stateStyle.stroke;
+		styles["& svg"][selector] = {
+			"& path, & polygon, & circle, & rect, & ellipse": {
+				fill: `${fill} !important`,
+				stroke: `${stroke} !important`,
+				strokeWidth: actionStyle === "running" ? "3px" : "2px",
+				opacity: stateStyle.opacity,
+				transition: "all 180ms ease",
+				filter:
+					actionStyle === "running"
+						? "drop-shadow(0 0 8px rgba(14,165,233,0.35))"
+						: actionStyle === "failed"
+						? "drop-shadow(0 0 8px rgba(220,38,38,0.25))"
+						: "none",
+				strokeDasharray: actionStyle === "running" ? "5 3" : "none",
+			},
+			"& text": {
+				fontWeight: item.state === 1 || item.state === 2 ? 600 : 500,
+			},
+		};
+	});
+	return styles;
+};
+
+const getEthereumActionConfig = (
+	element: any,
+	instanceId: number,
+	messageInputs: Record<string, string>,
+) => {
+	if (element?.type === "message" && element?.state === 1) {
+		return {
+			type: "message" as const,
+			label: "Send",
+			method: `${element.MessageID}_Send`,
+			payload: {
+				instanceId,
+				fireflyTranId:
+					messageInputs[element.MessageID] || `ff-${Date.now()}`,
+			},
+		};
+	}
+	if (element?.type === "gateway" && element?.state === 1) {
+		return {
+			type: "gateway" as const,
+			label: "Execute",
+			method: element.GatewayID,
+			payload: { instanceId },
+		};
+	}
+	if (element?.type === "event" && element?.state === 1) {
+		return {
+			type: "event" as const,
+			label: "Execute",
+			method: element.EventID,
+			payload: { instanceId },
+		};
+	}
+	if (element?.type === "businessRule" && element?.state === 1) {
+		return {
+			type: "businessRule" as const,
+			label: "Request DMN",
+			method: element.BusinessRuleID,
+			payload: { instanceId },
+		};
+	}
+	if (element?.type === "businessRule" && element?.state === 2) {
+		return {
+			type: "businessRule" as const,
+			label: "Continue",
+			method: `${element.BusinessRuleID}_Continue`,
+			payload: { instanceId },
+		};
+	}
+	return null;
+};
+
+const EthereumExecutionView = ({
+	bpmnData,
+	bpmnInstance,
+	contractMethodDes,
+	onActionRecord,
+	actionRecords = [],
+}: {
+	bpmnData: any;
+	bpmnInstance: any;
+	contractMethodDes: any;
+	onActionRecord?: (event: ActionRecordEvent) => void;
+	actionRecords?: ActionRecord[];
+}) => {
+	const apiBaseUrl = bpmnData?.firefly_url || "";
+	const methods = Array.isArray(contractMethodDes?.methods)
+		? contractMethodDes.methods
+		: [];
+	const instanceId = Number(bpmnInstance?.instance_chaincode_id ?? 0);
+	const executableMethods = methods.filter((method: any) => {
+		const name = method?.name || "";
+		return (
+			name.startsWith("Message_") ||
+			name.startsWith("Gateway_") ||
+			name.startsWith("Event_") ||
+			name.startsWith("Activity_")
+		);
+	});
+	const inspectMethods = methods.filter((method: any) => {
+		const name = method?.name || "";
+		return !(
+			name === "createInstance" ||
+			name === "initLedger" ||
+			name === "setOracle"
+		);
+	});
+	const defaultMethodName =
+		executableMethods[0]?.name ||
+		inspectMethods[0]?.name ||
+		"";
+	const [selectedMethod, setSelectedMethod] = useState(defaultMethodName);
+	const [payloadText, setPayloadText] = useState("{}");
+	const [resultText, setResultText] = useState("");
+	const [requestMode, setRequestMode] = useState<"invoke" | "query">("invoke");
+	const [running, setRunning] = useState(false);
+	const [snapshotLoading, setSnapshotLoading] = useState(false);
+	const [snapshotError, setSnapshotError] = useState<string | null>(null);
+	const [snapshotElements, setSnapshotElements] = useState<any[]>([]);
+	const [messageInputs, setMessageInputs] = useState<Record<string, string>>({});
+	const [svgStyle, setSvgStyle] = useState({});
+
+	useEffect(() => {
+		const method =
+			methods.find((item: any) => item?.name === selectedMethod) || null;
+		if (!method) {
+			setPayloadText("{}");
+			return;
+		}
+		const payload = buildEthereumMethodPayload(
+			method,
+			bpmnInstance?.instance_chaincode_id,
+		);
+		setPayloadText(JSON.stringify(payload, null, 2));
+	}, [selectedMethod, methods, bpmnInstance?.instance_chaincode_id]);
+
+	useEffect(() => {
+		if (!selectedMethod && defaultMethodName) {
+			setSelectedMethod(defaultMethodName);
+		}
+	}, [selectedMethod, defaultMethodName]);
+
+	const refreshSnapshot = async () => {
+		if (!apiBaseUrl) {
+			setSnapshotError("Execution API is not ready");
+			setSnapshotElements([]);
+			return;
+		}
+		if (!Number.isFinite(instanceId)) {
+			setSnapshotError("Instance id is invalid");
+			setSnapshotElements([]);
+			return;
+		}
+		setSnapshotLoading(true);
+		setSnapshotError(null);
+		try {
+			const response = await callFireflyContract(
+				apiBaseUrl,
+				"getExecutionSnapshot",
+				{ instanceId },
+				"query",
+			);
+			const snapshot = extractSnapshotOutput(response);
+			const elements = buildEthereumExecutionElements(methods, snapshot);
+			setSnapshotElements(elements);
+		} catch (error: any) {
+			const errorText = String(error?.message || error || "Snapshot query failed");
+			setSnapshotError(errorText);
+			setSnapshotElements([]);
+		} finally {
+			setSnapshotLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		refreshSnapshot();
+	}, [apiBaseUrl, instanceId, methods.length]);
+
+	useEffect(() => {
+		setSvgStyle(buildSvgStyleForElements(snapshotElements, actionRecords));
+	}, [snapshotElements, actionRecords]);
+
+	const stateCounter = snapshotElements.reduce(
+		(acc, item) => {
+			const state = Number(item?.state ?? 0);
+			if (state === 1) acc.ready += 1;
+			else if (state === 2) acc.confirm += 1;
+			else if (state === 3) acc.done += 1;
+			else acc.disabled += 1;
+			return acc;
+		},
+		{ disabled: 0, ready: 0, confirm: 0, done: 0 },
+	);
+	const actionableElements = snapshotElements.filter((item) =>
+		Boolean(getEthereumActionConfig(item, instanceId, messageInputs)),
+	);
+
+	const invokeElementAction = async (element: any) => {
+		const config = getEthereumActionConfig(element, instanceId, messageInputs);
+		if (!config) {
+			message.info("No executable action for current state");
+			return;
+		}
+		const traceId = createTraceId(`eth-${config.type}`);
+		onActionRecord?.({
+			traceId,
+			phase: "start",
+			type: config.type,
+			action: config.method,
+			elementId: getElementId(element),
+			detail: `${config.label} started`,
+			payload: config.payload,
+		});
+		try {
+			const response = await callFireflyContract(
+				apiBaseUrl,
+				config.method,
+				config.payload,
+				"invoke",
+			);
+			setResultText(JSON.stringify(response, null, 2));
+			onActionRecord?.({
+				traceId,
+				phase: "success",
+				type: config.type,
+				action: config.method,
+				elementId: getElementId(element),
+				detail: `${config.label} success`,
+				payload: response,
+				txId: response?.tx,
+			});
+			await refreshSnapshot();
+			message.success(`${config.label} success`);
+		} catch (error: any) {
+			const errorText = String(error?.message || error || "Action failed");
+			setResultText(errorText);
+			onActionRecord?.({
+				traceId,
+				phase: "error",
+				type: config.type,
+				action: config.method,
+				elementId: getElementId(element),
+				detail: `${config.label} failed`,
+				error: errorText,
+			});
+			message.error(errorText);
+		}
+	};
+
+	const invokeMethod = async () => {
+		if (!apiBaseUrl || !selectedMethod) {
+			message.error("Execution API is not ready");
+			return;
+		}
+		let payload: Record<string, any> = {};
+		try {
+			payload = payloadText.trim() ? JSON.parse(payloadText) : {};
+		} catch (error) {
+			message.error("Payload JSON is invalid");
+			return;
+		}
+		const traceId = createTraceId(`eth-${requestMode}`);
+		onActionRecord?.({
+			traceId,
+			phase: "start",
+			type: "message",
+			action: selectedMethod,
+			elementId: selectedMethod,
+			detail: `Ethereum ${requestMode}`,
+			payload,
+		});
+		setRunning(true);
+		try {
+			const response = await callFireflyContract(
+				apiBaseUrl,
+				selectedMethod,
+				payload,
+				requestMode,
+			);
+			setResultText(JSON.stringify(response, null, 2));
+			onActionRecord?.({
+				traceId,
+				phase: "success",
+				type: "message",
+				action: selectedMethod,
+				elementId: selectedMethod,
+				detail: `Ethereum ${requestMode} success`,
+				payload: response,
+				txId: response?.tx,
+			});
+			message.success(`${requestMode} ${selectedMethod} success`);
+		} catch (error: any) {
+			const errorText = String(error?.message || error || "Unknown error");
+			setResultText(errorText);
+			onActionRecord?.({
+				traceId,
+				phase: "error",
+				type: "message",
+				action: selectedMethod,
+				elementId: selectedMethod,
+				detail: `Ethereum ${requestMode} failed`,
+				error: errorText,
+			});
+			message.error(errorText);
+		} finally {
+			setRunning(false);
+		}
+	};
+
+	return (
+		<div>
+			<Alert
+				type="info"
+				showIcon
+				message="Ethereum Execution"
+				description="This page uses the BPMN's registered FireFly API directly. State is rendered from getExecutionSnapshot(instanceId)."
+				style={{ marginBottom: 12 }}
+			/>
+			<div
+				style={{
+					display: "flex",
+					flexWrap: "wrap",
+					gap: 12,
+					marginBottom: 12,
+				}}
+			>
+				<Tag color="blue">Instance: {bpmnInstance?.instance_chaincode_id ?? "-"}</Tag>
+				<Tag color="purple">API: {apiBaseUrl || "-"}</Tag>
+				<Tag color="cyan">Methods: {methods.length}</Tag>
+				<Tag color="processing">Ready: {stateCounter.ready}</Tag>
+				<Tag color="orange">Waiting: {stateCounter.confirm}</Tag>
+				<Tag color="success">Done: {stateCounter.done}</Tag>
+				<Tag color="default">Disabled: {stateCounter.disabled}</Tag>
+				<Tag color="geekblue">Actionable: {actionableElements.length}</Tag>
+				<Button size="small" loading={snapshotLoading} onClick={refreshSnapshot}>
+					Refresh Snapshot
+				</Button>
+			</div>
+			{snapshotError ? (
+				<Alert
+					type="warning"
+					showIcon
+					message="Snapshot query failed"
+					description={snapshotError}
+					style={{ marginBottom: 12 }}
+				/>
+			) : null}
+			<div
+				style={{
+					display: "grid",
+					gridTemplateColumns: "minmax(320px, 420px) 1fr",
+					gap: 16,
+					alignItems: "start",
+				}}
+			>
+				<div
+					style={{
+						padding: 12,
+						border: "1px solid #e2e8f0",
+						borderRadius: 10,
+						background: "#fff",
+					}}
+				>
+					<Space direction="vertical" style={{ width: "100%" }} size={12}>
+						<div>
+							<Typography.Text strong>Actionable Elements</Typography.Text>
+							<div style={{ marginTop: 8, display: "grid", gap: 10 }}>
+								{actionableElements.length === 0 ? (
+									<Typography.Text type="secondary">
+										No actionable element in current snapshot.
+									</Typography.Text>
+								) : (
+									actionableElements.map((element) => {
+										const config = getEthereumActionConfig(
+											element,
+											instanceId,
+											messageInputs,
+										);
+										if (!config) return null;
+										const elementId = getElementId(element);
+										return (
+											<div
+												key={`${element.type}-${elementId}`}
+												style={{
+													padding: 10,
+													border: "1px solid #e2e8f0",
+													borderRadius: 8,
+													background: "#f8fafc",
+												}}
+											>
+												<Space wrap size={8}>
+													<Tag color="blue">{element.type}</Tag>
+													<Tag color="purple">{element.state}</Tag>
+													<Typography.Text strong>{elementId}</Typography.Text>
+												</Space>
+												{element.type === "message" ? (
+													<div style={{ marginTop: 8 }}>
+														<Typography.Text type="secondary">
+															fireflyTranId
+														</Typography.Text>
+														<Input
+															style={{ marginTop: 4 }}
+															value={
+																messageInputs[element.MessageID] ||
+																`ff-${instanceId}-${element.MessageID}`
+															}
+															onChange={(event) =>
+																setMessageInputs((prev) => ({
+																	...prev,
+																	[element.MessageID]: event.target.value,
+																}))
+															}
+														/>
+													</div>
+												) : null}
+												{element.type === "businessRule" && element.RequestID ? (
+													<div style={{ marginTop: 8 }}>
+														<Typography.Text type="secondary">
+															RequestID: {element.RequestID}
+														</Typography.Text>
+													</div>
+												) : null}
+												<Button
+													style={{ marginTop: 8 }}
+													type="primary"
+													onClick={() => invokeElementAction(element)}
+												>
+													{config.label}
+												</Button>
+											</div>
+										);
+									})
+								)}
+							</div>
+						</div>
+						<div>
+							<Typography.Text type="secondary">Advanced Action Method</Typography.Text>
+							<Select
+								style={{ width: "100%", marginTop: 4 }}
+								value={selectedMethod}
+								onChange={setSelectedMethod}
+								options={executableMethods.map((item: any) => ({
+									label: item.name,
+									value: item.name,
+								}))}
+							/>
+						</div>
+						<div>
+							<Typography.Text type="secondary">Advanced Inspect Method</Typography.Text>
+							<Select
+								style={{ width: "100%", marginTop: 4 }}
+								value={selectedMethod}
+								onChange={(value) => {
+									setRequestMode("query");
+									setSelectedMethod(value);
+								}}
+								options={inspectMethods.map((item: any) => ({
+									label: item.name,
+									value: item.name,
+								}))}
+							/>
+						</div>
+						<div>
+							<Typography.Text type="secondary">Advanced Mode</Typography.Text>
+							<Select
+								style={{ width: "100%", marginTop: 4 }}
+								value={requestMode}
+								onChange={(value) => setRequestMode(value)}
+								options={[
+									{ label: "Invoke", value: "invoke" },
+									{ label: "Query", value: "query" },
+								]}
+							/>
+						</div>
+						<div>
+							<Typography.Text type="secondary">Advanced Payload JSON</Typography.Text>
+							<Input.TextArea
+								value={payloadText}
+								onChange={(event) => setPayloadText(event.target.value)}
+								autoSize={{ minRows: 12, maxRows: 24 }}
+								style={{ marginTop: 4, fontFamily: "monospace" }}
+							/>
+						</div>
+						<Button type="default" loading={running} onClick={invokeMethod}>
+							Run
+						</Button>
+					</Space>
+				</div>
+				<div>
+					<div
+						style={{
+							padding: 12,
+							border: "1px solid #e2e8f0",
+							borderRadius: 10,
+							background: "#fff",
+							marginBottom: 12,
+						}}
+					>
+						<Typography.Text strong>BPMN Diagram</Typography.Text>
+						<div
+							style={{ marginTop: 12 }}
+							className={css(svgStyle)}
+							dangerouslySetInnerHTML={{ __html: bpmnData?.svgContent || "" }}
+						/>
+					</div>
+					<div
+						style={{
+							padding: 12,
+							border: "1px solid #e2e8f0",
+							borderRadius: 10,
+							background: "#fff",
+						}}
+					>
+						<Typography.Text strong>Result</Typography.Text>
+						<pre
+							style={{
+								marginTop: 8,
+								maxHeight: 420,
+								overflow: "auto",
+								background: "#0f172a",
+								color: "#e2e8f0",
+								padding: 12,
+								borderRadius: 8,
+							}}
+						>
+							{resultText || "No result yet"}
+						</pre>
+					</div>
+				</div>
+			</div>
 		</div>
 	);
 };
@@ -1102,10 +1834,19 @@ const ExecutionPage = (props) => {
 		};
 	}, [bpmnInstanceId, svgRef.current, bpmnReady]);
 
+	const isEthereumBpmn = Boolean(bpmnData?.eth_environment || bpmnData?.ethereum_contract);
 	const contractName = bpmnReady
-		? bpmnData.chaincode.name + "-" + bpmnData.chaincode.id.substring(0, 6)
+		? isEthereumBpmn
+			? bpmnData?.firefly_url?.split("/apis/")?.[1] || ""
+			: bpmnData?.chaincode?.name && bpmnData?.chaincode?.id
+				? `${bpmnData.chaincode.name}-${bpmnData.chaincode.id.substring(0, 6)}`
+				: ""
 		: "";
-	const full_core_url = "http://" + identity.core_url;
+	const full_core_url = isEthereumBpmn
+		? bpmnData?.firefly_url
+			? bpmnData.firefly_url.split("/api/v1/namespaces/default/apis/")[0]
+			: "http://"
+		: "http://" + identity.core_url;
 	const [
 		allEvents,
 		allGateways,
@@ -1118,6 +1859,7 @@ const ExecutionPage = (props) => {
 		full_core_url,
 		contractName,
 		bpmnInstance.instance_chaincode_id,
+		!isEthereumBpmn,
 	);
 	const realElements = [
 		...allMessages,
@@ -1510,6 +2252,18 @@ const ExecutionPage = (props) => {
 	// }
 	//     , []);
 
+	if (bpmnReady && isEthereumBpmn) {
+		return (
+			<EthereumExecutionView
+				bpmnData={bpmnData}
+				bpmnInstance={bpmnInstance}
+				contractMethodDes={contractMethodDes}
+				onActionRecord={onActionRecord}
+				actionRecords={actionRecords}
+			/>
+		);
+	}
+
 	return (
 		<div className="Execution">
 			<div
@@ -1601,8 +2355,16 @@ const ExecutionPage = (props) => {
 				) : null}
 			</div>
 
-			{executionMode === "real" ? (
+			{executionMode === "real" && !isEthereumBpmn ? (
 				<IdentitySelector identity={identity} setIdentity={setIdentity} />
+			) : executionMode === "real" && isEthereumBpmn ? (
+				<Alert
+					type="info"
+					showIcon
+					message="Ethereum execution"
+					description="This BPMN uses the registered FireFly API directly. No Fabric FireFly identity selection is required on this page."
+					style={{ marginBottom: 12 }}
+				/>
 			) : (
 				<Alert
 					type="info"

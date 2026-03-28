@@ -36,18 +36,7 @@ interface ContractRow {
 }
 
 const compilerVersionOptions = [
-  "0.8.24",
-  "0.8.23",
-  "0.8.22",
-  "0.8.21",
-  "0.8.20",
   "0.8.19",
-  "0.8.18",
-  "0.8.17",
-  "0.8.16",
-  "0.8.15",
-  "0.7.6",
-  "0.6.12",
 ].map((version) => ({
   label: version,
   value: version,
@@ -346,7 +335,7 @@ const SmartContract: React.FC = () => {
             name="compilerVersion"
             rules={[{ required: true, message: "Please choose a compiler version" }]}
           >
-            <Select showSearch options={compilerVersionOptions} optionFilterProp="label" />
+            <Select disabled options={compilerVersionOptions} optionFilterProp="label" />
           </Form.Item>
           <Form.Item
             label="Namespace"

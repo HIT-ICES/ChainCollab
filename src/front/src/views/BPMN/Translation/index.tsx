@@ -290,7 +290,12 @@ const Translation: React.FC = () => {
           }
         }}
       />
-      <ParticipantDmnBindingModal open={isBindingOpen} setOpen={setIsBindingOpen} bpmnId={currentBpmnId} />
+      <ParticipantDmnBindingModal
+        open={isBindingOpen}
+        setOpen={setIsBindingOpen}
+        bpmnId={currentBpmnId}
+        syncExternalData={syncBpmnData}
+      />
       <Modal
         title={editingRecord ? `Edit BPMN: ${editingRecord.name}` : "Edit BPMN"}
         open={isEditOpen}

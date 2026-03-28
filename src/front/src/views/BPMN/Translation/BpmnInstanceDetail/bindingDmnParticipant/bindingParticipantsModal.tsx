@@ -108,16 +108,18 @@ interface membershipItemType {
   consortiumId: string;
 }
 
-const BindingParticipantComponent = ({ clickedActionIndex, showBindingParticipantMap, setShowBindingParticipantMap, showBindingParticipantValueMap, setShowBindingParticipantValueMap }) => {
+const BindingParticipantComponent = ({ clickedActionIndex, showBindingParticipantMap, setShowBindingParticipantMap, showBindingParticipantValueMap, setShowBindingParticipantValueMap, envId, envType }) => {
 
   const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
   const currentEnvType = useAppSelector((state) => state.env.currentEnvType);
+  const effectiveEnvId = envId || currentEnvId;
+  const effectiveEnvType = envType || currentEnvType;
 
   // fetch datas
-  const [identities, { isLoading, isError, isSuccess }, refetch] = currentEnvType === "Ethereum"
-    ? useEthereumIdentities(currentEnvId, showBindingParticipantValueMap.get(clickedActionIndex)?.selectedMembershipId)
-    : useFabricIdentities(currentEnvId, showBindingParticipantValueMap.get(clickedActionIndex)?.selectedMembershipId);
-  const [members, syncMembers] = useAvailableMembers(currentEnvId)
+  const [identities, { isLoading, isError, isSuccess }, refetch] = effectiveEnvType === "Ethereum"
+    ? useEthereumIdentities(effectiveEnvId, showBindingParticipantValueMap.get(clickedActionIndex)?.selectedMembershipId)
+    : useFabricIdentities(effectiveEnvId, showBindingParticipantValueMap.get(clickedActionIndex)?.selectedMembershipId);
+  const [members, syncMembers] = useAvailableMembers(effectiveEnvId)
 
   const [membershipList, setMembershipList] = useState<membershipItemType[]>([]);
 
@@ -284,7 +286,7 @@ const BindingParticipantComponent = ({ clickedActionIndex, showBindingParticipan
 };
 
 
-export const BindingParticipant = ({ participants, showBindingParticipantMap, setShowBindingParticipantMap, showBindingParticipantValueMap, setShowBindingParticipantValueMap
+export const BindingParticipant = ({ participants, showBindingParticipantMap, setShowBindingParticipantMap, showBindingParticipantValueMap, setShowBindingParticipantValueMap, envId, envType
 }) => {
 
   const [clickedActionIndex, setClickedActionIndex] = useState("");
@@ -334,6 +336,8 @@ export const BindingParticipant = ({ participants, showBindingParticipantMap, se
           setShowBindingParticipantMap={setShowBindingParticipantMap}
           showBindingParticipantValueMap={showBindingParticipantValueMap}
           setShowBindingParticipantValueMap={setShowBindingParticipantValueMap}
+          envId={envId}
+          envType={envType}
         />
       </div>
     </div>

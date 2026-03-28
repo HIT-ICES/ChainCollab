@@ -120,7 +120,7 @@ import {
 } from '@/api/executionAPI'
 
 export const useAllFireflyData = (
-    coreUrl: string, contractName: string, bpmnInstanceId: string
+    coreUrl: string, contractName: string, bpmnInstanceId: string, enabled: boolean = true
 ): [
         any[],
         any[],
@@ -162,7 +162,7 @@ export const useAllFireflyData = (
         let ignore = false;
         const fetchData = async () => {
             setReady(false);
-            if (!coreUrl || !contractName || !bpmnInstanceId || coreUrl === "http://") {
+            if (!enabled || !coreUrl || !contractName || !bpmnInstanceId || coreUrl === "http://") {
                 if (!ignore) {
                     setEvents([]);
                     setGateways([]);
@@ -254,7 +254,7 @@ export const useAllFireflyData = (
         }
         fetchData();
         return () => { ignore = true; }
-    }, [syncFlag, coreUrl, contractName, bpmnInstanceId]);
+    }, [syncFlag, coreUrl, contractName, bpmnInstanceId, enabled]);
     return [
         events,
         gateways,
@@ -273,9 +273,15 @@ import axios from 'axios';
 export const useAvailableIdentity = () => {
     const currenOrgId = useAppSelector((state) => state.org.currentOrgId)
     const currenEnvId = useAppSelector((state) => state.env.currentEnvId)
+    const currentEnvType = useAppSelector((state) => state.env.currentEnvType)
     const { data, isLoading, isError, isSuccess, refetch } = useQuery(['availableIdentity', currenOrgId, currenEnvId], async () => {
+        if (currentEnvType === "Ethereum" || !currenEnvId || !currenOrgId) {
+            return []
+        }
         const res = await getFireflyIdentity(currenEnvId, currenOrgId)
-        return res
+        return Array.isArray(res) ? res : []
+    }, {
+        enabled: currentEnvType !== "Ethereum" && Boolean(currenEnvId) && Boolean(currenOrgId),
     })
     return [data, isLoading, refetch]
 }
