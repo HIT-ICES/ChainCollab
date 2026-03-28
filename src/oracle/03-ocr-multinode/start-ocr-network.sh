@@ -11,6 +11,8 @@ NC='\033[0m' # No Color
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+DEPLOYMENT_DIR="${CHAINCOLLAB_RUNTIME_DEPLOYMENT_DIR:-$ROOT_DIR/deployment}"
+RUNTIME_CONFIG_ROOT="${CHAINCOLLAB_CHAINLINK_CONFIG_ROOT:-$ROOT_DIR/runtime/chainlink-configs/03-ocr-multinode}"
 COMPOSE_FILE="$SCRIPT_DIR/docker-compose-multinode.yml"
 DMN_COMPOSE_FILE="$SCRIPT_DIR/../04-dmn-ocr/docker-compose-cdmn.yml"
 SYSTEM_GETH_CONTAINER="${SYSTEM_GETH_CONTAINER:-system-geth-node}"
@@ -36,6 +38,27 @@ cleanup_on_failure() {
 }
 
 trap 'exit_code=$?; trap - EXIT; cleanup_on_failure "$exit_code"; exit "$exit_code"' EXIT
+
+prepare_runtime_configs() {
+    rm -rf "$RUNTIME_CONFIG_ROOT"
+    mkdir -p "$RUNTIME_CONFIG_ROOT"
+    for node in chainlink-bootstrap chainlink1 chainlink2 chainlink3 chainlink4; do
+        cp -a "$SCRIPT_DIR/$node" "$RUNTIME_CONFIG_ROOT/$node"
+    done
+}
+
+config_path() {
+    local node="$1"
+    printf '%s/%s/config.toml\n' "$RUNTIME_CONFIG_ROOT" "$node"
+}
+
+export_runtime_config_dirs() {
+    export CHAINLINK_BOOTSTRAP_DIR="$RUNTIME_CONFIG_ROOT/chainlink-bootstrap"
+    export CHAINLINK_NODE1_DIR="$RUNTIME_CONFIG_ROOT/chainlink1"
+    export CHAINLINK_NODE2_DIR="$RUNTIME_CONFIG_ROOT/chainlink2"
+    export CHAINLINK_NODE3_DIR="$RUNTIME_CONFIG_ROOT/chainlink3"
+    export CHAINLINK_NODE4_DIR="$RUNTIME_CONFIG_ROOT/chainlink4"
+}
 
 ensure_system_geth_ready() {
     local container="$1"
@@ -67,7 +90,9 @@ ensure_system_geth_ready "$SYSTEM_GETH_CONTAINER"
 echo -e "${GREEN}system geth 节点已就绪，将复用其 RPC/WS。${NC}"
 
 # 创建部署目录
-mkdir -p "$ROOT_DIR/deployment"
+mkdir -p "$DEPLOYMENT_DIR"
+prepare_runtime_configs
+export_runtime_config_dirs
 
 # 步骤 1：启动 Bootstrap 节点和相关服务
 echo -e "${BLUE}步骤 1：启动 Bootstrap 节点和相关服务（复用外部 system-geth-node）...${NC}"
@@ -98,8 +123,8 @@ BOOTSTRAP_PEER_ID=""
 for i in {1..30}; do
     # 使用 get-node-info.js 脚本获取 Bootstrap 节点的 P2P ID
     node "$SCRIPT_DIR/get-node-info.js" bootstrap > /dev/null 2>&1
-    if [ -f "$ROOT_DIR/deployment/node-info.json" ]; then
-        BOOTSTRAP_PEER_ID=$(jq -r '.[] | select(.name == "bootstrap") | .p2pPeerId' "$ROOT_DIR/deployment/node-info.json")
+    if [ -f "$DEPLOYMENT_DIR/node-info.json" ]; then
+        BOOTSTRAP_PEER_ID=$(jq -r '.[] | select(.name == "bootstrap") | .p2pPeerId' "$DEPLOYMENT_DIR/node-info.json")
         if [ -n "$BOOTSTRAP_PEER_ID" ] && [ "$BOOTSTRAP_PEER_ID" != "null" ]; then
             break
         fi
@@ -121,7 +146,7 @@ BOOTSTRAP_MULTIADDR="${BOOTSTRAP_PEER_ID}@${BOOTSTRAP_IP}:6690"
 # 更新其他四个节点的配置
 for node in chainlink1 chainlink2 chainlink3 chainlink4; do
     # 强制更新 DefaultBootstrappers 为实际的 Bootstrap 地址（兼容单行/多行/缺失）
-    python3 - "$SCRIPT_DIR/$node/config.toml" "$BOOTSTRAP_MULTIADDR" <<'PY'
+    python3 - "$(config_path "$node")" "$BOOTSTRAP_MULTIADDR" <<'PY'
 import re
 import sys
 from pathlib import Path
@@ -169,7 +194,7 @@ for node in chainlink1 chainlink2 chainlink3 chainlink4; do
     else
         PORT=6696
     fi
-    sed -i "s|AnnounceAddresses = \\[\".*\"\\]|AnnounceAddresses = [\"${BOOTSTRAP_IP}:${PORT}\"]|g" "$SCRIPT_DIR/$node/config.toml"
+    sed -i "s|AnnounceAddresses = \\[\".*\"\\]|AnnounceAddresses = [\"${BOOTSTRAP_IP}:${PORT}\"]|g" "$(config_path "$node")"
 done
 docker-compose -f "$COMPOSE_FILE" restart chainlink1 chainlink2 chainlink3 chainlink4
 
@@ -215,7 +240,7 @@ node "$SCRIPT_DIR/get-node-info.js"
 
 echo -e "${BLUE}步骤 6：启动 CDMN 服务...${NC}"
 STARTED_DMN=1
-OCR_DEPLOYMENT="$ROOT_DIR/deployment/ocr-deployment.json"
+OCR_DEPLOYMENT="$DEPLOYMENT_DIR/ocr-deployment.json"
 if [ -f "$OCR_DEPLOYMENT" ] && command -v jq &> /dev/null; then
     OCR_AGGREGATOR_ADDRESS=$(jq -r '.contractAddress' "$OCR_DEPLOYMENT")
 fi

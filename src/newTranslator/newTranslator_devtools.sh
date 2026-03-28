@@ -35,10 +35,21 @@ def pick_node_manager() -> str:
     return "npm"
 
 
+def venv_is_healthy(candidate: Path) -> bool:
+    python_bin = candidate / "bin" / "python"
+    python3_bin = candidate / "bin" / "python3"
+    return (
+        python_bin.exists()
+        and python3_bin.exists()
+        and os.access(python_bin, os.X_OK)
+        and os.access(python3_bin, os.X_OK)
+    )
+
+
 def find_venv() -> Path | None:
     for name in (".venv", "venv"):
         candidate = PROJECT_DIR / name
-        if (candidate / "bin" / "python").exists():
+        if venv_is_healthy(candidate):
             return candidate
     return None
 
@@ -48,6 +59,9 @@ def ensure_venv() -> Path:
     if venv:
         return venv
     venv = PROJECT_DIR / ".venv"
+    if venv.exists():
+        print(f"[newTranslator] removing broken virtualenv: {venv}")
+        shutil.rmtree(venv, ignore_errors=True)
     if cmd_exists("uv"):
         run_cmd(["uv", "venv", "--seed", str(venv)])
     else:

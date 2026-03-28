@@ -11,6 +11,8 @@ NC='\033[0m' # No Color
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+SRC_ROOT="$(cd "$ROOT_DIR/../.." && pwd)"
+RUNTIME_CONFIG_ROOT="${CHAINCOLLAB_CHAINLINK_CONFIG_ROOT:-$SRC_ROOT/runtime/chainlink-configs/chainlink-features-03-ocr-multinode}"
 COMPOSE_FILE="$SCRIPT_DIR/docker-compose-multinode.yml"
 DMN_COMPOSE_FILE="$ROOT_DIR/features/04-dmn-ocr/docker-compose-cdmn.yml"
 
@@ -20,8 +22,31 @@ if ! docker info &> /dev/null; then
     exit 1
 fi
 
+prepare_runtime_configs() {
+    rm -rf "$RUNTIME_CONFIG_ROOT"
+    mkdir -p "$RUNTIME_CONFIG_ROOT"
+    for node in chainlink-bootstrap chainlink1 chainlink2 chainlink3 chainlink4; do
+        cp -a "$SCRIPT_DIR/$node" "$RUNTIME_CONFIG_ROOT/$node"
+    done
+}
+
+config_path() {
+    local node="$1"
+    printf '%s/%s/config.toml\n' "$RUNTIME_CONFIG_ROOT" "$node"
+}
+
+export_runtime_config_dirs() {
+    export CHAINLINK_BOOTSTRAP_DIR="$RUNTIME_CONFIG_ROOT/chainlink-bootstrap"
+    export CHAINLINK_NODE1_DIR="$RUNTIME_CONFIG_ROOT/chainlink1"
+    export CHAINLINK_NODE2_DIR="$RUNTIME_CONFIG_ROOT/chainlink2"
+    export CHAINLINK_NODE3_DIR="$RUNTIME_CONFIG_ROOT/chainlink3"
+    export CHAINLINK_NODE4_DIR="$RUNTIME_CONFIG_ROOT/chainlink4"
+}
+
 # 创建部署目录
 mkdir -p "$ROOT_DIR/deployment"
+prepare_runtime_configs
+export_runtime_config_dirs
 
 # 步骤 1：启动 Bootstrap 节点和相关服务
 echo -e "${BLUE}步骤 1：启动 Bootstrap 节点和相关服务...${NC}"
@@ -74,7 +99,7 @@ BOOTSTRAP_MULTIADDR="${BOOTSTRAP_PEER_ID}@${BOOTSTRAP_IP}:6690"
 # 更新其他四个节点的配置
 for node in chainlink1 chainlink2 chainlink3 chainlink4; do
     # 强制更新 DefaultBootstrappers 为实际的 Bootstrap 地址（兼容单行/多行/缺失）
-    python3 - "$SCRIPT_DIR/$node/config.toml" "$BOOTSTRAP_MULTIADDR" <<'PY'
+    python3 - "$(config_path "$node")" "$BOOTSTRAP_MULTIADDR" <<'PY'
 import re
 import sys
 from pathlib import Path
@@ -121,7 +146,7 @@ for node in chainlink1 chainlink2 chainlink3 chainlink4; do
     else
         PORT=6696
     fi
-    sed -i "s|AnnounceAddresses = \\[\".*\"\\]|AnnounceAddresses = [\"${BOOTSTRAP_IP}:${PORT}\"]|g" "$SCRIPT_DIR/$node/config.toml"
+    sed -i "s|AnnounceAddresses = \\[\".*\"\\]|AnnounceAddresses = [\"${BOOTSTRAP_IP}:${PORT}\"]|g" "$(config_path "$node")"
 done
 docker-compose -f "$COMPOSE_FILE" restart chainlink1 chainlink2 chainlink3 chainlink4
 

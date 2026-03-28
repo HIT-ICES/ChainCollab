@@ -87,7 +87,7 @@ services:
       - "6687:6688"         # Node HTTP/API
       - "6690:6690"         # libp2p default listening
     volumes:
-      - ./chainlink-bootstrap:/chainlink
+      - ${CHAINLINK_BOOTSTRAP_DIR:-./chainlink-bootstrap}:/chainlink
     command: >
       node --config /chainlink/config.toml --secrets /chainlink/secrets.toml start --api /chainlink/.api --password /chainlink/.password
     networks:
@@ -104,7 +104,7 @@ services:
       - "6688:6688"
       - "6698:6698"
     volumes:
-      - ./chainlink1:/chainlink
+      - ${CHAINLINK_NODE1_DIR:-./chainlink1}:/chainlink
     command: >
       node --config /chainlink/config.toml --secrets /chainlink/secrets.toml start --api /chainlink/.api --password /chainlink/.password
     networks:
@@ -123,7 +123,7 @@ services:
       - "6689:6688"
       - "6699:6699"
     volumes:
-      - ./chainlink2:/chainlink
+      - ${CHAINLINK_NODE2_DIR:-./chainlink2}:/chainlink
     command: >
       node --config /chainlink/config.toml --secrets /chainlink/secrets.toml start --api /chainlink/.api --password /chainlink/.password
     networks:
@@ -142,7 +142,7 @@ services:
       - "6691:6688"
       - "6697:6697"
     volumes:
-      - ./chainlink3:/chainlink
+      - ${CHAINLINK_NODE3_DIR:-./chainlink3}:/chainlink
     command: >
       node --config /chainlink/config.toml --secrets /chainlink/secrets.toml start --api /chainlink/.api --password /chainlink/.password
     networks:
@@ -161,7 +161,7 @@ services:
       - "6692:6688"
       - "6696:6696"
     volumes:
-      - ./chainlink4:/chainlink
+      - ${CHAINLINK_NODE4_DIR:-./chainlink4}:/chainlink
     command: >
       node --config /chainlink/config.toml --secrets /chainlink/secrets.toml start --api /chainlink/.api --password /chainlink/.password
     networks:

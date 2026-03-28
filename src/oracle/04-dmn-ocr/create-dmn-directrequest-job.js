@@ -18,6 +18,9 @@ function resolveChainlinkRoot() {
 }
 
 const ROOT_DIR = resolveChainlinkRoot();
+const DEPLOYMENT_DIR = path.resolve(
+  process.env.CHAINCOLLAB_RUNTIME_DEPLOYMENT_DIR || path.join(ROOT_DIR, 'deployment')
+);
 function requireFromChainlink(modName) {
   try {
     return require(modName);
@@ -170,7 +173,7 @@ function extractJobName(jobSpec) {
 }
 
 function resolveOperatorAddress() {
-  const deploymentPath = path.join(ROOT_DIR, 'deployment', 'chainlink-deployment.json');
+  const deploymentPath = path.join(DEPLOYMENT_DIR, 'chainlink-deployment.json');
   if (!fs.existsSync(deploymentPath)) {
     console.error('❌ 找不到 deployment/chainlink-deployment.json，请先部署 Chainlink 基础设施');
     process.exit(1);
@@ -190,7 +193,7 @@ function resolveOperatorAddress() {
 }
 
 function resolveDmnRequestContract() {
-  const deploymentPath = path.join(ROOT_DIR, 'deployment', 'deployment.json');
+  const deploymentPath = path.join(DEPLOYMENT_DIR, 'deployment.json');
   if (!fs.existsSync(deploymentPath)) {
     return null;
   }
@@ -224,7 +227,7 @@ async function main() {
       contractAddress = '0x0000000000000000000000000000000000000000';
       console.warn('⚠️  使用占位合约地址 0x0 创建 Job，部署后请重建 Job 以更新合约地址');
     }
-    const deploymentPath = path.join(ROOT_DIR, 'deployment', 'chainlink-deployment.json');
+    const deploymentPath = path.join(DEPLOYMENT_DIR, 'chainlink-deployment.json');
     let externalJobId =
       process.env.EXTERNAL_JOB_ID || process.argv[2] || null;
 

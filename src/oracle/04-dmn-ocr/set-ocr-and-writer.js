@@ -45,6 +45,9 @@ function firstExisting(paths, required = true) {
 
 const CHAINLINK_ROOT = resolveChainlinkRoot();
 const CHAINLINK_DEPLOYMENT_DIR = path.join(CHAINLINK_ROOT, 'deployment');
+const RUNTIME_DEPLOYMENT_DIR = path.resolve(
+  process.env.CHAINCOLLAB_RUNTIME_DEPLOYMENT_DIR || path.join(CHAINLINK_ROOT, 'deployment')
+);
 const SHARED_DEPLOYMENT_DIR = path.join(ROOT_DIR, 'deployment');
 
 function requireFromChainlink(modName) {
@@ -55,15 +58,16 @@ function requireFromChainlink(modName) {
   }
 }
 
-const deployment = readJson(path.join(CHAINLINK_DEPLOYMENT_DIR, 'deployment.json'));
-const chainlinkDeployment = readJson(path.join(CHAINLINK_DEPLOYMENT_DIR, 'chainlink-deployment.json'));
+const deployment = readJson(path.join(RUNTIME_DEPLOYMENT_DIR, 'deployment.json'));
+const chainlinkDeployment = readJson(path.join(RUNTIME_DEPLOYMENT_DIR, 'chainlink-deployment.json'));
 const nodeInfo = readJson(
   firstExisting([
+    path.join(RUNTIME_DEPLOYMENT_DIR, 'node-info.json'),
     path.join(SHARED_DEPLOYMENT_DIR, 'node-info.json'),
     path.join(CHAINLINK_DEPLOYMENT_DIR, 'node-info.json'),
   ])
 );
-const compiled = readJson(path.join(CHAINLINK_DEPLOYMENT_DIR, 'compiled.json'));
+const compiled = readJson(path.join(RUNTIME_DEPLOYMENT_DIR, 'compiled.json'));
 const DMN_MODE = process.env.DMN_MODE === 'lite' ? 'lite' : 'full';
 const contractKey =
   DMN_MODE === 'lite'

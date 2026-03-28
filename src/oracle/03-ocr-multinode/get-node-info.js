@@ -6,6 +6,9 @@ const path = require('path');
 const { execSync } = require('child_process');
 
 const ROOT_DIR = path.resolve(__dirname, '..', '..');
+const DEPLOYMENT_DIR = path.resolve(
+  process.env.CHAINCOLLAB_RUNTIME_DEPLOYMENT_DIR || path.join(ROOT_DIR, 'deployment')
+);
 
 const username = 'admin@chain.link';
 const password = 'change-me-strong';
@@ -410,12 +413,11 @@ async function main() {
   }
 
   // 保存节点信息
-  const deploymentDir = path.join(ROOT_DIR, 'deployment');
-  if (!fs.existsSync(deploymentDir)) {
-    fs.mkdirSync(deploymentDir);
+  if (!fs.existsSync(DEPLOYMENT_DIR)) {
+    fs.mkdirSync(DEPLOYMENT_DIR, { recursive: true });
   }
 
-  const nodeInfoFile = `${deploymentDir}/node-info.json`;
+  const nodeInfoFile = path.join(DEPLOYMENT_DIR, 'node-info.json');
   fs.writeFileSync(nodeInfoFile, JSON.stringify(allNodeInfo, null, 2));
 
   console.log(`✅ 所有节点信息已保存到 ${nodeInfoFile}`);

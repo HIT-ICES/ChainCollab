@@ -6,7 +6,12 @@ ORACLE_ROOT="${ORACLE_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 if [ "$(basename "$ORACLE_ROOT")" = "04-dmn-ocr" ]; then
   ORACLE_ROOT="$(cd "$ORACLE_ROOT/.." && pwd)"
 fi
+SRC_ROOT="${SRC_ROOT:-$(cd "$ORACLE_ROOT/.." && pwd)}"
 CHAINLINK_ROOT="${CHAINLINK_ROOT:-$ORACLE_ROOT/CHAINLINK}"
+CHAINLINK_DEPLOYMENT_DIR="$CHAINLINK_ROOT/deployment"
+RUNTIME_ROOT="${RUNTIME_ROOT:-$SRC_ROOT/runtime}"
+RUNTIME_DEPLOYMENT_DIR="${CHAINCOLLAB_RUNTIME_DEPLOYMENT_DIR:-$RUNTIME_ROOT/deployment}"
+CHAINLINK_DEPLOYMENT_BACKUP_DIR="$RUNTIME_ROOT/.chainlink-deployment-backup"
 FEATURES_04="$ORACLE_ROOT/04-dmn-ocr"
 FEATURES_03="$ORACLE_ROOT/03-ocr-multinode"
 if [ ! -d "$FEATURES_03" ]; then
@@ -22,6 +27,20 @@ STARTED_OCR_NETWORK=0
 STARTED_CDMN=0
 export OCR_RPC_URL="${OCR_RPC_URL:-http://system-geth-node:8545}"
 SYSTEM_GETH_CONTAINER="${SYSTEM_GETH_CONTAINER:-system-geth-node}"
+export CHAINCOLLAB_RUNTIME_DEPLOYMENT_DIR="$RUNTIME_DEPLOYMENT_DIR"
+
+DEPLOYMENT_FILES=(
+  chainlink-deployment.json
+  compiled.json
+  deployment.json
+  external-initiator.json
+  node-info.json
+  ocr-config-gen.json
+  ocr-config.json
+  ocr-deployment.json
+  operator-abi.json
+  operator-compiled.json
+)
 
 cleanup_on_failure() {
   local exit_code="$1"
@@ -41,19 +60,82 @@ cleanup_on_failure() {
     echo " - stopping OCR network"
     (cd "$FEATURES_03" && ./stop-ocr-network.sh) >/dev/null 2>&1 || true
   fi
+
+  restore_chainlink_deployment_backup >/dev/null 2>&1 || true
 }
 
 MODE="full"
 for arg in "$@"; do
   case "$arg" in
     --smoke) MODE="smoke" ;;
+    --clean) MODE="clean" ;;
     -h|--help)
-      echo "Usage: $0 [--smoke]"
+      echo "Usage: $0 [--smoke|--clean]"
       echo "  --smoke  only check running containers and basic health endpoints"
+      echo "  --clean  stop lite containers and remove runtime/deployment artifacts"
       exit 0
       ;;
   esac
 done
+
+ensure_runtime_deployment_dir() {
+  mkdir -p "$RUNTIME_DEPLOYMENT_DIR"
+}
+
+remove_runtime_deployment() {
+  if [ -d "$RUNTIME_DEPLOYMENT_DIR" ]; then
+    rm -rf "$RUNTIME_DEPLOYMENT_DIR"
+  fi
+}
+
+backup_chainlink_deployment() {
+  rm -rf "$CHAINLINK_DEPLOYMENT_BACKUP_DIR"
+  mkdir -p "$CHAINLINK_DEPLOYMENT_BACKUP_DIR"
+  mkdir -p "$CHAINLINK_DEPLOYMENT_DIR"
+  for name in "${DEPLOYMENT_FILES[@]}"; do
+    if [ -f "$CHAINLINK_DEPLOYMENT_DIR/$name" ]; then
+      cp "$CHAINLINK_DEPLOYMENT_DIR/$name" "$CHAINLINK_DEPLOYMENT_BACKUP_DIR/$name"
+    fi
+  done
+}
+
+restore_chainlink_deployment_backup() {
+  if [ ! -d "$CHAINLINK_DEPLOYMENT_BACKUP_DIR" ]; then
+    return
+  fi
+  mkdir -p "$CHAINLINK_DEPLOYMENT_DIR"
+  for name in "${DEPLOYMENT_FILES[@]}"; do
+    rm -f "$CHAINLINK_DEPLOYMENT_DIR/$name"
+    if [ -f "$CHAINLINK_DEPLOYMENT_BACKUP_DIR/$name" ]; then
+      cp "$CHAINLINK_DEPLOYMENT_BACKUP_DIR/$name" "$CHAINLINK_DEPLOYMENT_DIR/$name"
+    fi
+  done
+  rm -rf "$CHAINLINK_DEPLOYMENT_BACKUP_DIR"
+}
+
+restore_chainlink_deployment_from_runtime() {
+  mkdir -p "$CHAINLINK_DEPLOYMENT_DIR"
+  for name in "${DEPLOYMENT_FILES[@]}"; do
+    rm -f "$CHAINLINK_DEPLOYMENT_DIR/$name"
+  done
+  if [ ! -d "$RUNTIME_DEPLOYMENT_DIR" ]; then
+    return
+  fi
+  for name in "${DEPLOYMENT_FILES[@]}"; do
+    if [ -f "$RUNTIME_DEPLOYMENT_DIR/$name" ]; then
+      cp "$RUNTIME_DEPLOYMENT_DIR/$name" "$CHAINLINK_DEPLOYMENT_DIR/$name"
+    fi
+  done
+}
+
+persist_chainlink_deployment_to_runtime() {
+  ensure_runtime_deployment_dir
+  for name in "${DEPLOYMENT_FILES[@]}"; do
+    if [ -f "$CHAINLINK_DEPLOYMENT_DIR/$name" ]; then
+      cp "$CHAINLINK_DEPLOYMENT_DIR/$name" "$RUNTIME_DEPLOYMENT_DIR/$name"
+    fi
+  done
+}
 
 smoke_check() {
   echo "== [smoke] basic checks =="
@@ -84,6 +166,16 @@ smoke_check() {
   echo "== [smoke] done =="
 }
 
+clean_mode() {
+  echo "== [clean] stop lite services =="
+  (cd "$FEATURES_04" && docker-compose -f docker-compose-cdmn.yml down) >/dev/null 2>&1 || true
+  (cd "$FEATURES_03" && ./stop-ocr-network.sh) >/dev/null 2>&1 || true
+  restore_chainlink_deployment_backup >/dev/null 2>&1 || true
+  echo "== [clean] remove runtime deployment =="
+  remove_runtime_deployment
+  echo "== [clean] done =="
+}
+
 resolve_host_rpc_url() {
   if [ -n "${RPC_URL:-}" ]; then
     printf '%s\n' "$RPC_URL"
@@ -105,8 +197,15 @@ if [ "$MODE" = "smoke" ]; then
   exit 0
 fi
 
+if [ "$MODE" = "clean" ]; then
+  clean_mode
+  exit 0
+fi
+
 export RPC_URL="${RPC_URL:-$(resolve_host_rpc_url)}"
 echo "== [rpc] host RPC: ${RPC_URL} =="
+echo "== [deployment] runtime dir: ${RUNTIME_DEPLOYMENT_DIR} =="
+ensure_runtime_deployment_dir
 
 trap 'exit_code=$?; trap - EXIT; cleanup_on_failure "$exit_code"; exit "$exit_code"' EXIT
 
@@ -177,7 +276,7 @@ ensure_chainlink_deps() {
 }
 
 read_deployment_contract() {
-  local deployment_json="$CHAINLINK_ROOT/deployment/deployment.json"
+  local deployment_json="$CHAINLINK_DEPLOYMENT_DIR/deployment.json"
   if [ ! -f "$deployment_json" ]; then
     return 0
   fi
@@ -248,8 +347,8 @@ NODE
 
 ensure_dmn_contract_deployed() {
   local rpc_url="${RPC_URL:-http://localhost:8545}"
-  local deployment_json="$CHAINLINK_ROOT/deployment/deployment.json"
-  local chainlink_json="$CHAINLINK_ROOT/deployment/chainlink-deployment.json"
+  local deployment_json="$CHAINLINK_DEPLOYMENT_DIR/deployment.json"
+  local chainlink_json="$CHAINLINK_DEPLOYMENT_DIR/chainlink-deployment.json"
   local contract_addr=""
   local contract_code=""
   local current_link_token=""
@@ -326,20 +425,25 @@ docker-compose -f docker-compose-cdmn.yml up -d --build --pull=never
 echo "== [3] Chainlink 基础部署（LinkToken/Operator） =="
 cd "$CHAINLINK_ROOT"
 ensure_chainlink_deps
+backup_chainlink_deployment
+restore_chainlink_deployment_from_runtime
 # 允许 04-dmn-ocr 脚本从 CHAINLINK_ROOT/node_modules 解析依赖。
 export NODE_PATH="$CHAINLINK_ROOT/node_modules${NODE_PATH:+:$NODE_PATH}"
 ./compile.sh
 ./unlock-account.sh
 node scripts/deploy-chainlink.js
 node scripts/fund-chainlink-node.js --all --min 1 --amount 10
+persist_chainlink_deployment_to_runtime
 
 echo "== [4] 确保 DMN 请求合约已部署 =="
 cd "$CHAINLINK_ROOT"
+restore_chainlink_deployment_from_runtime
 ensure_dmn_contract_deployed
+persist_chainlink_deployment_to_runtime
 
 echo "== [5] 创建 directrequest 缓存 Job（监听 OracleRequest） =="
 cd "$CHAINLINK_ROOT"
-EXTERNAL_JOB_ID=$(node -e "const fs=require('fs');const path=require('path');const p=path.join(process.cwd(),'deployment','chainlink-deployment.json');const data=JSON.parse(fs.readFileSync(p,'utf8'));console.log(data.dmnJobId||'');") \
+EXTERNAL_JOB_ID=$(node -e "const fs=require('fs');const path=require('path');const p=path.join(process.env.CHAINCOLLAB_RUNTIME_DEPLOYMENT_DIR||path.join(process.cwd(),'deployment'),'chainlink-deployment.json');const data=JSON.parse(fs.readFileSync(p,'utf8'));console.log(data.dmnJobId||'');") \
   node "$FEATURES_04/create-dmn-directrequest-job.js"
 
 echo "== [6] 将 DMN Job ID 写回合约 setJobId =="
@@ -352,9 +456,13 @@ DMN_MODE=lite node "$FEATURES_04/set-ocr-and-writer.js"
 
 echo "== [8] 为 DMN 合约充值 LINK =="
 cd "$CHAINLINK_ROOT"
+restore_chainlink_deployment_from_runtime
 node scripts/fund-contract.js
+persist_chainlink_deployment_to_runtime
 
 echo "== [9] 测试 directrequest 缓存链路 =="
 DMN_RANDOM=1 node "$FEATURES_04/test-dmn-ocr.js"
+
+restore_chainlink_deployment_backup
 
 echo "== 完成：已启用 Operator 监听 + DMN 直写链路（无 OCR 聚合） =="

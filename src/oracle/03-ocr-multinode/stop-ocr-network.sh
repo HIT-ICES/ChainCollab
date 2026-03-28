@@ -10,8 +10,16 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+RUNTIME_CONFIG_ROOT="${CHAINCOLLAB_CHAINLINK_CONFIG_ROOT:-$ROOT_DIR/runtime/chainlink-configs/03-ocr-multinode}"
 COMPOSE_FILE="$SCRIPT_DIR/docker-compose-multinode.yml"
 DMN_COMPOSE_FILE="$SCRIPT_DIR/../04-dmn-ocr/docker-compose-cdmn.yml"
+
+export CHAINLINK_BOOTSTRAP_DIR="$RUNTIME_CONFIG_ROOT/chainlink-bootstrap"
+export CHAINLINK_NODE1_DIR="$RUNTIME_CONFIG_ROOT/chainlink1"
+export CHAINLINK_NODE2_DIR="$RUNTIME_CONFIG_ROOT/chainlink2"
+export CHAINLINK_NODE3_DIR="$RUNTIME_CONFIG_ROOT/chainlink3"
+export CHAINLINK_NODE4_DIR="$RUNTIME_CONFIG_ROOT/chainlink4"
 
 # 检查 Docker 是否正在运行
 if ! docker info &> /dev/null; then

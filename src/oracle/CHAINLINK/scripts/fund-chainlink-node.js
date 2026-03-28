@@ -275,11 +275,21 @@ function parseAmount(value, fallback) {
     return Number.isFinite(num) && num >= 0 ? num : fallback;
 }
 
-function getNodeInfoAddresses() {
-    const deploymentPath = path.resolve(__dirname, '../deployment/node-info.json');
-    if (!fs.existsSync(deploymentPath)) {
-        throw new Error('deployment/node-info.json 不存在，无法批量获取节点地址');
+function resolveNodeInfoPath() {
+    const candidates = [
+        path.resolve(__dirname, '../deployment/node-info.json'),
+        path.resolve(__dirname, '../../../deployment/node-info.json'),
+    ];
+    for (const candidate of candidates) {
+        if (fs.existsSync(candidate)) {
+            return candidate;
+        }
     }
+    throw new Error(`${candidates.join(' | ')} 均不存在，无法批量获取节点地址`);
+}
+
+function getNodeInfoAddresses() {
+    const deploymentPath = resolveNodeInfoPath();
     const info = JSON.parse(fs.readFileSync(deploymentPath, 'utf8'));
     const addresses = info
         .map((node) => node.ethAddress)

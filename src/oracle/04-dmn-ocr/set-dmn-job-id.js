@@ -19,7 +19,9 @@ function resolveChainlinkRoot() {
 }
 
 const ROOT_DIR = resolveChainlinkRoot();
-const DEPLOYMENT_DIR = path.join(ROOT_DIR, 'deployment');
+const DEPLOYMENT_DIR = path.resolve(
+  process.env.CHAINCOLLAB_RUNTIME_DEPLOYMENT_DIR || path.join(ROOT_DIR, 'deployment')
+);
 function requireFromChainlink(modName) {
   try {
     return require(modName);

@@ -17,6 +17,9 @@ function resolveChainlinkRoot() {
 }
 
 const ROOT_DIR = resolveChainlinkRoot();
+const DEPLOYMENT_DIR = path.resolve(
+  process.env.CHAINCOLLAB_RUNTIME_DEPLOYMENT_DIR || path.join(ROOT_DIR, 'deployment')
+);
 function requireFromChainlink(modName) {
   try {
     return require(modName);
@@ -27,10 +30,10 @@ function requireFromChainlink(modName) {
 
 const axios = requireFromChainlink('axios');
 const deployment = JSON.parse(
-  fs.readFileSync(path.join(ROOT_DIR, 'deployment', 'deployment.json'), 'utf8')
+  fs.readFileSync(path.join(DEPLOYMENT_DIR, 'deployment.json'), 'utf8')
 );
 const chainlinkDeployment = JSON.parse(
-  fs.readFileSync(path.join(ROOT_DIR, 'deployment', 'chainlink-deployment.json'), 'utf8')
+  fs.readFileSync(path.join(DEPLOYMENT_DIR, 'chainlink-deployment.json'), 'utf8')
 );
 
 const DMN_URL =
@@ -210,7 +213,7 @@ async function testOracle() {
     console.log('');
 
     const compiled = JSON.parse(
-      fs.readFileSync(path.join(ROOT_DIR, 'deployment', 'compiled.json'), 'utf8')
+      fs.readFileSync(path.join(DEPLOYMENT_DIR, 'compiled.json'), 'utf8')
     );
     const abi =
       compiled.contracts['contracts/MyChainlinkRequesterDMN.sol:MyChainlinkRequesterDMN']
