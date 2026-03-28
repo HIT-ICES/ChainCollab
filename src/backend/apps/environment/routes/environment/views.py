@@ -11,11 +11,12 @@ from django.db import transaction
 from django.utils import timezone
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 from common.enums import EthNodeType, FabricNodeType
 
 from .serializers import EnvironmentSerializer, EthEnvironmentSerializer
-from rest_framework.decorators import action
+from rest_framework.decorators import action, parser_classes
 
 from apps.infra.models import Agent
 from apps.ethereum.models import (
@@ -896,6 +897,20 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
             return EthEnvironment.objects.get(pk=pk), None
         except EthEnvironment.DoesNotExist:
             return None, Response(status=status.HTTP_404_NOT_FOUND)
+
+    def _sanitize_upload_name(self, filename: str) -> str:
+        safe_name = re.sub(r"[^A-Za-z0-9._-]+", "_", filename or "identity-contract.zip")
+        return safe_name[:200] or "identity-contract.zip"
+
+    def _store_identity_archive_upload(self, uploaded_file) -> str:
+        upload_root = os.path.join(ETHEREUM_CONTRACT_STORE, "identity-contract", "uploads")
+        os.makedirs(upload_root, exist_ok=True)
+        safe_name = self._sanitize_upload_name(getattr(uploaded_file, "name", "identity-contract.zip"))
+        archive_path = os.path.join(upload_root, f"{uuid4()}-{safe_name}")
+        with open(archive_path, "wb") as handle:
+            for chunk in uploaded_file.chunks():
+                handle.write(chunk)
+        return archive_path
 
     def _enqueue_eth_chaincode_install(
         self,
@@ -2809,6 +2824,7 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
 
         return Response(status=status.HTTP_201_CREATED)
 
+    @parser_classes([MultiPartParser, FormParser, JSONParser])
     @action(methods=["post"], detail=True, url_path="identity-contract/install")
     def install_identity_contract(self, request, pk=None, *args, **kwargs):
         env, error_response = self._get_eth_env_or_404(pk)
@@ -2827,11 +2843,35 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
         if idempotent.get("response"):
             return idempotent["response"]
         idempotency_key = idempotent["idempotency_key"]
+        compiler_version = str(request.data.get("compiler_version") or "").strip() or None
+        contract_name = str(request.data.get("contract_name") or "").strip() or None
+        if contract_name and not re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", contract_name):
+            return Response(
+                {"message": "Invalid contract_name. Use letters, numbers and underscores, and start with a letter or underscore."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        archive = request.FILES.get("archive") or request.FILES.get("file")
+        archive_path = None
+
+        if archive:
+            archive_name = getattr(archive, "name", "").lower()
+            allowed_suffixes = (".zip", ".tar", ".tgz", ".tar.gz")
+            if not archive_name.endswith(allowed_suffixes):
+                return Response(
+                    {"message": "Unsupported archive format. Use zip/tar/tgz source bundle."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            archive_path = self._store_identity_archive_upload(archive)
 
         deployment, _ = IdentityDeployment.objects.get_or_create(
             eth_environment=env
         )
         if deployment.status == "STARTED" and deployment.contract_address:
+            if archive_path and os.path.exists(archive_path):
+                try:
+                    os.remove(archive_path)
+                except Exception:
+                    LOG.warning("IdentityContract upload cleanup failed env=%s path=%s", env.id, archive_path)
             LOG.info("IdentityContract action=already_deployed env=%s", env.id)
             return Response(
                 {
@@ -2860,7 +2900,14 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
         LOG.info("IdentityContract action=install_task task=%s env=%s", task.id, env.id)
 
         identity = self._identity_orchestrator()
-        self._start_task(task, identity.deploy_identity_contract, env.id)
+        self._start_task(
+            task,
+            identity.deploy_identity_contract,
+            env.id,
+            source_archive_path=archive_path,
+            compiler_version=compiler_version,
+            contract_name=contract_name,
+        )
 
         return Response(
             {"task_id": str(task.id), "status": task.status},
@@ -2932,7 +2979,7 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
             "firefly_core_url": firefly_core_url,
         }
         if deployment:
-            api_name = deployment.api_name or "IdentityRegistry"
+            api_name = deployment.api_name or deployment.contract_name or "IdentityRegistry"
             api_base = None
             if deployment.api_address:
                 api_base = deployment.api_address
@@ -2962,6 +3009,9 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
                 else None,
                 "firefly_api_base": api_base,
             }
+        artifact_meta = identity.flow._load_identity_artifact_meta()
+        if artifact_meta:
+            response["artifacts"] = artifact_meta
         return Response(response, status=status.HTTP_200_OK)
 
 

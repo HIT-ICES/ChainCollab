@@ -13,8 +13,8 @@ class IdentityOrchestrator:
     def flow(self) -> IdentityContractFlow:
         return self._flow
 
-    def deploy_identity_contract(self, env_id):
-        return self._flow.deploy_identity_contract(env_id)
+    def deploy_identity_contract(self, env_id, **kwargs):
+        return self._flow.deploy_identity_contract(env_id, **kwargs)
 
     def redeploy_and_sync(self, env_id):
         return self._flow.redeploy_and_sync(env_id)

@@ -5,9 +5,14 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 import os
+import re
+import tarfile
 import traceback
 import logging
+import shutil
+import zipfile
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +41,7 @@ from apps.ethereum.routes.ethereum.serializers import (
 from common import ok, err
 from common.lib.ethereum.solc_compiler import SolidityCompiler
 from common.lib.ethereum.contract_actions import ensure_contract_actions
+from common.lib.ethereum.firefly_contracts import deploy_contract as firefly_deploy_contract
 import requests
 import json
 from apps.infra.models import Firefly
@@ -47,6 +53,157 @@ class EthereumContractViewSet(viewsets.ViewSet):
     permission_classes = [
         IsAuthenticated,
     ]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def _safe_extract_path(self, target_root: str, member_name: str) -> str:
+        normalized = os.path.normpath(member_name).replace("\\", "/")
+        if normalized.startswith("../") or normalized == ".." or os.path.isabs(normalized):
+            raise ValueError(f"Unsafe archive entry: {member_name}")
+        return os.path.join(target_root, normalized)
+
+    def _extract_archive(self, archive_path: str, target_root: str) -> None:
+        if zipfile.is_zipfile(archive_path):
+            with zipfile.ZipFile(archive_path) as archive:
+                for member in archive.infolist():
+                    if member.is_dir():
+                        continue
+                    destination = self._safe_extract_path(target_root, member.filename)
+                    os.makedirs(os.path.dirname(destination), exist_ok=True)
+                    with archive.open(member) as src, open(destination, "wb") as dst:
+                        shutil.copyfileobj(src, dst)
+            return
+        if tarfile.is_tarfile(archive_path):
+            with tarfile.open(archive_path, "r:*") as archive:
+                for member in archive.getmembers():
+                    if not member.isfile():
+                        continue
+                    destination = self._safe_extract_path(target_root, member.name)
+                    os.makedirs(os.path.dirname(destination), exist_ok=True)
+                    src = archive.extractfile(member)
+                    if src is None:
+                        continue
+                    with src, open(destination, "wb") as dst:
+                        shutil.copyfileobj(src, dst)
+            return
+        raise ValueError("Unsupported archive format. Use .zip/.tar/.tgz/.tar.gz")
+
+    def _list_solidity_files(self, root_dir: str) -> list[str]:
+        solidity_files: list[str] = []
+        for root, _, files in os.walk(root_dir):
+            for filename in files:
+                if filename.endswith(".sol"):
+                    solidity_files.append(os.path.join(root, filename))
+        return sorted(solidity_files)
+
+    def _resolve_source_entry(self, root_dir: str, requested_contract_name: str | None = None) -> str:
+        solidity_files = self._list_solidity_files(root_dir)
+        if not solidity_files:
+            raise FileNotFoundError("No Solidity source found in uploaded file")
+        if requested_contract_name:
+            exact_name = f"{requested_contract_name}.sol"
+            exact_matches = [
+                path for path in solidity_files if os.path.basename(path) == exact_name
+            ]
+            if exact_matches:
+                return exact_matches[0]
+        preferred_names = {"chaincode.sol", "contract.sol"}
+        preferred_matches = [
+            path for path in solidity_files if os.path.basename(path).lower() in preferred_names
+        ]
+        if preferred_matches:
+            return preferred_matches[0]
+        if len(solidity_files) == 1:
+            return solidity_files[0]
+        return solidity_files[0]
+
+    def _resolve_compiled_contract_name(self, compiled_data: dict, requested_contract_name: str | None = None) -> str:
+        contracts = compiled_data.get("contracts", {})
+        deployable = [key for key, value in contracts.items() if value.get("bin")]
+        if not deployable:
+            raise ValueError("No deployable contract found in compilation output")
+        deployable_names = [key.split(":")[-1] for key in deployable]
+        if requested_contract_name:
+            matches = [
+                key for key in deployable
+                if key.split(":")[-1] == requested_contract_name
+                or key.split(":")[-1].lower() == requested_contract_name.lower()
+            ]
+            if matches:
+                return matches[0].split(":")[-1]
+            if len(deployable_names) == 1:
+                logger.warning(
+                    "Requested contract name '%s' not found; falling back to sole deployable contract '%s'",
+                    requested_contract_name,
+                    deployable_names[0],
+                )
+                return deployable_names[0]
+            raise ValueError(
+                f"Contract '{requested_contract_name}' not found in compilation output. "
+                f"Available contracts: {', '.join(deployable_names)}"
+            )
+        if len(deployable_names) == 1:
+            return deployable_names[0]
+        return deployable_names[0]
+
+    def _resolve_firefly_for_env(self, env_id: str):
+        from apps.fabric.models import ResourceSet
+        from apps.ethereum.models import EthNode, EthereumResourceSet
+        from common.enums import EthNodeType
+
+        try:
+            env = EthEnvironment.objects.get(id=env_id)
+            resource_sets = ResourceSet.objects.filter(eth_environment=env)
+        except EthEnvironment.DoesNotExist:
+            env = Environment.objects.get(id=env_id)
+            resource_sets = ResourceSet.objects.filter(environment=env)
+
+        ethereum_resource_sets = EthereumResourceSet.objects.filter(resource_set__in=resource_sets)
+        system_nodes = EthNode.objects.filter(
+            fabric_resource_set__in=ethereum_resource_sets,
+            type=EthNodeType.System.value,
+        )
+        if not system_nodes.exists():
+            raise ValueError("No system nodes found for the environment")
+        node = system_nodes.first()
+        ethereum_resource_set = node.fabric_resource_set
+        if not ethereum_resource_set or not ethereum_resource_set.resource_set:
+            raise ValueError("System node has no resource set")
+        resource_set = ethereum_resource_set.resource_set
+        firefly = Firefly.objects.filter(resource_set=resource_set).first()
+        if not firefly:
+            raise ValueError("No Firefly instance found for this environment")
+        return env, firefly
+
+    def _normalize_abi(self, abi: object) -> list[dict]:
+        if isinstance(abi, str):
+            try:
+                abi = json.loads(abi)
+            except Exception as exc:
+                raise ValueError(f"Invalid ABI JSON: {exc}") from exc
+        if not isinstance(abi, list):
+            raise ValueError("Compiled ABI is not a list")
+        return abi
+
+    def _validate_constructor_args(self, abi: list[dict], constructor_args: list) -> None:
+        constructor = next(
+            (entry for entry in abi if isinstance(entry, dict) and entry.get("type") == "constructor"),
+            None,
+        )
+        if not constructor:
+            if constructor_args:
+                raise ValueError("This contract does not define a constructor. Remove constructor arguments.")
+            return
+
+        inputs = constructor.get("inputs") or []
+        expected_count = len(inputs)
+        actual_count = len(constructor_args)
+        if expected_count != actual_count:
+            expected_signature = ", ".join(
+                [f"{item.get('name') or 'arg'}:{item.get('type') or 'unknown'}" for item in inputs]
+            ) or "no arguments"
+            raise ValueError(
+                f"Constructor args mismatch. Expected {expected_count} argument(s): {expected_signature}. Got {actual_count}."
+            )
 
     def retrieve(self, request, *args, **kwargs):
         """
@@ -58,6 +215,7 @@ class EthereumContractViewSet(viewsets.ViewSet):
         try:
             contract_id = request.parser_context["kwargs"].get("pk")
             contract = EthereumContract.objects.get(id=contract_id)
+            latest_deployment = contract.deployments.order_by("-create_ts").first()
             contract_data = {
                 "id": contract.id,
                 "name": contract.name,
@@ -66,9 +224,18 @@ class EthereumContractViewSet(viewsets.ViewSet):
                 "creator": contract.creator.name,
                 "language": contract.language,
                 "create_ts": contract.create_ts,
+                "status": contract.status,
                 "contract_address": contract.contract_address,
                 "deployment_tx_hash": contract.deployment_tx_hash,
                 "contract_content": contract.contract_content,
+                "deployment": {
+                    "id": str(latest_deployment.id),
+                    "namespace": latest_deployment.namespace,
+                    "constructor_args": latest_deployment.constructor_args,
+                    "deployment_id": latest_deployment.deployment_id,
+                    "status": latest_deployment.status,
+                    "create_ts": latest_deployment.create_ts,
+                } if latest_deployment else None,
             }
             return Response(data=contract_data, status=status.HTTP_200_OK)
         except EthereumContract.DoesNotExist:
@@ -96,7 +263,7 @@ class EthereumContractViewSet(viewsets.ViewSet):
         """
         try:
             env_id = request.parser_context["kwargs"].get("environment_id")
-            contracts = EthereumContract.objects.filter(environment_id=env_id)
+            contracts = EthereumContract.objects.filter(eth_environment_id=env_id).order_by("-create_ts")
 
             contracts_list = [
                 {
@@ -106,7 +273,10 @@ class EthereumContractViewSet(viewsets.ViewSet):
                     "creator": contract.creator.name,
                     "language": contract.language,
                     "create_ts": contract.create_ts,
+                    "filename": contract.filename,
+                    "status": contract.status,
                     "contract_address": contract.contract_address,
+                    "deployment_tx_hash": contract.deployment_tx_hash,
                 }
                 for contract in contracts
             ]
@@ -114,6 +284,202 @@ class EthereumContractViewSet(viewsets.ViewSet):
         except Exception as e:
             traceback.print_exc()
             return Response(err(e.args), status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=["post"], url_path="install")
+    def install(self, request, *args, **kwargs):
+        env_id = request.parser_context["kwargs"].get("environment_id")
+        name = str(request.data.get("name") or "").strip()
+        version = str(request.data.get("version") or "").strip()
+        language = str(request.data.get("language") or "solidity").strip() or "solidity"
+        org_id = request.data.get("org_id")
+        compiler_version = str(request.data.get("compiler_version") or "").strip() or None
+        requested_contract_name = str(request.data.get("contract_name") or "").strip() or None
+        namespace = str(request.data.get("namespace") or "default").strip() or "default"
+        constructor_args = request.data.get("constructor_args") or []
+        uploaded_file = request.FILES.get("file") or request.FILES.get("archive")
+
+        if not name:
+            return Response(err("name is required"), status=status.HTTP_400_BAD_REQUEST)
+        if not version:
+            return Response(err("version is required"), status=status.HTTP_400_BAD_REQUEST)
+        if not org_id:
+            return Response(err("org_id is required"), status=status.HTTP_400_BAD_REQUEST)
+        if not uploaded_file:
+            return Response(err("file is required"), status=status.HTTP_400_BAD_REQUEST)
+        if requested_contract_name and not re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", requested_contract_name):
+            return Response(
+                err("Invalid contract_name. Use letters, numbers and underscores, and start with a letter or underscore."),
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if isinstance(constructor_args, str):
+            try:
+                constructor_args = json.loads(constructor_args)
+            except Exception:
+                return Response(err("constructor_args must be a JSON array"), status=status.HTTP_400_BAD_REQUEST)
+        if not isinstance(constructor_args, list):
+            return Response(err("constructor_args must be a JSON array"), status=status.HTTP_400_BAD_REQUEST)
+
+        contract_id = make_uuid()
+        file_path = os.path.join(ETHEREUM_CONTRACT_STORE, str(contract_id))
+        source_root = os.path.join(file_path, "src")
+
+        try:
+            env, firefly = self._resolve_firefly_for_env(env_id)
+            org = LoleidoOrganization.objects.get(id=org_id)
+
+            os.makedirs(file_path, exist_ok=True)
+            os.makedirs(source_root, exist_ok=True)
+
+            upload_name = os.path.basename(getattr(uploaded_file, "name", "contract.sol"))
+            upload_path = os.path.join(file_path, upload_name)
+            with open(upload_path, "wb") as handle:
+                for chunk in uploaded_file.chunks():
+                    handle.write(chunk)
+
+            if upload_name.lower().endswith(".sol"):
+                source_path = os.path.join(source_root, upload_name)
+                shutil.copyfile(upload_path, source_path)
+            else:
+                self._extract_archive(upload_path, source_root)
+                source_path = self._resolve_source_entry(source_root, requested_contract_name)
+
+            with open(source_path, "r", encoding="utf-8") as source_handle:
+                contract_content = source_handle.read()
+
+            contract = EthereumContract.objects.create(
+                id=contract_id,
+                name=name,
+                version=version,
+                filename=os.path.relpath(source_path, file_path).replace("\\", "/"),
+                creator=org,
+                language=language,
+                eth_environment=env if isinstance(env, EthEnvironment) else None,
+                environment=env if isinstance(env, Environment) else None,
+                contract_content=contract_content,
+                status="uploaded",
+            )
+
+            compiler = SolidityCompiler(version=compiler_version or "0.8.19")
+            is_installed, version_or_error = compiler.check_installation()
+            if not is_installed:
+                return Response(
+                    err(f"Solidity compiler not available: {version_or_error}"),
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            output_json_path = os.path.join(file_path, f"{name}.compiled.json")
+            return_code, compiled_data, error_msg = compiler.compile_contract(
+                source_path,
+                output_json_path,
+            )
+            if return_code != 0:
+                return Response(err(f"Compilation failed: {error_msg}"), status=status.HTTP_400_BAD_REQUEST)
+
+            from common.lib.ethereum.convert_contract import extract_contract_info
+
+            compiled_contract_name = self._resolve_compiled_contract_name(
+                compiled_data,
+                requested_contract_name=requested_contract_name,
+            )
+            contract_info = extract_contract_info(
+                compiled_data,
+                contract_name=compiled_contract_name,
+                constructor_params=constructor_args,
+            )
+
+            normalized_abi = self._normalize_abi(contract_info["definition"])
+            self._validate_constructor_args(normalized_abi, constructor_args)
+
+            contract.abi = normalized_abi
+            contract.bytecode = contract_info["contract"]
+            contract.status = "compiled"
+            contract.save(update_fields=["abi", "bytecode", "status", "contract_content", "updated_at"] if hasattr(contract, "updated_at") else ["abi", "bytecode", "status", "contract_content"])
+
+            logger.info(
+                "Deploying Ethereum contract via FireFly core=%s namespace=%s contract=%s constructor_args=%s",
+                firefly.core_url,
+                namespace,
+                requested_contract_name or compiled_contract_name,
+                constructor_args,
+            )
+            try:
+                deployment_result = firefly_deploy_contract(
+                    firefly.core_url,
+                    contract.abi,
+                    contract.bytecode,
+                    namespace=namespace,
+                    constructor_args=constructor_args,
+                    confirm=True,
+                    timeout=120,
+                )
+            except RuntimeError as exc:
+                contract.status = "failed"
+                contract.save(update_fields=["status"])
+                logger.error("FireFly deployment failed for contract %s: %s", contract.id, exc)
+                return Response(
+                    err(f"FireFly deployment failed: {exc}"),
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            deployment_status = deployment_result.get("status", "Unknown")
+            deployment_id = deployment_result.get("id")
+            tx_id = deployment_result.get("tx")
+            output_data = deployment_result.get("output", {})
+            contract_location = output_data.get("contractLocation", {})
+            contract_address = contract_location.get("address") or output_data.get("address")
+            tx_hash = output_data.get("transactionHash") or tx_id
+
+            contract.contract_address = contract_address
+            contract.deployment_tx_hash = tx_hash
+            contract.status = "deployed" if contract_address else "compiled"
+            contract.save(update_fields=["contract_address", "deployment_tx_hash", "status"])
+
+            EthereumDeployment.objects.create(
+                contract=contract,
+                namespace=namespace,
+                constructor_args=constructor_args,
+                contract_address=contract_address,
+                deployment_tx_hash=tx_hash,
+                deployment_id=deployment_id,
+                status=deployment_status,
+                eth_environment=env if isinstance(env, EthEnvironment) else None,
+                environment=env if isinstance(env, Environment) else None,
+            )
+
+            try:
+                ensure_contract_actions(
+                    firefly.core_url,
+                    contract.abi,
+                    requested_contract_name or compiled_contract_name,
+                    file_path,
+                    namespace=namespace,
+                    logger=logger,
+                )
+            except Exception as exc:
+                logger.warning(f"Contract actions generation failed: {str(exc)}")
+
+            return Response(
+                ok(
+                    {
+                        "contract_id": str(contract.id),
+                        "name": contract.name,
+                        "contract_name": requested_contract_name or compiled_contract_name,
+                        "compiler_version": compiler.version,
+                        "contract_address": contract_address,
+                        "transaction_hash": tx_hash,
+                        "deployment_id": deployment_id,
+                        "status": deployment_status,
+                    }
+                ),
+                status=status.HTTP_200_OK,
+            )
+        except LoleidoOrganization.DoesNotExist:
+            return Response(err("Organization not found"), status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error in Ethereum contract install: {str(e)}")
+            logger.error(f"Stack trace: {traceback.format_exc()}")
+            if os.path.exists(file_path):
+                shutil.rmtree(file_path, ignore_errors=True)
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
         method="post",

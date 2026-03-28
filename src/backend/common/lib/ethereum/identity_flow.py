@@ -2,7 +2,10 @@ import json
 import logging
 import os
 import shutil
+import tarfile
 import time
+import zipfile
+import hashlib
 
 import requests
 
@@ -52,18 +55,171 @@ class IdentityContractFlow:
         else:
             self.log.info(msg, *args)
 
-    def resolve_identity_artifacts(self):
+    def _contract_dir(self) -> str:
+        contract_dir = os.path.join(ETHEREUM_CONTRACT_STORE, "identity-contract")
+        os.makedirs(contract_dir, exist_ok=True)
+        return contract_dir
+
+    def _artifact_meta_path(self) -> str:
+        return os.path.join(self._contract_dir(), "IdentityRegistry.solc.meta.json")
+
+    def _uploaded_source_root(self) -> str:
+        return os.path.join(self._contract_dir(), "uploaded-src")
+
+    def _load_identity_artifact_meta(self) -> dict | None:
+        meta_path = self._artifact_meta_path()
+        if not os.path.exists(meta_path):
+            return None
+        try:
+            with open(meta_path, "r") as meta_file:
+                return json.load(meta_file)
+        except Exception:
+            return None
+
+    def _safe_extract_path(self, target_root: str, member_name: str) -> str:
+        normalized = os.path.normpath(member_name).replace("\\", "/")
+        if normalized.startswith("../") or normalized == ".." or os.path.isabs(normalized):
+            raise ValueError(f"Unsafe archive entry: {member_name}")
+        return os.path.join(target_root, normalized)
+
+    def _extract_contract_archive(self, archive_path: str, target_root: str) -> None:
+        if zipfile.is_zipfile(archive_path):
+            with zipfile.ZipFile(archive_path) as archive:
+                for member in archive.infolist():
+                    if member.is_dir():
+                        continue
+                    destination = self._safe_extract_path(target_root, member.filename)
+                    os.makedirs(os.path.dirname(destination), exist_ok=True)
+                    with archive.open(member) as src, open(destination, "wb") as dst:
+                        shutil.copyfileobj(src, dst)
+            return
+        if tarfile.is_tarfile(archive_path):
+            with tarfile.open(archive_path, "r:*") as archive:
+                for member in archive.getmembers():
+                    if not member.isfile():
+                        continue
+                    destination = self._safe_extract_path(target_root, member.name)
+                    os.makedirs(os.path.dirname(destination), exist_ok=True)
+                    src = archive.extractfile(member)
+                    if src is None:
+                        continue
+                    with src, open(destination, "wb") as dst:
+                        shutil.copyfileobj(src, dst)
+            return
+        raise ValueError("Unsupported archive format. Please upload zip/tar/tgz source bundle.")
+
+    def _list_solidity_files(self, root_dir: str) -> list[str]:
+        solidity_files: list[str] = []
+        for root, _, files in os.walk(root_dir):
+            for filename in files:
+                if filename.endswith(".sol"):
+                    solidity_files.append(os.path.join(root, filename))
+        return sorted(solidity_files)
+
+    def _hash_file(self, file_path: str) -> str:
+        digest = hashlib.sha256()
+        with open(file_path, "rb") as handle:
+            while True:
+                chunk = handle.read(1024 * 1024)
+                if not chunk:
+                    break
+                digest.update(chunk)
+        return digest.hexdigest()
+
+    def _hash_solidity_tree(self, root_dir: str) -> str:
+        digest = hashlib.sha256()
+        for file_path in self._list_solidity_files(root_dir):
+            rel_path = os.path.relpath(file_path, root_dir).replace("\\", "/")
+            digest.update(rel_path.encode("utf-8"))
+            with open(file_path, "rb") as handle:
+                while True:
+                    chunk = handle.read(1024 * 1024)
+                    if not chunk:
+                        break
+                    digest.update(chunk)
+        return digest.hexdigest()
+
+    def _resolve_uploaded_entry_source(self, source_root: str) -> str:
+        solidity_files = self._list_solidity_files(source_root)
+        if not solidity_files:
+            raise FileNotFoundError("No Solidity source found in uploaded archive")
+        preferred = [
+            path for path in solidity_files if os.path.basename(path) == "IdentityRegistry.sol"
+        ]
+        if preferred:
+            return preferred[0]
+        if len(solidity_files) == 1:
+            return solidity_files[0]
+        raise ValueError(
+            "Archive contains multiple Solidity files. Keep the main contract as IdentityRegistry.sol."
+        )
+
+    def _resolve_compiled_contract_name(
+        self,
+        compiled_data: dict,
+        preferred_source_path: str | None = None,
+    ) -> str:
+        contracts = compiled_data.get("contracts", {})
+        deployable = [
+            key for key, value in contracts.items() if value.get("bin")
+        ]
+        if not deployable:
+            raise ValueError("No deployable contract found in compilation output")
+        identity_matches = [key for key in deployable if key.endswith(":IdentityRegistry")]
+        if identity_matches:
+            return "IdentityRegistry"
+        if preferred_source_path:
+            preferred_name = os.path.basename(preferred_source_path)
+            source_matches = [
+                key for key in deployable if key.split(":")[0].endswith(preferred_name)
+            ]
+            if len(source_matches) == 1:
+                return source_matches[0].split(":")[-1]
+            preferred_stem = os.path.splitext(preferred_name)[0]
+            stem_matches = [
+                key for key in source_matches if key.endswith(f":{preferred_stem}")
+            ]
+            if stem_matches:
+                return stem_matches[0].split(":")[-1]
+        if len(deployable) == 1:
+            return deployable[0].split(":")[-1]
+        raise ValueError(
+            "Compilation produced multiple deployable contracts. Keep the main contract as IdentityRegistry or leave only one deployable contract."
+        )
+
+    def resolve_identity_artifacts(self, source_archive_path: str | None = None, compiler_version: str | None = None):
         repo_root = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "../../../../..")
         )
-        contract_dir = os.path.join(ETHEREUM_CONTRACT_STORE, "identity-contract")
-        os.makedirs(contract_dir, exist_ok=True)
+        contract_dir = self._contract_dir()
         abi_path = os.path.join(contract_dir, "IdentityRegistry.abi")
         bin_path = os.path.join(contract_dir, "IdentityRegistry.bin")
         sol_copy_path = os.path.join(contract_dir, "IdentityRegistry.sol")
-        meta_path = os.path.join(contract_dir, "IdentityRegistry.solc.meta.json")
+        meta_path = self._artifact_meta_path()
+        uploaded_source_root = self._uploaded_source_root()
+        existing_meta = self._load_identity_artifact_meta()
 
-        if not os.path.exists(sol_copy_path):
+        selected_source_path = None
+        source_mode = "preset"
+        source_archive_name = None
+
+        if source_archive_path:
+            if os.path.exists(uploaded_source_root):
+                shutil.rmtree(uploaded_source_root)
+            os.makedirs(uploaded_source_root, exist_ok=True)
+            self._extract_contract_archive(source_archive_path, uploaded_source_root)
+            selected_source_path = self._resolve_uploaded_entry_source(uploaded_source_root)
+            source_mode = "archive"
+            source_archive_name = os.path.basename(source_archive_path)
+        elif os.path.exists(uploaded_source_root):
+            try:
+                selected_source_path = self._resolve_uploaded_entry_source(uploaded_source_root)
+                source_mode = "archive"
+                source_archive_name = (existing_meta or {}).get("source_archive")
+            except Exception:
+                selected_source_path = None
+
+        if not selected_source_path and not os.path.exists(sol_copy_path):
             candidate_paths = [
                 os.path.join(
                     repo_root,
@@ -95,19 +251,23 @@ class IdentityContractFlow:
                     "IdentityRegistry.sol not found under opt/ethereum-contracts or geth_identity_contract/contracts"
                 )
             shutil.copyfile(source_path, sol_copy_path)
+        if not selected_source_path:
+            selected_source_path = sol_copy_path
 
-        compiler = SolidityCompiler()
+        compiler = SolidityCompiler(version=compiler_version or "0.8.19")
+        source_hash = (
+            self._hash_solidity_tree(uploaded_source_root)
+            if source_mode == "archive"
+            else self._hash_file(selected_source_path)
+        )
         expected_meta = {
             "compiler_version": compiler.version,
             "evm_version": compiler.evm_version,
+            "source_mode": source_mode,
+            "source_file": os.path.relpath(selected_source_path, contract_dir).replace("\\", "/"),
+            "source_archive": source_archive_name,
+            "source_hash": source_hash,
         }
-        existing_meta = None
-        if os.path.exists(meta_path):
-            try:
-                with open(meta_path, "r") as meta_file:
-                    existing_meta = json.load(meta_file)
-            except Exception:
-                existing_meta = None
 
         if (
             not os.path.exists(abi_path)
@@ -119,30 +279,49 @@ class IdentityContractFlow:
                 raise Exception(
                     f"Solidity compiler not available: {version_or_error}"
                 )
-            output_json_path = os.path.join(contract_dir, "IdentityRegistry.json")
+            output_json_path = os.path.join(
+                contract_dir,
+                f"{os.path.splitext(os.path.basename(selected_source_path))[0]}.json",
+            )
             return_code, compiled_data, error_msg = compiler.compile_contract(
-                sol_copy_path, output_json_path
+                selected_source_path, output_json_path
             )
             if return_code != 0:
                 raise Exception(f"Compilation failed: {error_msg}")
+            contract_name = self._resolve_compiled_contract_name(
+                compiled_data,
+                preferred_source_path=selected_source_path,
+            )
             contract_info = extract_contract_info(
-                compiled_data, contract_name="IdentityRegistry"
+                compiled_data, contract_name=contract_name
             )
             with open(abi_path, "w") as abi_file:
                 json.dump(contract_info["definition"], abi_file, indent=2)
             with open(bin_path, "w") as bin_file:
                 bin_file.write(contract_info["contract"])
             with open(meta_path, "w") as meta_file:
-                json.dump(expected_meta, meta_file, indent=2)
+                json.dump(
+                    {
+                        **expected_meta,
+                        "contract_name": contract_name,
+                    },
+                    meta_file,
+                    indent=2,
+                )
+        else:
+            contract_name = (existing_meta or {}).get("contract_name") or "IdentityRegistry"
         with open(abi_path, "r") as abi_file:
             abi = json.load(abi_file)
         with open(bin_path, "r") as bin_file:
             bytecode = bin_file.read().strip()
         if not bytecode:
             raise ValueError("IdentityRegistry bytecode is empty")
-        return abi, bytecode
+        return abi, bytecode, contract_name, {
+            **expected_meta,
+            "contract_name": contract_name,
+        }
 
-    def build_identity_ffi(self, abi: list) -> dict:
+    def build_identity_ffi(self, abi: list, contract_name: str = "IdentityRegistry") -> dict:
         methods = []
         for entry in abi:
             if entry.get("type") != "function":
@@ -172,8 +351,8 @@ class IdentityContractFlow:
             )
         return {
             "namespace": "default",
-            "name": "IdentityRegistry",
-            "description": "Identity registry contract interface",
+            "name": contract_name,
+            "description": f"{contract_name} contract interface",
             "version": "1.0",
             "methods": methods,
         }
@@ -302,20 +481,20 @@ class IdentityContractFlow:
             api_name=api_name,
         )
 
-    def generate_identity_ffi(self, firefly_core_url: str, abi: list) -> dict:
+    def generate_identity_ffi(self, firefly_core_url: str, abi: list, contract_name: str = "IdentityRegistry") -> dict:
         return firefly_generate_ffi(
             firefly_core_url,
             abi,
-            name="IdentityRegistry",
+            name=contract_name,
             namespace="default",
             version="1.0",
-            description="Identity registry contract interface",
+            description=f"{contract_name} contract interface",
         )
 
-    def register_identity_ffi(self, firefly_core_url: str, abi: list) -> dict:
+    def register_identity_ffi(self, firefly_core_url: str, abi: list, contract_name: str = "IdentityRegistry") -> dict:
         contract_dir = os.path.join(ETHEREUM_CONTRACT_STORE, "identity-contract")
         os.makedirs(contract_dir, exist_ok=True)
-        existing = self.find_identity_interface_id(firefly_core_url)
+        existing = self.find_identity_interface_id(firefly_core_url, contract_name)
         if existing:
             self._log_action(
                 "info",
@@ -345,12 +524,12 @@ class IdentityContractFlow:
                 return {"id": existing, "existing": True}
         try:
             self._log_action("info", "ffi_generate_start", core=firefly_core_url)
-            ffi = self.generate_identity_ffi(firefly_core_url, abi)
+            ffi = self.generate_identity_ffi(firefly_core_url, abi, contract_name)
             ffi = self.normalize_identity_ffi(ffi, version_suffix="1")
             self.write_identity_ffi(ffi)
             self.load_identity_actions(ffi)
         except Exception as exc:
-            fallback_ffi = self.build_identity_ffi(abi)
+            fallback_ffi = self.build_identity_ffi(abi, contract_name)
             fallback_ffi = self.normalize_identity_ffi(fallback_ffi, version_suffix="1")
             with open(os.path.join(contract_dir, "identityFFI.generate_error.log"), "w") as handle:
                 handle.write(str(exc))
@@ -379,7 +558,7 @@ class IdentityContractFlow:
         )
         if status_code not in [200, 201, 202]:
             if isinstance(payload, dict) and payload.get("error", "").startswith("FF10127"):
-                existing = self.find_identity_interface_id(firefly_core_url)
+                existing = self.find_identity_interface_id(firefly_core_url, contract_name)
                 if existing:
                     return {"id": existing, "existing": True}
             raise Exception(
@@ -388,10 +567,10 @@ class IdentityContractFlow:
             )
         return payload
 
-    def find_identity_interface_id(self, firefly_core_url: str) -> str | None:
+    def find_identity_interface_id(self, firefly_core_url: str, contract_name: str = "IdentityRegistry") -> str | None:
         response = requests.get(
             f"http://{firefly_core_url}/api/v1/namespaces/default/contracts/interfaces",
-            params={"name": "IdentityRegistry"},
+            params={"name": contract_name},
             timeout=30,
         )
         if response.status_code != 200:
@@ -965,9 +1144,17 @@ class IdentityContractFlow:
         deployment = IdentityDeployment.objects.filter(eth_environment=env).first()
         if deployment and deployment.api_name:
             return deployment.api_name
+        if deployment and deployment.contract_name:
+            return deployment.contract_name
         return "IdentityRegistry"
 
-    def deploy_identity_contract(self, env_id):
+    def deploy_identity_contract(
+        self,
+        env_id,
+        source_archive_path: str | None = None,
+        compiler_version: str | None = None,
+        contract_name: str | None = None,
+    ):
         env = EthEnvironment.objects.get(id=env_id)
         self._log_action("info", "deploy_start", env=env.id)
         deployment, _ = IdentityDeployment.objects.get_or_create(
@@ -978,125 +1165,111 @@ class IdentityContractFlow:
         deployment.save(update_fields=["status", "error", "updated_at"])
         env.identity_contract_status = "SETTINGUP"
         env.save(update_fields=["identity_contract_status"])
+        try:
+            abi, bytecode, compiled_contract_name, artifact_meta = self.resolve_identity_artifacts(
+                source_archive_path=source_archive_path,
+                compiler_version=compiler_version,
+            )
+            requested_contract_name = (contract_name or "").strip() or None
+            display_contract_name = (
+                requested_contract_name
+                or (deployment.contract_name or "").strip()
+                or compiled_contract_name
+            )
+            firefly_core_url = self.get_firefly_core_url(env)
+            self._log_action("info", "deploy_core", env=env.id, core=firefly_core_url)
 
-        abi, bytecode = self.resolve_identity_artifacts()
-        firefly_core_url = self.get_firefly_core_url(env)
-        self._log_action("info", "deploy_core", env=env.id, core=firefly_core_url)
+            deployment_result = firefly_deploy_contract(
+                firefly_core_url,
+                abi,
+                bytecode,
+                namespace="default",
+                constructor_args=[],
+                confirm=True,
+                timeout=120,
+            )
+            self._log_action("info", "deploy_response_ok", env=env.id)
 
-        deployment_result = firefly_deploy_contract(
-            firefly_core_url,
-            abi,
-            bytecode,
-            namespace="default",
-            constructor_args=[],
-            confirm=True,
-            timeout=120,
-        )
-        self._log_action("info", "deploy_response_ok", env=env.id)
+            deployment_status = deployment_result.get("status", "Unknown")
+            output_data = deployment_result.get("output", {})
+            contract_location = output_data.get("contractLocation", {})
+            contract_address = contract_location.get("address") or output_data.get("address")
+            tx_hash = output_data.get("transactionHash") or deployment_result.get("tx")
+            deployment_id = deployment_result.get("id")
 
-        deployment_status = deployment_result.get("status", "Unknown")
-        output_data = deployment_result.get("output", {})
-        contract_location = output_data.get("contractLocation", {})
-        contract_address = contract_location.get("address") or output_data.get("address")
-        tx_hash = output_data.get("transactionHash") or deployment_result.get("tx")
-        deployment_id = deployment_result.get("id")
+            if str(deployment_status).lower() in ["succeeded", "success", "started"]:
+                mapped_status = "STARTED"
+            elif str(deployment_status).lower() in ["pending", "running"]:
+                mapped_status = "SETTINGUP"
+            else:
+                mapped_status = "FAILED"
 
-        if str(deployment_status).lower() in ["succeeded", "success", "started"]:
-            mapped_status = "STARTED"
-        elif str(deployment_status).lower() in ["pending", "running"]:
-            mapped_status = "SETTINGUP"
-        else:
-            mapped_status = "FAILED"
+            deployment.contract_name = display_contract_name
+            deployment.contract_address = contract_address
+            deployment.deployment_tx_hash = tx_hash
+            deployment.deployment_id = deployment_id
+            deployment.status = mapped_status
+            deployment.save(
+                update_fields=[
+                    "contract_name",
+                    "contract_address",
+                    "deployment_tx_hash",
+                    "deployment_id",
+                    "status",
+                    "updated_at",
+                ]
+            )
+            env.identity_contract_status = mapped_status
+            env.save(update_fields=["identity_contract_status"])
+            self._log_action(
+                "info",
+                "deploy_status",
+                env=env.id,
+                status=mapped_status,
+                address=contract_address,
+                tx=tx_hash,
+            )
 
-        deployment.contract_address = contract_address
-        deployment.deployment_tx_hash = tx_hash
-        deployment.deployment_id = deployment_id
-        deployment.status = mapped_status
-        deployment.save(
-            update_fields=[
-                "contract_address",
-                "deployment_tx_hash",
-                "deployment_id",
-                "status",
-                "updated_at",
-            ]
-        )
-        env.identity_contract_status = mapped_status
-        env.save(update_fields=["identity_contract_status"])
-        self._log_action(
-            "info",
-            "deploy_status",
-            env=env.id,
-            status=mapped_status,
-            address=contract_address,
-            tx=tx_hash,
-        )
-
-        if mapped_status in ["STARTED", "SETTINGUP"]:
-            try:
-                api_name = None
-                if contract_address:
-                    api_name = f"IdentityRegistry-{contract_address[-6:]}"
-                else:
-                    api_name = f"IdentityRegistry-{int(time.time())}"
-                system_rs = env.resource_sets.filter(
-                    ethereum_sub_resource_set__org_type=1
-                ).first()
-                if not system_rs:
-                    raise Exception("System resource set not found for identity deploy")
-                firefly = Firefly.objects.filter(resource_set=system_rs).first()
-                if not firefly:
-                    raise Exception("System firefly not found for identity deploy")
-                self._log_action(
-                    "info",
-                    "deploy_register_start",
-                    env=env.id,
-                    resource_set=system_rs.id,
-                    core=firefly.core_url,
-                )
-                ffi_response = self.register_identity_ffi(firefly.core_url, abi)
-                interface_id = (
-                    ffi_response.get("id")
-                    or ffi_response.get("interface", {}).get("id")
-                )
-                listeners: list[dict] = []
-                self._log_action(
-                    "info",
-                    "deploy_register_interface",
-                    core=firefly.core_url,
-                    interface=interface_id,
-                )
-                if interface_id and contract_address:
-                    try:
-                        api_response = self.register_identity_api(
-                            firefly.core_url,
-                            interface_id,
-                            contract_address,
-                            api_name,
-                        )
-                        listeners = self.register_identity_listeners(
-                            firefly.core_url,
-                            interface_id,
-                            contract_address,
-                            api_name,
-                            abi,
-                        )
-                    except Exception as exc:
-                        error_text = str(exc)
-                        if "FF10303" in error_text or "interface" in error_text.lower():
-                            self._log_action(
-                                "warning",
-                                "deploy_api_retry_interface_missing",
-                                core=firefly.core_url,
-                                interface=interface_id,
-                            )
-                            ffi_response = self.register_identity_ffi(
-                                firefly.core_url, abi
-                            )
-                            interface_id = (
-                                ffi_response.get("id")
-                                or ffi_response.get("interface", {}).get("id")
-                            )
+            if mapped_status in ["STARTED", "SETTINGUP"]:
+                try:
+                    api_name = None
+                    if contract_address:
+                        api_name = f"{display_contract_name}-{contract_address[-6:]}"
+                    else:
+                        api_name = f"{display_contract_name}-{int(time.time())}"
+                    system_rs = env.resource_sets.filter(
+                        ethereum_sub_resource_set__org_type=1
+                    ).first()
+                    if not system_rs:
+                        raise Exception("System resource set not found for identity deploy")
+                    firefly = Firefly.objects.filter(resource_set=system_rs).first()
+                    if not firefly:
+                        raise Exception("System firefly not found for identity deploy")
+                    self._log_action(
+                        "info",
+                        "deploy_register_start",
+                        env=env.id,
+                        resource_set=system_rs.id,
+                        core=firefly.core_url,
+                    )
+                    ffi_response = self.register_identity_ffi(
+                        firefly.core_url,
+                        abi,
+                        display_contract_name,
+                    )
+                    interface_id = (
+                        ffi_response.get("id")
+                        or ffi_response.get("interface", {}).get("id")
+                    )
+                    listeners: list[dict] = []
+                    self._log_action(
+                        "info",
+                        "deploy_register_interface",
+                        core=firefly.core_url,
+                        interface=interface_id,
+                    )
+                    if interface_id and contract_address:
+                        try:
                             api_response = self.register_identity_api(
                                 firefly.core_url,
                                 interface_id,
@@ -1110,63 +1283,115 @@ class IdentityContractFlow:
                                 api_name,
                                 abi,
                             )
-                        else:
-                            raise
+                        except Exception as exc:
+                            error_text = str(exc)
+                            if "FF10303" in error_text or "interface" in error_text.lower():
+                                self._log_action(
+                                    "warning",
+                                    "deploy_api_retry_interface_missing",
+                                    core=firefly.core_url,
+                                    interface=interface_id,
+                                )
+                                ffi_response = self.register_identity_ffi(
+                                    firefly.core_url,
+                                    abi,
+                                    display_contract_name,
+                                )
+                                interface_id = (
+                                    ffi_response.get("id")
+                                    or ffi_response.get("interface", {}).get("id")
+                                )
+                                api_response = self.register_identity_api(
+                                    firefly.core_url,
+                                    interface_id,
+                                    contract_address,
+                                    api_name,
+                                )
+                                listeners = self.register_identity_listeners(
+                                    firefly.core_url,
+                                    interface_id,
+                                    contract_address,
+                                    api_name,
+                                    abi,
+                                )
+                            else:
+                                raise
+                        self._log_action(
+                            "info",
+                            "deploy_register_api",
+                            core=firefly.core_url,
+                            api_id=api_response.get("id"),
+                            api_name=api_name,
+                        )
+                        deployment.interface_id = interface_id
+                        deployment.api_id = api_response.get("id")
+                        deployment.api_name = api_name
+                        deployment.api_address = firefly_api_base(
+                            firefly.core_url, api_name, namespace="default"
+                        )
+                        deployment.firefly_listeners = listeners
+                        deployment.save(
+                            update_fields=[
+                                "interface_id",
+                                "api_id",
+                                "api_name",
+                                "api_address",
+                                "firefly_listeners",
+                                "updated_at",
+                            ]
+                        )
+                    self._log_action("info", "deploy_register_done", env=env.id)
+                    org_result = self.register_memberships_for_env(env)
                     self._log_action(
                         "info",
-                        "deploy_register_api",
-                        core=firefly.core_url,
-                        api_id=api_response.get("id"),
-                        api_name=api_name,
+                        "deploy_org_registration",
+                        env=env.id,
+                        success=org_result.get("success"),
+                        failed=org_result.get("failed"),
                     )
-                    deployment.interface_id = interface_id
-                    deployment.api_id = api_response.get("id")
-                    deployment.api_name = api_name
-                    deployment.api_address = firefly_api_base(
-                        firefly.core_url, api_name, namespace="default"
+                except Exception as exc:
+                    deployment.error = f"FFI registration failed: {exc}"
+                    deployment.save(update_fields=["error", "updated_at"])
+                    self._log_action(
+                        "warning",
+                        "deploy_register_failed",
+                        env=env.id,
+                        error=exc,
                     )
-                    deployment.firefly_listeners = listeners
-                    deployment.save(
-                        update_fields=[
-                            "interface_id",
-                            "api_id",
-                            "api_name",
-                            "api_address",
-                            "firefly_listeners",
-                            "updated_at",
-                        ]
-                    )
-                self._log_action("info", "deploy_register_done", env=env.id)
-                org_result = self.register_memberships_for_env(env)
-                self._log_action(
-                    "info",
-                    "deploy_org_registration",
-                    env=env.id,
-                    success=org_result.get("success"),
-                    failed=org_result.get("failed"),
-                )
-            except Exception as exc:
-                deployment.error = f"FFI registration failed: {exc}"
-                deployment.save(update_fields=["error", "updated_at"])
-                self._log_action(
-                    "warning",
-                    "deploy_register_failed",
-                    env=env.id,
-                    error=exc,
-                )
 
-        self._log_action(
-            "info",
-            "deploy_done",
-            env=env.id,
-            status=mapped_status,
-        )
-        return {
-            "status": mapped_status,
-            "contract_address": contract_address,
-            "transaction_hash": tx_hash,
-            "deployment_id": deployment_id,
-        }
+            self._log_action(
+                "info",
+                "deploy_done",
+                env=env.id,
+                status=mapped_status,
+            )
+            return {
+                "status": mapped_status,
+                "contract_name": display_contract_name,
+                "contract_address": contract_address,
+                "transaction_hash": tx_hash,
+                "deployment_id": deployment_id,
+                "compiler_version": artifact_meta.get("compiler_version"),
+            }
+        except Exception as exc:
+            deployment.status = "FAILED"
+            deployment.error = str(exc)
+            deployment.save(update_fields=["status", "error", "updated_at"])
+            env.identity_contract_status = "FAILED"
+            env.save(update_fields=["identity_contract_status"])
+            self._log_action("warning", "deploy_failed", env=env.id, error=exc)
+            raise
+        finally:
+            if source_archive_path and os.path.exists(source_archive_path):
+                try:
+                    os.remove(source_archive_path)
+                except Exception:
+                    self._log_action(
+                        "warning",
+                        "archive_cleanup_failed",
+                        env=env.id,
+                        path=source_archive_path,
+                    )
 
     def redeploy_and_sync(self, env_id):
         self._log_action("info", "redeploy_sync_start", env=env_id)
