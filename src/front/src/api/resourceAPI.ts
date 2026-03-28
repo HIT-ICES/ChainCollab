@@ -527,6 +527,77 @@ export const getChainCodeList = async (envId: string) => {
     }
 }
 
+export const getEthContractList = async (envId: string) => {
+    try {
+        const response = await api.get(`/eth-environments/${envId}/contracts`)
+        const items = response.data?.data ?? response.data ?? []
+        return items.map((item: any) => {
+            return {
+                key: item.id,
+                id: item.id,
+                name: item.name,
+                version: item.version,
+                language: item.language,
+                creator: item.creator,
+                filename: item.filename,
+                status: item.status,
+                contract_address: item.contract_address,
+                deployment_tx_hash: item.deployment_tx_hash,
+                create_time: item.create_ts,
+            }
+        })
+    } catch (error) {
+        throwApiError(error, "Get ethereum contract list failed");
+    }
+}
+
+export const getEthContractDetail = async (envId: string, contractId: string) => {
+    try {
+        const response = await api.get(`/eth-environments/${envId}/contracts/${contractId}`)
+        return response.data?.data ?? response.data
+    } catch (error) {
+        throwApiError(error, "Get ethereum contract detail failed");
+    }
+}
+
+export const installEthContract = async ({
+    envId,
+    name,
+    version,
+    language = "solidity",
+    file,
+    orgId,
+    compilerVersion,
+    contractName,
+    namespace = "default",
+    constructorArgs = [],
+}: any) => {
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("version", version);
+    formData.append("language", language);
+    formData.append("file", file);
+    formData.append("org_id", orgId);
+    formData.append("namespace", namespace);
+    formData.append("constructor_args", JSON.stringify(constructorArgs));
+    if (compilerVersion) {
+        formData.append("compiler_version", compilerVersion);
+    }
+    if (contractName) {
+        formData.append("contract_name", contractName);
+    }
+    try {
+        const response = await api.post(`/eth-environments/${envId}/contracts/install`, formData, {
+            headers: {
+                "Content-Type": "multipart/form-data"
+            }
+        })
+        return response.data?.data ?? response.data;
+    } catch (error) {
+        throwApiError(error, "Install ethereum contract failed");
+    }
+}
+
 // ETH ENV API
 
 export const InitEthEnv = async (envId: string) => {
@@ -575,11 +646,52 @@ export const StartFireflyForEthEnv = async (envId: string) => {
     }
 }
 
-export const InstallIdentityContract = async (envId: string, force: boolean = false) => {
+export const InstallIdentityContract = async (
+    envId: string,
+    options: {
+        force?: boolean,
+        compilerVersion?: string | null,
+        archive?: File | null,
+        contractName?: string | null,
+    } = {}
+) => {
     try {
-        const response = await api.post(`/eth-environments/${envId}/identity-contract/install`, {
+        const { force = false, compilerVersion = null, archive = null, contractName = null } = options;
+        const hasArchive = archive instanceof File;
+        if (hasArchive) {
+            const payload = new FormData();
+            if (archive) {
+                payload.append("archive", archive);
+            }
+            if (force) {
+                payload.append("force", "true");
+            }
+            if (compilerVersion) {
+                payload.append("compiler_version", compilerVersion);
+            }
+            if (contractName) {
+                payload.append("contract_name", contractName);
+            }
+            const response = await api.post(
+                `/eth-environments/${envId}/identity-contract/install`,
+                payload,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data"
+                    }
+                }
+            )
+            return response.data;
+        }
+        const payload = {
             ...(force ? { force: true } : {}),
-        })
+            ...(compilerVersion ? { compiler_version: compilerVersion } : {}),
+            ...(contractName ? { contract_name: contractName } : {}),
+        };
+        const response = await api.post(
+            `/eth-environments/${envId}/identity-contract/install`,
+            payload
+        )
         return response.data;
     } catch (error) {
         throwApiError(error, "Install identity contract failed");

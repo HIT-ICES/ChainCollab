@@ -43,7 +43,6 @@ import {
   ActivateEthEnv,
   InitFireflyForEthEnv,
   StartFireflyForEthEnv,
-  InstallIdentityContract,
   getIdentityContractDetail,
   redeployIdentityContract,
   getChainlinkDetailForEthEnv,
@@ -111,7 +110,6 @@ const requestDmnDecisionTestSample = {
   decisionId: "Decision_Eligibility",
   inputData: JSON.stringify({ applicant: { age: 20 } }),
 };
-
 
 import { useEnvInfo, useMembershipListData } from './hooks'
 import { useAppSelector } from '@/redux/hooks'
@@ -198,7 +196,6 @@ const Overview: React.FC = () => {
   const [setupRelayerContractLoading, setSetupRelayerContractLoading] = useState(false)
   const [setupRelayerFireflyLoading, setSetupRelayerFireflyLoading] = useState(false)
   const [relayerNodeActionLoading, setRelayerNodeActionLoading] = useState(false)
-  const [setupIdentityLoading, setSetupIdentityLoading] = useState(false)
 
   const [detailOpen, setDetailOpen] = useState(false)
   const [detailType, setDetailType] = useState("")
@@ -1506,25 +1503,6 @@ const Overview: React.FC = () => {
     }
   }
 
-  const handleSetUpIdentityContractOnly = async () => {
-    try {
-      setSetupIdentityLoading(true)
-      if (currentEnvType !== "Ethereum") {
-        message.warning("Identity contract only supports Ethereum environment")
-        return
-      }
-      const identityRes = await InstallIdentityContract(currentEnvId, shouldForceRetry(taskMap.identity))
-      if (identityRes?.task_id) {
-        await startTaskPolling(identityRes.task_id, "Ethereum Identity Contract Install")
-      }
-      setSync()
-    } catch (error: any) {
-      message.error(extractErrorMessage(error, "Setup identity contract failed"))
-    } finally {
-      setSetupIdentityLoading(false)
-    }
-  }
-
   const formatWei = (wei: string | null | undefined) => {
     if (!wei || typeof wei !== "string") {
       return "-"
@@ -2088,8 +2066,8 @@ const Overview: React.FC = () => {
                     className="nodrag nopan"
                     size="small"
                     variant="outlined"
-                    loading={setupIdentityLoading}
-                    onClick={handleSetUpIdentityContractOnly}
+                    loading={false}
+                    onClick={() => navigate(`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/ethereum/smartcontract`)}
                     disabled={
                       currentEnvType !== "Ethereum" ||
                       !ethSystemAccountReady ||
@@ -2975,6 +2953,9 @@ const Overview: React.FC = () => {
             ) : (
               <>
                 <div>
+                  Contract Name: {detailPayload?.deployment?.contract_name || "-"}
+                </div>
+                <div>
                   Firefly Core: {detailPayload?.firefly_core_url || "-"}
                 </div>
                 <div>
@@ -2982,6 +2963,12 @@ const Overview: React.FC = () => {
                 </div>
                 <div>
                   Firefly API Base: {detailPayload?.deployment?.firefly_api_base || "-"}
+                </div>
+                <div>
+                  Compiler Version: {detailPayload?.artifacts?.compiler_version || "-"}
+                </div>
+                <div>
+                  Source File: {detailPayload?.artifacts?.source_file || "-"}
                 </div>
                 <Form form={callForm} layout="vertical">
                   <Form.Item label="Quick Actions">

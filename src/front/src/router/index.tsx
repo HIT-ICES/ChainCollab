@@ -40,6 +40,7 @@ const MembershipDetailInEnv = lazy(() => import("@/views/Environment/Dashboard/O
 const BPMNOverview = lazy(() => import("@/views/BPMN/Translation/BpmnDetail"));
 const DmnOverview = lazy(() => import("@/views/BPMN/Dmn"));
 const ChainlinkJobs = lazy(() => import("@/views/Environment/Ethereum/ChainlinkJobs"));
+const SmartContract = lazy(() => import("@/views/Environment/Ethereum/SmartContract"));
 
 const withLoadingComponent = (Comp: JSX.Element) => (
   <React.Suspense fallback={<SkeletonLoading />}>{Comp}</React.Suspense>
@@ -246,6 +247,13 @@ const routes: routesType[] = [
                     element: withLoadingComponent(<FireflyDetail />),
                     meta: {
                       title: "FireflyDetail",
+                    },
+                  },
+                  {
+                    path: "/orgs/:org_id/consortia/:consortium_id/envs/:env_id/ethereum/smartcontract",
+                    element: withLoadingComponent(<SmartContract />),
+                    meta: {
+                      title: "SmartContract",
                     },
                   },
                   {

@@ -118,28 +118,65 @@ class SolidityCompiler:
     def _run_docker_solc(self, contract_path: str):
         workdir = os.path.abspath(os.path.dirname(contract_path) or ".")
         filename = os.path.basename(contract_path)
-        cmd = [
-            "docker",
-            "run",
-            "--rm",
-            "-v",
-            f"{workdir}:/workspace",
-            "-w",
-            "/workspace",
-            os.environ.get("SOLC_DOCKER_IMAGE", "ethereum/solc:stable"),
-            filename,
-            "--evm-version",
-            self.evm_version,
-            "--combined-json",
-            "abi,bin,metadata",
-        ]
-        logger.info(f"Falling back to docker solc: {' '.join(cmd)}")
-        return subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            timeout=120,
-        )
+        last_result = None
+        last_error = None
+        for image in self._docker_image_candidates():
+            cmd = [
+                "docker",
+                "run",
+                "--rm",
+                "-v",
+                f"{workdir}:/workspace",
+                "-w",
+                "/workspace",
+                image,
+                filename,
+                "--evm-version",
+                self.evm_version,
+                "--combined-json",
+                "abi,bin,metadata",
+            ]
+            logger.info(f"Falling back to docker solc: {' '.join(cmd)}")
+            try:
+                result = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=120,
+                )
+                last_result = result
+                if result.returncode == 0:
+                    return result
+                logger.warning(
+                    "Docker solc image %s failed: %s",
+                    image,
+                    result.stderr or result.stdout,
+                )
+            except Exception as exc:
+                last_error = exc
+                logger.warning(f"Docker solc image {image} failed: {exc}")
+        if last_result is not None:
+            return last_result
+        raise last_error or RuntimeError("docker solc unavailable")
+
+    def _docker_image_candidates(self) -> list[str]:
+        candidates: list[str] = []
+        env_image = os.environ.get("SOLC_DOCKER_IMAGE")
+        if env_image:
+            candidates.append(env_image)
+        if self.version:
+            candidates.extend(
+                [
+                    f"ethereum/solc:{self.version}",
+                    f"ethereum/solc:v{self.version}",
+                ]
+            )
+        candidates.append("ethereum/solc:stable")
+        deduped: list[str] = []
+        for candidate in candidates:
+            if candidate and candidate not in deduped:
+                deduped.append(candidate)
+        return deduped
 
     @staticmethod
     def extract_pragma_version(source_code: str) -> Optional[str]:
@@ -225,22 +262,25 @@ class SolidityCompiler:
             except Exception as e:
                 logger.warning(f"Local solc version check failed: {str(e)}")
         try:
-            result = subprocess.run(
-                [
-                    "docker",
-                    "run",
-                    "--rm",
-                    os.environ.get("SOLC_DOCKER_IMAGE", "ethereum/solc:stable"),
-                    "--version",
-                ],
-                capture_output=True,
-                text=True,
-                timeout=30,
-            )
-            if result.returncode == 0:
-                version_line = result.stdout.split("\n")[0] if result.stdout else "Docker solc"
-                return True, f"docker:{version_line}"
-            return False, result.stderr or "docker solc unavailable"
+            docker_errors = []
+            for image in self._docker_image_candidates():
+                result = subprocess.run(
+                    [
+                        "docker",
+                        "run",
+                        "--rm",
+                        image,
+                        "--version",
+                    ],
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                )
+                if result.returncode == 0:
+                    version_line = result.stdout.split("\n")[0] if result.stdout else image
+                    return True, f"docker:{version_line}"
+                docker_errors.append(result.stderr or result.stdout or image)
+            return False, "; ".join([msg for msg in docker_errors if msg]) or "docker solc unavailable"
         except FileNotFoundError:
             return False, "solc not found and docker fallback is unavailable"
         except subprocess.TimeoutExpired:
