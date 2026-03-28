@@ -23,6 +23,14 @@ def random_name(prefix=""):
     return "%s-%s" % (prefix, uuid.uuid4().hex)
 
 
+def random_agent_name():
+    return random_name("agent")
+
+
+def random_network_name():
+    return random_name("netowrk")
+
+
 def with_common_response(responses=None):
     if responses is None:
         responses = {}

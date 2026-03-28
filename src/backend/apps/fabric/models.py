@@ -15,7 +15,7 @@ from common.enums import (
     NodeStatus,
     FabricNodeType,
 )
-from common.utils.common import make_uuid, random_name, hash_file
+from common.utils.common import make_uuid, random_network_name, hash_file
 from django.conf import settings
 
 MEDIA_ROOT = getattr(settings, "MEDIA_ROOT")
@@ -69,7 +69,7 @@ class Network(models.Model):
     name = models.CharField(
         help_text="network name, can be generated automatically.",
         max_length=64,
-        default=random_name("netowrk"),
+        default=random_network_name,
     )
     type = models.CharField(
         help_text="Type of network, %s" % NetworkType.values(),

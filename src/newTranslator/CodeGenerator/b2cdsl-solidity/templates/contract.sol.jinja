@@ -17,15 +17,33 @@ interface IOracle {
     ) external view returns (string memory value);
 }
 
+interface IDmnLite {
+    function requestDMNDecision(
+        string calldata url,
+        string calldata dmnContent,
+        string calldata decisionId,
+        string calldata inputData
+    ) external returns (bytes32 requestId);
+
+    function getRequestStatus(bytes32 requestId)
+        external
+        view
+        returns (
+            uint8 state,
+            address requester,
+            uint256 createdAt,
+            uint256 fulfilledAt,
+            bool exists
+        );
+
+    function getRawByRequestId(bytes32 requestId) external view returns (string memory);
+}
+
 interface IIdentityRegistry {
     function getIdentityOrg(address identityAddress) external view returns (string memory);
 }
 
-contract WorkflowContract {
-    // ------------------------------------------------------------------
-    // Enums
-    // ------------------------------------------------------------------
-
+contract {{ contract_name }} {
     enum ElementState {
         DISABLED,
         ENABLED,
@@ -78,17 +96,13 @@ contract WorkflowContract {
     {% endif %}
     }
 
-    // ------------------------------------------------------------------
-    // Structs
-    // ------------------------------------------------------------------
-
     struct StateMemory {
     {% if globals %}
     {% for item in globals %}
         {{ item.type }} {{ item.name }};
     {% endfor %}
     {% else %}
-        // no global variables defined
+        bool placeholder;
     {% endif %}
     }
 
@@ -120,18 +134,34 @@ contract WorkflowContract {
         ElementState state;
     }
 
+    struct BusinessRuleInit {
+        string dmnContent;
+        string decisionId;
+        bool callerRestricted;
+        address allowedCaller;
+    }
+
     struct BusinessRule {
         bool exists;
-        address contractAddress;
+        string dmnContent;
         bytes32 hashOfDmn;
         string decisionId;
+        bool callerRestricted;
+        address allowedCaller;
         ElementState state;
+        bytes32 requestId;
+        uint256 requestedAt;
+        uint256 fulfilledAt;
+        string lastRawResult;
     }
 
     struct Instance {
         bool exists;
         uint256 instanceId;
         address identityContractAddress;
+        address dmnLiteAddress;
+        string dmnEvalUrl;
+        bool enforceBusinessRuleCaller;
         StateMemory stateMemory;
         mapping(MessageKey => Message) messages;
         mapping(GatewayKey => Gateway) gateways;
@@ -140,9 +170,23 @@ contract WorkflowContract {
         mapping(BusinessRuleKey => BusinessRule) businessRules;
     }
 
-    // ------------------------------------------------------------------
-    // Storage
-    // ------------------------------------------------------------------
+    struct InitParameters {
+        address identityContractAddress;
+        address dmnLiteAddress;
+        string dmnEvalUrl;
+        bool enforceBusinessRuleCaller;
+    {% if participants %}
+    {% for participant in participants %}
+        address {{ participant.param_name }};
+        string {{ participant.org_param }};
+    {% endfor %}
+    {% else %}
+        address placeholder;
+    {% endif %}
+    {% for rule in business_rules %}
+        BusinessRuleInit {{ rule.config_param }};
+    {% endfor %}
+    }
 
     address public owner;
     bool public isInited;
@@ -151,17 +195,21 @@ contract WorkflowContract {
 
     mapping(uint256 => Instance) private instances;
 
-    // ------------------------------------------------------------------
-    // Events
-    // ------------------------------------------------------------------
+    uint8 private constant DMN_REQUEST_FULFILLED = 2;
 
     event MessageSent(uint256 instanceId, MessageKey messageKey, string fireflyTranId);
     event GatewayDone(uint256 instanceId, GatewayKey gatewayKey);
     event ActionEventDone(uint256 instanceId, EventKey eventKey);
-
-    // ------------------------------------------------------------------
-    // Modifiers
-    // ------------------------------------------------------------------
+    event BusinessRuleRequested(
+        uint256 indexed instanceId,
+        BusinessRuleKey indexed ruleKey,
+        bytes32 indexed requestId
+    );
+    event BusinessRuleCompleted(
+        uint256 indexed instanceId,
+        BusinessRuleKey indexed ruleKey,
+        bytes32 indexed requestId
+    );
 
     modifier onlyOwner() {
         require(msg.sender == owner, "not owner");
@@ -182,23 +230,13 @@ contract WorkflowContract {
         oracle = IOracle(oracleAddress);
     }
 
-    // ------------------------------------------------------------------
-    // Initialization
-    // ------------------------------------------------------------------
-
     function initLedger() external onlyOwner {
         require(!isInited, "already initialized");
         isInited = true;
         currentInstanceId = 0;
     }
 
-    // ------------------------------------------------------------------
-    // Internal helpers
-    // ------------------------------------------------------------------
-
-    function _getInstance(
-        uint256 instanceId
-    ) internal view returns (Instance storage inst) {
+    function _getInstance(uint256 instanceId) internal view returns (Instance storage inst) {
         inst = instances[instanceId];
         require(inst.exists, "instance not found");
     }
@@ -219,6 +257,17 @@ contract WorkflowContract {
             keccak256(bytes(callerOrg)) == keccak256(bytes(participant.org)),
             "participant org not allowed"
         );
+    }
+
+    function _checkBusinessRuleCaller(
+        Instance storage inst,
+        BusinessRule storage br
+    ) internal view {
+        if (!(inst.enforceBusinessRuleCaller || br.callerRestricted)) {
+            return;
+        }
+        require(br.allowedCaller != address(0), "business rule caller not configured");
+        require(msg.sender == br.allowedCaller, "business rule caller not allowed");
     }
 
     function _createParticipant(
@@ -277,16 +326,20 @@ contract WorkflowContract {
     function _createBusinessRule(
         Instance storage inst,
         BusinessRuleKey key,
-        address contractAddress,
-        string memory dmnContent,
-        string memory decisionId
+        BusinessRuleInit calldata config
     ) internal {
         inst.businessRules[key] = BusinessRule({
             exists: true,
-            contractAddress: contractAddress,
-            hashOfDmn: keccak256(bytes(dmnContent)),
-            decisionId: decisionId,
-            state: ElementState.DISABLED
+            dmnContent: config.dmnContent,
+            hashOfDmn: keccak256(bytes(config.dmnContent)),
+            decisionId: config.decisionId,
+            callerRestricted: config.callerRestricted,
+            allowedCaller: config.allowedCaller,
+            state: ElementState.DISABLED,
+            requestId: bytes32(0),
+            requestedAt: 0,
+            fulfilledAt: 0,
+            lastRawResult: ""
         });
     }
 
@@ -322,25 +375,189 @@ contract WorkflowContract {
         );
     }
 
-    // ------------------------------------------------------------------
-    // Instance creation
-    // ------------------------------------------------------------------
+    function _jsonString(string memory value) internal pure returns (string memory) {
+        return string.concat("\"", value, "\"");
+    }
 
-    struct InitParameters {
-        address identityContractAddress;
-    {% if participants %}
-    {% for participant in participants %}
-        address {{ participant.param_name }};
-        string {{ participant.org_param }};
-    {% endfor %}
-    {% else %}
-        address placeholder;
-    {% endif %}
-    {% for rule in business_rules %}
-        address {{ rule.address_param }};
-        string {{ rule.content_param }};
-        string {{ rule.decision_param }};
-    {% endfor %}
+    function _jsonBool(bool value) internal pure returns (string memory) {
+        return value ? "true" : "false";
+    }
+
+    function _jsonInt(int256 value) internal pure returns (string memory) {
+        if (value == 0) {
+            return "0";
+        }
+
+        bool negative = value < 0;
+        uint256 temp = uint256(negative ? -value : value);
+        uint256 digits;
+        uint256 cursor = temp;
+        while (cursor != 0) {
+            digits++;
+            cursor /= 10;
+        }
+
+        uint256 totalLength = digits + (negative ? 1 : 0);
+        bytes memory buffer = new bytes(totalLength);
+        uint256 index = totalLength;
+        while (temp != 0) {
+            index--;
+            buffer[index] = bytes1(uint8(48 + (temp % 10)));
+            temp /= 10;
+        }
+        if (negative) {
+            buffer[0] = bytes1("-");
+        }
+        return string(buffer);
+    }
+
+    function _skipWhitespace(bytes memory data, uint256 index) internal pure returns (uint256) {
+        while (index < data.length) {
+            bytes1 ch = data[index];
+            if (ch != 0x20 && ch != 0x09 && ch != 0x0A && ch != 0x0D) {
+                break;
+            }
+            unchecked {
+                index++;
+            }
+        }
+        return index;
+    }
+
+    function _sliceBytes(
+        bytes memory data,
+        uint256 start,
+        uint256 end
+    ) internal pure returns (string memory) {
+        require(end >= start, "invalid slice");
+        bytes memory out = new bytes(end - start);
+        for (uint256 i = start; i < end; i++) {
+            out[i - start] = data[i];
+        }
+        return string(out);
+    }
+
+    function _findJsonValue(
+        string memory raw,
+        string memory key
+    ) internal pure returns (uint256 start, uint256 end, uint8 kind, bool found) {
+        bytes memory data = bytes(raw);
+        bytes memory keyBytes = bytes(key);
+        if (data.length == 0 || keyBytes.length == 0) {
+            return (0, 0, 0, false);
+        }
+
+        for (uint256 i = 0; i + keyBytes.length + 2 <= data.length; i++) {
+            if (data[i] != bytes1("\"")) {
+                continue;
+            }
+
+            bool matches = true;
+            for (uint256 j = 0; j < keyBytes.length; j++) {
+                if (data[i + 1 + j] != keyBytes[j]) {
+                    matches = false;
+                    break;
+                }
+            }
+            if (!matches || data[i + 1 + keyBytes.length] != bytes1("\"")) {
+                continue;
+            }
+
+            uint256 cursor = _skipWhitespace(data, i + keyBytes.length + 2);
+            if (cursor >= data.length || data[cursor] != bytes1(":")) {
+                continue;
+            }
+            cursor = _skipWhitespace(data, cursor + 1);
+            if (cursor >= data.length) {
+                return (0, 0, 0, false);
+            }
+
+            bytes1 ch = data[cursor];
+            if (ch == bytes1("\"")) {
+                uint256 valueStart = cursor + 1;
+                uint256 valueEnd = valueStart;
+                while (valueEnd < data.length) {
+                    if (data[valueEnd] == bytes1("\"") && (valueEnd == valueStart || data[valueEnd - 1] != bytes1("\\"))) {
+                        return (valueStart, valueEnd, 1, true);
+                    }
+                    unchecked {
+                        valueEnd++;
+                    }
+                }
+                revert("unterminated json string");
+            }
+
+            if (ch == bytes1("t") || ch == bytes1("f")) {
+                uint256 valueEnd = cursor;
+                while (valueEnd < data.length) {
+                    bytes1 c = data[valueEnd];
+                    if ((c < bytes1("a") || c > bytes1("z")) && (c < bytes1("A") || c > bytes1("Z"))) {
+                        break;
+                    }
+                    unchecked {
+                        valueEnd++;
+                    }
+                }
+                return (cursor, valueEnd, 2, true);
+            }
+
+            if (
+                ch == bytes1("-") ||
+                (ch >= bytes1("0") && ch <= bytes1("9"))
+            ) {
+                uint256 valueEnd = cursor;
+                while (valueEnd < data.length) {
+                    bytes1 c = data[valueEnd];
+                    if (
+                        c != bytes1("-") &&
+                        c != bytes1(".") &&
+                        (c < bytes1("0") || c > bytes1("9"))
+                    ) {
+                        break;
+                    }
+                    unchecked {
+                        valueEnd++;
+                    }
+                }
+                return (cursor, valueEnd, 3, true);
+            }
+        }
+
+        return (0, 0, 0, false);
+    }
+
+    function _extractJsonString(
+        string memory raw,
+        string memory key
+    ) internal pure returns (string memory) {
+        (uint256 start, uint256 end, uint8 kind, bool found) = _findJsonValue(raw, key);
+        require(found && kind == 1, "json string not found");
+        return _sliceBytes(bytes(raw), start, end);
+    }
+
+    function _extractJsonBool(
+        string memory raw,
+        string memory key
+    ) internal pure returns (bool) {
+        (uint256 start, uint256 end, uint8 kind, bool found) = _findJsonValue(raw, key);
+        require(found && kind == 2, "json bool not found");
+        bytes32 hashed = keccak256(bytes(_sliceBytes(bytes(raw), start, end)));
+        if (hashed == keccak256(bytes("true"))) {
+            return true;
+        }
+        if (hashed == keccak256(bytes("false"))) {
+            return false;
+        }
+        revert("invalid json bool");
+    }
+
+    function _extractJsonInt(
+        string memory raw,
+        string memory key
+    ) internal pure returns (int256) {
+        (uint256 start, uint256 end, uint8 kind, bool found) = _findJsonValue(raw, key);
+        require(found && kind == 3, "json number not found");
+        return _stringToInt(_sliceBytes(bytes(raw), start, end));
     }
 
     function createInstance(
@@ -352,8 +569,15 @@ contract WorkflowContract {
 
         inst.exists = true;
         inst.instanceId = instanceId;
-        require(params.identityContractAddress != address(0), "identity contract not set");
         inst.identityContractAddress = params.identityContractAddress;
+        inst.dmnLiteAddress = params.dmnLiteAddress;
+        inst.dmnEvalUrl = params.dmnEvalUrl;
+        inst.enforceBusinessRuleCaller = params.enforceBusinessRuleCaller;
+
+        {% if business_rules %}
+        require(inst.dmnLiteAddress != address(0), "dmn lite not set");
+        require(bytes(inst.dmnEvalUrl).length != 0, "dmn eval url not set");
+        {% endif %}
 
         {% for participant in participants %}
         _createParticipant(
@@ -405,18 +629,12 @@ contract WorkflowContract {
         _createBusinessRule(
             inst,
             BusinessRuleKey.{{ rule.enum_name }},
-            params.{{ rule.address_param }},
-            params.{{ rule.content_param }},
-            params.{{ rule.decision_param }}
+            params.{{ rule.config_param }}
         );
         {% endfor %}
 
         currentInstanceId += 1;
     }
-
-    // ------------------------------------------------------------------
-    // Business rule handlers
-    // ------------------------------------------------------------------
 
 {% if business_rules %}
 {% for rule in business_rules %}
@@ -425,27 +643,85 @@ contract WorkflowContract {
         BusinessRule storage br = inst.businessRules[BusinessRuleKey.{{ rule.enum_name }}];
         require(br.exists, "business rule not set");
         require(br.state == ElementState.ENABLED, "business rule not enabled");
+        _checkBusinessRuleCaller(inst, br);
 
+        IDmnLite dmnLite = IDmnLite(inst.dmnLiteAddress);
+        string memory inputData = "{";
+        {% for mapping in rule.input_mappings %}
+        inputData = string.concat(
+            inputData,
+            {% if loop.first %}""{% else %}","{% endif %},
+            {{ mapping.param_literal }},
+            ":",
+            {% if mapping.sol_type == 'int256' %}
+            _jsonInt(inst.stateMemory.{{ mapping.slot_name }})
+            {% elif mapping.sol_type == 'bool' %}
+            _jsonBool(inst.stateMemory.{{ mapping.slot_name }})
+            {% else %}
+            _jsonString(inst.stateMemory.{{ mapping.slot_name }})
+            {% endif %}
+        );
+        {% endfor %}
+        inputData = string.concat(inputData, "}");
+
+        bytes32 requestId = dmnLite.requestDMNDecision(
+            inst.dmnEvalUrl,
+            br.dmnContent,
+            br.decisionId,
+            inputData
+        );
+
+        br.requestId = requestId;
+        br.requestedAt = block.timestamp;
+        br.fulfilledAt = 0;
+        br.lastRawResult = "";
         br.state = ElementState.WAITING_FOR_CONFIRMATION;
+
+        emit BusinessRuleRequested(instanceId, BusinessRuleKey.{{ rule.enum_name }}, requestId);
     }
 
     function {{ rule.enum_name }}_Continue(uint256 instanceId) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
         BusinessRule storage br = inst.businessRules[BusinessRuleKey.{{ rule.enum_name }}];
+        require(br.exists, "business rule not set");
         require(br.state == ElementState.WAITING_FOR_CONFIRMATION, "business rule not waiting");
+        require(br.requestId != bytes32(0), "business rule not requested");
+        _checkBusinessRuleCaller(inst, br);
 
+        IDmnLite dmnLite = IDmnLite(inst.dmnLiteAddress);
+        (
+            uint8 requestState,
+            address requester,
+            ,
+            uint256 fulfilledAt,
+            bool exists
+        ) = dmnLite.getRequestStatus(br.requestId);
+        require(exists, "dmn request missing");
+        require(requester == address(this), "unexpected dmn requester");
+        require(requestState == DMN_REQUEST_FULFILLED, "dmn result not ready");
+
+        string memory raw = dmnLite.getRawByRequestId(br.requestId);
+        br.lastRawResult = raw;
+        br.fulfilledAt = fulfilledAt;
+        {% for mapping in rule.output_mappings %}
+        {% if mapping.sol_type == 'int256' %}
+        inst.stateMemory.{{ mapping.slot_name }} = _extractJsonInt(raw, {{ mapping.param_literal }});
+        {% elif mapping.sol_type == 'bool' %}
+        inst.stateMemory.{{ mapping.slot_name }} = _extractJsonBool(raw, {{ mapping.param_literal }});
+        {% else %}
+        inst.stateMemory.{{ mapping.slot_name }} = _extractJsonString(raw, {{ mapping.param_literal }});
+        {% endif %}
+        {% endfor %}
         br.state = ElementState.COMPLETED;
 {% if rule.done_actions %}
 {{ rule.done_actions }}
 {% endif %}
+
+        emit BusinessRuleCompleted(instanceId, BusinessRuleKey.{{ rule.enum_name }}, br.requestId);
     }
 
 {% endfor %}
 {% endif %}
-
-    // ------------------------------------------------------------------
-    // Workflow logic generated from DSL flows
-    // ------------------------------------------------------------------
 
 {% if flow_functions %}
 {{ flow_functions | join('\n\n') }}

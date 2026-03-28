@@ -235,6 +235,23 @@ export const packageBpmn = async (chaincodeContent: string, ffiContent: string, 
     }
 }
 
+export const generateBpmnArtifacts = async (
+    bpmnId: string,
+    target: "go" | "solidity",
+    consortiumId: string = "1",
+    artifactName?: string,
+) => {
+    try {
+        const response = await api.post(`/consortiums/${consortiumId}/bpmns/${bpmnId}/generate`, {
+            target,
+            artifact_name: artifactName,
+        });
+        return response.data;
+    } catch (error) {
+        return null;
+    }
+}
+
 export const uploadEthContract = async (contractContent: string, orgId: string, bpmnId: string, consortiumId: string = '1', contractId?: string) => {
     try {
         const requestData: any = {

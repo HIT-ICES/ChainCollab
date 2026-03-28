@@ -22,7 +22,7 @@ from common.enums import (
     separate_upper_class,
     FileType,
 )
-from common.utils.common import make_uuid, random_name, hash_file
+from common.utils.common import make_uuid, random_agent_name, hash_file
 from common.lib.firefly.api import register_identity
 from apps.core.models import LoleidoOrganization
 
@@ -56,7 +56,7 @@ class Agent(models.Model):
     name = models.CharField(
         help_text="Agent name, can be generated automatically.",
         max_length=64,
-        default=random_name("agent"),
+        default=random_agent_name,
     )
     urls = models.URLField(help_text="Agent URL", null=True, blank=True)
     organization = models.ForeignKey(

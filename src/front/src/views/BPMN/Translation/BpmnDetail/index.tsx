@@ -1,8 +1,8 @@
 import { useState } from "react"
 import { Card, Row, Col, Button, Steps, Modal, Select, Tag, Collapse, Typography, Tabs } from "antd"
 import { useLocation, useNavigate } from "react-router-dom";
-import { retrieveBPMN, packageBpmn, uploadEthContract, compileEthContract, deployEthContract, updateBPMNStatus, updateBpmnEnv, updateBPMNFireflyUrl, updateBpmnEvents } from "@/api/externalResource"
-import { generateChaincode, getMessagesByBpmnContent } from "@/api/translator"
+import { retrieveBPMN, packageBpmn, uploadEthContract, compileEthContract, deployEthContract, updateBPMNStatus, updateBpmnEnv, updateBPMNFireflyUrl, updateBpmnEvents, generateBpmnArtifacts } from "@/api/externalResource"
+import { getMessagesByBpmnContent } from "@/api/translator"
 import { useAvaliableEnvs, useBpmnDetailData } from "./hooks"
 import axios from "axios"
 import api from "@/api/apiConfig"
@@ -171,20 +171,21 @@ const BPMNOverview = () => {
     const onGenerate = async () => {
         try {
             setButtonLoading(true);
-            const bpmn = await retrieveBPMN(bpmnId);
-            // 根据环境类型调用不同的生成 API
             const target = currentEnvType === 'Ethereum' ? 'solidity' : 'go';
-            const res = await generateChaincode(bpmn.bpmnContent, target);
-            const chaincode_content = res.bpmnContent;
-            const ffi_content = res.ffiContent;
-            setDslContentForModify(res.dslContent || "");
+            const res = await generateBpmnArtifacts(
+                bpmnId,
+                target,
+                currentConsortiumId || "1"
+            );
+            const generated = res?.data || {};
+            const chaincode_content = generated.chaincodeContent || "";
+            const ffi_content = generated.ffiContent || "{}";
+            setDslContentForModify(generated.dslContent || "");
             setChainCodeContentForModify(chaincode_content);
             setFFIContentForModify(ffi_content);
             setShowArtifacts(true);
+            refetchBpmn();
             setButtonLoading(false);
-            // await packageBPMN(chaincode_content, ffi_content, bpmnInstanceId, currentOrgId);
-            // syncInstance()
-            // setButtonLoading(false);
         } catch (e) {
             setButtonLoading(false);
         }
@@ -701,11 +702,16 @@ const BPMNOverview = () => {
                     extra={
                         status !== 'Generated' && status !== 'Installed' && status !== 'Registered' ? (
                             <Button type="primary" onClick={handlePackage} loading={buttonLoading}>
-                                {currentEnvType === 'Ethereum' ? 'Upload' : 'Package'}
+                                {currentEnvType === 'Ethereum' ? 'Upload & Compile' : 'Package'}
                             </Button>
                         ) : null
                     }
                 >
+                    <Text type="secondary">
+                        {currentEnvType === 'Ethereum'
+                            ? '生成动作已通过 backend 调用 NewTranslator。当前产物包含 DSL、Solidity 合约和 FFI；下一步需要 Upload & Compile。'
+                            : '生成动作已通过 backend 调用 NewTranslator。当前产物包含 DSL、Go 链码和 FFI；下一步是 Package。'}
+                    </Text>
                     <Tabs
                         defaultActiveKey="dsl"
                         onChange={(key) => setActiveTabKey(key as "dsl" | "chaincode")}
@@ -737,7 +743,7 @@ const BPMNOverview = () => {
                             },
                             {
                                 key: "chaincode",
-                                label: "Chaincode",
+                                label: currentEnvType === 'Ethereum' ? "Solidity" : "Chaincode",
                                 children: (
                                     <PreviewBlock
                                         value={chainCodeContentForModify}
@@ -780,7 +786,7 @@ const BPMNOverview = () => {
                     editorKey === "dsl"
                         ? "Edit DSL"
                         : editorKey === "chaincode"
-                          ? "Edit Chaincode"
+                          ? (currentEnvType === 'Ethereum' ? "Edit Solidity" : "Edit Chaincode")
                           : "Edit FFI"
                 }
             >

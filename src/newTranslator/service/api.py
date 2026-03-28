@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 import uvicorn
 from pydantic import BaseModel
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from fastapi.middleware.cors import CORSMiddleware
 from textx import metamodel_from_file
 
@@ -59,6 +59,7 @@ app.add_middleware(
 
 class ChaincodeGenerateParams(BaseModel):
     bpmnContent: str
+    artifactName: Optional[str] = None
 
 
 class ChaincodeGenerateResponse(BaseModel):
@@ -70,13 +71,14 @@ class ChaincodeGenerateResponse(BaseModel):
 @app.post("/api/v1/chaincode/generate")
 async def generate_chaincode(params: ChaincodeGenerateParams):
     translator: GoChaincodeTranslator = GoChaincodeTranslator(params.bpmnContent)
-    chaincode = translator.generate_chaincode()
+    chaincode = translator.generate_chaincode(contract_name=params.artifactName)
     ffi = translator.generate_ffi()
     return ChaincodeGenerateResponse(bpmnContent=chaincode, ffiContent=ffi)
 
 
 class EthContractGenerateParams(BaseModel):
     bpmnContent: str
+    artifactName: Optional[str] = None
 
 
 class EthContractGenerateResponse(BaseModel):
@@ -89,7 +91,9 @@ class EthContractGenerateResponse(BaseModel):
 async def generate_eth_contract(params: EthContractGenerateParams):
     translator = SolidityContractTranslator(params.bpmnContent)
     try:
-        contract_content, dsl_content = translator.generate_contract_bundle()
+        contract_content, dsl_content = translator.generate_contract_bundle(
+            contract_name=params.artifactName
+        )
     except ValueError as exc:
         return JSONResponse(status_code=400, content={"message": str(exc)})
     ffi_content = translator.generate_ffi()

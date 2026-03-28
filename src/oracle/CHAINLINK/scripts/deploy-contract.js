@@ -251,6 +251,10 @@ async function deploy() {
         // 保存部署信息
         const deploymentInfo = {
             contractAddress: receipt.contractAddress,
+            contractName: contractKey.split(':')[1],
+            contractMode: isDmnContract
+                ? (contractKey.includes('MyChainlinkRequesterDMN_Lite') ? 'lite' : 'full')
+                : null,
             deployer: deployer,
             timestamp: new Date().toISOString(),
             txHash: txHash,

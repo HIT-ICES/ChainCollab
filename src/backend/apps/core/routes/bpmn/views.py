@@ -17,6 +17,7 @@ from apps.core.routes.bpmn.serializers import (
     BpmnListSerializer,
     BpmnSerializer,
     BpmnInstanceSerializer,
+    BpmnGenerateSerializer,
     DmnSerializer,
 )
 import yaml
@@ -34,6 +35,7 @@ from xml.etree import ElementTree as ET
 # from api.routes.bpmn  import BpmnCreateBody
 from rest_framework import viewsets, status
 from requests import get, post
+from apps.core.services import NewTranslatorClient, NewTranslatorError
 
 
 logger = logging.getLogger(__name__)
@@ -78,6 +80,16 @@ def _default_svg_content(title: str) -> str:
         f'<text x="24" y="78" fill="#334155" font-size="24" font-family="Arial, sans-serif">{safe_title}</text>'
         "</svg>"
     )
+
+
+def _default_artifact_name(name: str) -> str:
+    stem = Path(name or "WorkflowContract").stem
+    sanitized = re.sub(r"[^0-9A-Za-z_]", "_", stem).strip("_")
+    if not sanitized:
+        return "WorkflowContract"
+    if sanitized[0].isdigit():
+        sanitized = f"WorkflowContract_{sanitized}"
+    return sanitized
 
 
 def _pick_seed_owner(consortium: Consortium, request_user):
@@ -279,6 +291,12 @@ class BPMNViewsSet(viewsets.ModelViewSet):
                 bpmn.user_id = request.data.get("user_id")
             if "firefly_url" in request.data:
                 bpmn.firefly_url = request.data.get("firefly_url")
+            if "chaincodeContent" in request.data:
+                bpmn.chaincode_content = request.data.get("chaincodeContent")
+            if "chaincode_content" in request.data:
+                bpmn.chaincode_content = request.data.get("chaincode_content")
+            if "ffiContent" in request.data:
+                bpmn.ffiContent = request.data.get("ffiContent")
             if "envId" in request.data:
                 envId = request.data.get("envId")
                 envType = request.data.get("envType", "fabric")  # 默认为 fabric
@@ -323,6 +341,41 @@ class BPMNViewsSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
+    @action(methods=["post"], detail=True, url_path="generate")
+    def generate(self, request, pk=None, *args, **kwargs):
+        try:
+            serializer = BpmnGenerateSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+
+            bpmn = BPMN.objects.get(pk=pk)
+            target = serializer.validated_data.get("target")
+            if not target:
+                target = "solidity" if (bpmn.eth_environment or bpmn.ethereum_contract) else "go"
+
+            artifact_name = serializer.validated_data.get("artifact_name") or _default_artifact_name(
+                bpmn.name
+            )
+            generated = NewTranslatorClient().generate_artifacts(
+                bpmn.bpmnContent,
+                target=target,
+                artifact_name=artifact_name,
+            )
+
+            bpmn.chaincode_content = generated.get("chaincodeContent") or ""
+            bpmn.ffiContent = generated.get("ffiContent") or "{}"
+            bpmn.save(update_fields=["chaincode_content", "ffiContent"])
+
+            return Response(data=ok(generated), status=status.HTTP_200_OK)
+        except BPMN.DoesNotExist:
+            return Response(
+                data=err(f"BPMN with id {pk} does not exist"),
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except NewTranslatorError as exc:
+            return Response(data=err(str(exc)), status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(err(str(e)), status=status.HTTP_400_BAD_REQUEST)
+
     def retrieve(self, request, pk=None, *args, **kwargs):
         """
         获取Bpmn详情
@@ -357,10 +410,16 @@ class BPMNViewsSet(viewsets.ModelViewSet):
         try:
             bpmn_id = pk
             orgid = request.data.get("orgId")
-            chaincodeContent = request.data.get("chaincodeContent")
-            ffiContent = request.data.get("ffiContent")
             bpmn = BPMN.objects.get(pk=bpmn_id)
+            chaincodeContent = request.data.get("chaincodeContent") or bpmn.chaincode_content
+            ffiContent = request.data.get("ffiContent") or bpmn.ffiContent
             env_id = bpmn.environment.id
+
+            if not chaincodeContent:
+                return Response(
+                    err("No generated chaincode content found for this BPMN."),
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
             with open(
                 BPMN_CHAINCODE_STORE + "/chaincode-go-bpmn/chaincode/smartcontract.go",
@@ -429,6 +488,8 @@ class BPMNViewsSet(viewsets.ModelViewSet):
             logger.info(f"Org ID: {orgid}, Contract ID: {contract_id}, Has contract content: {bool(contract_content)}")
 
             bpmn = BPMN.objects.get(pk=bpmn_id)
+            if not contract_content and not contract_id:
+                contract_content = bpmn.chaincode_content
             logger.info(f"BPMN found: {bpmn.name}")
             logger.info(f"BPMN environment: {bpmn.environment}")
             logger.info(f"BPMN eth_environment: {bpmn.eth_environment}")

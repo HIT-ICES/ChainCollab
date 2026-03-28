@@ -42,6 +42,15 @@ def sanitize_identifier(name: str) -> str:
     return "".join(ch if ch.isalnum() or ch == "_" else "_" for ch in name)
 
 
+def sanitize_contract_name(name: str) -> str:
+    identifier = sanitize_identifier(name or "")
+    if not identifier:
+        return "WorkflowContract"
+    if identifier[0].isdigit():
+        return f"WorkflowContract_{identifier}"
+    return identifier
+
+
 class DSLContractAdapter:
     def __init__(self, contract: Any):
         self.contract = contract
@@ -90,6 +99,7 @@ class SolidityRenderer:
         flow_functions = flow_renderer.render_blocks()
         rule_done_actions = flow_renderer.rule_done_actions()
         return {
+            "contract_name": sanitize_contract_name(getattr(self.adapter.contract, "name", "")),
             "participants": self._participant_payload(),
             "messages": self._message_payload(),
             "gateways": self._simple_payload(self.adapter.gateways),
@@ -218,16 +228,55 @@ class SolidityRenderer:
         return payload
 
     def _business_rule_payload(self, rule_done_actions: dict[str, str]) -> List[dict]:
+        global_type_map = self._global_type_map()
         payload: List[dict] = []
         for rule in self.adapter.business_rules:
             enum_name = sanitize_identifier(rule.name)
+            input_mappings = []
+            for mapping in getattr(rule, "inputMappings", []) or []:
+                global_ref = getattr(mapping, "globalRef", None)
+                global_name = getattr(global_ref, "name", "")
+                if not global_name:
+                    continue
+                slot_name = sanitize_identifier(public_the_name(global_name))
+                param_name = (getattr(mapping, "dmnParam", "") or global_name).strip()
+                input_mappings.append(
+                    {
+                        "param_name": param_name,
+                        "param_literal": json.dumps(param_name),
+                        "slot_name": slot_name,
+                        "sol_type": SOLIDITY_TYPE.get(global_type_map.get(global_name, "string"), "string"),
+                    }
+                )
+
+            output_mappings = []
+            for mapping in getattr(rule, "outputMappings", []) or []:
+                global_ref = getattr(mapping, "globalRef", None)
+                global_name = getattr(global_ref, "name", "")
+                if not global_name:
+                    continue
+                slot_name = sanitize_identifier(public_the_name(global_name))
+                param_name = (getattr(mapping, "dmnParam", "") or global_name).strip()
+                output_mappings.append(
+                    {
+                        "param_name": param_name,
+                        "param_literal": json.dumps(param_name),
+                        "slot_name": slot_name,
+                        "sol_type": SOLIDITY_TYPE.get(global_type_map.get(global_name, "string"), "string"),
+                    }
+                )
+
             payload.append(
                 {
                     "name": rule.name,
                     "enum_name": enum_name,
-                    "address_param": f"{enum_name}_contract",
-                    "content_param": f"{enum_name}_content",
-                    "decision_param": f"{enum_name}_decision",
+                    "config_param": enum_name,
+                    "content_param": "dmnContent",
+                    "decision_param": "decisionId",
+                    "caller_restricted_param": "callerRestricted",
+                    "allowed_caller_param": "allowedCaller",
+                    "input_mappings": input_mappings,
+                    "output_mappings": output_mappings,
                     "done_actions": rule_done_actions.get(rule.name, ""),
                 }
             )
@@ -540,6 +589,11 @@ class SolidityFlowRenderer:
             if literal is not None:
                 return literal
 
+        if normalized_type == "string":
+            literal = string_literal()
+            if literal is not None:
+                return literal
+
         value = getattr(expr, "value", None)
         if isinstance(value, bool):
             return "true" if value else "false"
@@ -600,7 +654,15 @@ class SolidityFlowRenderer:
         if cls_name == "GatewayCompareBranch":
             var_name = getattr(branch.var, "name", "")
             field = sanitize_identifier(public_the_name(var_name))
-            literal = self._literal_value(branch.value, self.global_type_map.get(var_name, "string"))
+            target_type = self.global_type_map.get(var_name, "string")
+            literal = self._literal_value(branch.value, target_type)
+            if target_type == "string":
+                return (
+                    f"keccak256(bytes(inst.stateMemory.{field})) "
+                    f"{branch.relation} "
+                    f"keccak256(bytes({literal}))",
+                    False,
+                )
             return f"inst.stateMemory.{field} {branch.relation} {literal}", False
         if cls_name == "GatewayElseBranch":
             return None, True

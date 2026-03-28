@@ -19,6 +19,11 @@ class BpmnPageQuerySerializer(serializers.Serializer):
         default=10, help_text="Per Page of filter", min_value=1, max_value=100
     )
 
+
+class BpmnGenerateSerializer(serializers.Serializer):
+    target = serializers.ChoiceField(choices=("go", "solidity"), required=False)
+    artifact_name = serializers.CharField(required=False, allow_blank=True)
+
 class ChaincodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChainCode

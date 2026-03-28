@@ -469,6 +469,7 @@ const Overview: React.FC = () => {
       method: "requestDMNDecision",
       mode: "invoke",
       kind: "contract",
+      group: "primary",
       params: [
         { key: "url", label: "DMN URL", placeholder: "http://cdmn-node1:5000/api/dmn/evaluate" },
         { key: "dmnContent", label: "DMN Content", placeholder: "<DMN XML>" },
@@ -481,6 +482,7 @@ const Overview: React.FC = () => {
       method: "getRequestStatus",
       mode: "query",
       kind: "contract",
+      group: "primary",
       params: [{ key: "requestId", label: "Request ID", placeholder: "0x..." }],
     },
     {
@@ -488,6 +490,7 @@ const Overview: React.FC = () => {
       method: "getRawByRequestId",
       mode: "query",
       kind: "contract",
+      group: "primary",
       scope: "lite",
       params: [{ key: "requestId", label: "Request ID", placeholder: "0x..." }],
     },
@@ -496,14 +499,24 @@ const Overview: React.FC = () => {
       method: "getFinalizedRaw",
       mode: "query",
       kind: "contract",
+      group: "primary",
       scope: "full",
       params: [{ key: "requestId", label: "Request ID", placeholder: "0x..." }],
+    },
+    {
+      label: "getAllRequests",
+      method: "getAllRequests",
+      mode: "query",
+      kind: "contract",
+      group: "primary",
+      params: [],
     },
     {
       label: "getDMNResult",
       method: "getDMNResult",
       mode: "query",
       kind: "contract",
+      group: "advanced",
       params: [],
     },
     {
@@ -511,6 +524,7 @@ const Overview: React.FC = () => {
       method: "rawResultCount",
       mode: "query",
       kind: "contract",
+      group: "advanced",
       params: [],
     },
     {
@@ -518,6 +532,7 @@ const Overview: React.FC = () => {
       method: "rawResultHashAt",
       mode: "query",
       kind: "contract",
+      group: "advanced",
       params: [{ key: "index", label: "Index", placeholder: "0" }],
     },
     {
@@ -525,13 +540,7 @@ const Overview: React.FC = () => {
       method: "getAllRawResults",
       mode: "query",
       kind: "contract",
-      params: [],
-    },
-    {
-      label: "getAllRequests",
-      method: "getAllRequests",
-      mode: "query",
-      kind: "contract",
+      group: "advanced",
       params: [],
     },
   ]
@@ -559,6 +568,8 @@ const Overview: React.FC = () => {
   const dmnMethodPlaceholder =
     dmnContractActions.map((item) => item.method).join(" / ") ||
     "requestDMNDecision / getDMNResult"
+  const dmnPrimaryActions = dmnContractActions.filter((action) => action.group !== "advanced")
+  const dmnAdvancedActions = dmnContractActions.filter((action) => action.group === "advanced")
   const chainlinkFireflyRelatedContracts = ((chainlinkDetail as any)?.firefly?.firefly_related_contracts || {}) as Record<string, any>
   const chainlinkFireflyListenerCount = Object.values(chainlinkFireflyRelatedContracts).reduce(
     (acc: number, item: any) => acc + (Array.isArray(item?.firefly_listeners) ? item.firefly_listeners.length : 0),
@@ -2715,13 +2726,13 @@ const Overview: React.FC = () => {
                       <Form.Item label="Direct FireFly Actions">
                         <Space direction="vertical" style={{ width: "100%" }} size={8}>
                           <div style={{ color: "#64748b", fontSize: 12 }}>
-                            DMN 的主要操作都在这里，直接通过 FireFly 发起请求、查询结果，以及测试相关接口。
+                            主入口已按 4 个核心能力收敛：请求决策、查看全部请求、查看请求状态、查询单次结果。
                           </div>
                           <Space wrap>
                             <AntdButton type="dashed" onClick={fillRequestDmnDecisionTest}>
                               Test requestDMNDecision
                             </AntdButton>
-                            {dmnContractActions.map((action) => (
+                            {dmnPrimaryActions.map((action) => (
                               <AntdButton
                                 key={action.method}
                                 onClick={() => applyDmnQuickAction(action)}
@@ -2730,6 +2741,25 @@ const Overview: React.FC = () => {
                               </AntdButton>
                             ))}
                           </Space>
+                          {dmnAdvancedActions.length ? (
+                            <Space direction="vertical" style={{ width: "100%" }} size={6}>
+                              <div style={{ color: "#64748b", fontSize: 12 }}>
+                                Advanced
+                              </div>
+                              <Space wrap>
+                                {dmnAdvancedActions.map((action) => (
+                                  <AntdButton
+                                    key={action.method}
+                                    size="small"
+                                    type="default"
+                                    onClick={() => applyDmnQuickAction(action)}
+                                  >
+                                    {action.label}
+                                  </AntdButton>
+                                ))}
+                              </Space>
+                            </Space>
+                          ) : null}
                         </Space>
                       </Form.Item>
                       <Form.Item

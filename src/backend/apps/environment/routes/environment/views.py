@@ -1777,7 +1777,10 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
 
         payload = self._load_chainlink_deployments()
         chainlink = env.chainlink_detail or (payload.get("chainlink_deployment") or {})
-        dmn = env.dmn_detail or (payload.get("dmn_deployment") or {})
+        dmn = {
+            **(env.dmn_detail or {}),
+            **(payload.get("dmn_deployment") or {}),
+        }
         relayer = self._resolve_relayer_deployment(env, payload)
         contract_name = self._resolve_dmn_contract_name(dmn)
 
@@ -1836,7 +1839,10 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
 
         payload = self._load_chainlink_deployments()
         chainlink = env.chainlink_detail or (payload.get("chainlink_deployment") or {})
-        dmn = env.dmn_detail or (payload.get("dmn_deployment") or {})
+        dmn = {
+            **(env.dmn_detail or {}),
+            **(payload.get("dmn_deployment") or {}),
+        }
         compiled = payload.get("compiled") or {}
         contract_name = self._resolve_dmn_contract_name(dmn)
         contract_key = f"contracts/{contract_name}.sol:{contract_name}"

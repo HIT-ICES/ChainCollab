@@ -2,8 +2,7 @@ import { useEffect, useState } from "react"
 import { Card, Row, Col, Button, Typography, Steps, Modal, TableProps, Table, Select, Input, Tag } from "antd"
 import { useLocation, useNavigate } from "react-router-dom";
 import { BindingModal } from "./bindingModel"
-import { retrieveBPMN, packageBpmnToInstance, updateBPMNInstanceStatus, updateBPMNInstanceFireflyUrl } from "@/api/externalResource"
-import { generateChaincode } from "@/api/translator"
+import { retrieveBPMN, packageBpmnToInstance, updateBPMNInstanceStatus, updateBPMNInstanceFireflyUrl, generateBpmnArtifacts } from "@/api/externalResource"
 import { useAvailableMembers } from "./hooks"
 import axios from "axios"
 const steps = [
@@ -46,6 +45,7 @@ const MembershipModal = ({
         msp: "",
     })
     const currentOrgId = useAppSelector((state) => state.org.currentOrgId);
+    const currentEnvType = useAppSelector((state) => state.env.currentEnvType);
     const [fireflyData, syncFireflyData] = useFireflyData(
         envId,
         currentOrgId,
@@ -114,6 +114,7 @@ const BPMNInstanceOverview = () => {
         }
     })(status);
     const currentOrgId = useAppSelector((state) => state.org.currentOrgId);
+    const currentEnvType = useAppSelector((state) => state.env.currentEnvType);
 
     const [buttonLoading, setButtonLoading] = useState(false);
     const [isExecuteModalOpen, setIsExecuteModalOpen] = useState(false);
@@ -187,30 +188,38 @@ const BPMNInstanceOverview = () => {
         try {
             setButtonLoading(true);
             const bpmn = await retrieveBPMN(instance.bpmn);
-            const res = await generateChaincode(bpmn.bpmnContent);
-            const chaincode_content = res.bpmnContent;
-            const ffi_content = res.ffiContent;
-            setDslContentForModify(res.dslContent || "");
+            const isEthereum = Boolean(bpmn?.eth_environment || bpmn?.ethereum_contract);
+            const target = isEthereum ? "solidity" : "go";
+            const res = await generateBpmnArtifacts(
+                bpmn.id,
+                target,
+                currentConsortiumId || "1"
+            );
+            const generated = res?.data || {};
+            const chaincode_content = generated.chaincodeContent || "";
+            const ffi_content = generated.ffiContent || "{}";
+            setDslContentForModify(generated.dslContent || "");
             setChainCodeContentForModify(chaincode_content);
             setFFIContentForModify(ffi_content);
             setIsModifyModalOpen(true);
-            // await packageBPMN(chaincode_content, ffi_content, bpmnInstanceId, currentOrgId);
-            // syncInstance()
-            // setButtonLoading(false);
+            setButtonLoading(false);
         } catch (e) {
+            setButtonLoading(false);
         }
     }
 
     const onTestGenerate = async () => {
         const bpmn = await retrieveBPMN(instance.bpmn);
+        const isEthereum = Boolean(bpmn?.eth_environment || bpmn?.ethereum_contract);
 
         const record = []
         for (let i = 0; i < 50; i++) {
-            // var start = performance.now();
-            const res = await generateChaincode(bpmn.bpmnContent);
-            // var end = performance.now();
-            // var timeCost = end - start;
-            record.push({ index: i + 1, timeCost: res.timeCost });
+            const res = await generateBpmnArtifacts(
+                bpmn.id,
+                isEthereum ? "solidity" : "go",
+                currentConsortiumId || "1"
+            );
+            record.push({ index: i + 1, timeCost: res?.data?.timeCost || "" });
         }
         let csvContent = "index,timeCost\n";
         record.forEach((record) => {
@@ -319,7 +328,10 @@ const BPMNInstanceOverview = () => {
         } else if (status == 'Registered') {
             return 'Execute';
         } else {
-            return status == 'Generated' ? 'Install' : 'Generate';
+            if (status == 'Generated') {
+                return currentEnvType === 'Ethereum' ? 'Open Contracts' : 'Install';
+            }
+            return 'Generate';
         }
     })()
 
@@ -352,7 +364,11 @@ const BPMNInstanceOverview = () => {
                             loading={buttonLoading}
                             onClick={() => {
                                 if (status == 'Generated') {
-                                    navigate(`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/fabric/chaincode`)
+                                    const contractPage =
+                                        currentEnvType === 'Ethereum'
+                                            ? 'ethereum/smartcontract'
+                                            : 'fabric/chaincode';
+                                    navigate(`/orgs/${currentOrgId}/consortia/${currentConsortiumId}/envs/${currentEnvId}/${contractPage}`)
                                 } else if (status == 'Installed') {
                                     onRegister();
                                 } else if (status == 'Registered') {

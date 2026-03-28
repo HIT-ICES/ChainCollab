@@ -22,6 +22,7 @@ from apps.core.routes.consortium.views import (
 )
 from apps.core.routes.membership.views import MembershipViewSet
 from apps.core.routes.bpmn.views import BPMNViewsSet, BPMNInstanceViewSet, DmnViewSet
+from apps.core.routes.translator.views import TranslatorProxyViewSet
 
 router = DefaultRouter(trailing_slash=False)
 
@@ -57,6 +58,7 @@ router.register(
     DmnViewSet,
     basename="dmn",
 )
+router.register("translator", TranslatorProxyViewSet, basename="translator")
 
 urlpatterns = router.urls + [
     path("login", LoleidoTokenObtainPairView.as_view(), name="token_obtain_pair"),
