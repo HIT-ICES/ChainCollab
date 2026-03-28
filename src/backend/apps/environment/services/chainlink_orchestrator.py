@@ -701,7 +701,23 @@ class ChainlinkOrchestrator:
     def load_chainlink_deployments(self) -> dict:
         scripts = self.resolve_chainlink_scripts()
         chainlink_root = Path(scripts["chainlink_root"])
-        deployment_dir = chainlink_root / "deployment"
+        legacy_deployment_dir = chainlink_root / "deployment"
+        runtime_deployment_dir = Path(
+            os.environ.get("CHAINCOLLAB_RUNTIME_DEPLOYMENT_DIR")
+            or (chainlink_root.parent.parent / "runtime" / "deployment")
+        )
+        deployment_dir = legacy_deployment_dir
+        for candidate in (runtime_deployment_dir, legacy_deployment_dir):
+            if any(
+                (candidate / name).exists()
+                for name in (
+                    "chainlink-deployment.json",
+                    "deployment.json",
+                    "compiled.json",
+                )
+            ):
+                deployment_dir = candidate
+                break
         chainlink_deploy = deployment_dir / "chainlink-deployment.json"
         dmn_deploy = deployment_dir / "deployment.json"
         oracle_task_suite = deployment_dir / "oracle-task-suite.json"
@@ -716,6 +732,8 @@ class ChainlinkOrchestrator:
         return {
             "chainlink_root": str(chainlink_root),
             "deployment_dir": str(deployment_dir),
+            "runtime_deployment_dir": str(runtime_deployment_dir),
+            "legacy_deployment_dir": str(legacy_deployment_dir),
             "chainlink_deployment": _load_json(chainlink_deploy),
             "dmn_deployment": _load_json(dmn_deploy),
             "oracle_task_suite": _load_json(oracle_task_suite),
