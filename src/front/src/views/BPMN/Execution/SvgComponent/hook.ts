@@ -267,7 +267,7 @@ export const useAllFireflyData = (
 }
 
 import { useQuery } from 'react-query'
-import { getFireflyIdentity } from "@/api/platformAPI"
+import { getEthereumIdentityList, getFireflyIdentity } from "@/api/platformAPI"
 import axios from 'axios';
 
 export const useAvailableIdentity = () => {
@@ -284,6 +284,23 @@ export const useAvailableIdentity = () => {
         enabled: currentEnvType !== "Ethereum" && Boolean(currenEnvId) && Boolean(currenOrgId),
     })
     return [data, isLoading, refetch]
+}
+
+export const useAvailableEthereumIdentity = (ethEnvironmentId: string) => {
+    const { data, isLoading, refetch } = useQuery(
+        ['availableEthereumIdentity', ethEnvironmentId],
+        async () => {
+            if (!ethEnvironmentId) {
+                return []
+            }
+            const res = await getEthereumIdentityList(ethEnvironmentId)
+            return Array.isArray(res) ? res : []
+        },
+        {
+            enabled: Boolean(ethEnvironmentId),
+        },
+    )
+    return [Array.isArray(data) ? data : [], isLoading, refetch] as const
 }
 
 export const useFireflyIdentity = (coreUrl: string, idInFirefly: string) => {

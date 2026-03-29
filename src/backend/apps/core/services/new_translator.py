@@ -56,6 +56,7 @@ class NewTranslatorClient:
                 "dslContent": result.get("dslContent", ""),
                 "chaincodeContent": result.get("contractContent", ""),
                 "ffiContent": result.get("ffiContent", "{}"),
+                "executionLayout": result.get("executionLayout", {}),
             }
 
         dsl_result = self._post(
@@ -81,6 +82,7 @@ class NewTranslatorClient:
             "dslContent": dsl_content,
             "chaincodeContent": compile_result.get("chaincodeContent", ""),
             "ffiContent": ffi_content,
+            "executionLayout": {},
         }
 
     def get_participants(self, bpmn_content: str) -> Any:

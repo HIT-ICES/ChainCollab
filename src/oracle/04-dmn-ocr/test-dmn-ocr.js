@@ -294,7 +294,7 @@ async function testOracle() {
       console.log('合约 LINK 余额:', balance.toString());
     }
 
-    const dmnContent = `<?xml version="1.0" encoding="UTF-8"?>
+    const inlineDmnContent = `<?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://www.omg.org/spec/DMN/20151101/dmn.xsd"
              id="dish-decision"
              name="Dish Decision"
@@ -375,6 +375,7 @@ async function testOracle() {
     </decisionTable>
   </decision>
 </definitions>`;
+    const dmnCid = process.env.DMN_CID || inlineDmnContent;
 
     const decisionId = 'dish';
     const defaultTemp = Number(process.env.DMN_TEMPERATURE || 20);
@@ -409,12 +410,12 @@ async function testOracle() {
         type: 'function',
         inputs: [
           { type: 'string', name: 'url' },
-          { type: 'string', name: 'dmnContent' },
+          { type: 'string', name: 'dmnCid' },
           { type: 'string', name: 'decisionId' },
           { type: 'string', name: 'inputData' },
         ],
       },
-      [DMN_URL, dmnContent, decisionId, inputData]
+      [DMN_URL, dmnCid, decisionId, inputData]
     );
 
     console.log('🚀 发起 DMN Oracle 请求...');

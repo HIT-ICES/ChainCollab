@@ -20,7 +20,7 @@ interface IOracle {
 interface IDmnLite {
     function requestDMNDecision(
         string calldata url,
-        string calldata dmnContent,
+        string calldata dmnCid,
         string calldata decisionId,
         string calldata inputData
     ) external returns (bytes32 requestId);
@@ -121,7 +121,6 @@ contract {{ contract_name }} {
         ParticipantKey receiveParticipant;
         string fireflyTranId;
         ElementState state;
-        string formatJson;
     }
 
     struct Gateway {
@@ -135,7 +134,8 @@ contract {{ contract_name }} {
     }
 
     struct BusinessRuleInit {
-        string dmnContent;
+        string dmnCid;
+        bytes32 dmnHash;
         string decisionId;
         bool callerRestricted;
         address allowedCaller;
@@ -143,6 +143,7 @@ contract {{ contract_name }} {
 
     struct BusinessRule {
         bool exists;
+        string dmnCid;
         bytes32 hashOfDmn;
         string decisionId;
         bool callerRestricted;
@@ -203,13 +204,6 @@ contract {{ contract_name }} {
         uint256 indexed instanceId,
         BusinessRuleKey indexed ruleKey,
         bytes32 indexed requestId
-    );
-    event BusinessRuleDispatchRequested(
-        uint256 indexed instanceId,
-        BusinessRuleKey indexed ruleKey,
-        bytes32 indexed dmnHash,
-        string decisionId,
-        string inputData
     );
     event BusinessRuleCompleted(
         uint256 indexed instanceId,
@@ -300,16 +294,14 @@ contract {{ contract_name }} {
         MessageKey key,
         ParticipantKey sendKey,
         ParticipantKey recvKey,
-        ElementState state,
-        string memory formatJson
+        ElementState state
     ) internal {
         inst.messages[key] = Message({
             exists: true,
             sendParticipant: sendKey,
             receiveParticipant: recvKey,
             fireflyTranId: "",
-            state: state,
-            formatJson: formatJson
+            state: state
         });
     }
 
@@ -336,7 +328,8 @@ contract {{ contract_name }} {
     ) internal {
         inst.businessRules[key] = BusinessRule({
             exists: true,
-            hashOfDmn: keccak256(bytes(config.dmnContent)),
+            dmnCid: config.dmnCid,
+            hashOfDmn: config.dmnHash,
             decisionId: config.decisionId,
             callerRestricted: config.callerRestricted,
             allowedCaller: config.allowedCaller,
@@ -346,26 +339,6 @@ contract {{ contract_name }} {
             fulfilledAt: 0,
             lastRawResult: ""
         });
-    }
-
-    // TODO: Replace dmnContent init payload with a registry/CID lookup so createInstance no longer
-    // needs to carry the full DMN XML in calldata. The off-chain worker should resolve hashOfDmn,
-    // call DMN_lite, and then bind the returned requestId through recordBusinessRuleRequest().
-    function recordBusinessRuleRequest(
-        uint256 instanceId,
-        BusinessRuleKey key,
-        bytes32 requestId
-    ) external onlyOwner onlyInitialized {
-        Instance storage inst = _getInstance(instanceId);
-        BusinessRule storage br = inst.businessRules[key];
-        require(br.exists, "business rule not set");
-        require(br.state == ElementState.WAITING_FOR_CONFIRMATION, "business rule not waiting");
-        require(requestId != bytes32(0), "request id not set");
-        require(br.requestId == bytes32(0), "business rule request already bound");
-
-        br.requestId = requestId;
-
-        emit BusinessRuleRequested(instanceId, key, requestId);
     }
 
     function _stringToInt(string memory value) internal pure returns (int256) {
@@ -434,6 +407,27 @@ contract {{ contract_name }} {
             buffer[0] = bytes1("-");
         }
         return string(buffer);
+    }
+
+    function _jsonField(
+        string memory key,
+        string memory encodedValue
+    ) internal pure returns (string memory) {
+        return string.concat(_jsonString(key), ":", encodedValue);
+    }
+
+    function _jsonAppendField(
+        string memory body,
+        string memory field
+    ) internal pure returns (string memory) {
+        if (bytes(body).length == 0) {
+            return field;
+        }
+        return string.concat(body, ",", field);
+    }
+
+    function _jsonObject(string memory body) internal pure returns (string memory) {
+        return string.concat("{", body, "}");
     }
 
     function _skipWhitespace(bytes memory data, uint256 index) internal pure returns (uint256) {
@@ -637,8 +631,7 @@ contract {{ contract_name }} {
             MessageKey.{{ message.enum_name }},
             ParticipantKey.{{ message.sender }},
             ParticipantKey.{{ message.receiver }},
-            ElementState.{{ message.initial_state }},
-            {{ message.schema }}
+            ElementState.{{ message.initial_state }}
         );
         {% endfor %}
 
@@ -728,13 +721,12 @@ contract {{ contract_name }} {
         require(br.state == ElementState.ENABLED, "business rule not enabled");
         _checkBusinessRuleCaller(inst, br);
 
-        string memory inputData = "{";
+        string memory inputBody = "";
         {% for mapping in rule.input_mappings %}
-        inputData = string.concat(
-            inputData,
-            {% if loop.first %}""{% else %}","{% endif %},
-            {{ mapping.param_literal }},
-            ":",
+        inputBody = _jsonAppendField(
+            inputBody,
+            _jsonField(
+                {{ mapping.param_literal }},
             {% if mapping.sol_type == 'int256' %}
             _jsonInt(inst.stateMemory.{{ mapping.slot_name }})
             {% elif mapping.sol_type == 'bool' %}
@@ -742,22 +734,25 @@ contract {{ contract_name }} {
             {% else %}
             _jsonString(inst.stateMemory.{{ mapping.slot_name }})
             {% endif %}
+            )
         );
         {% endfor %}
-        inputData = string.concat(inputData, "}");
-        br.requestId = bytes32(0);
+        string memory inputData = _jsonObject(inputBody);
+        IDmnLite dmnLite = IDmnLite(inst.dmnLiteAddress);
+        require(bytes(br.dmnCid).length != 0, "dmn cid not set");
+        bytes32 requestId = dmnLite.requestDMNDecision(
+            inst.dmnEvalUrl,
+            br.dmnCid,
+            br.decisionId,
+            inputData
+        );
+        require(requestId != bytes32(0), "dmn request failed");
+        br.requestId = requestId;
         br.requestedAt = block.timestamp;
         br.fulfilledAt = 0;
         br.lastRawResult = "";
         br.state = ElementState.WAITING_FOR_CONFIRMATION;
-
-        emit BusinessRuleDispatchRequested(
-            instanceId,
-            BusinessRuleKey.{{ rule.enum_name }},
-            br.hashOfDmn,
-            br.decisionId,
-            inputData
-        );
+        emit BusinessRuleRequested(instanceId, BusinessRuleKey.{{ rule.enum_name }}, requestId);
     }
 
     function {{ rule.enum_name }}_Continue(uint256 instanceId) external onlyInitialized {

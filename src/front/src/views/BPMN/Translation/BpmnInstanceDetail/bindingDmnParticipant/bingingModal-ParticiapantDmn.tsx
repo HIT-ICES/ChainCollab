@@ -7,12 +7,28 @@ import { getMembership, retrieveFabricIdentity, retrieveEthereumIdentity } from 
 import { getDmnContractDetailForEthEnv, getFireflyList, getIdentityContractDetail, getResourceSets } from "@/api/resourceAPI";
 import { useAppSelector } from "@/redux/hooks";
 import { useFireflyData, useParticipantsData } from "../hooks";
-import { callFireflyContract, getFireflyVerify, invokeCreateInstance } from "@/api/executionAPI";
-import { addBPMNInstance, retrieveBPMN, updateBPMNInstance } from "@/api/externalResource";
+import {
+	callFireflyContract,
+	fireflyBroadcastData,
+	fireflyFileTransfer,
+	getFireflyData,
+	getFireflyVerify,
+	invokeCreateInstance,
+} from "@/api/executionAPI";
+import {
+	addBPMNInstance,
+	retrieveBPMN,
+	retrieveDmn,
+	updateBPMNInstance,
+	updateDmn,
+} from "@/api/externalResource";
 import { useBusinessRulesDataByBpmn } from "./hooks";
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+const ZERO_BYTES32 = `0x${"0".repeat(64)}`;
 const DEFAULT_DMN_EVAL_URL = "http://cdmn-node1:5000/api/dmn/evaluate";
+const ETH_INSTANCE_POLL_ATTEMPTS = 15;
+const ETH_INSTANCE_POLL_INTERVAL_MS = 2000;
 
 const ParticipantDmnBindingModal = ({
 	open,
@@ -83,44 +99,192 @@ const ParticipantDmnBindingModal = ({
 		return null;
 	};
 
+	const sleep = (ms: number) =>
+		new Promise((resolve) => {
+			window.setTimeout(resolve, ms);
+		});
+
+	const normalizeHttpUrl = (value: string) => {
+		if (!value) {
+			return "";
+		}
+		return value.startsWith("http://") || value.startsWith("https://")
+			? value
+			: `http://${value}`;
+	};
+
+	const extractCidFromFireflyData = (payload: any) => {
+		const publicUrl =
+			payload?.blob?.public || payload?.blob?.url || payload?.blob?.href || "";
+		if (!publicUrl) {
+			return "";
+		}
+		const value = String(publicUrl).trim();
+		const match = value.match(/\/ipfs\/([^/?#]+)/);
+		if (match?.[1]) {
+			return match[1];
+		}
+		if (/^(Qm[1-9A-HJ-NP-Za-km-z]{44}|bafy[1-9A-HJ-NP-Za-km-z]+)$/.test(value)) {
+			return value;
+		}
+		return "";
+	};
+
+	const ensureDmnStoredForEthereum = async (
+		dmnId: string,
+		dmnContent: string,
+	) => {
+		if (!currentConsortiumId) {
+			throw new Error("Consortium id is required for DMN storage");
+		}
+		if (!dmnId) {
+			throw new Error("DMN id is required");
+		}
+		if (!dmnContent) {
+			throw new Error(`DMN ${dmnId} content is empty`);
+		}
+
+		const existingDmn = await retrieveDmn(currentConsortiumId, dmnId);
+		if (existingDmn?.cid) {
+			return {
+				dmnCid: existingDmn.cid,
+				dmnHash: existingDmn.contentHash || ZERO_BYTES32,
+				fireflyDataId: existingDmn.fireflyDataId || "",
+			};
+		}
+
+		const fireflyList = await getFireflyList(
+			effectiveEnvId || currentEnvId,
+			null,
+			null,
+			"Ethereum",
+		);
+		const fireflyCoreUrl = normalizeHttpUrl(fireflyList?.[0]?.coreURL || "");
+		if (!fireflyCoreUrl) {
+			throw new Error("FireFly core is not available for DMN upload");
+		}
+
+		const uploadedFile = new File(
+			[new Blob([dmnContent], { type: "application/xml" })],
+			`${dmnId}.dmn`,
+			{ type: "application/xml" },
+		);
+		const uploadResult = await fireflyFileTransfer(fireflyCoreUrl, uploadedFile);
+		const dataId =
+			uploadResult?.id ||
+			uploadResult?.data?.id ||
+			uploadResult?.data?.[0]?.id ||
+			"";
+		if (!dataId) {
+			throw new Error(`Failed to upload DMN ${dmnId} to FireFly data manager`);
+		}
+
+		await fireflyBroadcastData(fireflyCoreUrl, dataId);
+		let cid = "";
+		for (let attempt = 0; attempt < 10; attempt++) {
+			if (attempt > 0) {
+				await sleep(1000);
+			} else {
+				await sleep(1500);
+			}
+			const fireflyData = await getFireflyData(fireflyCoreUrl, dataId);
+			cid = extractCidFromFireflyData(fireflyData);
+			if (cid) {
+				break;
+			}
+		}
+		if (!cid) {
+			throw new Error(`Failed to resolve CID for DMN ${dmnId}`);
+		}
+
+		const updatedDmn = await updateDmn(currentConsortiumId, dmnId, {
+			fireflyDataId: dataId,
+			cid,
+			dmnContent,
+		});
+		if (!updatedDmn) {
+			throw new Error(`Failed to persist CID metadata for DMN ${dmnId}`);
+		}
+
+		return {
+			dmnCid: updatedDmn.cid || cid,
+			dmnHash: updatedDmn.contentHash || ZERO_BYTES32,
+			fireflyDataId: updatedDmn.fireflyDataId || dataId,
+		};
+	};
+
+	const waitForEthereumInstance = async (
+		chaincodeUrl: string,
+		createResult: any,
+		startingCounter: number | null,
+	) => {
+		let lastError: any = null;
+		for (let attempt = 0; attempt < ETH_INSTANCE_POLL_ATTEMPTS; attempt++) {
+			try {
+				const queryResult = await callFireflyContract(
+					chaincodeUrl,
+					"currentInstanceId",
+					{},
+					"query",
+				);
+				const resolvedCounter = extractFireflyScalar(queryResult);
+				const numericCounter = Number(resolvedCounter);
+				if (!Number.isFinite(numericCounter)) {
+					throw new Error(
+						`Invalid instance counter returned from FireFly: ${resolvedCounter}`,
+					);
+				}
+
+				if (
+					startingCounter !== null &&
+					Number.isFinite(startingCounter) &&
+					numericCounter <= startingCounter
+				) {
+					throw new Error("instance counter has not advanced yet");
+				}
+
+				const fallbackId = extractFireflyScalar(createResult);
+				const numericInstanceId =
+					numericCounter > 0 ? numericCounter - 1 : Number(fallbackId ?? 0);
+				if (!Number.isFinite(numericInstanceId) || numericInstanceId < 0) {
+					throw new Error(
+						`Invalid instance id returned from FireFly: ${fallbackId}`,
+					);
+				}
+
+				await callFireflyContract(
+					chaincodeUrl,
+					"getExecutionSnapshot",
+					{ instanceId: numericInstanceId },
+					"query",
+				);
+				return numericInstanceId;
+			} catch (error: any) {
+				lastError = error;
+				if (attempt < ETH_INSTANCE_POLL_ATTEMPTS - 1) {
+					await sleep(ETH_INSTANCE_POLL_INTERVAL_MS);
+				}
+			}
+		}
+
+		throw new Error(
+			lastError?.message ||
+				"createInstance did not produce a readable on-chain instance in time",
+		);
+	};
+
 	const persistEthereumInstance = async (
 		bpmn: any,
 		chaincodeUrl: string,
 		createResult: any,
+		startingCounter: number | null,
+		executionBindings: Record<string, any>,
 	) => {
-		const queryResult = await callFireflyContract(
+		const numericInstanceId = await waitForEthereumInstance(
 			chaincodeUrl,
-			"currentInstanceId",
-			{},
-			"query",
+			createResult,
+			startingCounter,
 		);
-		const resolvedId =
-			extractFireflyScalar(queryResult) ?? extractFireflyScalar(createResult);
-		if (resolvedId === null || resolvedId === undefined || resolvedId === "") {
-			throw new Error("Unable to resolve created instance id from FireFly");
-		}
-		const rawInstanceCounter = Number(resolvedId);
-		if (!Number.isFinite(rawInstanceCounter)) {
-			throw new Error(`Invalid instance id returned from FireFly: ${resolvedId}`);
-		}
-		// currentInstanceId() is the next available id after createInstance completes.
-		const numericInstanceId = rawInstanceCounter > 0 ? rawInstanceCounter - 1 : 0;
-		if (!Number.isFinite(numericInstanceId)) {
-			throw new Error(`Invalid instance id returned from FireFly: ${resolvedId}`);
-		}
-		try {
-			await callFireflyContract(
-				chaincodeUrl,
-				"getExecutionSnapshot",
-				{ instanceId: numericInstanceId },
-				"query",
-			);
-		} catch (error: any) {
-			throw new Error(
-				error?.message ||
-					"createInstance did not produce a readable on-chain instance",
-			);
-		}
 
 		let targetInstanceId = bpmnInstanceId || "";
 		if (!targetInstanceId) {
@@ -129,6 +293,7 @@ const ParticipantDmnBindingModal = ({
 				bpmn.id,
 				generatedName,
 				effectiveEnvId || currentEnvId || "",
+				executionBindings,
 			);
 			targetInstanceId = created?.id || created?.data?.id || "";
 		}
@@ -139,6 +304,7 @@ const ParticipantDmnBindingModal = ({
 		const updated = await updateBPMNInstance(targetInstanceId, bpmn.id, {
 			instance_chaincode_id: numericInstanceId,
 			name: `${(bpmn?.name || "BPMN").replace(".bpmn", "")}-${numericInstanceId}`,
+			execution_bindings: executionBindings,
 		});
 		if (!updated) {
 			throw new Error("Failed to update BPMN instance with chain instance id");
@@ -219,7 +385,8 @@ const ParticipantDmnBindingModal = ({
 		const envTypeForInstance =
 			effectiveEnvType || (bpmn?.eth_environment ? "Ethereum" : currentEnvType);
 		if (envTypeForInstance === "Ethereum") {
-			const createInstanceParam = await constructEthereumParam();
+			const { params: createInstanceParam, executionBindings } =
+				await constructEthereumParam();
 			const payload = { params: createInstanceParam };
 
 			if (onlyReturnParam) {
@@ -230,13 +397,36 @@ const ParticipantDmnBindingModal = ({
 				};
 			}
 
+			let startingCounter: number | null = null;
+			try {
+				const preCreateCounter = await callFireflyContract(
+					chaincode_url,
+					"currentInstanceId",
+					{},
+					"query",
+				);
+				const resolvedCounter = extractFireflyScalar(preCreateCounter);
+				const numericCounter = Number(resolvedCounter);
+				if (Number.isFinite(numericCounter)) {
+					startingCounter = numericCounter;
+				}
+			} catch (error) {
+				startingCounter = null;
+			}
+
 			const createResult = await callFireflyContract(
 				chaincode_url,
 				"createInstance",
 				payload,
 				"invoke",
 			);
-			await persistEthereumInstance(bpmn, chaincode_url, createResult);
+			await persistEthereumInstance(
+				bpmn,
+				chaincode_url,
+				createResult,
+				startingCounter,
+				executionBindings,
+			);
 			return;
 		}
 
@@ -368,6 +558,10 @@ const ParticipantDmnBindingModal = ({
 				dmnEvalUrl: dmnEvalUrl.trim(),
 				enforceBusinessRuleCaller,
 			};
+			const executionBindings: Record<string, any> = {
+				participants: {},
+				business_rules: {},
+			};
 
 			for (const [participantId, value] of showBindingParticipantValueMap.entries()) {
 				const participantLabel = participantNameMap.get(participantId) || participantId;
@@ -393,6 +587,12 @@ const ParticipantDmnBindingModal = ({
 				params[`${participantId}_account`] = ethereumIdentity.address;
 				params[`${participantId}_org`] =
 					membership?.name || membership?.membershipName || "";
+				executionBindings.participants[participantId] = {
+					membership_id: value.selectedMembershipId,
+					ethereum_identity_id: value.selectedUser,
+					address: ethereumIdentity.address,
+					org_name: membership?.name || membership?.membershipName || "",
+				};
 			}
 
 			const businessRuleIds = Object.keys(businessRules || {});
@@ -401,23 +601,38 @@ const ParticipantDmnBindingModal = ({
 				if (!value?.isBinded) {
 					throw new Error(`BusinessRule ${businessRuleId} is not bound to a DMN`);
 				}
+				const dmnId = value[`${businessRuleId}_DMNID`] || "";
 				const dmnContent = value[`${businessRuleId}_Content`] || "";
 				const decisionId = value[`${businessRuleId}_DecisionID`] || "";
+				if (!dmnId) {
+					throw new Error(`BusinessRule ${businessRuleId} DMN id is required`);
+				}
 				if (!dmnContent) {
 					throw new Error(`BusinessRule ${businessRuleId} DMN content is required`);
 				}
 				if (!decisionId) {
 					throw new Error(`BusinessRule ${businessRuleId} decision id is required`);
 				}
+				const dmnStorage = await ensureDmnStoredForEthereum(dmnId, dmnContent);
 				params[businessRuleId] = {
-					dmnContent,
+					dmnCid: dmnStorage.dmnCid,
+					dmnHash: dmnStorage.dmnHash,
 					decisionId,
 					callerRestricted: false,
 					allowedCaller: ZERO_ADDRESS,
 				};
+				executionBindings.business_rules[businessRuleId] = {
+					dmn_id: dmnId,
+					dmn_cid: dmnStorage.dmnCid,
+					dmn_hash: dmnStorage.dmnHash,
+					firefly_data_id: dmnStorage.fireflyDataId,
+					callerRestricted: false,
+					allowedCaller: ZERO_ADDRESS,
+					decisionId,
+				};
 			}
 
-			return params;
+			return { params, executionBindings };
 		}
 	};
 

@@ -44,6 +44,18 @@ export const getFireflyData = async (coreUrl: string, dataId: string) => {
     }
 }
 
+export const fireflyBroadcastData = async (coreUrl: string, dataId: string) => {
+    try {
+        const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/messages/broadcast`, {
+            data: [{ id: dataId }],
+        });
+        return res.data;
+    } catch (error: any) {
+        console.error("Error occurred while broadcasting Firefly data:", error);
+        throw new Error(error?.response?.data?.message || error?.message || "Firefly data broadcast failed");
+    }
+}
+
 export const fireflyDataTransfer = async (coreUrl: string, data: any) => {
     try {
         const res = await fireflyAPI.post(`${coreUrl}/api/v1/namespaces/default/messages/private`, data);
@@ -214,11 +226,15 @@ export const callFireflyContract = async (
     contractBaseUrl: string,
     method: string,
     params: Record<string, any> = {},
-    mode: "invoke" | "query" = "invoke"
+    mode: "invoke" | "query" = "invoke",
+    key?: string,
 ) => {
-    const payload = {
+    const payload: any = {
         input: params,
     };
+    if (key && mode === "invoke") {
+        payload.key = key;
+    }
     const res = await fireflyAPI.post(`${contractBaseUrl}/${mode}/${method}`, payload);
     return res.data;
 }

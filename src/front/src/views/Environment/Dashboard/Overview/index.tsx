@@ -86,28 +86,7 @@ const requestDmnDecisionTestSample = {
   method: "requestDMNDecision",
   mode: "invoke",
   url: "http://cdmn-node1:5000/api/dmn/evaluate",
-  dmnContent: `<?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" id="SampleDecision" name="Decisions">
-  <decision id="Decision_Eligibility" name="Eligibility">
-    <variable id="var" name="Eligibility" typeRef="string" />
-    <decisionTable>
-      <input id="Input_Age">
-        <inputExpression typeRef="number">
-          <text>applicant.age</text>
-        </inputExpression>
-      </input>
-      <output id="Output_Result" typeRef="string" />
-      <rule>
-        <inputEntry>
-          <text>&gt;=18</text>
-        </inputEntry>
-        <outputEntry>
-          <text>"Approved"</text>
-        </outputEntry>
-      </rule>
-    </decisionTable>
-  </decision>
-</definitions>`,
+  dmnCid: "QmExampleDecisionCidReplaceMe",
   decisionId: "Decision_Eligibility",
   inputData: JSON.stringify({ applicant: { age: 20 } }),
 };
@@ -471,7 +450,7 @@ const Overview: React.FC = () => {
       group: "primary",
       params: [
         { key: "url", label: "DMN URL", placeholder: "http://cdmn-node1:5000/api/dmn/evaluate" },
-        { key: "dmnContent", label: "DMN Content", placeholder: "<DMN XML>" },
+        { key: "dmnCid", label: "DMN CID", placeholder: "Qm... / bafy..." },
         { key: "decisionId", label: "Decision ID", placeholder: "decision" },
         { key: "inputData", label: "Input JSON", placeholder: "{\"temperature\":20}" },
       ],
@@ -1757,7 +1736,7 @@ const Overview: React.FC = () => {
       method: requestDmnDecisionTestSample.method,
       mode: requestDmnDecisionTestSample.mode,
       url: requestDmnDecisionTestSample.url,
-      dmnContent: requestDmnDecisionTestSample.dmnContent,
+      dmnCid: requestDmnDecisionTestSample.dmnCid,
       decisionId: requestDmnDecisionTestSample.decisionId,
       inputData: requestDmnDecisionTestSample.inputData,
     })

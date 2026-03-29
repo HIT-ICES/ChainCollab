@@ -75,9 +75,6 @@ class SolidityCompiler:
         for version in preferred_versions:
             if version and version not in candidates:
                 candidates.append(version)
-        for version in installed_versions:
-            if version not in candidates:
-                candidates.append(version)
 
         for version in candidates:
             if version not in installed_versions:

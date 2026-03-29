@@ -69,6 +69,28 @@ export const getDmnList = async (consortiumId: string) => {
     }
 }
 
+export const retrieveDmn = async (consortiumId: string, dmnId: string) => {
+    try {
+        const response = await api.get(`/consortiums/${consortiumId}/dmns/${dmnId}`)
+        return response.data?.data || response.data;
+    } catch (error) {
+        return null;
+    }
+}
+
+export const updateDmn = async (
+    consortiumId: string,
+    dmnId: string,
+    payload: Record<string, any>,
+) => {
+    try {
+        const response = await api.put(`/consortiums/${consortiumId}/dmns/${dmnId}`, payload)
+        return response.data?.data || response.data;
+    } catch (error) {
+        return null;
+    }
+}
+
 export const getBPMNInstanceList = async (BPMNId: string) => {
     try {
         const response = await api.get(`/bpmns/${BPMNId}/bpmn-instances`)
@@ -82,11 +104,17 @@ export const uploadBPMN = async (envId: string, bpmn: any) => {
 
 }
 
-export const addBPMNInstance = async (bpmnId: string, name: string, currentEnvId: string) => {
+export const addBPMNInstance = async (
+    bpmnId: string,
+    name: string,
+    currentEnvId: string,
+    executionBindings: Record<string, any> = {},
+) => {
     try {
         const response = await api.post(`/bpmns/${bpmnId}/bpmn-instances`, {
             name: name,
-            env_id: currentEnvId
+            env_id: currentEnvId,
+            execution_bindings: executionBindings,
         })
         return response.data?.data ?? response.data;
     } catch (error) {

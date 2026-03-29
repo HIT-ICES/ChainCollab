@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { css } from "@emotion/css";
 import { useLocation } from "react-router-dom";
 import {
@@ -974,7 +974,7 @@ const ControlPanel = ({
 		);
 };
 
-import { useAvailableIdentity } from "./hook.ts";
+import { useAvailableEthereumIdentity, useAvailableIdentity } from "./hook.ts";
 
 const IdentitySelector = ({ identity, setIdentity }) => {
 	// 1. get all membership and participant based on user identity
@@ -1058,6 +1058,54 @@ const IdentitySelector = ({ identity, setIdentity }) => {
 	);
 };
 
+const EthereumIdentitySelector = ({
+	ethEnvironmentId,
+	selectedKey,
+	onSelect,
+}: {
+	ethEnvironmentId: string;
+	selectedKey: string;
+	onSelect: (identity: any) => void;
+}) => {
+	const [availableIdentities, isLoading, refetch] =
+		useAvailableEthereumIdentity(ethEnvironmentId);
+
+	useEffect(() => {
+		if (!selectedKey && availableIdentities.length > 0) {
+			onSelect(availableIdentities[0]);
+		}
+	}, [availableIdentities, onSelect, selectedKey]);
+
+	return (
+		<div style={{ marginBottom: 12 }}>
+			<Space wrap size={12}>
+				<Typography.Text strong>Ethereum Signer</Typography.Text>
+				<Button size="small" onClick={() => refetch()}>
+					Refresh
+				</Button>
+				<Select
+					loading={isLoading}
+					style={{ minWidth: 360 }}
+					value={selectedKey || undefined}
+					placeholder="Select Ethereum identity"
+					onChange={(value) => {
+						const matched = availableIdentities.find(
+							(item: any) => item?.address === value,
+						);
+						if (matched) {
+							onSelect(matched);
+						}
+					}}
+					options={availableIdentities.map((item: any) => ({
+						value: item?.address || "",
+						label: `${item?.name || "Identity"} (${item?.address || "-"})`,
+					}))}
+				/>
+			</Space>
+		</div>
+	);
+};
+
 const inferEthereumParamType = (param: any) => {
 	const raw = String(
 		param?.schema?.details?.type ||
@@ -1071,36 +1119,166 @@ const inferEthereumParamType = (param: any) => {
 	return "string";
 };
 
+const getEthereumParamDefaultValue = (
+	param: any,
+	instanceId: any,
+	element?: any,
+) => {
+	const name = String(param?.name || "");
+	const paramType = inferEthereumParamType(param);
+	const lowerName = name.toLowerCase();
+	const messageFormat = element?.type === "message" ? element?.Format || {} : {};
+	const propertyDef =
+		messageFormat?.properties?.[name] ||
+		messageFormat?.properties?.[lowerName] ||
+		messageFormat?.files?.[name] ||
+		messageFormat?.files?.[lowerName] ||
+		null;
+
+	if (name === "instanceId" || name === "InstanceID") {
+		return Number(instanceId || 0);
+	}
+	if (lowerName.includes("fireflytran")) {
+		const elementId = getElementId(element) || "action";
+		return `ff-${instanceId || 0}-${elementId}`;
+	}
+	if (paramType === "boolean") {
+		return false;
+	}
+	if (paramType === "number") {
+		return 1;
+	}
+	if (messageFormat?.files?.[name] || messageFormat?.files?.[lowerName]) {
+		return `${name || "file"}.dat`;
+	}
+	if (lowerName.endsWith("id") || lowerName.includes("requestid")) {
+		const elementId = getElementId(element) || "item";
+		return `${elementId}-${instanceId || 0}`;
+	}
+	const description = String(propertyDef?.description || "").trim();
+	if (description) {
+		return description.length > 40 ? description.slice(0, 40) : description;
+	}
+	return `sample-${name || "value"}`;
+};
+
 const buildEthereumMethodPayload = (method: any, instanceId: any) => {
 	const payload: Record<string, any> = {};
 	for (const param of method?.params || []) {
 		const name = param?.name;
 		if (!name) continue;
-		if (name === "instanceId" || name === "InstanceID") {
-			payload[name] = Number(instanceId || 0);
-			continue;
-		}
-		if (name.toLowerCase().includes("fireflytran")) {
-			payload[name] = `ff-${Date.now()}`;
-			continue;
-		}
-		const kind = inferEthereumParamType(param);
-		payload[name] = kind === "number" ? 0 : kind === "boolean" ? false : "";
+		payload[name] = getEthereumParamDefaultValue(param, instanceId);
 	}
 	return payload;
 };
 
-const getEthereumEnumIds = (methods: any[]) => {
-	const messageIds = methods
+const safeParseJsonText = (value: string) => {
+	if (!value || typeof value !== "string") return null;
+	try {
+		return JSON.parse(value);
+	} catch {
+		return null;
+	}
+};
+
+const getBpmnDocumentationText = (element: Element) => {
+	const docNode = Array.from(element.children).find(
+		(child) => child.localName === "documentation",
+	);
+	return docNode?.textContent?.trim() || "";
+};
+
+const parseBpmnExecutionMeta = (bpmnContent?: string) => {
+	const meta = {
+		messages: {} as Record<string, any>,
+		gateways: {} as Record<string, any>,
+		events: {} as Record<string, any>,
+		businessRules: {} as Record<string, any>,
+	};
+	if (!bpmnContent || typeof DOMParser === "undefined") {
+		return meta;
+	}
+	try {
+		const doc = new DOMParser().parseFromString(bpmnContent, "text/xml");
+		const nodes = Array.from(doc.querySelectorAll("[id]"));
+		nodes.forEach((node) => {
+			const id = node.getAttribute("id") || "";
+			if (!id) return;
+			const name = node.getAttribute("name") || id;
+			const documentation = getBpmnDocumentationText(node);
+			const parsedDoc = safeParseJsonText(documentation);
+			const entry = {
+				id,
+				name,
+				documentation,
+				parsedDoc,
+				type: node.localName,
+			};
+			if (id.startsWith("Message_")) {
+				meta.messages[id] = {
+					...entry,
+					format: parsedDoc,
+				};
+				return;
+			}
+			if (id.startsWith("Gateway_")) {
+				meta.gateways[id] = entry;
+				return;
+			}
+			if (
+				id.startsWith("Event_") ||
+				id.startsWith("StartEvent_") ||
+				id.startsWith("EndEvent_") ||
+				id.startsWith("Intermediate")
+			) {
+				meta.events[id] = entry;
+				return;
+			}
+			if (id.startsWith("Activity_") && node.localName === "businessRuleTask") {
+				meta.businessRules[id] = {
+					...entry,
+					inputs: Array.isArray(parsedDoc?.inputs) ? parsedDoc.inputs : [],
+					outputs: Array.isArray(parsedDoc?.outputs) ? parsedDoc.outputs : [],
+				};
+			}
+		});
+	} catch (error) {
+		console.error("Failed to parse BPMN execution metadata", error);
+	}
+	return meta;
+};
+
+const getEthereumEnumIds = (methods: any[], executionLayout?: any) => {
+	const layoutMessages = Array.isArray(executionLayout?.messages)
+		? executionLayout.messages
+				.map((item: any) => (typeof item === "string" ? item : item?.id))
+				.filter(Boolean)
+		: [];
+	const layoutGateways = Array.isArray(executionLayout?.gateways)
+		? executionLayout.gateways
+				.map((item: any) => (typeof item === "string" ? item : item?.id))
+				.filter(Boolean)
+		: [];
+	const layoutEvents = Array.isArray(executionLayout?.events)
+		? executionLayout.events
+				.map((item: any) => (typeof item === "string" ? item : item?.id))
+				.filter(Boolean)
+		: [];
+	const layoutBusinessRules = Array.isArray(executionLayout?.businessRules)
+		? executionLayout.businessRules
+				.map((item: any) => (typeof item === "string" ? item : item?.id))
+				.filter(Boolean)
+		: [];
+	const messageIds = layoutMessages.length > 0 ? layoutMessages : methods
 		.filter((method: any) => /^Message_.+_Send$/.test(method?.name || ""))
 		.map((method: any) => String(method.name).replace(/_Send$/, ""));
-	const gatewayIds = methods
+	const gatewayIds = layoutGateways.length > 0 ? layoutGateways : methods
 		.filter((method: any) => /^Gateway_/.test(method?.name || ""))
 		.map((method: any) => String(method.name));
-	const eventIds = methods
+	const eventIds = layoutEvents.length > 0 ? layoutEvents : methods
 		.filter((method: any) => /^Event_/.test(method?.name || ""))
 		.map((method: any) => String(method.name));
-	const businessRuleIds = methods
+	const businessRuleIds = layoutBusinessRules.length > 0 ? layoutBusinessRules : methods
 		.filter(
 			(method: any) =>
 				/^Activity_/.test(method?.name || "") &&
@@ -1173,27 +1351,40 @@ const toNumericState = (value: any) => {
 const buildEthereumExecutionElements = (
 	methods: any[],
 	snapshot: ReturnType<typeof extractSnapshotOutput>,
+	meta: ReturnType<typeof parseBpmnExecutionMeta>,
+	executionLayout?: any,
 ) => {
-	const enumIds = getEthereumEnumIds(methods);
+	const enumIds = getEthereumEnumIds(methods, executionLayout);
 	const messageElements = enumIds.messageIds.map((id, index) => ({
 		type: "message",
 		MessageID: id,
+		DisplayName: meta.messages[id]?.name || id,
+		Documentation: meta.messages[id]?.documentation || "",
+		Format: meta.messages[id]?.format || null,
 		state: toNumericState(snapshot.messageStates[index]),
 		FireflyTranID: String(snapshot.messageFireflyTranIds[index] ?? ""),
 	}));
 	const gatewayElements = enumIds.gatewayIds.map((id, index) => ({
 		type: "gateway",
 		GatewayID: id,
+		DisplayName: meta.gateways[id]?.name || id,
+		Documentation: meta.gateways[id]?.documentation || "",
 		state: toNumericState(snapshot.gatewayStates[index]),
 	}));
 	const eventElements = enumIds.eventIds.map((id, index) => ({
 		type: "event",
 		EventID: id,
+		DisplayName: meta.events[id]?.name || id,
+		Documentation: meta.events[id]?.documentation || "",
 		state: toNumericState(snapshot.eventStates[index]),
 	}));
 	const businessRuleElements = enumIds.businessRuleIds.map((id, index) => ({
 		type: "businessRule",
 		BusinessRuleID: id,
+		DisplayName: meta.businessRules[id]?.name || id,
+		Documentation: meta.businessRules[id]?.documentation || "",
+		Inputs: meta.businessRules[id]?.inputs || [],
+		Outputs: meta.businessRules[id]?.outputs || [],
 		state: toNumericState(snapshot.businessRuleStates[index]),
 		RequestID: String(snapshot.businessRuleRequestIds[index] ?? ""),
 	}));
@@ -1266,53 +1457,104 @@ const buildSvgStyleForElements = (
 const getEthereumActionConfig = (
 	element: any,
 	instanceId: number,
-	messageInputs: Record<string, string>,
+	methodsByName: Record<string, any>,
+	actionInputs: Record<string, Record<string, any>>,
 ) => {
+	const hasBusinessRuleRequestId =
+		typeof element?.RequestID === "string" &&
+		element.RequestID !== "" &&
+		element.RequestID !== "0x" &&
+		element.RequestID !==
+			"0x0000000000000000000000000000000000000000000000000000000000000000";
 	if (element?.type === "message" && element?.state === 1) {
+		const methodName = `${element.MessageID}_Send`;
+		const method = methodsByName[methodName];
+		const payload = buildEthereumMethodPayload(method, instanceId);
+		const overrides = actionInputs[element.MessageID] || {};
 		return {
 			type: "message" as const,
 			label: "Send",
-			method: `${element.MessageID}_Send`,
-			payload: {
-				instanceId,
-				fireflyTranId:
-					messageInputs[element.MessageID] || `ff-${Date.now()}`,
-			},
+			method: methodName,
+			methodDef: method,
+			payload: { ...payload, ...overrides },
 		};
 	}
 	if (element?.type === "gateway" && element?.state === 1) {
+		const method = methodsByName[element.GatewayID];
 		return {
 			type: "gateway" as const,
 			label: "Execute",
 			method: element.GatewayID,
-			payload: { instanceId },
+			methodDef: method,
+			payload: {
+				...buildEthereumMethodPayload(method, instanceId),
+				...(actionInputs[element.GatewayID] || {}),
+			},
 		};
 	}
 	if (element?.type === "event" && element?.state === 1) {
+		const method = methodsByName[element.EventID];
 		return {
 			type: "event" as const,
 			label: "Execute",
 			method: element.EventID,
-			payload: { instanceId },
+			methodDef: method,
+			payload: {
+				...buildEthereumMethodPayload(method, instanceId),
+				...(actionInputs[element.EventID] || {}),
+			},
 		};
 	}
 	if (element?.type === "businessRule" && element?.state === 1) {
+		const method = methodsByName[element.BusinessRuleID];
 		return {
 			type: "businessRule" as const,
 			label: "Request DMN",
 			method: element.BusinessRuleID,
-			payload: { instanceId },
+			methodDef: method,
+			payload: {
+				...buildEthereumMethodPayload(method, instanceId),
+				...(actionInputs[element.BusinessRuleID] || {}),
+			},
 		};
 	}
 	if (element?.type === "businessRule" && element?.state === 2) {
+		if (!hasBusinessRuleRequestId) {
+			return null;
+		}
+		const methodName = `${element.BusinessRuleID}_Continue`;
+		const method = methodsByName[methodName];
 		return {
 			type: "businessRule" as const,
 			label: "Continue",
-			method: `${element.BusinessRuleID}_Continue`,
-			payload: { instanceId },
+			method: methodName,
+			methodDef: method,
+			payload: {
+				...buildEthereumMethodPayload(method, instanceId),
+				...(actionInputs[element.BusinessRuleID] || {}),
+			},
 		};
 	}
 	return null;
+};
+
+const getEthereumActionKey = (element: any, method: string) =>
+	`${getElementId(element)}:${method}`;
+
+const buildEthereumActionInputDefaults = (
+	element: any,
+	config: any,
+	instanceId: number,
+) => {
+	const defaults: Record<string, any> = {};
+	for (const param of config?.methodDef?.params || []) {
+		const name = param?.name;
+		if (!name || name === "instanceId" || name === "InstanceID") {
+			continue;
+		}
+		defaults[name] = getEthereumParamDefaultValue(param, instanceId, element);
+	}
+	return defaults;
 };
 
 const EthereumExecutionView = ({
@@ -1332,6 +1574,20 @@ const EthereumExecutionView = ({
 	const methods = Array.isArray(contractMethodDes?.methods)
 		? contractMethodDes.methods
 		: [];
+	const ethEnvironmentId = String(bpmnData?.eth_environment || "");
+	const methodsByName = useMemo(
+		() =>
+			methods.reduce((acc, item) => {
+				if (item?.name) acc[item.name] = item;
+				return acc;
+			}, {} as Record<string, any>),
+		[methods],
+	);
+	const executionMeta = useMemo(
+		() => parseBpmnExecutionMeta(bpmnData?.bpmnContent),
+		[bpmnData?.bpmnContent],
+	);
+	const executionLayout = bpmnData?.execution_layout || {};
 	const instanceId = Number(bpmnInstance?.instance_chaincode_id ?? 0);
 	const executableMethods = methods.filter((method: any) => {
 		const name = method?.name || "";
@@ -1362,8 +1618,18 @@ const EthereumExecutionView = ({
 	const [snapshotLoading, setSnapshotLoading] = useState(false);
 	const [snapshotError, setSnapshotError] = useState<string | null>(null);
 	const [snapshotElements, setSnapshotElements] = useState<any[]>([]);
-	const [messageInputs, setMessageInputs] = useState<Record<string, string>>({});
+	const [actionInputs, setActionInputs] = useState<Record<string, Record<string, any>>>(
+		{},
+	);
 	const [svgStyle, setSvgStyle] = useState({});
+	const [selectedEthereumIdentity, setSelectedEthereumIdentity] = useState<any>(null);
+	const selectedEthereumKey = selectedEthereumIdentity?.address || "";
+	const [pendingActionKeys, setPendingActionKeys] = useState<Record<string, boolean>>(
+		{},
+	);
+	const [autoExecuteEnabled, setAutoExecuteEnabled] = useState(false);
+	const [autoExecuteIntervalMs, setAutoExecuteIntervalMs] = useState(3000);
+	const [autoExecuteRunning, setAutoExecuteRunning] = useState(false);
 
 	useEffect(() => {
 		const method =
@@ -1389,12 +1655,12 @@ const EthereumExecutionView = ({
 		if (!apiBaseUrl) {
 			setSnapshotError("Execution API is not ready");
 			setSnapshotElements([]);
-			return;
+			return [] as any[];
 		}
 		if (!Number.isFinite(instanceId)) {
 			setSnapshotError("Instance id is invalid");
 			setSnapshotElements([]);
-			return;
+			return [] as any[];
 		}
 		setSnapshotLoading(true);
 		setSnapshotError(null);
@@ -1406,12 +1672,19 @@ const EthereumExecutionView = ({
 				"query",
 			);
 			const snapshot = extractSnapshotOutput(response);
-			const elements = buildEthereumExecutionElements(methods, snapshot);
+			const elements = buildEthereumExecutionElements(
+				methods,
+				snapshot,
+				executionMeta,
+				executionLayout,
+			);
 			setSnapshotElements(elements);
+			return elements;
 		} catch (error: any) {
 			const errorText = String(error?.message || error || "Snapshot query failed");
 			setSnapshotError(errorText);
 			setSnapshotElements([]);
+			throw error;
 		} finally {
 			setSnapshotLoading(false);
 		}
@@ -1419,7 +1692,7 @@ const EthereumExecutionView = ({
 
 	useEffect(() => {
 		refreshSnapshot();
-	}, [apiBaseUrl, instanceId, methods.length]);
+	}, [apiBaseUrl, instanceId, methods.length, executionMeta, executionLayout]);
 
 	useEffect(() => {
 		setSvgStyle(buildSvgStyleForElements(snapshotElements, actionRecords));
@@ -1437,15 +1710,94 @@ const EthereumExecutionView = ({
 		{ disabled: 0, ready: 0, confirm: 0, done: 0 },
 	);
 	const actionableElements = snapshotElements.filter((item) =>
-		Boolean(getEthereumActionConfig(item, instanceId, messageInputs)),
+		Boolean(getEthereumActionConfig(item, instanceId, methodsByName, actionInputs)),
 	);
 
-	const invokeElementAction = async (element: any) => {
-		const config = getEthereumActionConfig(element, instanceId, messageInputs);
-		if (!config) {
-			message.info("No executable action for current state");
+	useEffect(() => {
+		if (snapshotElements.length === 0) {
 			return;
 		}
+		setActionInputs((prev) => {
+			let changed = false;
+			const next = { ...prev };
+			for (const element of snapshotElements) {
+				const config = getEthereumActionConfig(
+					element,
+					instanceId,
+					methodsByName,
+					prev,
+				);
+				if (!config) {
+					continue;
+				}
+				const elementId = getElementId(element);
+				if (!elementId) {
+					continue;
+				}
+				const current = { ...(next[elementId] || {}) };
+				const defaults = buildEthereumActionInputDefaults(
+					element,
+					config,
+					instanceId,
+				);
+				for (const [name, value] of Object.entries(defaults)) {
+					if (
+						current[name] === undefined ||
+						current[name] === null ||
+						current[name] === ""
+					) {
+						current[name] = value;
+						changed = true;
+					}
+				}
+				next[elementId] = current;
+			}
+			return changed ? next : prev;
+		});
+	}, [snapshotElements, instanceId, methodsByName]);
+
+	const invokeElementAction = async (element: any) => {
+		const config = getEthereumActionConfig(
+			element,
+			instanceId,
+			methodsByName,
+			actionInputs,
+		);
+		if (!config) {
+			message.info("No executable action for current state");
+			return false;
+		}
+		if (!selectedEthereumKey) {
+			message.error("Select an Ethereum signer first");
+			return false;
+		}
+		const actionKey = getEthereumActionKey(element, config.method);
+		if (pendingActionKeys[actionKey]) {
+			message.info("This action is already pending");
+			return false;
+		}
+		try {
+			const latestElements = await refreshSnapshot();
+			const latestElement = latestElements.find(
+				(item: any) => getElementId(item) === getElementId(element),
+			);
+			const latestConfig = latestElement
+				? getEthereumActionConfig(
+						latestElement,
+						instanceId,
+						methodsByName,
+						actionInputs,
+				  )
+				: null;
+			if (!latestConfig || latestConfig.method !== config.method) {
+				message.warning("Element is no longer actionable. Snapshot has been refreshed.");
+				return false;
+			}
+		} catch {
+			message.error("Failed to refresh execution snapshot before invoke");
+			return false;
+		}
+		setPendingActionKeys((prev) => ({ ...prev, [actionKey]: true }));
 		const traceId = createTraceId(`eth-${config.type}`);
 		onActionRecord?.({
 			traceId,
@@ -1462,6 +1814,7 @@ const EthereumExecutionView = ({
 				config.method,
 				config.payload,
 				"invoke",
+				selectedEthereumKey,
 			);
 			setResultText(JSON.stringify(response, null, 2));
 			onActionRecord?.({
@@ -1476,6 +1829,7 @@ const EthereumExecutionView = ({
 			});
 			await refreshSnapshot();
 			message.success(`${config.label} success`);
+			return true;
 		} catch (error: any) {
 			const errorText = String(error?.message || error || "Action failed");
 			setResultText(errorText);
@@ -1489,12 +1843,66 @@ const EthereumExecutionView = ({
 				error: errorText,
 			});
 			message.error(errorText);
+			return false;
+		} finally {
+			setPendingActionKeys((prev) => {
+				const next = { ...prev };
+				delete next[actionKey];
+				return next;
+			});
 		}
 	};
+
+	useEffect(() => {
+		if (!autoExecuteEnabled) {
+			setAutoExecuteRunning(false);
+			return;
+		}
+		if (!selectedEthereumKey) {
+			return;
+		}
+		if (snapshotLoading || running || autoExecuteRunning) {
+			return;
+		}
+		if (Object.keys(pendingActionKeys).length > 0) {
+			return;
+		}
+		const nextElement = actionableElements[0];
+		if (!nextElement) {
+			return;
+		}
+		const timer = window.setTimeout(async () => {
+			setAutoExecuteRunning(true);
+			try {
+				const ok = await invokeElementAction(nextElement);
+				if (!ok) {
+					setAutoExecuteEnabled(false);
+				}
+			} finally {
+				setAutoExecuteRunning(false);
+			}
+		}, autoExecuteIntervalMs);
+		return () => {
+			window.clearTimeout(timer);
+		};
+	}, [
+		autoExecuteEnabled,
+		autoExecuteIntervalMs,
+		selectedEthereumKey,
+		snapshotLoading,
+		running,
+		autoExecuteRunning,
+		pendingActionKeys,
+		actionableElements,
+	]);
 
 	const invokeMethod = async () => {
 		if (!apiBaseUrl || !selectedMethod) {
 			message.error("Execution API is not ready");
+			return;
+		}
+		if (requestMode === "invoke" && !selectedEthereumKey) {
+			message.error("Select an Ethereum signer first");
 			return;
 		}
 		let payload: Record<string, any> = {};
@@ -1521,6 +1929,7 @@ const EthereumExecutionView = ({
 				selectedMethod,
 				payload,
 				requestMode,
+				requestMode === "invoke" ? selectedEthereumKey : undefined,
 			);
 			setResultText(JSON.stringify(response, null, 2));
 			onActionRecord?.({
@@ -1561,6 +1970,28 @@ const EthereumExecutionView = ({
 				description="This page uses the BPMN's registered FireFly API directly. State is rendered from getExecutionSnapshot(instanceId)."
 				style={{ marginBottom: 12 }}
 			/>
+			<EthereumIdentitySelector
+				ethEnvironmentId={ethEnvironmentId}
+				selectedKey={selectedEthereumKey}
+				onSelect={setSelectedEthereumIdentity}
+			/>
+			{!selectedEthereumKey ? (
+				<Alert
+					type="warning"
+					showIcon
+					message="No Ethereum signer selected"
+					description="Invoke actions use the selected Ethereum identity address as FireFly key. Without it, participant checks will revert."
+					style={{ marginBottom: 12 }}
+				/>
+			) : (
+				<Alert
+					type="success"
+					showIcon
+					message="Ethereum signer ready"
+					description={`Current signer: ${selectedEthereumIdentity?.name || "Identity"} (${selectedEthereumKey})`}
+					style={{ marginBottom: 12 }}
+				/>
+			)}
 			<div
 				style={{
 					display: "flex",
@@ -1577,9 +2008,44 @@ const EthereumExecutionView = ({
 				<Tag color="success">Done: {stateCounter.done}</Tag>
 				<Tag color="default">Disabled: {stateCounter.disabled}</Tag>
 				<Tag color="geekblue">Actionable: {actionableElements.length}</Tag>
+				<Tag color={autoExecuteEnabled ? "green" : "default"}>
+					Auto Execute: {autoExecuteEnabled ? "ON" : "OFF"}
+				</Tag>
 				<Button size="small" loading={snapshotLoading} onClick={refreshSnapshot}>
 					Refresh Snapshot
 				</Button>
+			</div>
+			<div
+				style={{
+					display: "flex",
+					flexWrap: "wrap",
+					gap: 12,
+					marginBottom: 12,
+					alignItems: "center",
+				}}
+			>
+				<Switch
+					checked={autoExecuteEnabled}
+					onChange={setAutoExecuteEnabled}
+					checkedChildren="Auto Execute"
+					unCheckedChildren="Manual"
+					disabled={!selectedEthereumKey}
+				/>
+				<Select
+					value={autoExecuteIntervalMs}
+					style={{ width: 180 }}
+					onChange={(value) => setAutoExecuteIntervalMs(value)}
+					options={[
+						{ label: "1s interval", value: 1000 },
+						{ label: "2s interval", value: 2000 },
+						{ label: "3s interval", value: 3000 },
+						{ label: "5s interval", value: 5000 },
+					]}
+					disabled={!selectedEthereumKey}
+				/>
+				<Typography.Text type="secondary">
+					Auto mode executes the first actionable element with current default parameters and selected signer.
+				</Typography.Text>
 			</div>
 			{snapshotError ? (
 				<Alert
@@ -1619,10 +2085,22 @@ const EthereumExecutionView = ({
 										const config = getEthereumActionConfig(
 											element,
 											instanceId,
-											messageInputs,
+											methodsByName,
+											actionInputs,
 										);
 										if (!config) return null;
 										const elementId = getElementId(element);
+										const actionKey = getEthereumActionKey(
+											element,
+											config.method,
+										);
+										const isPending = Boolean(pendingActionKeys[actionKey]);
+										const editableParams = (config.methodDef?.params || []).filter(
+											(param: any) =>
+												param?.name &&
+												param.name !== "instanceId" &&
+												param.name !== "InstanceID",
+										);
 										return (
 											<div
 												key={`${element.type}-${elementId}`}
@@ -1632,32 +2110,112 @@ const EthereumExecutionView = ({
 													borderRadius: 8,
 													background: "#f8fafc",
 												}}
-											>
-												<Space wrap size={8}>
-													<Tag color="blue">{element.type}</Tag>
-													<Tag color="purple">{element.state}</Tag>
-													<Typography.Text strong>{elementId}</Typography.Text>
-												</Space>
-												{element.type === "message" ? (
+												>
+													<Space wrap size={8}>
+														<Tag color="blue">{element.type}</Tag>
+														<Tag color="purple">{element.state}</Tag>
+														<Typography.Text strong>
+															{element.DisplayName || elementId}
+														</Typography.Text>
+														{element.DisplayName &&
+														element.DisplayName !== elementId ? (
+															<Tag>{elementId}</Tag>
+														) : null}
+													</Space>
+												{element.Documentation ? (
 													<div style={{ marginTop: 8 }}>
 														<Typography.Text type="secondary">
-															fireflyTranId
+															{element.Documentation}
 														</Typography.Text>
-														<Input
-															style={{ marginTop: 4 }}
-															value={
-																messageInputs[element.MessageID] ||
-																`ff-${instanceId}-${element.MessageID}`
-															}
-															onChange={(event) =>
-																setMessageInputs((prev) => ({
-																	...prev,
-																	[element.MessageID]: event.target.value,
-																}))
-															}
-														/>
 													</div>
 												) : null}
+												{element.type === "message" &&
+												element.Format &&
+												typeof element.Format === "object" ? (
+													<div style={{ marginTop: 8 }}>
+														<Typography.Text type="secondary">
+															Message Schema
+														</Typography.Text>
+														<div style={{ marginTop: 4, display: "flex", flexWrap: "wrap", gap: 6 }}>
+															{Object.keys(element.Format?.properties || {}).map((key) => (
+																<Tag key={key} color="geekblue">
+																	{key}:{String(
+																		element.Format.properties?.[key]?.type || "string",
+																	)}
+																</Tag>
+															))}
+															{Object.keys(element.Format?.files || {}).map((key) => (
+																<Tag key={key} color="purple">
+																	file:{key}
+																</Tag>
+															))}
+														</div>
+													</div>
+												) : null}
+												{element.type === "businessRule" &&
+												(Array.isArray(element.Inputs) || Array.isArray(element.Outputs)) ? (
+													<div style={{ marginTop: 8, display: "grid", gap: 4 }}>
+														{Array.isArray(element.Inputs) && element.Inputs.length > 0 ? (
+															<Typography.Text type="secondary">
+																Inputs: {element.Inputs.map((item: any) => item?.name || item).join(", ")}
+															</Typography.Text>
+														) : null}
+														{Array.isArray(element.Outputs) && element.Outputs.length > 0 ? (
+															<Typography.Text type="secondary">
+																Outputs: {element.Outputs.map((item: any) => item?.name || item).join(", ")}
+															</Typography.Text>
+														) : null}
+													</div>
+												) : null}
+												{editableParams.map((param: any) => {
+													const name = param.name;
+													const paramType = inferEthereumParamType(param);
+													const currentValue =
+														actionInputs[elementId]?.[name] ??
+														config.payload?.[name] ??
+														"";
+													return (
+														<div key={`${elementId}-${name}`} style={{ marginTop: 8 }}>
+															<Typography.Text type="secondary">
+																{name}
+															</Typography.Text>
+															{paramType === "boolean" ? (
+																<div style={{ marginTop: 4 }}>
+																	<Switch
+																		checked={Boolean(currentValue)}
+																		onChange={(checked) =>
+																			setActionInputs((prev) => ({
+																				...prev,
+																				[elementId]: {
+																					...(prev[elementId] || {}),
+																					[name]: checked,
+																				},
+																			}))
+																		}
+																	/>
+																</div>
+															) : (
+																<Input
+																	style={{ marginTop: 4 }}
+																	type={paramType === "number" ? "number" : "text"}
+																	value={String(currentValue ?? "")}
+																	onChange={(event) =>
+																		setActionInputs((prev) => ({
+																			...prev,
+																			[elementId]: {
+																				...(prev[elementId] || {}),
+																				[name]:
+																					paramType === "number"
+																						? Number(event.target.value || 0)
+																						: event.target.value,
+																			},
+																		}))
+																	}
+																/>
+															)}
+														</div>
+													);
+												})}
 												{element.type === "businessRule" && element.RequestID ? (
 													<div style={{ marginTop: 8 }}>
 														<Typography.Text type="secondary">
@@ -1665,9 +2223,23 @@ const EthereumExecutionView = ({
 														</Typography.Text>
 													</div>
 												) : null}
+												{element.type === "businessRule" &&
+												element.state === 2 &&
+												(!element.RequestID ||
+													element.RequestID === "0x" ||
+													element.RequestID ===
+														"0x0000000000000000000000000000000000000000000000000000000000000000") ? (
+													<div style={{ marginTop: 8 }}>
+														<Typography.Text type="secondary">
+															Waiting for off-chain worker to bind DMN requestId.
+														</Typography.Text>
+													</div>
+												) : null}
 												<Button
 													style={{ marginTop: 8 }}
 													type="primary"
+													loading={isPending}
+													disabled={isPending}
 													onClick={() => invokeElementAction(element)}
 												>
 													{config.label}

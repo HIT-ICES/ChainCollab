@@ -89,6 +89,7 @@ class BpmnListSerializer(serializers.ModelSerializer):
             "chaincode_content",
             "firefly_url",
             "ffiContent",
+            "execution_layout",
             "environment_id",
             "eth_environment_id",
             "environment_name",

@@ -369,6 +369,12 @@ class BPMN(models.Model):
     ffiContent = models.TextField(
         help_text="content of ffi file", null=True, blank=True, default=None
     )
+    execution_layout = models.JSONField(
+        help_text="execution layout metadata for BPMN runtime",
+        null=True,
+        blank=True,
+        default=dict,
+    )
     environment = models.ForeignKey(
         "Environment",
         help_text="related environment_id",
@@ -404,6 +410,12 @@ class BPMNInstance(models.Model):
         help_text="instance_id of BPMNInstance in chaincode",
         null=True,
         blank=True,
+    )
+    execution_bindings = models.JSONField(
+        help_text="instance execution bindings such as participant accounts",
+        null=True,
+        blank=True,
+        default=dict,
     )
     bpmn = models.ForeignKey(
         BPMN,
@@ -481,6 +493,24 @@ class DMN(models.Model):
     )
     dmnContent = models.TextField(help_text="content of dmn file")
     svgContent = models.TextField(help_text="content of dmn`s svg file")
+    fireflyDataId = models.CharField(
+        help_text="FireFly data id for DMN content",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+    cid = models.CharField(
+        help_text="IPFS CID for DMN content",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+    contentHash = models.CharField(
+        help_text="keccak256 hash of DMN content",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         app_label = "api"

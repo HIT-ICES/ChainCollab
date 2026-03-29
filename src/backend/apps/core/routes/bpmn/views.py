@@ -2,6 +2,7 @@ import logging
 import os
 import re
 import time
+import hashlib
 from pathlib import Path
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
@@ -99,6 +100,15 @@ def _default_artifact_name(name: str) -> str:
     if sanitized[0].isdigit():
         sanitized = f"WorkflowContract_{sanitized}"
     return sanitized
+
+
+def _hash_dmn_content(dmn_content: str | None) -> str | None:
+    if not dmn_content:
+        return None
+    try:
+        return "0x" + hashlib.sha3_256(dmn_content.encode("utf-8")).hexdigest()
+    except Exception:
+        return None
 
 
 def _build_ff_datatype_payload(datatype_name: str, documentation: str) -> dict | None:
@@ -329,6 +339,8 @@ class BPMNViewsSet(viewsets.ModelViewSet):
                 bpmn.chaincode_content = request.data.get("chaincode_content")
             if "ffiContent" in request.data:
                 bpmn.ffiContent = request.data.get("ffiContent")
+            if "execution_layout" in request.data:
+                bpmn.execution_layout = request.data.get("execution_layout") or {}
             if "envId" in request.data:
                 envId = request.data.get("envId")
                 envType = request.data.get("envType", "fabric")  # 默认为 fabric
@@ -395,7 +407,8 @@ class BPMNViewsSet(viewsets.ModelViewSet):
 
             bpmn.chaincode_content = generated.get("chaincodeContent") or ""
             bpmn.ffiContent = generated.get("ffiContent") or "{}"
-            bpmn.save(update_fields=["chaincode_content", "ffiContent"])
+            bpmn.execution_layout = generated.get("executionLayout") or {}
+            bpmn.save(update_fields=["chaincode_content", "ffiContent", "execution_layout"])
 
             return Response(data=ok(generated), status=status.HTTP_200_OK)
         except BPMN.DoesNotExist:
@@ -1255,8 +1268,12 @@ class BPMNInstanceViewSet(viewsets.ModelViewSet):
             bpmn = BPMN.objects.get(pk=bpmn_id)
             instance_chaincode_id = request.data.get("instance_chaincode_id")
             name = request.data.get("name")
+            execution_bindings = request.data.get("execution_bindings") or {}
             bpmn_instance = BPMNInstance.objects.create(
-                bpmn=bpmn, instance_chaincode_id=instance_chaincode_id, name=name
+                bpmn=bpmn,
+                instance_chaincode_id=instance_chaincode_id,
+                name=name,
+                execution_bindings=execution_bindings,
             )
             bpmn_instance.save()
             serializer = BpmnInstanceSerializer(bpmn_instance)
@@ -1322,6 +1339,10 @@ class DmnViewSet(viewsets.ModelViewSet):
                 name=request.data.get("name"),
                 dmnContent=request.data.get("dmnContent"),
                 svgContent=request.data.get("svgContent"),
+                fireflyDataId=request.data.get("fireflyDataId"),
+                cid=request.data.get("cid"),
+                contentHash=request.data.get("contentHash")
+                or _hash_dmn_content(request.data.get("dmnContent")),
             )
             dmn.save()
             serializer = DmnSerializer(dmn)
@@ -1363,8 +1384,19 @@ class DmnViewSet(viewsets.ModelViewSet):
                 dmn.name = request.data.get("name")
             if "dmnContent" in request.data:
                 dmn.dmnContent = request.data.get("dmnContent")
+                dmn.contentHash = request.data.get("contentHash") or _hash_dmn_content(
+                    request.data.get("dmnContent")
+                )
             if "dmnSvgContent" in request.data:
                 dmn.dmnSvgContent = request.data.get("dmnSvgContent")
+            if "svgContent" in request.data:
+                dmn.svgContent = request.data.get("svgContent")
+            if "fireflyDataId" in request.data:
+                dmn.fireflyDataId = request.data.get("fireflyDataId")
+            if "cid" in request.data:
+                dmn.cid = request.data.get("cid")
+            if "contentHash" in request.data and "dmnContent" not in request.data:
+                dmn.contentHash = request.data.get("contentHash")
             if "consortiumid" in request.data:
                 dmn.consortiumid = request.data.get("consortiumid")
             if "orgid" in request.data:

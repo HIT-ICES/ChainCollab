@@ -32,6 +32,7 @@ class TranslatorProxyViewSet(viewsets.ViewSet):
                 "bpmnContent": generated.get("chaincodeContent", ""),
                 "dslContent": generated.get("dslContent", ""),
                 "ffiContent": generated.get("ffiContent", "{}"),
+                "executionLayout": generated.get("executionLayout", {}),
                 "target": generated.get("target", "go"),
             },
             status=status.HTTP_200_OK,

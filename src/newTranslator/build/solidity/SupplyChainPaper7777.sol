@@ -20,7 +20,7 @@ interface IOracle {
 interface IDmnLite {
     function requestDMNDecision(
         string calldata url,
-        string calldata dmnContent,
+        string calldata dmnCid,
         string calldata decisionId,
         string calldata inputData
     ) external returns (bytes32 requestId);
@@ -118,7 +118,6 @@ contract GeneratedContract {
         ParticipantKey receiveParticipant;
         string fireflyTranId;
         ElementState state;
-        string formatJson;
     }
 
     struct Gateway {
@@ -132,7 +131,8 @@ contract GeneratedContract {
     }
 
     struct BusinessRuleInit {
-        string dmnContent;
+        string dmnCid;
+        bytes32 dmnHash;
         string decisionId;
         bool callerRestricted;
         address allowedCaller;
@@ -140,6 +140,7 @@ contract GeneratedContract {
 
     struct BusinessRule {
         bool exists;
+        string dmnCid;
         bytes32 hashOfDmn;
         string decisionId;
         bool callerRestricted;
@@ -200,13 +201,6 @@ contract GeneratedContract {
         uint256 indexed instanceId,
         BusinessRuleKey indexed ruleKey,
         bytes32 indexed requestId
-    );
-    event BusinessRuleDispatchRequested(
-        uint256 indexed instanceId,
-        BusinessRuleKey indexed ruleKey,
-        bytes32 indexed dmnHash,
-        string decisionId,
-        string inputData
     );
     event BusinessRuleCompleted(
         uint256 indexed instanceId,
@@ -297,16 +291,14 @@ contract GeneratedContract {
         MessageKey key,
         ParticipantKey sendKey,
         ParticipantKey recvKey,
-        ElementState state,
-        string memory formatJson
+        ElementState state
     ) internal {
         inst.messages[key] = Message({
             exists: true,
             sendParticipant: sendKey,
             receiveParticipant: recvKey,
             fireflyTranId: "",
-            state: state,
-            formatJson: formatJson
+            state: state
         });
     }
 
@@ -333,7 +325,8 @@ contract GeneratedContract {
     ) internal {
         inst.businessRules[key] = BusinessRule({
             exists: true,
-            hashOfDmn: keccak256(bytes(config.dmnContent)),
+            dmnCid: config.dmnCid,
+            hashOfDmn: config.dmnHash,
             decisionId: config.decisionId,
             callerRestricted: config.callerRestricted,
             allowedCaller: config.allowedCaller,
@@ -343,26 +336,6 @@ contract GeneratedContract {
             fulfilledAt: 0,
             lastRawResult: ""
         });
-    }
-
-    // TODO: Replace dmnContent init payload with a registry/CID lookup so createInstance no longer
-    // needs to carry the full DMN XML in calldata. The off-chain worker should resolve hashOfDmn,
-    // call DMN_lite, and then bind the returned requestId through recordBusinessRuleRequest().
-    function recordBusinessRuleRequest(
-        uint256 instanceId,
-        BusinessRuleKey key,
-        bytes32 requestId
-    ) external onlyOwner onlyInitialized {
-        Instance storage inst = _getInstance(instanceId);
-        BusinessRule storage br = inst.businessRules[key];
-        require(br.exists, "business rule not set");
-        require(br.state == ElementState.WAITING_FOR_CONFIRMATION, "business rule not waiting");
-        require(requestId != bytes32(0), "request id not set");
-        require(br.requestId == bytes32(0), "business rule request already bound");
-
-        br.requestId = requestId;
-
-        emit BusinessRuleRequested(instanceId, key, requestId);
     }
 
     function _stringToInt(string memory value) internal pure returns (int256) {
@@ -431,6 +404,27 @@ contract GeneratedContract {
             buffer[0] = bytes1("-");
         }
         return string(buffer);
+    }
+
+    function _jsonField(
+        string memory key,
+        string memory encodedValue
+    ) internal pure returns (string memory) {
+        return string.concat(_jsonString(key), ":", encodedValue);
+    }
+
+    function _jsonAppendField(
+        string memory body,
+        string memory field
+    ) internal pure returns (string memory) {
+        if (bytes(body).length == 0) {
+            return field;
+        }
+        return string.concat(body, ",", field);
+    }
+
+    function _jsonObject(string memory body) internal pure returns (string memory) {
+        return string.concat("{", body, "}");
     }
 
     function _skipWhitespace(bytes memory data, uint256 index) internal pure returns (uint256) {
@@ -661,104 +655,91 @@ contract GeneratedContract {
             MessageKey.Message_04wmlqe,
             ParticipantKey.Participant_19mgbdn,
             ParticipantKey.Participant_0w6qkdf,
-            ElementState.DISABLED,
-            "productionStart"
+            ElementState.DISABLED
         );
         _createMessage(
             inst,
             MessageKey.Message_0cba4t6,
             ParticipantKey.Participant_09cjol2,
             ParticipantKey.Participant_0sa2v7d,
-            ElementState.DISABLED,
-            "supplyOrderId"
+            ElementState.DISABLED
         );
         _createMessage(
             inst,
             MessageKey.Message_0d2xte5,
             ParticipantKey.Participant_19j1e3o,
             ParticipantKey.Participant_19mgbdn,
-            ElementState.DISABLED,
-            "deliveryConfirmation"
+            ElementState.DISABLED
         );
         _createMessage(
             inst,
             MessageKey.Message_0hpha6h,
             ParticipantKey.Participant_0sa2v7d,
             ParticipantKey.Participant_19j1e3o,
-            ElementState.DISABLED,
-            "requestId + supplierReputation"
+            ElementState.DISABLED
         );
         _createMessage(
             inst,
             MessageKey.Message_0pm90nx,
             ParticipantKey.Participant_09cjol2,
             ParticipantKey.Participant_19j1e3o,
-            ElementState.DISABLED,
-            "transportOrderId"
+            ElementState.DISABLED
         );
         _createMessage(
             inst,
             MessageKey.Message_0rwz1km,
             ParticipantKey.Participant_19j1e3o,
             ParticipantKey.Participant_0sa2v7d,
-            ElementState.DISABLED,
-            "requestId + numberOfUnits + urgent"
+            ElementState.DISABLED
         );
         _createMessage(
             inst,
             MessageKey.Message_196q1fj,
             ParticipantKey.Participant_19mgbdn,
             ParticipantKey.Participant_0w6qkdf,
-            ElementState.DISABLED,
-            "{\"properties\":{},\"required\":[],\"files\":{\"deliveryNote\":{\"type\":\"file\",\"description\":\"A document confirming the delivery of goods\"}},\"file required\":[\"deliveryNote\"]}"
+            ElementState.DISABLED
         );
         _createMessage(
             inst,
             MessageKey.Message_1ajdm9l,
             ParticipantKey.Participant_19mgbdn,
             ParticipantKey.Participant_09cjol2,
-            ElementState.DISABLED,
-            "supplyOrderDetails"
+            ElementState.DISABLED
         );
         _createMessage(
             inst,
             MessageKey.Message_1dmeexg,
             ParticipantKey.Participant_19j1e3o,
             ParticipantKey.Participant_19mgbdn,
-            ElementState.DISABLED,
-            "{}"
+            ElementState.DISABLED
         );
         _createMessage(
             inst,
             MessageKey.Message_1dzkcn0,
             ParticipantKey.Participant_19j1e3o,
             ParticipantKey.Participant_19mgbdn,
-            ElementState.DISABLED,
-            "{}"
+            ElementState.DISABLED
         );
         _createMessage(
             inst,
             MessageKey.Message_1io2g9u,
             ParticipantKey.Participant_0sa2v7d,
             ParticipantKey.Participant_19j1e3o,
-            ElementState.DISABLED,
-            "{\"properties\":{},\"required\":[],\"files\":{\"waybill\":{\"type\":\"file\",\"description\":\"Digital or physical waybill document\uff0cdetailing the shipment contents and destination.\"}},\"file required\":[\"waybill\"]}"
+            ElementState.DISABLED
         );
         _createMessage(
             inst,
             MessageKey.Message_1oxmq1k,
             ParticipantKey.Participant_19j1e3o,
             ParticipantKey.Participant_19mgbdn,
-            ElementState.DISABLED,
-            "{}"
+            ElementState.DISABLED
         );
         _createMessage(
             inst,
             MessageKey.Message_1wswgqu,
             ParticipantKey.Participant_0w6qkdf,
             ParticipantKey.Participant_19mgbdn,
-            ElementState.DISABLED,
-            "orderDetails"
+            ElementState.DISABLED
         );
 
         _createGateway(
@@ -917,42 +898,44 @@ contract GeneratedContract {
         require(br.state == ElementState.ENABLED, "business rule not enabled");
         _checkBusinessRuleCaller(inst, br);
 
-        string memory inputData = "{";
-        inputData = string.concat(
-            inputData,
-"",
-            "numberOfUnits",
-            ":",
+        string memory inputBody = "";
+        inputBody = _jsonAppendField(
+            inputBody,
+            _jsonField(
+                "numberOfUnits",
             _jsonInt(inst.stateMemory.NumberOfUnits)
+            )
         );
-        inputData = string.concat(
-            inputData,
-",",
-            "urgent",
-            ":",
+        inputBody = _jsonAppendField(
+            inputBody,
+            _jsonField(
+                "urgent",
             _jsonBool(inst.stateMemory.Urgent)
+            )
         );
-        inputData = string.concat(
-            inputData,
-",",
-            "supplierReputation",
-            ":",
+        inputBody = _jsonAppendField(
+            inputBody,
+            _jsonField(
+                "supplierReputation",
             _jsonInt(inst.stateMemory.SupplierReputation)
+            )
         );
-        inputData = string.concat(inputData, "}");
-        br.requestId = bytes32(0);
+        string memory inputData = _jsonObject(inputBody);
+        IDmnLite dmnLite = IDmnLite(inst.dmnLiteAddress);
+        require(bytes(br.dmnCid).length != 0, "dmn cid not set");
+        bytes32 requestId = dmnLite.requestDMNDecision(
+            inst.dmnEvalUrl,
+            br.dmnCid,
+            br.decisionId,
+            inputData
+        );
+        require(requestId != bytes32(0), "dmn request failed");
+        br.requestId = requestId;
         br.requestedAt = block.timestamp;
         br.fulfilledAt = 0;
         br.lastRawResult = "";
         br.state = ElementState.WAITING_FOR_CONFIRMATION;
-
-        emit BusinessRuleDispatchRequested(
-            instanceId,
-            BusinessRuleKey.Activity_0rm8bkp,
-            br.hashOfDmn,
-            br.decisionId,
-            inputData
-        );
+        emit BusinessRuleRequested(instanceId, BusinessRuleKey.Activity_0rm8bkp, requestId);
     }
 
     function Activity_0rm8bkp_Continue(uint256 instanceId) external onlyInitialized {
@@ -999,7 +982,7 @@ function Event_06sexe6(uint256 instanceId) external onlyInitialized {
 
     }
 
-function Message_04wmlqe_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+function Message_04wmlqe_Send(uint256 instanceId, string calldata fireflyTranId, string calldata productionStart) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
         Message storage m = inst.messages[MessageKey.Message_04wmlqe];
         require(m.exists, "message not set");
@@ -1007,12 +990,14 @@ function Message_04wmlqe_Send(uint256 instanceId, string calldata fireflyTranId)
         require(m.state == ElementState.ENABLED, "message state not allowed");
 
         m.fireflyTranId = fireflyTranId;
+        inst.stateMemory.ProductionStart = productionStart;
         m.state = ElementState.COMPLETED;
         emit MessageSent(instanceId, MessageKey.Message_04wmlqe, fireflyTranId);
+        inst.messages[MessageKey.Message_196q1fj].state = ElementState.ENABLED;
 
     }
 
-function Message_0cba4t6_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+function Message_0cba4t6_Send(uint256 instanceId, string calldata fireflyTranId, string calldata supplyOrderId) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
         Message storage m = inst.messages[MessageKey.Message_0cba4t6];
         require(m.exists, "message not set");
@@ -1020,12 +1005,14 @@ function Message_0cba4t6_Send(uint256 instanceId, string calldata fireflyTranId)
         require(m.state == ElementState.ENABLED, "message state not allowed");
 
         m.fireflyTranId = fireflyTranId;
+        inst.stateMemory.SupplyOrderId = supplyOrderId;
         m.state = ElementState.COMPLETED;
         emit MessageSent(instanceId, MessageKey.Message_0cba4t6, fireflyTranId);
+        inst.gateways[GatewayKey.Gateway_1fbifca].state = ElementState.ENABLED;
 
     }
 
-function Message_0d2xte5_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+function Message_0d2xte5_Send(uint256 instanceId, string calldata fireflyTranId, bool deliveryConfirmation) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
         Message storage m = inst.messages[MessageKey.Message_0d2xte5];
         require(m.exists, "message not set");
@@ -1033,12 +1020,14 @@ function Message_0d2xte5_Send(uint256 instanceId, string calldata fireflyTranId)
         require(m.state == ElementState.ENABLED, "message state not allowed");
 
         m.fireflyTranId = fireflyTranId;
+        inst.stateMemory.DeliveryConfirmation = deliveryConfirmation;
         m.state = ElementState.COMPLETED;
         emit MessageSent(instanceId, MessageKey.Message_0d2xte5, fireflyTranId);
+        inst.gateways[GatewayKey.Gateway_1cr0nma].state = ElementState.ENABLED;
 
     }
 
-function Message_0hpha6h_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+function Message_0hpha6h_Send(uint256 instanceId, string calldata fireflyTranId, int256 requestId, int256 supplierReputation) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
         Message storage m = inst.messages[MessageKey.Message_0hpha6h];
         require(m.exists, "message not set");
@@ -1046,12 +1035,15 @@ function Message_0hpha6h_Send(uint256 instanceId, string calldata fireflyTranId)
         require(m.state == ElementState.ENABLED, "message state not allowed");
 
         m.fireflyTranId = fireflyTranId;
+        inst.stateMemory.RequestId = requestId;
+        inst.stateMemory.SupplierReputation = supplierReputation;
         m.state = ElementState.COMPLETED;
         emit MessageSent(instanceId, MessageKey.Message_0hpha6h, fireflyTranId);
+        inst.messages[MessageKey.Message_1io2g9u].state = ElementState.ENABLED;
 
     }
 
-function Message_0pm90nx_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+function Message_0pm90nx_Send(uint256 instanceId, string calldata fireflyTranId, string calldata transportOrderId) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
         Message storage m = inst.messages[MessageKey.Message_0pm90nx];
         require(m.exists, "message not set");
@@ -1059,12 +1051,14 @@ function Message_0pm90nx_Send(uint256 instanceId, string calldata fireflyTranId)
         require(m.state == ElementState.ENABLED, "message state not allowed");
 
         m.fireflyTranId = fireflyTranId;
+        inst.stateMemory.TransportOrderId = transportOrderId;
         m.state = ElementState.COMPLETED;
         emit MessageSent(instanceId, MessageKey.Message_0pm90nx, fireflyTranId);
+        inst.gateways[GatewayKey.Gateway_1fbifca].state = ElementState.ENABLED;
 
     }
 
-function Message_0rwz1km_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+function Message_0rwz1km_Send(uint256 instanceId, string calldata fireflyTranId, int256 requestId, int256 numberOfUnits, bool urgent) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
         Message storage m = inst.messages[MessageKey.Message_0rwz1km];
         require(m.exists, "message not set");
@@ -1072,12 +1066,16 @@ function Message_0rwz1km_Send(uint256 instanceId, string calldata fireflyTranId)
         require(m.state == ElementState.ENABLED, "message state not allowed");
 
         m.fireflyTranId = fireflyTranId;
+        inst.stateMemory.RequestId = requestId;
+        inst.stateMemory.NumberOfUnits = numberOfUnits;
+        inst.stateMemory.Urgent = urgent;
         m.state = ElementState.COMPLETED;
         emit MessageSent(instanceId, MessageKey.Message_0rwz1km, fireflyTranId);
+        inst.messages[MessageKey.Message_0hpha6h].state = ElementState.ENABLED;
 
     }
 
-function Message_196q1fj_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+function Message_196q1fj_Send(uint256 instanceId, string calldata fireflyTranId, string calldata deliveryNote) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
         Message storage m = inst.messages[MessageKey.Message_196q1fj];
         require(m.exists, "message not set");
@@ -1087,10 +1085,11 @@ function Message_196q1fj_Send(uint256 instanceId, string calldata fireflyTranId)
         m.fireflyTranId = fireflyTranId;
         m.state = ElementState.COMPLETED;
         emit MessageSent(instanceId, MessageKey.Message_196q1fj, fireflyTranId);
+        inst.events[EventKey.Event_13pbqdz].state = ElementState.ENABLED;
 
     }
 
-function Message_1ajdm9l_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+function Message_1ajdm9l_Send(uint256 instanceId, string calldata fireflyTranId, string calldata supplyOrderDetails) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
         Message storage m = inst.messages[MessageKey.Message_1ajdm9l];
         require(m.exists, "message not set");
@@ -1098,8 +1097,10 @@ function Message_1ajdm9l_Send(uint256 instanceId, string calldata fireflyTranId)
         require(m.state == ElementState.ENABLED, "message state not allowed");
 
         m.fireflyTranId = fireflyTranId;
+        inst.stateMemory.SupplyOrderDetails = supplyOrderDetails;
         m.state = ElementState.COMPLETED;
         emit MessageSent(instanceId, MessageKey.Message_1ajdm9l, fireflyTranId);
+        inst.gateways[GatewayKey.Gateway_0onpe6x].state = ElementState.ENABLED;
 
     }
 
@@ -1113,6 +1114,7 @@ function Message_1dmeexg_Send(uint256 instanceId, string calldata fireflyTranId)
         m.fireflyTranId = fireflyTranId;
         m.state = ElementState.COMPLETED;
         emit MessageSent(instanceId, MessageKey.Message_1dmeexg, fireflyTranId);
+        inst.gateways[GatewayKey.Gateway_1cr0nma].state = ElementState.ENABLED;
 
     }
 
@@ -1126,10 +1128,11 @@ function Message_1dzkcn0_Send(uint256 instanceId, string calldata fireflyTranId)
         m.fireflyTranId = fireflyTranId;
         m.state = ElementState.COMPLETED;
         emit MessageSent(instanceId, MessageKey.Message_1dzkcn0, fireflyTranId);
+        inst.gateways[GatewayKey.Gateway_1cr0nma].state = ElementState.ENABLED;
 
     }
 
-function Message_1io2g9u_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+function Message_1io2g9u_Send(uint256 instanceId, string calldata fireflyTranId, string calldata waybill) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
         Message storage m = inst.messages[MessageKey.Message_1io2g9u];
         require(m.exists, "message not set");
@@ -1139,6 +1142,7 @@ function Message_1io2g9u_Send(uint256 instanceId, string calldata fireflyTranId)
         m.fireflyTranId = fireflyTranId;
         m.state = ElementState.COMPLETED;
         emit MessageSent(instanceId, MessageKey.Message_1io2g9u, fireflyTranId);
+        inst.businessRules[BusinessRuleKey.Activity_0rm8bkp].state = ElementState.ENABLED;
 
     }
 
@@ -1152,10 +1156,11 @@ function Message_1oxmq1k_Send(uint256 instanceId, string calldata fireflyTranId)
         m.fireflyTranId = fireflyTranId;
         m.state = ElementState.COMPLETED;
         emit MessageSent(instanceId, MessageKey.Message_1oxmq1k, fireflyTranId);
+        inst.gateways[GatewayKey.Gateway_1cr0nma].state = ElementState.ENABLED;
 
     }
 
-function Message_1wswgqu_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {
+function Message_1wswgqu_Send(uint256 instanceId, string calldata fireflyTranId, string calldata orderDetails) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
         Message storage m = inst.messages[MessageKey.Message_1wswgqu];
         require(m.exists, "message not set");
@@ -1163,8 +1168,10 @@ function Message_1wswgqu_Send(uint256 instanceId, string calldata fireflyTranId)
         require(m.state == ElementState.ENABLED, "message state not allowed");
 
         m.fireflyTranId = fireflyTranId;
+        inst.stateMemory.OrderDetails = orderDetails;
         m.state = ElementState.COMPLETED;
         emit MessageSent(instanceId, MessageKey.Message_1wswgqu, fireflyTranId);
+        inst.messages[MessageKey.Message_1ajdm9l].state = ElementState.ENABLED;
 
     }
 

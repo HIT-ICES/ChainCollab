@@ -12,8 +12,12 @@ from textx.generators import gen_file, get_output_filename
 SOLIDITY_TYPE = {
     "string": "string",
     "int": "int256",
+    "integer": "int256",
+    "number": "int256",
     "bool": "bool",
+    "boolean": "bool",
     "float": "int256",
+    "float64": "int256",
 }
 
 STATE_ALIAS = {
@@ -49,6 +53,10 @@ def sanitize_contract_name(name: str) -> str:
     if identifier[0].isdigit():
         return f"WorkflowContract_{identifier}"
     return identifier
+
+
+def _message_param_type(type_name: str) -> str:
+    return SOLIDITY_TYPE.get((type_name or "string").lower(), "string")
 
 
 class DSLContractAdapter:
@@ -108,6 +116,72 @@ class SolidityRenderer:
             "globals": self._global_variables(),
             "business_rules": self._business_rule_payload(rule_done_actions),
             "flow_functions": flow_functions,
+        }
+
+    def build_execution_layout(self) -> dict:
+        return {
+            "messages": [
+                {
+                    "id": item["enum_name"],
+                    "sender": item["sender"],
+                    "receiver": item["receiver"],
+                }
+                for item in self._message_payload()
+            ],
+            "gateways": [
+                {"id": item["enum_name"]}
+                for item in self._simple_payload(self.adapter.gateways)
+            ],
+            "events": [
+                {"id": item["enum_name"]}
+                for item in self._simple_payload(self.adapter.events)
+            ],
+            "businessRules": [
+                {
+                    "id": item["enum_name"],
+                    "method": item["enum_name"],
+                    "continueMethod": f"{item['enum_name']}_Continue",
+                    "inputs": [
+                        {
+                            "name": mapping["param_name"],
+                            "slot": mapping["slot_name"],
+                            "type": mapping["sol_type"],
+                        }
+                        for mapping in item["input_mappings"]
+                    ],
+                    "outputs": [
+                        {
+                            "name": mapping["param_name"],
+                            "slot": mapping["slot_name"],
+                            "type": mapping["sol_type"],
+                        }
+                        for mapping in item["output_mappings"]
+                    ],
+                }
+                for item in self._business_rule_payload({})
+            ],
+            "methodMap": {
+                **{
+                    item["enum_name"]: f"{item['enum_name']}_Send"
+                    for item in self._message_payload()
+                },
+                **{
+                    item["enum_name"]: item["enum_name"]
+                    for item in self._simple_payload(self.adapter.gateways)
+                },
+                **{
+                    item["enum_name"]: item["enum_name"]
+                    for item in self._simple_payload(self.adapter.events)
+                },
+                **{
+                    item["enum_name"]: item["enum_name"]
+                    for item in self._business_rule_payload({})
+                },
+                **{
+                    f"{item['enum_name']}#continue": f"{item['enum_name']}_Continue"
+                    for item in self._business_rule_payload({})
+                },
+            },
         }
 
     def _enum_maps(self) -> dict[str, dict[str, str]]:
@@ -271,7 +345,8 @@ class SolidityRenderer:
                     "name": rule.name,
                     "enum_name": enum_name,
                     "config_param": enum_name,
-                    "content_param": "dmnContent",
+                    "content_param": "dmnCid",
+                    "hash_param": "dmnHash",
                     "decision_param": "decisionId",
                     "caller_restricted_param": "callerRestricted",
                     "allowed_caller_param": "allowedCaller",
@@ -380,8 +455,13 @@ class SolidityFlowRenderer:
         functions: List[str] = []
         for message in self.adapter.messages:
             enum_name = self.enum_maps["message"].get(message.name, sanitize_identifier(message.name))
-            send_actions = self._indent("".join(self.message_actions.get((message.name, "sent"), [])), 2)
-            body = f"""function {enum_name}_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {{
+            method_params, assignment_block = self._message_method_signature(message)
+            # The Solidity runtime has a single message send transition that also
+            # marks the message as completed. Support both DSL conditions here so
+            # message follow-up flow is not dropped when the DSL uses `completed`.
+            send_actions = self._indent("".join(self._message_transition_actions(message.name)), 2)
+            signature = ", ".join(["uint256 instanceId", "string calldata fireflyTranId", *method_params])
+            body = f"""function {enum_name}_Send({signature}) external onlyInitialized {{
         Instance storage inst = _getInstance(instanceId);
         Message storage m = inst.messages[MessageKey.{enum_name}];
         require(m.exists, "message not set");
@@ -389,12 +469,83 @@ class SolidityFlowRenderer:
         require(m.state == ElementState.ENABLED, "message state not allowed");
 
         m.fireflyTranId = fireflyTranId;
+{assignment_block}\
         m.state = ElementState.COMPLETED;
         emit MessageSent(instanceId, MessageKey.{enum_name}, fireflyTranId);
 {send_actions}
     }}"""
             functions.append(body)
         return functions
+
+    def _message_transition_actions(self, message_name: str) -> List[str]:
+        combined: List[str] = []
+        seen: set[str] = set()
+        for condition in ("sent", "completed"):
+            for action in self.message_actions.get((message_name, condition), []):
+                if action in seen:
+                    continue
+                seen.add(action)
+                combined.append(action)
+        return combined
+
+    def _message_method_signature(self, message: Any) -> tuple[List[str], str]:
+        schema_doc = self._parse_message_schema(getattr(message, "schema", "") or "")
+        params: List[str] = []
+        assignments: List[str] = []
+        seen_param_names: set[str] = {"instanceId", "fireflyTranId"}
+        global_slots = {
+            sanitize_identifier(public_the_name(name)): self.global_type_map.get(name, "string")
+            for name in self.global_type_map.keys()
+        }
+
+        def append_param(source_name: str, type_name: str, assign_to_state: bool):
+            param_name = sanitize_identifier(source_name) or "value"
+            if param_name[0].isdigit():
+                param_name_local = f"field_{param_name}"
+            else:
+                param_name_local = param_name
+            while param_name_local in seen_param_names:
+                param_name_local = f"{param_name_local}_value"
+            seen_param_names.add(param_name_local)
+
+            sol_type = _message_param_type(type_name)
+            if sol_type == "string":
+                params.append(f"string calldata {param_name_local}")
+            else:
+                params.append(f"{sol_type} {param_name_local}")
+
+            if not assign_to_state:
+                return
+
+            slot_name = sanitize_identifier(public_the_name(source_name))
+            if not slot_name:
+                return
+            if slot_name not in global_slots:
+                return
+            assignments.append(
+                f"        inst.stateMemory.{slot_name} = {param_name_local};\n"
+            )
+
+        for field_name, definition in (schema_doc.get("properties") or {}).items():
+            append_param(
+                field_name,
+                str((definition or {}).get("type", self.global_type_map.get(field_name, "string"))),
+                True,
+            )
+
+        for field_name in (schema_doc.get("files") or {}).keys():
+            append_param(field_name, "string", field_name in global_slots)
+
+        return params, "".join(assignments)
+
+    def _parse_message_schema(self, raw_schema: str) -> dict[str, Any]:
+        if not raw_schema:
+            return {}
+        try:
+            parsed = json.loads(raw_schema)
+        except (TypeError, json.JSONDecodeError):
+            return {}
+        return parsed if isinstance(parsed, dict) else {}
 
     def _render_gateways(self) -> List[str]:
         functions: List[str] = []
