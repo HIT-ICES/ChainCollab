@@ -111,6 +111,7 @@ const requestDmnDecisionTestSample = {
 </definitions>`,
   decisionId: "Decision_Eligibility",
   inputData: JSON.stringify({ applicant: { age: 20 } }),
+  requiredOrganizations: 1,
 };
 
 import { useEnvInfo, useMembershipListData } from './hooks'
@@ -477,6 +478,7 @@ const Overview: React.FC = () => {
         { key: "dmnContent", label: "DMN Content", placeholder: "<DMN XML>" },
         { key: "decisionId", label: "Decision ID", placeholder: "decision" },
         { key: "inputData", label: "Input JSON", placeholder: "{\"temperature\":20}" },
+        { key: "requiredOrganizations", label: "Required Organizations", placeholder: "1", type: "number" },
       ],
     },
     {
@@ -577,6 +579,17 @@ const Overview: React.FC = () => {
     (acc: number, item: any) => acc + (Array.isArray(item?.firefly_listeners) ? item.firefly_listeners.length : 0),
     0
   )
+  const resolveDefaultRequiredOrganizations = () => {
+    const clusterSync = (chainlinkDetail as any)?.cluster_sync
+    const healthyCount = Number(clusterSync?.healthy_count || 0)
+    if (Number.isInteger(healthyCount) && healthyCount > 0) {
+      return healthyCount
+    }
+    if (membershipCount > 0) {
+      return membershipCount
+    }
+    return requestDmnDecisionTestSample.requiredOrganizations
+  }
   const openFireflyApiPage = (apiBase?: string | null) => {
     if (!apiBase) {
       return
@@ -1036,7 +1049,21 @@ const Overview: React.FC = () => {
   const startTaskPolling = async (taskId: string, label: string) => {
     const seed = { id: taskId, label, status: "PENDING" }
     upsertTaskItem(seed)
-    await pollTasksOnce([seed])
+    for (let attempt = 0; attempt < 180; attempt++) {
+      try {
+        const res = await getTask(taskId)
+        if (res && res.id) {
+          upsertTaskItem({ ...seed, ...res, label })
+          const status = String(res.status || "").toUpperCase()
+          if (["SUCCESS", "FAILED"].includes(status)) {
+            return
+          }
+        }
+      } catch (error) {
+        // keep polling resilient for transient per-task failures
+      }
+      await new Promise((resolve) => window.setTimeout(resolve, 2000))
+    }
   }
 
   const buildTaskMap = (tasks: any[]) => {
@@ -1749,10 +1776,14 @@ const Overview: React.FC = () => {
 
   const applyDmnQuickAction = (action) => {
     setDmnAction(action)
-    dmnForm.setFieldsValue({
+    const nextValues: Record<string, any> = {
       method: action.method,
       mode: action.mode,
-    })
+    }
+    if (action.method === "requestDMNDecision") {
+      nextValues.requiredOrganizations = resolveDefaultRequiredOrganizations()
+    }
+    dmnForm.setFieldsValue(nextValues)
     if (
       (action.method === "getRequestStatus" ||
         action.method === "getRawByRequestId" ||
@@ -1799,6 +1830,7 @@ const Overview: React.FC = () => {
       dmnContent: requestDmnDecisionTestSample.dmnContent,
       decisionId: requestDmnDecisionTestSample.decisionId,
       inputData: requestDmnDecisionTestSample.inputData,
+      requiredOrganizations: resolveDefaultRequiredOrganizations(),
     })
     message.success("已填充 requestDMNDecision 测试参数")
   }
@@ -1826,7 +1858,14 @@ const Overview: React.FC = () => {
         return
       }
       const params = (dmnAction?.params || []).reduce((acc, param) => {
-        const value = values[param.key]
+        let value = values[param.key]
+        if (param.key === "requiredOrganizations" && value !== undefined && value !== "") {
+          const parsed = Number(value)
+          if (!Number.isInteger(parsed) || parsed < 1) {
+            throw new Error("Required Organizations must be a positive integer")
+          }
+          value = parsed
+        }
         if (value !== undefined) {
           acc[param.key] = value
         }
@@ -2837,7 +2876,7 @@ const Overview: React.FC = () => {
                             name={param.key}
                             rules={[{ required: true, message: `${param.label} is required` }]}
                           >
-                            <Input placeholder={param.placeholder} />
+                            <Input type={param.type === "number" ? "number" : undefined} placeholder={param.placeholder} />
                           </Form.Item>
                         ))
                       ) : (

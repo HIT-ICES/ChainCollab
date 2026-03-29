@@ -43,6 +43,7 @@ const DMN_CACHE_HOSTS = (process.env.DMN_CACHE_HOSTS ||
   .split(',')
   .map((item) => item.trim())
   .filter(Boolean);
+const DMN_MODE = process.env.DMN_MODE === 'lite' ? 'lite' : 'full';
 
 const RPC_URL = process.env.RPC_URL || 'http://localhost:8545';
 
@@ -205,6 +206,134 @@ async function pollLatest(host, tries = 30, intervalMs = 2000) {
   return null;
 }
 
+function decodeUint(value) {
+  if (typeof value === 'bigint') return Number(value);
+  if (typeof value === 'number') return value;
+  if (typeof value === 'string') {
+    if (value.startsWith('0x')) return Number(BigInt(value));
+    return Number(value);
+  }
+  return 0;
+}
+
+function readJsonIfExists(filePath) {
+  if (!fs.existsSync(filePath)) return null;
+  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+}
+
+function findBaselineWriters(nodeInfo) {
+  if (!Array.isArray(nodeInfo)) return [];
+  return nodeInfo
+    .filter((node) => node.name && (node.name.startsWith('node') || node.name === 'bootstrap'))
+    .map((node) => node.ethAddress)
+    .filter(Boolean);
+}
+
+function resolveRequiredOrganizations() {
+  const explicit = process.env.DMN_REQUIRED_ORGS;
+  if (explicit) {
+    const parsed = Number(explicit);
+    if (Number.isInteger(parsed) && parsed > 0) {
+      return parsed;
+    }
+    throw new Error(`DMN_REQUIRED_ORGS 非法: ${explicit}`);
+  }
+
+  const nodeInfo = readJsonIfExists(path.join(DEPLOYMENT_DIR, 'node-info.json'));
+  const writers = findBaselineWriters(nodeInfo);
+  if (writers.length > 0) {
+    return writers.length;
+  }
+  return Math.max(1, DMN_CACHE_HOSTS.length);
+}
+
+function extractRequestIdFromReceipt(receipt, contractAddress, abi) {
+  const Web3EthAbi = requireFromChainlink('web3-eth-abi');
+  const sentEvent = abi.find((item) => item.type === 'event' && item.name === 'RequestSent');
+  const pendingEvent = abi.find((item) => item.type === 'event' && item.name === 'RequestPending');
+  const signatures = [sentEvent, pendingEvent]
+    .filter(Boolean)
+    .map((item) => Web3EthAbi.encodeEventSignature(item));
+
+  for (const log of receipt.logs || []) {
+    if (!log.address || log.address.toLowerCase() !== contractAddress.toLowerCase()) {
+      continue;
+    }
+    if (!log.topics || log.topics.length < 2) {
+      continue;
+    }
+    if (!signatures.includes(log.topics[0])) {
+      continue;
+    }
+    return log.topics[1];
+  }
+  return null;
+}
+
+async function pollConsensus(contractAddress, abi, requestId, tries = 20, intervalMs = 2000) {
+  const Web3EthAbi = requireFromChainlink('web3-eth-abi');
+  const getRequestStatusAbi = abi.find((item) => item.type === 'function' && item.name === 'getRequestStatus');
+  const getConsensusStatusAbi = abi.find((item) => item.type === 'function' && item.name === 'getConsensusStatus');
+  if (!getRequestStatusAbi || !requestId) {
+    return { ok: true, supported: false };
+  }
+
+  for (let i = 0; i < tries; i++) {
+    let requestStatus;
+    let consensusStatus = null;
+    try {
+      const requestStatusData = Web3EthAbi.encodeFunctionCall(getRequestStatusAbi, [requestId]);
+      const requestStatusResult = await rpcCall('eth_call', [{ to: contractAddress, data: requestStatusData }, 'latest']);
+      requestStatus = Web3EthAbi.decodeParameters(getRequestStatusAbi.outputs, requestStatusResult);
+      if (getConsensusStatusAbi) {
+        const consensusStatusData = Web3EthAbi.encodeFunctionCall(getConsensusStatusAbi, [requestId]);
+        const consensusStatusResult = await rpcCall('eth_call', [{ to: contractAddress, data: consensusStatusData }, 'latest']);
+        consensusStatus = Web3EthAbi.decodeParameters(getConsensusStatusAbi.outputs, consensusStatusResult);
+      }
+    } catch (error) {
+      return { ok: false, error: error.message };
+    }
+
+    const state = decodeUint(requestStatus.state);
+    const fulfilled = state === 2;
+    const quorum = consensusStatus ? decodeUint(consensusStatus.quorum) : null;
+    const decidedVotes = consensusStatus ? decodeUint(consensusStatus.decidedVotes) : null;
+
+    if (consensusStatus) {
+      console.log(
+        `链上共识状态: state=${state} quorum=${quorum} decidedVotes=${decidedVotes} fulfilled=${consensusStatus.fulfilled}`
+      );
+    } else {
+      console.log(`链上请求状态: state=${state} fulfilledAt=${requestStatus.fulfilledAt}`);
+    }
+
+    if (fulfilled) {
+      if (consensusStatus && decidedVotes < quorum) {
+        return {
+          ok: false,
+          error: `请求已 Fulfilled，但票数不足多数: ${decidedVotes}/${quorum}`,
+        };
+      }
+      return {
+        ok: true,
+        supported: true,
+        state,
+        quorum,
+        decidedVotes,
+        fulfilled,
+      };
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+
+  return {
+    ok: false,
+    supported: true,
+    error: '等待链上多数共识超时，请求仍未 Fulfilled',
+  };
+}
+
 async function testOracle() {
   try {
     console.log('📋 测试 DMN OCR 流程（directrequest 缓存）...');
@@ -215,9 +344,16 @@ async function testOracle() {
     const compiled = JSON.parse(
       fs.readFileSync(path.join(DEPLOYMENT_DIR, 'compiled.json'), 'utf8')
     );
-    const abi =
-      compiled.contracts['contracts/MyChainlinkRequesterDMN.sol:MyChainlinkRequesterDMN']
-        .abi;
+    const contractKey =
+      DMN_MODE === 'lite'
+        ? 'contracts/MyChainlinkRequesterDMN_Lite.sol:MyChainlinkRequesterDMN_Lite'
+        : 'contracts/MyChainlinkRequesterDMN.sol:MyChainlinkRequesterDMN';
+    const contractEntry = compiled.contracts?.[contractKey];
+    if (!contractEntry?.abi) {
+      console.error(`❌ compiled.json 缺少合约 ABI: ${contractKey}`);
+      return false;
+    }
+    const abi = contractEntry.abi;
     const contractAddress = deployment.contractAddress;
     if (!contractAddress) {
       console.error('❌ 缺少合约地址：deployment/deployment.json');
@@ -403,18 +539,29 @@ async function testOracle() {
     console.log('预计 DMN 输出:', expectedDish ?? '(无匹配规则)');
     console.log('');
 
+    const requestInputs = [
+      { type: 'string', name: 'url' },
+      { type: 'string', name: 'dmnContent' },
+      { type: 'string', name: 'decisionId' },
+      { type: 'string', name: 'inputData' },
+    ];
+    const requestArgs = [DMN_URL, dmnContent, decisionId, inputData];
+
+    if (DMN_MODE === 'lite') {
+      const requiredOrganizations = resolveRequiredOrganizations();
+      console.log('要求参与组织数:', requiredOrganizations);
+      console.log('多数阈值:', Math.floor(requiredOrganizations / 2) + 1);
+      requestInputs.push({ type: 'uint256', name: 'requiredOrganizations' });
+      requestArgs.push(requiredOrganizations);
+    }
+
     const requestData = Web3EthAbi.encodeFunctionCall(
       {
         name: 'requestDMNDecision',
         type: 'function',
-        inputs: [
-          { type: 'string', name: 'url' },
-          { type: 'string', name: 'dmnContent' },
-          { type: 'string', name: 'decisionId' },
-          { type: 'string', name: 'inputData' },
-        ],
+        inputs: requestInputs,
       },
-      [DMN_URL, dmnContent, decisionId, inputData]
+      requestArgs
     );
 
     console.log('🚀 发起 DMN Oracle 请求...');
@@ -474,6 +621,13 @@ async function testOracle() {
       return false;
     }
 
+    const requestId = extractRequestIdFromReceipt(receipt, contractAddress, abi);
+    if (requestId) {
+      console.log('requestId:', requestId);
+    } else {
+      console.warn('⚠️  未能从 receipt 提取 requestId，将只做缓存检查');
+    }
+
     console.log('✅ 请求已发送，开始检查各 DMN 缓存节点...');
     for (const host of DMN_CACHE_HOSTS) {
       const data = await pollLatest(host);
@@ -482,6 +636,15 @@ async function testOracle() {
       } else {
         console.log(`⚠️  ${host} 未检测到缓存更新`);
       }
+    }
+
+    const consensus = await pollConsensus(contractAddress, abi, requestId);
+    if (!consensus.ok) {
+      console.error('❌ 链上多数共识检查失败:', consensus.error);
+      return false;
+    }
+    if (consensus.supported) {
+      console.log('✅ 链上请求已达到多数共识并 Fulfilled');
     }
     return true;
   } catch (error) {

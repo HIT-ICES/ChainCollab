@@ -22,7 +22,8 @@ interface IDmnLite {
         string calldata url,
         string calldata dmnContent,
         string calldata decisionId,
-        string calldata inputData
+        string calldata inputData,
+        uint256 requiredOrganizations
     ) external returns (bytes32 requestId);
 
     function getRequestStatus(bytes32 requestId)
@@ -139,14 +140,17 @@ contract {{ contract_name }} {
         string decisionId;
         bool callerRestricted;
         address allowedCaller;
+        uint256 requiredOrganizations;
     }
 
     struct BusinessRule {
         bool exists;
+        string dmnContent;
         bytes32 hashOfDmn;
         string decisionId;
         bool callerRestricted;
         address allowedCaller;
+        uint256 requiredOrganizations;
         ElementState state;
         bytes32 requestId;
         uint256 requestedAt;
@@ -336,10 +340,12 @@ contract {{ contract_name }} {
     ) internal {
         inst.businessRules[key] = BusinessRule({
             exists: true,
+            dmnContent: config.dmnContent,
             hashOfDmn: keccak256(bytes(config.dmnContent)),
             decisionId: config.decisionId,
             callerRestricted: config.callerRestricted,
             allowedCaller: config.allowedCaller,
+            requiredOrganizations: config.requiredOrganizations,
             state: ElementState.DISABLED,
             requestId: bytes32(0),
             requestedAt: 0,
@@ -745,7 +751,17 @@ contract {{ contract_name }} {
         );
         {% endfor %}
         inputData = string.concat(inputData, "}");
-        br.requestId = bytes32(0);
+
+        IDmnLite dmnLite = IDmnLite(inst.dmnLiteAddress);
+        bytes32 requestId = dmnLite.requestDMNDecision(
+            inst.dmnEvalUrl,
+            br.dmnContent,
+            br.decisionId,
+            inputData,
+            br.requiredOrganizations
+        );
+
+        br.requestId = requestId;
         br.requestedAt = block.timestamp;
         br.fulfilledAt = 0;
         br.lastRawResult = "";
