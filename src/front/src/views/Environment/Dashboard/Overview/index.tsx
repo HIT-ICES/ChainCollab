@@ -35,6 +35,7 @@ import {
   InstallOracle,
   InstallDmnEngine,
   InstallChainlinkForEthEnv,
+  CleanChainlinkForEthEnv,
   StartFireflyForEnv,
   requestOracleFFI,
   InitEthEnv,
@@ -189,6 +190,7 @@ const Overview: React.FC = () => {
   const [setupDMNLoading, setSetupDMNLoading] = useState(false)
   const [redeployDmnLoading, setRedeployDmnLoading] = useState(false)
   const [setupChainlinkMode, setSetupChainlinkMode] = useState<"lite" | "full" | null>(null)
+  const [cleanChainlinkLoading, setCleanChainlinkLoading] = useState(false)
   const [setupDmnFireflyLoading, setSetupDmnFireflyLoading] = useState(false)
   const [setupDataContractLoading, setSetupDataContractLoading] = useState(false)
   const [setupDataFireflyLoading, setSetupDataFireflyLoading] = useState(false)
@@ -245,6 +247,7 @@ const Overview: React.FC = () => {
     FABRIC_DMN_INSTALL: "DMN Install",
     ETH_DMN_INSTALL: "ETH DMN Install",
     CHAINLINK_INSTALL: "Chainlink + DMN Install",
+    CHAINLINK_CLEAN: "Chainlink + DMN Clean",
     CHAINLINK_JOB_CREATE: "Chainlink Job Create",
     DMN_CONTRACT_REDEPLOY: "DMN Contract Redeploy",
     DMN_FIREFLY_REGISTER: "Register DMN to FireFly",
@@ -688,7 +691,7 @@ const Overview: React.FC = () => {
     const rawType = String(task?.type || "").toUpperCase()
     const baseLabel = humanizeTaskType(rawType)
     const mode = String(task?.result?.mode || task?.mode || "").toLowerCase()
-    if (rawType === "CHAINLINK_INSTALL" && ["lite", "full"].includes(mode)) {
+    if (["CHAINLINK_INSTALL", "CHAINLINK_CLEAN"].includes(rawType) && ["lite", "full"].includes(mode)) {
       return `${baseLabel} (${mode.toUpperCase()})`
     }
     return baseLabel
@@ -756,6 +759,7 @@ const Overview: React.FC = () => {
         "FABRIC_DMN_INSTALL",
         "ETH_DMN_INSTALL",
         "CHAINLINK_INSTALL",
+        "CHAINLINK_CLEAN",
         "CHAINLINK_JOB_CREATE",
         "DMN_CONTRACT_REDEPLOY",
         "DMN_FIREFLY_REGISTER",
@@ -1048,12 +1052,14 @@ const Overview: React.FC = () => {
       "FABRIC_ORACLE_INSTALL",
       "ETH_ORACLE_INSTALL",
       "CHAINLINK_INSTALL",
+      "CHAINLINK_CLEAN",
       "CHAINLINK_JOB_CREATE",
     ])
     map.dmn = pickLatest([
       "FABRIC_DMN_INSTALL",
       "ETH_DMN_INSTALL",
       "CHAINLINK_INSTALL",
+      "CHAINLINK_CLEAN",
       "DMN_CONTRACT_REDEPLOY",
       "DMN_FIREFLY_REGISTER",
     ])
@@ -1079,6 +1085,12 @@ const Overview: React.FC = () => {
   }
 
   const shouldForceRetry = (taskInfo: any) => String(taskInfo?.status || "").toUpperCase() === "FAILED"
+  const hasFailedTaskHistory = (types: string[]) =>
+    taskItemsRef.current.some(
+      (task) =>
+        types.includes(String(task?.type || "").toUpperCase()) &&
+        String(task?.status || "").toUpperCase() === "FAILED"
+    )
 
   useEffect(() => {
     if (!currentEnvId || !currentEnvType) {
@@ -1274,7 +1286,9 @@ const Overview: React.FC = () => {
     }
     try {
       setSetupChainlinkMode(mode)
-      const chainlinkRes = await InstallChainlinkForEthEnv(currentEnvId, mode, shouldForceRetry(taskMap.dmn))
+      const shouldForce =
+        shouldForceRetry(taskMap.dmn) || hasFailedTaskHistory(["CHAINLINK_INSTALL"])
+      const chainlinkRes = await InstallChainlinkForEthEnv(currentEnvId, mode, shouldForce)
       if (chainlinkRes?.task_id) {
         const label = mode === "lite" ? "Ethereum Chainlink Lite Install" : "Ethereum Chainlink Full Install"
         await startTaskPolling(chainlinkRes.task_id, label)
@@ -1284,6 +1298,31 @@ const Overview: React.FC = () => {
       message.error(extractErrorMessage(error, `Setup Chainlink ${mode} failed`))
     } finally {
       setSetupChainlinkMode(null)
+    }
+  }
+
+  const handleCleanChainlinkInstall = async () => {
+    if (currentEnvType !== "Ethereum") {
+      message.warning("Chainlink clean only supports Ethereum environment")
+      return
+    }
+    if (setupChainlinkMode) {
+      message.warning(`Chainlink ${setupChainlinkMode} setup is already running`)
+      return
+    }
+    try {
+      setCleanChainlinkLoading(true)
+      const shouldForce =
+        shouldForceRetry(taskMap.dmn) || hasFailedTaskHistory(["CHAINLINK_CLEAN"])
+      const chainlinkRes = await CleanChainlinkForEthEnv(currentEnvId, "lite", shouldForce)
+      if (chainlinkRes?.task_id) {
+        await startTaskPolling(chainlinkRes.task_id, "Ethereum Chainlink Lite Clean")
+      }
+      setSync()
+    } catch (error: any) {
+      message.error(extractErrorMessage(error, "Clean Chainlink lite failed"))
+    } finally {
+      setCleanChainlinkLoading(false)
     }
   }
 
@@ -2173,6 +2212,17 @@ const Overview: React.FC = () => {
                       }
                     >
                       Full Setup
+                    </LoadingButton>
+                    <LoadingButton
+                      className="nodrag nopan"
+                      size="small"
+                      color="error"
+                      variant="outlined"
+                      loading={cleanChainlinkLoading}
+                      onClick={handleCleanChainlinkInstall}
+                      disabled={Boolean(setupChainlinkMode)}
+                    >
+                      Clean
                     </LoadingButton>
                   </Space>
                 }

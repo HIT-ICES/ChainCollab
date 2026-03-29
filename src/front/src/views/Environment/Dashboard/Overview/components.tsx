@@ -327,6 +327,7 @@ export const CustomCard = (props) => {
     FABRIC_DMN_INSTALL: "DMN Install",
     ETH_DMN_INSTALL: "ETH DMN Install",
     CHAINLINK_INSTALL: "Chainlink + DMN Install",
+    CHAINLINK_CLEAN: "Chainlink + DMN Clean",
     DMN_FIREFLY_REGISTER: "Register DMN to Firefly",
     DATA_CONTRACT_SETUP: "Data Contract Setup",
     DATA_CONTRACT_FIREFLY_REGISTER: "Register Data Contract to Firefly",
@@ -355,7 +356,7 @@ export const CustomCard = (props) => {
     const typeLabel = taskTypeLabelMap[rawType] || humanizeRaw(rawType) || "Task";
     const chainlinkMode = String(info?.result?.mode || info?.mode || "").toLowerCase();
     const customLabel = String(info?.label || "").trim();
-    if (rawType === "CHAINLINK_INSTALL" && ["lite", "full"].includes(chainlinkMode)) {
+    if (["CHAINLINK_INSTALL", "CHAINLINK_CLEAN"].includes(rawType) && ["lite", "full"].includes(chainlinkMode)) {
       return `${typeLabel} (${chainlinkMode.toUpperCase()})`;
     }
     if (!customLabel) {
