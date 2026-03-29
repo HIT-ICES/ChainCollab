@@ -461,7 +461,7 @@ node scripts/fund-contract.js
 persist_chainlink_deployment_to_runtime
 
 echo "== [9] 测试 directrequest 缓存链路 =="
-DMN_RANDOM=1 node "$FEATURES_04/test-dmn-ocr.js"
+DMN_MODE=lite DMN_RANDOM=1 node "$FEATURES_04/test-dmn-ocr.js"
 
 restore_chainlink_deployment_backup
 

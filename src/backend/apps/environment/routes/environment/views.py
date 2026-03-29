@@ -1072,6 +1072,18 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
             result["firefly_registration_error"] = str(exc)
         return result
 
+    def _run_chainlink_clean(
+        self,
+        env_id: str,
+        mode: str = "lite",
+        task_id: str | None = None,
+    ) -> dict:
+        return self._chainlink_orchestrator().run_chainlink_clean(
+            env_id,
+            mode=mode,
+            task_id=task_id,
+        )
+
     def _run_chainlink_create_job(
         self,
         env_id: str,
@@ -2609,6 +2621,72 @@ class EthEnvironmentOperateViewSet(viewsets.ViewSet):
         self._start_task(
             task,
             self._run_chainlink_setup,
+            env.id,
+            mode,
+            str(task.id),
+        )
+        return Response(
+            {"task_id": str(task.id), "status": task.status, "mode": mode},
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+    @action(methods=["post"], detail=True, url_path="chainlink/clean")
+    def clean_chainlink(self, request, pk=None, *args, **kwargs):
+        env, error_response = self._get_eth_env_or_404(pk)
+        if error_response:
+            LOG.warning("Chainlink action=clean_missing_env env=%s", pk)
+            return error_response
+        not_ready = self._require_started_or_activated(env)
+        if not_ready:
+            LOG.warning(
+                "Chainlink action=clean_rejected env=%s status=%s",
+                env.id,
+                env.status,
+            )
+            return not_ready
+
+        mode = (request.data.get("mode") or "lite").lower()
+        if mode not in ["lite", "full"]:
+            mode = "lite"
+
+        idempotent = self._ensure_idempotent_task(
+            request, str(env.id), "CHAINLINK_CLEAN", mode
+        )
+        if idempotent.get("response"):
+            return idempotent["response"]
+        idempotency_key = idempotent["idempotency_key"]
+
+        LOG.info(
+            "Chainlink action=clean_request env=%s mode=%s user=%s",
+            env.id,
+            mode,
+            getattr(request.user, "id", None),
+        )
+
+        task, _ = create_task_with_status_transition(
+            task_type="CHAINLINK_CLEAN",
+            target_type="EthEnvironment",
+            target_id=str(env.id),
+            idempotency_key=idempotency_key,
+            target_obj=env,
+            status_field="chainlink_status",
+            pending_value="SETTINGUP",
+            extra_rollback={
+                "chainlink_detail": env.chainlink_detail,
+                "dmn_detail": env.dmn_detail,
+            },
+        )
+        LOG.info(
+            "Chainlink action=clean_task task=%s env=%s mode=%s status=%s",
+            task.id,
+            env.id,
+            mode,
+            task.status,
+        )
+
+        self._start_task(
+            task,
+            self._run_chainlink_clean,
             env.id,
             mode,
             str(task.id),

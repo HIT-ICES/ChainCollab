@@ -185,6 +185,18 @@ export const InstallChainlinkForEthEnv = async (envId: string, mode: string = "l
     }
 }
 
+export const CleanChainlinkForEthEnv = async (envId: string, mode: string = "lite", force: boolean = false) => {
+    try {
+        const response = await api.post(`/eth-environments/${envId}/chainlink/clean`, {
+            mode,
+            ...(force ? { force: true } : {}),
+        })
+        return response.data;
+    } catch (error) {
+        throwApiError(error, "Clean Chainlink failed");
+    }
+}
+
 export const getTask = async (taskId: string) => {
     try {
         const response = await api.get(`/tasks/${taskId}`)

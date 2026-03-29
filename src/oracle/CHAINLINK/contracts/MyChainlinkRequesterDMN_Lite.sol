@@ -28,7 +28,14 @@ contract MyChainlinkRequesterDMN_Lite is ChainlinkClient, ConfirmedOwner {
         bool exists;
     }
 
+    struct ConsensusConfig {
+        uint256 requiredOrganizations;
+        uint256 quorum;
+        bool exists;
+    }
+
     mapping(bytes32 => BaselineResult) public baselines;
+    mapping(bytes32 => ConsensusConfig) public consensusConfigs;
     mapping(bytes32 => string) private rawByRequestId;
     mapping(bytes32 => bool) private rawByRequestExists;
     mapping(bytes32 => RequestState) private requestStates;
@@ -41,11 +48,20 @@ contract MyChainlinkRequesterDMN_Lite is ChainlinkClient, ConfirmedOwner {
     mapping(bytes32 => string) public rawResults;
     mapping(bytes32 => bool) private rawResultExists;
     bytes32[] private rawResultHashes;
+    mapping(bytes32 => mapping(address => bytes32)) private writerVotes;
+    mapping(bytes32 => mapping(bytes32 => uint256)) private voteCountsByHash;
 
     event RequestSent(bytes32 indexed requestId, uint256 timestamp);
     event DecisionFulfilled(bytes32 indexed requestId, bytes result);
     event RawResultStored(bytes32 indexed hash, string raw);
     event BaselineCommitted(bytes32 indexed requestId, bytes32 hash, string raw);
+    event BaselineVoteRecorded(
+        bytes32 indexed requestId,
+        address indexed writer,
+        bytes32 indexed hash,
+        uint256 votes,
+        uint256 quorum
+    );
     event BaselineWriterUpdated(address indexed writer, bool allowed);
     event RequestPending(bytes32 indexed requestId, address indexed requester, uint256 timestamp);
     event RequestFulfilled(bytes32 indexed requestId, uint256 timestamp);
@@ -66,8 +82,10 @@ contract MyChainlinkRequesterDMN_Lite is ChainlinkClient, ConfirmedOwner {
         string calldata url,
         string calldata dmnCid,
         string calldata decisionId,
-        string calldata inputData
+        string calldata inputData,
+        uint256 requiredOrganizations
     ) external returns (bytes32 requestId) {
+        require(requiredOrganizations > 0, "requiredOrganizations must be > 0");
         Chainlink.Request memory req = _buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
 
         req._add("url", url);
@@ -79,6 +97,11 @@ contract MyChainlinkRequesterDMN_Lite is ChainlinkClient, ConfirmedOwner {
         requestStates[requestId] = RequestState.Pending;
         requestRequesters[requestId] = msg.sender;
         requestCreatedAt[requestId] = block.timestamp;
+        consensusConfigs[requestId] = ConsensusConfig({
+            requiredOrganizations: requiredOrganizations,
+            quorum: _majorityThreshold(requiredOrganizations),
+            exists: true
+        });
         _trackRequestId(requestId);
         emit RequestPending(requestId, msg.sender, block.timestamp);
         emit RequestSent(requestId, block.timestamp);
@@ -118,28 +141,37 @@ contract MyChainlinkRequesterDMN_Lite is ChainlinkClient, ConfirmedOwner {
 
     function commitBaselineFromRaw(bytes32 requestId, string calldata raw) external {
         require(_isAuthorizedBaselineWriter(), "Not authorized");
+        require(requestStates[requestId] != RequestState.None, "Request not found");
+
+        ConsensusConfig memory config = consensusConfigs[requestId];
+        require(config.exists, "Consensus not configured");
 
         bytes32 rawHash = keccak256(bytes(raw));
+        bytes32 previousVote = writerVotes[requestId][msg.sender];
+
+        if (previousVote != bytes32(0)) {
+            require(previousVote == rawHash, "Writer already voted differently");
+        } else {
+            writerVotes[requestId][msg.sender] = rawHash;
+            voteCountsByHash[requestId][rawHash] += 1;
+        }
 
         BaselineResult storage existing = baselines[requestId];
         if (existing.exists) {
             require(existing.hash == rawHash, "Baseline hash mismatch");
-        } else {
+        } else if (voteCountsByHash[requestId][rawHash] >= config.quorum) {
             baselines[requestId] = BaselineResult({
                 hash: rawHash,
                 raw: raw,
                 exists: true
             });
+
+            rawByRequestId[requestId] = raw;
+            rawByRequestExists[requestId] = true;
+            _markRequestFulfilled(requestId);
         }
 
-        rawByRequestId[requestId] = raw;
-        rawByRequestExists[requestId] = true;
-        if (requestStates[requestId] == RequestState.None) {
-            requestStates[requestId] = RequestState.Pending;
-            requestCreatedAt[requestId] = block.timestamp;
-        }
         _trackRequestId(requestId);
-        _markRequestFulfilled(requestId);
 
         rawResults[rawHash] = raw;
         if (!rawResultExists[rawHash]) {
@@ -148,7 +180,16 @@ contract MyChainlinkRequesterDMN_Lite is ChainlinkClient, ConfirmedOwner {
         }
 
         emit RawResultStored(rawHash, raw);
-        emit BaselineCommitted(requestId, rawHash, raw);
+        emit BaselineVoteRecorded(
+            requestId,
+            msg.sender,
+            rawHash,
+            voteCountsByHash[requestId][rawHash],
+            config.quorum
+        );
+        if (baselines[requestId].exists) {
+            emit BaselineCommitted(requestId, rawHash, raw);
+        }
     }
 
     function getRawByRequestId(bytes32 requestId) external view returns (string memory) {
@@ -173,6 +214,26 @@ contract MyChainlinkRequesterDMN_Lite is ChainlinkClient, ConfirmedOwner {
         createdAt = requestCreatedAt[requestId];
         fulfilledAt = requestFulfilledAt[requestId];
         exists = state != RequestState.None;
+    }
+
+    function getConsensusStatus(bytes32 requestId)
+        external
+        view
+        returns (
+            uint256 requiredOrganizations,
+            uint256 quorum,
+            bytes32 decidedHash,
+            uint256 decidedVotes,
+            bool fulfilled
+        )
+    {
+        ConsensusConfig memory config = consensusConfigs[requestId];
+        require(config.exists, "Consensus not configured");
+        requiredOrganizations = config.requiredOrganizations;
+        quorum = config.quorum;
+        decidedHash = baselines[requestId].hash;
+        decidedVotes = decidedHash == bytes32(0) ? 0 : voteCountsByHash[requestId][decidedHash];
+        fulfilled = requestStates[requestId] == RequestState.Fulfilled;
     }
 
     function rawResultCount() external view returns (uint256) {
@@ -240,5 +301,9 @@ contract MyChainlinkRequesterDMN_Lite is ChainlinkClient, ConfirmedOwner {
             requestListed[requestId] = true;
             requestIds.push(requestId);
         }
+    }
+
+    function _majorityThreshold(uint256 participantCount) internal pure returns (uint256) {
+        return (participantCount / 2) + 1;
     }
 }

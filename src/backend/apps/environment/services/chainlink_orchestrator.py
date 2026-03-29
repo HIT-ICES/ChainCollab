@@ -46,6 +46,7 @@ class ChainlinkOrchestrator:
             "chainlink_root": chainlink_root,
             "lite": oracle_root / "run-setup-lite.sh",
             "full": oracle_root / "run-setup.sh",
+            "clean": oracle_root / "clean.sh",
         }
 
     def resolve_chainlink_credentials(self) -> tuple[str, str]:
@@ -223,6 +224,96 @@ class ChainlinkOrchestrator:
         except Exception:
             env.save(update_fields=["chainlink_status"])
             self.log.exception("Chainlink action=store_deployment_failed env=%s", env_id)
+        return payload
+
+    def run_chainlink_clean(
+        self,
+        env_id: str,
+        mode: str = "lite",
+        task_id: str | None = None,
+    ) -> dict:
+        env = EthEnvironment.objects.get(pk=env_id)
+        env.chainlink_status = "SETTINGUP"
+        env.save(update_fields=["chainlink_status"])
+
+        self.set_task_step(task_id, "RESOLVE_SCRIPT")
+        log_path = _task_log_path(task_id) if task_id else None
+        scripts = self.resolve_chainlink_scripts()
+        script = scripts["clean"]
+        if not script.exists():
+            env.chainlink_status = "FAILED"
+            env.save(update_fields=["chainlink_status"])
+            raise FileNotFoundError(f"Chainlink clean script not found: {script}")
+
+        env_vars = {
+            "ORACLE_ROOT": str(scripts["oracle_root"]),
+            "CHAINLINK_ROOT": str(scripts["chainlink_root"]),
+            "DEPLOYER_ACCOUNT": str(self.eth_system_account),
+        }
+        try:
+            env_vars["RPC_URL"] = self.resolve_system_rpc_url(env)
+        except Exception as exc:
+            self.log.warning("Chainlink action=resolve_rpc_failed env=%s error=%s", env_id, exc)
+        if mode == "lite":
+            env_vars["DMN_MODE"] = "lite"
+
+        self.log.info(
+            "Chainlink action=clean_start env=%s mode=%s script=%s",
+            env_id,
+            mode,
+            script,
+        )
+        try:
+            self.set_task_step(task_id, "RUN_SCRIPT")
+            process = subprocess.Popen(
+                ["bash", str(script)],
+                cwd=str(scripts["chainlink_root"]),
+                env={
+                    **os.environ,
+                    **env_vars,
+                    "LANG": "C.UTF-8",
+                    "LC_ALL": "C.UTF-8",
+                    "PYTHONIOENCODING": "UTF-8",
+                },
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                bufsize=1,
+            )
+            if log_path:
+                _append_task_log(log_path, f"run: bash {script}")
+            _stream_process_output(process, log_path)
+            returncode = process.wait()
+            if returncode != 0:
+                self.log.warning("Chainlink clean script exited with code=%s", returncode)
+        except Exception:
+            env.chainlink_status = "FAILED"
+            env.save(update_fields=["chainlink_status"])
+            raise
+
+        if returncode != 0:
+            env.chainlink_status = "FAILED"
+            env.save(update_fields=["chainlink_status"])
+            raise RuntimeError(
+                f"Chainlink clean failed (code={returncode}). "
+                f"See task log: {log_path}"
+            )
+
+        self.set_task_step(task_id, "PROCESS_RESULT")
+        payload = {
+            "mode": mode,
+            "script": str(script),
+            "returncode": returncode,
+            "log_tail": _read_task_log_tail(log_path) if log_path else "",
+        }
+
+        self.set_task_step(task_id, "UPDATE_STATUS")
+        env.chainlink_status = "NO"
+        env.chainlink_detail = None
+        env.dmn_detail = None
+        env.save(update_fields=["chainlink_status", "chainlink_detail", "dmn_detail"])
         return payload
 
     def run_chainlink_create_job(
