@@ -23,6 +23,7 @@ class TranslatorProxyViewSet(viewsets.ViewSet):
                 serializer.validated_data["bpmnContent"],
                 target=serializer.validated_data.get("target") or "go",
                 artifact_name=serializer.validated_data.get("artifact_name"),
+                persist_to_runtime=True,
             )
         except NewTranslatorError as exc:
             return Response({"message": str(exc)}, status=status.HTTP_400_BAD_REQUEST)

@@ -181,6 +181,7 @@ def main():
             except FileNotFoundError:
                 continue
         remove_contents(runtime_dir / "tasks")
+        remove_contents(runtime_dir / "newTranslator")
 
     print("Remove Docker Container")
     pattern = re.compile(

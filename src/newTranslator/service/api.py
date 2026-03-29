@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from datetime import datetime
 import asyncio
 import json
+import re
 import sys
 from pathlib import Path
 import uvicorn
@@ -39,6 +40,7 @@ from b2cdsl_go import DSLContractAdapter as GoDSLContractAdapter, GoChaincodeRen
 from b2cdsl_solidity import DSLContractAdapter as SolidityDSLContractAdapter, SolidityRenderer, TEMPLATE_ENV as SOL_TEMPLATE_ENV, CONTRACT_TEMPLATE as SOL_CONTRACT_TEMPLATE
 
 _B2C_METAMODEL = None
+_RUNTIME_TRANSLATOR_DIR = _PACKAGE_ROOT.parent / "runtime" / "newTranslator"
 
 
 def _load_b2c_metamodel():
@@ -47,6 +49,43 @@ def _load_b2c_metamodel():
         grammar_path = _PACKAGE_ROOT / "DSL" / "B2CDSL" / "b2cdsl" / "b2c.tx"
         _B2C_METAMODEL = metamodel_from_file(str(grammar_path))
     return _B2C_METAMODEL
+
+
+def _safe_artifact_name(name: Optional[str], fallback: str) -> str:
+    candidate = (name or "").strip() or fallback
+    sanitized = re.sub(r"[^A-Za-z0-9_.-]+", "_", candidate).strip("._")
+    return sanitized or fallback
+
+
+def _persist_runtime_artifacts(
+    *,
+    target: str,
+    artifact_name: Optional[str],
+    dsl_content: str = "",
+    contract_content: str = "",
+    ffi_content: str = "",
+) -> Dict[str, str]:
+    timestamp = datetime.utcnow().strftime("%Y%m%d-%H%M%S-%f")
+    safe_name = _safe_artifact_name(artifact_name, f"{target}-artifact")
+    output_dir = _RUNTIME_TRANSLATOR_DIR / timestamp
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    written: Dict[str, str] = {}
+    if dsl_content:
+        dsl_path = output_dir / f"{safe_name}.b2c"
+        dsl_path.write_text(dsl_content, encoding="utf-8")
+        written["dslPath"] = str(dsl_path)
+    if contract_content:
+        suffix = ".sol" if target == "solidity" else ".go"
+        contract_path = output_dir / f"{safe_name}{suffix}"
+        contract_path.write_text(contract_content, encoding="utf-8")
+        written["artifactPath"] = str(contract_path)
+    if ffi_content:
+        ffi_path = output_dir / f"{safe_name}.ffi.json"
+        ffi_path.write_text(ffi_content, encoding="utf-8")
+        written["ffiPath"] = str(ffi_path)
+    written["outputDir"] = str(output_dir)
+    return written
 
 app = FastAPI()
 app.add_middleware(
@@ -60,12 +99,17 @@ app.add_middleware(
 class ChaincodeGenerateParams(BaseModel):
     bpmnContent: str
     artifactName: Optional[str] = None
+    persist_to_runtime: bool = False
 
 
 class ChaincodeGenerateResponse(BaseModel):
     bpmnContent: str
     ffiContent: str
     timecost: str = None
+    outputDir: Optional[str] = None
+    artifactPath: Optional[str] = None
+    dslPath: Optional[str] = None
+    ffiPath: Optional[str] = None
 
 
 @app.post("/api/v1/chaincode/generate")
@@ -73,18 +117,38 @@ async def generate_chaincode(params: ChaincodeGenerateParams):
     translator: GoChaincodeTranslator = GoChaincodeTranslator(params.bpmnContent)
     chaincode = translator.generate_chaincode(contract_name=params.artifactName)
     ffi = translator.generate_ffi()
-    return ChaincodeGenerateResponse(bpmnContent=chaincode, ffiContent=ffi)
+    persist_result = {}
+    if params.persist_to_runtime:
+        persist_result = _persist_runtime_artifacts(
+            target="go",
+            artifact_name=params.artifactName,
+            dsl_content=chaincode,
+            ffi_content=ffi,
+        )
+    return ChaincodeGenerateResponse(
+        bpmnContent=chaincode,
+        ffiContent=ffi,
+        outputDir=persist_result.get("outputDir"),
+        artifactPath=persist_result.get("artifactPath"),
+        dslPath=persist_result.get("dslPath"),
+        ffiPath=persist_result.get("ffiPath"),
+    )
 
 
 class EthContractGenerateParams(BaseModel):
     bpmnContent: str
     artifactName: Optional[str] = None
+    persist_to_runtime: bool = False
 
 
 class EthContractGenerateResponse(BaseModel):
     contractContent: str
     dslContent: str
     ffiContent: str
+    outputDir: Optional[str] = None
+    artifactPath: Optional[str] = None
+    dslPath: Optional[str] = None
+    ffiPath: Optional[str] = None
 
 
 @app.post("/api/v1/chaincode/generate-eth")
@@ -97,10 +161,23 @@ async def generate_eth_contract(params: EthContractGenerateParams):
     except ValueError as exc:
         return JSONResponse(status_code=400, content={"message": str(exc)})
     ffi_content = translator.generate_ffi()
+    persist_result = {}
+    if params.persist_to_runtime:
+        persist_result = _persist_runtime_artifacts(
+            target="solidity",
+            artifact_name=params.artifactName,
+            dsl_content=dsl_content,
+            contract_content=contract_content,
+            ffi_content=ffi_content,
+        )
     return EthContractGenerateResponse(
         contractContent=contract_content,
         dslContent=dsl_content,
         ffiContent=ffi_content,
+        outputDir=persist_result.get("outputDir"),
+        artifactPath=persist_result.get("artifactPath"),
+        dslPath=persist_result.get("dslPath"),
+        ffiPath=persist_result.get("ffiPath"),
     )
 
 

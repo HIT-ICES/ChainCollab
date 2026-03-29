@@ -42,6 +42,7 @@ class NewTranslatorClient:
         bpmn_content: str,
         target: TranslatorTarget,
         artifact_name: Optional[str] = None,
+        persist_to_runtime: bool = False,
     ) -> Dict[str, Any]:
         if target == "solidity":
             result = self._post(
@@ -49,6 +50,7 @@ class NewTranslatorClient:
                 {
                     "bpmnContent": bpmn_content,
                     "artifactName": artifact_name,
+                    "persist_to_runtime": persist_to_runtime,
                 },
             )
             return {
@@ -56,6 +58,10 @@ class NewTranslatorClient:
                 "dslContent": result.get("dslContent", ""),
                 "chaincodeContent": result.get("contractContent", ""),
                 "ffiContent": result.get("ffiContent", "{}"),
+                "outputDir": result.get("outputDir", ""),
+                "artifactPath": result.get("artifactPath", ""),
+                "dslPath": result.get("dslPath", ""),
+                "ffiPath": result.get("ffiPath", ""),
             }
 
         dsl_result = self._post(
@@ -63,6 +69,7 @@ class NewTranslatorClient:
             {
                 "bpmnContent": bpmn_content,
                 "artifactName": artifact_name,
+                "persist_to_runtime": persist_to_runtime,
             },
         )
         dsl_content = dsl_result.get("bpmnContent", "")
@@ -81,6 +88,10 @@ class NewTranslatorClient:
             "dslContent": dsl_content,
             "chaincodeContent": compile_result.get("chaincodeContent", ""),
             "ffiContent": ffi_content,
+            "outputDir": dsl_result.get("outputDir", ""),
+            "artifactPath": dsl_result.get("artifactPath", ""),
+            "dslPath": dsl_result.get("dslPath", ""),
+            "ffiPath": dsl_result.get("ffiPath", ""),
         }
 
     def get_participants(self, bpmn_content: str) -> Any:

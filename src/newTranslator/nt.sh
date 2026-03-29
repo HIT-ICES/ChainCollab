@@ -9,11 +9,17 @@ else
 fi
 export NEWTRANS_ROOT
 cd "$NEWTRANS_ROOT" || exit 1
+export NT_RUNTIME_ROOT="$NEWTRANS_ROOT/../runtime/newTranslator"
 
 export NT_B2C_DIR="$NEWTRANS_ROOT/build/b2c"
 export NT_BPMN_DIR="$NEWTRANS_ROOT/build/bpmn"
 export NT_BUILD_DIR="$NEWTRANS_ROOT/build/chaincode"
-export NT_SOL_DIR="$NEWTRANS_ROOT/build/solidity"
+export NT_SOL_OUTPUT_MODE="${NT_SOL_OUTPUT_MODE:-build}"
+if [ "$NT_SOL_OUTPUT_MODE" = "runtime" ]; then
+  export NT_SOL_DIR="$NT_RUNTIME_ROOT/solidity"
+else
+  export NT_SOL_DIR="$NEWTRANS_ROOT/build/solidity"
+fi
 export NT_EXAMPLE="$NT_B2C_DIR/chaincode.b2c"
 
 nt-activate() {
@@ -213,9 +219,9 @@ Commands:
   go-build          Go build in build/chaincode
   go-clean          Remove build/chaincode
   sol-gen           Generate Solidity contracts from .b2c
-  sol-fmt           Run solhint on Solidity output
-  sol-build         Compile Solidity output with solc
-  sol-clean         Remove build/solidity
+  sol-fmt           Run solhint on current Solidity output directory
+  sol-build         Compile current Solidity output directory with solc
+  sol-clean         Remove current Solidity output directory
   bpmn-to-b2c        Convert .bpmn to .b2c
   b2c-view          Render .b2c to dot/png
   help              Show this help
@@ -223,6 +229,7 @@ Commands:
 Examples:
   ./newtranslator_env.sh bpmn-to-b2c ./build/bpmn/YourFlow.bpmn
   ./newtranslator_env.sh go-gen ./build/b2c/chaincode.b2c
+  NT_SOL_OUTPUT_MODE=runtime ./newtranslator_env.sh sol-gen ./build/b2c/chaincode.b2c
 EOF
 }
 

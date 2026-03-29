@@ -391,6 +391,7 @@ class BPMNViewsSet(viewsets.ModelViewSet):
                 bpmn.bpmnContent,
                 target=target,
                 artifact_name=artifact_name,
+                persist_to_runtime=True,
             )
 
             bpmn.chaincode_content = generated.get("chaincodeContent") or ""
