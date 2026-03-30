@@ -25,6 +25,7 @@ fi
 
 STARTED_OCR_NETWORK=0
 STARTED_CDMN=0
+CHAINLINK_HOLD_ON_TEST_FAILURE="${CHAINLINK_HOLD_ON_TEST_FAILURE:-1}"
 export OCR_RPC_URL="${OCR_RPC_URL:-http://system-geth-node:8545}"
 SYSTEM_GETH_CONTAINER="${SYSTEM_GETH_CONTAINER:-system-geth-node}"
 export CHAINCOLLAB_RUNTIME_DEPLOYMENT_DIR="$RUNTIME_DEPLOYMENT_DIR"
@@ -62,6 +63,17 @@ cleanup_on_failure() {
   fi
 
   restore_chainlink_deployment_backup >/dev/null 2>&1 || true
+}
+
+hold_debug_state() {
+  echo "== [debug] final test failed, preserving OCR/CDMN containers and deployment =="
+  echo "== [debug] automatic rollback disabled; inspect the environment manually =="
+  echo "== [debug] run clean.sh or the frontend Clean button when you are done =="
+  trap - EXIT
+  while true; do
+    echo "== [debug] waiting for manual cleanup; setup task remains RUNNING =="
+    sleep 60
+  done
 }
 
 MODE="full"
@@ -461,7 +473,18 @@ node scripts/fund-contract.js
 persist_chainlink_deployment_to_runtime
 
 echo "== [9] 测试 directrequest 缓存链路 =="
-DMN_MODE=lite DMN_RANDOM=1 node "$FEATURES_04/test-dmn-ocr.js"
+if [ "$CHAINLINK_HOLD_ON_TEST_FAILURE" = "1" ]; then
+  set +e
+  DMN_MODE=lite DMN_RANDOM=1 node "$FEATURES_04/test-dmn-ocr.js"
+  test_exit_code=$?
+  set -e
+  if [ "$test_exit_code" -ne 0 ]; then
+    echo "❌ final test failed with code=$test_exit_code"
+    hold_debug_state
+  fi
+else
+  DMN_MODE=lite DMN_RANDOM=1 node "$FEATURES_04/test-dmn-ocr.js"
+fi
 
 restore_chainlink_deployment_backup
 

@@ -90,7 +90,6 @@ const requestDmnDecisionTestSample = {
   dmnCid: "QmExampleDecisionCidReplaceMe",
   decisionId: "Decision_Eligibility",
   inputData: JSON.stringify({ applicant: { age: 20 } }),
-  requiredOrganizations: 1,
 };
 
 import { useEnvInfo, useMembershipListData } from './hooks'
@@ -457,7 +456,6 @@ const Overview: React.FC = () => {
         { key: "dmnCid", label: "DMN CID", placeholder: "Qm... / bafy..." },
         { key: "decisionId", label: "Decision ID", placeholder: "decision" },
         { key: "inputData", label: "Input JSON", placeholder: "{\"temperature\":20}" },
-        { key: "requiredOrganizations", label: "Required Organizations", placeholder: "1", type: "number" },
       ],
     },
     {
@@ -558,17 +556,6 @@ const Overview: React.FC = () => {
     (acc: number, item: any) => acc + (Array.isArray(item?.firefly_listeners) ? item.firefly_listeners.length : 0),
     0
   )
-  const resolveDefaultRequiredOrganizations = () => {
-    const clusterSync = (chainlinkDetail as any)?.cluster_sync
-    const healthyCount = Number(clusterSync?.healthy_count || 0)
-    if (Number.isInteger(healthyCount) && healthyCount > 0) {
-      return healthyCount
-    }
-    if (membershipCount > 0) {
-      return membershipCount
-    }
-    return requestDmnDecisionTestSample.requiredOrganizations
-  }
   const openFireflyApiPage = (apiBase?: string | null) => {
     if (!apiBase) {
       return
@@ -1759,9 +1746,6 @@ const Overview: React.FC = () => {
       method: action.method,
       mode: action.mode,
     }
-    if (action.method === "requestDMNDecision") {
-      nextValues.requiredOrganizations = resolveDefaultRequiredOrganizations()
-    }
     dmnForm.setFieldsValue(nextValues)
     if (
       (action.method === "getRequestStatus" ||
@@ -1809,7 +1793,6 @@ const Overview: React.FC = () => {
       dmnCid: requestDmnDecisionTestSample.dmnCid,
       decisionId: requestDmnDecisionTestSample.decisionId,
       inputData: requestDmnDecisionTestSample.inputData,
-      requiredOrganizations: resolveDefaultRequiredOrganizations(),
     })
     message.success("已填充 requestDMNDecision 测试参数")
   }
@@ -1837,14 +1820,7 @@ const Overview: React.FC = () => {
         return
       }
       const params = (dmnAction?.params || []).reduce((acc, param) => {
-        let value = values[param.key]
-        if (param.key === "requiredOrganizations" && value !== undefined && value !== "") {
-          const parsed = Number(value)
-          if (!Number.isInteger(parsed) || parsed < 1) {
-            throw new Error("Required Organizations must be a positive integer")
-          }
-          value = parsed
-        }
+        const value = values[param.key]
         if (value !== undefined) {
           acc[param.key] = value
         }

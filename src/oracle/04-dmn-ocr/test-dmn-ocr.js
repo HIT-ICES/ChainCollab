@@ -45,7 +45,6 @@ const DMN_CACHE_HOSTS = (process.env.DMN_CACHE_HOSTS ||
   .filter(Boolean);
 
 const RPC_URL = process.env.RPC_URL || 'http://localhost:8545';
-
 function rpcCall(method, params) {
   return new Promise((resolve, reject) => {
     const postData = JSON.stringify({
