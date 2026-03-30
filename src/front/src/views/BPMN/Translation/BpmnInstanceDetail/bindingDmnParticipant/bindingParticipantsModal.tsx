@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Card, Row, Col, Button, Typography, Steps, Modal, TableProps, Table, Select, Input, Tag, List, message } from "antd"
+import { Card, Row, Col, Button, Typography, Steps, Modal, TableProps, Table, Select, Input, Tag, List, Switch, message } from "antd"
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAppSelector } from "@/redux/hooks";
 import { useParticipantsData, useAvailableMembers } from "../hooks"
@@ -329,6 +329,7 @@ export const BindingParticipant = ({ participants, showBindingParticipantMap, se
 
   const [clickedActionIndex, setClickedActionIndex] = useState("");
   const [autoBinding, setAutoBinding] = useState(false);
+  const [useFirstMembershipForAll, setUseFirstMembershipForAll] = useState(false);
   const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
   const currentEnvType = useAppSelector((state) => state.env.currentEnvType);
   const effectiveEnvId = envId || currentEnvId;
@@ -392,11 +393,16 @@ export const BindingParticipant = ({ participants, showBindingParticipantMap, se
       message.error("Environment is not selected");
       return;
     }
+    if (useFirstMembershipForAll && membershipList.length === 0) {
+      message.error("No memberships available for auto binding");
+      return;
+    }
     setAutoBinding(true);
     try {
       const nextMap = new Map(showBindingParticipantMap);
       const nextValueMap = new Map(showBindingParticipantValueMap);
       let autoBoundCount = 0;
+      const firstMembershipId = membershipList[0]?.id || "";
 
       for (const participant of participants) {
         const bestMembership = membershipList
@@ -406,18 +412,24 @@ export const BindingParticipant = ({ participants, showBindingParticipantMap, se
           }))
           .sort((a, b) => b.score - a.score)[0];
 
-        const selectedMembershipId =
-          bestMembership && bestMembership.score > 0
+        const selectedMembershipId = useFirstMembershipForAll
+          ? firstMembershipId
+          : bestMembership && bestMembership.score > 0
             ? bestMembership.membership.id
             : membershipList.length === 1
               ? membershipList[0].id
               : "";
 
         const currentValue = (nextValueMap.get(participant.id) || {}) as bindingValueType;
+        const selectedUser = useFirstMembershipForAll
+          ? ""
+          : currentValue.selectedUser || "";
         const mergedValue: Record<string, any> = {
           selectedValidationType: currentValue.selectedValidationType || "equal",
-          selectedMembershipId: currentValue.selectedMembershipId || selectedMembershipId,
-          selectedUser: currentValue.selectedUser || "",
+          selectedMembershipId: useFirstMembershipForAll
+            ? selectedMembershipId
+            : currentValue.selectedMembershipId || selectedMembershipId,
+          selectedUser,
           Attr: currentValue.Attr || [],
         };
 
@@ -454,7 +466,11 @@ export const BindingParticipant = ({ participants, showBindingParticipantMap, se
 
       setShowBindingParticipantMap(nextMap);
       setShowBindingParticipantValueMap(nextValueMap);
-      message.success(`已自动填充 ${autoBoundCount}/${participants.length} 个 participant 绑定`);
+      message.success(
+        useFirstMembershipForAll
+          ? `已按第一个 membership 自动填充 ${autoBoundCount}/${participants.length} 个 participant 绑定`
+          : `已自动填充 ${autoBoundCount}/${participants.length} 个 participant 绑定`,
+      );
     } catch (error: any) {
       message.error(error?.message || "自动绑定失败");
     } finally {
@@ -511,7 +527,14 @@ export const BindingParticipant = ({ participants, showBindingParticipantMap, se
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'stretch' }}>
       <div style={{ flex: 1, marginRight: '20px' }}> {/* 为Table组件添加右边距 */}
-        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Switch
+              checked={useFirstMembershipForAll}
+              onChange={setUseFirstMembershipForAll}
+            />
+            <span>全部使用第一个 membership</span>
+          </div>
           <Button type="primary" ghost loading={autoBinding} onClick={handleAutoBind}>
             一键自动绑定
           </Button>

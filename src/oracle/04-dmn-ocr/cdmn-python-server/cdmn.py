@@ -23,38 +23,100 @@ class DMNEngine:
         Evaluate a DMN decision.
         """
         try:
-            # Parse DMN XML
             root = ET.fromstring(dmn_content)
-
-            # Determine the DMN version and namespace
-            # Check for DMN 1.3 (2019) or DMN 1.1 (2015)
             namespace = root.tag.split('}')[0][1:]
-            if namespace == 'http://www.omg.org/spec/DMN/20151101/dmn.xsd':
-                dmn_ns = 'dmn11'
-            else:
-                dmn_ns = 'dmn'
-
-            # Find decision with specified id
-            decision = root.find(f".//{{{namespace}}}decision[@id='{decision_id}']")
-            if decision is None:
-                raise ValueError(f"Decision '{decision_id}' not found")
-
-            # Get decision logic (DMN 1.1 has decisionTable directly under decision)
-            decision_table = decision.find(f".//{{{namespace}}}decisionTable")
-            if decision_table is None:
-                # Check for DMN 1.3 decisionLogic wrapper
-                decision_logic = decision.find(f".//{{{namespace}}}decisionLogic")
-                if decision_logic is not None:
-                    decision_table = decision_logic.find(f".//{{{namespace}}}decisionTable")
-
-            if decision_table is None:
-                raise ValueError(f"Decision table for '{decision_id}' not found")
-
-            # Evaluate decision table
-            return self._evaluate_decision_table(decision_table, input_data, namespace)
+            decisions_by_id, decisions_by_name = self._index_decisions(root, namespace)
+            _, result_list = self._evaluate_decision(
+                decision_id,
+                decisions_by_id,
+                decisions_by_name,
+                namespace,
+                dict(input_data or {}),
+                {}
+            )
+            return result_list
 
         except Exception as e:
             raise Exception(f"DMN evaluation error: {str(e)}")
+
+    def _index_decisions(self, root, namespace):
+        decisions_by_id = {}
+        decisions_by_name = {}
+        for decision in root.findall(f".//{{{namespace}}}decision"):
+            decision_id = decision.get('id')
+            decision_name = decision.get('name')
+            if decision_id:
+                decisions_by_id[decision_id] = decision
+            if decision_name:
+                decisions_by_name[decision_name] = decision
+        return decisions_by_id, decisions_by_name
+
+    def _resolve_decision(self, decision_ref, decisions_by_id, decisions_by_name):
+        decision = decisions_by_id.get(decision_ref)
+        if decision is not None:
+            return decision
+        decision = decisions_by_name.get(decision_ref)
+        if decision is not None:
+            return decision
+        raise ValueError(f"Decision '{decision_ref}' not found")
+
+    def _get_decision_table(self, decision, namespace):
+        decision_table = decision.find(f"./{{{namespace}}}decisionTable")
+        if decision_table is None:
+            decision_logic = decision.find(f"./{{{namespace}}}decisionLogic")
+            if decision_logic is not None:
+                decision_table = decision_logic.find(f"./{{{namespace}}}decisionTable")
+        if decision_table is None:
+            decision_id = decision.get('id') or decision.get('name') or '<unknown>'
+            raise ValueError(f"Decision table for '{decision_id}' not found")
+        return decision_table
+
+    def _evaluate_decision(
+        self,
+        decision_ref,
+        decisions_by_id,
+        decisions_by_name,
+        namespace,
+        context,
+        cache
+    ):
+        if decision_ref in cache:
+            return cache[decision_ref]
+
+        decision = self._resolve_decision(decision_ref, decisions_by_id, decisions_by_name)
+        merged_context = dict(context)
+
+        for info_req in decision.findall(f"./{{{namespace}}}informationRequirement"):
+            required_decision = info_req.find(f"./{{{namespace}}}requiredDecision")
+            if required_decision is None:
+                continue
+            href = required_decision.get('href')
+            if not href:
+                continue
+            dependency_ref = href[1:] if href.startswith('#') else href
+            dependency_decision, dependency_results = self._evaluate_decision(
+                dependency_ref,
+                decisions_by_id,
+                decisions_by_name,
+                namespace,
+                merged_context,
+                cache
+            )
+            if dependency_results:
+                # Mirror Camunda-style evaluation semantics used in the old Fabric DMN contract:
+                # later decisions can consume the first matched output row as input variables.
+                merged_context.update(dependency_results[0])
+
+        decision_table = self._get_decision_table(decision, namespace)
+        results = self._evaluate_decision_table(decision_table, merged_context, namespace)
+
+        cache_key = decision.get('id') or decision_ref
+        resolved = (decision, results)
+        cache[cache_key] = resolved
+        decision_name = decision.get('name')
+        if decision_name:
+            cache[decision_name] = resolved
+        return resolved
 
     def _evaluate_decision_table(self, decision_table, input_data, namespace):
         """
@@ -138,10 +200,7 @@ class DMNEngine:
         if expression.startswith('<'):
             return value < float(expression[1:])
         if '..' in expression:
-            # Range comparison (inclusive), handling [x..y] or x..y format
-            range_str = expression.strip('[]')
-            min_val, max_val = map(float, range_str.split('..'))
-            return min_val <= value <= max_val
+            return self._evaluate_range_expression(expression, value)
         if expression.startswith('not(') and expression.endswith(')'):
             # Not operator
             sub_expr = expression[4:-1].strip()
@@ -167,6 +226,31 @@ class DMNEngine:
                (expression.startswith("'") and expression.endswith("'")):
                 expression = expression[1:-1]
             return str(value) == str(expression)
+
+    def _evaluate_range_expression(self, expression, value):
+        expr = expression.strip()
+        if not expr:
+            return False
+
+        left_inclusive = True
+        right_inclusive = True
+        if expr[0] in '[(':
+            left_inclusive = expr[0] == '['
+            expr = expr[1:]
+        if expr and expr[-1] in '])':
+            right_inclusive = expr[-1] == ']'
+            expr = expr[:-1]
+
+        try:
+            min_raw, max_raw = [part.strip() for part in expr.split('..', 1)]
+            min_val = float(min_raw)
+            max_val = float(max_raw)
+        except Exception:
+            return False
+
+        left_ok = value >= min_val if left_inclusive else value > min_val
+        right_ok = value <= max_val if right_inclusive else value < max_val
+        return left_ok and right_ok
 
     def _parse_value(self, value_str, type_ref):
         """

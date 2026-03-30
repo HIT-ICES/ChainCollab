@@ -1418,7 +1418,7 @@ const buildSvgStyleForElements = (
 		if (!elementId) return;
 		const selector = `& g[data-element-id="${elementId}"]`;
 		const stateStyle = palette[item.state] || palette[0];
-		const actionStyle = latestActionStatus[elementId];
+		const actionStyle = item.state === 3 ? undefined : latestActionStatus[elementId];
 		const fill =
 			actionStyle === "failed"
 				? "#fee2e2"
@@ -1894,6 +1894,37 @@ const EthereumExecutionView = ({
 		autoExecuteRunning,
 		pendingActionKeys,
 		actionableElements,
+	]);
+
+	useEffect(() => {
+		if (!autoExecuteEnabled || !selectedEthereumKey || !apiBaseUrl) {
+			return;
+		}
+		if (!Number.isFinite(instanceId)) {
+			return;
+		}
+		const loop = window.setInterval(() => {
+			if (snapshotLoading || running || autoExecuteRunning) {
+				return;
+			}
+			refreshSnapshot().catch(() => {
+				// refreshSnapshot already records snapshotError; keep auto polling alive
+			});
+		}, document.visibilityState === "visible"
+			? autoExecuteIntervalMs
+			: Math.max(autoExecuteIntervalMs, 15000));
+		return () => {
+			window.clearInterval(loop);
+		};
+	}, [
+		autoExecuteEnabled,
+		selectedEthereumKey,
+		apiBaseUrl,
+		instanceId,
+		autoExecuteIntervalMs,
+		snapshotLoading,
+		running,
+		autoExecuteRunning,
 	]);
 
 	const invokeMethod = async () => {
@@ -2741,7 +2772,7 @@ const ExecutionPage = (props) => {
 				if (!elementId) return;
 				const selector = `& g[data-element-id="${elementId}"]`;
 				const stateStyle = palette[msg.state] || palette[0];
-				const actionStyle = latestActionStatus[elementId];
+				const actionStyle = msg.state === 3 ? undefined : latestActionStatus[elementId];
 				const fill =
 					actionStyle === "failed"
 						? "#fee2e2"
