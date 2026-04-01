@@ -407,8 +407,8 @@ ChoreoRules.prototype.canConnect = function (source, target, connection) {
   return BpmnRules.prototype.canConnect.call(this, source, target, connection);
 };
 ChoreoRules.prototype.canResize = function (shape, newBounds) {
-  if (is(shape, 'bpmn:Task')) {
-    // choreography activities can be resized
+  if (is(shape, 'bpmn:ChoreographyActivity') || is(shape, 'bpmn:Task')) {
+    // choreography activities and tasks can be resized
     return true;
   } else if (shape.type === 'bpmn:Participant') {
     // participants (= participant bands) can not be resized
