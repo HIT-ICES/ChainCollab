@@ -1,0 +1,477 @@
+{
+  "case_name": "amazon",
+  "source_files": {
+    "bpmn": "/root/code/ChainCollab/src/newTranslator/generator/resource/bpmn/amazon.bpmn",
+    "dmn": "/root/code/ChainCollab/Experiment/BPMNwithDMNcase/amazon.dmn"
+  },
+  "participants": [
+    {
+      "id": "Participant_1p9owwo",
+      "name": "amazon support center"
+    },
+    {
+      "id": "Participant_12df78t",
+      "name": "customer"
+    }
+  ],
+  "messages": [
+    {
+      "id": "MessageFlow_13hle13",
+      "messageRef": "Message_1b1qlzd",
+      "name": "Notification of application failure",
+      "sourceRef": "Participant_1p9owwo",
+      "targetRef": "Participant_12df78t",
+      "sender": "amazon support center",
+      "receiver": "customer",
+      "schema": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": ""
+          },
+          "result": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "reason",
+          "result"
+        ],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_191vfqw",
+      "messageRef": "Message_01jq2zl",
+      "name": "send Deduction amount",
+      "sourceRef": "Participant_1p9owwo",
+      "targetRef": "Participant_12df78t",
+      "sender": "amazon support center",
+      "receiver": "customer",
+      "schema": {
+        "properties": {
+          "amount": {
+            "type": "number",
+            "description": ""
+          }
+        },
+        "required": [
+          "amount"
+        ],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_05bvd7t",
+      "messageRef": "Message_12n6jjk",
+      "name": "submit form",
+      "sourceRef": "Participant_12df78t",
+      "targetRef": "Participant_1p9owwo",
+      "sender": "customer",
+      "receiver": "amazon support center",
+      "schema": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": ""
+          },
+          "duration": {
+            "type": "number",
+            "description": ""
+          }
+        },
+        "required": [
+          "type",
+          "duration"
+        ],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_1haf3pl",
+      "messageRef": "Message_076ulzs",
+      "name": "details1",
+      "sourceRef": "Participant_12df78t",
+      "targetRef": "Participant_1p9owwo",
+      "sender": "customer",
+      "receiver": "amazon support center",
+      "schema": {
+        "properties": {
+          "time": {
+            "type": "string",
+            "description": ""
+          },
+          "description": {
+            "type": "string",
+            "description": ""
+          },
+          "EC2 resource ID": {
+            "type": "string",
+            "description": ""
+          },
+          "logs": {
+            "type": "string",
+            "description": ""
+          },
+          "other information": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "time",
+          "description",
+          "EC2 resource ID",
+          "logs"
+        ],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_1nqrrp6",
+      "messageRef": "Message_068kmzv",
+      "name": "details2",
+      "sourceRef": "Participant_12df78t",
+      "targetRef": "Participant_1p9owwo",
+      "sender": "customer",
+      "receiver": "amazon support center",
+      "schema": {
+        "properties": {
+          "time": {
+            "type": "string",
+            "description": ""
+          },
+          "instance ID": {
+            "type": "string",
+            "description": ""
+          },
+          "logs": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "time",
+          "instance ID",
+          "logs"
+        ],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_1lf21qb",
+      "messageRef": "Message_09krt7c",
+      "name": "create questions",
+      "sourceRef": "Participant_12df78t",
+      "targetRef": "Participant_1p9owwo",
+      "sender": "customer",
+      "receiver": "amazon support center",
+      "schema": {
+        "properties": {
+          "question name": {
+            "type": "string",
+            "description": ""
+          },
+          "description": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "question name",
+          "description"
+        ],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_0khz8el",
+      "messageRef": "Message_1bhhp1n",
+      "name": "Regional level application",
+      "sourceRef": "Participant_12df78t",
+      "targetRef": "Participant_1p9owwo",
+      "sender": "customer",
+      "receiver": "amazon support center",
+      "schema": {
+        "properties": {
+          "serviceType": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "serviceType"
+        ],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_1urma6e",
+      "messageRef": "Message_0ywghlt",
+      "name": "instance level application",
+      "sourceRef": "Participant_12df78t",
+      "targetRef": "Participant_1p9owwo",
+      "sender": "customer",
+      "receiver": "amazon support center",
+      "schema": {
+        "properties": {
+          "serviceType": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "serviceType"
+        ],
+        "files": {},
+        "file required": []
+      }
+    }
+  ],
+  "gateways": [
+    {
+      "id": "Gateway_0auc3he",
+      "name": "Gateway_0auc3he",
+      "type": "exclusive"
+    },
+    {
+      "id": "Gateway_0ivv4vg",
+      "name": "Gateway_0ivv4vg",
+      "type": "exclusive"
+    },
+    {
+      "id": "Gateway_0jgq0a6",
+      "name": "Gateway_0jgq0a6",
+      "type": "event"
+    }
+  ],
+  "events": [
+    {
+      "id": "Event_0ojehz6",
+      "name": "Event_0ojehz6",
+      "kind": "start"
+    },
+    {
+      "id": "Event_0ci2gl8",
+      "name": "Event_0ci2gl8",
+      "kind": "end"
+    },
+    {
+      "id": "Event_0dyp0ut",
+      "name": "Event_0dyp0ut",
+      "kind": "end"
+    }
+  ],
+  "businessrules": [
+    {
+      "id": "Activity_0tya4bp",
+      "name": "Activity_0tya4bp",
+      "dmn": null,
+      "decision": null,
+      "input_mapping": [
+        {
+          "name": "type",
+          "type": "string",
+          "description": ""
+        },
+        {
+          "name": "duration",
+          "type": "number",
+          "description": ""
+        }
+      ],
+      "output_mapping": [
+        {
+          "name": "confirm",
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "dmn_inference": {
+        "path": "amazon.dmn",
+        "decision_id": "decision_0tybghz",
+        "decision_name": "",
+        "used_inference": true
+      }
+    }
+  ],
+  "flows": [
+    {
+      "id": "Flow_0bbli9z",
+      "sourceRef": "Event_0ojehz6",
+      "targetRef": "ChoreographyTask_15hdy0f",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_0dtlny7",
+      "sourceRef": "ChoreographyTask_15hdy0f",
+      "targetRef": "Gateway_0jgq0a6",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1kx9uv2",
+      "sourceRef": "Gateway_0jgq0a6",
+      "targetRef": "ChoreographyTask_0qvin75",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_0td67i7",
+      "sourceRef": "Gateway_0jgq0a6",
+      "targetRef": "ChoreographyTask_0qv0nys",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1mhr2rd",
+      "sourceRef": "ChoreographyTask_0qvin75",
+      "targetRef": "ChoreographyTask_1xe5w82",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_05fmni9",
+      "sourceRef": "ChoreographyTask_0qv0nys",
+      "targetRef": "ChoreographyTask_08v8azc",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_0ezj4h3",
+      "sourceRef": "ChoreographyTask_1xe5w82",
+      "targetRef": "Gateway_0auc3he",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1qyvyn9",
+      "sourceRef": "ChoreographyTask_08v8azc",
+      "targetRef": "Gateway_0auc3he",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_0rawiic",
+      "sourceRef": "Gateway_0auc3he",
+      "targetRef": "ChoreographyTask_14x309o",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1bh56yy",
+      "sourceRef": "ChoreographyTask_14x309o",
+      "targetRef": "Activity_0tya4bp",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1niv4wa",
+      "sourceRef": "ChoreographyTask_09o0tby",
+      "targetRef": "Event_0ci2gl8",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_092fqzb",
+      "sourceRef": "ChoreographyTask_0wtdaho",
+      "targetRef": "Event_0dyp0ut",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1m6mf5r",
+      "sourceRef": "Activity_0tya4bp",
+      "targetRef": "Gateway_0ivv4vg",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_06m03vj",
+      "sourceRef": "Gateway_0ivv4vg",
+      "targetRef": "ChoreographyTask_0wtdaho",
+      "type": "sequenceFlow",
+      "trigger_hint": "confirm==false"
+    },
+    {
+      "id": "Flow_17hhdvo",
+      "sourceRef": "Gateway_0ivv4vg",
+      "targetRef": "ChoreographyTask_09o0tby",
+      "type": "sequenceFlow",
+      "trigger_hint": "confirm==true"
+    }
+  ],
+  "dmn_metadata": {
+    "path": "/root/code/ChainCollab/Experiment/BPMNwithDMNcase/amazon.dmn",
+    "file_name": "amazon.dmn",
+    "decisions": [
+      {
+        "id": "decision_0tybghz",
+        "name": "",
+        "inputs": [
+          {
+            "id": "input1",
+            "label": "type",
+            "expression_id": "inputExpression1",
+            "typeRef": "string",
+            "text": "type"
+          },
+          {
+            "id": "InputClause_13zdqxt",
+            "label": "time1",
+            "expression_id": "LiteralExpression_0rrdy7t",
+            "typeRef": "number",
+            "text": "time1"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "output1",
+            "name": "result",
+            "label": "result",
+            "type": "boolean"
+          }
+        ],
+        "is_main": true
+      }
+    ],
+    "main_decision": {
+      "id": "decision_0tybghz",
+      "name": "",
+      "inputs": [
+        {
+          "id": "input1",
+          "label": "type",
+          "expression_id": "inputExpression1",
+          "typeRef": "string",
+          "text": "type"
+        },
+        {
+          "id": "InputClause_13zdqxt",
+          "label": "time1",
+          "expression_id": "LiteralExpression_0rrdy7t",
+          "typeRef": "number",
+          "text": "time1"
+        }
+      ],
+      "outputs": [
+        {
+          "id": "output1",
+          "name": "result",
+          "label": "result",
+          "type": "boolean"
+        }
+      ],
+      "is_main": true
+    }
+  }
+}

@@ -1,0 +1,233 @@
+{
+  "case_name": "ExamProcedure",
+  "source_files": {
+    "bpmn": "/root/code/ChainCollab/Experiment/CaseTest/ExamProcedure.bpmn",
+    "dmn": null
+  },
+  "participants": [
+    {
+      "id": "Participant_1nsr1pk",
+      "name": "Professor"
+    },
+    {
+      "id": "Participant_17p14zp",
+      "name": "Secretary"
+    },
+    {
+      "id": "Participant_0hq3u2g",
+      "name": "Student"
+    }
+  ],
+  "messages": [
+    {
+      "id": "MessageFlow_0gs3xdn",
+      "messageRef": "Message_056fnvb",
+      "name": "registration(string date, uint finalMark)",
+      "sourceRef": "Participant_1nsr1pk",
+      "targetRef": "Participant_0hq3u2g",
+      "sender": "Professor",
+      "receiver": "Student",
+      "schema": {}
+    },
+    {
+      "id": "MessageFlow_00u4438",
+      "messageRef": "Message_02c4y9x",
+      "name": "accept(bool accept)",
+      "sourceRef": "Participant_0hq3u2g",
+      "targetRef": "Participant_1nsr1pk",
+      "sender": "Student",
+      "receiver": "Professor",
+      "schema": {}
+    },
+    {
+      "id": "MessageFlow_0hsmt49",
+      "messageRef": "Message_17fxrx9",
+      "name": "evaluation(bool passed, uint mark)",
+      "sourceRef": "Participant_1nsr1pk",
+      "targetRef": "Participant_0hq3u2g",
+      "sender": "Professor",
+      "receiver": "Student",
+      "schema": {}
+    },
+    {
+      "id": "MessageFlow_03cmks3",
+      "messageRef": "Message_0q57ry5",
+      "name": "start(string exam)",
+      "sourceRef": "Participant_1nsr1pk",
+      "targetRef": "Participant_0hq3u2g",
+      "sender": "Professor",
+      "receiver": "Student",
+      "schema": {}
+    },
+    {
+      "id": "MessageFlow_0kuz7xy",
+      "messageRef": "Message_088v968",
+      "name": "advise(string registrationId)",
+      "sourceRef": "Participant_17p14zp",
+      "targetRef": "Participant_1nsr1pk",
+      "sender": "Secretary",
+      "receiver": "Professor",
+      "schema": {}
+    },
+    {
+      "id": "MessageFlow_1qj4ovk",
+      "messageRef": "Message_0ljgx63",
+      "name": "subscription(string studentId)",
+      "sourceRef": "Participant_0hq3u2g",
+      "targetRef": "Participant_17p14zp",
+      "sender": "Student",
+      "receiver": "Secretary",
+      "schema": {}
+    },
+    {
+      "id": "MessageFlow_0qram9q",
+      "messageRef": "Message_0hmbvna",
+      "name": "exam(string name, string examId, string examDate)",
+      "sourceRef": "Participant_1nsr1pk",
+      "targetRef": "Participant_17p14zp",
+      "sender": "Professor",
+      "receiver": "Secretary",
+      "schema": {}
+    }
+  ],
+  "gateways": [
+    {
+      "id": "ExclusiveGateway_03vvj42",
+      "name": "ExclusiveGateway_03vvj42",
+      "type": "exclusive"
+    },
+    {
+      "id": "ExclusiveGateway_1rce5wz",
+      "name": "ExclusiveGateway_1rce5wz",
+      "type": "exclusive"
+    },
+    {
+      "id": "ExclusiveGateway_0w1a2wn",
+      "name": "ExclusiveGateway_0w1a2wn",
+      "type": "exclusive"
+    },
+    {
+      "id": "ExclusiveGateway_08unpzh",
+      "name": "ExclusiveGateway_08unpzh",
+      "type": "exclusive"
+    }
+  ],
+  "events": [
+    {
+      "id": "StartEvent_1c8pohk",
+      "name": "StartEvent_1c8pohk",
+      "kind": "start"
+    },
+    {
+      "id": "EndEvent_12bli43",
+      "name": "EndEvent_12bli43",
+      "kind": "end"
+    }
+  ],
+  "businessrules": [],
+  "flows": [
+    {
+      "id": "SequenceFlow_1271y8p",
+      "sourceRef": "StartEvent_1c8pohk",
+      "targetRef": "ExclusiveGateway_03vvj42",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "SequenceFlow_00dtr18",
+      "sourceRef": "ExclusiveGateway_03vvj42",
+      "targetRef": "ChoreographyTask_1180bs5",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "SequenceFlow_1rjcv0h",
+      "sourceRef": "ChoreographyTask_1180bs5",
+      "targetRef": "ChoreographyTask_0i6cmwd",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "SequenceFlow_07tcl08",
+      "sourceRef": "ChoreographyTask_0i6cmwd",
+      "targetRef": "ChoreographyTask_1mpql38",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "SequenceFlow_1odk9ii",
+      "sourceRef": "ChoreographyTask_1mpql38",
+      "targetRef": "ChoreographyTask_1xhcsoc",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "SequenceFlow_04nbzdi",
+      "sourceRef": "ChoreographyTask_1xhcsoc",
+      "targetRef": "ChoreographyTask_0kqzybc",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "SequenceFlow_1g0eclv",
+      "sourceRef": "ChoreographyTask_0kqzybc",
+      "targetRef": "ExclusiveGateway_1rce5wz",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "SequenceFlow_16waqcd",
+      "sourceRef": "ExclusiveGateway_1rce5wz",
+      "targetRef": "ExclusiveGateway_0w1a2wn",
+      "type": "sequenceFlow",
+      "trigger_hint": "passed==false"
+    },
+    {
+      "id": "SequenceFlow_0radnhu",
+      "sourceRef": "ExclusiveGateway_1rce5wz",
+      "targetRef": "ChoreographyTask_11ztk1b",
+      "type": "sequenceFlow",
+      "trigger_hint": "passed == true"
+    },
+    {
+      "id": "SequenceFlow_1i5gbev",
+      "sourceRef": "ChoreographyTask_11ztk1b",
+      "targetRef": "ExclusiveGateway_08unpzh",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "SequenceFlow_06t3voo",
+      "sourceRef": "ExclusiveGateway_08unpzh",
+      "targetRef": "ExclusiveGateway_0w1a2wn",
+      "type": "sequenceFlow",
+      "trigger_hint": "accept==false"
+    },
+    {
+      "id": "SequenceFlow_1ih9i8h",
+      "sourceRef": "ExclusiveGateway_08unpzh",
+      "targetRef": "ChoreographyTask_1v0qyf5",
+      "type": "sequenceFlow",
+      "trigger_hint": "accept==true"
+    },
+    {
+      "id": "SequenceFlow_0tlo64c",
+      "sourceRef": "ChoreographyTask_1v0qyf5",
+      "targetRef": "EndEvent_12bli43",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "SequenceFlow_0p4u154",
+      "sourceRef": "ExclusiveGateway_0w1a2wn",
+      "targetRef": "ExclusiveGateway_03vvj42",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    }
+  ],
+  "dmn_metadata": {
+    "path": null,
+    "decisions": [],
+    "main_decision": null
+  }
+}

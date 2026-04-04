@@ -1,0 +1,428 @@
+{
+  "case_name": "amazon_new2",
+  "source_files": {
+    "b2c": "/root/code/ChainCollab/Experiment/new/exp1_mapping/outputs/regenerated/amazon_new2.generated.b2c"
+  },
+  "contracts": [
+    "amazon_new2"
+  ],
+  "participants": [
+    {
+      "name": "Participant_1p9owwo",
+      "msp": "Amazon_support_centerMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "amazon support center"
+        }
+      ],
+      "role": "amazon support center"
+    },
+    {
+      "name": "Participant_12df78t",
+      "msp": "CustomerMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "customer"
+        }
+      ],
+      "role": "customer"
+    }
+  ],
+  "globals": [
+    {
+      "name": "EC2_resource_ID",
+      "type": "string"
+    },
+    {
+      "name": "Amount",
+      "type": "int"
+    },
+    {
+      "name": "Confirm",
+      "type": "bool"
+    },
+    {
+      "name": "Description",
+      "type": "string"
+    },
+    {
+      "name": "Duration",
+      "type": "int"
+    },
+    {
+      "name": "Instance_ID",
+      "type": "string"
+    },
+    {
+      "name": "Logs",
+      "type": "string"
+    },
+    {
+      "name": "Other_information",
+      "type": "string"
+    },
+    {
+      "name": "Question_name",
+      "type": "string"
+    },
+    {
+      "name": "Reason",
+      "type": "string"
+    },
+    {
+      "name": "Result",
+      "type": "string"
+    },
+    {
+      "name": "ServiceType",
+      "type": "string"
+    },
+    {
+      "name": "Time",
+      "type": "string"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ],
+  "messages": [
+    {
+      "name": "Message_01jq2zl",
+      "sender": "Participant_1p9owwo",
+      "receiver": "Participant_12df78t",
+      "schema": "{\"properties\":{\"amount\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"amount\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_068kmzv",
+      "sender": "Participant_12df78t",
+      "receiver": "Participant_1p9owwo",
+      "schema": "{\"properties\":{\"time\":{\"type\":\"string\",\"description\":\"\"},\"instance ID\":{\"type\":\"string\",\"description\":\"\"},\"logs\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"time\",\"instance ID\",\"logs\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_076ulzs",
+      "sender": "Participant_12df78t",
+      "receiver": "Participant_1p9owwo",
+      "schema": "{\"properties\":{\"time\":{\"type\":\"string\",\"description\":\"\"},\"description\":{\"type\":\"string\",\"description\":\"\"},\"EC2 resource ID\":{\"type\":\"string\",\"description\":\"\"},\"logs\":{\"type\":\"string\",\"description\":\"\"},\"other information\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"time\",\"description\",\"EC2 resource ID\",\"logs\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_09krt7c",
+      "sender": "Participant_12df78t",
+      "receiver": "Participant_1p9owwo",
+      "schema": "{\"properties\":{\"question name\":{\"type\":\"string\",\"description\":\"\"},\"description\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"question name\",\"description\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_0ywghlt",
+      "sender": "Participant_12df78t",
+      "receiver": "Participant_1p9owwo",
+      "schema": "{\"properties\":{\"serviceType\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"serviceType\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_12n6jjk",
+      "sender": "Participant_12df78t",
+      "receiver": "Participant_1p9owwo",
+      "schema": "{\"properties\":{\"type\":{\"type\":\"string\",\"description\":\"\"},\"duration\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"type\",\"duration\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1b1qlzd",
+      "sender": "Participant_1p9owwo",
+      "receiver": "Participant_12df78t",
+      "schema": "{\"properties\":{\"reason\":{\"type\":\"string\",\"description\":\"\"},\"result\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"reason\",\"result\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1bhhp1n",
+      "sender": "Participant_12df78t",
+      "receiver": "Participant_1p9owwo",
+      "schema": "{\"properties\":{\"serviceType\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"serviceType\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "Gateway_0auc3he",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Gateway_0ivv4vg",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Gateway_0jgq0a6",
+      "type": "event",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "Event_0ojehz6",
+      "initial_state": "READY"
+    },
+    {
+      "name": "Event_0ci2gl8",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Event_0dyp0ut",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [
+    {
+      "name": "Activity_0tya4bp",
+      "dmn": "Activity_0tya4bp.dmn",
+      "decision": "Activity_0tya4bp_DecisionID",
+      "input_mapping": [
+        {
+          "dmnParam": "type",
+          "globalRef": "Type"
+        },
+        {
+          "dmnParam": "duration",
+          "globalRef": "Duration"
+        }
+      ],
+      "output_mapping": [
+        {
+          "dmnParam": "confirm",
+          "globalRef": "Confirm"
+        }
+      ],
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "flows": [
+    {
+      "kind": "start_flow",
+      "trigger_type": "start",
+      "trigger_name": "Event_0ojehz6",
+      "trigger_state": "ready",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_09krt7c"
+        }
+      ],
+      "raw_text": "start event Event_0ojehz6 enables Message_09krt7c;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_09krt7c",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_0jgq0a6"
+        }
+      ],
+      "raw_text": "when message Message_09krt7c completed then enable Gateway_0jgq0a6;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_0ywghlt",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "disable",
+          "target": "Message_1bhhp1n"
+        },
+        {
+          "kind": "enable",
+          "target": "Message_068kmzv"
+        }
+      ],
+      "raw_text": "when message Message_0ywghlt completed then disable Message_1bhhp1n, enable Message_068kmzv;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1bhhp1n",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "disable",
+          "target": "Message_0ywghlt"
+        },
+        {
+          "kind": "enable",
+          "target": "Message_076ulzs"
+        }
+      ],
+      "raw_text": "when message Message_1bhhp1n completed then disable Message_0ywghlt, enable Message_076ulzs;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_068kmzv",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_0auc3he"
+        }
+      ],
+      "raw_text": "when message Message_068kmzv completed then enable Gateway_0auc3he;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_076ulzs",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_0auc3he"
+        }
+      ],
+      "raw_text": "when message Message_076ulzs completed then enable Gateway_0auc3he;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_12n6jjk",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Activity_0tya4bp"
+        }
+      ],
+      "raw_text": "when message Message_12n6jjk completed then enable Activity_0tya4bp;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1b1qlzd",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Event_0dyp0ut"
+        }
+      ],
+      "raw_text": "when message Message_1b1qlzd completed then enable Event_0dyp0ut;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_01jq2zl",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Event_0ci2gl8"
+        }
+      ],
+      "raw_text": "when message Message_01jq2zl completed then enable Event_0ci2gl8;"
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger_type": "gateway",
+      "trigger_name": "Gateway_0auc3he",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_12n6jjk"
+        }
+      ],
+      "branches": [],
+      "raw_text": "when gateway Gateway_0auc3he completed then enable Message_12n6jjk;"
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger_type": "gateway",
+      "trigger_name": "Gateway_0ivv4vg",
+      "trigger_state": "completed",
+      "actions": [],
+      "branches": [
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_1b1qlzd"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Confirm",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_01jq2zl"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Confirm",
+          "relation": "==",
+          "value": ""
+        }
+      ],
+      "raw_text": "when gateway Gateway_0ivv4vg completed choose ..."
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger_type": "gateway",
+      "trigger_name": "Gateway_0jgq0a6",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0ywghlt"
+        },
+        {
+          "kind": "enable",
+          "target": "Message_1bhhp1n"
+        }
+      ],
+      "branches": [],
+      "raw_text": "when gateway Gateway_0jgq0a6 completed then enable Message_0ywghlt, enable Message_1bhhp1n;"
+    },
+    {
+      "kind": "rule_flow",
+      "trigger_type": "businessrule",
+      "trigger_name": "Activity_0tya4bp",
+      "trigger_state": "done",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_0ivv4vg"
+        }
+      ],
+      "raw_text": "when businessrule Activity_0tya4bp done then enable Gateway_0ivv4vg;"
+    }
+  ],
+  "participant_aliases": {
+    "Participant_1p9owwo": [
+      "Participant_1p9owwo",
+      "amazon support center"
+    ],
+    "Participant_12df78t": [
+      "Participant_12df78t",
+      "customer"
+    ]
+  }
+}

@@ -1,0 +1,354 @@
+{
+  "case_name": "ManagementSystem",
+  "source_files": {
+    "bpmn": "/root/code/ChainCollab/Experiment/BPMNwithDMNcase/ManagementSystem_new3.bpmn",
+    "dmn": "/root/code/ChainCollab/Experiment/BPMNwithDMNcase/management.dmn"
+  },
+  "participants": [
+    {
+      "id": "Participant_0ykkst0",
+      "name": "Registered Contributor"
+    },
+    {
+      "id": "Participant_1be5jmm",
+      "name": "Worker"
+    },
+    {
+      "id": "Participant_0a0qr98",
+      "name": "Unregistered Contributor"
+    }
+  ],
+  "messages": [
+    {
+      "id": "MessageFlow_10317zu",
+      "messageRef": "Message_1h1vc49",
+      "name": "discard",
+      "sourceRef": "Participant_1be5jmm",
+      "targetRef": "Participant_0ykkst0",
+      "sender": "Worker",
+      "receiver": "Registered Contributor",
+      "schema": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_1rzx3lk",
+      "messageRef": "Message_094ld7m",
+      "name": "check",
+      "sourceRef": "Participant_0ykkst0",
+      "targetRef": "Participant_1be5jmm",
+      "sender": "Registered Contributor",
+      "receiver": "Worker",
+      "schema": {
+        "properties": {
+          "quality": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "quality"
+        ],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_180bmu4",
+      "messageRef": "Message_02ng01e",
+      "name": "complete",
+      "sourceRef": "Participant_1be5jmm",
+      "targetRef": "Participant_0ykkst0",
+      "sender": "Worker",
+      "receiver": "Registered Contributor",
+      "schema": {
+        "properties": {
+          "complete": {
+            "type": "boolean",
+            "description": ""
+          }
+        },
+        "required": [
+          "complete"
+        ],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_06wulzi",
+      "messageRef": "Message_1tiyc35",
+      "name": "Free to work on a new APEFD",
+      "sourceRef": "Participant_0ykkst0",
+      "targetRef": "Participant_1be5jmm",
+      "sender": "Registered Contributor",
+      "receiver": "Worker",
+      "schema": {
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_0w90cf1",
+      "messageRef": "Message_02echpq",
+      "name": "Send APEFD Status",
+      "sourceRef": "Participant_0ykkst0",
+      "targetRef": "Participant_1be5jmm",
+      "sender": "Registered Contributor",
+      "receiver": "Worker",
+      "schema": {
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_0xi8bfc",
+      "messageRef": "Message_1ejkslm",
+      "name": "Register to Worker",
+      "sourceRef": "Participant_0a0qr98",
+      "targetRef": "Participant_1be5jmm",
+      "sender": "Unregistered Contributor",
+      "receiver": "Worker",
+      "schema": {
+        "properties": {
+          "Content": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [],
+        "files": {},
+        "file required": []
+      }
+    }
+  ],
+  "gateways": [
+    {
+      "id": "Gateway_067p6u8",
+      "name": "Gateway_067p6u8",
+      "type": "exclusive"
+    },
+    {
+      "id": "Gateway_1fl1t0k",
+      "name": "Gateway_1fl1t0k",
+      "type": "exclusive"
+    },
+    {
+      "id": "Gateway_0e7k79c",
+      "name": "Gateway_0e7k79c",
+      "type": "event"
+    }
+  ],
+  "events": [
+    {
+      "id": "Event_1y0sgtz",
+      "name": "Event_1y0sgtz",
+      "kind": "start"
+    },
+    {
+      "id": "Event_1u0cugu",
+      "name": "Event_1u0cugu",
+      "kind": "end"
+    },
+    {
+      "id": "Event_1pm2yw6",
+      "name": "Event_1pm2yw6",
+      "kind": "end"
+    }
+  ],
+  "businessrules": [
+    {
+      "id": "Activity_18dcm0h",
+      "name": "Activity_18dcm0h",
+      "dmn": null,
+      "decision": null,
+      "input_mapping": [
+        {
+          "name": "quality",
+          "type": "string",
+          "description": ""
+        }
+      ],
+      "output_mapping": [
+        {
+          "name": "qualified",
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "dmn_inference": {
+        "path": "management.dmn",
+        "decision_id": "decision_0tybghz",
+        "decision_name": "",
+        "used_inference": true
+      }
+    }
+  ],
+  "flows": [
+    {
+      "id": "Flow_00yjjoy",
+      "sourceRef": "Gateway_0e7k79c",
+      "targetRef": "ChoreographyTask_0p0fmsg",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_15tiaxz",
+      "sourceRef": "Gateway_0e7k79c",
+      "targetRef": "ChoreographyTask_0gryre6",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1nxfpng",
+      "sourceRef": "ChoreographyTask_0p0fmsg",
+      "targetRef": "Gateway_067p6u8",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1wdxjvm",
+      "sourceRef": "ChoreographyTask_0gryre6",
+      "targetRef": "Gateway_067p6u8",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_0ypljvz",
+      "sourceRef": "Gateway_067p6u8",
+      "targetRef": "ChoreographyTask_00l67sg",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_0yqybnx",
+      "sourceRef": "ChoreographyTask_00l67sg",
+      "targetRef": "ChoreographyTask_08a3r5d",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_00nou89",
+      "sourceRef": "ChoreographyTask_08a3r5d",
+      "targetRef": "Activity_18dcm0h",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1ba87mj",
+      "sourceRef": "Activity_18dcm0h",
+      "targetRef": "Gateway_1fl1t0k",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_0f210zq",
+      "sourceRef": "Gateway_1fl1t0k",
+      "targetRef": "Event_1u0cugu",
+      "type": "sequenceFlow",
+      "trigger_hint": "qualified==true"
+    },
+    {
+      "id": "Flow_0nj4rbf",
+      "sourceRef": "Gateway_1fl1t0k",
+      "targetRef": "ChoreographyTask_1wzc8c9",
+      "type": "sequenceFlow",
+      "trigger_hint": "qualified==false"
+    },
+    {
+      "id": "Flow_1glipiz",
+      "sourceRef": "ChoreographyTask_1wzc8c9",
+      "targetRef": "Event_1pm2yw6",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1wtcc8c",
+      "sourceRef": "Event_1y0sgtz",
+      "targetRef": "ChoreographyTask_1xoz3od",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_0jju6ec",
+      "sourceRef": "ChoreographyTask_1xoz3od",
+      "targetRef": "Gateway_0e7k79c",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    }
+  ],
+  "dmn_metadata": {
+    "path": "/root/code/ChainCollab/Experiment/BPMNwithDMNcase/management.dmn",
+    "file_name": "management.dmn",
+    "decisions": [
+      {
+        "id": "decision_0tybghz",
+        "name": "",
+        "inputs": [
+          {
+            "id": "input1",
+            "label": "quality",
+            "expression_id": "inputExpression1",
+            "typeRef": "string",
+            "text": "quality"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "output1",
+            "name": "qualified",
+            "label": "qualified",
+            "type": "boolean"
+          }
+        ],
+        "is_main": true
+      }
+    ],
+    "main_decision": {
+      "id": "decision_0tybghz",
+      "name": "",
+      "inputs": [
+        {
+          "id": "input1",
+          "label": "quality",
+          "expression_id": "inputExpression1",
+          "typeRef": "string",
+          "text": "quality"
+        }
+      ],
+      "outputs": [
+        {
+          "id": "output1",
+          "name": "qualified",
+          "label": "qualified",
+          "type": "boolean"
+        }
+      ],
+      "is_main": true
+    }
+  }
+}

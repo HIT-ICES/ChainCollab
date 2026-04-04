@@ -1,0 +1,427 @@
+{
+  "case_name": "Hotel_CaseTest",
+  "source_files": {
+    "b2c": "/root/code/ChainCollab/Experiment/new/exp1_mapping/outputs/regenerated/Hotel_CaseTest.generated.b2c"
+  },
+  "contracts": [
+    "Hotel_CaseTest"
+  ],
+  "participants": [
+    {
+      "name": "Participant_1080bkg",
+      "msp": "ClientMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "Client"
+        }
+      ],
+      "role": "Client"
+    },
+    {
+      "name": "Participant_0sktaei",
+      "msp": "HotelMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "Hotel"
+        }
+      ],
+      "role": "Hotel"
+    }
+  ],
+  "globals": [
+    {
+      "name": "Cancel",
+      "type": "bool"
+    },
+    {
+      "name": "Confirm",
+      "type": "bool"
+    }
+  ],
+  "messages": [
+    {
+      "name": "Message_045i10y",
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_0m9p3da",
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_0o8eyir",
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_0r9lypd",
+      "sender": "Participant_0sktaei",
+      "receiver": "Participant_1080bkg",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1em0ee4",
+      "sender": "Participant_0sktaei",
+      "receiver": "Participant_1080bkg",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1etcmvl",
+      "sender": "Participant_0sktaei",
+      "receiver": "Participant_1080bkg",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1joj7ca",
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1ljlm4g",
+      "sender": "Participant_0sktaei",
+      "receiver": "Participant_1080bkg",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1nlagx2",
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1xm9dxy",
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "ExclusiveGateway_106je4z",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "ExclusiveGateway_0hs3ztq",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "ExclusiveGateway_0nzwv7v",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "EventBasedGateway_1fxpmyn",
+      "type": "event",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "StartEvent_1jtgn3j",
+      "initial_state": "READY"
+    },
+    {
+      "name": "EndEvent_0366pfz",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "EndEvent_08edp7f",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "EndEvent_146eii4",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [],
+  "flows": [
+    {
+      "kind": "start_flow",
+      "trigger_type": "start",
+      "trigger_name": "StartEvent_1jtgn3j",
+      "trigger_state": "ready",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "ExclusiveGateway_0hs3ztq"
+        }
+      ],
+      "raw_text": "start event StartEvent_1jtgn3j enables ExclusiveGateway_0hs3ztq;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_045i10y",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0r9lypd"
+        }
+      ],
+      "raw_text": "when message Message_045i10y completed then enable Message_0r9lypd;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_0r9lypd",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "ExclusiveGateway_106je4z"
+        }
+      ],
+      "raw_text": "when message Message_0r9lypd completed then enable ExclusiveGateway_106je4z;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1em0ee4",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1nlagx2"
+        }
+      ],
+      "raw_text": "when message Message_1em0ee4 completed then enable Message_1nlagx2;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1nlagx2",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "EventBasedGateway_1fxpmyn"
+        }
+      ],
+      "raw_text": "when message Message_1nlagx2 completed then enable EventBasedGateway_1fxpmyn;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_0o8eyir",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "disable",
+          "target": "Message_1xm9dxy"
+        },
+        {
+          "kind": "enable",
+          "target": "Message_1ljlm4g"
+        }
+      ],
+      "raw_text": "when message Message_0o8eyir completed then disable Message_1xm9dxy, enable Message_1ljlm4g;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1xm9dxy",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "disable",
+          "target": "Message_0o8eyir"
+        },
+        {
+          "kind": "enable",
+          "target": "EndEvent_0366pfz"
+        }
+      ],
+      "raw_text": "when message Message_1xm9dxy completed then disable Message_0o8eyir, enable EndEvent_0366pfz;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1ljlm4g",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0m9p3da"
+        }
+      ],
+      "raw_text": "when message Message_1ljlm4g completed then enable Message_0m9p3da;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_0m9p3da",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "ExclusiveGateway_0nzwv7v"
+        }
+      ],
+      "raw_text": "when message Message_0m9p3da completed then enable ExclusiveGateway_0nzwv7v;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1joj7ca",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1etcmvl"
+        }
+      ],
+      "raw_text": "when message Message_1joj7ca completed then enable Message_1etcmvl;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1etcmvl",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "EndEvent_146eii4"
+        }
+      ],
+      "raw_text": "when message Message_1etcmvl completed then enable EndEvent_146eii4;"
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger_type": "gateway",
+      "trigger_name": "ExclusiveGateway_106je4z",
+      "trigger_state": "completed",
+      "actions": [],
+      "branches": [
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_1em0ee4"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Confirm",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "ExclusiveGateway_0hs3ztq"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Confirm",
+          "relation": "==",
+          "value": ""
+        }
+      ],
+      "raw_text": "when gateway ExclusiveGateway_106je4z completed choose ..."
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger_type": "gateway",
+      "trigger_name": "ExclusiveGateway_0hs3ztq",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_045i10y"
+        }
+      ],
+      "branches": [],
+      "raw_text": "when gateway ExclusiveGateway_0hs3ztq completed then enable Message_045i10y;"
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger_type": "gateway",
+      "trigger_name": "ExclusiveGateway_0nzwv7v",
+      "trigger_state": "completed",
+      "actions": [],
+      "branches": [
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "EndEvent_08edp7f"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Cancel",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_1joj7ca"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Cancel",
+          "relation": "==",
+          "value": ""
+        }
+      ],
+      "raw_text": "when gateway ExclusiveGateway_0nzwv7v completed choose ..."
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger_type": "gateway",
+      "trigger_name": "EventBasedGateway_1fxpmyn",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0o8eyir"
+        },
+        {
+          "kind": "enable",
+          "target": "Message_1xm9dxy"
+        }
+      ],
+      "branches": [],
+      "raw_text": "when gateway EventBasedGateway_1fxpmyn completed then enable Message_0o8eyir, enable Message_1xm9dxy;"
+    }
+  ],
+  "participant_aliases": {
+    "Participant_1080bkg": [
+      "Participant_1080bkg",
+      "Client"
+    ],
+    "Participant_0sktaei": [
+      "Participant_0sktaei",
+      "Hotel"
+    ]
+  }
+}

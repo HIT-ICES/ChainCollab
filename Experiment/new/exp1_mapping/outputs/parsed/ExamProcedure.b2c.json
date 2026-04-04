@@ -1,0 +1,366 @@
+{
+  "case_name": "ExamProcedure",
+  "source_files": {
+    "b2c": "/root/code/ChainCollab/Experiment/new/exp1_mapping/outputs/regenerated/ExamProcedure.generated.b2c"
+  },
+  "contracts": [
+    "ExamProcedure"
+  ],
+  "participants": [
+    {
+      "name": "Participant_1nsr1pk",
+      "msp": "ProfessorMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "Professor"
+        }
+      ],
+      "role": "Professor"
+    },
+    {
+      "name": "Participant_17p14zp",
+      "msp": "SecretaryMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "Secretary"
+        }
+      ],
+      "role": "Secretary"
+    },
+    {
+      "name": "Participant_0hq3u2g",
+      "msp": "StudentMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "Student"
+        }
+      ],
+      "role": "Student"
+    }
+  ],
+  "globals": [
+    {
+      "name": "Accept",
+      "type": "bool"
+    },
+    {
+      "name": "Passed",
+      "type": "bool"
+    }
+  ],
+  "messages": [
+    {
+      "name": "Message_02c4y9x",
+      "sender": "Participant_0hq3u2g",
+      "receiver": "Participant_1nsr1pk",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_056fnvb",
+      "sender": "Participant_1nsr1pk",
+      "receiver": "Participant_0hq3u2g",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_088v968",
+      "sender": "Participant_17p14zp",
+      "receiver": "Participant_1nsr1pk",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_0hmbvna",
+      "sender": "Participant_1nsr1pk",
+      "receiver": "Participant_17p14zp",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_0ljgx63",
+      "sender": "Participant_0hq3u2g",
+      "receiver": "Participant_17p14zp",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_0q57ry5",
+      "sender": "Participant_1nsr1pk",
+      "receiver": "Participant_0hq3u2g",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_17fxrx9",
+      "sender": "Participant_1nsr1pk",
+      "receiver": "Participant_0hq3u2g",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "ExclusiveGateway_03vvj42",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "ExclusiveGateway_1rce5wz",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "ExclusiveGateway_0w1a2wn",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "ExclusiveGateway_08unpzh",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "StartEvent_1c8pohk",
+      "initial_state": "READY"
+    },
+    {
+      "name": "EndEvent_12bli43",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [],
+  "flows": [
+    {
+      "kind": "start_flow",
+      "trigger_type": "start",
+      "trigger_name": "StartEvent_1c8pohk",
+      "trigger_state": "ready",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "ExclusiveGateway_03vvj42"
+        }
+      ],
+      "raw_text": "start event StartEvent_1c8pohk enables ExclusiveGateway_03vvj42;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_0hmbvna",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0ljgx63"
+        }
+      ],
+      "raw_text": "when message Message_0hmbvna completed then enable Message_0ljgx63;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_0ljgx63",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_088v968"
+        }
+      ],
+      "raw_text": "when message Message_0ljgx63 completed then enable Message_088v968;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_088v968",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0q57ry5"
+        }
+      ],
+      "raw_text": "when message Message_088v968 completed then enable Message_0q57ry5;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_0q57ry5",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_17fxrx9"
+        }
+      ],
+      "raw_text": "when message Message_0q57ry5 completed then enable Message_17fxrx9;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_17fxrx9",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "ExclusiveGateway_1rce5wz"
+        }
+      ],
+      "raw_text": "when message Message_17fxrx9 completed then enable ExclusiveGateway_1rce5wz;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_02c4y9x",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "ExclusiveGateway_08unpzh"
+        }
+      ],
+      "raw_text": "when message Message_02c4y9x completed then enable ExclusiveGateway_08unpzh;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_056fnvb",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "EndEvent_12bli43"
+        }
+      ],
+      "raw_text": "when message Message_056fnvb completed then enable EndEvent_12bli43;"
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger_type": "gateway",
+      "trigger_name": "ExclusiveGateway_03vvj42",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0hmbvna"
+        }
+      ],
+      "branches": [],
+      "raw_text": "when gateway ExclusiveGateway_03vvj42 completed then enable Message_0hmbvna;"
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger_type": "gateway",
+      "trigger_name": "ExclusiveGateway_1rce5wz",
+      "trigger_state": "completed",
+      "actions": [],
+      "branches": [
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "ExclusiveGateway_0w1a2wn"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Passed",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_02c4y9x"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Passed",
+          "relation": "==",
+          "value": ""
+        }
+      ],
+      "raw_text": "when gateway ExclusiveGateway_1rce5wz completed choose ..."
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger_type": "gateway",
+      "trigger_name": "ExclusiveGateway_0w1a2wn",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "ExclusiveGateway_03vvj42"
+        }
+      ],
+      "branches": [],
+      "raw_text": "when gateway ExclusiveGateway_0w1a2wn completed then enable ExclusiveGateway_03vvj42;"
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger_type": "gateway",
+      "trigger_name": "ExclusiveGateway_08unpzh",
+      "trigger_state": "completed",
+      "actions": [],
+      "branches": [
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "ExclusiveGateway_0w1a2wn"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Accept",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_056fnvb"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Accept",
+          "relation": "==",
+          "value": ""
+        }
+      ],
+      "raw_text": "when gateway ExclusiveGateway_08unpzh completed choose ..."
+    }
+  ],
+  "participant_aliases": {
+    "Participant_1nsr1pk": [
+      "Participant_1nsr1pk",
+      "Professor"
+    ],
+    "Participant_17p14zp": [
+      "Participant_17p14zp",
+      "Secretary"
+    ],
+    "Participant_0hq3u2g": [
+      "Participant_0hq3u2g",
+      "Student"
+    ]
+  }
+}

@@ -1,0 +1,624 @@
+{
+  "case_name": "SupplyChainPaper7777",
+  "source_files": {
+    "bpmn": "/root/code/ChainCollab/Experiment/BPMNwithDMNcase/SupplyChainPaper7777.bpmn",
+    "dmn": "/root/code/ChainCollab/Experiment/BPMNwithDMNcase/supplyChainPaper.dmn"
+  },
+  "participants": [
+    {
+      "id": "Participant_0w6qkdf",
+      "name": "Bulk buyer"
+    },
+    {
+      "id": "Participant_19mgbdn",
+      "name": "Manufacturer"
+    },
+    {
+      "id": "Participant_09cjol2",
+      "name": "Middleman"
+    },
+    {
+      "id": "Participant_0sa2v7d",
+      "name": "Supplier"
+    },
+    {
+      "id": "Participant_19j1e3o",
+      "name": "Special carrier"
+    }
+  ],
+  "messages": [
+    {
+      "id": "MessageFlow_16tyv4a",
+      "messageRef": "Message_1dmeexg",
+      "name": "Supplies Delivery Confirmation",
+      "sourceRef": "Participant_19j1e3o",
+      "targetRef": "Participant_19mgbdn",
+      "sender": "Special carrier",
+      "receiver": "Manufacturer",
+      "schema": {}
+    },
+    {
+      "id": "MessageFlow_0j9vpbt",
+      "messageRef": "Message_1dzkcn0",
+      "name": "Supplies Delivery Confirmation",
+      "sourceRef": "Participant_19j1e3o",
+      "targetRef": "Participant_19mgbdn",
+      "sender": "Special carrier",
+      "receiver": "Manufacturer",
+      "schema": {}
+    },
+    {
+      "id": "MessageFlow_1wcvu98",
+      "messageRef": "Message_1oxmq1k",
+      "name": "Supplies Delivery Confirmation",
+      "sourceRef": "Participant_19j1e3o",
+      "targetRef": "Participant_19mgbdn",
+      "sender": "Special carrier",
+      "receiver": "Manufacturer",
+      "schema": {}
+    },
+    {
+      "id": "MessageFlow_1wmjt89",
+      "messageRef": "Message_196q1fj",
+      "name": "Goods Delivery Confirmatio",
+      "sourceRef": "Participant_19mgbdn",
+      "targetRef": "Participant_0w6qkdf",
+      "sender": "Manufacturer",
+      "receiver": "Bulk buyer",
+      "schema": {
+        "properties": {},
+        "required": [],
+        "files": {
+          "deliveryNote": {
+            "type": "file",
+            "description": "A document confirming the delivery of goods"
+          }
+        },
+        "file required": [
+          "deliveryNote"
+        ]
+      }
+    },
+    {
+      "id": "MessageFlow_0g6c3ic",
+      "messageRef": "Message_04wmlqe",
+      "name": "Supplies Delivery Confirmation",
+      "sourceRef": "Participant_19mgbdn",
+      "targetRef": "Participant_0w6qkdf",
+      "sender": "Manufacturer",
+      "receiver": "Bulk buyer",
+      "schema": {
+        "properties": {
+          "productionStart": {
+            "type": "string",
+            "description": "Notification of the commencement of production, including the date and time"
+          }
+        },
+        "required": [
+          "productionStart"
+        ],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_1wk4rp7",
+      "messageRef": "Message_0d2xte5",
+      "name": "Supplies Delivery Confirmation",
+      "sourceRef": "Participant_19j1e3o",
+      "targetRef": "Participant_19mgbdn",
+      "sender": "Special carrier",
+      "receiver": "Manufacturer",
+      "schema": {
+        "properties": {
+          "deliveryConfirmation": {
+            "type": "boolean",
+            "description": "Confirmation of whether the supplies have been successfully delivered"
+          }
+        },
+        "required": [
+          "deliveryConfirmation"
+        ],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_12csdsd",
+      "messageRef": "Message_1io2g9u",
+      "name": "Waybill Transmission",
+      "sourceRef": "Participant_0sa2v7d",
+      "targetRef": "Participant_19j1e3o",
+      "sender": "Supplier",
+      "receiver": "Special carrier",
+      "schema": {
+        "properties": {},
+        "required": [],
+        "files": {
+          "waybill": {
+            "type": "file",
+            "description": "Digital or physical waybill document，detailing the shipment contents and destination."
+          }
+        },
+        "file required": [
+          "waybill"
+        ]
+      }
+    },
+    {
+      "id": "MessageFlow_0tx6stl",
+      "messageRef": "Message_0hpha6h",
+      "name": "Details Provision",
+      "sourceRef": "Participant_0sa2v7d",
+      "targetRef": "Participant_19j1e3o",
+      "sender": "Supplier",
+      "receiver": "Special carrier",
+      "schema": {
+        "properties": {
+          "requestId": {
+            "type": "number",
+            "description": "Unique identifier of the request for additional details "
+          },
+          "supplierReputation": {
+            "type": "number",
+            "description": "A numerical rating representing the supplier's reputation."
+          }
+        },
+        "required": [
+          "requestId",
+          "supplierReputation"
+        ],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_087ue4t",
+      "messageRef": "Message_0rwz1km",
+      "name": "Request Details",
+      "sourceRef": "Participant_19j1e3o",
+      "targetRef": "Participant_0sa2v7d",
+      "sender": "Special carrier",
+      "receiver": "Supplier",
+      "schema": {
+        "properties": {
+          "requestId": {
+            "type": "number",
+            "description": " Unique identifier of the request for additional details "
+          },
+          "numberOfUnits": {
+            "type": "number",
+            "description": " Total number of units in the order requested"
+          },
+          "urgent": {
+            "type": "boolean",
+            "description": "Indicates whether the order requires urgent delivery."
+          }
+        },
+        "required": [
+          "requestId",
+          "numberOfUnits",
+          "urgent"
+        ],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_1541zid",
+      "messageRef": "Message_0pm90nx",
+      "name": "Transport Order Forwarding",
+      "sourceRef": "Participant_09cjol2",
+      "targetRef": "Participant_19j1e3o",
+      "sender": "Middleman",
+      "receiver": "Special carrier",
+      "schema": {
+        "properties": {
+          "transportOrderId": {
+            "type": "string",
+            "description": "Identifier of the transport order being forwarded"
+          }
+        },
+        "required": [
+          "transportOrderId"
+        ],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_1m81z4l",
+      "messageRef": "Message_0cba4t6",
+      "name": "Supply Order Forwarding",
+      "sourceRef": "Participant_09cjol2",
+      "targetRef": "Participant_0sa2v7d",
+      "sender": "Middleman",
+      "receiver": "Supplier",
+      "schema": {
+        "properties": {
+          "supplyOrderId": {
+            "type": "string",
+            "description": " Identifier of the supply order being forwarded"
+          }
+        },
+        "required": [
+          "supplyOrderId"
+        ],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_1vbejzn",
+      "messageRef": "Message_1ajdm9l",
+      "name": "Supply Order Request",
+      "sourceRef": "Participant_19mgbdn",
+      "targetRef": "Participant_09cjol2",
+      "sender": "Manufacturer",
+      "receiver": "Middleman",
+      "schema": {
+        "properties": {
+          "supplyOrderDetails": {
+            "type": "string",
+            "description": " Details of the supplies needed"
+          }
+        },
+        "required": [
+          "supplyOrderDetails"
+        ],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_06374xt",
+      "messageRef": "Message_1wswgqu",
+      "name": "Goods Order Request",
+      "sourceRef": "Participant_0w6qkdf",
+      "targetRef": "Participant_19mgbdn",
+      "sender": "Bulk buyer",
+      "receiver": "Manufacturer",
+      "schema": {
+        "properties": {
+          "orderDetails": {
+            "type": "string",
+            "description": "Detailed list of goods ordered"
+          }
+        },
+        "required": [
+          "orderDetails"
+        ],
+        "files": {},
+        "file required": []
+      }
+    }
+  ],
+  "gateways": [
+    {
+      "id": "Gateway_1cr0nma",
+      "name": "Gateway_1cr0nma",
+      "type": "exclusive"
+    },
+    {
+      "id": "Gateway_0ep8cuh",
+      "name": "Gateway_0ep8cuh",
+      "type": "exclusive"
+    },
+    {
+      "id": "Gateway_0onpe6x",
+      "name": "Gateway_0onpe6x",
+      "type": "parallel"
+    },
+    {
+      "id": "Gateway_1fbifca",
+      "name": "Gateway_1fbifca",
+      "type": "parallel"
+    }
+  ],
+  "events": [
+    {
+      "id": "Event_06sexe6",
+      "name": "Event_06sexe6",
+      "kind": "start"
+    },
+    {
+      "id": "Event_13pbqdz",
+      "name": "Event_13pbqdz",
+      "kind": "end"
+    }
+  ],
+  "businessrules": [
+    {
+      "id": "Activity_0rm8bkp",
+      "name": "Priority Decision",
+      "dmn": null,
+      "decision": null,
+      "input_mapping": [
+        {
+          "name": "numberOfUnits",
+          "type": "number",
+          "description": " Total number of units in the order requested"
+        },
+        {
+          "name": "urgent",
+          "type": "boolean",
+          "description": "Indicates whether the order requires urgent delivery."
+        },
+        {
+          "name": "supplierReputation",
+          "type": "number",
+          "description": "A numerical rating representing the supplier's reputation."
+        }
+      ],
+      "output_mapping": [
+        {
+          "name": "finalPriority",
+          "type": "string",
+          "description": ""
+        }
+      ],
+      "dmn_inference": {
+        "path": "supplyChainPaper.dmn",
+        "decision_id": "Decision_0zwjfyy",
+        "decision_name": "Final Priority Adjustment Decision",
+        "used_inference": true
+      }
+    }
+  ],
+  "flows": [
+    {
+      "id": "Flow_1btgvf6",
+      "sourceRef": "Event_06sexe6",
+      "targetRef": "ChoreographyTask_0tyax7p",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_06esz8k",
+      "sourceRef": "ChoreographyTask_0tyax7p",
+      "targetRef": "ChoreographyTask_0m4d50p",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_0by1ery",
+      "sourceRef": "ChoreographyTask_0m4d50p",
+      "targetRef": "Gateway_0onpe6x",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_0fs2i4x",
+      "sourceRef": "Gateway_0onpe6x",
+      "targetRef": "ChoreographyTask_0i0ht39",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1wyrozo",
+      "sourceRef": "Gateway_0onpe6x",
+      "targetRef": "ChoreographyTask_145bktk",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1azhglw",
+      "sourceRef": "ChoreographyTask_0i0ht39",
+      "targetRef": "Gateway_1fbifca",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1tvz6lc",
+      "sourceRef": "ChoreographyTask_145bktk",
+      "targetRef": "Gateway_1fbifca",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_0gtd6v3",
+      "sourceRef": "Gateway_1fbifca",
+      "targetRef": "ChoreographyTask_1cceq4q",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_17gtrvu",
+      "sourceRef": "ChoreographyTask_1q3p8t2",
+      "targetRef": "Event_13pbqdz",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1tf8ufi",
+      "sourceRef": "ChoreographyTask_0s4ig1m",
+      "targetRef": "ChoreographyTask_1q3p8t2",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_0imjwmb",
+      "sourceRef": "ChoreographyTask_1cceq4q",
+      "targetRef": "ChoreographyTask_1tkm8jm",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_19s99wl",
+      "sourceRef": "ChoreographyTask_0q1fvry",
+      "targetRef": "Activity_0rm8bkp",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1jxt9fr",
+      "sourceRef": "Activity_0rm8bkp",
+      "targetRef": "Gateway_0ep8cuh",
+      "type": "sequenceFlow",
+      "trigger_hint": "finalPriority==\"VeryLow\""
+    },
+    {
+      "id": "Flow_08iq6o5",
+      "sourceRef": "ChoreographyTask_1tkm8jm",
+      "targetRef": "ChoreographyTask_0q1fvry",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1rdmhkh",
+      "sourceRef": "ChoreographyTask_0p8dcch",
+      "targetRef": "Gateway_1cr0nma",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_0kh4ywx",
+      "sourceRef": "Gateway_1cr0nma",
+      "targetRef": "ChoreographyTask_0s4ig1m",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_0bna2ku",
+      "sourceRef": "Gateway_0ep8cuh",
+      "targetRef": "ChoreographyTask_1573x71",
+      "type": "sequenceFlow",
+      "trigger_hint": "finalPriority==\"Low\""
+    },
+    {
+      "id": "Flow_1ihncup",
+      "sourceRef": "Gateway_0ep8cuh",
+      "targetRef": "ChoreographyTask_1qfvx9k",
+      "type": "sequenceFlow",
+      "trigger_hint": "finalPriority==\"Medium\""
+    },
+    {
+      "id": "Flow_0r6rayf",
+      "sourceRef": "Gateway_0ep8cuh",
+      "targetRef": "ChoreographyTask_01sje89",
+      "type": "sequenceFlow",
+      "trigger_hint": "finalPriority==\"High\""
+    },
+    {
+      "id": "Flow_12cq02s",
+      "sourceRef": "ChoreographyTask_1573x71",
+      "targetRef": "Gateway_1cr0nma",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_0ieovgu",
+      "sourceRef": "ChoreographyTask_1qfvx9k",
+      "targetRef": "Gateway_1cr0nma",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1sdqx53",
+      "sourceRef": "ChoreographyTask_01sje89",
+      "targetRef": "Gateway_1cr0nma",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_07u4u9g",
+      "sourceRef": "Gateway_0ep8cuh",
+      "targetRef": "ChoreographyTask_0p8dcch",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    }
+  ],
+  "dmn_metadata": {
+    "path": "/root/code/ChainCollab/Experiment/BPMNwithDMNcase/supplyChainPaper.dmn",
+    "file_name": "supplyChainPaper.dmn",
+    "decisions": [
+      {
+        "id": "decision_0tybghz",
+        "name": "Initial Priority Decision",
+        "inputs": [
+          {
+            "id": "input1",
+            "label": "numberOfUnits",
+            "expression_id": "inputExpression1",
+            "typeRef": "number",
+            "text": "numberOfUnits"
+          },
+          {
+            "id": "InputClause_0pvns0w",
+            "label": "urgent",
+            "expression_id": "LiteralExpression_08nncbj",
+            "typeRef": "boolean",
+            "text": "urgent"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "output1",
+            "name": "initialPriority",
+            "label": "initialPriority",
+            "type": "string"
+          }
+        ],
+        "is_main": false
+      },
+      {
+        "id": "Decision_0zwjfyy",
+        "name": "Final Priority Adjustment Decision",
+        "inputs": [
+          {
+            "id": "InputClause_14snh1s",
+            "label": "initialPriority",
+            "expression_id": "LiteralExpression_0zgz0u7",
+            "typeRef": "string",
+            "text": "initialPriority"
+          },
+          {
+            "id": "InputClause_0r7er56",
+            "label": "supplierReputation",
+            "expression_id": "LiteralExpression_14je7bl",
+            "typeRef": "number",
+            "text": "supplierReputation"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "OutputClause_0ugy0r3",
+            "name": "finalPriority",
+            "label": "finalPriority",
+            "type": "string"
+          }
+        ],
+        "is_main": true
+      }
+    ],
+    "main_decision": {
+      "id": "Decision_0zwjfyy",
+      "name": "Final Priority Adjustment Decision",
+      "inputs": [
+        {
+          "id": "InputClause_14snh1s",
+          "label": "initialPriority",
+          "expression_id": "LiteralExpression_0zgz0u7",
+          "typeRef": "string",
+          "text": "initialPriority"
+        },
+        {
+          "id": "InputClause_0r7er56",
+          "label": "supplierReputation",
+          "expression_id": "LiteralExpression_14je7bl",
+          "typeRef": "number",
+          "text": "supplierReputation"
+        }
+      ],
+      "outputs": [
+        {
+          "id": "OutputClause_0ugy0r3",
+          "name": "finalPriority",
+          "label": "finalPriority",
+          "type": "string"
+        }
+      ],
+      "is_main": true
+    }
+  }
+}

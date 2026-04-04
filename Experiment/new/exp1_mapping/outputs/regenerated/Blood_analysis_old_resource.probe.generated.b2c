@@ -1,0 +1,169 @@
+contract Blood_analysis_old_resource {
+
+    participants {
+        participant Participant_0ggs0ck {
+            msp "GynecologistMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Gynecologist"
+
+            }
+        }
+        participant Participant_1v6wnpq {
+            msp "LabMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Lab"
+
+            }
+        }
+        participant Participant_0tkhpj2 {
+            msp "HospitalMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Hospital"
+
+            }
+        }
+
+    }
+
+
+
+    globals {
+        FurtherCheck: bool
+        FurtherCheckDate: string
+        FurtherCheckPlace: string
+        PatientData: string
+        Result: string
+        Sample: string
+
+    }
+
+
+
+    messages {
+        message Message_0gd0z61 from Participant_0tkhpj2 to Participant_0ggs0ck {
+            initial state INACTIVE
+            schema "{\"properties\":{\"furtherCheckPlace\":{\"type\":\"string\",\"description\":\"\"},\"furtherCheckDate\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"furtherCheckPlace\",\"furtherCheckDate\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_0gswvmq from Participant_0ggs0ck to Participant_1v6wnpq {
+            initial state INACTIVE
+            schema "{\"properties\":{\"sample\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"sample\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_0wq8mc6 from Participant_0ggs0ck to Participant_0tkhpj2 {
+            initial state INACTIVE
+            schema "{\"properties\":{\"patientData\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"patientData\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1rqbibd from Participant_0ggs0ck to Participant_0tkhpj2 {
+            initial state INACTIVE
+            schema "{\"properties\":{\"result\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"result\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1vzqd37 from Participant_1v6wnpq to Participant_0ggs0ck {
+            initial state INACTIVE
+            schema "{\"properties\":{\"result\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"result\"],\"files\":{},\"file required\":[]}"
+        }
+
+    }
+
+
+
+    gateways {
+        gateway Gateway_0o8snyv {
+            type exclusive
+            initial state INACTIVE
+        }
+        gateway ParallelGateway_1pgjqtw {
+            type parallel
+            initial state INACTIVE
+        }
+        gateway Gateway_1m6dgym {
+            type parallel
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    events {
+        event StartEvent_0m7hz56 {
+            initial state READY
+        }
+        event EndEvent_110myff {
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    businessrules {
+        businessrule Activity_1mj4mr7 {
+            dmn "Activity_1mj4mr7.dmn"
+            decision "Activity_1mj4mr7_DecisionID"
+            input mapping {
+                result -> Result
+
+            }
+            output mapping {
+                FurtherCheck -> FurtherCheck
+
+            }
+
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    oracletasks {
+
+    }
+
+
+
+    flows {
+        start event StartEvent_0m7hz56 enables ParallelGateway_1pgjqtw;
+
+        when message Message_0gswvmq completed
+        then enable Message_1vzqd37;
+        when message Message_0wq8mc6 completed
+        then enable Gateway_1m6dgym;
+        when message Message_1vzqd37 completed
+        then enable Gateway_1m6dgym;
+        when message Message_1rqbibd completed
+        then enable Activity_1mj4mr7;
+        when message Message_0gd0z61 completed
+        then enable EndEvent_110myff;
+
+        when gateway Gateway_0o8snyv completed
+        choose {
+            if FurtherCheck == false
+            then enable EndEvent_110myff;
+            if FurtherCheck == true
+            then enable Message_0gd0z61;
+
+        }
+        when gateway ParallelGateway_1pgjqtw completed
+        then enable Message_0gswvmq, enable Message_0wq8mc6;
+
+        parallel gateway Gateway_1m6dgym await Message_1vzqd37, Message_0wq8mc6
+        then enable Message_1rqbibd;
+
+        when businessrule Activity_1mj4mr7 done
+        then enable Gateway_0o8snyv;
+
+    }
+
+}

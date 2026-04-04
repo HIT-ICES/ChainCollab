@@ -1,0 +1,157 @@
+{
+  "case_name": "Coffee_machine_CaseTest",
+  "source_files": {
+    "bpmn": "/root/code/ChainCollab/Experiment/CaseTest/Coffee_machine.bpmn",
+    "dmn": null
+  },
+  "participants": [
+    {
+      "id": "Participant_1pasf6v",
+      "name": "Customer"
+    },
+    {
+      "id": "Participant_1tddbk5",
+      "name": "Coffee_machine"
+    }
+  ],
+  "messages": [
+    {
+      "id": "MessageFlow_1fgi2sb",
+      "messageRef": "Message_1j4s0qh",
+      "name": "production(string message, bool error)",
+      "sourceRef": "Participant_1tddbk5",
+      "targetRef": "Participant_1pasf6v",
+      "sender": "Coffee_machine",
+      "receiver": "Customer",
+      "schema": {}
+    },
+    {
+      "id": "MessageFlow_0mteofp",
+      "messageRef": "Message_0gg08bf",
+      "name": "payment1(address payable to)",
+      "sourceRef": "Participant_1tddbk5",
+      "targetRef": "Participant_1pasf6v",
+      "sender": "Coffee_machine",
+      "receiver": "Customer",
+      "schema": {}
+    },
+    {
+      "id": "MessageFlow_1yzgau8",
+      "messageRef": "Message_0i0xp6a",
+      "name": "cost(uint amount)",
+      "sourceRef": "Participant_1pasf6v",
+      "targetRef": "Participant_1tddbk5",
+      "sender": "Customer",
+      "receiver": "Coffee_machine",
+      "schema": {}
+    },
+    {
+      "id": "MessageFlow_1izdk9y",
+      "messageRef": "Message_1uiozoi",
+      "name": "selection(string product)",
+      "sourceRef": "Participant_1tddbk5",
+      "targetRef": "Participant_1pasf6v",
+      "sender": "Coffee_machine",
+      "receiver": "Customer",
+      "schema": {}
+    },
+    {
+      "id": "MessageFlow_0w1g28b",
+      "messageRef": "Message_1e90tfn",
+      "name": "products(string products)",
+      "sourceRef": "Participant_1pasf6v",
+      "targetRef": "Participant_1tddbk5",
+      "sender": "Customer",
+      "receiver": "Coffee_machine",
+      "schema": {}
+    }
+  ],
+  "gateways": [
+    {
+      "id": "ExclusiveGateway_0c8hy9b",
+      "name": "ExclusiveGateway_0c8hy9b",
+      "type": "exclusive"
+    },
+    {
+      "id": "ExclusiveGateway_1sp1v7s",
+      "name": "ExclusiveGateway_1sp1v7s",
+      "type": "exclusive"
+    }
+  ],
+  "events": [
+    {
+      "id": "StartEvent_1v2ab61",
+      "name": "StartEvent_1v2ab61",
+      "kind": "start"
+    },
+    {
+      "id": "EndEvent_17h95ah",
+      "name": "EndEvent_17h95ah",
+      "kind": "end"
+    }
+  ],
+  "businessrules": [],
+  "flows": [
+    {
+      "id": "SequenceFlow_1pzcjnd",
+      "sourceRef": "ChoreographyTask_164ymrj",
+      "targetRef": "ChoreographyTask_0mnrjy0",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "SequenceFlow_09q7c97",
+      "sourceRef": "ChoreographyTask_0mnrjy0",
+      "targetRef": "ChoreographyTask_08f0s86",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "SequenceFlow_1376ji2",
+      "sourceRef": "ChoreographyTask_08f0s86",
+      "targetRef": "ChoreographyTask_0gwsf88",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "SequenceFlow_0d5ugdt",
+      "sourceRef": "ChoreographyTask_0gwsf88",
+      "targetRef": "ExclusiveGateway_0c8hy9b",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "SequenceFlow_1s5opbd",
+      "sourceRef": "StartEvent_1v2ab61",
+      "targetRef": "ExclusiveGateway_1sp1v7s",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "SequenceFlow_1qeuw8y",
+      "sourceRef": "ExclusiveGateway_1sp1v7s",
+      "targetRef": "ChoreographyTask_164ymrj",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "SequenceFlow_1x5k1vx",
+      "sourceRef": "ExclusiveGateway_0c8hy9b",
+      "targetRef": "ExclusiveGateway_1sp1v7s",
+      "type": "sequenceFlow",
+      "trigger_hint": "error==true"
+    },
+    {
+      "id": "SequenceFlow_0j4i53n",
+      "sourceRef": "ExclusiveGateway_0c8hy9b",
+      "targetRef": "EndEvent_17h95ah",
+      "type": "sequenceFlow",
+      "trigger_hint": "error==false"
+    }
+  ],
+  "dmn_metadata": {
+    "path": null,
+    "decisions": [],
+    "main_decision": null
+  }
+}

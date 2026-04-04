@@ -1,0 +1,184 @@
+contract Hotel_CaseTest {
+
+    participants {
+        participant Participant_1080bkg {
+            msp "ClientMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Client"
+
+            }
+        }
+        participant Participant_0sktaei {
+            msp "HotelMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Hotel"
+
+            }
+        }
+
+    }
+
+
+
+    globals {
+        Cancel: bool
+        Confirm: bool
+
+    }
+
+
+
+    messages {
+        message Message_045i10y from Participant_1080bkg to Participant_0sktaei {
+            initial state INACTIVE
+            schema "{}"
+        }
+        message Message_0m9p3da from Participant_1080bkg to Participant_0sktaei {
+            initial state INACTIVE
+            schema "{}"
+        }
+        message Message_0o8eyir from Participant_1080bkg to Participant_0sktaei {
+            initial state INACTIVE
+            schema "{}"
+        }
+        message Message_0r9lypd from Participant_0sktaei to Participant_1080bkg {
+            initial state INACTIVE
+            schema "{}"
+        }
+        message Message_1em0ee4 from Participant_0sktaei to Participant_1080bkg {
+            initial state INACTIVE
+            schema "{}"
+        }
+        message Message_1etcmvl from Participant_0sktaei to Participant_1080bkg {
+            initial state INACTIVE
+            schema "{}"
+        }
+        message Message_1joj7ca from Participant_1080bkg to Participant_0sktaei {
+            initial state INACTIVE
+            schema "{}"
+        }
+        message Message_1ljlm4g from Participant_0sktaei to Participant_1080bkg {
+            initial state INACTIVE
+            schema "{}"
+        }
+        message Message_1nlagx2 from Participant_1080bkg to Participant_0sktaei {
+            initial state INACTIVE
+            schema "{}"
+        }
+        message Message_1xm9dxy from Participant_1080bkg to Participant_0sktaei {
+            initial state INACTIVE
+            schema "{}"
+        }
+
+    }
+
+
+
+    gateways {
+        gateway ExclusiveGateway_106je4z {
+            type exclusive
+            initial state INACTIVE
+        }
+        gateway ExclusiveGateway_0hs3ztq {
+            type exclusive
+            initial state INACTIVE
+        }
+        gateway ExclusiveGateway_0nzwv7v {
+            type exclusive
+            initial state INACTIVE
+        }
+        gateway EventBasedGateway_1fxpmyn {
+            type event
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    events {
+        event StartEvent_1jtgn3j {
+            initial state READY
+        }
+        event EndEvent_0366pfz {
+            initial state INACTIVE
+        }
+        event EndEvent_08edp7f {
+            initial state INACTIVE
+        }
+        event EndEvent_146eii4 {
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    businessrules {
+
+    }
+
+
+
+    oracletasks {
+
+    }
+
+
+
+    flows {
+        start event StartEvent_1jtgn3j enables ExclusiveGateway_0hs3ztq;
+
+        when message Message_045i10y completed
+        then enable Message_0r9lypd;
+        when message Message_0r9lypd completed
+        then enable ExclusiveGateway_106je4z;
+        when message Message_1em0ee4 completed
+        then enable Message_1nlagx2;
+        when message Message_1nlagx2 completed
+        then enable EventBasedGateway_1fxpmyn;
+        when message Message_0o8eyir completed
+        then disable Message_1xm9dxy, enable Message_1ljlm4g;
+        when message Message_1xm9dxy completed
+        then disable Message_0o8eyir, enable EndEvent_0366pfz;
+        when message Message_1ljlm4g completed
+        then enable Message_0m9p3da;
+        when message Message_0m9p3da completed
+        then enable ExclusiveGateway_0nzwv7v;
+        when message Message_1joj7ca completed
+        then enable Message_1etcmvl;
+        when message Message_1etcmvl completed
+        then enable EndEvent_146eii4;
+
+        when gateway ExclusiveGateway_106je4z completed
+        choose {
+            if Confirm == true
+            then enable Message_1em0ee4;
+            if Confirm == false
+            then enable ExclusiveGateway_0hs3ztq;
+
+        }
+        when gateway ExclusiveGateway_0hs3ztq completed
+        then enable Message_045i10y;
+        when gateway ExclusiveGateway_0nzwv7v completed
+        choose {
+            if Cancel == false
+            then enable EndEvent_08edp7f;
+            if Cancel == true
+            then enable Message_1joj7ca;
+
+        }
+        when gateway EventBasedGateway_1fxpmyn completed
+        then enable Message_0o8eyir, enable Message_1xm9dxy;
+
+    }
+
+}

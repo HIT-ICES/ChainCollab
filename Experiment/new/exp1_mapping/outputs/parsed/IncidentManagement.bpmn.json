@@ -1,0 +1,390 @@
+{
+  "case_name": "IncidentManagement",
+  "source_files": {
+    "bpmn": "/root/code/ChainCollab/Experiment/CaseTest/IncidentManagement.bpmn",
+    "dmn": null
+  },
+  "participants": [
+    {
+      "id": "Participant_15d83ih",
+      "name": "VIP Customer"
+    },
+    {
+      "id": "Participant_1yxjs7i",
+      "name": "Key Account Manager"
+    },
+    {
+      "id": "Participant_123vwrd",
+      "name": "1st level support agent"
+    },
+    {
+      "id": "Participant_19fntjv",
+      "name": "2nd level support agent"
+    },
+    {
+      "id": "Participant_01r48ub",
+      "name": "Software developer"
+    }
+  ],
+  "messages": [
+    {
+      "id": "MessageFlow_1n1pl37",
+      "messageRef": "Message_0meslzn",
+      "name": "Solution",
+      "sourceRef": "Participant_1yxjs7i",
+      "targetRef": "Participant_15d83ih",
+      "sender": "Key Account Manager",
+      "receiver": "VIP Customer",
+      "schema": {
+        "properties": {
+          "solution": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_1koz5c1",
+      "messageRef": "Message_05qx9bx",
+      "name": "FirstIssue",
+      "sourceRef": "Participant_1yxjs7i",
+      "targetRef": "Participant_123vwrd",
+      "sender": "Key Account Manager",
+      "receiver": "1st level support agent",
+      "schema": {
+        "properties": {
+          "first_issue": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_158d20g",
+      "messageRef": "Message_19uhzjz",
+      "name": "answer",
+      "sourceRef": "Participant_15d83ih",
+      "targetRef": "Participant_1yxjs7i",
+      "sender": "VIP Customer",
+      "receiver": "Key Account Manager",
+      "schema": {
+        "properties": {
+          "answer": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_1n6tjhk",
+      "messageRef": "Message_0zg86is",
+      "name": "SecondFeedback",
+      "sourceRef": "Participant_01r48ub",
+      "targetRef": "Participant_19fntjv",
+      "sender": "Software developer",
+      "receiver": "2nd level support agent",
+      "schema": {
+        "properties": {
+          "feedback": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_19qfikc",
+      "messageRef": "Message_0r74t0d",
+      "name": "DevIssue",
+      "sourceRef": "Participant_19fntjv",
+      "targetRef": "Participant_01r48ub",
+      "sender": "2nd level support agent",
+      "receiver": "Software developer",
+      "schema": {
+        "properties": {
+          "dev_issue": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_0zaaa4u",
+      "messageRef": "Message_0x3m7cv",
+      "name": "FirstFeedback",
+      "sourceRef": "Participant_19fntjv",
+      "targetRef": "Participant_123vwrd",
+      "sender": "2nd level support agent",
+      "receiver": "1st level support agent",
+      "schema": {
+        "properties": {
+          "feedback": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_1x0m89s",
+      "messageRef": "Message_0bvz0t0",
+      "name": "SecondIssue",
+      "sourceRef": "Participant_123vwrd",
+      "targetRef": "Participant_19fntjv",
+      "sender": "1st level support agent",
+      "receiver": "2nd level support agent",
+      "schema": {
+        "properties": {
+          "second_issue": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_0sdj6u1",
+      "messageRef": "Message_0tfcf0f",
+      "name": "FinalFeedback",
+      "sourceRef": "Participant_123vwrd",
+      "targetRef": "Participant_1yxjs7i",
+      "sender": "1st level support agent",
+      "receiver": "Key Account Manager",
+      "schema": {
+        "properties": {
+          "feedback": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_0nnlchf",
+      "messageRef": "Message_1c9wwae",
+      "name": "Message_1c9wwae",
+      "sourceRef": "Participant_123vwrd",
+      "targetRef": "Participant_1yxjs7i",
+      "sender": "1st level support agent",
+      "receiver": "Key Account Manager",
+      "schema": {}
+    },
+    {
+      "id": "MessageFlow_03r27p5",
+      "messageRef": "Message_0ek1csx",
+      "name": "Message_0ek1csx",
+      "sourceRef": "Participant_15d83ih",
+      "targetRef": "Participant_1yxjs7i",
+      "sender": "VIP Customer",
+      "receiver": "Key Account Manager",
+      "schema": {}
+    },
+    {
+      "id": "MessageFlow_11m43s0",
+      "messageRef": "Message_1k8bc91",
+      "name": "Message_1k8bc91",
+      "sourceRef": "Participant_1yxjs7i",
+      "targetRef": "Participant_15d83ih",
+      "sender": "Key Account Manager",
+      "receiver": "VIP Customer",
+      "schema": {}
+    },
+    {
+      "id": "MessageFlow_04fr105",
+      "messageRef": "Message_1j8ntet",
+      "name": "problem",
+      "sourceRef": "Participant_15d83ih",
+      "targetRef": "Participant_1yxjs7i",
+      "sender": "VIP Customer",
+      "receiver": "Key Account Manager",
+      "schema": {
+        "properties": {
+          "problem": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [],
+        "files": {},
+        "file required": []
+      }
+    }
+  ],
+  "gateways": [
+    {
+      "id": "Gateway_0xhpdxq",
+      "name": "Gateway_0xhpdxq",
+      "type": "exclusive"
+    },
+    {
+      "id": "Gateway_0a3xut0",
+      "name": "Gateway_0a3xut0",
+      "type": "exclusive"
+    },
+    {
+      "id": "Gateway_1lr7zva",
+      "name": "Gateway_1lr7zva",
+      "type": "exclusive"
+    }
+  ],
+  "events": [
+    {
+      "id": "Event_026jxk6",
+      "name": "Event_026jxk6",
+      "kind": "start"
+    },
+    {
+      "id": "Event_18807k4",
+      "name": "Event_18807k4",
+      "kind": "end"
+    }
+  ],
+  "businessrules": [],
+  "flows": [
+    {
+      "id": "Flow_0kzgm6t",
+      "sourceRef": "Event_026jxk6",
+      "targetRef": "ChoreographyTask_1uanr32",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1nnemtw",
+      "sourceRef": "ChoreographyTask_1uanr32",
+      "targetRef": "ChoreographyTask_1qo2smh",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_0xu8209",
+      "sourceRef": "ChoreographyTask_1qo2smh",
+      "targetRef": "Gateway_0xhpdxq",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1ua45rq",
+      "sourceRef": "Gateway_0xhpdxq",
+      "targetRef": "ChoreographyTask_1kv7ita",
+      "type": "sequenceFlow",
+      "trigger_hint": "handle==true"
+    },
+    {
+      "id": "Flow_1itsmvk",
+      "sourceRef": "Gateway_0xhpdxq",
+      "targetRef": "ChoreographyTask_0h3dkhm",
+      "type": "sequenceFlow",
+      "trigger_hint": "handle==false"
+    },
+    {
+      "id": "Flow_1nnzz0b",
+      "sourceRef": "ChoreographyTask_0h3dkhm",
+      "targetRef": "Gateway_0a3xut0",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1odp7v1",
+      "sourceRef": "Gateway_0a3xut0",
+      "targetRef": "ChoreographyTask_0574qw1",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_13idivf",
+      "sourceRef": "Gateway_0a3xut0",
+      "targetRef": "ChoreographyTask_00evgfe",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1pxoa5a",
+      "sourceRef": "ChoreographyTask_00evgfe",
+      "targetRef": "Gateway_1lr7zva",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_0c8j21q",
+      "sourceRef": "Gateway_1lr7zva",
+      "targetRef": "ChoreographyTask_02opmn4",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_12o2vm7",
+      "sourceRef": "Gateway_1lr7zva",
+      "targetRef": "ChoreographyTask_105sn6c",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_19dys92",
+      "sourceRef": "ChoreographyTask_105sn6c",
+      "targetRef": "ChoreographyTask_03v9lul",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1l70fg1",
+      "sourceRef": "ChoreographyTask_03v9lul",
+      "targetRef": "ChoreographyTask_02opmn4",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1j81qsx",
+      "sourceRef": "ChoreographyTask_02opmn4",
+      "targetRef": "ChoreographyTask_0574qw1",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_0pcbsrz",
+      "sourceRef": "ChoreographyTask_0574qw1",
+      "targetRef": "ChoreographyTask_1kv7ita",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_0xlf0h6",
+      "sourceRef": "ChoreographyTask_1kv7ita",
+      "targetRef": "Event_18807k4",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    }
+  ],
+  "dmn_metadata": {
+    "path": null,
+    "decisions": [],
+    "main_decision": null
+  }
+}

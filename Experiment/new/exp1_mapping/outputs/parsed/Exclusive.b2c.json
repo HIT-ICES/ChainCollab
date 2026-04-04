@@ -1,0 +1,262 @@
+{
+  "case_name": "Exclusive",
+  "source_files": {
+    "b2c": "/root/code/ChainCollab/Experiment/new/exp1_mapping/outputs/regenerated/Exclusive.generated.b2c"
+  },
+  "contracts": [
+    "Exclusive"
+  ],
+  "participants": [
+    {
+      "name": "Participant_127fmp5",
+      "msp": "New_Participant_1MSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "New Participant 1"
+        }
+      ],
+      "role": "New Participant 1"
+    },
+    {
+      "name": "Participant_1i0wkot",
+      "msp": "New_Participant_2MSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "New Participant 2"
+        }
+      ],
+      "role": "New Participant 2"
+    }
+  ],
+  "globals": [
+    {
+      "name": "Condition",
+      "type": "int"
+    }
+  ],
+  "messages": [
+    {
+      "name": "Message_1kt861j",
+      "sender": "Participant_127fmp5",
+      "receiver": "Participant_1i0wkot",
+      "schema": "{\"properties\":{\"condition\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "Gateway_1309cek",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "Event_1ex6tww",
+      "initial_state": "READY"
+    },
+    {
+      "name": "Event_1w9hecu",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Event_0azwphb",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Event_13dkewm",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Event_0if27w4",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Event_1tsrojw",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Event_0ox11yo",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Event_00uq91w",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Event_1eluy7v",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Event_0a9rmyh",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [],
+  "flows": [
+    {
+      "kind": "start_flow",
+      "trigger_type": "start",
+      "trigger_name": "Event_1ex6tww",
+      "trigger_state": "ready",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1kt861j"
+        }
+      ],
+      "raw_text": "start event Event_1ex6tww enables Message_1kt861j;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1kt861j",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1309cek"
+        }
+      ],
+      "raw_text": "when message Message_1kt861j completed then enable Gateway_1309cek;"
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger_type": "gateway",
+      "trigger_name": "Gateway_1309cek",
+      "trigger_state": "completed",
+      "actions": [],
+      "branches": [
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Event_1w9hecu"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Condition",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Event_0azwphb"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Condition",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Event_13dkewm"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Condition",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Event_0if27w4"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Condition",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Event_1tsrojw"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Condition",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Event_0ox11yo"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Condition",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Event_00uq91w"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Condition",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Event_1eluy7v"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Condition",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Event_0a9rmyh"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Condition",
+          "relation": "==",
+          "value": ""
+        }
+      ],
+      "raw_text": "when gateway Gateway_1309cek completed choose ..."
+    }
+  ],
+  "participant_aliases": {
+    "Participant_127fmp5": [
+      "Participant_127fmp5",
+      "New Participant 1"
+    ],
+    "Participant_1i0wkot": [
+      "Participant_1i0wkot",
+      "New Participant 2"
+    ]
+  }
+}

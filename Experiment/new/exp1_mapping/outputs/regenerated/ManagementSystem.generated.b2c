@@ -1,0 +1,177 @@
+contract ManagementSystem {
+
+    participants {
+        participant Participant_0ykkst0 {
+            msp "Registered_ContributorMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Registered Contributor"
+
+            }
+        }
+        participant Participant_1be5jmm {
+            msp "WorkerMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Worker"
+
+            }
+        }
+        participant Participant_0a0qr98 {
+            msp "Unregistered_ContributorMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Unregistered Contributor"
+
+            }
+        }
+
+    }
+
+
+
+    globals {
+        Content: string
+        Complete: bool
+        Content: string
+        Id: string
+        Qualified: bool
+        Quality: string
+
+    }
+
+
+
+    messages {
+        message Message_02echpq from Participant_0ykkst0 to Participant_1be5jmm {
+            initial state INACTIVE
+            schema "{\"properties\":{\"content\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+        }
+        message Message_02ng01e from Participant_1be5jmm to Participant_0ykkst0 {
+            initial state INACTIVE
+            schema "{\"properties\":{\"complete\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"complete\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_094ld7m from Participant_0ykkst0 to Participant_1be5jmm {
+            initial state INACTIVE
+            schema "{\"properties\":{\"quality\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"quality\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1ejkslm from Participant_0a0qr98 to Participant_1be5jmm {
+            initial state INACTIVE
+            schema "{\"properties\":{\"Content\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1h1vc49 from Participant_1be5jmm to Participant_0ykkst0 {
+            initial state INACTIVE
+            schema "{\"properties\":{\"id\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"id\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1tiyc35 from Participant_0ykkst0 to Participant_1be5jmm {
+            initial state INACTIVE
+            schema "{\"properties\":{\"content\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+        }
+
+    }
+
+
+
+    gateways {
+        gateway Gateway_067p6u8 {
+            type exclusive
+            initial state INACTIVE
+        }
+        gateway Gateway_1fl1t0k {
+            type exclusive
+            initial state INACTIVE
+        }
+        gateway Gateway_0e7k79c {
+            type event
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    events {
+        event Event_1y0sgtz {
+            initial state READY
+        }
+        event Event_1u0cugu {
+            initial state INACTIVE
+        }
+        event Event_1pm2yw6 {
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    businessrules {
+        businessrule Activity_18dcm0h {
+            dmn "Activity_18dcm0h.dmn"
+            decision "Activity_18dcm0h_DecisionID"
+            input mapping {
+                quality -> Quality
+
+            }
+            output mapping {
+                qualified -> Qualified
+
+            }
+
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    oracletasks {
+
+    }
+
+
+
+    flows {
+        start event Event_1y0sgtz enables Message_1ejkslm;
+
+        when message Message_1ejkslm completed
+        then enable Gateway_0e7k79c;
+        when message Message_02echpq completed
+        then disable Message_1tiyc35, enable Gateway_067p6u8;
+        when message Message_1tiyc35 completed
+        then disable Message_02echpq, enable Gateway_067p6u8;
+        when message Message_02ng01e completed
+        then enable Message_094ld7m;
+        when message Message_094ld7m completed
+        then enable Activity_18dcm0h;
+        when message Message_1h1vc49 completed
+        then enable Event_1pm2yw6;
+
+        when gateway Gateway_067p6u8 completed
+        then enable Message_02ng01e;
+        when gateway Gateway_1fl1t0k completed
+        choose {
+            if Qualified == true
+            then enable Event_1u0cugu;
+            if Qualified == false
+            then enable Message_1h1vc49;
+
+        }
+        when gateway Gateway_0e7k79c completed
+        then enable Message_02echpq, enable Message_1tiyc35;
+
+        when businessrule Activity_18dcm0h done
+        then enable Gateway_1fl1t0k;
+
+    }
+
+}

@@ -1,0 +1,183 @@
+{
+  "case_name": "Exclusive",
+  "source_files": {
+    "bpmn": "/root/code/ChainCollab/Experiment/CaseTest/Exclusive.bpmn",
+    "dmn": null
+  },
+  "participants": [
+    {
+      "id": "Participant_127fmp5",
+      "name": "New Participant 1"
+    },
+    {
+      "id": "Participant_1i0wkot",
+      "name": "New Participant 2"
+    }
+  ],
+  "messages": [
+    {
+      "id": "MessageFlow_0s0v1yi",
+      "messageRef": "Message_1kt861j",
+      "name": "ConditionMessage",
+      "sourceRef": "Participant_127fmp5",
+      "targetRef": "Participant_1i0wkot",
+      "sender": "New Participant 1",
+      "receiver": "New Participant 2",
+      "schema": {
+        "properties": {
+          "condition": {
+            "type": "number",
+            "description": ""
+          }
+        },
+        "required": [],
+        "files": {},
+        "file required": []
+      }
+    }
+  ],
+  "gateways": [
+    {
+      "id": "Gateway_1309cek",
+      "name": "Gateway_1309cek",
+      "type": "exclusive"
+    }
+  ],
+  "events": [
+    {
+      "id": "Event_1ex6tww",
+      "name": "Event_1ex6tww",
+      "kind": "start"
+    },
+    {
+      "id": "Event_1w9hecu",
+      "name": "Event_1w9hecu",
+      "kind": "end"
+    },
+    {
+      "id": "Event_0azwphb",
+      "name": "Event_0azwphb",
+      "kind": "end"
+    },
+    {
+      "id": "Event_13dkewm",
+      "name": "Event_13dkewm",
+      "kind": "end"
+    },
+    {
+      "id": "Event_0if27w4",
+      "name": "Event_0if27w4",
+      "kind": "end"
+    },
+    {
+      "id": "Event_1tsrojw",
+      "name": "Event_1tsrojw",
+      "kind": "end"
+    },
+    {
+      "id": "Event_0ox11yo",
+      "name": "Event_0ox11yo",
+      "kind": "end"
+    },
+    {
+      "id": "Event_00uq91w",
+      "name": "Event_00uq91w",
+      "kind": "end"
+    },
+    {
+      "id": "Event_1eluy7v",
+      "name": "Event_1eluy7v",
+      "kind": "end"
+    },
+    {
+      "id": "Event_0a9rmyh",
+      "name": "Event_0a9rmyh",
+      "kind": "end"
+    }
+  ],
+  "businessrules": [],
+  "flows": [
+    {
+      "id": "Flow_1pn7wwb",
+      "sourceRef": "Event_1ex6tww",
+      "targetRef": "ChoreographyTask_0ub0bdy",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_0kn5dg1",
+      "sourceRef": "ChoreographyTask_0ub0bdy",
+      "targetRef": "Gateway_1309cek",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1387hne",
+      "sourceRef": "Gateway_1309cek",
+      "targetRef": "Event_1w9hecu",
+      "type": "sequenceFlow",
+      "trigger_hint": "condition==1"
+    },
+    {
+      "id": "Flow_15zqwbi",
+      "sourceRef": "Gateway_1309cek",
+      "targetRef": "Event_0azwphb",
+      "type": "sequenceFlow",
+      "trigger_hint": "condition==2"
+    },
+    {
+      "id": "Flow_0iw2smf",
+      "sourceRef": "Gateway_1309cek",
+      "targetRef": "Event_13dkewm",
+      "type": "sequenceFlow",
+      "trigger_hint": "condition==3"
+    },
+    {
+      "id": "Flow_03vlmfn",
+      "sourceRef": "Gateway_1309cek",
+      "targetRef": "Event_0if27w4",
+      "type": "sequenceFlow",
+      "trigger_hint": "condition==4"
+    },
+    {
+      "id": "Flow_0k13hbj",
+      "sourceRef": "Gateway_1309cek",
+      "targetRef": "Event_1tsrojw",
+      "type": "sequenceFlow",
+      "trigger_hint": "condition==5"
+    },
+    {
+      "id": "Flow_17oxkoa",
+      "sourceRef": "Gateway_1309cek",
+      "targetRef": "Event_0ox11yo",
+      "type": "sequenceFlow",
+      "trigger_hint": "condition==7"
+    },
+    {
+      "id": "Flow_065fmpc",
+      "sourceRef": "Gateway_1309cek",
+      "targetRef": "Event_00uq91w",
+      "type": "sequenceFlow",
+      "trigger_hint": "condition==8"
+    },
+    {
+      "id": "Flow_1kkptna",
+      "sourceRef": "Gateway_1309cek",
+      "targetRef": "Event_1eluy7v",
+      "type": "sequenceFlow",
+      "trigger_hint": "condition==9"
+    },
+    {
+      "id": "Flow_0wf7v5o",
+      "sourceRef": "Gateway_1309cek",
+      "targetRef": "Event_0a9rmyh",
+      "type": "sequenceFlow",
+      "trigger_hint": "condition==10"
+    }
+  ],
+  "dmn_metadata": {
+    "path": null,
+    "decisions": [],
+    "main_decision": null
+  }
+}

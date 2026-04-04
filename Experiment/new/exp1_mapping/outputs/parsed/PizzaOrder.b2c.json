@@ -1,0 +1,371 @@
+{
+  "case_name": "PizzaOrder",
+  "source_files": {
+    "b2c": "/root/code/ChainCollab/Experiment/new/exp1_mapping/outputs/regenerated/PizzaOrder.generated.b2c"
+  },
+  "contracts": [
+    "PizzaOrder"
+  ],
+  "participants": [
+    {
+      "name": "Participant_1ho1h5w",
+      "msp": "CustomerMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "Customer"
+        }
+      ],
+      "role": "Customer"
+    },
+    {
+      "name": "Participant_0sap3uu",
+      "msp": "Pizza_PlaceMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "Pizza Place"
+        }
+      ],
+      "role": "Pizza Place"
+    },
+    {
+      "name": "Participant_0wqp6et",
+      "msp": "New_Participant_1MSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "New Participant 1"
+        }
+      ],
+      "role": "New Participant 1"
+    },
+    {
+      "name": "Participant_02o0v0t",
+      "msp": "Delivery_DriverMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "Delivery Driver"
+        }
+      ],
+      "role": "Delivery Driver"
+    }
+  ],
+  "globals": [
+    {
+      "name": "Address",
+      "type": "string"
+    },
+    {
+      "name": "DeliveryInfomation",
+      "type": "string"
+    },
+    {
+      "name": "OrderContent",
+      "type": "string"
+    },
+    {
+      "name": "PickUpTime",
+      "type": "string"
+    },
+    {
+      "name": "Signature",
+      "type": "string"
+    }
+  ],
+  "messages": [
+    {
+      "name": "Message_07ijcd8",
+      "sender": "Participant_0sap3uu",
+      "receiver": "Participant_1ho1h5w",
+      "schema": "{\"properties\":{\"Signature\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_166dqh1",
+      "sender": "Participant_0sap3uu",
+      "receiver": "Participant_02o0v0t",
+      "schema": "{\"properties\":{\"DeliveryInfomation\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_17lsnh5",
+      "sender": "Participant_0sap3uu",
+      "receiver": "Participant_1ho1h5w",
+      "schema": "{\"properties\":{\"PickUpTime\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"PickUpTime\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1801074",
+      "sender": "Participant_1ho1h5w",
+      "receiver": "Participant_0sap3uu",
+      "schema": "{\"properties\":{\"OrderContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"OrderContent\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1ccaj59",
+      "sender": "Participant_1ho1h5w",
+      "receiver": "Participant_02o0v0t",
+      "schema": "{\"properties\":{\"Signature\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1flmnkz",
+      "sender": "Participant_02o0v0t",
+      "receiver": "Participant_1ho1h5w",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1ib4iio",
+      "sender": "Participant_1ho1h5w",
+      "receiver": "Participant_0sap3uu",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1pbiv0r",
+      "sender": "Participant_1ho1h5w",
+      "receiver": "Participant_0sap3uu",
+      "schema": "{\"properties\":{\"Address\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"Address\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1ypsrgy",
+      "sender": "Participant_1ho1h5w",
+      "receiver": "Participant_0sap3uu",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "Gateway_1pguang",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Gateway_0nafkvy",
+      "type": "event",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "Event_1a62z0q",
+      "initial_state": "READY"
+    },
+    {
+      "name": "Event_04u53jh",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [],
+  "flows": [
+    {
+      "kind": "start_flow",
+      "trigger_type": "start",
+      "trigger_name": "Event_1a62z0q",
+      "trigger_state": "ready",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1801074"
+        }
+      ],
+      "raw_text": "start event Event_1a62z0q enables Message_1801074;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1801074",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_0nafkvy"
+        }
+      ],
+      "raw_text": "when message Message_1801074 completed then enable Gateway_0nafkvy;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1pbiv0r",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "disable",
+          "target": "Message_1ib4iio"
+        },
+        {
+          "kind": "enable",
+          "target": "Message_166dqh1"
+        }
+      ],
+      "raw_text": "when message Message_1pbiv0r completed then disable Message_1ib4iio, enable Message_166dqh1;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1ib4iio",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "disable",
+          "target": "Message_1pbiv0r"
+        },
+        {
+          "kind": "enable",
+          "target": "Message_17lsnh5"
+        }
+      ],
+      "raw_text": "when message Message_1ib4iio completed then disable Message_1pbiv0r, enable Message_17lsnh5;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_17lsnh5",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1ypsrgy"
+        }
+      ],
+      "raw_text": "when message Message_17lsnh5 completed then enable Message_1ypsrgy;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_166dqh1",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1flmnkz"
+        }
+      ],
+      "raw_text": "when message Message_166dqh1 completed then enable Message_1flmnkz;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1flmnkz",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1ccaj59"
+        }
+      ],
+      "raw_text": "when message Message_1flmnkz completed then enable Message_1ccaj59;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1ccaj59",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1pguang"
+        }
+      ],
+      "raw_text": "when message Message_1ccaj59 completed then enable Gateway_1pguang;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1ypsrgy",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_07ijcd8"
+        }
+      ],
+      "raw_text": "when message Message_1ypsrgy completed then enable Message_07ijcd8;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_07ijcd8",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1pguang"
+        }
+      ],
+      "raw_text": "when message Message_07ijcd8 completed then enable Gateway_1pguang;"
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger_type": "gateway",
+      "trigger_name": "Gateway_1pguang",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Event_04u53jh"
+        }
+      ],
+      "branches": [],
+      "raw_text": "when gateway Gateway_1pguang completed then enable Event_04u53jh;"
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger_type": "gateway",
+      "trigger_name": "Gateway_0nafkvy",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1pbiv0r"
+        },
+        {
+          "kind": "enable",
+          "target": "Message_1ib4iio"
+        }
+      ],
+      "branches": [],
+      "raw_text": "when gateway Gateway_0nafkvy completed then enable Message_1pbiv0r, enable Message_1ib4iio;"
+    }
+  ],
+  "participant_aliases": {
+    "Participant_1ho1h5w": [
+      "Participant_1ho1h5w",
+      "Customer"
+    ],
+    "Participant_0sap3uu": [
+      "Participant_0sap3uu",
+      "Pizza Place"
+    ],
+    "Participant_0wqp6et": [
+      "Participant_0wqp6et",
+      "New Participant 1"
+    ],
+    "Participant_02o0v0t": [
+      "Participant_02o0v0t",
+      "Delivery Driver"
+    ]
+  }
+}

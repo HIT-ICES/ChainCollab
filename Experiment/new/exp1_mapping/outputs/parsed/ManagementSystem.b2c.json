@@ -1,0 +1,371 @@
+{
+  "case_name": "ManagementSystem",
+  "source_files": {
+    "b2c": "/root/code/ChainCollab/Experiment/new/exp1_mapping/outputs/regenerated/ManagementSystem.generated.b2c"
+  },
+  "contracts": [
+    "ManagementSystem"
+  ],
+  "participants": [
+    {
+      "name": "Participant_0ykkst0",
+      "msp": "Registered_ContributorMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "Registered Contributor"
+        }
+      ],
+      "role": "Registered Contributor"
+    },
+    {
+      "name": "Participant_1be5jmm",
+      "msp": "WorkerMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "Worker"
+        }
+      ],
+      "role": "Worker"
+    },
+    {
+      "name": "Participant_0a0qr98",
+      "msp": "Unregistered_ContributorMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "Unregistered Contributor"
+        }
+      ],
+      "role": "Unregistered Contributor"
+    }
+  ],
+  "globals": [
+    {
+      "name": "Content",
+      "type": "string"
+    },
+    {
+      "name": "Complete",
+      "type": "bool"
+    },
+    {
+      "name": "Content",
+      "type": "string"
+    },
+    {
+      "name": "Id",
+      "type": "string"
+    },
+    {
+      "name": "Qualified",
+      "type": "bool"
+    },
+    {
+      "name": "Quality",
+      "type": "string"
+    }
+  ],
+  "messages": [
+    {
+      "name": "Message_02echpq",
+      "sender": "Participant_0ykkst0",
+      "receiver": "Participant_1be5jmm",
+      "schema": "{\"properties\":{\"content\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_02ng01e",
+      "sender": "Participant_1be5jmm",
+      "receiver": "Participant_0ykkst0",
+      "schema": "{\"properties\":{\"complete\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"complete\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_094ld7m",
+      "sender": "Participant_0ykkst0",
+      "receiver": "Participant_1be5jmm",
+      "schema": "{\"properties\":{\"quality\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"quality\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1ejkslm",
+      "sender": "Participant_0a0qr98",
+      "receiver": "Participant_1be5jmm",
+      "schema": "{\"properties\":{\"Content\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1h1vc49",
+      "sender": "Participant_1be5jmm",
+      "receiver": "Participant_0ykkst0",
+      "schema": "{\"properties\":{\"id\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"id\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1tiyc35",
+      "sender": "Participant_0ykkst0",
+      "receiver": "Participant_1be5jmm",
+      "schema": "{\"properties\":{\"content\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "Gateway_067p6u8",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Gateway_1fl1t0k",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Gateway_0e7k79c",
+      "type": "event",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "Event_1y0sgtz",
+      "initial_state": "READY"
+    },
+    {
+      "name": "Event_1u0cugu",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Event_1pm2yw6",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [
+    {
+      "name": "Activity_18dcm0h",
+      "dmn": "Activity_18dcm0h.dmn",
+      "decision": "Activity_18dcm0h_DecisionID",
+      "input_mapping": [
+        {
+          "dmnParam": "quality",
+          "globalRef": "Quality"
+        }
+      ],
+      "output_mapping": [
+        {
+          "dmnParam": "qualified",
+          "globalRef": "Qualified"
+        }
+      ],
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "flows": [
+    {
+      "kind": "start_flow",
+      "trigger_type": "start",
+      "trigger_name": "Event_1y0sgtz",
+      "trigger_state": "ready",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1ejkslm"
+        }
+      ],
+      "raw_text": "start event Event_1y0sgtz enables Message_1ejkslm;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1ejkslm",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_0e7k79c"
+        }
+      ],
+      "raw_text": "when message Message_1ejkslm completed then enable Gateway_0e7k79c;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_02echpq",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "disable",
+          "target": "Message_1tiyc35"
+        },
+        {
+          "kind": "enable",
+          "target": "Gateway_067p6u8"
+        }
+      ],
+      "raw_text": "when message Message_02echpq completed then disable Message_1tiyc35, enable Gateway_067p6u8;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1tiyc35",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "disable",
+          "target": "Message_02echpq"
+        },
+        {
+          "kind": "enable",
+          "target": "Gateway_067p6u8"
+        }
+      ],
+      "raw_text": "when message Message_1tiyc35 completed then disable Message_02echpq, enable Gateway_067p6u8;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_02ng01e",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_094ld7m"
+        }
+      ],
+      "raw_text": "when message Message_02ng01e completed then enable Message_094ld7m;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_094ld7m",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Activity_18dcm0h"
+        }
+      ],
+      "raw_text": "when message Message_094ld7m completed then enable Activity_18dcm0h;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1h1vc49",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Event_1pm2yw6"
+        }
+      ],
+      "raw_text": "when message Message_1h1vc49 completed then enable Event_1pm2yw6;"
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger_type": "gateway",
+      "trigger_name": "Gateway_067p6u8",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_02ng01e"
+        }
+      ],
+      "branches": [],
+      "raw_text": "when gateway Gateway_067p6u8 completed then enable Message_02ng01e;"
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger_type": "gateway",
+      "trigger_name": "Gateway_1fl1t0k",
+      "trigger_state": "completed",
+      "actions": [],
+      "branches": [
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Event_1u0cugu"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Qualified",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_1h1vc49"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Qualified",
+          "relation": "==",
+          "value": ""
+        }
+      ],
+      "raw_text": "when gateway Gateway_1fl1t0k completed choose ..."
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger_type": "gateway",
+      "trigger_name": "Gateway_0e7k79c",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_02echpq"
+        },
+        {
+          "kind": "enable",
+          "target": "Message_1tiyc35"
+        }
+      ],
+      "branches": [],
+      "raw_text": "when gateway Gateway_0e7k79c completed then enable Message_02echpq, enable Message_1tiyc35;"
+    },
+    {
+      "kind": "rule_flow",
+      "trigger_type": "businessrule",
+      "trigger_name": "Activity_18dcm0h",
+      "trigger_state": "done",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1fl1t0k"
+        }
+      ],
+      "raw_text": "when businessrule Activity_18dcm0h done then enable Gateway_1fl1t0k;"
+    }
+  ],
+  "participant_aliases": {
+    "Participant_0ykkst0": [
+      "Participant_0ykkst0",
+      "Registered Contributor"
+    ],
+    "Participant_1be5jmm": [
+      "Participant_1be5jmm",
+      "Worker"
+    ],
+    "Participant_0a0qr98": [
+      "Participant_0a0qr98",
+      "Unregistered Contributor"
+    ]
+  }
+}

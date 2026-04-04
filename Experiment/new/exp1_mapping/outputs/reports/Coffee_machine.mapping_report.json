@@ -1,0 +1,175 @@
+{
+  "case_name": "Coffee_machine",
+  "source_files": {
+    "bpmn": "/root/code/ChainCollab/src/newTranslator/generator/resource/bpmn/Coffee_machine.bpmn",
+    "dmn": null,
+    "b2c": "/root/code/ChainCollab/Experiment/new/exp1_mapping/outputs/regenerated/Coffee_machine.generated.b2c"
+  },
+  "total_elements": 12,
+  "success_mappings": 11,
+  "preserved_elements": 12,
+  "missing_items": [],
+  "type_mismatches": [
+    {
+      "contract_type": "businessrule_mapping",
+      "bpmn_element_type": "businessRuleTask",
+      "bpmn_element_id": "Activity_0ysk2q6",
+      "bpmn_element_name": "Activity_0ysk2q6",
+      "dsl_node_id": "Activity_0ysk2q6",
+      "passed": false,
+      "reason": "DSL businessrule missing input mapping; DSL businessrule missing output mapping",
+      "severity": "error"
+    }
+  ],
+  "contract_total": 13,
+  "contract_passed": 12,
+  "contract_failed": 1,
+  "element_preservation_rate": 1.0,
+  "mapping_accuracy": 0.9167,
+  "contract_satisfaction_rate": 0.9231,
+  "pass": false,
+  "details": [
+    {
+      "contract_type": "participant_mapping",
+      "bpmn_element_type": "participant",
+      "bpmn_element_id": "Participant_1pasf6v",
+      "bpmn_element_name": "Customer",
+      "dsl_node_id": "Participant_1pasf6v",
+      "passed": true,
+      "reason": "Participant matched by id/name/role alias.",
+      "severity": "info"
+    },
+    {
+      "contract_type": "participant_mapping",
+      "bpmn_element_type": "participant",
+      "bpmn_element_id": "Participant_1tddbk5",
+      "bpmn_element_name": "Coffee_machine",
+      "dsl_node_id": "Participant_1tddbk5",
+      "passed": true,
+      "reason": "Participant matched by id/name/role alias.",
+      "severity": "info"
+    },
+    {
+      "contract_type": "participant_count",
+      "bpmn_element_type": "participant_group",
+      "bpmn_element_id": "participants",
+      "bpmn_element_name": "participants",
+      "dsl_node_id": "participants",
+      "passed": true,
+      "reason": "BPMN participants=2, DSL participants=2.",
+      "severity": "error"
+    },
+    {
+      "contract_type": "message_mapping",
+      "bpmn_element_type": "messageFlow",
+      "bpmn_element_id": "MessageFlow_1fgi2sb",
+      "bpmn_element_name": "production(string message, bool error)",
+      "dsl_node_id": "Message_1j4s0qh",
+      "passed": true,
+      "reason": "Message definition and flow trigger preserved.",
+      "severity": "info"
+    },
+    {
+      "contract_type": "message_mapping",
+      "bpmn_element_type": "messageFlow",
+      "bpmn_element_id": "MessageFlow_0mteofp",
+      "bpmn_element_name": "payment1(address payable to)",
+      "dsl_node_id": "Message_0gg08bf",
+      "passed": true,
+      "reason": "Message definition and flow trigger preserved.",
+      "severity": "info"
+    },
+    {
+      "contract_type": "message_mapping",
+      "bpmn_element_type": "messageFlow",
+      "bpmn_element_id": "MessageFlow_1yzgau8",
+      "bpmn_element_name": "cost(uint amount)",
+      "dsl_node_id": "Message_0i0xp6a",
+      "passed": true,
+      "reason": "Message definition and flow trigger preserved.",
+      "severity": "info"
+    },
+    {
+      "contract_type": "message_mapping",
+      "bpmn_element_type": "messageFlow",
+      "bpmn_element_id": "MessageFlow_1izdk9y",
+      "bpmn_element_name": "selection(string product)",
+      "dsl_node_id": "Message_1uiozoi",
+      "passed": true,
+      "reason": "Message definition and flow trigger preserved.",
+      "severity": "info"
+    },
+    {
+      "contract_type": "message_mapping",
+      "bpmn_element_type": "messageFlow",
+      "bpmn_element_id": "MessageFlow_0w1g28b",
+      "bpmn_element_name": "products(string products)",
+      "dsl_node_id": "Message_1e90tfn",
+      "passed": true,
+      "reason": "Message definition and flow trigger preserved.",
+      "severity": "info"
+    },
+    {
+      "contract_type": "gateway_mapping",
+      "bpmn_element_type": "gateway",
+      "bpmn_element_id": "ExclusiveGateway_0c8hy9b",
+      "bpmn_element_name": "ExclusiveGateway_0c8hy9b",
+      "dsl_node_id": "ExclusiveGateway_0c8hy9b",
+      "passed": true,
+      "reason": "Gateway type preserved.",
+      "severity": "info"
+    },
+    {
+      "contract_type": "gateway_mapping",
+      "bpmn_element_type": "gateway",
+      "bpmn_element_id": "ExclusiveGateway_1sp1v7s",
+      "bpmn_element_name": "ExclusiveGateway_1sp1v7s",
+      "dsl_node_id": "ExclusiveGateway_1sp1v7s",
+      "passed": true,
+      "reason": "Gateway type preserved.",
+      "severity": "info"
+    },
+    {
+      "contract_type": "event_mapping",
+      "bpmn_element_type": "event",
+      "bpmn_element_id": "StartEvent_1v2ab61",
+      "bpmn_element_name": "StartEvent_1v2ab61",
+      "dsl_node_id": "StartEvent_1v2ab61",
+      "passed": true,
+      "reason": "Event preserved with expected progression rule.",
+      "severity": "info"
+    },
+    {
+      "contract_type": "event_mapping",
+      "bpmn_element_type": "event",
+      "bpmn_element_id": "EndEvent_17h95ah",
+      "bpmn_element_name": "EndEvent_17h95ah",
+      "dsl_node_id": "EndEvent_17h95ah",
+      "passed": true,
+      "reason": "Event preserved with expected progression rule.",
+      "severity": "info"
+    },
+    {
+      "contract_type": "businessrule_mapping",
+      "bpmn_element_type": "businessRuleTask",
+      "bpmn_element_id": "Activity_0ysk2q6",
+      "bpmn_element_name": "Activity_0ysk2q6",
+      "dsl_node_id": "Activity_0ysk2q6",
+      "passed": false,
+      "reason": "DSL businessrule missing input mapping; DSL businessrule missing output mapping",
+      "severity": "error"
+    }
+  ],
+  "failed_details": [
+    {
+      "contract_type": "businessrule_mapping",
+      "bpmn_element_type": "businessRuleTask",
+      "bpmn_element_id": "Activity_0ysk2q6",
+      "bpmn_element_name": "Activity_0ysk2q6",
+      "dsl_node_id": "Activity_0ysk2q6",
+      "passed": false,
+      "reason": "DSL businessrule missing input mapping; DSL businessrule missing output mapping",
+      "severity": "error"
+    }
+  ]
+}

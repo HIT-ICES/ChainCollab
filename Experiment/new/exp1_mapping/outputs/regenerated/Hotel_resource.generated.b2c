@@ -1,0 +1,250 @@
+contract Hotel_resource {
+
+    participants {
+        participant Participant_1080bkg {
+            msp "ClientMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Client"
+
+            }
+        }
+        participant Participant_0sktaei {
+            msp "HotelMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Hotel"
+
+            }
+        }
+
+    }
+
+
+
+    globals {
+        ID: string
+        VIPLevel: int
+        VIPcardId: string
+        VIPpoints: int
+        Bedrooms: int
+        Booking_id: string
+        Cancel: bool
+        Confirm: bool
+        Confirmation: bool
+        Date: string
+        Discount1: int
+        Discount2: int
+        Motivation: string
+        Payableto: string
+        Quotation: int
+
+    }
+
+
+
+    messages {
+        message Message_045i10y from Participant_1080bkg to Participant_0sktaei {
+            initial state INACTIVE
+            schema "{\"properties\":{\"date\":{\"type\":\"string\",\"description\":\"\"},\"bedrooms\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"date\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_04ikf2n from Participant_0sktaei to Participant_1080bkg {
+            initial state INACTIVE
+            schema "{\"properties\":{\"discount2\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+        }
+        message Message_0m9p3da from Participant_1080bkg to Participant_0sktaei {
+            initial state INACTIVE
+            schema "{\"properties\":{\"cancel\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"cancel\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_0o8eyir from Participant_1080bkg to Participant_0sktaei {
+            initial state INACTIVE
+            schema "{\"properties\":{\"payableto\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"payableto\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_0r9lypd from Participant_0sktaei to Participant_1080bkg {
+            initial state INACTIVE
+            schema "{\"properties\":{\"confirm\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"confirm\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_0vlxzcv from Participant_0sktaei to Participant_1080bkg {
+            initial state INACTIVE
+            schema "{\"properties\":{\"discount1\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"discount1\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_104h2tt from Participant_1080bkg to Participant_0sktaei {
+            initial state INACTIVE
+            schema "{\"properties\":{\"VIPpoints\":{\"type\":\"number\",\"description\":\"\"},\"VIPcardId\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"VIPpoints\",\"VIPcardId\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1em0ee4 from Participant_0sktaei to Participant_1080bkg {
+            initial state INACTIVE
+            schema "{\"properties\":{\"quotation\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"quotation\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1etcmvl from Participant_0sktaei to Participant_1080bkg {
+            initial state INACTIVE
+            schema "{\"properties\":{\"payableto\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"payableto\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1joj7ca from Participant_1080bkg to Participant_0sktaei {
+            initial state INACTIVE
+            schema "{\"properties\":{\"ID\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"ID\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1ljlm4g from Participant_0sktaei to Participant_1080bkg {
+            initial state INACTIVE
+            schema "{\"properties\":{\"booking_id\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"booking_id\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1nlagx2 from Participant_1080bkg to Participant_0sktaei {
+            initial state INACTIVE
+            schema "{\"properties\":{\"confirmation\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"confirmation\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1xm9dxy from Participant_1080bkg to Participant_0sktaei {
+            initial state INACTIVE
+            schema "{\"properties\":{\"motivation\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"motivation\"],\"files\":{},\"file required\":[]}"
+        }
+
+    }
+
+
+
+    gateways {
+        gateway ExclusiveGateway_106je4z {
+            type exclusive
+            initial state INACTIVE
+        }
+        gateway ExclusiveGateway_0hs3ztq {
+            type exclusive
+            initial state INACTIVE
+        }
+        gateway ExclusiveGateway_0nzwv7v {
+            type exclusive
+            initial state INACTIVE
+        }
+        gateway Gateway_1jhfnrm {
+            type exclusive
+            initial state INACTIVE
+        }
+        gateway Gateway_1atxr3y {
+            type exclusive
+            initial state INACTIVE
+        }
+        gateway EventBasedGateway_1fxpmyn {
+            type event
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    events {
+        event StartEvent_1jtgn3j {
+            initial state READY
+        }
+        event EndEvent_0366pfz {
+            initial state INACTIVE
+        }
+        event EndEvent_08edp7f {
+            initial state INACTIVE
+        }
+        event EndEvent_146eii4 {
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    businessrules {
+        businessrule Activity_0b1f7uv {
+            dmn "Activity_0b1f7uv.dmn"
+            decision "Activity_0b1f7uv_DecisionID"
+            input mapping {
+                VIPpoints -> VIPpoints
+
+            }
+            output mapping {
+                VIPLevel -> VIPLevel
+
+            }
+
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    oracletasks {
+
+    }
+
+
+
+    flows {
+        start event StartEvent_1jtgn3j enables ExclusiveGateway_0hs3ztq;
+
+        when message Message_045i10y completed
+        then enable Message_0r9lypd;
+        when message Message_0r9lypd completed
+        then enable ExclusiveGateway_106je4z;
+        when message Message_1em0ee4 completed
+        then enable Message_1nlagx2;
+        when message Message_1nlagx2 completed
+        then enable EventBasedGateway_1fxpmyn;
+        when message Message_0o8eyir completed
+        then disable Message_1xm9dxy, disable Message_104h2tt, enable Message_1ljlm4g;
+        when message Message_1xm9dxy completed
+        then disable Message_0o8eyir, disable Message_104h2tt, enable EndEvent_0366pfz;
+        when message Message_1ljlm4g completed
+        then enable Message_0m9p3da;
+        when message Message_0m9p3da completed
+        then enable ExclusiveGateway_0nzwv7v;
+        when message Message_1joj7ca completed
+        then enable Message_1etcmvl;
+        when message Message_1etcmvl completed
+        then enable EndEvent_146eii4;
+        when message Message_104h2tt completed
+        then disable Message_0o8eyir, disable Message_1xm9dxy, enable Activity_0b1f7uv;
+        when message Message_0vlxzcv completed
+        then enable Gateway_1atxr3y;
+        when message Message_04ikf2n completed
+        then enable Gateway_1atxr3y;
+
+        when gateway ExclusiveGateway_106je4z completed
+        choose {
+            if Confirm == true
+            then enable Message_1em0ee4;
+            if Confirm == false
+            then enable ExclusiveGateway_0hs3ztq;
+
+        }
+        when gateway ExclusiveGateway_0hs3ztq completed
+        then enable Message_045i10y;
+        when gateway ExclusiveGateway_0nzwv7v completed
+        choose {
+            if Cancel == false
+            then enable EndEvent_08edp7f;
+            if Cancel == true
+            then enable Message_1joj7ca;
+
+        }
+        when gateway Gateway_1jhfnrm completed
+        choose {
+            if VIPLevel < 3
+            then enable Message_0vlxzcv;
+            if VIPLevel == 3
+            then enable Message_04ikf2n;
+
+        }
+        when gateway Gateway_1atxr3y completed
+        then enable Message_0o8eyir;
+        when gateway EventBasedGateway_1fxpmyn completed
+        then enable Message_0o8eyir, enable Message_1xm9dxy, enable Message_104h2tt;
+
+        when businessrule Activity_0b1f7uv done
+        then enable Gateway_1jhfnrm;
+
+    }
+
+}

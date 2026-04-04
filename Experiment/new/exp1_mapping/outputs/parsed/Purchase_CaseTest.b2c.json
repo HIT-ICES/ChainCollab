@@ -1,0 +1,380 @@
+{
+  "case_name": "Purchase_CaseTest",
+  "source_files": {
+    "b2c": "/root/code/ChainCollab/Experiment/new/exp1_mapping/outputs/regenerated/Purchase_CaseTest.generated.b2c"
+  },
+  "contracts": [
+    "Purchase_CaseTest"
+  ],
+  "participants": [
+    {
+      "name": "Participant_0oa2za9",
+      "msp": "ClientMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "Client"
+        }
+      ],
+      "role": "Client"
+    },
+    {
+      "name": "Participant_0jwk4tk",
+      "msp": "CompanyMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "Company"
+        }
+      ],
+      "role": "Company"
+    },
+    {
+      "name": "Participant_0cb2p7d",
+      "msp": "New_Participant_1MSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "New Participant 1"
+        }
+      ],
+      "role": "New Participant 1"
+    }
+  ],
+  "globals": [
+    {
+      "name": "MessageContent",
+      "type": "string"
+    },
+    {
+      "name": "Price",
+      "type": "string"
+    },
+    {
+      "name": "Time",
+      "type": "string"
+    },
+    {
+      "name": "Num",
+      "type": "string"
+    },
+    {
+      "name": "OrderContent",
+      "type": "string"
+    },
+    {
+      "name": "Time",
+      "type": "string"
+    }
+  ],
+  "messages": [
+    {
+      "name": "Message_01kcpmi",
+      "sender": "Participant_0oa2za9",
+      "receiver": "Participant_0jwk4tk",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_02q44he",
+      "sender": "Participant_0oa2za9",
+      "receiver": "Participant_0jwk4tk",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_05gz8u0",
+      "sender": "Participant_0jwk4tk",
+      "receiver": "Participant_0oa2za9",
+      "schema": "{\"properties\":{\"MessageContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_0g7m9tf",
+      "sender": "Participant_0oa2za9",
+      "receiver": "Participant_0jwk4tk",
+      "schema": "{\"properties\":{\"num\":{\"type\":\"string\",\"description\":\"\"},\"time\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_0mcktm6",
+      "sender": "Participant_0jwk4tk",
+      "receiver": "Participant_0oa2za9",
+      "schema": "{\"properties\":{\"Price\":{\"type\":\"string\",\"description\":\"\"},\"Time\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_0q9hvem",
+      "sender": "Participant_0jwk4tk",
+      "receiver": "Participant_0oa2za9",
+      "schema": "{\"properties\":{\"orderContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_14wu8ts",
+      "sender": "Participant_0oa2za9",
+      "receiver": "Participant_0jwk4tk",
+      "schema": "{\"properties\":{\"MessageContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_15pehvh",
+      "sender": "Participant_0jwk4tk",
+      "receiver": "Participant_0oa2za9",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1f0gefc",
+      "sender": "Participant_0oa2za9",
+      "receiver": "Participant_0jwk4tk",
+      "schema": "{\"properties\":{\"MessageContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1ieb8wn",
+      "sender": "Participant_0oa2za9",
+      "receiver": "Participant_0jwk4tk",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "Gateway_1ltys0e",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Gateway_025uwvp",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "Event_0ehnwwz",
+      "initial_state": "READY"
+    },
+    {
+      "name": "Event_0e3j88g",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Event_1o9guxu",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Event_194zr5n",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [],
+  "flows": [
+    {
+      "kind": "start_flow",
+      "trigger_type": "start",
+      "trigger_name": "Event_0ehnwwz",
+      "trigger_state": "ready",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0q9hvem"
+        }
+      ],
+      "raw_text": "start event Event_0ehnwwz enables Message_0q9hvem;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_0q9hvem",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1ieb8wn"
+        }
+      ],
+      "raw_text": "when message Message_0q9hvem completed then enable Message_1ieb8wn;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1ieb8wn",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1ltys0e"
+        }
+      ],
+      "raw_text": "when message Message_1ieb8wn completed then enable Gateway_1ltys0e;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1f0gefc",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_025uwvp"
+        }
+      ],
+      "raw_text": "when message Message_1f0gefc completed then enable Gateway_025uwvp;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_14wu8ts",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Event_194zr5n"
+        }
+      ],
+      "raw_text": "when message Message_14wu8ts completed then enable Event_194zr5n;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_0mcktm6",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_02q44he"
+        }
+      ],
+      "raw_text": "when message Message_0mcktm6 completed then enable Message_02q44he;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_02q44he",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0g7m9tf"
+        }
+      ],
+      "raw_text": "when message Message_02q44he completed then enable Message_0g7m9tf;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_05gz8u0",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_01kcpmi"
+        }
+      ],
+      "raw_text": "when message Message_05gz8u0 completed then enable Message_01kcpmi;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_01kcpmi",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Event_0e3j88g"
+        }
+      ],
+      "raw_text": "when message Message_01kcpmi completed then enable Event_0e3j88g;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_0g7m9tf",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_15pehvh"
+        }
+      ],
+      "raw_text": "when message Message_0g7m9tf completed then enable Message_15pehvh;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_15pehvh",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Event_1o9guxu"
+        }
+      ],
+      "raw_text": "when message Message_15pehvh completed then enable Event_1o9guxu;"
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger_type": "gateway",
+      "trigger_name": "Gateway_1ltys0e",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1f0gefc"
+        },
+        {
+          "kind": "enable",
+          "target": "Message_14wu8ts"
+        }
+      ],
+      "branches": [],
+      "raw_text": "when gateway Gateway_1ltys0e completed then enable Message_1f0gefc, enable Message_14wu8ts;"
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger_type": "gateway",
+      "trigger_name": "Gateway_025uwvp",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0mcktm6"
+        },
+        {
+          "kind": "enable",
+          "target": "Message_05gz8u0"
+        }
+      ],
+      "branches": [],
+      "raw_text": "when gateway Gateway_025uwvp completed then enable Message_0mcktm6, enable Message_05gz8u0;"
+    }
+  ],
+  "participant_aliases": {
+    "Participant_0oa2za9": [
+      "Participant_0oa2za9",
+      "Client"
+    ],
+    "Participant_0jwk4tk": [
+      "Participant_0jwk4tk",
+      "Company"
+    ],
+    "Participant_0cb2p7d": [
+      "Participant_0cb2p7d",
+      "New Participant 1"
+    ]
+  }
+}

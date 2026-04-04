@@ -1,0 +1,366 @@
+{
+  "case_name": "Blood_analysis_resource",
+  "source_files": {
+    "b2c": "/root/code/ChainCollab/Experiment/new/exp1_mapping/outputs/regenerated/Blood_analysis_resource.generated.b2c"
+  },
+  "contracts": [
+    "Blood_analysis_resource"
+  ],
+  "participants": [
+    {
+      "name": "Participant_0ggs0ck",
+      "msp": "GynecologistMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "Gynecologist"
+        }
+      ],
+      "role": "Gynecologist"
+    },
+    {
+      "name": "Participant_1v6wnpq",
+      "msp": "LabMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "Lab"
+        }
+      ],
+      "role": "Lab"
+    },
+    {
+      "name": "Participant_0tkhpj2",
+      "msp": "HospitalMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "Hospital"
+        }
+      ],
+      "role": "Hospital"
+    }
+  ],
+  "globals": [
+    {
+      "name": "FurtherCheck",
+      "type": "bool"
+    },
+    {
+      "name": "FurtherCheckDate",
+      "type": "string"
+    },
+    {
+      "name": "FurtherCheckPlace",
+      "type": "string"
+    },
+    {
+      "name": "PatientData",
+      "type": "string"
+    },
+    {
+      "name": "ReportContent",
+      "type": "string"
+    },
+    {
+      "name": "Result",
+      "type": "string"
+    },
+    {
+      "name": "Sample",
+      "type": "string"
+    }
+  ],
+  "messages": [
+    {
+      "name": "Message_0gd0z61",
+      "sender": "Participant_0tkhpj2",
+      "receiver": "Participant_0ggs0ck",
+      "schema": "{\"properties\":{\"furtherCheckPlace\":{\"type\":\"string\",\"description\":\"\"},\"furtherCheckDate\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"furtherCheckPlace\",\"furtherCheckDate\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_0gswvmq",
+      "sender": "Participant_0ggs0ck",
+      "receiver": "Participant_1v6wnpq",
+      "schema": "{\"properties\":{\"sample\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"sample\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_0wq8mc6",
+      "sender": "Participant_0ggs0ck",
+      "receiver": "Participant_0tkhpj2",
+      "schema": "{\"properties\":{\"patientData\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"patientData\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_13mh6mk",
+      "sender": "Participant_0tkhpj2",
+      "receiver": "Participant_0ggs0ck",
+      "schema": "{\"properties\":{\"reportContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"reportContent\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1rqbibd",
+      "sender": "Participant_0ggs0ck",
+      "receiver": "Participant_0tkhpj2",
+      "schema": "{\"properties\":{\"result\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"result\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1vzqd37",
+      "sender": "Participant_1v6wnpq",
+      "receiver": "Participant_0ggs0ck",
+      "schema": "{\"properties\":{\"result\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"result\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "Gateway_0o8snyv",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "ParallelGateway_1pgjqtw",
+      "type": "parallel",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Gateway_1m6dgym",
+      "type": "parallel",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "StartEvent_0m7hz56",
+      "initial_state": "READY"
+    },
+    {
+      "name": "EndEvent_110myff",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [
+    {
+      "name": "Activity_1mj4mr7",
+      "dmn": "Activity_1mj4mr7.dmn",
+      "decision": "Activity_1mj4mr7_DecisionID",
+      "input_mapping": [
+        {
+          "dmnParam": "result",
+          "globalRef": "Result"
+        }
+      ],
+      "output_mapping": [
+        {
+          "dmnParam": "FurtherCheck",
+          "globalRef": "FurtherCheck"
+        }
+      ],
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "flows": [
+    {
+      "kind": "start_flow",
+      "trigger_type": "start",
+      "trigger_name": "StartEvent_0m7hz56",
+      "trigger_state": "ready",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "ParallelGateway_1pgjqtw"
+        }
+      ],
+      "raw_text": "start event StartEvent_0m7hz56 enables ParallelGateway_1pgjqtw;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_0gswvmq",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1vzqd37"
+        }
+      ],
+      "raw_text": "when message Message_0gswvmq completed then enable Message_1vzqd37;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_0wq8mc6",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_13mh6mk"
+        }
+      ],
+      "raw_text": "when message Message_0wq8mc6 completed then enable Message_13mh6mk;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1vzqd37",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1m6dgym"
+        }
+      ],
+      "raw_text": "when message Message_1vzqd37 completed then enable Gateway_1m6dgym;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1rqbibd",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Activity_1mj4mr7"
+        }
+      ],
+      "raw_text": "when message Message_1rqbibd completed then enable Activity_1mj4mr7;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_0gd0z61",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "EndEvent_110myff"
+        }
+      ],
+      "raw_text": "when message Message_0gd0z61 completed then enable EndEvent_110myff;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_13mh6mk",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1m6dgym"
+        }
+      ],
+      "raw_text": "when message Message_13mh6mk completed then enable Gateway_1m6dgym;"
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger_type": "gateway",
+      "trigger_name": "Gateway_0o8snyv",
+      "trigger_state": "completed",
+      "actions": [],
+      "branches": [
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "EndEvent_110myff"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "FurtherCheck",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_0gd0z61"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "FurtherCheck",
+          "relation": "==",
+          "value": ""
+        }
+      ],
+      "raw_text": "when gateway Gateway_0o8snyv completed choose ..."
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger_type": "gateway",
+      "trigger_name": "ParallelGateway_1pgjqtw",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0gswvmq"
+        },
+        {
+          "kind": "enable",
+          "target": "Message_0wq8mc6"
+        }
+      ],
+      "branches": [],
+      "raw_text": "when gateway ParallelGateway_1pgjqtw completed then enable Message_0gswvmq, enable Message_0wq8mc6;"
+    },
+    {
+      "kind": "parallel_join",
+      "trigger_type": "parallel",
+      "trigger_name": "Gateway_1m6dgym",
+      "trigger_state": "await",
+      "sources": [
+        "Message_1vzqd37",
+        "Message_13mh6mk"
+      ],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1rqbibd"
+        }
+      ],
+      "raw_text": "parallel gateway Gateway_1m6dgym await Message_1vzqd37, Message_13mh6mk then enable Message_1rqbibd;"
+    },
+    {
+      "kind": "rule_flow",
+      "trigger_type": "businessrule",
+      "trigger_name": "Activity_1mj4mr7",
+      "trigger_state": "done",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_0o8snyv"
+        }
+      ],
+      "raw_text": "when businessrule Activity_1mj4mr7 done then enable Gateway_0o8snyv;"
+    }
+  ],
+  "participant_aliases": {
+    "Participant_0ggs0ck": [
+      "Participant_0ggs0ck",
+      "Gynecologist"
+    ],
+    "Participant_1v6wnpq": [
+      "Participant_1v6wnpq",
+      "Lab"
+    ],
+    "Participant_0tkhpj2": [
+      "Participant_0tkhpj2",
+      "Hospital"
+    ]
+  }
+}

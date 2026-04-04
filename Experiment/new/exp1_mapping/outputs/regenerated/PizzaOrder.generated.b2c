@@ -1,0 +1,173 @@
+contract PizzaOrder {
+
+    participants {
+        participant Participant_1ho1h5w {
+            msp "CustomerMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Customer"
+
+            }
+        }
+        participant Participant_0sap3uu {
+            msp "Pizza_PlaceMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Pizza Place"
+
+            }
+        }
+        participant Participant_0wqp6et {
+            msp "New_Participant_1MSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "New Participant 1"
+
+            }
+        }
+        participant Participant_02o0v0t {
+            msp "Delivery_DriverMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Delivery Driver"
+
+            }
+        }
+
+    }
+
+
+
+    globals {
+        Address: string
+        DeliveryInfomation: string
+        OrderContent: string
+        PickUpTime: string
+        Signature: string
+
+    }
+
+
+
+    messages {
+        message Message_07ijcd8 from Participant_0sap3uu to Participant_1ho1h5w {
+            initial state INACTIVE
+            schema "{\"properties\":{\"Signature\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+        }
+        message Message_166dqh1 from Participant_0sap3uu to Participant_02o0v0t {
+            initial state INACTIVE
+            schema "{\"properties\":{\"DeliveryInfomation\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+        }
+        message Message_17lsnh5 from Participant_0sap3uu to Participant_1ho1h5w {
+            initial state INACTIVE
+            schema "{\"properties\":{\"PickUpTime\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"PickUpTime\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1801074 from Participant_1ho1h5w to Participant_0sap3uu {
+            initial state INACTIVE
+            schema "{\"properties\":{\"OrderContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"OrderContent\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1ccaj59 from Participant_1ho1h5w to Participant_02o0v0t {
+            initial state INACTIVE
+            schema "{\"properties\":{\"Signature\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1flmnkz from Participant_02o0v0t to Participant_1ho1h5w {
+            initial state INACTIVE
+            schema "{}"
+        }
+        message Message_1ib4iio from Participant_1ho1h5w to Participant_0sap3uu {
+            initial state INACTIVE
+            schema "{}"
+        }
+        message Message_1pbiv0r from Participant_1ho1h5w to Participant_0sap3uu {
+            initial state INACTIVE
+            schema "{\"properties\":{\"Address\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"Address\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1ypsrgy from Participant_1ho1h5w to Participant_0sap3uu {
+            initial state INACTIVE
+            schema "{}"
+        }
+
+    }
+
+
+
+    gateways {
+        gateway Gateway_1pguang {
+            type exclusive
+            initial state INACTIVE
+        }
+        gateway Gateway_0nafkvy {
+            type event
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    events {
+        event Event_1a62z0q {
+            initial state READY
+        }
+        event Event_04u53jh {
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    businessrules {
+
+    }
+
+
+
+    oracletasks {
+
+    }
+
+
+
+    flows {
+        start event Event_1a62z0q enables Message_1801074;
+
+        when message Message_1801074 completed
+        then enable Gateway_0nafkvy;
+        when message Message_1pbiv0r completed
+        then disable Message_1ib4iio, enable Message_166dqh1;
+        when message Message_1ib4iio completed
+        then disable Message_1pbiv0r, enable Message_17lsnh5;
+        when message Message_17lsnh5 completed
+        then enable Message_1ypsrgy;
+        when message Message_166dqh1 completed
+        then enable Message_1flmnkz;
+        when message Message_1flmnkz completed
+        then enable Message_1ccaj59;
+        when message Message_1ccaj59 completed
+        then enable Gateway_1pguang;
+        when message Message_1ypsrgy completed
+        then enable Message_07ijcd8;
+        when message Message_07ijcd8 completed
+        then enable Gateway_1pguang;
+
+        when gateway Gateway_1pguang completed
+        then enable Event_04u53jh;
+        when gateway Gateway_0nafkvy completed
+        then enable Message_1pbiv0r, enable Message_1ib4iio;
+
+    }
+
+}

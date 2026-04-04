@@ -1,0 +1,608 @@
+{
+  "case_name": "SupplyChainPaper7777",
+  "source_files": {
+    "b2c": "/root/code/ChainCollab/Experiment/new/exp1_mapping/outputs/regenerated/SupplyChainPaper7777.generated.b2c"
+  },
+  "contracts": [
+    "SupplyChainPaper7777"
+  ],
+  "participants": [
+    {
+      "name": "Participant_0w6qkdf",
+      "msp": "Bulk_buyerMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "Bulk buyer"
+        }
+      ],
+      "role": "Bulk buyer"
+    },
+    {
+      "name": "Participant_19mgbdn",
+      "msp": "ManufacturerMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "Manufacturer"
+        }
+      ],
+      "role": "Manufacturer"
+    },
+    {
+      "name": "Participant_09cjol2",
+      "msp": "MiddlemanMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "Middleman"
+        }
+      ],
+      "role": "Middleman"
+    },
+    {
+      "name": "Participant_0sa2v7d",
+      "msp": "SupplierMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "Supplier"
+        }
+      ],
+      "role": "Supplier"
+    },
+    {
+      "name": "Participant_19j1e3o",
+      "msp": "Special_carrierMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": [
+        {
+          "key": "role",
+          "value": "Special carrier"
+        }
+      ],
+      "role": "Special carrier"
+    }
+  ],
+  "globals": [
+    {
+      "name": "DeliveryConfirmation",
+      "type": "bool"
+    },
+    {
+      "name": "FinalPriority",
+      "type": "string"
+    },
+    {
+      "name": "NumberOfUnits",
+      "type": "int"
+    },
+    {
+      "name": "OrderDetails",
+      "type": "string"
+    },
+    {
+      "name": "ProductionStart",
+      "type": "string"
+    },
+    {
+      "name": "RequestId",
+      "type": "int"
+    },
+    {
+      "name": "SupplierReputation",
+      "type": "int"
+    },
+    {
+      "name": "SupplyOrderDetails",
+      "type": "string"
+    },
+    {
+      "name": "SupplyOrderId",
+      "type": "string"
+    },
+    {
+      "name": "TransportOrderId",
+      "type": "string"
+    },
+    {
+      "name": "Urgent",
+      "type": "bool"
+    }
+  ],
+  "messages": [
+    {
+      "name": "Message_04wmlqe",
+      "sender": "Participant_19mgbdn",
+      "receiver": "Participant_0w6qkdf",
+      "schema": "{\"properties\":{\"productionStart\":{\"type\":\"string\",\"description\":\"Notification of the commencement of production, including the date and time\"}},\"required\":[\"productionStart\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_0cba4t6",
+      "sender": "Participant_09cjol2",
+      "receiver": "Participant_0sa2v7d",
+      "schema": "{\"properties\":{\"supplyOrderId\":{\"type\":\"string\",\"description\":\" Identifier of the supply order being forwarded\"}},\"required\":[\"supplyOrderId\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_0d2xte5",
+      "sender": "Participant_19j1e3o",
+      "receiver": "Participant_19mgbdn",
+      "schema": "{\"properties\":{\"deliveryConfirmation\":{\"type\":\"boolean\",\"description\":\"Confirmation of whether the supplies have been successfully delivered\"}},\"required\":[\"deliveryConfirmation\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_0hpha6h",
+      "sender": "Participant_0sa2v7d",
+      "receiver": "Participant_19j1e3o",
+      "schema": "{\"properties\":{\"requestId\":{\"type\":\"number\",\"description\":\"Unique identifier of the request for additional details \"},\"supplierReputation\":{\"type\":\"number\",\"description\":\"A numerical rating representing the supplier's reputation.\"}},\"required\":[\"requestId\",\"supplierReputation\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_0pm90nx",
+      "sender": "Participant_09cjol2",
+      "receiver": "Participant_19j1e3o",
+      "schema": "{\"properties\":{\"transportOrderId\":{\"type\":\"string\",\"description\":\"Identifier of the transport order being forwarded\"}},\"required\":[\"transportOrderId\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_0rwz1km",
+      "sender": "Participant_19j1e3o",
+      "receiver": "Participant_0sa2v7d",
+      "schema": "{\"properties\":{\"requestId\":{\"type\":\"number\",\"description\":\" Unique identifier of the request for additional details \"},\"numberOfUnits\":{\"type\":\"number\",\"description\":\" Total number of units in the order requested\"},\"urgent\":{\"type\":\"boolean\",\"description\":\"Indicates whether the order requires urgent delivery.\"}},\"required\":[\"requestId\",\"numberOfUnits\",\"urgent\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_196q1fj",
+      "sender": "Participant_19mgbdn",
+      "receiver": "Participant_0w6qkdf",
+      "schema": "{\"properties\":{},\"required\":[],\"files\":{\"deliveryNote\":{\"type\":\"file\",\"description\":\"A document confirming the delivery of goods\"}},\"file required\":[\"deliveryNote\"]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1ajdm9l",
+      "sender": "Participant_19mgbdn",
+      "receiver": "Participant_09cjol2",
+      "schema": "{\"properties\":{\"supplyOrderDetails\":{\"type\":\"string\",\"description\":\" Details of the supplies needed\"}},\"required\":[\"supplyOrderDetails\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1dmeexg",
+      "sender": "Participant_19j1e3o",
+      "receiver": "Participant_19mgbdn",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1dzkcn0",
+      "sender": "Participant_19j1e3o",
+      "receiver": "Participant_19mgbdn",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1io2g9u",
+      "sender": "Participant_0sa2v7d",
+      "receiver": "Participant_19j1e3o",
+      "schema": "{\"properties\":{},\"required\":[],\"files\":{\"waybill\":{\"type\":\"file\",\"description\":\"Digital or physical waybill document\\uff0cdetailing the shipment contents and destination.\"}},\"file required\":[\"waybill\"]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1oxmq1k",
+      "sender": "Participant_19j1e3o",
+      "receiver": "Participant_19mgbdn",
+      "schema": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Message_1wswgqu",
+      "sender": "Participant_0w6qkdf",
+      "receiver": "Participant_19mgbdn",
+      "schema": "{\"properties\":{\"orderDetails\":{\"type\":\"string\",\"description\":\"Detailed list of goods ordered\"}},\"required\":[\"orderDetails\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "Gateway_1cr0nma",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Gateway_0ep8cuh",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Gateway_0onpe6x",
+      "type": "parallel",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Gateway_1fbifca",
+      "type": "parallel",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "Event_06sexe6",
+      "initial_state": "READY"
+    },
+    {
+      "name": "Event_13pbqdz",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [
+    {
+      "name": "Activity_0rm8bkp",
+      "dmn": "Activity_0rm8bkp.dmn",
+      "decision": "Activity_0rm8bkp_DecisionID",
+      "input_mapping": [
+        {
+          "dmnParam": "numberOfUnits",
+          "globalRef": "NumberOfUnits"
+        },
+        {
+          "dmnParam": "urgent",
+          "globalRef": "Urgent"
+        },
+        {
+          "dmnParam": "supplierReputation",
+          "globalRef": "SupplierReputation"
+        }
+      ],
+      "output_mapping": [
+        {
+          "dmnParam": "finalPriority",
+          "globalRef": "FinalPriority"
+        }
+      ],
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "flows": [
+    {
+      "kind": "start_flow",
+      "trigger_type": "start",
+      "trigger_name": "Event_06sexe6",
+      "trigger_state": "ready",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1wswgqu"
+        }
+      ],
+      "raw_text": "start event Event_06sexe6 enables Message_1wswgqu;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1wswgqu",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1ajdm9l"
+        }
+      ],
+      "raw_text": "when message Message_1wswgqu completed then enable Message_1ajdm9l;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1ajdm9l",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_0onpe6x"
+        }
+      ],
+      "raw_text": "when message Message_1ajdm9l completed then enable Gateway_0onpe6x;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_0cba4t6",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1fbifca"
+        }
+      ],
+      "raw_text": "when message Message_0cba4t6 completed then enable Gateway_1fbifca;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_0pm90nx",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1fbifca"
+        }
+      ],
+      "raw_text": "when message Message_0pm90nx completed then enable Gateway_1fbifca;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_0rwz1km",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0hpha6h"
+        }
+      ],
+      "raw_text": "when message Message_0rwz1km completed then enable Message_0hpha6h;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_0hpha6h",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1io2g9u"
+        }
+      ],
+      "raw_text": "when message Message_0hpha6h completed then enable Message_1io2g9u;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1io2g9u",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Activity_0rm8bkp"
+        }
+      ],
+      "raw_text": "when message Message_1io2g9u completed then enable Activity_0rm8bkp;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_0d2xte5",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1cr0nma"
+        }
+      ],
+      "raw_text": "when message Message_0d2xte5 completed then enable Gateway_1cr0nma;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_04wmlqe",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_196q1fj"
+        }
+      ],
+      "raw_text": "when message Message_04wmlqe completed then enable Message_196q1fj;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_196q1fj",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Event_13pbqdz"
+        }
+      ],
+      "raw_text": "when message Message_196q1fj completed then enable Event_13pbqdz;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1oxmq1k",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1cr0nma"
+        }
+      ],
+      "raw_text": "when message Message_1oxmq1k completed then enable Gateway_1cr0nma;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1dzkcn0",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1cr0nma"
+        }
+      ],
+      "raw_text": "when message Message_1dzkcn0 completed then enable Gateway_1cr0nma;"
+    },
+    {
+      "kind": "message_flow",
+      "trigger_type": "message",
+      "trigger_name": "Message_1dmeexg",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1cr0nma"
+        }
+      ],
+      "raw_text": "when message Message_1dmeexg completed then enable Gateway_1cr0nma;"
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger_type": "gateway",
+      "trigger_name": "Gateway_1cr0nma",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_04wmlqe"
+        }
+      ],
+      "branches": [],
+      "raw_text": "when gateway Gateway_1cr0nma completed then enable Message_04wmlqe;"
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger_type": "gateway",
+      "trigger_name": "Gateway_0ep8cuh",
+      "trigger_state": "completed",
+      "actions": [],
+      "branches": [
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_1oxmq1k"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "FinalPriority",
+          "relation": "==",
+          "value": "\"Low\""
+        },
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_1dmeexg"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "FinalPriority",
+          "relation": "==",
+          "value": "\"High\""
+        },
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_1dzkcn0"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "FinalPriority",
+          "relation": "==",
+          "value": "\"Medium\""
+        },
+        {
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_0d2xte5"
+            }
+          ],
+          "condition_kind": "else"
+        }
+      ],
+      "raw_text": "when gateway Gateway_0ep8cuh completed choose ..."
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger_type": "gateway",
+      "trigger_name": "Gateway_0onpe6x",
+      "trigger_state": "completed",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0cba4t6"
+        },
+        {
+          "kind": "enable",
+          "target": "Message_0pm90nx"
+        }
+      ],
+      "branches": [],
+      "raw_text": "when gateway Gateway_0onpe6x completed then enable Message_0cba4t6, enable Message_0pm90nx;"
+    },
+    {
+      "kind": "parallel_join",
+      "trigger_type": "parallel",
+      "trigger_name": "Gateway_1fbifca",
+      "trigger_state": "await",
+      "sources": [
+        "Message_0cba4t6",
+        "Message_0pm90nx"
+      ],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0rwz1km"
+        }
+      ],
+      "raw_text": "parallel gateway Gateway_1fbifca await Message_0cba4t6, Message_0pm90nx then enable Message_0rwz1km;"
+    },
+    {
+      "kind": "rule_flow",
+      "trigger_type": "businessrule",
+      "trigger_name": "Activity_0rm8bkp",
+      "trigger_state": "done",
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_0ep8cuh"
+        }
+      ],
+      "raw_text": "when businessrule Activity_0rm8bkp done then enable Gateway_0ep8cuh;"
+    }
+  ],
+  "participant_aliases": {
+    "Participant_0w6qkdf": [
+      "Participant_0w6qkdf",
+      "Bulk buyer"
+    ],
+    "Participant_19mgbdn": [
+      "Participant_19mgbdn",
+      "Manufacturer"
+    ],
+    "Participant_09cjol2": [
+      "Participant_09cjol2",
+      "Middleman"
+    ],
+    "Participant_0sa2v7d": [
+      "Participant_0sa2v7d",
+      "Supplier"
+    ],
+    "Participant_19j1e3o": [
+      "Participant_19j1e3o",
+      "Special carrier"
+    ]
+  }
+}

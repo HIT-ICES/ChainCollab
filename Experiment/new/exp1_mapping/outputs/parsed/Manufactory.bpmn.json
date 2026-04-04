@@ -1,0 +1,434 @@
+{
+  "case_name": "Manufactory",
+  "source_files": {
+    "bpmn": "/root/code/ChainCollab/Experiment/BPMNwithDMNcase/manu2.bpmn",
+    "dmn": "/root/code/ChainCollab/Experiment/BPMNwithDMNcase/Manufactory.dmn"
+  },
+  "participants": [
+    {
+      "id": "Participant_1xq1vsc",
+      "name": "Manufacturer"
+    },
+    {
+      "id": "Participant_05g5xih",
+      "name": "Customer"
+    }
+  ],
+  "messages": [
+    {
+      "id": "MessageFlow_1eq3g4t",
+      "messageRef": "Message_05uqcn2",
+      "name": "pay",
+      "sourceRef": "Participant_1xq1vsc",
+      "targetRef": "Participant_05g5xih",
+      "sender": "Manufacturer",
+      "receiver": "Customer",
+      "schema": {
+        "properties": {
+          "payMethod": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_1ljtjwy",
+      "messageRef": "Message_1i5n14f",
+      "name": "Payment",
+      "sourceRef": "Participant_05g5xih",
+      "targetRef": "Participant_1xq1vsc",
+      "sender": "Customer",
+      "receiver": "Manufacturer",
+      "schema": {
+        "properties": {
+          "Fee": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_1iy52jz",
+      "messageRef": "Message_13l7271",
+      "name": "Payment",
+      "sourceRef": "Participant_1xq1vsc",
+      "targetRef": "Participant_05g5xih",
+      "sender": "Manufacturer",
+      "receiver": "Customer",
+      "schema": {
+        "properties": {
+          "payRecord": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_15pbqsf",
+      "messageRef": "Message_1yln43l",
+      "name": "Invoice",
+      "sourceRef": "Participant_05g5xih",
+      "targetRef": "Participant_1xq1vsc",
+      "sender": "Customer",
+      "receiver": "Manufacturer",
+      "schema": {
+        "properties": {
+          "InvoiceContent": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_0xv5py0",
+      "messageRef": "Message_0zt8q9t",
+      "name": "Cancelation Ack",
+      "sourceRef": "Participant_05g5xih",
+      "targetRef": "Participant_1xq1vsc",
+      "sender": "Customer",
+      "receiver": "Manufacturer",
+      "schema": {
+        "properties": {
+          "ConcelAck": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "ConcelAck"
+        ],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_07o8kbh",
+      "messageRef": "Message_03was4c",
+      "name": "Order Confirmation",
+      "sourceRef": "Participant_1xq1vsc",
+      "targetRef": "Participant_05g5xih",
+      "sender": "Manufacturer",
+      "receiver": "Customer",
+      "schema": {
+        "properties": {
+          "confirm message": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "confirm message"
+        ],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_0t8jgbn",
+      "messageRef": "Message_0z8kf0j",
+      "name": "Order Cancelation",
+      "sourceRef": "Participant_1xq1vsc",
+      "targetRef": "Participant_05g5xih",
+      "sender": "Manufacturer",
+      "receiver": "Customer",
+      "schema": {
+        "properties": {
+          "cancelation": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "cancelation"
+        ],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_0yyvb3o",
+      "messageRef": "Message_1y5d31x",
+      "name": "Order",
+      "sourceRef": "Participant_05g5xih",
+      "targetRef": "Participant_1xq1vsc",
+      "sender": "Customer",
+      "receiver": "Manufacturer",
+      "schema": {
+        "properties": {
+          "OrderContent": {
+            "type": "string",
+            "description": ""
+          },
+          "OrderAmount": {
+            "type": "number",
+            "description": ""
+          }
+        },
+        "required": [
+          "OrderContent",
+          "OrderAmount"
+        ],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_1ikddog",
+      "messageRef": "Message_1kazup6",
+      "name": "Quote",
+      "sourceRef": "Participant_05g5xih",
+      "targetRef": "Participant_1xq1vsc",
+      "sender": "Customer",
+      "receiver": "Manufacturer",
+      "schema": {
+        "properties": {
+          "QuoteContent": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "QuoteContent"
+        ],
+        "files": {},
+        "file required": []
+      }
+    },
+    {
+      "id": "MessageFlow_0jy4bux",
+      "messageRef": "Message_00wpjke",
+      "name": "Request for Quote",
+      "sourceRef": "Participant_1xq1vsc",
+      "targetRef": "Participant_05g5xih",
+      "sender": "Manufacturer",
+      "receiver": "Customer",
+      "schema": {
+        "properties": {
+          "QuoteRequest": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "QuoteRequest"
+        ],
+        "files": {},
+        "file required": []
+      }
+    }
+  ],
+  "gateways": [
+    {
+      "id": "Gateway_19zzj3s",
+      "name": "Gateway_19zzj3s",
+      "type": "exclusive"
+    },
+    {
+      "id": "Gateway_085e7pr",
+      "name": "Gateway_085e7pr",
+      "type": "event"
+    }
+  ],
+  "events": [
+    {
+      "id": "Event_0okhbce",
+      "name": "Event_0okhbce",
+      "kind": "start"
+    },
+    {
+      "id": "Event_0th6os0",
+      "name": "Event_0th6os0",
+      "kind": "end"
+    },
+    {
+      "id": "Event_0awuo5v",
+      "name": "Event_0awuo5v",
+      "kind": "end"
+    },
+    {
+      "id": "Event_0zsq5na",
+      "name": "Event_0zsq5na",
+      "kind": "end"
+    }
+  ],
+  "businessrules": [
+    {
+      "id": "Activity_1uktp5z",
+      "name": "Cancel",
+      "dmn": null,
+      "decision": null,
+      "input_mapping": [
+        {
+          "name": "OrderAmount",
+          "type": "number",
+          "description": ""
+        }
+      ],
+      "output_mapping": [
+        {
+          "name": "CancelFee",
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "dmn_inference": {
+        "path": "Manufactory.dmn",
+        "decision_id": "decision_0tybghz",
+        "decision_name": "manufactory",
+        "used_inference": true
+      }
+    }
+  ],
+  "flows": [
+    {
+      "id": "Flow_1ee7hm3",
+      "sourceRef": "Event_0okhbce",
+      "targetRef": "ChoreographyTask_0760eth",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_164pudk",
+      "sourceRef": "ChoreographyTask_0760eth",
+      "targetRef": "ChoreographyTask_08y6nn5",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1umky7j",
+      "sourceRef": "ChoreographyTask_08y6nn5",
+      "targetRef": "Gateway_085e7pr",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_0cz4fit",
+      "sourceRef": "Gateway_085e7pr",
+      "targetRef": "ChoreographyTask_1he549j",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_0t6gewr",
+      "sourceRef": "Gateway_085e7pr",
+      "targetRef": "ChoreographyTask_041ugdo",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_00qh424",
+      "sourceRef": "ChoreographyTask_1he549j",
+      "targetRef": "Activity_1uktp5z",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1qfqu6c",
+      "sourceRef": "ChoreographyTask_041ugdo",
+      "targetRef": "ChoreographyTask_0upordx",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_11xk0nh",
+      "sourceRef": "ChoreographyTask_0upordx",
+      "targetRef": "Event_0th6os0",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_08kp8xk",
+      "sourceRef": "Activity_1uktp5z",
+      "targetRef": "Gateway_19zzj3s",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    },
+    {
+      "id": "Flow_1vll7kq",
+      "sourceRef": "Gateway_19zzj3s",
+      "targetRef": "Event_0awuo5v",
+      "type": "sequenceFlow",
+      "trigger_hint": "CancelFee==false"
+    },
+    {
+      "id": "Flow_0j6aki6",
+      "sourceRef": "Gateway_19zzj3s",
+      "targetRef": "ChoreographyTask_0c55hcl",
+      "type": "sequenceFlow",
+      "trigger_hint": "CancelFee==true"
+    },
+    {
+      "id": "Flow_0efab79",
+      "sourceRef": "ChoreographyTask_0c55hcl",
+      "targetRef": "Event_0zsq5na",
+      "type": "sequenceFlow",
+      "trigger_hint": ""
+    }
+  ],
+  "dmn_metadata": {
+    "path": "/root/code/ChainCollab/Experiment/BPMNwithDMNcase/Manufactory.dmn",
+    "file_name": "Manufactory.dmn",
+    "decisions": [
+      {
+        "id": "decision_0tybghz",
+        "name": "manufactory",
+        "inputs": [
+          {
+            "id": "input1",
+            "label": "CancelAmount",
+            "expression_id": "inputExpression1",
+            "typeRef": "number",
+            "text": "CancelAmount"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "output1",
+            "name": "CancelFee",
+            "label": "CancelFee",
+            "type": "boolean"
+          }
+        ],
+        "is_main": true
+      }
+    ],
+    "main_decision": {
+      "id": "decision_0tybghz",
+      "name": "manufactory",
+      "inputs": [
+        {
+          "id": "input1",
+          "label": "CancelAmount",
+          "expression_id": "inputExpression1",
+          "typeRef": "number",
+          "text": "CancelAmount"
+        }
+      ],
+      "outputs": [
+        {
+          "id": "output1",
+          "name": "CancelFee",
+          "label": "CancelFee",
+          "type": "boolean"
+        }
+      ],
+      "is_main": true
+    }
+  }
+}

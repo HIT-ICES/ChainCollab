@@ -1,0 +1,143 @@
+{
+  "case_name": "Blood_CaseTest",
+  "source_files": {
+    "bpmn": "/root/code/ChainCollab/Experiment/CaseTest/Blood_analysis.bpmn",
+    "dmn": null,
+    "b2c": "/root/code/ChainCollab/Experiment/new/exp1_mapping/outputs/regenerated/Blood_CaseTest.generated.b2c"
+  },
+  "total_elements": 11,
+  "success_mappings": 11,
+  "preserved_elements": 11,
+  "missing_items": [],
+  "type_mismatches": [],
+  "contract_total": 12,
+  "contract_passed": 12,
+  "contract_failed": 0,
+  "element_preservation_rate": 1.0,
+  "mapping_accuracy": 1.0,
+  "contract_satisfaction_rate": 1.0,
+  "pass": true,
+  "details": [
+    {
+      "contract_type": "participant_mapping",
+      "bpmn_element_type": "participant",
+      "bpmn_element_id": "Participant_0ggs0ck",
+      "bpmn_element_name": "Gynecologist",
+      "dsl_node_id": "Participant_0ggs0ck",
+      "passed": true,
+      "reason": "Participant matched by id/name/role alias.",
+      "severity": "info"
+    },
+    {
+      "contract_type": "participant_mapping",
+      "bpmn_element_type": "participant",
+      "bpmn_element_id": "Participant_1v6wnpq",
+      "bpmn_element_name": "Lab",
+      "dsl_node_id": "Participant_1v6wnpq",
+      "passed": true,
+      "reason": "Participant matched by id/name/role alias.",
+      "severity": "info"
+    },
+    {
+      "contract_type": "participant_mapping",
+      "bpmn_element_type": "participant",
+      "bpmn_element_id": "Participant_0tkhpj2",
+      "bpmn_element_name": "Hospital",
+      "dsl_node_id": "Participant_0tkhpj2",
+      "passed": true,
+      "reason": "Participant matched by id/name/role alias.",
+      "severity": "info"
+    },
+    {
+      "contract_type": "participant_count",
+      "bpmn_element_type": "participant_group",
+      "bpmn_element_id": "participants",
+      "bpmn_element_name": "participants",
+      "dsl_node_id": "participants",
+      "passed": true,
+      "reason": "BPMN participants=3, DSL participants=3.",
+      "severity": "error"
+    },
+    {
+      "contract_type": "message_mapping",
+      "bpmn_element_type": "messageFlow",
+      "bpmn_element_id": "MessageFlow_09o9s93",
+      "bpmn_element_name": "bloodResults(string bloodResults)",
+      "dsl_node_id": "Message_1rqbibd",
+      "passed": true,
+      "reason": "Message definition and flow trigger preserved.",
+      "severity": "info"
+    },
+    {
+      "contract_type": "message_mapping",
+      "bpmn_element_type": "messageFlow",
+      "bpmn_element_id": "MessageFlow_0r5mbr1",
+      "bpmn_element_name": "result(string result)",
+      "dsl_node_id": "Message_1vzqd37",
+      "passed": true,
+      "reason": "Message definition and flow trigger preserved.",
+      "severity": "info"
+    },
+    {
+      "contract_type": "message_mapping",
+      "bpmn_element_type": "messageFlow",
+      "bpmn_element_id": "MessageFlow_0vz56a0",
+      "bpmn_element_name": "data(string patientData)",
+      "dsl_node_id": "Message_0wq8mc6",
+      "passed": true,
+      "reason": "Message definition and flow trigger preserved.",
+      "severity": "info"
+    },
+    {
+      "contract_type": "message_mapping",
+      "bpmn_element_type": "messageFlow",
+      "bpmn_element_id": "MessageFlow_16uaf5s",
+      "bpmn_element_name": "sample(string sample)",
+      "dsl_node_id": "Message_0gswvmq",
+      "passed": true,
+      "reason": "Message definition and flow trigger preserved.",
+      "severity": "info"
+    },
+    {
+      "contract_type": "gateway_mapping",
+      "bpmn_element_type": "gateway",
+      "bpmn_element_id": "ParallelGateway_1pgjqtw",
+      "bpmn_element_name": "ParallelGateway_1pgjqtw",
+      "dsl_node_id": "ParallelGateway_1pgjqtw",
+      "passed": true,
+      "reason": "Gateway type preserved.",
+      "severity": "info"
+    },
+    {
+      "contract_type": "gateway_mapping",
+      "bpmn_element_type": "gateway",
+      "bpmn_element_id": "ParallelGateway_16ab76f",
+      "bpmn_element_name": "ParallelGateway_16ab76f",
+      "dsl_node_id": "ParallelGateway_16ab76f",
+      "passed": true,
+      "reason": "Gateway type preserved.",
+      "severity": "info"
+    },
+    {
+      "contract_type": "event_mapping",
+      "bpmn_element_type": "event",
+      "bpmn_element_id": "StartEvent_0m7hz56",
+      "bpmn_element_name": "StartEvent_0m7hz56",
+      "dsl_node_id": "StartEvent_0m7hz56",
+      "passed": true,
+      "reason": "Event preserved with expected progression rule.",
+      "severity": "info"
+    },
+    {
+      "contract_type": "event_mapping",
+      "bpmn_element_type": "event",
+      "bpmn_element_id": "EndEvent_110myff",
+      "bpmn_element_name": "EndEvent_110myff",
+      "dsl_node_id": "EndEvent_110myff",
+      "passed": true,
+      "reason": "Event preserved with expected progression rule.",
+      "severity": "info"
+    }
+  ],
+  "failed_details": []
+}
