@@ -1,0 +1,411 @@
+{
+  "contract_name": "Purchase",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/Purchase/Purchase.b2c",
+  "participants": [
+    {
+      "name": "Participant_0oa2za9",
+      "msp": "ClientMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "role": "Client",
+      "attributes": {
+        "role": "Client"
+      }
+    },
+    {
+      "name": "Participant_0jwk4tk",
+      "msp": "CompanyMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "role": "Company",
+      "attributes": {
+        "role": "Company"
+      }
+    },
+    {
+      "name": "Participant_0cb2p7d",
+      "msp": "New_Participant_1MSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "role": "New Participant 1",
+      "attributes": {
+        "role": "New Participant 1"
+      }
+    }
+  ],
+  "globals": [
+    {
+      "name": "MessageContent",
+      "type": "string"
+    },
+    {
+      "name": "Price",
+      "type": "int"
+    },
+    {
+      "name": "Time",
+      "type": "string"
+    },
+    {
+      "name": "Discount",
+      "type": "bool"
+    },
+    {
+      "name": "Num",
+      "type": "string"
+    },
+    {
+      "name": "OrderContent",
+      "type": "string"
+    },
+    {
+      "name": "PriceOK",
+      "type": "bool"
+    },
+    {
+      "name": "ProductAvalibale",
+      "type": "bool"
+    },
+    {
+      "name": "Sale",
+      "type": "string"
+    },
+    {
+      "name": "Time",
+      "type": "string"
+    }
+  ],
+  "messages": [
+    {
+      "name": "Message_05gz8u0",
+      "from": "Participant_0jwk4tk",
+      "to": "Participant_0oa2za9",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"MessageContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_08ms1jj",
+      "from": "Participant_0jwk4tk",
+      "to": "Participant_0oa2za9",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"sale\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"sale\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_0g7m9tf",
+      "from": "Participant_0oa2za9",
+      "to": "Participant_0jwk4tk",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"num\":{\"type\":\"string\",\"description\":\"\"},\"time\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_0mcktm6",
+      "from": "Participant_0jwk4tk",
+      "to": "Participant_0oa2za9",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"Price\":{\"type\":\"number\",\"description\":\"\"},\"Time\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"Price\",\"Time\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_0q9hvem",
+      "from": "Participant_0jwk4tk",
+      "to": "Participant_0oa2za9",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"orderContent\":{\"type\":\"string\",\"description\":\"\"},\"productAvalibale\":{\"type\":\"boolean\",\"description\":\"is product avaliable\"}},\"required\":[\"orderContent\",\"productAvalibale\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_14wu8ts",
+      "from": "Participant_0oa2za9",
+      "to": "Participant_0jwk4tk",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"MessageContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_1f0gefc",
+      "from": "Participant_0oa2za9",
+      "to": "Participant_0jwk4tk",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"MessageContent\":{\"type\":\"string\",\"description\":\"\"},\"priceOK\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"MessageContent\",\"priceOK\"],\"files\":{},\"file required\":[]}"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "Gateway_1ltys0e",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Gateway_025uwvp",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Gateway_13i0b7w",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "Event_0ehnwwz",
+      "initial_state": "READY"
+    },
+    {
+      "name": "Event_0e3j88g",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Event_1o9guxu",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Event_194zr5n",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [
+    {
+      "name": "Activity_12arovy",
+      "dmn": "Activity_12arovy.dmn",
+      "decision": "Activity_12arovy_DecisionID",
+      "input_mapping": [
+        {
+          "dmn_param": "Price",
+          "global": "Price"
+        }
+      ],
+      "output_mapping": [
+        {
+          "dmn_param": "discount",
+          "global": "Discount"
+        }
+      ],
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "oracletasks": [],
+  "flows": [
+    {
+      "kind": "start_flow",
+      "trigger": {
+        "type": "start",
+        "name": "Event_0ehnwwz",
+        "state": "ready"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0q9hvem"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0q9hvem",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1ltys0e"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_1f0gefc",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_025uwvp"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_14wu8ts",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Event_194zr5n"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0mcktm6",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Activity_12arovy"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_05gz8u0",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Event_0e3j88g"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0g7m9tf",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Event_1o9guxu"
+        }
+      ]
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "Gateway_1ltys0e",
+        "state": "completed"
+      },
+      "conditions": [
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_1f0gefc"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "ProductAvalibale",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_14wu8ts"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "ProductAvalibale",
+          "relation": "==",
+          "value": ""
+        }
+      ],
+      "actions": []
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "Gateway_025uwvp",
+        "state": "completed"
+      },
+      "conditions": [
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_0mcktm6"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "PriceOK",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_05gz8u0"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "PriceOK",
+          "relation": "==",
+          "value": ""
+        }
+      ],
+      "actions": []
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "Gateway_13i0b7w",
+        "state": "completed"
+      },
+      "conditions": [
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_0g7m9tf"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Discount",
+          "relation": "==",
+          "value": ""
+        }
+      ],
+      "actions": []
+    },
+    {
+      "kind": "rule_flow",
+      "trigger": {
+        "type": "businessrule",
+        "name": "Activity_12arovy",
+        "state": "done"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_13i0b7w"
+        }
+      ]
+    }
+  ]
+}

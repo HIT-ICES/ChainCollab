@@ -1,0 +1,737 @@
+{
+  "case_name": "Hotel_Booking",
+  "target": "solidity",
+  "contract_name": "Hotel_Booking",
+  "elements": [
+    {
+      "element_name": "ID",
+      "element_type": "global",
+      "matched": true,
+      "evidence": [
+        "StateMemory.ID : string"
+      ],
+      "missing_reason": "",
+      "severity": "low"
+    },
+    {
+      "element_name": "VIPLevel",
+      "element_type": "global",
+      "matched": true,
+      "evidence": [
+        "StateMemory.VIPLevel : int256"
+      ],
+      "missing_reason": "",
+      "severity": "low"
+    },
+    {
+      "element_name": "VIPcardId",
+      "element_type": "global",
+      "matched": true,
+      "evidence": [
+        "StateMemory.VIPcardId : string"
+      ],
+      "missing_reason": "",
+      "severity": "low"
+    },
+    {
+      "element_name": "VIPpoints",
+      "element_type": "global",
+      "matched": true,
+      "evidence": [
+        "StateMemory.VIPpoints : int256"
+      ],
+      "missing_reason": "",
+      "severity": "low"
+    },
+    {
+      "element_name": "Bedrooms",
+      "element_type": "global",
+      "matched": true,
+      "evidence": [
+        "StateMemory.Bedrooms : int256"
+      ],
+      "missing_reason": "",
+      "severity": "low"
+    },
+    {
+      "element_name": "Booking_id",
+      "element_type": "global",
+      "matched": true,
+      "evidence": [
+        "StateMemory.Booking_id : string"
+      ],
+      "missing_reason": "",
+      "severity": "low"
+    },
+    {
+      "element_name": "Cancel",
+      "element_type": "global",
+      "matched": true,
+      "evidence": [
+        "StateMemory.Cancel : bool"
+      ],
+      "missing_reason": "",
+      "severity": "low"
+    },
+    {
+      "element_name": "Confirm",
+      "element_type": "global",
+      "matched": true,
+      "evidence": [
+        "StateMemory.Confirm : bool"
+      ],
+      "missing_reason": "",
+      "severity": "low"
+    },
+    {
+      "element_name": "Confirmation",
+      "element_type": "global",
+      "matched": true,
+      "evidence": [
+        "StateMemory.Confirmation : bool"
+      ],
+      "missing_reason": "",
+      "severity": "low"
+    },
+    {
+      "element_name": "Date",
+      "element_type": "global",
+      "matched": true,
+      "evidence": [
+        "StateMemory.Date : string"
+      ],
+      "missing_reason": "",
+      "severity": "low"
+    },
+    {
+      "element_name": "Discount1",
+      "element_type": "global",
+      "matched": true,
+      "evidence": [
+        "StateMemory.Discount1 : int256"
+      ],
+      "missing_reason": "",
+      "severity": "low"
+    },
+    {
+      "element_name": "Discount2",
+      "element_type": "global",
+      "matched": true,
+      "evidence": [
+        "StateMemory.Discount2 : int256"
+      ],
+      "missing_reason": "",
+      "severity": "low"
+    },
+    {
+      "element_name": "Motivation",
+      "element_type": "global",
+      "matched": true,
+      "evidence": [
+        "StateMemory.Motivation : string"
+      ],
+      "missing_reason": "",
+      "severity": "low"
+    },
+    {
+      "element_name": "Payableto",
+      "element_type": "global",
+      "matched": true,
+      "evidence": [
+        "StateMemory.Payableto : string"
+      ],
+      "missing_reason": "",
+      "severity": "low"
+    },
+    {
+      "element_name": "Quotation",
+      "element_type": "global",
+      "matched": true,
+      "evidence": [
+        "StateMemory.Quotation : int256"
+      ],
+      "missing_reason": "",
+      "severity": "low"
+    },
+    {
+      "element_name": "Participant_1080bkg",
+      "element_type": "participant",
+      "matched": true,
+      "evidence": [
+        "ParticipantKey enum contains `Participant_1080bkg`",
+        "Solidity uses _checkParticipant(msg.sender/identity registry)"
+      ],
+      "missing_reason": "",
+      "severity": "low"
+    },
+    {
+      "element_name": "Participant_0sktaei",
+      "element_type": "participant",
+      "matched": true,
+      "evidence": [
+        "ParticipantKey enum contains `Participant_0sktaei`",
+        "Solidity uses _checkParticipant(msg.sender/identity registry)"
+      ],
+      "missing_reason": "",
+      "severity": "low"
+    },
+    {
+      "element_name": "Message_045i10y",
+      "element_type": "message",
+      "matched": true,
+      "evidence": [
+        "function Message_045i10y_Send",
+        "sender participant `Participant_1080bkg` preserved in ParticipantKey",
+        "receiver participant `Participant_0sktaei` preserved in ParticipantKey",
+        "participant guard via _checkParticipant",
+        "message state assignment in handler"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "Message_04ikf2n",
+      "element_type": "message",
+      "matched": true,
+      "evidence": [
+        "function Message_04ikf2n_Send",
+        "sender participant `Participant_0sktaei` preserved in ParticipantKey",
+        "receiver participant `Participant_1080bkg` preserved in ParticipantKey",
+        "participant guard via _checkParticipant",
+        "message state assignment in handler"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "Message_0m9p3da",
+      "element_type": "message",
+      "matched": true,
+      "evidence": [
+        "function Message_0m9p3da_Send",
+        "sender participant `Participant_1080bkg` preserved in ParticipantKey",
+        "receiver participant `Participant_0sktaei` preserved in ParticipantKey",
+        "participant guard via _checkParticipant",
+        "message state assignment in handler"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "Message_0o8eyir",
+      "element_type": "message",
+      "matched": true,
+      "evidence": [
+        "function Message_0o8eyir_Send",
+        "sender participant `Participant_1080bkg` preserved in ParticipantKey",
+        "receiver participant `Participant_0sktaei` preserved in ParticipantKey",
+        "participant guard via _checkParticipant",
+        "message state assignment in handler"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "Message_0r9lypd",
+      "element_type": "message",
+      "matched": true,
+      "evidence": [
+        "function Message_0r9lypd_Send",
+        "sender participant `Participant_0sktaei` preserved in ParticipantKey",
+        "receiver participant `Participant_1080bkg` preserved in ParticipantKey",
+        "participant guard via _checkParticipant",
+        "message state assignment in handler"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "Message_0vlxzcv",
+      "element_type": "message",
+      "matched": true,
+      "evidence": [
+        "function Message_0vlxzcv_Send",
+        "sender participant `Participant_0sktaei` preserved in ParticipantKey",
+        "receiver participant `Participant_1080bkg` preserved in ParticipantKey",
+        "participant guard via _checkParticipant",
+        "message state assignment in handler"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "Message_104h2tt",
+      "element_type": "message",
+      "matched": true,
+      "evidence": [
+        "function Message_104h2tt_Send",
+        "sender participant `Participant_1080bkg` preserved in ParticipantKey",
+        "receiver participant `Participant_0sktaei` preserved in ParticipantKey",
+        "participant guard via _checkParticipant",
+        "message state assignment in handler"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "Message_1em0ee4",
+      "element_type": "message",
+      "matched": true,
+      "evidence": [
+        "function Message_1em0ee4_Send",
+        "sender participant `Participant_0sktaei` preserved in ParticipantKey",
+        "receiver participant `Participant_1080bkg` preserved in ParticipantKey",
+        "participant guard via _checkParticipant",
+        "message state assignment in handler"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "Message_1etcmvl",
+      "element_type": "message",
+      "matched": true,
+      "evidence": [
+        "function Message_1etcmvl_Send",
+        "sender participant `Participant_0sktaei` preserved in ParticipantKey",
+        "receiver participant `Participant_1080bkg` preserved in ParticipantKey",
+        "participant guard via _checkParticipant",
+        "message state assignment in handler"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "Message_1joj7ca",
+      "element_type": "message",
+      "matched": true,
+      "evidence": [
+        "function Message_1joj7ca_Send",
+        "sender participant `Participant_1080bkg` preserved in ParticipantKey",
+        "receiver participant `Participant_0sktaei` preserved in ParticipantKey",
+        "participant guard via _checkParticipant",
+        "message state assignment in handler"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "Message_1ljlm4g",
+      "element_type": "message",
+      "matched": true,
+      "evidence": [
+        "function Message_1ljlm4g_Send",
+        "sender participant `Participant_0sktaei` preserved in ParticipantKey",
+        "receiver participant `Participant_1080bkg` preserved in ParticipantKey",
+        "participant guard via _checkParticipant",
+        "message state assignment in handler"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "Message_1nlagx2",
+      "element_type": "message",
+      "matched": true,
+      "evidence": [
+        "function Message_1nlagx2_Send",
+        "sender participant `Participant_1080bkg` preserved in ParticipantKey",
+        "receiver participant `Participant_0sktaei` preserved in ParticipantKey",
+        "participant guard via _checkParticipant",
+        "message state assignment in handler"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "Message_1xm9dxy",
+      "element_type": "message",
+      "matched": true,
+      "evidence": [
+        "function Message_1xm9dxy_Send",
+        "sender participant `Participant_1080bkg` preserved in ParticipantKey",
+        "receiver participant `Participant_0sktaei` preserved in ParticipantKey",
+        "participant guard via _checkParticipant",
+        "message state assignment in handler"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "ExclusiveGateway_106je4z",
+      "element_type": "gateway",
+      "matched": true,
+      "evidence": [
+        "function ExclusiveGateway_106je4z",
+        "exclusive gateway backed by if branch"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "ExclusiveGateway_0hs3ztq",
+      "element_type": "gateway",
+      "matched": true,
+      "evidence": [
+        "function ExclusiveGateway_0hs3ztq"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "ExclusiveGateway_0nzwv7v",
+      "element_type": "gateway",
+      "matched": true,
+      "evidence": [
+        "function ExclusiveGateway_0nzwv7v",
+        "exclusive gateway backed by if branch"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "Gateway_1jhfnrm",
+      "element_type": "gateway",
+      "matched": true,
+      "evidence": [
+        "function Gateway_1jhfnrm",
+        "exclusive gateway backed by if branch"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "Gateway_1atxr3y",
+      "element_type": "gateway",
+      "matched": true,
+      "evidence": [
+        "function Gateway_1atxr3y"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "EventBasedGateway_1fxpmyn",
+      "element_type": "gateway",
+      "matched": true,
+      "evidence": [
+        "function EventBasedGateway_1fxpmyn",
+        "gateway guarded by runtime state check"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "StartEvent_1jtgn3j",
+      "element_type": "event",
+      "matched": true,
+      "evidence": [
+        "function StartEvent_1jtgn3j",
+        "event enables downstream message/gateway"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "EndEvent_0366pfz",
+      "element_type": "event",
+      "matched": true,
+      "evidence": [
+        "function EndEvent_0366pfz"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "EndEvent_08edp7f",
+      "element_type": "event",
+      "matched": true,
+      "evidence": [
+        "function EndEvent_08edp7f"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "EndEvent_146eii4",
+      "element_type": "event",
+      "matched": true,
+      "evidence": [
+        "function EndEvent_146eii4"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "Activity_0b1f7uv",
+      "element_type": "businessrule",
+      "matched": true,
+      "evidence": [
+        "function Activity_0b1f7uv",
+        "function Activity_0b1f7uv_Continue",
+        "DMN request call found",
+        "DMN request status polling found",
+        "DMN result fetch found"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "flow_1:start:StartEvent_1jtgn3j",
+      "element_type": "flow",
+      "matched": true,
+      "evidence": [
+        "trigger handled by StartEvent_1jtgn3j",
+        "inst.gateways[GatewayKey.ExclusiveGateway_0hs3ztq].state = ElementState.ENABLED"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "flow_2:message:Message_045i10y",
+      "element_type": "flow",
+      "matched": true,
+      "evidence": [
+        "trigger handled by Message_045i10y_Send",
+        "inst.messages[MessageKey.Message_0r9lypd].state = ElementState.ENABLED"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "flow_3:message:Message_0r9lypd",
+      "element_type": "flow",
+      "matched": true,
+      "evidence": [
+        "trigger handled by Message_0r9lypd_Send",
+        "inst.gateways[GatewayKey.ExclusiveGateway_106je4z].state = ElementState.ENABLED"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "flow_4:message:Message_1em0ee4",
+      "element_type": "flow",
+      "matched": true,
+      "evidence": [
+        "trigger handled by Message_1em0ee4_Send",
+        "inst.messages[MessageKey.Message_1nlagx2].state = ElementState.ENABLED"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "flow_5:message:Message_1nlagx2",
+      "element_type": "flow",
+      "matched": true,
+      "evidence": [
+        "trigger handled by Message_1nlagx2_Send",
+        "inst.gateways[GatewayKey.EventBasedGateway_1fxpmyn].state = ElementState.ENABLED"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "flow_6:message:Message_0o8eyir",
+      "element_type": "flow",
+      "matched": true,
+      "evidence": [
+        "trigger handled by Message_0o8eyir_Send",
+        "inst.messages[MessageKey.Message_1xm9dxy].state = ElementState.DISABLED",
+        "inst.messages[MessageKey.Message_1xm9dxy].state = ElementState.DISABLED",
+        "inst.messages[MessageKey.Message_1ljlm4g].state = ElementState.ENABLED"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "flow_7:message:Message_1xm9dxy",
+      "element_type": "flow",
+      "matched": true,
+      "evidence": [
+        "trigger handled by Message_1xm9dxy_Send",
+        "inst.messages[MessageKey.Message_0o8eyir].state = ElementState.DISABLED",
+        "inst.messages[MessageKey.Message_0o8eyir].state = ElementState.DISABLED",
+        "inst.events[EventKey.EndEvent_0366pfz].state = ElementState.ENABLED"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "flow_8:message:Message_1ljlm4g",
+      "element_type": "flow",
+      "matched": true,
+      "evidence": [
+        "trigger handled by Message_1ljlm4g_Send",
+        "inst.messages[MessageKey.Message_0m9p3da].state = ElementState.ENABLED"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "flow_9:message:Message_0m9p3da",
+      "element_type": "flow",
+      "matched": true,
+      "evidence": [
+        "trigger handled by Message_0m9p3da_Send",
+        "inst.gateways[GatewayKey.ExclusiveGateway_0nzwv7v].state = ElementState.ENABLED"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "flow_10:message:Message_1joj7ca",
+      "element_type": "flow",
+      "matched": true,
+      "evidence": [
+        "trigger handled by Message_1joj7ca_Send",
+        "inst.messages[MessageKey.Message_1etcmvl].state = ElementState.ENABLED"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "flow_11:message:Message_1etcmvl",
+      "element_type": "flow",
+      "matched": true,
+      "evidence": [
+        "trigger handled by Message_1etcmvl_Send",
+        "inst.events[EventKey.EndEvent_146eii4].state = ElementState.ENABLED"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "flow_12:message:Message_104h2tt",
+      "element_type": "flow",
+      "matched": true,
+      "evidence": [
+        "trigger handled by Message_104h2tt_Send",
+        "inst.messages[MessageKey.Message_0o8eyir].state = ElementState.DISABLED",
+        "inst.messages[MessageKey.Message_0o8eyir].state = ElementState.DISABLED",
+        "inst.businessRules[BusinessRuleKey.Activity_0b1f7uv].state = ElementState.ENABLED"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "flow_13:message:Message_0vlxzcv",
+      "element_type": "flow",
+      "matched": true,
+      "evidence": [
+        "trigger handled by Message_0vlxzcv_Send",
+        "inst.gateways[GatewayKey.Gateway_1atxr3y].state = ElementState.ENABLED"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "flow_14:message:Message_04ikf2n",
+      "element_type": "flow",
+      "matched": true,
+      "evidence": [
+        "trigger handled by Message_04ikf2n_Send",
+        "inst.gateways[GatewayKey.Gateway_1atxr3y].state = ElementState.ENABLED"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "flow_15:gateway:ExclusiveGateway_106je4z",
+      "element_type": "flow",
+      "matched": true,
+      "evidence": [
+        "trigger handled by ExclusiveGateway_106je4z",
+        "inst.gateways[GatewayKey.ExclusiveGateway_0hs3ztq].state = ElementState.ENABLED",
+        "inst.gateways[GatewayKey.ExclusiveGateway_0hs3ztq].state = ElementState.ENABLED",
+        "branch condition `inst.stateMemory.Confirm == true`",
+        "branch condition `inst.stateMemory.Confirm == true`"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "flow_16:gateway:ExclusiveGateway_0hs3ztq",
+      "element_type": "flow",
+      "matched": true,
+      "evidence": [
+        "trigger handled by ExclusiveGateway_0hs3ztq",
+        "inst.messages[MessageKey.Message_045i10y].state = ElementState.ENABLED"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "flow_17:gateway:ExclusiveGateway_0nzwv7v",
+      "element_type": "flow",
+      "matched": true,
+      "evidence": [
+        "trigger handled by ExclusiveGateway_0nzwv7v",
+        "inst.messages[MessageKey.Message_1joj7ca].state = ElementState.ENABLED",
+        "inst.messages[MessageKey.Message_1joj7ca].state = ElementState.ENABLED",
+        "branch condition `inst.stateMemory.Cancel == false`",
+        "branch condition `inst.stateMemory.Cancel == false`"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "flow_18:gateway:Gateway_1jhfnrm",
+      "element_type": "flow",
+      "matched": true,
+      "evidence": [
+        "trigger handled by Gateway_1jhfnrm",
+        "inst.messages[MessageKey.Message_04ikf2n].state = ElementState.ENABLED",
+        "inst.messages[MessageKey.Message_04ikf2n].state = ElementState.ENABLED",
+        "branch condition `inst.stateMemory.VIPLevel < 3`",
+        "branch condition `inst.stateMemory.VIPLevel < 3`"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "flow_19:gateway:Gateway_1atxr3y",
+      "element_type": "flow",
+      "matched": true,
+      "evidence": [
+        "trigger handled by Gateway_1atxr3y",
+        "inst.messages[MessageKey.Message_0o8eyir].state = ElementState.ENABLED"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "flow_20:gateway:EventBasedGateway_1fxpmyn",
+      "element_type": "flow",
+      "matched": true,
+      "evidence": [
+        "trigger handled by EventBasedGateway_1fxpmyn",
+        "inst.messages[MessageKey.Message_0o8eyir].state = ElementState.ENABLED",
+        "inst.messages[MessageKey.Message_0o8eyir].state = ElementState.ENABLED",
+        "inst.messages[MessageKey.Message_0o8eyir].state = ElementState.ENABLED"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    },
+    {
+      "element_name": "flow_21:businessrule:Activity_0b1f7uv",
+      "element_type": "flow",
+      "matched": true,
+      "evidence": [
+        "trigger handled by Activity_0b1f7uv",
+        "trigger handled by Activity_0b1f7uv_Continue",
+        "inst.gateways[GatewayKey.Gateway_1jhfnrm].state = ElementState.ENABLED"
+      ],
+      "missing_reason": "",
+      "severity": "medium"
+    }
+  ],
+  "summary": {
+    "dsl_element_coverage": 1.0,
+    "state_transition_preservation_rate": 1.0,
+    "branch_logic_preservation_rate": 1.0,
+    "businessrule_mapping_accuracy": 1.0,
+    "total_elements": 62,
+    "matched_elements": 62
+  }
+}

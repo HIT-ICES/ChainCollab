@@ -1,0 +1,731 @@
+{
+  "contract_name": "BikeRental",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/BikeRental/BikeRental.b2c",
+  "participants": [
+    {
+      "name": "Participant_1jz106x",
+      "msp": "Bike_centerMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "role": "Bike center",
+      "attributes": {
+        "role": "Bike center"
+      }
+    },
+    {
+      "name": "Participant_0jcddbb",
+      "msp": "CustomerMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "role": "Customer",
+      "attributes": {
+        "role": "Customer"
+      }
+    },
+    {
+      "name": "Participant_0c1qh31",
+      "msp": "InsurerMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "role": "Insurer",
+      "attributes": {
+        "role": "Insurer"
+      }
+    }
+  ],
+  "globals": [
+    {
+      "name": "Ask",
+      "type": "bool"
+    },
+    {
+      "name": "InsuranceReq",
+      "type": "bool"
+    },
+    {
+      "name": "IsAvailable",
+      "type": "bool"
+    }
+  ],
+  "messages": [
+    {
+      "name": "Message_009a0bz",
+      "from": "Participant_1jz106x",
+      "to": "Participant_0jcddbb",
+      "initial_state": "INACTIVE",
+      "schema": "{}"
+    },
+    {
+      "name": "Message_02ckm6k",
+      "from": "Participant_0jcddbb",
+      "to": "Participant_1jz106x",
+      "initial_state": "INACTIVE",
+      "schema": "{}"
+    },
+    {
+      "name": "Message_06bv1qa",
+      "from": "Participant_1jz106x",
+      "to": "Participant_0jcddbb",
+      "initial_state": "INACTIVE",
+      "schema": "{}"
+    },
+    {
+      "name": "Message_0b1e9t1",
+      "from": "Participant_1jz106x",
+      "to": "Participant_0jcddbb",
+      "initial_state": "INACTIVE",
+      "schema": "{}"
+    },
+    {
+      "name": "Message_0cq2w1g",
+      "from": "Participant_0jcddbb",
+      "to": "Participant_1jz106x",
+      "initial_state": "INACTIVE",
+      "schema": "{}"
+    },
+    {
+      "name": "Message_0g4xpdf",
+      "from": "Participant_1jz106x",
+      "to": "Participant_0jcddbb",
+      "initial_state": "INACTIVE",
+      "schema": "{}"
+    },
+    {
+      "name": "Message_0hzpgno",
+      "from": "Participant_1jz106x",
+      "to": "Participant_0jcddbb",
+      "initial_state": "INACTIVE",
+      "schema": "{}"
+    },
+    {
+      "name": "Message_0is10sh",
+      "from": "Participant_1jz106x",
+      "to": "Participant_0jcddbb",
+      "initial_state": "INACTIVE",
+      "schema": "{}"
+    },
+    {
+      "name": "Message_0l75vce",
+      "from": "Participant_0jcddbb",
+      "to": "Participant_1jz106x",
+      "initial_state": "INACTIVE",
+      "schema": "{}"
+    },
+    {
+      "name": "Message_0lvlunm",
+      "from": "Participant_0c1qh31",
+      "to": "Participant_0jcddbb",
+      "initial_state": "INACTIVE",
+      "schema": "{}"
+    },
+    {
+      "name": "Message_0nkjynd",
+      "from": "Participant_0jcddbb",
+      "to": "Participant_1jz106x",
+      "initial_state": "INACTIVE",
+      "schema": "{}"
+    },
+    {
+      "name": "Message_0psi2ab",
+      "from": "Participant_0jcddbb",
+      "to": "Participant_0c1qh31",
+      "initial_state": "INACTIVE",
+      "schema": "{}"
+    },
+    {
+      "name": "Message_0to30q0",
+      "from": "Participant_0jcddbb",
+      "to": "Participant_1jz106x",
+      "initial_state": "INACTIVE",
+      "schema": "{}"
+    },
+    {
+      "name": "Message_1989eur",
+      "from": "Participant_0jcddbb",
+      "to": "Participant_1jz106x",
+      "initial_state": "INACTIVE",
+      "schema": "{}"
+    },
+    {
+      "name": "Message_1dp5xa4",
+      "from": "Participant_0jcddbb",
+      "to": "Participant_1jz106x",
+      "initial_state": "INACTIVE",
+      "schema": "{}"
+    },
+    {
+      "name": "Message_1ufjjj2",
+      "from": "Participant_1jz106x",
+      "to": "Participant_0jcddbb",
+      "initial_state": "INACTIVE",
+      "schema": "{}"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "ExclusiveGateway_0uhgcse",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "ExclusiveGateway_1e98v4d",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "ExclusiveGateway_04bkb0l",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "ExclusiveGateway_0cfvdeh",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "ExclusiveGateway_1ksw1j2",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "ExclusiveGateway_05xdg8u",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "ExclusiveGateway_0wc677m",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "ParallelGateway_0yw95j2",
+      "type": "parallel",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "ParallelGateway_0himv1h",
+      "type": "parallel",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "EventBasedGateway_1nphygh",
+      "type": "event",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "StartEvent_0gb8jks",
+      "initial_state": "READY"
+    },
+    {
+      "name": "EndEvent_11pwcmo",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [],
+  "oracletasks": [],
+  "flows": [
+    {
+      "kind": "start_flow",
+      "trigger": {
+        "type": "start",
+        "name": "StartEvent_0gb8jks",
+        "state": "ready"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "ExclusiveGateway_0uhgcse"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_06bv1qa",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "ExclusiveGateway_1e98v4d"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0nkjynd",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0b1e9t1"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0b1e9t1",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0hzpgno"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0hzpgno",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "EventBasedGateway_1nphygh"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0cq2w1g",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "disable",
+          "target": "Message_1989eur"
+        },
+        {
+          "kind": "enable",
+          "target": "Message_1ufjjj2"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_1ufjjj2",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "ExclusiveGateway_04bkb0l"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0to30q0",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "ExclusiveGateway_0cfvdeh"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0g4xpdf",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "ParallelGateway_0himv1h"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0is10sh",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "ParallelGateway_0himv1h"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_1989eur",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "disable",
+          "target": "Message_0cq2w1g"
+        },
+        {
+          "kind": "enable",
+          "target": "ExclusiveGateway_1ksw1j2"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_1dp5xa4",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "ParallelGateway_0yw95j2"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_02ckm6k",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_06bv1qa"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0psi2ab",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0lvlunm"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0lvlunm",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "ExclusiveGateway_0wc677m"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0l75vce",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "ExclusiveGateway_05xdg8u"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_009a0bz",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0psi2ab"
+        }
+      ]
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "ExclusiveGateway_0uhgcse",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_02ckm6k"
+        }
+      ]
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "ExclusiveGateway_1e98v4d",
+        "state": "completed"
+      },
+      "conditions": [
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "ExclusiveGateway_0uhgcse"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "IsAvailable",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_0l75vce"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "IsAvailable",
+          "relation": "==",
+          "value": ""
+        }
+      ],
+      "actions": []
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "ExclusiveGateway_04bkb0l",
+        "state": "completed"
+      },
+      "conditions": [
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_0to30q0"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Ask",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "ExclusiveGateway_0cfvdeh"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Ask",
+          "relation": "==",
+          "value": ""
+        }
+      ],
+      "actions": []
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "ExclusiveGateway_0cfvdeh",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "ExclusiveGateway_1ksw1j2"
+        }
+      ]
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "ExclusiveGateway_1ksw1j2",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1dp5xa4"
+        }
+      ]
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "ExclusiveGateway_05xdg8u",
+        "state": "completed"
+      },
+      "conditions": [
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "ExclusiveGateway_0wc677m"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "InsuranceReq",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_009a0bz"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "InsuranceReq",
+          "relation": "==",
+          "value": ""
+        }
+      ],
+      "actions": []
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "ExclusiveGateway_0wc677m",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0nkjynd"
+        }
+      ]
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "ParallelGateway_0yw95j2",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0g4xpdf"
+        },
+        {
+          "kind": "enable",
+          "target": "Message_0is10sh"
+        }
+      ]
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "EventBasedGateway_1nphygh",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0cq2w1g"
+        },
+        {
+          "kind": "enable",
+          "target": "Message_1989eur"
+        }
+      ]
+    },
+    {
+      "kind": "parallel_join",
+      "trigger": {
+        "type": "parallel",
+        "name": "ParallelGateway_0himv1h",
+        "state": "await"
+      },
+      "conditions": [
+        {
+          "condition_kind": "await_all",
+          "sources": [
+            "Message_0is10sh",
+            "Message_0g4xpdf"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "EndEvent_11pwcmo"
+        }
+      ]
+    }
+  ]
+}

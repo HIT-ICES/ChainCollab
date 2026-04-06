@@ -1,0 +1,733 @@
+{
+  "contract_name": "customer",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/customer/customer.b2c",
+  "participants": [
+    {
+      "name": "Participant_1080bkg",
+      "msp": "CustomerMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "role": "Customer",
+      "attributes": {
+        "role": "Customer"
+      }
+    },
+    {
+      "name": "Participant_0sktaei",
+      "msp": "Service_ProviderMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "role": "Service Provider",
+      "attributes": {
+        "role": "Service Provider"
+      }
+    },
+    {
+      "name": "Participant_1gcdqza",
+      "msp": "External_service_providerMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "role": "External service provider",
+      "attributes": {
+        "role": "External service provider"
+      }
+    }
+  ],
+  "globals": [
+    {
+      "name": "Confirmation",
+      "type": "bool"
+    },
+    {
+      "name": "Delivered_product_id",
+      "type": "string"
+    },
+    {
+      "name": "External_service_Id",
+      "type": "string"
+    },
+    {
+      "name": "Invoice",
+      "type": "bool"
+    },
+    {
+      "name": "Invoice_information",
+      "type": "string"
+    },
+    {
+      "name": "InvoiceType",
+      "type": "string"
+    },
+    {
+      "name": "InvoiceTypeAvailable",
+      "type": "bool"
+    },
+    {
+      "name": "Invoice_data",
+      "type": "int"
+    },
+    {
+      "name": "Invoice_id",
+      "type": "string"
+    },
+    {
+      "name": "Is_available",
+      "type": "bool"
+    },
+    {
+      "name": "MembershipId",
+      "type": "int"
+    },
+    {
+      "name": "MembershipLevel",
+      "type": "int"
+    },
+    {
+      "name": "Motivation",
+      "type": "string"
+    },
+    {
+      "name": "Need_external_provider",
+      "type": "bool"
+    },
+    {
+      "name": "OrderID",
+      "type": "int"
+    },
+    {
+      "name": "Payment_amount",
+      "type": "int"
+    },
+    {
+      "name": "Price_quotation",
+      "type": "int"
+    },
+    {
+      "name": "Product_Id",
+      "type": "string"
+    },
+    {
+      "name": "Service_plan",
+      "type": "string"
+    },
+    {
+      "name": "ServiceId",
+      "type": "string"
+    }
+  ],
+  "messages": [
+    {
+      "name": "Message_045i10y",
+      "from": "Participant_1080bkg",
+      "to": "Participant_0sktaei",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"serviceId\":{\"type\":\"string\",\"description\":\"The required service id\"},\"membershipId\":{\"type\":\"number\",\"description\":\"id\"}},\"required\":[\"serviceId\",\"membershipId\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_0m9p3da",
+      "from": "Participant_1080bkg",
+      "to": "Participant_0sktaei",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"invoice\":{\"type\":\"boolean\",\"description\":\"Do you need an invoice?\"},\"invoiceType\":{\"type\":\"string\",\"description\":\"type\"}},\"required\":[\"invoice\",\"invoiceType\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_0o8eyir",
+      "from": "Participant_1080bkg",
+      "to": "Participant_0sktaei",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"payment amount\":{\"type\":\"number\",\"description\":\"payment amount\"},\"orderID\":{\"type\":\"number\",\"description\":\"The order id of payment\"}},\"required\":[\"payment amount\",\"orderID\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_0r9lypd",
+      "from": "Participant_0sktaei",
+      "to": "Participant_1080bkg",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"is_available\":{\"type\":\"boolean\",\"description\":\"Is the service available?\"}},\"required\":[\"is_available\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_1em0ee4",
+      "from": "Participant_0sktaei",
+      "to": "Participant_1080bkg",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"service plan\":{\"type\":\"string\",\"description\":\"service plan\"},\"price_quotation\":{\"type\":\"number\",\"description\":\"Price quotation\"},\"need_external_provider\":{\"type\":\"boolean\",\"description\":\"Whether external service providers are required\"}},\"required\":[\"service plan\",\"price_quotation\",\"need_external_provider\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_1etcmvl",
+      "from": "Participant_0sktaei",
+      "to": "Participant_1080bkg",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"invoice_id\":{\"type\":\"string\",\"description\":\"Invoice Id\"},\"invoice_data\":{\"type\":\"number\",\"description\":\"Date of invoice issuance\"}},\"required\":[\"invoice_id\"],\"files\":{\"invoice\":{\"type\":\"file\",\"description\":\"Invoice documents\"}},\"file required\":[\"invoice\"]}"
+    },
+    {
+      "name": "Message_1i8rlqn",
+      "from": "Participant_0sktaei",
+      "to": "Participant_1gcdqza",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"external service Id\":{\"type\":\"string\",\"description\":\"The requested external service information\"}},\"required\":[\"external service Id\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_1joj7ca",
+      "from": "Participant_1080bkg",
+      "to": "Participant_0sktaei",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"invoice information\":{\"type\":\"string\",\"description\":\"Invoice related information\"}},\"required\":[\"invoice information\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_1ljlm4g",
+      "from": "Participant_0sktaei",
+      "to": "Participant_1080bkg",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"delivered_product_id\":{\"type\":\"string\",\"description\":\"delivered_product_id\"}},\"required\":[\"delivered_product_id\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_1nlagx2",
+      "from": "Participant_1080bkg",
+      "to": "Participant_0sktaei",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"confirmation\":{\"type\":\"boolean\",\"description\":\"Whether to accept the service plan\"}},\"required\":[\"confirmation\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_1q05nnw",
+      "from": "Participant_0sktaei",
+      "to": "Participant_1gcdqza",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"payment amount\":{\"type\":\"number\",\"description\":\"payment amount\"}},\"required\":[\"payment amount\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_1qbk325",
+      "from": "Participant_1gcdqza",
+      "to": "Participant_0sktaei",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"product Id\":{\"type\":\"string\",\"description\":\"Delivered product id\"}},\"required\":[\"product Id\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_1xm9dxy",
+      "from": "Participant_1080bkg",
+      "to": "Participant_0sktaei",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"motivation\":{\"type\":\"string\",\"description\":\"Motivation for Canceling orders\"}},\"required\":[\"motivation\"],\"files\":{},\"file required\":[]}"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "ExclusiveGateway_106je4z",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "ExclusiveGateway_0hs3ztq",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "ExclusiveGateway_0nzwv7v",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Gateway_1bhtapl",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Gateway_04h9e6e",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "EventBasedGateway_1fxpmyn",
+      "type": "event",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "Event_1jtgn3j",
+      "initial_state": "READY"
+    },
+    {
+      "name": "Event_0366pfz",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Event_08edp7f",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Event_146eii4",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Event_143ykco",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [
+    {
+      "name": "Activity_1yl9tfp",
+      "dmn": "Activity_1yl9tfp.dmn",
+      "decision": "Activity_1yl9tfp_DecisionID",
+      "input_mapping": [
+        {
+          "dmn_param": "membershipId",
+          "global": "MembershipId"
+        }
+      ],
+      "output_mapping": [
+        {
+          "dmn_param": "membershipLevel",
+          "global": "MembershipLevel"
+        }
+      ],
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Activity_0ibsbry",
+      "dmn": "Activity_0ibsbry.dmn",
+      "decision": "Activity_0ibsbry_DecisionID",
+      "input_mapping": [
+        {
+          "dmn_param": "invoiceType",
+          "global": "InvoiceType"
+        }
+      ],
+      "output_mapping": [
+        {
+          "dmn_param": "invoiceTypeAvailable",
+          "global": "InvoiceTypeAvailable"
+        }
+      ],
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "oracletasks": [],
+  "flows": [
+    {
+      "kind": "start_flow",
+      "trigger": {
+        "type": "start",
+        "name": "Event_1jtgn3j",
+        "state": "ready"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "ExclusiveGateway_0hs3ztq"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_045i10y",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0r9lypd"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0r9lypd",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "ExclusiveGateway_106je4z"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_1em0ee4",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1nlagx2"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_1nlagx2",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "EventBasedGateway_1fxpmyn"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0o8eyir",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "disable",
+          "target": "Message_1xm9dxy"
+        },
+        {
+          "kind": "enable",
+          "target": "Activity_1yl9tfp"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_1xm9dxy",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "disable",
+          "target": "Message_0o8eyir"
+        },
+        {
+          "kind": "enable",
+          "target": "Event_0366pfz"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_1ljlm4g",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0m9p3da"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0m9p3da",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Activity_0ibsbry"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_1joj7ca",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1etcmvl"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_1etcmvl",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Event_146eii4"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_1i8rlqn",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1q05nnw"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_1q05nnw",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1qbk325"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_1qbk325",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_04h9e6e"
+        }
+      ]
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "ExclusiveGateway_106je4z",
+        "state": "completed"
+      },
+      "conditions": [
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_1em0ee4"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Is_available",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "ExclusiveGateway_0hs3ztq"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Is_available",
+          "relation": "==",
+          "value": ""
+        }
+      ],
+      "actions": []
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "ExclusiveGateway_0hs3ztq",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_045i10y"
+        }
+      ]
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "ExclusiveGateway_0nzwv7v",
+        "state": "completed"
+      },
+      "conditions": [
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Event_08edp7f"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Invoice",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_1joj7ca"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Invoice",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Event_143ykco"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Invoice",
+          "relation": "==",
+          "value": ""
+        }
+      ],
+      "actions": []
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "Gateway_1bhtapl",
+        "state": "completed"
+      },
+      "conditions": [
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_1i8rlqn"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Need_external_provider",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Gateway_04h9e6e"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Need_external_provider",
+          "relation": "==",
+          "value": ""
+        }
+      ],
+      "actions": []
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "Gateway_04h9e6e",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1ljlm4g"
+        }
+      ]
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "EventBasedGateway_1fxpmyn",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0o8eyir"
+        },
+        {
+          "kind": "enable",
+          "target": "Message_1xm9dxy"
+        }
+      ]
+    },
+    {
+      "kind": "rule_flow",
+      "trigger": {
+        "type": "businessrule",
+        "name": "Activity_1yl9tfp",
+        "state": "done"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1bhtapl"
+        }
+      ]
+    },
+    {
+      "kind": "rule_flow",
+      "trigger": {
+        "type": "businessrule",
+        "name": "Activity_0ibsbry",
+        "state": "done"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "ExclusiveGateway_0nzwv7v"
+        }
+      ]
+    }
+  ]
+}

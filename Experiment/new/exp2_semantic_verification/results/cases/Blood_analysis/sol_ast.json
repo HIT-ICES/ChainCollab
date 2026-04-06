@@ -1,0 +1,4714 @@
+{
+  "contracts": [
+    {
+      "name": "IOracle",
+      "kind": "interface"
+    },
+    {
+      "name": "IDmnLite",
+      "kind": "interface"
+    },
+    {
+      "name": "IIdentityRegistry",
+      "kind": "interface"
+    },
+    {
+      "name": "Blood_analysis",
+      "kind": "contract"
+    }
+  ],
+  "state_variables": [
+    {
+      "contract": "Blood_analysis",
+      "name": "FurtherCheck",
+      "type": "bool",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "FurtherCheckDate",
+      "type": "string",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "FurtherCheckPlace",
+      "type": "string",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "PatientData",
+      "type": "string",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "ReportContent",
+      "type": "string",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "Result",
+      "type": "string",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "Sample",
+      "type": "string",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "owner",
+      "type": "address",
+      "visibility": "public"
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "isInited",
+      "type": "bool",
+      "visibility": "public"
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "currentInstanceId",
+      "type": "uint256",
+      "visibility": "public"
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "oracle",
+      "type": "UserDefinedTypeName",
+      "visibility": "public"
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "instances",
+      "type": "Mapping",
+      "visibility": "private"
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "DMN_REQUEST_FULFILLED",
+      "type": "uint8",
+      "visibility": "private"
+    }
+  ],
+  "enums": [
+    {
+      "contract": "Blood_analysis",
+      "name": "ElementState",
+      "values": [
+        "DISABLED",
+        "ENABLED",
+        "WAITING_FOR_CONFIRMATION",
+        "COMPLETED"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "ParticipantKey",
+      "values": [
+        "Participant_0ggs0ck",
+        "Participant_1v6wnpq",
+        "Participant_0tkhpj2"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "MessageKey",
+      "values": [
+        "Message_0gd0z61",
+        "Message_0gswvmq",
+        "Message_0wq8mc6",
+        "Message_13mh6mk",
+        "Message_1rqbibd",
+        "Message_1vzqd37"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "GatewayKey",
+      "values": [
+        "Gateway_0o8snyv",
+        "ParallelGateway_1pgjqtw",
+        "Gateway_1m6dgym"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "EventKey",
+      "values": [
+        "StartEvent_0m7hz56",
+        "EndEvent_110myff"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "BusinessRuleKey",
+      "values": [
+        "Activity_1mj4mr7"
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "contract": "IOracle",
+      "name": "getExternalData",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "activityId",
+          "type": "string"
+        },
+        {
+          "name": "dataSource",
+          "type": "string"
+        },
+        {
+          "name": "outputKey",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "value",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "IOracle",
+      "name": "runComputeTask",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "activityId",
+          "type": "string"
+        },
+        {
+          "name": "computeScript",
+          "type": "string"
+        },
+        {
+          "name": "outputKey",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "value",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "IDmnLite",
+      "name": "requestDMNDecision",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "url",
+          "type": "string"
+        },
+        {
+          "name": "dmnCid",
+          "type": "string"
+        },
+        {
+          "name": "decisionId",
+          "type": "string"
+        },
+        {
+          "name": "inputData",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "requestId",
+          "type": "bytes32"
+        }
+      ]
+    },
+    {
+      "contract": "IDmnLite",
+      "name": "getRequestStatus",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "requestId",
+          "type": "bytes32"
+        }
+      ],
+      "returns": [
+        {
+          "name": "state",
+          "type": "uint8"
+        },
+        {
+          "name": "requester",
+          "type": "address"
+        },
+        {
+          "name": "createdAt",
+          "type": "uint256"
+        },
+        {
+          "name": "fulfilledAt",
+          "type": "uint256"
+        },
+        {
+          "name": "exists",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "contract": "IDmnLite",
+      "name": "getRawByRequestId",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "requestId",
+          "type": "bytes32"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "IIdentityRegistry",
+      "name": "getIdentityOrg",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "identityAddress",
+          "type": "address"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "constructor",
+      "kind": "constructor",
+      "visibility": "public",
+      "state_mutability": "nonpayable",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "oracleAddress",
+          "type": "address"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "setOracle",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyOwner"
+      ],
+      "parameters": [
+        {
+          "name": "oracleAddress",
+          "type": "address"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "initLedger",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyOwner"
+      ],
+      "parameters": [],
+      "returns": []
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "_getInstance",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": [
+        {
+          "name": "inst",
+          "type": "UserDefinedTypeName"
+        }
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "_checkParticipant",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "inst",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "key",
+          "type": "UserDefinedTypeName"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "_checkBusinessRuleCaller",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "inst",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "br",
+          "type": "UserDefinedTypeName"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "_createParticipant",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "nonpayable",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "inst",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "key",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "name": "org",
+          "type": "string"
+        },
+        {
+          "name": "isMulti",
+          "type": "bool"
+        },
+        {
+          "name": "maxMulti",
+          "type": "uint8"
+        },
+        {
+          "name": "minMulti",
+          "type": "uint8"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "_createMessage",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "nonpayable",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "inst",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "key",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "sendKey",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "recvKey",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "state",
+          "type": "UserDefinedTypeName"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "_createGateway",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "nonpayable",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "inst",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "key",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "state",
+          "type": "UserDefinedTypeName"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "_createActionEvent",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "nonpayable",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "inst",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "key",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "state",
+          "type": "UserDefinedTypeName"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "_createBusinessRule",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "nonpayable",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "inst",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "key",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "config",
+          "type": "UserDefinedTypeName"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "_stringToInt",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "value",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "int256"
+        }
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "_stringToBool",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "value",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "_jsonString",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "value",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "_jsonBool",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "value",
+          "type": "bool"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "_jsonInt",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "value",
+          "type": "int256"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "_jsonField",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "key",
+          "type": "string"
+        },
+        {
+          "name": "encodedValue",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "_jsonAppendField",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "body",
+          "type": "string"
+        },
+        {
+          "name": "field",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "_jsonObject",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "body",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "_skipWhitespace",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "data",
+          "type": "bytes"
+        },
+        {
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "_sliceBytes",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "data",
+          "type": "bytes"
+        },
+        {
+          "name": "start",
+          "type": "uint256"
+        },
+        {
+          "name": "end",
+          "type": "uint256"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "_findJsonValue",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "raw",
+          "type": "string"
+        },
+        {
+          "name": "key",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "start",
+          "type": "uint256"
+        },
+        {
+          "name": "end",
+          "type": "uint256"
+        },
+        {
+          "name": "kind",
+          "type": "uint8"
+        },
+        {
+          "name": "found",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "_extractJsonString",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "raw",
+          "type": "string"
+        },
+        {
+          "name": "key",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "_extractJsonBool",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "raw",
+          "type": "string"
+        },
+        {
+          "name": "key",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "_extractJsonInt",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "raw",
+          "type": "string"
+        },
+        {
+          "name": "key",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "int256"
+        }
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "createInstance",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyOwner",
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "params",
+          "type": "UserDefinedTypeName"
+        }
+      ],
+      "returns": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "getExecutionSnapshot",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": [
+        {
+          "name": "messageStates",
+          "type": "ArrayTypeName"
+        },
+        {
+          "name": "messageFireflyTranIds",
+          "type": "ArrayTypeName"
+        },
+        {
+          "name": "gatewayStates",
+          "type": "ArrayTypeName"
+        },
+        {
+          "name": "eventStates",
+          "type": "ArrayTypeName"
+        },
+        {
+          "name": "businessRuleStates",
+          "type": "ArrayTypeName"
+        },
+        {
+          "name": "businessRuleRequestIds",
+          "type": "ArrayTypeName"
+        }
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "Activity_1mj4mr7",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "Activity_1mj4mr7_Continue",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "StartEvent_0m7hz56",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "Message_0gd0z61_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "furtherCheckPlace",
+          "type": "string"
+        },
+        {
+          "name": "furtherCheckDate",
+          "type": "string"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "Message_0gswvmq_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "sample",
+          "type": "string"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "Message_0wq8mc6_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "patientData",
+          "type": "string"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "Message_13mh6mk_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "reportContent",
+          "type": "string"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "Message_1rqbibd_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "result",
+          "type": "string"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "Message_1vzqd37_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "result",
+          "type": "string"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "Gateway_0o8snyv",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "ParallelGateway_1pgjqtw",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "Gateway_1m6dgym",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "EndEvent_110myff",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    }
+  ],
+  "requires": [
+    {
+      "contract": "Blood_analysis",
+      "function": "",
+      "callee": "require",
+      "arguments": [
+        "msg.sender == owner",
+        "not owner"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "",
+      "callee": "require",
+      "arguments": [
+        "isInited",
+        "contract not initialized"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "initLedger",
+      "callee": "require",
+      "arguments": [
+        "!isInited",
+        "already initialized"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_getInstance",
+      "callee": "require",
+      "arguments": [
+        "inst.exists",
+        "instance not found"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_checkParticipant",
+      "callee": "require",
+      "arguments": [
+        "participant.exists",
+        "participant not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_checkParticipant",
+      "callee": "require",
+      "arguments": [
+        "msg.sender == participant.account",
+        "participant not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_checkParticipant",
+      "callee": "require",
+      "arguments": [
+        "inst.identityContractAddress != address",
+        "identity contract not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_checkParticipant",
+      "callee": "require",
+      "arguments": [
+        "keccak256 == keccak256",
+        "participant org not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_checkBusinessRuleCaller",
+      "callee": "require",
+      "arguments": [
+        "br.allowedCaller != address",
+        "business rule caller not configured"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_checkBusinessRuleCaller",
+      "callee": "require",
+      "arguments": [
+        "msg.sender == br.allowedCaller",
+        "business rule caller not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_stringToInt",
+      "callee": "require",
+      "arguments": [
+        "c >= 48 && c <= 57",
+        "invalid int string"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_sliceBytes",
+      "callee": "require",
+      "arguments": [
+        "end >= start",
+        "invalid slice"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonString",
+      "callee": "require",
+      "arguments": [
+        "found && kind == 1",
+        "json string not found"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonBool",
+      "callee": "require",
+      "arguments": [
+        "found && kind == 2",
+        "json bool not found"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonInt",
+      "callee": "require",
+      "arguments": [
+        "found && kind == 3",
+        "json number not found"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "callee": "require",
+      "arguments": [
+        "!inst.exists",
+        "instance already exists"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "callee": "require",
+      "arguments": [
+        "inst.dmnLiteAddress != address",
+        "dmn lite not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "callee": "require",
+      "arguments": [
+        "bytes.length != 0",
+        "dmn eval url not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "callee": "require",
+      "arguments": [
+        "br.exists",
+        "business rule not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "callee": "require",
+      "arguments": [
+        "br.state == ElementState.ENABLED",
+        "business rule not enabled"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "callee": "require",
+      "arguments": [
+        "bytes.length != 0",
+        "dmn cid not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "callee": "require",
+      "arguments": [
+        "requestId != bytes32",
+        "dmn request failed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "callee": "require",
+      "arguments": [
+        "br.exists",
+        "business rule not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "callee": "require",
+      "arguments": [
+        "br.state == ElementState.WAITING_FOR_CONFIRMATION",
+        "business rule not waiting"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "callee": "require",
+      "arguments": [
+        "br.requestId != bytes32",
+        "business rule not requested"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "callee": "require",
+      "arguments": [
+        "exists",
+        "dmn request missing"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "callee": "require",
+      "arguments": [
+        "requester == address",
+        "unexpected dmn requester"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "callee": "require",
+      "arguments": [
+        "requestState == DMN_REQUEST_FULFILLED",
+        "dmn result not ready"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "StartEvent_0m7hz56",
+      "callee": "require",
+      "arguments": [
+        "ev.exists",
+        "event not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "StartEvent_0m7hz56",
+      "callee": "require",
+      "arguments": [
+        "ev.state == ElementState.ENABLED",
+        "event state not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0gd0z61_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0gd0z61_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0gswvmq_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0gswvmq_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0wq8mc6_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0wq8mc6_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_13mh6mk_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_13mh6mk_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_1rqbibd_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_1rqbibd_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_1vzqd37_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_1vzqd37_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Gateway_0o8snyv",
+      "callee": "require",
+      "arguments": [
+        "g.exists",
+        "gateway not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Gateway_0o8snyv",
+      "callee": "require",
+      "arguments": [
+        "g.state == ElementState.ENABLED",
+        "gateway state not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "ParallelGateway_1pgjqtw",
+      "callee": "require",
+      "arguments": [
+        "g.exists",
+        "gateway not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "ParallelGateway_1pgjqtw",
+      "callee": "require",
+      "arguments": [
+        "g.state == ElementState.ENABLED",
+        "gateway state not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Gateway_1m6dgym",
+      "callee": "require",
+      "arguments": [
+        "g.exists",
+        "gateway not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Gateway_1m6dgym",
+      "callee": "require",
+      "arguments": [
+        "g.state == ElementState.ENABLED",
+        "gateway state not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "EndEvent_110myff",
+      "callee": "require",
+      "arguments": [
+        "ev.exists",
+        "event not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "EndEvent_110myff",
+      "callee": "require",
+      "arguments": [
+        "ev.state == ElementState.ENABLED",
+        "event state not allowed"
+      ]
+    }
+  ],
+  "assignments": [
+    {
+      "contract": "Blood_analysis",
+      "function": "constructor",
+      "lhs": "owner",
+      "rhs": "msg.sender",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "constructor",
+      "lhs": "oracle",
+      "rhs": "IOracle",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "setOracle",
+      "lhs": "oracle",
+      "rhs": "IOracle",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "initLedger",
+      "lhs": "isInited",
+      "rhs": "true",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "initLedger",
+      "lhs": "currentInstanceId",
+      "rhs": "0",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_getInstance",
+      "lhs": "inst",
+      "rhs": "instances[instanceId]",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_createParticipant",
+      "lhs": "inst.participants[key]",
+      "rhs": "Participant",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_createMessage",
+      "lhs": "inst.messages[key]",
+      "rhs": "Message",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_createGateway",
+      "lhs": "inst.gateways[key]",
+      "rhs": "Gateway",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_createActionEvent",
+      "lhs": "inst.events[key]",
+      "rhs": "ActionEvent",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_createBusinessRule",
+      "lhs": "inst.businessRules[key]",
+      "rhs": "BusinessRule",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_stringToInt",
+      "lhs": "negative",
+      "rhs": "true",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_stringToInt",
+      "lhs": "index",
+      "rhs": "1",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_stringToInt",
+      "lhs": "result",
+      "rhs": "result * 10 + int256",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_jsonInt",
+      "lhs": "cursor",
+      "rhs": "10",
+      "operator": "/="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_jsonInt",
+      "lhs": "buffer[index]",
+      "rhs": "bytes1",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_jsonInt",
+      "lhs": "temp",
+      "rhs": "10",
+      "operator": "/="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_jsonInt",
+      "lhs": "buffer[0]",
+      "rhs": "bytes1",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_sliceBytes",
+      "lhs": "out[i - start]",
+      "rhs": "data[i]",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "lhs": "matches",
+      "rhs": "false",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "lhs": "cursor",
+      "rhs": "_skipWhitespace",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "lhs": "instanceId",
+      "rhs": "currentInstanceId",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "lhs": "inst.exists",
+      "rhs": "true",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "lhs": "inst.instanceId",
+      "rhs": "instanceId",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "lhs": "inst.identityContractAddress",
+      "rhs": "params.identityContractAddress",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "lhs": "inst.dmnLiteAddress",
+      "rhs": "params.dmnLiteAddress",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "lhs": "inst.dmnEvalUrl",
+      "rhs": "params.dmnEvalUrl",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "lhs": "inst.enforceBusinessRuleCaller",
+      "rhs": "params.enforceBusinessRuleCaller",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "lhs": "currentInstanceId",
+      "rhs": "1",
+      "operator": "+="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates",
+      "rhs": "NewExpression",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds",
+      "rhs": "NewExpression",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[0]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[0]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[1]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[1]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[2]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[2]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[3]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[3]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[4]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[4]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[5]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[5]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "gatewayStates",
+      "rhs": "NewExpression",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "gatewayStates[0]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "gatewayStates[1]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "gatewayStates[2]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "eventStates",
+      "rhs": "NewExpression",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "eventStates[0]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "eventStates[1]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "businessRuleStates",
+      "rhs": "NewExpression",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "businessRuleRequestIds",
+      "rhs": "NewExpression",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "businessRuleStates[0]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "lhs": "businessRuleRequestIds[0]",
+      "rhs": "br.requestId",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "lhs": "inputBody",
+      "rhs": "_jsonAppendField",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "lhs": "br.requestId",
+      "rhs": "requestId",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "lhs": "br.requestedAt",
+      "rhs": "block.timestamp",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "lhs": "br.fulfilledAt",
+      "rhs": "0",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "lhs": "br.lastRawResult",
+      "rhs": "",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "lhs": "br.state",
+      "rhs": "ElementState.WAITING_FOR_CONFIRMATION",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "lhs": "br.lastRawResult",
+      "rhs": "raw",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "lhs": "br.fulfilledAt",
+      "rhs": "fulfilledAt",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "lhs": "inst.stateMemory.FurtherCheck",
+      "rhs": "_extractJsonBool",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "lhs": "br.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "lhs": "inst.gateways[GatewayKey.Gateway_0o8snyv].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "StartEvent_0m7hz56",
+      "lhs": "ev.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "StartEvent_0m7hz56",
+      "lhs": "inst.gateways[GatewayKey.ParallelGateway_1pgjqtw].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0gd0z61_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0gd0z61_Send",
+      "lhs": "inst.stateMemory.FurtherCheckPlace",
+      "rhs": "furtherCheckPlace",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0gd0z61_Send",
+      "lhs": "inst.stateMemory.FurtherCheckDate",
+      "rhs": "furtherCheckDate",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0gd0z61_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0gd0z61_Send",
+      "lhs": "inst.events[EventKey.EndEvent_110myff].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0gswvmq_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0gswvmq_Send",
+      "lhs": "inst.stateMemory.Sample",
+      "rhs": "sample",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0gswvmq_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0gswvmq_Send",
+      "lhs": "inst.messages[MessageKey.Message_1vzqd37].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0wq8mc6_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0wq8mc6_Send",
+      "lhs": "inst.stateMemory.PatientData",
+      "rhs": "patientData",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0wq8mc6_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0wq8mc6_Send",
+      "lhs": "inst.messages[MessageKey.Message_13mh6mk].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_13mh6mk_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_13mh6mk_Send",
+      "lhs": "inst.stateMemory.ReportContent",
+      "rhs": "reportContent",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_13mh6mk_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_13mh6mk_Send",
+      "lhs": "inst.gateways[GatewayKey.Gateway_1m6dgym].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_1rqbibd_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_1rqbibd_Send",
+      "lhs": "inst.stateMemory.Result",
+      "rhs": "result",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_1rqbibd_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_1rqbibd_Send",
+      "lhs": "inst.businessRules[BusinessRuleKey.Activity_1mj4mr7].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_1vzqd37_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_1vzqd37_Send",
+      "lhs": "inst.stateMemory.Result",
+      "rhs": "result",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_1vzqd37_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_1vzqd37_Send",
+      "lhs": "inst.gateways[GatewayKey.Gateway_1m6dgym].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Gateway_0o8snyv",
+      "lhs": "g.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Gateway_0o8snyv",
+      "lhs": "inst.messages[MessageKey.Message_0gd0z61].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Gateway_0o8snyv",
+      "lhs": "inst.events[EventKey.EndEvent_110myff].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "ParallelGateway_1pgjqtw",
+      "lhs": "g.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "ParallelGateway_1pgjqtw",
+      "lhs": "inst.messages[MessageKey.Message_0gswvmq].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "ParallelGateway_1pgjqtw",
+      "lhs": "inst.messages[MessageKey.Message_0wq8mc6].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Gateway_1m6dgym",
+      "lhs": "g.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Gateway_1m6dgym",
+      "lhs": "inst.messages[MessageKey.Message_1rqbibd].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "EndEvent_110myff",
+      "lhs": "ev.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    }
+  ],
+  "events": [
+    {
+      "contract": "Blood_analysis",
+      "name": "MessageSent",
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "messageKey",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "GatewayDone",
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "gatewayKey",
+          "type": "UserDefinedTypeName"
+        }
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "ActionEventDone",
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "eventKey",
+          "type": "UserDefinedTypeName"
+        }
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "BusinessRuleRequested",
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "ruleKey",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "requestId",
+          "type": "bytes32"
+        }
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "name": "BusinessRuleCompleted",
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "ruleKey",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "requestId",
+          "type": "bytes32"
+        }
+      ]
+    }
+  ],
+  "external_calls": [
+    {
+      "contract": "Blood_analysis",
+      "function": "constructor",
+      "callee": "IOracle",
+      "arguments": [
+        "oracleAddress"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "setOracle",
+      "callee": "IOracle",
+      "arguments": [
+        "oracleAddress"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_checkParticipant",
+      "callee": "IIdentityRegistry.getIdentityOrg",
+      "arguments": [
+        "msg.sender"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_checkParticipant",
+      "callee": "IIdentityRegistry",
+      "arguments": [
+        "inst.identityContractAddress"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_jsonString",
+      "callee": "string.concat",
+      "arguments": [
+        "\"",
+        "value",
+        "\""
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_jsonField",
+      "callee": "string.concat",
+      "arguments": [
+        "_jsonString",
+        ":",
+        "encodedValue"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_jsonAppendField",
+      "callee": "string.concat",
+      "arguments": [
+        "body",
+        ",",
+        "field"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_jsonObject",
+      "callee": "string.concat",
+      "arguments": [
+        "{",
+        "body",
+        "}"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "callee": "dmnLite.requestDMNDecision",
+      "arguments": [
+        "inst.dmnEvalUrl",
+        "br.dmnCid",
+        "br.decisionId",
+        "inputData"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "callee": "dmnLite.getRequestStatus",
+      "arguments": [
+        "br.requestId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "callee": "dmnLite.getRawByRequestId",
+      "arguments": [
+        "br.requestId"
+      ]
+    }
+  ],
+  "calls": [
+    {
+      "contract": "Blood_analysis",
+      "function": "",
+      "callee": "require",
+      "arguments": [
+        "msg.sender == owner",
+        "not owner"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "",
+      "callee": "require",
+      "arguments": [
+        "isInited",
+        "contract not initialized"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "constructor",
+      "callee": "IOracle",
+      "arguments": [
+        "oracleAddress"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "setOracle",
+      "callee": "IOracle",
+      "arguments": [
+        "oracleAddress"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "initLedger",
+      "callee": "require",
+      "arguments": [
+        "!isInited",
+        "already initialized"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_getInstance",
+      "callee": "require",
+      "arguments": [
+        "inst.exists",
+        "instance not found"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_checkParticipant",
+      "callee": "require",
+      "arguments": [
+        "participant.exists",
+        "participant not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_checkParticipant",
+      "callee": "require",
+      "arguments": [
+        "msg.sender == participant.account",
+        "participant not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_checkParticipant",
+      "callee": "require",
+      "arguments": [
+        "inst.identityContractAddress != address",
+        "identity contract not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_checkParticipant",
+      "callee": "address",
+      "arguments": [
+        "0"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_checkParticipant",
+      "callee": "IIdentityRegistry.getIdentityOrg",
+      "arguments": [
+        "msg.sender"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_checkParticipant",
+      "callee": "IIdentityRegistry",
+      "arguments": [
+        "inst.identityContractAddress"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_checkParticipant",
+      "callee": "require",
+      "arguments": [
+        "keccak256 == keccak256",
+        "participant org not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_checkParticipant",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_checkParticipant",
+      "callee": "bytes",
+      "arguments": [
+        "callerOrg"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_checkParticipant",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_checkParticipant",
+      "callee": "bytes",
+      "arguments": [
+        "participant.org"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_checkBusinessRuleCaller",
+      "callee": "require",
+      "arguments": [
+        "br.allowedCaller != address",
+        "business rule caller not configured"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_checkBusinessRuleCaller",
+      "callee": "address",
+      "arguments": [
+        "0"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_checkBusinessRuleCaller",
+      "callee": "require",
+      "arguments": [
+        "msg.sender == br.allowedCaller",
+        "business rule caller not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_createParticipant",
+      "callee": "Participant",
+      "arguments": [
+        "true",
+        "account",
+        "org",
+        "isMulti",
+        "maxMulti",
+        "minMulti"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_createMessage",
+      "callee": "Message",
+      "arguments": [
+        "true",
+        "sendKey",
+        "recvKey",
+        "",
+        "state"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_createGateway",
+      "callee": "Gateway",
+      "arguments": [
+        "true",
+        "state"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_createActionEvent",
+      "callee": "ActionEvent",
+      "arguments": [
+        "true",
+        "state"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_createBusinessRule",
+      "callee": "BusinessRule",
+      "arguments": [
+        "true",
+        "config.dmnCid",
+        "config.dmnHash",
+        "config.decisionId",
+        "config.callerRestricted",
+        "config.allowedCaller",
+        "ElementState.DISABLED",
+        "bytes32",
+        "0",
+        "0",
+        ""
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_createBusinessRule",
+      "callee": "bytes32",
+      "arguments": [
+        "0"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_stringToInt",
+      "callee": "bytes",
+      "arguments": [
+        "value"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_stringToInt",
+      "callee": "bytes1",
+      "arguments": [
+        "-"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_stringToInt",
+      "callee": "uint8",
+      "arguments": [
+        "data[index]"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_stringToInt",
+      "callee": "require",
+      "arguments": [
+        "c >= 48 && c <= 57",
+        "invalid int string"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_stringToInt",
+      "callee": "int256",
+      "arguments": [
+        "uint256"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_stringToInt",
+      "callee": "uint256",
+      "arguments": [
+        "c - 48"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_stringToBool",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_stringToBool",
+      "callee": "bytes",
+      "arguments": [
+        "value"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_stringToBool",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_stringToBool",
+      "callee": "bytes",
+      "arguments": [
+        "true"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_stringToBool",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_stringToBool",
+      "callee": "bytes",
+      "arguments": [
+        "TRUE"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_stringToBool",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_stringToBool",
+      "callee": "bytes",
+      "arguments": [
+        "1"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_jsonString",
+      "callee": "string.concat",
+      "arguments": [
+        "\"",
+        "value",
+        "\""
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_jsonInt",
+      "callee": "uint256",
+      "arguments": [
+        "Conditional"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_jsonInt",
+      "callee": "NewExpression",
+      "arguments": [
+        "totalLength"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_jsonInt",
+      "callee": "bytes1",
+      "arguments": [
+        "uint8"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_jsonInt",
+      "callee": "uint8",
+      "arguments": [
+        "48 + temp % 10"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_jsonInt",
+      "callee": "bytes1",
+      "arguments": [
+        "-"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_jsonInt",
+      "callee": "string",
+      "arguments": [
+        "buffer"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_jsonField",
+      "callee": "string.concat",
+      "arguments": [
+        "_jsonString",
+        ":",
+        "encodedValue"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_jsonField",
+      "callee": "_jsonString",
+      "arguments": [
+        "key"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_jsonAppendField",
+      "callee": "bytes",
+      "arguments": [
+        "body"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_jsonAppendField",
+      "callee": "string.concat",
+      "arguments": [
+        "body",
+        ",",
+        "field"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_jsonObject",
+      "callee": "string.concat",
+      "arguments": [
+        "{",
+        "body",
+        "}"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_sliceBytes",
+      "callee": "require",
+      "arguments": [
+        "end >= start",
+        "invalid slice"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_sliceBytes",
+      "callee": "NewExpression",
+      "arguments": [
+        "end - start"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_sliceBytes",
+      "callee": "string",
+      "arguments": [
+        "out"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "callee": "bytes",
+      "arguments": [
+        "raw"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "callee": "bytes",
+      "arguments": [
+        "key"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "\""
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "\""
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "callee": "_skipWhitespace",
+      "arguments": [
+        "data",
+        "i + keyBytes.length + 2"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        ":"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "callee": "_skipWhitespace",
+      "arguments": [
+        "data",
+        "cursor + 1"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "\""
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "\""
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "\\"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "callee": "revert",
+      "arguments": [
+        "unterminated json string"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "t"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "f"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "a"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "z"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "A"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "Z"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "-"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "0"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "9"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "-"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "."
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "0"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "9"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonString",
+      "callee": "_findJsonValue",
+      "arguments": [
+        "raw",
+        "key"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonString",
+      "callee": "require",
+      "arguments": [
+        "found && kind == 1",
+        "json string not found"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonString",
+      "callee": "_sliceBytes",
+      "arguments": [
+        "bytes",
+        "start",
+        "end"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonString",
+      "callee": "bytes",
+      "arguments": [
+        "raw"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonBool",
+      "callee": "_findJsonValue",
+      "arguments": [
+        "raw",
+        "key"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonBool",
+      "callee": "require",
+      "arguments": [
+        "found && kind == 2",
+        "json bool not found"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonBool",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonBool",
+      "callee": "bytes",
+      "arguments": [
+        "_sliceBytes"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonBool",
+      "callee": "_sliceBytes",
+      "arguments": [
+        "bytes",
+        "start",
+        "end"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonBool",
+      "callee": "bytes",
+      "arguments": [
+        "raw"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonBool",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonBool",
+      "callee": "bytes",
+      "arguments": [
+        "true"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonBool",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonBool",
+      "callee": "bytes",
+      "arguments": [
+        "false"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonBool",
+      "callee": "revert",
+      "arguments": [
+        "invalid json bool"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonInt",
+      "callee": "_findJsonValue",
+      "arguments": [
+        "raw",
+        "key"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonInt",
+      "callee": "require",
+      "arguments": [
+        "found && kind == 3",
+        "json number not found"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonInt",
+      "callee": "_stringToInt",
+      "arguments": [
+        "_sliceBytes"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonInt",
+      "callee": "_sliceBytes",
+      "arguments": [
+        "bytes",
+        "start",
+        "end"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonInt",
+      "callee": "bytes",
+      "arguments": [
+        "raw"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "callee": "require",
+      "arguments": [
+        "!inst.exists",
+        "instance already exists"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "callee": "require",
+      "arguments": [
+        "inst.dmnLiteAddress != address",
+        "dmn lite not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "callee": "address",
+      "arguments": [
+        "0"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "callee": "require",
+      "arguments": [
+        "bytes.length != 0",
+        "dmn eval url not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "callee": "bytes",
+      "arguments": [
+        "inst.dmnEvalUrl"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "callee": "_createParticipant",
+      "arguments": [
+        "inst",
+        "ParticipantKey.Participant_0ggs0ck",
+        "params.Participant_0ggs0ck_account",
+        "params.Participant_0ggs0ck_org",
+        "false",
+        "0",
+        "0"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "callee": "_createParticipant",
+      "arguments": [
+        "inst",
+        "ParticipantKey.Participant_1v6wnpq",
+        "params.Participant_1v6wnpq_account",
+        "params.Participant_1v6wnpq_org",
+        "false",
+        "0",
+        "0"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "callee": "_createParticipant",
+      "arguments": [
+        "inst",
+        "ParticipantKey.Participant_0tkhpj2",
+        "params.Participant_0tkhpj2_account",
+        "params.Participant_0tkhpj2_org",
+        "false",
+        "0",
+        "0"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "callee": "_createActionEvent",
+      "arguments": [
+        "inst",
+        "EventKey.StartEvent_0m7hz56",
+        "ElementState.ENABLED"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "callee": "_createActionEvent",
+      "arguments": [
+        "inst",
+        "EventKey.EndEvent_110myff",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_0gd0z61",
+        "ParticipantKey.Participant_0tkhpj2",
+        "ParticipantKey.Participant_0ggs0ck",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_0gswvmq",
+        "ParticipantKey.Participant_0ggs0ck",
+        "ParticipantKey.Participant_1v6wnpq",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_0wq8mc6",
+        "ParticipantKey.Participant_0ggs0ck",
+        "ParticipantKey.Participant_0tkhpj2",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_13mh6mk",
+        "ParticipantKey.Participant_0tkhpj2",
+        "ParticipantKey.Participant_0ggs0ck",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_1rqbibd",
+        "ParticipantKey.Participant_0ggs0ck",
+        "ParticipantKey.Participant_0tkhpj2",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_1vzqd37",
+        "ParticipantKey.Participant_1v6wnpq",
+        "ParticipantKey.Participant_0ggs0ck",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "callee": "_createGateway",
+      "arguments": [
+        "inst",
+        "GatewayKey.Gateway_0o8snyv",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "callee": "_createGateway",
+      "arguments": [
+        "inst",
+        "GatewayKey.ParallelGateway_1pgjqtw",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "callee": "_createGateway",
+      "arguments": [
+        "inst",
+        "GatewayKey.Gateway_1m6dgym",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "createInstance",
+      "callee": "_createBusinessRule",
+      "arguments": [
+        "inst",
+        "BusinessRuleKey.Activity_1mj4mr7",
+        "params.Activity_1mj4mr7"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "callee": "NewExpression",
+      "arguments": [
+        "6"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "callee": "NewExpression",
+      "arguments": [
+        "6"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "callee": "NewExpression",
+      "arguments": [
+        "3"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "g.state"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "g.state"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "g.state"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "callee": "NewExpression",
+      "arguments": [
+        "2"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "ev.state"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "ev.state"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "callee": "NewExpression",
+      "arguments": [
+        "1"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "callee": "NewExpression",
+      "arguments": [
+        "1"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "br.state"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "callee": "require",
+      "arguments": [
+        "br.exists",
+        "business rule not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "callee": "require",
+      "arguments": [
+        "br.state == ElementState.ENABLED",
+        "business rule not enabled"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "callee": "_checkBusinessRuleCaller",
+      "arguments": [
+        "inst",
+        "br"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "callee": "_jsonAppendField",
+      "arguments": [
+        "inputBody",
+        "_jsonField"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "callee": "_jsonField",
+      "arguments": [
+        "result",
+        "_jsonString"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "callee": "_jsonString",
+      "arguments": [
+        "inst.stateMemory.Result"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "callee": "_jsonObject",
+      "arguments": [
+        "inputBody"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "callee": "IDmnLite",
+      "arguments": [
+        "inst.dmnLiteAddress"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "callee": "require",
+      "arguments": [
+        "bytes.length != 0",
+        "dmn cid not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "callee": "bytes",
+      "arguments": [
+        "br.dmnCid"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "callee": "dmnLite.requestDMNDecision",
+      "arguments": [
+        "inst.dmnEvalUrl",
+        "br.dmnCid",
+        "br.decisionId",
+        "inputData"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "callee": "require",
+      "arguments": [
+        "requestId != bytes32",
+        "dmn request failed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "callee": "bytes32",
+      "arguments": [
+        "0"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7",
+      "callee": "BusinessRuleRequested",
+      "arguments": [
+        "instanceId",
+        "BusinessRuleKey.Activity_1mj4mr7",
+        "requestId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "callee": "require",
+      "arguments": [
+        "br.exists",
+        "business rule not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "callee": "require",
+      "arguments": [
+        "br.state == ElementState.WAITING_FOR_CONFIRMATION",
+        "business rule not waiting"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "callee": "require",
+      "arguments": [
+        "br.requestId != bytes32",
+        "business rule not requested"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "callee": "bytes32",
+      "arguments": [
+        "0"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "callee": "_checkBusinessRuleCaller",
+      "arguments": [
+        "inst",
+        "br"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "callee": "IDmnLite",
+      "arguments": [
+        "inst.dmnLiteAddress"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "callee": "dmnLite.getRequestStatus",
+      "arguments": [
+        "br.requestId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "callee": "require",
+      "arguments": [
+        "exists",
+        "dmn request missing"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "callee": "require",
+      "arguments": [
+        "requester == address",
+        "unexpected dmn requester"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "callee": "address",
+      "arguments": [
+        "this"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "callee": "require",
+      "arguments": [
+        "requestState == DMN_REQUEST_FULFILLED",
+        "dmn result not ready"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "callee": "dmnLite.getRawByRequestId",
+      "arguments": [
+        "br.requestId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "callee": "_extractJsonBool",
+      "arguments": [
+        "raw",
+        "FurtherCheck"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Activity_1mj4mr7_Continue",
+      "callee": "BusinessRuleCompleted",
+      "arguments": [
+        "instanceId",
+        "BusinessRuleKey.Activity_1mj4mr7",
+        "br.requestId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "StartEvent_0m7hz56",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "StartEvent_0m7hz56",
+      "callee": "require",
+      "arguments": [
+        "ev.exists",
+        "event not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "StartEvent_0m7hz56",
+      "callee": "require",
+      "arguments": [
+        "ev.state == ElementState.ENABLED",
+        "event state not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "StartEvent_0m7hz56",
+      "callee": "ActionEventDone",
+      "arguments": [
+        "instanceId",
+        "EventKey.StartEvent_0m7hz56"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0gd0z61_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0gd0z61_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0gd0z61_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0gd0z61_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0gd0z61_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_0gd0z61",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0gswvmq_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0gswvmq_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0gswvmq_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0gswvmq_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0gswvmq_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_0gswvmq",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0wq8mc6_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0wq8mc6_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0wq8mc6_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0wq8mc6_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_0wq8mc6_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_0wq8mc6",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_13mh6mk_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_13mh6mk_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_13mh6mk_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_13mh6mk_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_13mh6mk_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_13mh6mk",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_1rqbibd_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_1rqbibd_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_1rqbibd_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_1rqbibd_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_1rqbibd_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_1rqbibd",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_1vzqd37_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_1vzqd37_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_1vzqd37_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_1vzqd37_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Message_1vzqd37_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_1vzqd37",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Gateway_0o8snyv",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Gateway_0o8snyv",
+      "callee": "require",
+      "arguments": [
+        "g.exists",
+        "gateway not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Gateway_0o8snyv",
+      "callee": "require",
+      "arguments": [
+        "g.state == ElementState.ENABLED",
+        "gateway state not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Gateway_0o8snyv",
+      "callee": "GatewayDone",
+      "arguments": [
+        "instanceId",
+        "GatewayKey.Gateway_0o8snyv"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "ParallelGateway_1pgjqtw",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "ParallelGateway_1pgjqtw",
+      "callee": "require",
+      "arguments": [
+        "g.exists",
+        "gateway not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "ParallelGateway_1pgjqtw",
+      "callee": "require",
+      "arguments": [
+        "g.state == ElementState.ENABLED",
+        "gateway state not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "ParallelGateway_1pgjqtw",
+      "callee": "GatewayDone",
+      "arguments": [
+        "instanceId",
+        "GatewayKey.ParallelGateway_1pgjqtw"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Gateway_1m6dgym",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Gateway_1m6dgym",
+      "callee": "require",
+      "arguments": [
+        "g.exists",
+        "gateway not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Gateway_1m6dgym",
+      "callee": "require",
+      "arguments": [
+        "g.state == ElementState.ENABLED",
+        "gateway state not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Gateway_1m6dgym",
+      "callee": "GatewayDone",
+      "arguments": [
+        "instanceId",
+        "GatewayKey.Gateway_1m6dgym"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Gateway_1m6dgym",
+      "callee": "revert",
+      "arguments": [
+        "Parallel gateway prerequisites not met"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "EndEvent_110myff",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "EndEvent_110myff",
+      "callee": "require",
+      "arguments": [
+        "ev.exists",
+        "event not set"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "EndEvent_110myff",
+      "callee": "require",
+      "arguments": [
+        "ev.state == ElementState.ENABLED",
+        "event state not allowed"
+      ]
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "EndEvent_110myff",
+      "callee": "ActionEventDone",
+      "arguments": [
+        "instanceId",
+        "EventKey.EndEvent_110myff"
+      ]
+    }
+  ],
+  "if_conditions": [
+    {
+      "contract": "Blood_analysis",
+      "function": "_checkParticipant",
+      "condition": "!participant.isMulti"
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_checkBusinessRuleCaller",
+      "condition": "!inst.enforceBusinessRuleCaller || br.callerRestricted"
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_stringToInt",
+      "condition": "data.length == 0"
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_stringToInt",
+      "condition": "data[0] == bytes1"
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_jsonInt",
+      "condition": "value == 0"
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_jsonInt",
+      "condition": "negative"
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_jsonAppendField",
+      "condition": "bytes.length == 0"
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_skipWhitespace",
+      "condition": "ch != 0x20 && ch != 0x09 && ch != 0x0A && ch != 0x0D"
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "condition": "data.length == 0 || keyBytes.length == 0"
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "condition": "data[i] != bytes1"
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "condition": "data[i + 1 + j] != keyBytes[j]"
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "condition": "!matches || data[i + 1 + keyBytes.length] != bytes1"
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "condition": "cursor >= data.length || data[cursor] != bytes1"
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "condition": "cursor >= data.length"
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "condition": "ch == bytes1"
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "condition": "data[valueEnd] == bytes1 && valueEnd == valueStart || data[valueEnd - 1] != bytes1"
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "condition": "ch == bytes1 || ch == bytes1"
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "condition": "c < bytes1 || c > bytes1 && c < bytes1 || c > bytes1"
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "condition": "ch == bytes1 || ch >= bytes1 && ch <= bytes1"
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_findJsonValue",
+      "condition": "c != bytes1 && c != bytes1 && c < bytes1 || c > bytes1"
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonBool",
+      "condition": "hashed == keccak256"
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "_extractJsonBool",
+      "condition": "hashed == keccak256"
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Gateway_0o8snyv",
+      "condition": "inst.stateMemory.FurtherCheck == false"
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Gateway_0o8snyv",
+      "condition": "inst.stateMemory.FurtherCheck == true"
+    },
+    {
+      "contract": "Blood_analysis",
+      "function": "Gateway_1m6dgym",
+      "condition": "!inst.messages[MessageKey.Message_1vzqd37].state == ElementState.COMPLETED && inst.messages[MessageKey.Message_13mh6mk].state == ElementState.COMPLETED"
+    }
+  ],
+  "string_literals": [
+    "\"",
+    ",",
+    "-",
+    ".",
+    "0",
+    "0x09",
+    "0x0A",
+    "0x0D",
+    "0x20",
+    "1",
+    "10",
+    "2",
+    "3",
+    "4",
+    "48",
+    "5",
+    "57",
+    "6",
+    "9",
+    ":",
+    "A",
+    "FurtherCheck",
+    "Parallel gateway prerequisites not met",
+    "TRUE",
+    "Z",
+    "\\",
+    "a",
+    "already initialized",
+    "business rule caller not allowed",
+    "business rule caller not configured",
+    "business rule not enabled",
+    "business rule not requested",
+    "business rule not set",
+    "business rule not waiting",
+    "contract not initialized",
+    "dmn cid not set",
+    "dmn eval url not set",
+    "dmn lite not set",
+    "dmn request failed",
+    "dmn request missing",
+    "dmn result not ready",
+    "event not set",
+    "event state not allowed",
+    "f",
+    "false",
+    "gateway not set",
+    "gateway state not allowed",
+    "identity contract not set",
+    "instance already exists",
+    "instance not found",
+    "invalid int string",
+    "invalid json bool",
+    "invalid slice",
+    "json bool not found",
+    "json number not found",
+    "json string not found",
+    "message not set",
+    "message state not allowed",
+    "not owner",
+    "participant not allowed",
+    "participant not set",
+    "participant org not allowed",
+    "result",
+    "t",
+    "true",
+    "unexpected dmn requester",
+    "unterminated json string",
+    "z",
+    "{",
+    "}"
+  ]
+}
