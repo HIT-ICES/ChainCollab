@@ -218,6 +218,22 @@ yarn-error.log
 
 /coverage
 .idea
+
+### Experiment hygiene
+# Keep the main experiment code/data/reports, but do not publish generated runtime or archive noise.
+Experiment/Others/
+Experiment/**/node_modules/
+Experiment/**/cache/
+Experiment/**/artifacts/
+Experiment/**/runtime/
+Experiment/**/archive-*/
+Experiment/**/Archive/
+Experiment/**/output.json_output.txt
+Experiment/**/output*.txt
+Experiment/**/.*.bkp
+Experiment/**/.*.dtmp
+Experiment/**/.DS_Store
+Experiment/**/*.pid
 yarn.lock
 package-lock.json
 # *bak

@@ -1,0 +1,250 @@
+{
+  "generatedAt": "2026-04-06T11:40:27.830Z",
+  "datasetConfig": {
+    "path": "/tmp/relayer-three-clean.json",
+    "loaded": true,
+    "taskPolicy": {
+      "fixedTasksPerCase": 1,
+      "budgetMultiplier": 3,
+      "minTasks": 1,
+      "maxTasks": 1
+    }
+  },
+  "translator": {
+    "root": "/home/logres/system/src/newTranslator",
+    "python": "/home/logres/system/src/newTranslator/.venv/bin/python",
+    "splitModeEntry": "/home/logres/system/src/newTranslator/.venv/bin/python -m generator.bpmn_to_dsl --split-mode"
+  },
+  "cases": [
+    {
+      "caseId": "Coffee_machine",
+      "bpmnPath": "/home/logres/system/Experiment/CaseTest/Coffee_machine.bpmn",
+      "generatedArtifacts": {
+        "splitPlanPath": "/home/logres/system/Experiment/Current/Relayer/src/relayer-node/runtime/translator_split_mode/Coffee_machine/split-plan.json",
+        "sesePath": "/home/logres/system/Experiment/Current/Relayer/src/relayer-node/runtime/translator_split_mode/Coffee_machine/split/Coffee_machine.sese.json",
+        "b2cPath": "/home/logres/system/Experiment/Current/Relayer/src/relayer-node/runtime/translator_split_mode/Coffee_machine.b2c",
+        "solidityPath": "/home/logres/system/Experiment/Current/Relayer/src/relayer-node/runtime/translator_split_mode/Coffee_machine/full_solidity/Coffee_machine.sol",
+        "splitDslPath": "/home/logres/system/Experiment/Current/Relayer/src/relayer-node/runtime/translator_split_mode/Coffee_machine/split/Coffee_machine.split.dsl",
+        "splitContracts": {
+          "sourceContractName": "Coffee_machineSubmodelA",
+          "sourceContractPath": "/home/logres/system/Experiment/Current/Relayer/src/contract/generated/Coffee_machineSubmodelA.sol",
+          "targetContractName": "Coffee_machineSubmodelB",
+          "targetContractPath": "/home/logres/system/Experiment/Current/Relayer/src/contract/generated/Coffee_machineSubmodelB.sol"
+        }
+      },
+      "split": {
+        "model": "dual-submodel",
+        "selectedMarker": "AUTO_EXIT_A",
+        "selectedMerge": "AUTO_EXIT_A",
+        "submodels": [
+          {
+            "submodelId": "Coffee_machine_sub_1",
+            "entryNodes": [
+              "StartEvent_1v2ab61"
+            ],
+            "exitNodes": [
+              "EndEvent_17h95ah"
+            ],
+            "nodeIds": [
+              "StartEvent_1v2ab61",
+              "ChoreographyTask_164ymrj",
+              "ChoreographyTask_0mnrjy0",
+              "ChoreographyTask_08f0s86",
+              "ChoreographyTask_0gwsf88",
+              "ExclusiveGateway_0c8hy9b",
+              "ExclusiveGateway_1sp1v7s",
+              "EndEvent_17h95ah"
+            ],
+            "nodeCount": 8,
+            "condensedSize": 8
+          },
+          {
+            "submodelId": "Coffee_machine_sub_2",
+            "entryNodes": [
+              "AUTO_EXIT_A"
+            ],
+            "exitNodes": [
+              "AUTO_EXIT_A"
+            ],
+            "nodeIds": [
+              "AUTO_EXIT_A"
+            ],
+            "nodeCount": 1,
+            "condensedSize": 1
+          }
+        ],
+        "taskBudget": 1
+      },
+      "crossChainPlan": {
+        "sourceChain": "chainA",
+        "targetChain": "chainB",
+        "routing": [
+          {
+            "submodelId": "Coffee_machine_sub_1",
+            "route": "chainA->relayer->chainB"
+          },
+          {
+            "submodelId": "Coffee_machine_sub_2",
+            "route": "chainA->relayer->chainB"
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "Hotel_Booking",
+      "bpmnPath": "/home/logres/system/Experiment/CaseTest/Hotel Booking.bpmn",
+      "generatedArtifacts": {
+        "splitPlanPath": "/home/logres/system/Experiment/Current/Relayer/src/relayer-node/runtime/translator_split_mode/Hotel_Booking/split-plan.json",
+        "sesePath": "/home/logres/system/Experiment/Current/Relayer/src/relayer-node/runtime/translator_split_mode/Hotel_Booking/split/Hotel_Booking.sese.json",
+        "b2cPath": "/home/logres/system/Experiment/Current/Relayer/src/relayer-node/runtime/translator_split_mode/Hotel_Booking.b2c",
+        "solidityPath": "/home/logres/system/Experiment/Current/Relayer/src/relayer-node/runtime/translator_split_mode/Hotel_Booking/full_solidity/Hotel_Booking.sol",
+        "splitDslPath": "/home/logres/system/Experiment/Current/Relayer/src/relayer-node/runtime/translator_split_mode/Hotel_Booking/split/Hotel_Booking.split.dsl",
+        "splitContracts": {
+          "sourceContractName": "Hotel_BookingSubmodelA",
+          "sourceContractPath": "/home/logres/system/Experiment/Current/Relayer/src/contract/generated/Hotel_BookingSubmodelA.sol",
+          "targetContractName": "Hotel_BookingSubmodelB",
+          "targetContractPath": "/home/logres/system/Experiment/Current/Relayer/src/contract/generated/Hotel_BookingSubmodelB.sol"
+        }
+      },
+      "split": {
+        "model": "dual-submodel",
+        "selectedMarker": "UNKNOWN",
+        "selectedMerge": "UNKNOWN",
+        "submodels": [
+          {
+            "submodelId": "Hotel_Booking_sub_1",
+            "entryNodes": [
+              "StartEvent_1jtgn3j"
+            ],
+            "exitNodes": [
+              "EndEvent_146eii4"
+            ],
+            "nodeIds": [
+              "StartEvent_1jtgn3j",
+              "ChoreographyTask_1jv6c24",
+              "ExclusiveGateway_106je4z",
+              "ChoreographyTask_13nkbkb",
+              "ExclusiveGateway_0hs3ztq",
+              "EventBasedGateway_1fxpmyn",
+              "ChoreographyTask_177ikw5",
+              "ChoreographyTask_09lf521",
+              "EndEvent_0366pfz",
+              "ChoreographyTask_0suxm4u",
+              "ExclusiveGateway_0nzwv7v",
+              "EndEvent_08edp7f",
+              "ChoreographyTask_1iimt7t",
+              "EndEvent_146eii4"
+            ],
+            "nodeCount": 14,
+            "condensedSize": 14
+          },
+          {
+            "submodelId": "Hotel_Booking_sub_2",
+            "entryNodes": [
+              "UNKNOWN"
+            ],
+            "exitNodes": [
+              "UNKNOWN"
+            ],
+            "nodeIds": [
+              "UNKNOWN"
+            ],
+            "nodeCount": 1,
+            "condensedSize": 1
+          }
+        ],
+        "taskBudget": 1
+      },
+      "crossChainPlan": {
+        "sourceChain": "chainA",
+        "targetChain": "chainB",
+        "routing": [
+          {
+            "submodelId": "Hotel_Booking_sub_1",
+            "route": "chainA->relayer->chainB"
+          },
+          {
+            "submodelId": "Hotel_Booking_sub_2",
+            "route": "chainA->relayer->chainB"
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "ManagementSystem",
+      "bpmnPath": "/home/logres/system/Experiment/CaseTest/ManagementSystem.bpmn",
+      "generatedArtifacts": {
+        "splitPlanPath": "/home/logres/system/Experiment/Current/Relayer/src/relayer-node/runtime/translator_split_mode/ManagementSystem/split-plan.json",
+        "sesePath": "/home/logres/system/Experiment/Current/Relayer/src/relayer-node/runtime/translator_split_mode/ManagementSystem/split/ManagementSystem.sese.json",
+        "b2cPath": "/home/logres/system/Experiment/Current/Relayer/src/relayer-node/runtime/translator_split_mode/ManagementSystem.b2c",
+        "solidityPath": "/home/logres/system/Experiment/Current/Relayer/src/relayer-node/runtime/translator_split_mode/ManagementSystem/full_solidity/ManagementSystem.sol",
+        "splitDslPath": "/home/logres/system/Experiment/Current/Relayer/src/relayer-node/runtime/translator_split_mode/ManagementSystem/split/ManagementSystem.split.dsl",
+        "splitContracts": {
+          "sourceContractName": "ManagementSystemSubmodelA",
+          "sourceContractPath": "/home/logres/system/Experiment/Current/Relayer/src/contract/generated/ManagementSystemSubmodelA.sol",
+          "targetContractName": "ManagementSystemSubmodelB",
+          "targetContractPath": "/home/logres/system/Experiment/Current/Relayer/src/contract/generated/ManagementSystemSubmodelB.sol"
+        }
+      },
+      "split": {
+        "model": "dual-submodel",
+        "selectedMarker": "UNKNOWN",
+        "selectedMerge": "UNKNOWN",
+        "submodels": [
+          {
+            "submodelId": "ManagementSystem_sub_1",
+            "entryNodes": [
+              "Event_1y0sgtz"
+            ],
+            "exitNodes": [
+              "Event_03qnwuo"
+            ],
+            "nodeIds": [
+              "Event_1y0sgtz",
+              "Gateway_1ufqfso",
+              "Gateway_0e7k79c",
+              "ChoreographyTask_1xoz3od",
+              "ChoreographyTask_0p0fmsg",
+              "ChoreographyTask_0gryre6",
+              "Gateway_067p6u8",
+              "Gateway_1m5huw8",
+              "ChoreographyTask_00l67sg",
+              "Event_03qnwuo"
+            ],
+            "nodeCount": 10,
+            "condensedSize": 10
+          },
+          {
+            "submodelId": "ManagementSystem_sub_2",
+            "entryNodes": [
+              "UNKNOWN"
+            ],
+            "exitNodes": [
+              "UNKNOWN"
+            ],
+            "nodeIds": [
+              "UNKNOWN"
+            ],
+            "nodeCount": 1,
+            "condensedSize": 1
+          }
+        ],
+        "taskBudget": 1
+      },
+      "crossChainPlan": {
+        "sourceChain": "chainA",
+        "targetChain": "chainB",
+        "routing": [
+          {
+            "submodelId": "ManagementSystem_sub_1",
+            "route": "chainA->relayer->chainB"
+          },
+          {
+            "submodelId": "ManagementSystem_sub_2",
+            "route": "chainA->relayer->chainB"
+          }
+        ]
+      }
+    }
+  ]
+}
