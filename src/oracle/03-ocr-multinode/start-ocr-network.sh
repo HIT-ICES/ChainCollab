@@ -16,6 +16,8 @@ RUNTIME_CONFIG_ROOT="${CHAINCOLLAB_CHAINLINK_CONFIG_ROOT:-$ROOT_DIR/runtime/chai
 COMPOSE_FILE="$SCRIPT_DIR/docker-compose-multinode.yml"
 DMN_COMPOSE_FILE="$SCRIPT_DIR/../04-dmn-ocr/docker-compose-cdmn.yml"
 SYSTEM_GETH_CONTAINER="${SYSTEM_GETH_CONTAINER:-system-geth-node}"
+CDMN_IMAGE="${CDMN_IMAGE:-chaincollab-cdmn-server:latest}"
+CDMN_BASE_IMAGE="${CDMN_BASE_IMAGE:-python:3.9-slim}"
 STARTED_BOOTSTRAP=0
 STARTED_CHAINLINK=0
 STARTED_DMN=0
@@ -84,6 +86,22 @@ if ! docker info &> /dev/null; then
     echo -e "${RED}错误：Docker 未运行，请先启动 Docker。${NC}"
     exit 1
 fi
+
+ensure_cdmn_image() {
+    if docker image inspect "$CDMN_IMAGE" >/dev/null 2>&1; then
+        echo -e "${GREEN}复用已有 CDMN 镜像：${CDMN_IMAGE}${NC}"
+        return 0
+    fi
+
+    echo -e "${YELLOW}未找到 CDMN 镜像，首次构建 ${CDMN_IMAGE} ...${NC}"
+    (
+        cd "$SCRIPT_DIR/../04-dmn-ocr/cdmn-python-server"
+        docker build \
+          --build-arg "BASE_IMAGE=${CDMN_BASE_IMAGE}" \
+          -t "$CDMN_IMAGE" \
+          .
+    )
+}
 
 echo -e "${BLUE}检查外部系统链节点 ${SYSTEM_GETH_CONTAINER}...${NC}"
 ensure_system_geth_ready "$SYSTEM_GETH_CONTAINER"
@@ -239,6 +257,7 @@ echo -e "${BLUE}步骤 5：收集所有节点信息...${NC}"
 node "$SCRIPT_DIR/get-node-info.js"
 
 echo -e "${BLUE}步骤 6：启动 CDMN 服务...${NC}"
+ensure_cdmn_image
 STARTED_DMN=1
 OCR_DEPLOYMENT="$DEPLOYMENT_DIR/ocr-deployment.json"
 if [ -f "$OCR_DEPLOYMENT" ] && command -v jq &> /dev/null; then

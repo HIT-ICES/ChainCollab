@@ -10,6 +10,14 @@ const EXPECTED_DEPLOYER = (process.env.DEPLOYER_ACCOUNT || process.env.ETH_SYSTE
 const CHAINLINK_ROOT = path.resolve(__dirname, '..');
 const SOLC_IMAGE = process.env.SOLC_IMAGE || 'ethereum/solc:0.8.19';
 const OPERATOR_SOLC_IMAGE = process.env.OPERATOR_SOLC_IMAGE || 'ethereum/solc:0.8.19';
+const OPERATOR_OPENZEPPELIN_REMAPPINGS = [
+    '@openzeppelin/contracts@4.7.3=node_modules/@openzeppelin/contracts-4.7.3',
+    '@openzeppelin/contracts@4.8.3=node_modules/@openzeppelin/contracts-4.8.3',
+    '@openzeppelin/contracts@4.9.6=node_modules/@openzeppelin/contracts-4.9.6',
+    '@openzeppelin/contracts@5.0.2=node_modules/@openzeppelin/contracts-5.0.2',
+    '@openzeppelin/contracts@5.1.0=node_modules/@openzeppelin/contracts-5.1.0',
+    '@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/'
+];
 
 let cachedSolcRunner = null;
 
@@ -135,6 +143,17 @@ function runSolcWithImage(image, args, outputPath) {
         args: ['run', '--rm', '-v', `${CHAINLINK_ROOT}:/sources`, '-w', '/sources', image]
     };
     return runSolcWithRunner(runner, args, outputPath);
+}
+
+function buildOperatorSolcArgs(operatorPath) {
+    return [
+        '--optimize',
+        '--base-path', '.',
+        '--include-path', 'node_modules',
+        '--combined-json', 'abi,bin',
+        ...OPERATOR_OPENZEPPELIN_REMAPPINGS,
+        operatorPath
+    ];
 }
 
 // RPC 调用函数
@@ -321,13 +340,11 @@ async function main() {
         // 3. 部署 Operator 合约
         console.log('\n=== 步骤 3: 编译并部署 Operator ===');
         const operatorPath = 'node_modules/@chainlink/contracts/src/v0.8/operatorforwarder/Operator.sol';
-        const operatorCompiledJson = runSolcWithImage(OPERATOR_SOLC_IMAGE, [
-            '--optimize',
-            '--base-path', '.',
-            '--include-path', 'node_modules',
-            '--combined-json', 'abi,bin',
-            operatorPath
-        ], `${deploymentDir}/operator-compiled.json`);
+        const operatorCompiledJson = runSolcWithImage(
+            OPERATOR_SOLC_IMAGE,
+            buildOperatorSolcArgs(operatorPath),
+            `${deploymentDir}/operator-compiled.json`
+        );
 
         const operatorCompiled = JSON.parse(operatorCompiledJson);
         const operatorData = operatorCompiled.contracts[operatorPath + ':Operator'];
