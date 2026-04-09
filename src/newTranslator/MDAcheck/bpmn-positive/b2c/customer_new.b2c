@@ -1,0 +1,284 @@
+contract GeneratedContract {
+
+    participants {
+        participant Participant_1080bkg {
+            msp "CustomerMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Customer"
+
+            }
+        }
+        participant Participant_0sktaei {
+            msp "Service_ProviderMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Service Provider"
+
+            }
+        }
+        participant Participant_1gcdqza {
+            msp "External_service_providerMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "External service provider"
+
+            }
+        }
+
+    }
+
+
+
+    globals {
+        VIPpoints: int
+        Confirmation: bool
+        Delivered_product_id: string
+        External_service_Id: string
+        ExternalAvailable: bool
+        Invoice: bool
+        Invoice_information: string
+        InvoiceAvailable: bool
+        InvoiceType: string
+        Invoice_data: int
+        Invoice_id: string
+        Is_available: bool
+        Motivation: string
+        Need_external_provider: bool
+        OrderID: int
+        Payment_amount: int
+        Price_quotation: int
+        Product_Id: string
+        Service_plan: string
+        ServiceId: string
+
+    }
+
+
+
+    messages {
+        message Message_045i10y from Participant_1080bkg to Participant_0sktaei {
+            initial state INACTIVE
+            schema "{\"properties\":{\"serviceId\":{\"type\":\"string\",\"description\":\"The required service id\"},\"VIPpoints\":{\"type\":\"number\",\"description\":\"points\"}},\"required\":[\"serviceId\",\"VIPpoints\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_0m9p3da from Participant_1080bkg to Participant_0sktaei {
+            initial state INACTIVE
+            schema "{\"properties\":{\"invoice\":{\"type\":\"boolean\",\"description\":\"Do you need an invoice?\"},\"invoiceType\":{\"type\":\"string\",\"description\":\"type\"}},\"required\":[\"invoice\",\"invoiceType\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_0o8eyir from Participant_1080bkg to Participant_0sktaei {
+            initial state INACTIVE
+            schema "{\"properties\":{\"payment amount\":{\"type\":\"number\",\"description\":\"payment amount\"},\"orderID\":{\"type\":\"number\",\"description\":\"The order id of payment\"}},\"required\":[\"payment amount\",\"orderID\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_0r9lypd from Participant_0sktaei to Participant_1080bkg {
+            initial state INACTIVE
+            schema "{\"properties\":{\"is_available\":{\"type\":\"boolean\",\"description\":\"Is the service available?\"}},\"required\":[\"is_available\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1em0ee4 from Participant_0sktaei to Participant_1080bkg {
+            initial state INACTIVE
+            schema "{\"properties\":{\"service plan\":{\"type\":\"string\",\"description\":\"service plan\"},\"price_quotation\":{\"type\":\"number\",\"description\":\"Price quotation\"},\"need_external_provider\":{\"type\":\"boolean\",\"description\":\"Whether external service providers are required\"}},\"required\":[\"service plan\",\"price_quotation\",\"need_external_provider\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1etcmvl from Participant_0sktaei to Participant_1080bkg {
+            initial state INACTIVE
+            schema "{\"properties\":{\"invoice_id\":{\"type\":\"string\",\"description\":\"Invoice Id\"},\"invoice_data\":{\"type\":\"number\",\"description\":\"Date of invoice issuance\"}},\"required\":[\"invoice_id\"],\"files\":{\"invoice\":{\"type\":\"file\",\"description\":\"Invoice documents\"}},\"file required\":[\"invoice\"]}"
+        }
+        message Message_1i8rlqn from Participant_0sktaei to Participant_1gcdqza {
+            initial state INACTIVE
+            schema "{\"properties\":{\"external service Id\":{\"type\":\"string\",\"description\":\"The requested external service information\"}},\"required\":[\"external service Id\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1joj7ca from Participant_1080bkg to Participant_0sktaei {
+            initial state INACTIVE
+            schema "{\"properties\":{\"invoice information\":{\"type\":\"string\",\"description\":\"Invoice related information\"}},\"required\":[\"invoice information\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1ljlm4g from Participant_0sktaei to Participant_1080bkg {
+            initial state INACTIVE
+            schema "{\"properties\":{\"delivered_product_id\":{\"type\":\"string\",\"description\":\"delivered_product_id\"}},\"required\":[\"delivered_product_id\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1nlagx2 from Participant_1080bkg to Participant_0sktaei {
+            initial state INACTIVE
+            schema "{\"properties\":{\"confirmation\":{\"type\":\"boolean\",\"description\":\"Whether to accept the service plan\"}},\"required\":[\"confirmation\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1q05nnw from Participant_0sktaei to Participant_1gcdqza {
+            initial state INACTIVE
+            schema "{\"properties\":{\"payment amount\":{\"type\":\"number\",\"description\":\"payment amount\"}},\"required\":[\"payment amount\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1qbk325 from Participant_1gcdqza to Participant_0sktaei {
+            initial state INACTIVE
+            schema "{\"properties\":{\"product Id\":{\"type\":\"string\",\"description\":\"Delivered product id\"}},\"required\":[\"product Id\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1xm9dxy from Participant_1080bkg to Participant_0sktaei {
+            initial state INACTIVE
+            schema "{\"properties\":{\"motivation\":{\"type\":\"string\",\"description\":\"Motivation for Canceling orders\"}},\"required\":[\"motivation\"],\"files\":{},\"file required\":[]}"
+        }
+
+    }
+
+
+
+    gateways {
+        gateway ExclusiveGateway_106je4z {
+            type exclusive
+            initial state INACTIVE
+        }
+        gateway ExclusiveGateway_0hs3ztq {
+            type exclusive
+            initial state INACTIVE
+        }
+        gateway ExclusiveGateway_0nzwv7v {
+            type exclusive
+            initial state INACTIVE
+        }
+        gateway Gateway_1bhtapl {
+            type exclusive
+            initial state INACTIVE
+        }
+        gateway Gateway_04h9e6e {
+            type exclusive
+            initial state INACTIVE
+        }
+        gateway EventBasedGateway_1fxpmyn {
+            type event
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    events {
+        event Event_1jtgn3j {
+            initial state READY
+        }
+        event Event_0366pfz {
+            initial state INACTIVE
+        }
+        event Event_146eii4 {
+            initial state INACTIVE
+        }
+        event Event_143ykco {
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    businessrules {
+        businessrule Activity_1yl9tfp {
+            dmn "Activity_1yl9tfp.dmn"
+            decision "Activity_1yl9tfp_DecisionID"
+            input mapping {
+                VIPpoints -> VIPpoints
+                need_external_provider -> Need_external_provider
+
+            }
+            output mapping {
+                externalAvailable -> ExternalAvailable
+
+            }
+
+            initial state INACTIVE
+        }
+        businessrule Activity_0ibsbry {
+            dmn "Activity_0ibsbry.dmn"
+            decision "Activity_0ibsbry_DecisionID"
+            input mapping {
+                invoiceType -> InvoiceType
+                invoice -> Invoice
+
+            }
+            output mapping {
+                invoiceAvailable -> InvoiceAvailable
+
+            }
+
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    oracletasks {
+
+    }
+
+
+
+    flows {
+        start event Event_1jtgn3j enables ExclusiveGateway_0hs3ztq;
+
+        when message Message_045i10y completed
+        then enable Message_0r9lypd;
+        when message Message_0r9lypd completed
+        then enable ExclusiveGateway_106je4z;
+        when message Message_1em0ee4 completed
+        then enable Message_1nlagx2;
+        when message Message_1nlagx2 completed
+        then enable EventBasedGateway_1fxpmyn;
+        when message Message_0o8eyir completed
+        then disable Message_1xm9dxy, enable Activity_1yl9tfp;
+        when message Message_1xm9dxy completed
+        then disable Message_0o8eyir, enable Event_0366pfz;
+        when message Message_1ljlm4g completed
+        then enable Message_0m9p3da;
+        when message Message_0m9p3da completed
+        then enable Activity_0ibsbry;
+        when message Message_1joj7ca completed
+        then enable Message_1etcmvl;
+        when message Message_1etcmvl completed
+        then enable Event_146eii4;
+        when message Message_1i8rlqn completed
+        then enable Message_1q05nnw;
+        when message Message_1q05nnw completed
+        then enable Message_1qbk325;
+        when message Message_1qbk325 completed
+        then enable Gateway_04h9e6e;
+
+        when gateway ExclusiveGateway_106je4z completed
+        choose {
+            if Is_available == true
+            then enable Message_1em0ee4;
+            if Is_available == false
+            then enable ExclusiveGateway_0hs3ztq;
+
+        }
+        when gateway ExclusiveGateway_0hs3ztq completed
+        then enable Message_045i10y;
+        when gateway ExclusiveGateway_0nzwv7v completed
+        choose {
+            if InvoiceAvailable == true
+            then enable Message_1joj7ca;
+            if InvoiceAvailable == false
+            then enable Event_143ykco;
+
+        }
+        when gateway Gateway_1bhtapl completed
+        choose {
+            if ExternalAvailable == true
+            then enable Message_1i8rlqn;
+            if ExternalAvailable == false
+            then enable Gateway_04h9e6e;
+
+        }
+        when gateway Gateway_04h9e6e completed
+        then enable Message_1ljlm4g;
+        when gateway EventBasedGateway_1fxpmyn completed
+        then enable Message_0o8eyir, enable Message_1xm9dxy;
+
+        when businessrule Activity_1yl9tfp done
+        then enable Gateway_1bhtapl;
+        when businessrule Activity_0ibsbry done
+        then enable ExclusiveGateway_0nzwv7v;
+
+    }
+
+}

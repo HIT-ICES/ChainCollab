@@ -1,0 +1,486 @@
+{
+  "relativePath": "model87/result87_200.xmi",
+  "absolutePath": "/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi",
+  "ok": false,
+  "durationMs": 90,
+  "error": null,
+  "violationCount": 68,
+  "violations": [
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::MessagesRequireAtLeastTwoParticipants",
+      "meaningZh": "如果定义了 message，则 participant 至少 2 个（否则必然出现 sender=receiver 或无法建模通信）",
+      "message": "The 'Contract::MessagesRequireAtLeastTwoParticipants' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@6b9038cd{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::MessageParticipantsInContract",
+      "meaningZh": "Message 的 sender/receiver 必须来自本合约 participants（避免跨 contract 串引用）",
+      "message": "The 'Contract::MessageParticipantsInContract' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@6b9038cd{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::HasExactlyOneFlowSection",
+      "meaningZh": "对生成/执行更友好：要求合约包含且仅包含一个 flows 区块",
+      "message": "The 'Contract::HasExactlyOneFlowSection' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@6b9038cd{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::ExactlyOneReadyEventAndMatchesStart",
+      "meaningZh": "READY 的事件只能有一个，并且必须等于 start flow 的 start event",
+      "message": "The 'Contract::ExactlyOneReadyEventAndMatchesStart' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@6b9038cd{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::ExactlyOneStartFlow",
+      "meaningZh": "只允许 1 个起点；并要求 start event 显式 READY（与你示例/生成器取 start_event 的逻辑一致）",
+      "message": "The 'Contract::ExactlyOneStartFlow' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@6b9038cd{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::FlowSectionNotEmpty",
+      "meaningZh": "违反约束：Contract::FlowSectionNotEmpty",
+      "message": "The 'Contract::FlowSectionNotEmpty' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@6b9038cd{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::SectionAtMostOnceEachKind",
+      "meaningZh": "违反约束：Contract::SectionAtMostOnceEachKind",
+      "message": "The 'Contract::SectionAtMostOnceEachKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@6b9038cd{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：sender",
+      "message": "The required feature 'sender' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@a5beed7{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.0}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：receiver",
+      "message": "The required feature 'receiver' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@a5beed7{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.0}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Message::SenderNotReceiver",
+      "meaningZh": "违反约束：Message::SenderNotReceiver",
+      "message": "The 'Message::SenderNotReceiver' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@a5beed7{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.0}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：sender",
+      "message": "The required feature 'sender' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@773a803{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.1}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：receiver",
+      "message": "The required feature 'receiver' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@773a803{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.1}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Message::SenderNotReceiver",
+      "meaningZh": "违反约束：Message::SenderNotReceiver",
+      "message": "The 'Message::SenderNotReceiver' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@773a803{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.1}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：sender",
+      "message": "The required feature 'sender' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@7f1a7f32{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.2}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：receiver",
+      "message": "The required feature 'receiver' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@7f1a7f32{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.2}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Message::SenderNotReceiver",
+      "meaningZh": "违反约束：Message::SenderNotReceiver",
+      "message": "The 'Message::SenderNotReceiver' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@7f1a7f32{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.2}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：sender",
+      "message": "The required feature 'sender' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@93385b0{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.3}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：receiver",
+      "message": "The required feature 'receiver' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@93385b0{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.3}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Message::SenderNotReceiver",
+      "meaningZh": "违反约束：Message::SenderNotReceiver",
+      "message": "The 'Message::SenderNotReceiver' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@93385b0{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.3}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：sender",
+      "message": "The required feature 'sender' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@5c4bff17{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.4}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：receiver",
+      "message": "The required feature 'receiver' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@5c4bff17{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.4}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Message::SenderNotReceiver",
+      "meaningZh": "违反约束：Message::SenderNotReceiver",
+      "message": "The 'Message::SenderNotReceiver' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@5c4bff17{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.4}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：sender",
+      "message": "The required feature 'sender' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@46e2772d{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.5}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：receiver",
+      "message": "The required feature 'receiver' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@46e2772d{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.5}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Message::SenderNotReceiver",
+      "meaningZh": "违反约束：Message::SenderNotReceiver",
+      "message": "The 'Message::SenderNotReceiver' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@46e2772d{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.5}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：sender",
+      "message": "The required feature 'sender' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@6aad632c{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.6}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：receiver",
+      "message": "The required feature 'receiver' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@6aad632c{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.6}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Message::SenderNotReceiver",
+      "meaningZh": "违反约束：Message::SenderNotReceiver",
+      "message": "The 'Message::SenderNotReceiver' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@6aad632c{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.6}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：sender",
+      "message": "The required feature 'sender' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@7f2675cc{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.7}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：receiver",
+      "message": "The required feature 'receiver' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@7f2675cc{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.7}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Message::SenderNotReceiver",
+      "meaningZh": "违反约束：Message::SenderNotReceiver",
+      "message": "The 'Message::SenderNotReceiver' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@7f2675cc{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.7}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：sender",
+      "message": "The required feature 'sender' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@7c969e78{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.8}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：receiver",
+      "message": "The required feature 'receiver' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@7c969e78{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.8}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Message::SenderNotReceiver",
+      "meaningZh": "违反约束：Message::SenderNotReceiver",
+      "message": "The 'Message::SenderNotReceiver' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Message@7c969e78{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.3/@messages.8}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "BusinessRule::HasAtLeastOneInputMapping",
+      "meaningZh": "至少要有一个输入映射（否则业务规则无法从合约状态拿到参数）",
+      "message": "The 'BusinessRule::HasAtLeastOneInputMapping' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#BusinessRule@1f0bd063{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.5/@rules.3}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "BusinessRule::HasAtLeastOneInputMapping",
+      "meaningZh": "至少要有一个输入映射（否则业务规则无法从合约状态拿到参数）",
+      "message": "The 'BusinessRule::HasAtLeastOneInputMapping' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#BusinessRule@7ec1acc6{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.5/@rules.4}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "BusinessRule::HasAtLeastOneInputMapping",
+      "meaningZh": "至少要有一个输入映射（否则业务规则无法从合约状态拿到参数）",
+      "message": "The 'BusinessRule::HasAtLeastOneInputMapping' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#BusinessRule@33aec34a{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.5/@rules.5}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "BusinessRule::HasAtLeastOneInputMapping",
+      "meaningZh": "至少要有一个输入映射（否则业务规则无法从合约状态拿到参数）",
+      "message": "The 'BusinessRule::HasAtLeastOneInputMapping' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#BusinessRule@419f9cbc{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.5/@rules.6}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "BusinessRule::HasAtLeastOneInputMapping",
+      "meaningZh": "至少要有一个输入映射（否则业务规则无法从合约状态拿到参数）",
+      "message": "The 'BusinessRule::HasAtLeastOneInputMapping' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#BusinessRule@d6d424{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.5/@rules.7}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "BusinessRule::HasAtLeastOneInputMapping",
+      "meaningZh": "至少要有一个输入映射（否则业务规则无法从合约状态拿到参数）",
+      "message": "The 'BusinessRule::HasAtLeastOneInputMapping' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#BusinessRule@7302ff64{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.0/@sections.5/@rules.8}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::HasExactlyOneFlowSection",
+      "meaningZh": "对生成/执行更友好：要求合约包含且仅包含一个 flows 区块",
+      "message": "The 'Contract::HasExactlyOneFlowSection' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@7167188f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.1}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::ExactlyOneReadyEventAndMatchesStart",
+      "meaningZh": "READY 的事件只能有一个，并且必须等于 start flow 的 start event",
+      "message": "The 'Contract::ExactlyOneReadyEventAndMatchesStart' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@7167188f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.1}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::ExactlyOneStartFlow",
+      "meaningZh": "只允许 1 个起点；并要求 start event 显式 READY（与你示例/生成器取 start_event 的逻辑一致）",
+      "message": "The 'Contract::ExactlyOneStartFlow' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@7167188f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.1}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::FlowSectionNotEmpty",
+      "meaningZh": "违反约束：Contract::FlowSectionNotEmpty",
+      "message": "The 'Contract::FlowSectionNotEmpty' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@7167188f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.1}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::HasExactlyOneFlowSection",
+      "meaningZh": "对生成/执行更友好：要求合约包含且仅包含一个 flows 区块",
+      "message": "The 'Contract::HasExactlyOneFlowSection' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@33ef291c{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.2}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::ExactlyOneReadyEventAndMatchesStart",
+      "meaningZh": "READY 的事件只能有一个，并且必须等于 start flow 的 start event",
+      "message": "The 'Contract::ExactlyOneReadyEventAndMatchesStart' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@33ef291c{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.2}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::ExactlyOneStartFlow",
+      "meaningZh": "只允许 1 个起点；并要求 start event 显式 READY（与你示例/生成器取 start_event 的逻辑一致）",
+      "message": "The 'Contract::ExactlyOneStartFlow' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@33ef291c{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.2}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::FlowSectionNotEmpty",
+      "meaningZh": "违反约束：Contract::FlowSectionNotEmpty",
+      "message": "The 'Contract::FlowSectionNotEmpty' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@33ef291c{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.2}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::HasExactlyOneFlowSection",
+      "meaningZh": "对生成/执行更友好：要求合约包含且仅包含一个 flows 区块",
+      "message": "The 'Contract::HasExactlyOneFlowSection' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@6bfb4e8f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.3}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::ExactlyOneReadyEventAndMatchesStart",
+      "meaningZh": "READY 的事件只能有一个，并且必须等于 start flow 的 start event",
+      "message": "The 'Contract::ExactlyOneReadyEventAndMatchesStart' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@6bfb4e8f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.3}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::ExactlyOneStartFlow",
+      "meaningZh": "只允许 1 个起点；并要求 start event 显式 READY（与你示例/生成器取 start_event 的逻辑一致）",
+      "message": "The 'Contract::ExactlyOneStartFlow' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@6bfb4e8f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.3}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::FlowSectionNotEmpty",
+      "meaningZh": "违反约束：Contract::FlowSectionNotEmpty",
+      "message": "The 'Contract::FlowSectionNotEmpty' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@6bfb4e8f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.3}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::HasExactlyOneFlowSection",
+      "meaningZh": "对生成/执行更友好：要求合约包含且仅包含一个 flows 区块",
+      "message": "The 'Contract::HasExactlyOneFlowSection' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@1c7556d{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.4}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::ExactlyOneReadyEventAndMatchesStart",
+      "meaningZh": "READY 的事件只能有一个，并且必须等于 start flow 的 start event",
+      "message": "The 'Contract::ExactlyOneReadyEventAndMatchesStart' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@1c7556d{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.4}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::ExactlyOneStartFlow",
+      "meaningZh": "只允许 1 个起点；并要求 start event 显式 READY（与你示例/生成器取 start_event 的逻辑一致）",
+      "message": "The 'Contract::ExactlyOneStartFlow' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@1c7556d{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.4}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::FlowSectionNotEmpty",
+      "meaningZh": "违反约束：Contract::FlowSectionNotEmpty",
+      "message": "The 'Contract::FlowSectionNotEmpty' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@1c7556d{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.4}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::HasExactlyOneFlowSection",
+      "meaningZh": "对生成/执行更友好：要求合约包含且仅包含一个 flows 区块",
+      "message": "The 'Contract::HasExactlyOneFlowSection' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@482d86ba{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.5}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::ExactlyOneReadyEventAndMatchesStart",
+      "meaningZh": "READY 的事件只能有一个，并且必须等于 start flow 的 start event",
+      "message": "The 'Contract::ExactlyOneReadyEventAndMatchesStart' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@482d86ba{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.5}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::ExactlyOneStartFlow",
+      "meaningZh": "只允许 1 个起点；并要求 start event 显式 READY（与你示例/生成器取 start_event 的逻辑一致）",
+      "message": "The 'Contract::ExactlyOneStartFlow' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@482d86ba{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.5}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::FlowSectionNotEmpty",
+      "meaningZh": "违反约束：Contract::FlowSectionNotEmpty",
+      "message": "The 'Contract::FlowSectionNotEmpty' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@482d86ba{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.5}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::HasExactlyOneFlowSection",
+      "meaningZh": "对生成/执行更友好：要求合约包含且仅包含一个 flows 区块",
+      "message": "The 'Contract::HasExactlyOneFlowSection' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@2c0f16a{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.6}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::ExactlyOneReadyEventAndMatchesStart",
+      "meaningZh": "READY 的事件只能有一个，并且必须等于 start flow 的 start event",
+      "message": "The 'Contract::ExactlyOneReadyEventAndMatchesStart' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@2c0f16a{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.6}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::ExactlyOneStartFlow",
+      "meaningZh": "只允许 1 个起点；并要求 start event 显式 READY（与你示例/生成器取 start_event 的逻辑一致）",
+      "message": "The 'Contract::ExactlyOneStartFlow' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@2c0f16a{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.6}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::FlowSectionNotEmpty",
+      "meaningZh": "违反约束：Contract::FlowSectionNotEmpty",
+      "message": "The 'Contract::FlowSectionNotEmpty' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@2c0f16a{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.6}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::HasExactlyOneFlowSection",
+      "meaningZh": "对生成/执行更友好：要求合约包含且仅包含一个 flows 区块",
+      "message": "The 'Contract::HasExactlyOneFlowSection' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@337e588b{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.7}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::ExactlyOneReadyEventAndMatchesStart",
+      "meaningZh": "READY 的事件只能有一个，并且必须等于 start flow 的 start event",
+      "message": "The 'Contract::ExactlyOneReadyEventAndMatchesStart' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@337e588b{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.7}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::ExactlyOneStartFlow",
+      "meaningZh": "只允许 1 个起点；并要求 start event 显式 READY（与你示例/生成器取 start_event 的逻辑一致）",
+      "message": "The 'Contract::ExactlyOneStartFlow' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@337e588b{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.7}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::FlowSectionNotEmpty",
+      "meaningZh": "违反约束：Contract::FlowSectionNotEmpty",
+      "message": "The 'Contract::FlowSectionNotEmpty' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@337e588b{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model87/result87_200.xmi#//@contracts.7}'"
+    }
+  ]
+}

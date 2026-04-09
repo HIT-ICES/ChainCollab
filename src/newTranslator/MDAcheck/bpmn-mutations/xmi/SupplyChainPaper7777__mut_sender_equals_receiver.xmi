@@ -1,0 +1,144 @@
+<?xml version='1.0' encoding='utf-8'?>
+<b2c:Model xmlns:b2c="https://chaincollab/newTranslator/b2c" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmi:version="2.0">
+  <contracts name="GeneratedContract">
+    <sections xsi:type="b2c:ParticipantSection">
+      <participants name="Participant_0w6qkdf" msp="Bulk_buyerMSP" x509="" multiMin="0" multiMax="0">
+        <attributes key="role" value="Bulk buyer" />
+      </participants>
+      <participants name="Participant_19mgbdn" msp="ManufacturerMSP" x509="" multiMin="0" multiMax="0">
+        <attributes key="role" value="Manufacturer" />
+      </participants>
+      <participants name="Participant_09cjol2" msp="MiddlemanMSP" x509="" multiMin="0" multiMax="0">
+        <attributes key="role" value="Middleman" />
+      </participants>
+      <participants name="Participant_0sa2v7d" msp="SupplierMSP" x509="" multiMin="0" multiMax="0">
+        <attributes key="role" value="Supplier" />
+      </participants>
+      <participants name="Participant_19j1e3o" msp="Special_carrierMSP" x509="" multiMin="0" multiMax="0">
+        <attributes key="role" value="Special carrier" />
+      </participants>
+    </sections>
+    <sections xsi:type="b2c:GlobalSection">
+      <globals name="DeliveryConfirmation" type="bool" />
+      <globals name="FinalPriority" />
+      <globals name="NumberOfUnits" type="int" />
+      <globals name="OrderDetails" />
+      <globals name="ProductionStart" />
+      <globals name="RequestId" type="int" />
+      <globals name="SupplierReputation" type="int" />
+      <globals name="SupplyOrderDetails" />
+      <globals name="SupplyOrderId" />
+      <globals name="TransportOrderId" />
+      <globals name="Urgent" type="bool" />
+    </sections>
+    <sections xsi:type="b2c:MessageSection">
+      <messages name="Message_04wmlqe" sender="//@contracts.0/@sections.0/@participants.1" receiver="//@contracts.0/@sections.0/@participants.1" schema="{&quot;properties&quot;:{&quot;productionStart&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;Notification of the commencement of production, including the date and time&quot;}},&quot;required&quot;:[&quot;productionStart&quot;],&quot;files&quot;:{},&quot;file required&quot;:[]}" />
+      <messages name="Message_0cba4t6" sender="//@contracts.0/@sections.0/@participants.2" receiver="//@contracts.0/@sections.0/@participants.3" schema="{&quot;properties&quot;:{&quot;supplyOrderId&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot; Identifier of the supply order being forwarded&quot;}},&quot;required&quot;:[&quot;supplyOrderId&quot;],&quot;files&quot;:{},&quot;file required&quot;:[]}" />
+      <messages name="Message_0d2xte5" sender="//@contracts.0/@sections.0/@participants.4" receiver="//@contracts.0/@sections.0/@participants.1" schema="{&quot;properties&quot;:{&quot;deliveryConfirmation&quot;:{&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;Confirmation of whether the supplies have been successfully delivered&quot;}},&quot;required&quot;:[&quot;deliveryConfirmation&quot;],&quot;files&quot;:{},&quot;file required&quot;:[]}" />
+      <messages name="Message_0hpha6h" sender="//@contracts.0/@sections.0/@participants.3" receiver="//@contracts.0/@sections.0/@participants.4" schema="{&quot;properties&quot;:{&quot;requestId&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;Unique identifier of the request for additional details &quot;},&quot;supplierReputation&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;A numerical rating representing the supplier's reputation.&quot;}},&quot;required&quot;:[&quot;requestId&quot;,&quot;supplierReputation&quot;],&quot;files&quot;:{},&quot;file required&quot;:[]}" />
+      <messages name="Message_0pm90nx" sender="//@contracts.0/@sections.0/@participants.2" receiver="//@contracts.0/@sections.0/@participants.4" schema="{&quot;properties&quot;:{&quot;transportOrderId&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;Identifier of the transport order being forwarded&quot;}},&quot;required&quot;:[&quot;transportOrderId&quot;],&quot;files&quot;:{},&quot;file required&quot;:[]}" />
+      <messages name="Message_0rwz1km" sender="//@contracts.0/@sections.0/@participants.4" receiver="//@contracts.0/@sections.0/@participants.3" schema="{&quot;properties&quot;:{&quot;requestId&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot; Unique identifier of the request for additional details &quot;},&quot;numberOfUnits&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot; Total number of units in the order requested&quot;},&quot;urgent&quot;:{&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;Indicates whether the order requires urgent delivery.&quot;}},&quot;required&quot;:[&quot;requestId&quot;,&quot;numberOfUnits&quot;,&quot;urgent&quot;],&quot;files&quot;:{},&quot;file required&quot;:[]}" />
+      <messages name="Message_196q1fj" sender="//@contracts.0/@sections.0/@participants.1" receiver="//@contracts.0/@sections.0/@participants.0" schema="{&quot;properties&quot;:{},&quot;required&quot;:[],&quot;files&quot;:{&quot;deliveryNote&quot;:{&quot;type&quot;:&quot;file&quot;,&quot;description&quot;:&quot;A document confirming the delivery of goods&quot;}},&quot;file required&quot;:[&quot;deliveryNote&quot;]}" />
+      <messages name="Message_1ajdm9l" sender="//@contracts.0/@sections.0/@participants.1" receiver="//@contracts.0/@sections.0/@participants.2" schema="{&quot;properties&quot;:{&quot;supplyOrderDetails&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot; Details of the supplies needed&quot;}},&quot;required&quot;:[&quot;supplyOrderDetails&quot;],&quot;files&quot;:{},&quot;file required&quot;:[]}" />
+      <messages name="Message_1dmeexg" sender="//@contracts.0/@sections.0/@participants.4" receiver="//@contracts.0/@sections.0/@participants.1" schema="{}" />
+      <messages name="Message_1dzkcn0" sender="//@contracts.0/@sections.0/@participants.4" receiver="//@contracts.0/@sections.0/@participants.1" schema="{}" />
+      <messages name="Message_1io2g9u" sender="//@contracts.0/@sections.0/@participants.3" receiver="//@contracts.0/@sections.0/@participants.4" schema="{&quot;properties&quot;:{},&quot;required&quot;:[],&quot;files&quot;:{&quot;waybill&quot;:{&quot;type&quot;:&quot;file&quot;,&quot;description&quot;:&quot;Digital or physical waybill document\uff0cdetailing the shipment contents and destination.&quot;}},&quot;file required&quot;:[&quot;waybill&quot;]}" />
+      <messages name="Message_1oxmq1k" sender="//@contracts.0/@sections.0/@participants.4" receiver="//@contracts.0/@sections.0/@participants.1" schema="{}" />
+      <messages name="Message_1wswgqu" sender="//@contracts.0/@sections.0/@participants.0" receiver="//@contracts.0/@sections.0/@participants.1" schema="{&quot;properties&quot;:{&quot;orderDetails&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;Detailed list of goods ordered&quot;}},&quot;required&quot;:[&quot;orderDetails&quot;],&quot;files&quot;:{},&quot;file required&quot;:[]}" />
+    </sections>
+    <sections xsi:type="b2c:GatewaySection">
+      <gateways name="Gateway_1cr0nma" />
+      <gateways name="Gateway_0ep8cuh" />
+      <gateways name="Gateway_0onpe6x" gatewayType="parallel" />
+      <gateways name="Gateway_1fbifca" gatewayType="parallel" />
+    </sections>
+    <sections xsi:type="b2c:EventSection">
+      <events name="Event_06sexe6" initialState="READY" />
+      <events name="Event_13pbqdz" />
+    </sections>
+    <sections xsi:type="b2c:BusinessRuleSection">
+      <rules name="Activity_0rm8bkp" dmnResource="Activity_0rm8bkp.dmn" decisionID="Activity_0rm8bkp_DecisionID">
+        <inputMappings dmnParam="numberOfUnits" globalRef="//@contracts.0/@sections.1/@globals.2" />
+        <inputMappings dmnParam="urgent" globalRef="//@contracts.0/@sections.1/@globals.10" />
+        <inputMappings dmnParam="supplierReputation" globalRef="//@contracts.0/@sections.1/@globals.6" />
+        <outputMappings dmnParam="finalPriority" globalRef="//@contracts.0/@sections.1/@globals.1" />
+      </rules>
+    </sections>
+    <sections xsi:type="b2c:OracleTaskSection" />
+    <sections xsi:type="b2c:FlowSection">
+      <flowItems xsi:type="b2c:StartFlow" start="//@contracts.0/@sections.4/@events.0">
+        <target target="//@contracts.0/@sections.2/@messages.12" />
+      </flowItems>
+      <flowItems xsi:type="b2c:MessageFlow" msg="//@contracts.0/@sections.2/@messages.12" msgCond="completed">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.2/@messages.7" />
+      </flowItems>
+      <flowItems xsi:type="b2c:MessageFlow" msg="//@contracts.0/@sections.2/@messages.7" msgCond="completed">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.3/@gateways.2" />
+      </flowItems>
+      <flowItems xsi:type="b2c:MessageFlow" msg="//@contracts.0/@sections.2/@messages.1" msgCond="completed">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.3/@gateways.3" />
+      </flowItems>
+      <flowItems xsi:type="b2c:MessageFlow" msg="//@contracts.0/@sections.2/@messages.4" msgCond="completed">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.3/@gateways.3" />
+      </flowItems>
+      <flowItems xsi:type="b2c:MessageFlow" msg="//@contracts.0/@sections.2/@messages.5" msgCond="completed">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.2/@messages.3" />
+      </flowItems>
+      <flowItems xsi:type="b2c:MessageFlow" msg="//@contracts.0/@sections.2/@messages.3" msgCond="completed">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.2/@messages.10" />
+      </flowItems>
+      <flowItems xsi:type="b2c:MessageFlow" msg="//@contracts.0/@sections.2/@messages.10" msgCond="completed">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.5/@rules.0" />
+      </flowItems>
+      <flowItems xsi:type="b2c:MessageFlow" msg="//@contracts.0/@sections.2/@messages.2" msgCond="completed">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.3/@gateways.0" />
+      </flowItems>
+      <flowItems xsi:type="b2c:MessageFlow" msg="//@contracts.0/@sections.2/@messages.0" msgCond="completed">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.2/@messages.6" />
+      </flowItems>
+      <flowItems xsi:type="b2c:MessageFlow" msg="//@contracts.0/@sections.2/@messages.6" msgCond="completed">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.4/@events.1" />
+      </flowItems>
+      <flowItems xsi:type="b2c:MessageFlow" msg="//@contracts.0/@sections.2/@messages.11" msgCond="completed">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.3/@gateways.0" />
+      </flowItems>
+      <flowItems xsi:type="b2c:MessageFlow" msg="//@contracts.0/@sections.2/@messages.9" msgCond="completed">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.3/@gateways.0" />
+      </flowItems>
+      <flowItems xsi:type="b2c:MessageFlow" msg="//@contracts.0/@sections.2/@messages.8" msgCond="completed">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.3/@gateways.0" />
+      </flowItems>
+      <flowItems xsi:type="b2c:GatewayFlow" gtw="//@contracts.0/@sections.3/@gateways.0">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.2/@messages.0" />
+      </flowItems>
+      <flowItems xsi:type="b2c:GatewayFlow" gtw="//@contracts.0/@sections.3/@gateways.1">
+        <branches xsi:type="b2c:GatewayCompareBranch" var="//@contracts.0/@sections.1/@globals.1" relation="==">
+          <value stringValue="&quot;Low&quot;" />
+          <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.2/@messages.11" />
+        </branches>
+        <branches xsi:type="b2c:GatewayCompareBranch" var="//@contracts.0/@sections.1/@globals.1" relation="==">
+          <value stringValue="&quot;High&quot;" />
+          <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.2/@messages.8" />
+        </branches>
+        <branches xsi:type="b2c:GatewayCompareBranch" var="//@contracts.0/@sections.1/@globals.1" relation="==">
+          <value stringValue="&quot;Medium&quot;" />
+          <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.2/@messages.9" />
+        </branches>
+        <branches xsi:type="b2c:GatewayCompareBranch" var="//@contracts.0/@sections.1/@globals.1" relation="==">
+          <value stringValue="&quot;VeryLow&quot;" />
+          <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.2/@messages.2" />
+        </branches>
+      </flowItems>
+      <flowItems xsi:type="b2c:GatewayFlow" gtw="//@contracts.0/@sections.3/@gateways.2">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.2/@messages.1" />
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.2/@messages.4" />
+      </flowItems>
+      <flowItems xsi:type="b2c:ParallelJoin" gtw="//@contracts.0/@sections.3/@gateways.3" sources="//@contracts.0/@sections.2/@messages.1 //@contracts.0/@sections.2/@messages.4">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.2/@messages.5" />
+      </flowItems>
+      <flowItems xsi:type="b2c:RuleFlow" rule="//@contracts.0/@sections.5/@rules.0" ruleCond="done">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.3/@gateways.1" />
+      </flowItems>
+    </sections>
+  </contracts>
+</b2c:Model>

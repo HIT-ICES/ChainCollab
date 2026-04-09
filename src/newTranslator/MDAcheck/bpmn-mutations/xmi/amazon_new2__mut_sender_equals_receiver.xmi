@@ -1,0 +1,108 @@
+<?xml version='1.0' encoding='utf-8'?>
+<b2c:Model xmlns:b2c="https://chaincollab/newTranslator/b2c" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmi:version="2.0">
+  <contracts name="GeneratedContract">
+    <sections xsi:type="b2c:ParticipantSection">
+      <participants name="Participant_1p9owwo" msp="Amazon_support_centerMSP" x509="" multiMin="0" multiMax="0">
+        <attributes key="role" value="amazon support center" />
+      </participants>
+      <participants name="Participant_12df78t" msp="CustomerMSP" x509="" multiMin="0" multiMax="0">
+        <attributes key="role" value="customer" />
+      </participants>
+    </sections>
+    <sections xsi:type="b2c:GlobalSection">
+      <globals name="EC2_resource_ID" />
+      <globals name="Amount" type="int" />
+      <globals name="Confirm" type="bool" />
+      <globals name="Description" />
+      <globals name="Duration" type="int" />
+      <globals name="Instance_ID" />
+      <globals name="Logs" />
+      <globals name="Other_information" />
+      <globals name="Question_name" />
+      <globals name="Reason" />
+      <globals name="Result" />
+      <globals name="ServiceType" />
+      <globals name="Time" />
+      <globals name="Type" />
+    </sections>
+    <sections xsi:type="b2c:MessageSection">
+      <messages name="Message_01jq2zl" sender="//@contracts.0/@sections.0/@participants.0" receiver="//@contracts.0/@sections.0/@participants.0" schema="{&quot;properties&quot;:{&quot;amount&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;&quot;}},&quot;required&quot;:[&quot;amount&quot;],&quot;files&quot;:{},&quot;file required&quot;:[]}" />
+      <messages name="Message_068kmzv" sender="//@contracts.0/@sections.0/@participants.1" receiver="//@contracts.0/@sections.0/@participants.0" schema="{&quot;properties&quot;:{&quot;time&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;},&quot;instance ID&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;},&quot;logs&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}},&quot;required&quot;:[&quot;time&quot;,&quot;instance ID&quot;,&quot;logs&quot;],&quot;files&quot;:{},&quot;file required&quot;:[]}" />
+      <messages name="Message_076ulzs" sender="//@contracts.0/@sections.0/@participants.1" receiver="//@contracts.0/@sections.0/@participants.0" schema="{&quot;properties&quot;:{&quot;time&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;},&quot;description&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;},&quot;EC2 resource ID&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;},&quot;logs&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;},&quot;other information&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}},&quot;required&quot;:[&quot;time&quot;,&quot;description&quot;,&quot;EC2 resource ID&quot;,&quot;logs&quot;],&quot;files&quot;:{},&quot;file required&quot;:[]}" />
+      <messages name="Message_09krt7c" sender="//@contracts.0/@sections.0/@participants.1" receiver="//@contracts.0/@sections.0/@participants.0" schema="{&quot;properties&quot;:{&quot;question name&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;},&quot;description&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}},&quot;required&quot;:[&quot;question name&quot;,&quot;description&quot;],&quot;files&quot;:{},&quot;file required&quot;:[]}" />
+      <messages name="Message_0ywghlt" sender="//@contracts.0/@sections.0/@participants.1" receiver="//@contracts.0/@sections.0/@participants.0" schema="{&quot;properties&quot;:{&quot;serviceType&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}},&quot;required&quot;:[&quot;serviceType&quot;],&quot;files&quot;:{},&quot;file required&quot;:[]}" />
+      <messages name="Message_12n6jjk" sender="//@contracts.0/@sections.0/@participants.1" receiver="//@contracts.0/@sections.0/@participants.0" schema="{&quot;properties&quot;:{&quot;type&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;},&quot;duration&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;&quot;}},&quot;required&quot;:[&quot;type&quot;,&quot;duration&quot;],&quot;files&quot;:{},&quot;file required&quot;:[]}" />
+      <messages name="Message_1b1qlzd" sender="//@contracts.0/@sections.0/@participants.0" receiver="//@contracts.0/@sections.0/@participants.1" schema="{&quot;properties&quot;:{&quot;reason&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;},&quot;result&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}},&quot;required&quot;:[&quot;reason&quot;,&quot;result&quot;],&quot;files&quot;:{},&quot;file required&quot;:[]}" />
+      <messages name="Message_1bhhp1n" sender="//@contracts.0/@sections.0/@participants.1" receiver="//@contracts.0/@sections.0/@participants.0" schema="{&quot;properties&quot;:{&quot;serviceType&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}},&quot;required&quot;:[&quot;serviceType&quot;],&quot;files&quot;:{},&quot;file required&quot;:[]}" />
+    </sections>
+    <sections xsi:type="b2c:GatewaySection">
+      <gateways name="Gateway_0auc3he" />
+      <gateways name="Gateway_0ivv4vg" />
+      <gateways name="Gateway_0jgq0a6" gatewayType="event" />
+    </sections>
+    <sections xsi:type="b2c:EventSection">
+      <events name="Event_0ojehz6" initialState="READY" />
+      <events name="Event_0ci2gl8" />
+      <events name="Event_0dyp0ut" />
+    </sections>
+    <sections xsi:type="b2c:BusinessRuleSection">
+      <rules name="Activity_0tya4bp" dmnResource="Activity_0tya4bp.dmn" decisionID="Activity_0tya4bp_DecisionID">
+        <inputMappings dmnParam="type" globalRef="//@contracts.0/@sections.1/@globals.13" />
+        <inputMappings dmnParam="duration" globalRef="//@contracts.0/@sections.1/@globals.4" />
+        <outputMappings dmnParam="confirm" globalRef="//@contracts.0/@sections.1/@globals.2" />
+      </rules>
+    </sections>
+    <sections xsi:type="b2c:OracleTaskSection" />
+    <sections xsi:type="b2c:FlowSection">
+      <flowItems xsi:type="b2c:StartFlow" start="//@contracts.0/@sections.4/@events.0">
+        <target target="//@contracts.0/@sections.2/@messages.3" />
+      </flowItems>
+      <flowItems xsi:type="b2c:MessageFlow" msg="//@contracts.0/@sections.2/@messages.3" msgCond="completed">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.3/@gateways.2" />
+      </flowItems>
+      <flowItems xsi:type="b2c:MessageFlow" msg="//@contracts.0/@sections.2/@messages.4" msgCond="completed">
+        <actions xsi:type="b2c:DisableAction" target="//@contracts.0/@sections.2/@messages.7" />
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.2/@messages.1" />
+      </flowItems>
+      <flowItems xsi:type="b2c:MessageFlow" msg="//@contracts.0/@sections.2/@messages.7" msgCond="completed">
+        <actions xsi:type="b2c:DisableAction" target="//@contracts.0/@sections.2/@messages.4" />
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.2/@messages.2" />
+      </flowItems>
+      <flowItems xsi:type="b2c:MessageFlow" msg="//@contracts.0/@sections.2/@messages.1" msgCond="completed">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.3/@gateways.0" />
+      </flowItems>
+      <flowItems xsi:type="b2c:MessageFlow" msg="//@contracts.0/@sections.2/@messages.2" msgCond="completed">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.3/@gateways.0" />
+      </flowItems>
+      <flowItems xsi:type="b2c:MessageFlow" msg="//@contracts.0/@sections.2/@messages.5" msgCond="completed">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.5/@rules.0" />
+      </flowItems>
+      <flowItems xsi:type="b2c:MessageFlow" msg="//@contracts.0/@sections.2/@messages.6" msgCond="completed">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.4/@events.2" />
+      </flowItems>
+      <flowItems xsi:type="b2c:MessageFlow" msg="//@contracts.0/@sections.2/@messages.0" msgCond="completed">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.4/@events.1" />
+      </flowItems>
+      <flowItems xsi:type="b2c:GatewayFlow" gtw="//@contracts.0/@sections.3/@gateways.0">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.2/@messages.5" />
+      </flowItems>
+      <flowItems xsi:type="b2c:GatewayFlow" gtw="//@contracts.0/@sections.3/@gateways.1">
+        <branches xsi:type="b2c:GatewayCompareBranch" var="//@contracts.0/@sections.1/@globals.2" relation="==">
+          <value boolValue="false" />
+          <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.2/@messages.6" />
+        </branches>
+        <branches xsi:type="b2c:GatewayCompareBranch" var="//@contracts.0/@sections.1/@globals.2" relation="==">
+          <value boolValue="true" />
+          <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.2/@messages.0" />
+        </branches>
+      </flowItems>
+      <flowItems xsi:type="b2c:GatewayFlow" gtw="//@contracts.0/@sections.3/@gateways.2">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.2/@messages.4" />
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.2/@messages.7" />
+      </flowItems>
+      <flowItems xsi:type="b2c:RuleFlow" rule="//@contracts.0/@sections.5/@rules.0" ruleCond="done">
+        <actions xsi:type="b2c:EnableAction" target="//@contracts.0/@sections.3/@gateways.1" />
+      </flowItems>
+    </sections>
+  </contracts>
+</b2c:Model>

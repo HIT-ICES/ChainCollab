@@ -32,6 +32,9 @@ def: eventSections : Set(EventSection) =
 def: ruleSections : Set(BusinessRuleSection) =
   self.sections->select(oclIsKindOf(BusinessRuleSection))
                ->collect(oclAsType(BusinessRuleSection))->asSet()
+def: oracleTaskSections : Set(OracleTaskSection) =
+  self.sections->select(oclIsKindOf(OracleTaskSection))
+               ->collect(oclAsType(OracleTaskSection))->asSet()
 def: flowSections : Set(FlowSection) =
   self.sections->select(oclIsKindOf(FlowSection))
                ->collect(oclAsType(FlowSection))->asSet()
@@ -49,12 +52,15 @@ def: events : Set(Event) =
   self.eventSections.events->flatten()->asSet()
 def: businessRules : Set(BusinessRule) =
   self.ruleSections.rules->flatten()->asSet()
+def: oracleTasks : Set(OracleTask) =
+  self.oracleTaskSections.tasks->flatten()->asSet()
 
 -- 合约内所有可在 flows 中被引用的元素集合
 def: flowElements : Set(FlowElement) =
   self.messages->union(self.gateways)
                ->union(self.events)
                ->union(self.businessRules)
+               ->union(self.oracleTasks)
 
 inv SectionAtMostOnceEachKind:
   self.participantSections->size() <= 1 and
@@ -63,6 +69,7 @@ inv SectionAtMostOnceEachKind:
   self.gatewaySections->size() <= 1 and
   self.eventSections->size() <= 1 and
   self.ruleSections->size() <= 1 and
+  self.oracleTaskSections->size() <= 1 and
   self.flowSections->size() <= 1
 
 -- 对生成/执行更友好：要求合约包含且仅包含一个 flows 区块
@@ -79,7 +86,8 @@ inv UniqueNamesPerKind:
   self.messages->isUnique(name) and
   self.gateways->isUnique(name) and
   self.events->isUnique(name) and
-  self.businessRules->isUnique(name)
+  self.businessRules->isUnique(name) and
+  self.oracleTasks->isUnique(name)
 
 -- Message 的 sender/receiver 必须来自本合约 participants（避免跨 contract 串引用）
 inv MessageParticipantsInContract:
@@ -143,6 +151,12 @@ inv RuleMappingsReferenceOwnGlobals:
     r.outputMappings.globalRef->forAll(g | self.globals->includes(g))
   )
 
+-- OracleTask 的输出映射也必须引用“本合约 globals”里的变量（避免跨 contract 串引用）
+inv OracleTaskMappingsReferenceOwnGlobals:
+  self.oracleTasks->forAll(t |
+    t.outputMappings.globalRef->forAll(g | self.globals->includes(g))
+  )
+
 -- ==============
 -- Flow 约束（与代码生成器行为强相关）
 -- ==============
@@ -163,6 +177,9 @@ def: gatewayFlows : Set(GatewayFlow) =
 def: ruleFlows : Set(RuleFlow) =
   self.flowItems->select(oclIsKindOf(RuleFlow))
                 ->collect(oclAsType(RuleFlow))->asSet()
+def: oracleTaskFlows : Set(OracleTaskFlow) =
+  self.flowItems->select(oclIsKindOf(OracleTaskFlow))
+                ->collect(oclAsType(OracleTaskFlow))->asSet()
 def: eventFlows : Set(EventFlow) =
   self.flowItems->select(oclIsKindOf(EventFlow))
                 ->collect(oclAsType(EventFlow))->asSet()
@@ -177,6 +194,8 @@ def: ruleActions : Set(FlowAction) =
   self.ruleFlows->collect(actions)->flatten()->asSet()
 def: eventActions : Set(FlowAction) =
   self.eventFlows->collect(actions)->flatten()->asSet()
+def: oracleActions : Set(FlowAction) =
+  self.oracleTaskFlows->collect(actions)->flatten()->asSet()
 def: parallelActions : Set(FlowAction) =
   self.parallelJoins->collect(actions)->flatten()->asSet()
 def: gatewayThenActions : Set(FlowAction) =
@@ -193,6 +212,7 @@ def: gatewayBranchActions : Set(FlowAction) =
 def: allActions : Set(FlowAction) =
   self.msgActions->union(self.ruleActions)
                  ->union(self.eventActions)
+                 ->union(self.oracleActions)
                  ->union(self.parallelActions)
                  ->union(self.gatewayThenActions)
                  ->union(self.gatewayBranchActions)
@@ -206,10 +226,11 @@ inv FlowRefsStayInSameContract:
   self.messageFlows.msg->forAll(m | self.messages->includes(m)) and
   self.gatewayFlows.gtw->forAll(g | self.gateways->includes(g)) and
   self.ruleFlows.rule->forAll(r | self.businessRules->includes(r)) and
+  self.oracleTaskFlows.task->forAll(t | self.oracleTasks->includes(t)) and
   self.eventFlows.ev->forAll(e | self.events->includes(e)) and
   self.parallelJoins.gtw->forAll(g | self.gateways->includes(g)) and
   self.parallelJoins.sources->flatten()->forAll(x |
-     self.messages->includes(x) or self.gateways->includes(x) or self.events->includes(x) or self.businessRules->includes(x)
+     self.messages->includes(x) or self.gateways->includes(x) or self.events->includes(x) or self.businessRules->includes(x) or self.oracleTasks->includes(x)
   )
 
 -- 只允许 1 个起点；并要求 start event 显式 READY（与你示例/生成器取 start_event 的逻辑一致）
@@ -349,6 +370,16 @@ inv NoEnableDisableConflict:
     en->intersection(dis)->isEmpty()
 
 context EventFlow
+inv NoEnableDisableConflict:
+  let en : Set(FlowElement) =
+    self.actions->select(oclIsKindOf(EnableAction))->collect(oclAsType(EnableAction).target)->asSet()
+  in
+  let dis : Set(FlowElement) =
+    self.actions->select(oclIsKindOf(DisableAction))->collect(oclAsType(DisableAction).target)->asSet()
+  in
+    en->intersection(dis)->isEmpty()
+
+context OracleTaskFlow
 inv NoEnableDisableConflict:
   let en : Set(FlowElement) =
     self.actions->select(oclIsKindOf(EnableAction))->collect(oclAsType(EnableAction).target)->asSet()

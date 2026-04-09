@@ -129,6 +129,21 @@
   <eClassifiers xsi:type="ecore:EClass" name="Model">
     <eStructuralFeatures xsi:type="ecore:EReference" name="contracts" eType="#//Contract" lowerBound="1" upperBound="-1" containment="true"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OracleTask" eSuperTypes="#//FlowElement">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" lowerBound="1"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="oracleType" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" lowerBound="1"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dataSource" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" lowerBound="1"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="computeScript" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" lowerBound="1"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="outputMappings" eType="#//ParamMapping" upperBound="-1" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="initialState" eType="#//ElementState" lowerBound="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OracleTaskFlow" eSuperTypes="#//FlowItem">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="task" eType="#//OracleTask" lowerBound="1"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="actions" eType="#//FlowAction" upperBound="-1" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OracleTaskSection" eSuperTypes="#//ContractSection">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="tasks" eType="#//OracleTask" upperBound="-1" containment="true"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ParallelJoin" eSuperTypes="#//FlowItem">
     <eStructuralFeatures xsi:type="ecore:EReference" name="gtw" eType="#//Gateway" lowerBound="1"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sources" eType="#//FlowElement" lowerBound="1" upperBound="-1"/>
