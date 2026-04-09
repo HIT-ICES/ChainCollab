@@ -1,0 +1,2117 @@
+{
+  "relativePath": "model62/result62_200.xmi",
+  "absolutePath": "/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi",
+  "ok": false,
+  "durationMs": 82,
+  "error": null,
+  "violationCount": 301,
+  "violations": [
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::SectionAtMostOnceEachKind",
+      "meaningZh": "违反约束：Contract::SectionAtMostOnceEachKind",
+      "message": "The 'Contract::SectionAtMostOnceEachKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@4ee13ed2{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#/}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::ActionsReferenceOwnElementsAndGlobals",
+      "meaningZh": "所有 enable/disable 的目标必须在本合约内；所有 set 的 var 必须在本合约 globals 内",
+      "message": "The 'Contract::ActionsReferenceOwnElementsAndGlobals' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@4ee13ed2{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#/}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::ExactlyOneStartFlow",
+      "meaningZh": "只允许 1 个起点；并要求 start event 显式 READY（与你示例/生成器取 start_event 的逻辑一致）",
+      "message": "The 'Contract::ExactlyOneStartFlow' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@4ee13ed2{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#/}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::ExactlyOneReadyEventAndMatchesStart",
+      "meaningZh": "READY 的事件只能有一个，并且必须等于 start flow 的 start event",
+      "message": "The 'Contract::ExactlyOneReadyEventAndMatchesStart' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@4ee13ed2{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#/}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::FlowRefsStayInSameContract",
+      "meaningZh": "textX 默认作用域可能跨 contract；这里强制“本合约内自洽”",
+      "message": "The 'Contract::FlowRefsStayInSameContract' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@4ee13ed2{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#/}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "Contract::HasExactlyOneFlowSection",
+      "meaningZh": "对生成/执行更友好：要求合约包含且仅包含一个 flows 区块",
+      "message": "The 'Contract::HasExactlyOneFlowSection' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#Contract@4ee13ed2{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#/}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：msg",
+      "message": "The required feature 'msg' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#MessageFlow@416230eb{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.0}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "MessageFlow::NoEnableDisableConflict",
+      "meaningZh": "同一条 flow 里，不要对同一 target 同时 enable+disable（对生成代码/可读性更安全）",
+      "message": "The 'MessageFlow::NoEnableDisableConflict' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#MessageFlow@416230eb{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.0}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@1387325f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.0/@actions.0}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@31db0501{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.0/@actions.1}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@74c3519b{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.0/@actions.2}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@6021091{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.0/@actions.2/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@6df9db78{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.0/@actions.3}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@47c61952{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.0/@actions.4}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@2e5cffa6{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.0/@actions.5}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@298bd1c0{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.0/@actions.5/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@40fd2c7f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.0/@actions.6}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@63fc1d03{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.0/@actions.7}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@140794a7{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.0/@actions.8}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@1a293154{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.0/@actions.8/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：task",
+      "message": "The required feature 'task' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#OracleTaskFlow@34b600c1{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.1}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "OracleTaskFlow::NoEnableDisableConflict",
+      "meaningZh": "同一条 flow 里，不要对同一 target 同时 enable+disable（对生成代码/可读性更安全）",
+      "message": "The 'OracleTaskFlow::NoEnableDisableConflict' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#OracleTaskFlow@34b600c1{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.1}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@11ee3f7c{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.1/@actions.0}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@6bff35d{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.1/@actions.0/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@1f12a98b{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.1/@actions.1}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@60dcae7e{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.1/@actions.2}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@102fed83{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.1/@actions.2/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@76589e3{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.1/@actions.3}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@675d3b97{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.1/@actions.3/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@679043ac{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.1/@actions.4}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@6d44f024{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.1/@actions.5}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@68ee0cac{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.1/@actions.6}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@34ad05b9{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.1/@actions.6/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：rule",
+      "message": "The required feature 'rule' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#RuleFlow@2e0acc25{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.2}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "RuleFlow::NoEnableDisableConflict",
+      "meaningZh": "同一条 flow 里，不要对同一 target 同时 enable+disable（对生成代码/可读性更安全）",
+      "message": "The 'RuleFlow::NoEnableDisableConflict' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#RuleFlow@2e0acc25{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.2}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@2c21b859{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.2/@actions.0}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@5e2bf9c0{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.2/@actions.1}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@225d92b2{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.2/@actions.1/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@3b4b3655{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.2/@actions.2}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@d372f89{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.2/@actions.3}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@2c5284ed{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.2/@actions.3/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@2cf5bd06{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.2/@actions.4}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@2d11a4a1{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.2/@actions.5}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@708ecc13{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.2/@actions.5/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@4f8ac6c8{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.2/@actions.6}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@7b75e3d7{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.2/@actions.7}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@34503505{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.2/@actions.7/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：gtw",
+      "message": "The required feature 'gtw' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#ParallelJoin@2ea50756{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.3}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "UNKNOWN",
+      "code": "UNKNOWN",
+      "meaningZh": null,
+      "message": "The feature 'sources' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#ParallelJoin@2ea50756{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.3}' with 0 values must have at least 1 values"
+    },
+    {
+      "severity": 4,
+      "kind": "UNKNOWN",
+      "code": "UNKNOWN",
+      "meaningZh": null,
+      "message": "The 'ParallelJoin::ParallelGatewayTypeRequired' constraint result is invalid for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#ParallelJoin@2ea50756{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.3}'\n - Null source for 'https://chaincollab/newTranslator/b2c'::Gateway::gatewayType"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@7828c6ec{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.3/@actions.0}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@7ad6f93f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.3/@actions.0/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@53a2affa{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.3/@actions.1}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@7a82fefa{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.3/@actions.2}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@e58d673{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.3/@actions.3}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@30796ef2{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.3/@actions.4}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@7662ca78{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.3/@actions.5}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@1b7a8f60{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.3/@actions.6}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：rule",
+      "message": "The required feature 'rule' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#RuleFlow@7e108f01{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.4}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "RuleFlow::NoEnableDisableConflict",
+      "meaningZh": "同一条 flow 里，不要对同一 target 同时 enable+disable（对生成代码/可读性更安全）",
+      "message": "The 'RuleFlow::NoEnableDisableConflict' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#RuleFlow@7e108f01{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.4}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@461a0247{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.4/@actions.0}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@349c602d{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.4/@actions.1}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@1d3f3ce7{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.4/@actions.2}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@1e3146a5{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.4/@actions.3}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@421b6f64{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.4/@actions.3/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@82f771e{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.4/@actions.4}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@44f3cd60{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.4/@actions.4/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@5fe5e33e{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.4/@actions.5}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@3bd93421{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.4/@actions.6}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@2f494991{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.4/@actions.7}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@5cad5ce1{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.4/@actions.8}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：gtw",
+      "message": "The required feature 'gtw' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#GatewayFlow@7a24380a{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "UNKNOWN",
+      "code": "UNKNOWN",
+      "meaningZh": null,
+      "message": "The 'GatewayFlow::CompareBranchesNoDuplicateConditions' constraint result is invalid for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#GatewayFlow@7a24380a{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5}'\n - Null source for 'https://chaincollab/newTranslator/b2c'::GlobalVar::name"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@4dff7546{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@actions.0}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@1700bdfa{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@actions.1}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@3671737{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@actions.2}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@6627277a{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@actions.3}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@50443bbd{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@actions.4}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@42b9b322{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@actions.5}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@79dccaed{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@actions.6}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@269f3e5b{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@actions.7}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "GatewayExpressionBranch::NotSupportedByCurrentCodeGen",
+      "meaningZh": "违反约束：GatewayExpressionBranch::NotSupportedByCurrentCodeGen",
+      "message": "The 'GatewayExpressionBranch::NotSupportedByCurrentCodeGen' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#GatewayExpressionBranch@dbfe054{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.0}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@67a818ac{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.0/@actions.0}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@71be30e6{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.0/@actions.0/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@3182376c{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.0/@actions.1}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@7a286d90{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.0/@actions.2}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@3c6c20ef{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.0/@actions.2/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@230964d4{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.0/@actions.3}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@4c36561{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.0/@actions.4}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@24da0bc2{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.0/@actions.5}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@1da7a624{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.0/@actions.6}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@25151849{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.0/@actions.6/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@75604e80{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.0/@actions.7}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@7fd75946{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.0/@actions.7/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@6a97d520{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.0/@actions.8}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@734f1289{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.1/@actions.0}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@7f6e7f5a{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.1/@actions.0/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@d494ce1{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.1/@actions.1}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@156765e6{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.1/@actions.2}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@22d84300{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.1/@actions.2/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@1b3c612f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.1/@actions.3}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@106ce39b{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.1/@actions.4}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@57859b33{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.1/@actions.5}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@79638c70{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.1/@actions.6}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@1aebf6a{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.1/@actions.7}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@6e3ac3e8{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.2/@actions.0}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@3c901b4f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.2/@actions.1}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@b1b3c07{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.2/@actions.2}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@5cfe09c1{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.2/@actions.3}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@64e3b435{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.2/@actions.4}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@58958185{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.2/@actions.5}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@2f02d042{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.2/@actions.5/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@a3c6594{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.2/@actions.6}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@6a5ab18d{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.2/@actions.6/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@26a0c513{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.2/@actions.7}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@66c29733{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.2/@actions.7/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#GatewayCompareBranch@78f35b32{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.3}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "GatewayCompareBranch::RelationOperatorAllowed",
+      "meaningZh": "relation 仅允许 6 种比较运算符",
+      "message": "The 'GatewayCompareBranch::RelationOperatorAllowed' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#GatewayCompareBranch@78f35b32{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.3}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@3f5b58e6{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.3/@value}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@31ba6845{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.3/@actions.0}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@147d79b2{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.3/@actions.1}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@1403dacf{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.3/@actions.2}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@2b03eb17{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.3/@actions.3}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@49194672{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.3/@actions.4}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@36d6160a{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.3/@actions.5}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@b25059{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.3/@actions.5/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@3c8967bd{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.3/@actions.6}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@8667868{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.3/@actions.7}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#GatewayCompareBranch@a3ca938{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.4}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "GatewayCompareBranch::RelationOperatorAllowed",
+      "meaningZh": "relation 仅允许 6 种比较运算符",
+      "message": "The 'GatewayCompareBranch::RelationOperatorAllowed' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#GatewayCompareBranch@a3ca938{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.4}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@723b2473{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.4/@value}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@3d804437{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.4/@actions.0}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@e769d92{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.4/@actions.1}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@6fe6c86f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.4/@actions.2}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@12b01602{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.4/@actions.3}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@648a55d4{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.4/@actions.3/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@2d2e599f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.4/@actions.4}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@170edba5{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.4/@actions.5}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@4ef2cc9b{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.4/@actions.6}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@5ce0c341{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.4/@actions.7}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@3dd8be3{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.4/@actions.8}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@1f3adcb{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.4/@actions.8/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@6b6cb9b4{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.5/@actions.0}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@2a750f7e{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.5/@actions.1}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@ce0be90{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.5/@actions.2}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@4a7d64bf{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.5/@actions.3}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@13511534{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.5/@actions.3/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@4452d55d{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.5/@actions.4}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@3862b391{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.5/@actions.4/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@465e3c56{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.5/@actions.5}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@e7065bc{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.5/@actions.5/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@4fc30e33{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.5/@actions.6}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@12f10c4c{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.5/@actions.6/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@5f1b8fee{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.6/@actions.0}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@2bf6b421{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.6/@actions.1}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@428f640e{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.6/@actions.2}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@9924393{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.6/@actions.2/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@62a7b911{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.6/@actions.3}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@2441970b{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.6/@actions.3/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@61403e54{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.6/@actions.4}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@7f89d9e1{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.6/@actions.5}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@461f7d0a{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.6/@actions.6}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@19af3be9{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.7/@actions.0}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@29915bba{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.7/@actions.0/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@797d1416{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.7/@actions.1}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@3398a1a8{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.7/@actions.1/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@488a8c09{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.7/@actions.2}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@280de293{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.7/@actions.2/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@75404f3f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.7/@actions.3}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@5cc156{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.7/@actions.3/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@1550520d{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.7/@actions.4}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@23b3066c{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.7/@actions.4/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@41c3915{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.7/@actions.5}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@186a175b{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.7/@actions.6}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "GatewayExpressionBranch::NotSupportedByCurrentCodeGen",
+      "meaningZh": "违反约束：GatewayExpressionBranch::NotSupportedByCurrentCodeGen",
+      "message": "The 'GatewayExpressionBranch::NotSupportedByCurrentCodeGen' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#GatewayExpressionBranch@56dd3c44{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.8}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@2ea91f86{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.8/@actions.0}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@1dd9961a{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.8/@actions.1}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@55506653{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.8/@actions.1/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@aa86e5{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.8/@actions.2}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@790846c9{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.8/@actions.3}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@1f3b2341{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.8/@actions.4}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@128e1f10{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.8/@actions.4/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@4e031ffa{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.8/@actions.5}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@1a4a3571{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.8/@actions.6}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@21cf06ff{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.5/@branches.8/@actions.7}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：gtw",
+      "message": "The required feature 'gtw' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#GatewayFlow@237a88f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "UNKNOWN",
+      "code": "UNKNOWN",
+      "meaningZh": null,
+      "message": "The 'GatewayFlow::CompareBranchesNoDuplicateConditions' constraint result is invalid for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#GatewayFlow@237a88f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6}'\n - Null source for 'https://chaincollab/newTranslator/b2c'::GlobalVar::name"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@74f2fe11{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@actions.0}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@680b7fa7{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@actions.1}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@3ff8fd22{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@actions.2}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@743e3a66{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@actions.2/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@600f7fc6{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@actions.3}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@36e07a0{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@actions.4}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@30abb62d{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@actions.5}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@48424cf7{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@actions.6}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@53a8eb76{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@actions.7}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@2088a5a4{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@actions.8}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@4f85c2eb{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@actions.8/@expr}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "GatewayExpressionBranch::NotSupportedByCurrentCodeGen",
+      "meaningZh": "违反约束：GatewayExpressionBranch::NotSupportedByCurrentCodeGen",
+      "message": "The 'GatewayExpressionBranch::NotSupportedByCurrentCodeGen' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#GatewayExpressionBranch@187e5889{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.0}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@7629f4ff{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.0/@actions.0}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@d0eb50a{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.0/@actions.1}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@68eba8d7{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.0/@actions.2}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@1cca1f4f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.0/@actions.3}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@25fd9e25{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.0/@actions.4}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@5da3c975{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.0/@actions.5}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@19b147b6{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.0/@actions.5/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@683b7f06{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.0/@actions.6}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@7ba5bd0f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.0/@actions.6/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@24472529{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.0/@actions.7}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@7e4d4517{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.0/@actions.7/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@6d029b32{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.0/@actions.8}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#GatewayCompareBranch@74627b30{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.1}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "GatewayCompareBranch::RelationOperatorAllowed",
+      "meaningZh": "relation 仅允许 6 种比较运算符",
+      "message": "The 'GatewayCompareBranch::RelationOperatorAllowed' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#GatewayCompareBranch@74627b30{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.1}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@1f3e52af{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.1/@value}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@bcf85c0{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.1/@actions.0}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@d2fb4f5{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.1/@actions.1}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@7a6c8e62{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.1/@actions.2}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@41f20c7f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.1/@actions.3}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@36e47004{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.1/@actions.4}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@461ce231{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.1/@actions.5}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@589d6b0e{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.1/@actions.6}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@95d1596{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.1/@actions.7}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@ca12a09{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.1/@actions.7/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@1c2c30e9{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.1/@actions.8}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@5a3aa357{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.1/@actions.8/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@76c7992e{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.2/@actions.0}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@4ecb20fa{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.2/@actions.0/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@56db8f32{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.2/@actions.1}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@69dfacb0{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.2/@actions.2}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@238da8a6{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.2/@actions.2/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@4d149e65{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.2/@actions.3}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@26792fbc{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.2/@actions.3/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@7d07000{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.2/@actions.4}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@d78ddd7{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.2/@actions.5}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@19d65ae4{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.2/@actions.6}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@70d8180d{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.3/@actions.0}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@2956003f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.3/@actions.0/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@748c3666{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.3/@actions.1}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@3f51cb45{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.3/@actions.2}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@3e8d291f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.3/@actions.2/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@147bb731{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.3/@actions.3}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@24d3ddc3{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.3/@actions.4}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@31f9f039{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.3/@actions.5}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@708b6ef0{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.3/@actions.5/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@430ea0{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.3/@actions.6}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@1fe0ab92{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.3/@actions.6/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@4948f3a6{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.3/@actions.7}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#GatewayCompareBranch@200adfc5{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.4}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "GatewayCompareBranch::RelationOperatorAllowed",
+      "meaningZh": "relation 仅允许 6 种比较运算符",
+      "message": "The 'GatewayCompareBranch::RelationOperatorAllowed' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#GatewayCompareBranch@200adfc5{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.4}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@6ae07a9{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.4/@value}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@24793d78{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.4/@actions.0}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@51bc13b2{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.4/@actions.0/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@2712e498{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.4/@actions.1}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@7a6b1b9b{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.4/@actions.1/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@4550b302{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.4/@actions.2}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@77f0a206{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.4/@actions.3}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@1a0fd37d{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.4/@actions.4}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@2a89d280{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.4/@actions.5}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@6a81bc70{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.4/@actions.6}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@60cd837f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.4/@actions.6/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@1813d3b4{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.4/@actions.7}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@7c636ff0{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.4/@actions.8}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@16284380{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.4/@actions.8/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#GatewayCompareBranch@47d69b0f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.5}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "GatewayCompareBranch::RelationOperatorAllowed",
+      "meaningZh": "relation 仅允许 6 种比较运算符",
+      "message": "The 'GatewayCompareBranch::RelationOperatorAllowed' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#GatewayCompareBranch@47d69b0f{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.5}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@2738f374{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.5/@value}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@626fbbce{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.5/@actions.0}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@52d93cb{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.5/@actions.0/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@3a21250c{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.5/@actions.1}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@608113c2{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.5/@actions.2}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@f6c0ea2{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.5/@actions.3}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@1042754a{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.5/@actions.4}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@23782b0b{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.5/@actions.5}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@4b0f23a5{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.5/@actions.6}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@9773e6a{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.5/@actions.6/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#GatewayCompareBranch@621e0e81{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.6}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "GatewayCompareBranch::RelationOperatorAllowed",
+      "meaningZh": "relation 仅允许 6 种比较运算符",
+      "message": "The 'GatewayCompareBranch::RelationOperatorAllowed' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#GatewayCompareBranch@621e0e81{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.6}'"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@5d975887{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.6/@value}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@181aaf2e{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.6/@actions.0}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@3d54a312{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.6/@actions.0/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@7f9ff261{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.6/@actions.1}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@79171055{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.6/@actions.2}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@548edcb8{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.6/@actions.2/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@1e6cfc68{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.6/@actions.3}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@53c25354{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.6/@actions.4}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@53ceafb7{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.6/@actions.5}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@643a3c2d{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.6/@actions.5/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@121a8823{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.6/@actions.6}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@6fa48ade{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.7/@actions.0}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@78737d1d{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.7/@actions.1}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#DisableAction@1d423797{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.7/@actions.2}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@555a3bab{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.7/@actions.3}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@1ee3b9a4{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.7/@actions.4}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@38e034d{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.7/@actions.4/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@7d9bb4f0{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.7/@actions.5}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@1b5a6c1d{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.7/@actions.5/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：target",
+      "message": "The required feature 'target' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#EnableAction@71e9da5b{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.7/@actions.6}' must be set"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：var",
+      "message": "The required feature 'var' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#SetGlobalAction@75ea30ae{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.7/@actions.7}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "LiteralExpr::ExactlyOneLiteralKind",
+      "meaningZh": "LiteralExpr 是“互斥选择”，三个字段只能出现一个",
+      "message": "The 'LiteralExpr::ExactlyOneLiteralKind' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#LiteralExpr@391318d2{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.6/@branches.7/@actions.7/@expr}'"
+    },
+    {
+      "severity": 4,
+      "kind": "EMF",
+      "code": "EMF_REQUIRED_FEATURE",
+      "meaningZh": "必填字段未设置：gtw",
+      "message": "The required feature 'gtw' of 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#GatewayFlow@4ae9028{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.7}' must be set"
+    },
+    {
+      "severity": 2,
+      "kind": "OCL",
+      "code": "GatewayFlow::ExactlyOneGatewayFlowMode",
+      "meaningZh": "语法是二选一：要么 then actions，要么 choose branches（不能两者都有/都没有）",
+      "message": "The 'GatewayFlow::ExactlyOneGatewayFlowMode' constraint is violated for 'org.eclipse.emf.ecore.impl.DynamicEObjectImpl/https://chaincollab/newTranslator/b2c#GatewayFlow@4ae9028{file:/root/code/ChainCollab/src/newTranslator/MDAcheck/emf-random/b2c-100/b2c/model62/result62_200.xmi#//@sections.0/@flowItems.7}'"
+    }
+  ]
+}

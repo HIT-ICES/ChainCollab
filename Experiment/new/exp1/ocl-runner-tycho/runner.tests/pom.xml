@@ -1,0 +1,41 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>chaincollab.newtranslator</groupId>
+    <artifactId>ocl-runner-tycho-parent</artifactId>
+    <version>0.1.0</version>
+    <relativePath>..</relativePath>
+  </parent>
+
+  <artifactId>chaincollab.newtranslator.oclrunner.tests</artifactId>
+  <packaging>eclipse-test-plugin</packaging>
+  <name>Eclipse OCL Runner (tests)</name>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-surefire-plugin</artifactId>
+        <version>${tycho.version}</version>
+        <configuration>
+          <useUIHarness>false</useUIHarness>
+          <useUIThread>false</useUIThread>
+          <failIfNoTests>true</failIfNoTests>
+          <systemProperties>
+            <ecore>${ecore}</ecore>
+            <ocl>${ocl}</ocl>
+            <xmi>${xmi}</xmi>
+            <xmiDir>${xmiDir}</xmiDir>
+            <xmiGlob>${xmiGlob}</xmiGlob>
+            <reportDir>${reportDir}</reportDir>
+            <writePerModelJson>${writePerModelJson}</writePerModelJson>
+            <failOnViolation>${failOnViolation}</failOnViolation>
+          </systemProperties>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
