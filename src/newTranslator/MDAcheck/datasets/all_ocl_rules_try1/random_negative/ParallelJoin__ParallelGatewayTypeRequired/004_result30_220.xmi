@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="ASCII"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:b2c="https://chaincollab/newTranslator/b2c">
+  <b2c:ParamMapping dmnParam="3o7iXP8gLeWplpeDhCglK5gUHUCKR9geAWNKPSl9rKjJjbyF499FcagBQKzAhRhyY" globalRef="/13/@contracts.0/@sections.3/@globals.2"/>
+  <b2c:OracleTaskFlow>
+    <actions xsi:type="b2c:SetGlobalAction" var="/8">
+      <expr stringValue="tNe8RZqN28bI2SvfWOLXDdJbq8yaGn9DcAlRfWdG2n3aVMOtU8iC8XUnydUAtz" intValue="-439914862" boolValue="false"/>
+    </actions>
+    <actions xsi:type="b2c:DisableAction" target="/3/@gateways.3"/>
+    <actions xsi:type="b2c:DisableAction" target="/13/@contracts.0/@sections.2/@gateways.3"/>
+    <actions xsi:type="b2c:DisableAction" target="/13/@contracts.0/@sections.1/@events.4"/>
+    <actions xsi:type="b2c:DisableAction" target="/13/@contracts.0/@sections.0/@events.8"/>
+    <actions xsi:type="b2c:SetGlobalAction" var="/13/@contracts.0/@sections.3/@globals.3">
+      <expr stringValue="iutOUC51unoAlbyA1yq6w6K1J0cb2E5JgV0r5VBBq2824d8TdS7ge55qF7QCzX" intValue="-1573852628" boolValue="true"/>
+    </actions>
+    <actions xsi:type="b2c:SetGlobalAction" var="/13/@contracts.0/@sections.3/@globals.8">
+      <expr stringValue="KX6iy7Hgh0wdG21toCkmGtuaaHekKrt6pJUDikBymAm740IRm9n2vqYj7kj6H0K" intValue="-147541054" boolValue="true"/>
+    </actions>
+    <actions xsi:type="b2c:SetGlobalAction" var="/13/@contracts.0/@sections.3/@globals.6">
+      <expr stringValue="24KPUlxCh7yDq7wfLuYjqtFsE0jIx9AwxBsvIFZlTUHiWV7orWu2jZjxegc2h" intValue="900938667" boolValue="true"/>
+    </actions>
+    <actions xsi:type="b2c:DisableAction" target="/13/@contracts.0/@sections.2/@gateways.1"/>
+  </b2c:OracleTaskFlow>
+  <b2c:ParallelJoin gtw="/3/@gateways.4" sources="/3/@gateways.5 /3/@gateways.4 /3/@gateways.3 /13/@contracts.0/@sections.0/@events.4 /13/@contracts.0/@sections.2/@gateways.5">
+    <actions xsi:type="b2c:SetGlobalAction" var="/13/@contracts.0/@sections.3/@globals.6">
+      <expr stringValue="d3yBJgx74Sh93W1iJ6xMZcqEzeJ3sSVAJLO03NRI68DOtUDLjsPAwzhk26NGpfS8QnYf" intValue="-2139355181" boolValue="true"/>
+    </actions>
+    <actions xsi:type="b2c:DisableAction" target="/13/@contracts.0/@sections.1/@events.1"/>
+    <actions xsi:type="b2c:EnableAction" target="/13/@contracts.0/@sections.0/@events.7"/>
+    <actions xsi:type="b2c:SetGlobalAction" var="/13/@contracts.0/@sections.3/@globals.6">
+      <expr stringValue="OwNigSv6IMiP6gjCnYmUeyBAvfc8J5r8UQiqqzuNarnj3sTzyqdod3doHxOBAZH2r" intValue="-1269649126" boolValue="true"/>
+    </actions>
+    <actions xsi:type="b2c:DisableAction" target="/13/@contracts.0/@sections.1/@events.2"/>
+    <actions xsi:type="b2c:SetGlobalAction" var="/13/@contracts.0/@sections.3/@globals.1">
+      <expr stringValue="OdO0wfltzLcGXpF5KOZV4HfQq5PYc2HflRjoa7DbxaYVpNUuGHArUOUxscO0x391x" intValue="1448106004" boolValue="false"/>
+    </actions>
+    <actions xsi:type="b2c:DisableAction" target="/13/@contracts.0/@sections.2/@gateways.0"/>
+  </b2c:ParallelJoin>
+  <b2c:GatewaySection>
+    <gateways name="XPFJuwoLX8Tf4VKihJg16YBahnEAlax3RwaaXYrqlOJ6EZcTowOkVFxOUtssXQaAiC4A" gatewayType="event" initialState="READY"/>
+    <gateways name="gGbuC1ioiwKlMDcWonHcYepilmXWtcg6kCk0UrhKQ5daygQEn4bQZLj86D4C2RQcJ" gatewayType="parallel" initialState="READY"/>
+    <gateways name="6oFU6IsFu3xR0vNLfio0zBFfyVx3zrsuoNS3iw2cDGHsmyGUXiBfdTB890243qeIWfq" gatewayType="event" initialState="PENDING_CONFIRMATION"/>
+    <gateways name="yODRfPuswu8JoKBROobWTQMv3ibN0Bg9W1xD6muXk22OjLlUyyPLo6Ym9AS" gatewayType="parallel" initialState="DONE"/>
+    <gateways name="WgpW5wXXQ730NGncIm59J5yaU8McNxWaGdq9DQteyjQQKgSReNRDWP2LGl4C" initialState="READY"/>
+    <gateways name="fnWUSAdnG3lCCS1axMS4k110wvRrHLWFGMzkKCMCyMWdmrC6ZwCAJbBUjCIk9yaXNvR" gatewayType="event"/>
+    <gateways name="p0Fd9jWiJnvZiDghzv7BHkatbV4DaCmEc0LBOZi9pVJnpzqgZgG3a8qtM7P" gatewayType="event" initialState="DONE"/>
+    <gateways name="PLRYRf9WF5YmHWE4zy70VlJBdriQlIJHdiA81yjoZdT09pBDpCjcOexwEyzCY" gatewayType="event" initialState="READY"/>
+    <gateways name="cAVCU1QuQfqaWOzOitqPYBYSBCBiBQG29NK2JVfdA0SFwnb3d7B6p3znFBtzz4loUBrE" gatewayType="event"/>
+  </b2c:GatewaySection>
+  <b2c:DisableAction target="/13/@contracts.0/@sections.0/@events.1"/>
+  <b2c:FlowTarget target="/13/@contracts.0/@sections.0/@events.5"/>
+  <b2c:Attribute key="4lR78Z0rPo5Els0dRUyJCioJrnpq3rQ2TuIrgHGaR9d45U50HUSDm5qcdqai" value="waC0eQKCejHlghYmq3K4K7QDCwmuoc15L2Wc0Dcu2J8u0tYwK17rncymOBtiQK"/>
+  <b2c:GatewayCompareBranch var="/13/@contracts.0/@sections.3/@globals.5" relation="7QFpiSCcuarjIqnNUzc661Qku8EDfi5JxEDUqCmSdddyqVefhHbYlKtiFmWaP">
+    <value stringValue="vb3b5INb1D3D600OVGcA1wIVynHOPIgH3E88SzdcIoQOivKYzyN1oPGvE59B3wyrp" intValue="-1937755760" boolValue="false"/>
+    <actions xsi:type="b2c:DisableAction" target="/13/@contracts.0/@sections.1/@events.4"/>
+    <actions xsi:type="b2c:SetGlobalAction" var="/8">
+      <expr stringValue="ZTnogOUyJ0s8fRrhPn66h0cXoJcimB2lbSxFdVQENBhcXviLqvWX0iuwLPU" intValue="1607050307" boolValue="false"/>
+    </actions>
+    <actions xsi:type="b2c:DisableAction" target="/3/@gateways.3"/>
+    <actions xsi:type="b2c:EnableAction" target="/13/@contracts.0/@sections.0/@events.5"/>
+    <actions xsi:type="b2c:SetGlobalAction" var="/13/@contracts.0/@sections.3/@globals.1">
+      <expr stringValue="7cbBSNny3NJecLRZiDKRYLabEI9Wc1obiaOgQOYnOIf5RKHBPe7VvnH3gu" intValue="1627004066" boolValue="false"/>
+    </actions>
+    <actions xsi:type="b2c:SetGlobalAction" var="/13/@contracts.0/@sections.3/@globals.1">
+      <expr stringValue="WhWrEfvmJgSSrqxBfe7aaQ2NoyX4e86N6BwCdONJcgCVqQ5tP51aNI1KpfsFdgbg" intValue="1527066412" boolValue="false"/>
+    </actions>
+    <actions xsi:type="b2c:DisableAction" target="/3/@gateways.5"/>
+  </b2c:GatewayCompareBranch>
+  <b2c:GlobalVar name="B1d7G06r8iSvgoQw1SyFFjA4fhDSBSF7vhiSOvSqpxE2Ymd1YLkO9v4U5eMn5mpJ8" type="int"/>
+  <b2c:GatewayCompareBranch var="/13/@contracts.0/@sections.3/@globals.0" relation="hvgUUEi1j6lSalQoNFJcsP5ZpPygajokfZC9qiSq1839HkR7q5g7NGA1fq3hj4">
+    <value stringValue="RjTjOikt1kJ5apHXePHatMwm4l1HLVcs26XRzuwjTat5O2H4uzgUtcsCVYN4IVAKkH30" intValue="-583502389" boolValue="true"/>
+    <actions xsi:type="b2c:DisableAction" target="/13/@contracts.0/@sections.1/@events.5"/>
+    <actions xsi:type="b2c:SetGlobalAction" var="/13/@contracts.0/@sections.3/@globals.8">
+      <expr stringValue="6y6VXpQmbExiUBV4s9Umvhjwf0XQHl2j9d2U9Wyx3AxTGs67W2c6cFBtc3iE" intValue="-1937131874" boolValue="true"/>
+    </actions>
+    <actions xsi:type="b2c:DisableAction" target="/13/@contracts.0/@sections.0/@events.2"/>
+    <actions xsi:type="b2c:DisableAction" target="/3/@gateways.3"/>
+    <actions xsi:type="b2c:EnableAction" target="/3/@gateways.1"/>
+    <actions xsi:type="b2c:EnableAction" target="/3/@gateways.0"/>
+    <actions xsi:type="b2c:SetGlobalAction" var="/13/@contracts.0/@sections.3/@globals.5">
+      <expr stringValue="KVbuLa3hnv1C9RRYIiw7XmbXjgUGlgyKggmQM4FwNZuW9GDTdG2YXwJeYyWKckqyOse8z" intValue="966344238" boolValue="true"/>
+    </actions>
+    <actions xsi:type="b2c:DisableAction" target="/13/@contracts.0/@sections.2/@gateways.4"/>
+  </b2c:GatewayCompareBranch>
+  <b2c:GatewayExpressionBranch expr="j1ISD8eGEfYsHRtZAF6KxuRFtiPWw5iePPaJflqAuiWWgTYmiFlam7cMa6f">
+    <actions xsi:type="b2c:DisableAction" target="/3/@gateways.4"/>
+    <actions xsi:type="b2c:EnableAction" target="/3/@gateways.7"/>
+    <actions xsi:type="b2c:DisableAction" target="/3/@gateways.4"/>
+    <actions xsi:type="b2c:EnableAction" target="/13/@contracts.0/@sections.2/@gateways.1"/>
+    <actions xsi:type="b2c:DisableAction" target="/13/@contracts.0/@sections.0/@events.4"/>
+    <actions xsi:type="b2c:DisableAction" target="/3/@gateways.2"/>
+    <actions xsi:type="b2c:DisableAction" target="/13/@contracts.0/@sections.1/@events.4"/>
+  </b2c:GatewayExpressionBranch>
+  <b2c:ParticipantSection>
+    <participants name="192QC3XXX2xBYKu63t4RcMI05maZPSjFELyrj6wgBHQQlHmGNOi356K4RD" msp="acVBxt90Heu7hZNavckNKP0GWtbfNPf6dHqtdDRkHFno6JokvTvnJ0NZ2pf" x509="e6ROBLjdPCKhE70mEJfYklB5NsfvaSQefM0r6GJr0u4m5TL3b0PTOP7J8Dqdd0" multiMin="-659261234" multiMax="1226207839">
+      <attributes key="o5T1J45o52DbOMzgtxUatePAH2uoyvxg542Y8XHtAoSByx98U9NbjpiYMEtASHHQG92" value="7cpMaKkQ5Q4lfe4Zf1J65G3GVUf1gEbG6Z64r20kPiUbP05sIdEgVOeEgHGmmGBQlt"/>
+      <attributes key="wS9wEYGaupSXD2dBjpnqF3wjZ575hilBL83u0Abvkz6RRiQBs0e59lvnoIgCY2Ky2" value="dXldWNjydZM8EyMtus9WDKByprNbot9WrUVVceTL0H04MvpXdSaTPxWfBIt6EQ"/>
+      <attributes key="JG9yr4FlODlMiguz8pQmCEdtguwX3BjV6ssUbnivTadwXtBRgU7WXQlUSE8K8pjLFlw" value="1skdqMwIOMnROwF3OoIH6EE6sITLEC8f03WzdBSZZ7kEnMFrSeyxp8ElZvdJN06U5J"/>
+      <attributes key="jWTpYGiiBOctQSOymhI99jf1XdTuL4keR82vM42qyJEKmxICR0JMPxmlXgRoJgH" value="Bb9CCCAp3JFv6U5zNmCVx63zOkOrAL1vB902M8olVlBmJp98hUWM4oY0X84PPgNzYSi"/>
+      <attributes key="GsqKM9DyMTDveYqGDlYulo1IqY3RgVjV5tB4VwVnfTMlm3PGAf98kVDzMzKL9sjmvduLWW" value="eafXj85bfYJvxUmqe6EZZqj8JxocFRbxtRZhBwCUWykAzWsuLGDV1BJBGrut"/>
+      <attributes key="GjAmKKP4ImGH9OecrYjiFLPjFUvuetwvpGTaqbjcHN9Cib2oBFW4JUMug2CXNfKJuUi2S8" value="SYkz3fkFDOXgCFTwo0PqChlxwZxnNXo0bPA0hBRGC4In6DjlNlV4VbWY1w16JgiG"/>
+      <attributes key="4WKoTV67AE13kzIvSOZERwBsXWq6OS60c9ERrvyS3iVeNsTpm32OQNVp2iPzV4NsMaB8" value="zsfqHNdZNczfloFVZMsxqwVatCo4qhtSXid3ZR9kDPi30jMX0XsnK0ahikmAvJlZC"/>
+      <attributes key="UOFYt2FtIVFPoNVI8e1C5shc7jT7COYx9qd4zmAzkvC1tPYE2gvAXfGl4sq137UHDVWQ" value="bxJst1NjnbVLXx5aKNN6tGozqf79DcXz6VfiIDdmpjXG7JS8Nkpw6kM0Db1JqRu5"/>
+    </participants>
+    <participants name="iXlyIkSQVmitbXQuIYJUBuHETXBEKkS2mBBitYbgau30XZRpY3T5PkFcgPCcbbmz" msp="nfBnNq5RRFtWPU6n6wjVQwQfsZg7zjFWycf0XaVLrPnaFjiKdBwLMwVoxvAZX" x509="y6GL1tGKdNmLN5AOlEBT2eWDwTzpHVx1vo9oBnsaRuO5VqnunfEckms0hrwm2LNrugf7" isMulti="true" multiMin="-1670037876" multiMax="1029805169">
+      <attributes key="DyyRO2EPOOTIJnM3J02SmxT8OShu1XrELkXknizxqtxEf2ic8FKkCArsxGg8" value="EsHgCHMR4XMERUZAI9x5Pp430agIVBmsKu6jV3t2JiVrmPKAODFJl3bahw"/>
+      <attributes key="U9lsNBfLDApPoorBtkKmjfKslKxZvUnkexaud7IGCQj8hX5AlXueo5Fnu0vg" value="wlEivZMXHt26UzpK1fq9Bl9ncJcxLuAHarsdf8mpe730Pl8sealFWLLR7LEdCnt"/>
+      <attributes key="PmpS4NjNYRpzThY2yaCbpYGswD4hsQoapVrpgOIrZP0PldZZiUgtcSfosY" value="N8FpamoRQn23aMtBLfxfbg71WENheYLHvOTAWDkRJk9H8KhMsDZ4PqxfFMPKYGM"/>
+      <attributes key="m9LCFSG8JeGsebyDCdVV7LQNCR49mmHK5CmhJ1747Uwvomee9wjIzKHOxNaGJuRrtwnmU4" value="57lX38Xf7Sietty7oRpRDW7thOHlDzmTfiUy1cvCjydXUESqklV9oHdTXVN7GIe5"/>
+      <attributes key="AGt9yhtsjuM5dn8PVtZaQ1PSpJGaNUkLifjXLpR27SOylxldE2kZMi6FKSgmyD" value="a7vuXvdcAjTNQ2TsFFgnKOvBdNk5hjHQuts26jUmfmNtpbwVAiK8sCZbow8Rkwh1SAKq"/>
+      <attributes key="dVL68UaE9VVuz1O8HMFTwUrrj1zK16KgOkTvkOfmtvKIGuS48uPanyYPPw6Fq" value="QpnE2Lc30ZFjrZpCHrcUdQCDT4u1cCDUTCCRBoP2hpUAV5Zs3HPdYZfw5uv3C2"/>
+      <attributes key="9pC02LWXy5raG83EJdPRh1ctdzhl2lxcY6fVNC521FX1WH7bRZQLZuLtJtWHyt0bF" value="s1ygPyOvLemi80VFXOf8mBZ6xWPgpxrIKHcsYnEZSU9Y72WrqpqyZJ9cL2"/>
+    </participants>
+    <participants name="z2cgJzLYdFNFSaLWrGKpIhUocntaS1mkyGHWIfALvV3d6GgRQMdKLJnO1iP" msp="8a4KuVKhnd7MqRVQkRblpVZgZa5NI1cDSVeD4uYtBXBwj6lQ0BsHZI5w0Gy1Pq" x509="OtdVqhmvkKKuWJHhl1t3OMh38qBzKYdJdGlIgHQUjgQIJh9An3FTg3uCYjqdpOKHk" isMulti="true" multiMin="-1226841483" multiMax="-1453471940">
+      <attributes key="fcfXcSowelZi85Z21oLyCiijIjyoxJtL0dGokxNlkpVz34czc3vVvggKj5fAyVzV1L" value="EpmhC2nhgfLAgYe1haLWeE5cTr9Ui0YV1qsMxiOHrSupkr0ADKTDjieByFN7n"/>
+      <attributes key="gZ05nPmvkTYE3rUBK9Qyn9lBpVCfBYJz2de141zJ0RXbNXEytSIajiaIfWE5Rm7pKzn9" value="TlOVH3yj8ifgLS3QWZRyWOcCwhWaQRy7G0RTnko9SSKC7XP008NU3nBygDxw4ASs"/>
+      <attributes key="MIGWNcBzvdyjwrulCQYtjGkhF8CpYd5NwOX2iGoK55oLCS6ShiivY5aMh60lzGg9" value="h5pdY5a2jZxx4mKindVhLm2XYMWiqM8skfjSsU2fSUWkUIQPeSbSSfTfjA60pcKaNoK7k"/>
+      <attributes key="OTMRkC5fazK75cQhLWTEcLKsm3OGctFWypEqHe1A7XIApTaZxgz8yp6W3XWF3ClAzdV5Y7" value="Jxa7JH1JSBrBKh0z9PXScUhe58U3AVOy3iJzE8slEKPZpO7XFncDwx5Tne3i"/>
+      <attributes key="2re38F0UzP4DXO7QcTc2SmSyZ3GYsOcYnFzwTbl8hFWHhb05OaqbZ07cVzWrubXIKB" value="YyjBK5chRIFP1zkYfE24DsIooZOvxSdjQwOM9HwnEDTQe38lRc6DGKedyGFYeiLch"/>
+      <attributes key="YFsIRxsgxqVCAYMHGyaNS1CFQg3bLjD3XdnzIzeAsh0DXKKJ7gdGFcPs1AO" value="lbRHmor4dEasBMxdxKFrAL1oDwwsCNVq4cuEChYJgT1eEAAEdfNonVF0SKk"/>
+      <attributes key="YER1P3oAqR0sh599dujNSd3hPG7fP8uX4Gq9UzKvjbjbxA2UoqVauKFfH1IF5ek3mT1Lg" value="AlJa3apGBaeH6DeiPCm06V9C2FZrFaTtViuKJFQWINssF9oRWtAMqmA9EeLujZCas"/>
+      <attributes key="cT2jkg7e4HSMxQ1feuhjtnmFwvbU4n96Be5Y6icJMkUZfUKBTrjVZB9xb6jw1BNL6hAdcz" value="uBknYrwPnWUOQ169AZkpYwd3WopwEy02ij7kVqdqKaetu2d2RFUnoOEwmAVHGF2IrfY"/>
+    </participants>
+    <participants name="qlmOxWCBzTeNXi39XcTCM5LYjcvnZCUOX3PfBMdm5mV25Ss6yfaBYqPKioDMNjnS6" msp="nkPcG41fa34151qWDVTAciG23cjpz09GpGERoyGepTO96X7nooZOezKcgcR0hZfoqISFvY" x509="CiSqdiiJb5KwL23O1znNq78eCL4YYcjbWmYYujh9gA62DxL5JSRexFLD0HgNqW" isMulti="true" multiMin="-1176152455" multiMax="940555563">
+      <attributes key="s1TUMlx0Krwod8gbwnDZuMGTGU0uv74EYq5IssNrTRbOG7Aha0hwtVGPyg2s" value="IKfoARPrZo3hrmLaqAr7UHtJWhvVLGp9yD02MMapynz7PJTs0SY5Gid0ddQJf95f"/>
+      <attributes key="sW5EsjzzLbcxhVNhPc3M2ZLF6GEEVt8K0e4EAHXNSJknqkpmUlMle1JTd083PupmTrU" value="S1RJQOxvib2HXewPUfehnLbtHg1NMh0fGkWS4i8KKQHEcSyptYQb2JUGzRANzVhsxJ"/>
+      <attributes key="V89pZg6dngW0CEWCNjjuPkTL7kXyFxWwOWwzAtsliAyCDoCh4m9on62eEcO1Lxbfy" value="YgFiNs9iwnmuu92eAv0cy1aaoCl71ESFblEKU0GMkT80hFH1EKZ1H25ys3k1550pz4"/>
+      <attributes key="NMowB0YL7cnJUvd0Uwh6Idd9t9UvGV12wKBF7fZw2sV7plNDSnWGw6nZbz" value="dMxArfYUVUj3auoJ98LnjuDN8OPiugw5wrxD4HWlrkLWtbf7djcPIklwX1Eye1kJaoo2nY"/>
+      <attributes key="rV1Hju1wJv5M0KhYhCRSa7RrEKCOZlwLhAIxniZqyvTVvgzACJ1ffuwR5z" value="waxFX6DNgmShkSa4jf2p94nJ52uzv2ZSWUnY9uB6MCkcql4YnJCBrHO6YXjYZX4iJD"/>
+      <attributes key="oU85cBhiOwlwOWeIaMifMO3cGprHAsxtdytp1VWvGkAMboEztr2EWRq88Q" value="bLyeg1ahvQ1DJAO2X9R7dtctZ2YPcR9PZ87w3LRh1iUXmjUGARZ4sGsGfInj"/>
+      <attributes key="PQCbgOqPp8EvR573ZnlMpomMo0NPiPAsyU3mz526kjOagiYCiHgrEutWZNrP" value="sQNAxM65nZURzqLqsik0o64b7i8CpnoAeB8Kh9b8F7C8siOxXkG4yTnkUc"/>
+      <attributes key="tRT4Qj8pV5TCDsFEFNxAiVrsZYqRDkUbxIN6uUsulYsepOufvXr0fUhI7hqEs" value="pjjd7Gg2KtUL1aFN4bIFNG0YuAE5Ui6GtLWKhmhVFBvkgzFycOINLZbBjnVp2fm9"/>
+    </participants>
+    <participants name="cHcQS5CPMtJU6oL4DtEUi0wYBrwp4fkWqYDSywppl4PrJ1fhRrlp3lSSwJvigmaJs0pnx4" msp="PJw3A6Wx4BNiDLUD2qkcbIXdXx3TUmszLajvVjWDxC3a5nkOmGWylpC65RLxF4la" x509="SJWffKkWr5McpMj2FEpHOtQBvlZ8G8UxbqbaREjQbdyacLrwppqYrfnrRc3v4UMnJJDPaz" multiMin="-176765639" multiMax="-488832130">
+      <attributes key="kguOK03ZBAQcKUxh2mNeVB7unh7xUfCaeIdt6oqquJGI8ESEwbTNdG29oarxtmBcoN" value="VqeKeQDLuOzgBmZULmR1o1NeMvzxDN341oCflPC4YaFw19gAB7mSVmL0Ls0fRDepLg8Q"/>
+      <attributes key="dRynDdFOnfjim4HpDre1Coq8ePY0OJLkdVjaEgOSYGNwXzPnoHvpJiuMFmR" value="pcx7BXp811FzslUECOXHx0dMXxeJd8FMXSvA2Qg3SSHYyvZ9zNSulr32yjnt0KMx"/>
+      <attributes key="88WSSJv9E57XKBICKMdLb1owr4W0FeD4reChFLm5JoGzKpEhY7DtGHdRMYfsach" value="j0Q9m7hDwHWCMYJcKJxdR2cPobAlkp40CjOafN3Xb2KQYjZc99g5OrleccoU2"/>
+      <attributes key="nStnmqL2N04hNcSLzBOjbADGvzncTy70GVn2kOwig7F26a7ukPqx2YirK69K1N" value="OCtAzSysm8eoxqYu5M2ozwRGQ82ZFqD9TqfL8sIK0nfAMjzVaM3eOSt2jnRNF"/>
+      <attributes key="pE6Tlvqrk2DpvfkiNbPiGAo7wVOGzHFmVwfAN2Dlt8wc587rFQ6Ny1JYwbaVRXLNpE4x" value="dh7bplHWaIvEOal9Jfw8uWKnJlHAvmhSIpFNEQMElCwKIyr50FADK3TJTykqHFsTdEOv"/>
+      <attributes key="3Iw5pmCLbrIAdLRkFGear2um1uViTH8VIYB1BejTNZdD0ft0v9HT6yKElsFtR" value="NuBOqEvC8WF5OMUrDfrMvYEVeFCCQiS1GrzJOGjmTP5tRGRQXeo1PhJT9nGOFGLKeI"/>
+      <attributes key="z6bZ7d45jr55PdP4HmEri8uGZfh8g0NR0i0jtKwGwVC85bF9VH6LmxRvzN8cq5d4a" value="OltSnHZXHavSFTxGHbVDJAkMeDvpQWrRnG928tpyQxjVBjXy8GmySrRoe6fKjrHE"/>
+      <attributes key="o36xWSTsEYbgfyy9uHJZJC6VUUFa76ZXY61jyhlZ5D6poHe1tLC1KXbrzYF6" value="vyqJV4mD3CEcrdTF87FFjFCMtRQlwKXIN6Tm9Dz9kzZDJCC6JVHqyFiXO8Q"/>
+      <attributes key="bjE5RXsGC3QVzj4uxs9BqQQDWLSYXMbUgxtJv0tMqFof3NyPMdY91FLwUW2" value="LUjcCnKcRUqLC9NwtmRSUXsW8BD9572UsWS74juGqw3RSlAXXp108ZCvf26UkTUopR"/>
+    </participants>
+    <participants name="pA0EBYM7QRJRvygMsvME8QOORUYPSJJldXdqFEh5gQ1trasx84V3R7IGzLFExTYAy48R9" msp="hmVKl4PlST1twpFiVG5evUMTN8ou2fJv3BotR4pjWcMbqZySDzZU1UI2dUJ" x509="LXdKxbqJN5OnH8o8GbEbjpHX9NoFnflTFVHdX2lJ1dHWMVnMlNbQu2qBLJXUNPoEJtBCg" multiMin="1076958915" multiMax="608872562">
+      <attributes key="Dw2L9x3DhrKQgvkdXdvX9PfJHEX6oZaNVfessQ65JJeaAbImJEzVvEiXXATNcOoN3pe4" value="axUcIWuLctInpxLiVUx069ibN0k87hr0p3fKUHcepg1qxtJ8wmSTWXqWZHAdbJE"/>
+      <attributes key="6hLhPRdLslmEQkLtw9stzLClEVeR5mkWVrfySIyMyVCprBVQQLagJSeaudWNsZ2" value="2J5rk8WxDpC4q7g7dETqom5Ae1VjCUNGJ63CpFT5EgdN2Tq58ZrVZb2WUPB2J"/>
+      <attributes key="gq1aXksD9CYj2nR7K121ZRqFNaEOatsdnoMp5Ou9TSIeBCDhxtttkXfaGp89Cv4ful" value="tt9DhVk5FiDF07vOWLlP2I9hJnWrhBh8EOtMqq4wNUPqdK9rFERlR98nG5fBWrc3l"/>
+      <attributes key="Ntev72oCdWBoHAozxQ1yvKoXl48ABczCRyHsxIL1MUCF7mCHifrtM4KYIQ7tHuEGlYOK" value="OpMRjL9MEKfP0eFYgxPzfCJCrIK6IAVT53R57m9AprIgDNYPERqjhjbELWZmq9CMUzK3ts"/>
+      <attributes key="rirGGba67UJOdNXMOc7BbXPHJFNbLYVLeLSrlDyT8Kw12zwT7P1YUZ2aE3HhI" value="QvjCuSktsTMT4N3h9woMOESoOTJw8YXk7fGXDGEsVTwrapylysN5A2ZZmvrEW5"/>
+      <attributes key="JE2nUxQhlF65A2Ld5O0rxKtnqmlfj4rrnliBeX2B8nPSXrSUOHV7HYt5zNCbM" value="Yf8SKe7EbRm3vPzZ7IVHjznX5USFxVp4Bc9t3yiGf80wOG5NbDqj9Dv9g5MXsRDHQKXhE"/>
+      <attributes key="s0JE6fbFkHGk3Fb7OmCg4G9JvNdveVPTW0wupqdnE5S5FF79EpxhB6GAeWc3W" value="m5La4iyjMpHfVK00KtUYU7G7dCpGETQDDIkBbYvbWxvCOLmmwiBov25zI2L19bGJ"/>
+    </participants>
+    <participants name="r2yLl0vGawm5ywSNpkWgurXlCfDPLuR6UXhIrALAQSk0QsRxqijE2ApZvSzzGZidV4kQZ" msp="QyDsFn1cto7nb9A0xH1uFU2Wn2ySPjGH09qc2wAIfHaOFJFpJ5zph8JGNi0B5" x509="CC1QCD4edwfwmBR605g2c3wdqMyhJ4mtcw19bVopO5P4F2VPl2cTpX0u1TKWou49dD" isMulti="true" multiMin="-813056508" multiMax="1246813935">
+      <attributes key="tGUCBhQ4DZ3koel5PrcA6mwz5Cijdj4Omw9zllfBPOKkG5hrZKLdPDavbHrUmihXMRN" value="naWeaLDWVtKeDN1fy21bqwesI8TN37h54xGMOJ4OAOJuehkXrmqIL3FO56HF7ghjbYu99i"/>
+      <attributes key="asRke4W6cHH08Bv1ygsudyDuVjgvVqvoEkY0wth2cqXVaH23lEtM5J19jQIYh" value="FgtNXSl1Ud34aWYGkWHTg8XF3ZrikWGQbwsx3nDRno7YuA8EbNTVVzjQNszARYAV5v4gxY"/>
+      <attributes key="RCrlQIEdBQzGnbukuzGdJ75WuWuytHws0pLiWcsWtU5QXskOGSRzVLyPNjzoCn9j7I7Z" value="Oe1q9890qKdtIy3EnHvfPg9WlQkbtnmxsgOrszyE1E7FoGqEJNcMt5bhpccuU353y"/>
+      <attributes key="BNMmmsbEGbEKAHO7MesWcas5bMz8oZPQT57bFCoZ2qXW4Bx4rnsyBADfgLK7" value="YRyO8HYXKV4o92jj1PNALrbJTiReke1xvNhqaUkKp31JtkxOVwXM83Qs1akWDuIQK"/>
+      <attributes key="bQiEBapUJF1mj8Ryx5PHjqcpz339j6JnoBsXo3Lkxh2GZth89sAlYctZkd4jX15r" value="Qb35aKVtQA8z1FIuaXX2ihksg0K6pGLzkS8DbdIslhntUwd5Kg2r2bLf6b62s"/>
+      <attributes key="fBl2R3QIUNf6DwY3EFI7ciRDLf7pNJnguKVqWuMeQM29Zt3YmS0GVAbqazBvWL658xi" value="YLVlUV6qjxocDxCAShd89lKAmAvEobaV56CJyJ0UWDmSXGOacmsHvrKUNFwDxrRYttoVQ"/>
+      <attributes key="0Dzwx0H7kF6dV2JylhNldRP735XFUOP1sIU0XvaovcmdFfhaBepwWtFbxIdLfkCYXe" value="uCBzB8S2GkkVYhYlKi1VTUzGDLwdoK6JAvV2ufAdzYxaQLnYYSWMnVMrMhSqsDmZF"/>
+      <attributes key="p7gZaAr9brqUd5WXT0w3nJYgovnrfxFCU1IfaHl1c83QOV1bp3MDYMyv6G7u" value="eoGMiAwcLNAYEZ3clf0nqAe7efIWTmc54mueN8kB8R9ofLaiCDe1WmDREKXgSxa"/>
+    </participants>
+    <participants name="JNaAxyLzGrjRJ17zIOGIpcMiJVEd0S0qwb5pQFGMaf3C5PMk8cAjzxEbJ0q1nPEVh" msp="H6YJLEEdIxLiVfOcPTEO9oi6sDeWDTdvSi6mkkOkaGQOfrZVN3upN5rVt0hEjs19kX" x509="Sy63j9mxQUcAppi7e3gTwAcxhb7DDkyC3irAk22dgiYwOJ4oT5EAjOR4ux3k9of0D" multiMin="558390756" multiMax="-1316682275">
+      <attributes key="AkyBsbgKsejRZ8JfpbK1k9OeTdrdogBuSq2uR6ErKtRmZGjqAewE7deqwK103phB6o" value="bOxvWzixexthYmRYY9ElQJnZ78dzETzip1aqTkGR6enuIMv58yls9CzI2PNLauGDWc4"/>
+      <attributes key="rTYUHlIJjoQEqPzwvV9frrpo5R20RhGgr4os0t82IsxUqxwr6ya3uGImm1o5Frz7T" value="lpa5noDys8R6j5PczHGcAT2lUfGIXWVFjT0RZksvbDKNzRZuHz47jEEBT3uI"/>
+      <attributes key="PrHPY24MOT5y8wdqlvBJafwaXuBnXkSCl0bZOD6AgbikeXCcrGhezf9hwWanREZTOfn5" value="BOYCHRPfcuO24KRbYGqoHp01D1lRvIfruxPBgpnKGDcALDO4IVZJk8JAJqCcFh2tasXGNN"/>
+      <attributes key="rbizKI4jQhUvaTzXOYcFseNEoDiLywLm5xDaspDFT9LrUN9l3dX3Qhm4uxiTAZj1Qersc" value="8h8cFay6Xj9cJZlTsCRPpwAeCJiwVPYGPqtRfAUJcheBxRc8LFwpnMl4AA"/>
+      <attributes key="VUpcd52LH4n3O2u3BtD2vv1LulK5vKFmAGphzubsHWuBnSULB16mxS9H5fuCGmeGTU" value="3lIjx7KhRUL1IfnGdOLRVl2XJ0BuS2DmCs8kJ2lcyIvQV8Er4QuIgKIY38zjmh"/>
+      <attributes key="enTQAaJnvHmNHkgwLmBhuCObs8Uwwz0X8HlxezI1igMW7knYsNfBO4FFPyeQwp216SPyr" value="beHKiBp2trFtDPABBTHwsZwZI7yHax5tmHutb3Guwongr1ypD7iEwBQQgl2zfBLrAFAz1"/>
+      <attributes key="VttS20PsJFIPgY9pDporHOjYYKvSPoOHROsPpQ7OsSBZpdydu3MZj9eWQH3O" value="Cnw0BnMmnuzayqcmJK4kNeorK8vfXmIkX6IPSPdydgoIbULrU0UAbYuT6W"/>
+      <attributes key="rMqOjUoO6cTle43RVCb3EyMIdaZ9BtgQOy24q5PhsqvGLUe5h3q9HpJZSY0KCc7aY5v" value="8vWCIbvwbE8YqPp06lVJ7dUvlBrI12NfPNQQgqXha5l3ayEK6kYWBgrr60gTAt"/>
+    </participants>
+    <participants name="D24Dh5twDfhKgRPolkYq6jaOImFa6PiBb8zd31vXlISN7aiuS9JlCT0TROaoA8ir1TYzgR" msp="Ngu3dXczazfPCP3G9Isrsm3Sl7WbiQJSQrZCDcrzlqfigt9z2erNlMacaM4Tfg6TjIMqpv" x509="rwxOKtt9yS9ZAiTqY1PqkNlSiwyVaK7UGnG0RFgpbapEUpDkVrjjKXkxi08giKJ0Jg" isMulti="true" multiMin="354968096" multiMax="1574399408">
+      <attributes key="rXkeYwaTAyx2v8M8dJ6QiMiWWGpEMHBOm59YA316tPcgK9J101giN0grINKsVrqSXd" value="PxKunFPbzyb23nHpojEiSB90PZqOR90EFcH3mG8r4xyPIgh540Qi2pPMvKadniJzRJ7OJ"/>
+      <attributes key="qdbbzD9VG3H9QqVU7KbRF2uXqdS6dHBsrQvhBNhg8PBWzGfC1NZ68ZDpFCjA3qYP9OTVIK" value="EDg4UNUVmLoj4iQldE95VvnCWxjVQ7HcTxt4N9bwVDDCkEFtoS2cmqPHsWX2PZ"/>
+      <attributes key="qoWq8SqIrPh5ZJLCcvxICm6HntADGGbatrhNwhz7w02mi6zKlq4hXgwxmGk1x7xikxEKW" value="g33V10WW9weGYGFzklZ2pGCSThRq1N7z5568Mada34NUsl6un4ZUUDIFFkyurQkHY"/>
+      <attributes key="xECum3qVRTT2Wrc8KSB0Cffs6DDumJJWGkcZfW3b9aO7AM3o8E8naeSGIh" value="bxzKRElCSt28mfjs54rsRGBkuJp2Xr7ty7gX04fedG8pfJEPqYQ6YZG9xPLSwgzruCbv4"/>
+      <attributes key="0Zu1mzhJkX0Xm3PdCjtcczC6T882fxefuVH2aZuyTb2d9wvSL2K0iiWftfSfSophb1XNzc" value="RWnNdILVM1xZQ6T5MYvaegcFB78xUL3G6OCl0fLH3RCLarm9dBWjrrCm0hTQcynsNc78A"/>
+      <attributes key="IcKDenEXg3NHyreOZLVGyd3ddr32daptWWTcRrJDhc3MLwAYuFZysK2ne85hdbNjEjN" value="SKVYOiMuFBoTae5ugKoEO1lSOlFCW08pfCh6mMJDOSnoIqqBQ3ppxkitqBG7"/>
+      <attributes key="R5anNHJwInKlfZHJQiD19RtFGbvAwTqhlF4XUDMNeZN6OdaXFuD826iZuF6GadDZf" value="JtsybTSEJKmhQ1hBpXKzzHajEIQrFXoHQxuQLmw5gF0jajQd3juHPp0LY09G5YkkLXJh"/>
+      <attributes key="TdLMP93DkCVkoDpiIkVt2WnDAtmNJia13KReA9d4JhBdcf5DKbhJ5NcnuwKm4Ok4t3ApE4" value="psfZIt3bf7AQ1tncoFRjXWwXUSl2qn2pw0jG2nOXKlbVz7UaQlaSqdZYmDewxblZ5Fwu"/>
+      <attributes key="edZ2vJLASDbx2r08zB1JR8ewqMnlyLOrmqSu4cFv20TjCsm5Gtu1NQiw7BPPFkgiG7U6" value="XHzLiieIQdVHZ3zXElZas8Wf0WVwKh2jzcS1RRlTWxAW5ulNCWybhj45UczVeyFw2SHc"/>
+    </participants>
+  </b2c:ParticipantSection>
+  <b2c:ParamMapping dmnParam="KeUHc8vfF8Jj8AO0AIDsjvfx4DfV6PEGjLxT7fQQllccaFMstkVYb11sLvgg8" globalRef="/13/@contracts.0/@sections.3/@globals.4"/>
+  <b2c:Model>
+    <contracts name="dTAIhijvhKyTZsKHYPfC6zKrKDVoGnvMLV77IGnejAd6b21gdlYcfYVHWV1SX5sgOrcw7">
+      <sections xsi:type="b2c:EventSection">
+        <events name="kRUoxOoK4xoXfRn7bvZIyoBO3cv0OtEuEAFU9m6EZozDWXkcxLZFigpW9xXNfN" initialState="READY"/>
+        <events name="ZbG7Gy4vHLYOi6tkZJWMHs27rqjf9bpI9ISLABSDPpI6MiapjDrYTujRp9zy8nxab" initialState="PENDING_CONFIRMATION"/>
+        <events name="GD0pccdPzszfdJ5ut9nYQbeuuAb1VKknJlTg482a5Ef7X5FIQ1BnknFRPDGAlapWI82u" initialState="PENDING_CONFIRMATION"/>
+        <events name="AEcnTTQeWSXTLdRmL7d7GymwqyI5mG6iDCh7kgGo0NCn9Q9ToxvsYGacpNl"/>
+        <events name="75DUs8wRb2uwZrdu04P7y0oADjO1HgH3BzKh2LT6jKSNe8FXo6Lb8zrdiBoMUkb9Sct" initialState="DONE"/>
+        <events name="5hZFw3lDyzt6jfuZjJurNDRBFB5oe55YTyvHsE9AplyAGwVgY8VvlTLLPybdc"/>
+        <events name="pSYb4RzbuPgam9kOVTsIT9DWPgQldH2Avsk0f16pzOx3vc3wwhWlgdLrhXKKqLuNn1qdqU" initialState="PENDING_CONFIRMATION"/>
+        <events name="XsKygA86bJj9pNe4WqRrdwc6B80c06huwxlo58mUUzgP4Rb8a1LvH8lva7hRGFT" initialState="READY"/>
+        <events name="aoL7bbpzo3h4097o3lE4GMFCZbAy6Gp6HZ1aaAlldli20xRnp5xCnEj0XECUDzXd" initialState="DONE"/>
+      </sections>
+      <sections xsi:type="b2c:EventSection">
+        <events name="BaEVHUsnQCX5bQNqmAZR1yNlUgM0wWbDLvXTal3pbgGSGTwyAhMgPC26AV" initialState="PENDING_CONFIRMATION"/>
+        <events name="6Q0Si2ArSNIAhzJo0KyUpceBcRVzztNt3S9M9Ny9C8BJ1t9LyJ75IELfaNTZD6" initialState="DONE"/>
+        <events name="naPqTycW1qMHGOkx8QY6kELhMGfV8wNHMagXmbKkmkNgZxL91JeEK5NzkdAH" initialState="DONE"/>
+        <events name="yqJs60V89AhqMivM86jWj4m2HCVJ2Su9g5wF2XwPVKWlCFazLZgwP261f8a8czp"/>
+        <events name="cL8ozbvo2Vm4qgKu3Pj5yn7DvZaKx56txu563K2h2C6O3OuRCrBaTpAGS2i1opJc2iPYGU" initialState="PENDING_CONFIRMATION"/>
+        <events name="IF5qzFbIyjvvlkWW73KUyertWs4hLV7KogQcMfA0zVTLNiBG6sPmVWcvCep"/>
+        <events name="CTVE3kptqt9h5wFad7sMU3RZlZqQi8g78IQrzkNEyNxhapkrNWb2qEMkr9mhcYxpG5iAX" initialState="READY"/>
+      </sections>
+      <sections xsi:type="b2c:GatewaySection">
+        <gateways name="h1bcUHwYYhnfYrZa1BHtWRW9KH1EqvhZQkkEwPpPdvbfFyeW3f8dV1LiIJxX1Fi7yvLpl" initialState="PENDING_CONFIRMATION"/>
+        <gateways name="6V7i65HaweOwsHVA4bmSRVxbfsAaMfpA9ig5C8h1Mp8di4rhiy1YmZwhPUlpJji" gatewayType="parallel"/>
+        <gateways name="UG1SfjjuzwTK8ZeaqntDVdu2c61oFtkAcZ8XsICn2EJ9u4fHDCl4OHN6YPwI8BziD8f0K" gatewayType="parallel"/>
+        <gateways name="NahNRu41PLKVaicozwjO8bCkot7jRWfUfasRem3xvcnT5myTkudtYUh4bIIeD6aXUipY" gatewayType="event"/>
+        <gateways name="wlyJ9TRf4p4PQWqttjMGW36AqTx0WnaKwpnXsyzUICC2w0v6uavbVW17JJgV7Sulb" gatewayType="parallel"/>
+        <gateways name="D2wk7J2hBL6cAi841XyztrbHdNyhOFMrij0NamxuZI6ohPp3xcpmfuTpbfU2b9" gatewayType="event" initialState="PENDING_CONFIRMATION"/>
+        <gateways name="rI9LdTTrEuJmQuAH6Hs0AU1YkoZSzseoheLCrtREXopUvirqLSpxpXGg5JLw2VdrDz" initialState="DONE"/>
+        <gateways name="84bZgQof4EHFrEY0YoyJX4GhhyK445VRte6cbcqVjwIaVKxiZRMAm1W9vQFr" gatewayType="parallel"/>
+        <gateways name="JxAZCTOD51Hl0xkuRjUCPXTUd7ZhzoyreXYJRB8VuZknaMdxz7cgZNOa1gcVuO7pO7m3" gatewayType="event" initialState="READY"/>
+      </sections>
+      <sections xsi:type="b2c:GlobalSection">
+        <globals name="X4ob3Z4ooaLKScOpDBvMG7vrZm3XM2CGrkw9nTfUOZSEzV2UaTxUVUWfWD0L86U" type="bool"/>
+        <globals name="Pf0Uyf7IlG9cy8AvOtg5kwDZDrikdAg7rZaug64rRQoEjLCykjpJ6QVhgIxGOeNVQ" type="float"/>
+        <globals name="jP7ZmM2mBMwUj3NtNogB45vg6fGFSSafY2MUq0cL5NpQMExw5fFdXsG8z7nqreufuwQj" type="bool"/>
+        <globals name="U8II32cm7DHbhB6Qg6mHGBZyLHJMfP7ErFnZC8wNUlWZaLaIO1QIaLxJzgiCQ6Re" type="bool"/>
+        <globals name="z0Y4QhgCJpLcY7CUSzWPqFv4aW937ewchqOiHSKZ6jUyvh8oLwbEe9VFFmoenTBimxwb" type="float"/>
+        <globals name="9EzemQ6iZayZmSk6zSoyb0I1cEUKcyU1dEpsocbkmCqTxO8HHUPZWxkY9tZFLTf" type="float"/>
+        <globals name="x2OeVspWQ4VF0W0b2NQXyNOEsIVkJSYK3f8OFY40rBWf16KAd5qLWNymDucI" type="float"/>
+        <globals name="Yx3ppAsTR8oojxzE0BGsI6SpAZyykJbcJ8i0vgRjYm1YqZo4azRVO0MwzWVDG" type="float"/>
+        <globals name="oWFdEHOxBtieuYG7vgCqR50yAzbOiWPD8nzOLpDGkEhv0wQnAEctMqpv12VUyVjTTt8vFN" type="bool"/>
+      </sections>
+      <sections xsi:type="b2c:FlowSection">
+        <flowItems xsi:type="b2c:MessageFlow">
+          <actions xsi:type="b2c:EnableAction" target="/13/@contracts.0/@sections.0/@events.3"/>
+          <actions xsi:type="b2c:SetGlobalAction" var="/13/@contracts.0/@sections.3/@globals.4">
+            <expr stringValue="zItqA6htJmGTtMXWrYskmSmHwnp0WRe9pJYFB4lM9YnrgaxQg15xFpdQUBhwWd7iJ3" intValue="980227582" boolValue="false"/>
+          </actions>
+          <actions xsi:type="b2c:SetGlobalAction" var="/13/@contracts.0/@sections.3/@globals.3">
+            <expr stringValue="7P0Opnz6L7pU9Dm2hMBYQGxrDlbv6Rq2hJrmPYPwS7REbFRYA20kHXe9AM" intValue="616635132" boolValue="false"/>
+          </actions>
+          <actions xsi:type="b2c:DisableAction" target="/13/@contracts.0/@sections.1/@events.1"/>
+          <actions xsi:type="b2c:SetGlobalAction" var="/13/@contracts.0/@sections.3/@globals.6">
+            <expr stringValue="AxjK8Uv8JE5jXyTvboa4awm2AI9YtKZ8HWURJKoHTBSwha5QPc39MZqNTlBm" intValue="15659989" boolValue="true"/>
+          </actions>
+          <actions xsi:type="b2c:DisableAction" target="/13/@contracts.0/@sections.2/@gateways.0"/>
+          <actions xsi:type="b2c:EnableAction" target="/3/@gateways.7"/>
+        </flowItems>
+        <flowItems xsi:type="b2c:MessageFlow">
+          <actions xsi:type="b2c:DisableAction" target="/13/@contracts.0/@sections.0/@events.1"/>
+          <actions xsi:type="b2c:EnableAction" target="/3/@gateways.7"/>
+          <actions xsi:type="b2c:DisableAction" target="/3/@gateways.1"/>
+          <actions xsi:type="b2c:DisableAction" target="/3/@gateways.0"/>
+          <actions xsi:type="b2c:DisableAction" target="/13/@contracts.0/@sections.2/@gateways.6"/>
+          <actions xsi:type="b2c:DisableAction" target="/13/@contracts.0/@sections.0/@events.8"/>
+          <actions xsi:type="b2c:DisableAction" target="/13/@contracts.0/@sections.1/@events.1"/>
+        </flowItems>
+        <flowItems xsi:type="b2c:ParallelJoin" gtw="/13/@contracts.0/@sections.2/@gateways.7" sources="/13/@contracts.0/@sections.2/@gateways.4 /3/@gateways.8 /13/@contracts.0/@sections.2/@gateways.8 /13/@contracts.0/@sections.2/@gateways.6 /13/@contracts.0/@sections.1/@events.3 /13/@contracts.0/@sections.2/@gateways.0 /13/@contracts.0/@sections.0/@events.0 /3/@gateways.3 /3/@gateways.2">
+          <actions xsi:type="b2c:EnableAction" target="/3/@gateways.4"/>
+          <actions xsi:type="b2c:EnableAction" target="/13/@contracts.0/@sections.2/@gateways.3"/>
+          <actions xsi:type="b2c:DisableAction" target="/13/@contracts.0/@sections.0/@events.4"/>
+          <actions xsi:type="b2c:EnableAction" target="/13/@contracts.0/@sections.0/@events.1"/>
+          <actions xsi:type="b2c:EnableAction" target="/3/@gateways.4"/>
+          <actions xsi:type="b2c:DisableAction" target="/13/@contracts.0/@sections.0/@events.5"/>
+          <actions xsi:type="b2c:DisableAction" target="/13/@contracts.0/@sections.1/@events.3"/>
+          <actions xsi:type="b2c:EnableAction" target="/13/@contracts.0/@sections.0/@events.3"/>
+        </flowItems>
+        <flowItems xsi:type="b2c:GatewayFlow" gtw="/3/@gateways.2"/>
+        <flowItems xsi:type="b2c:OracleTaskFlow"/>
+        <flowItems xsi:type="b2c:MessageFlow" msgCond="completed">
+          <actions xsi:type="b2c:EnableAction" target="/13/@contracts.0/@sections.1/@events.4"/>
+          <actions xsi:type="b2c:EnableAction" target="/13/@contracts.0/@sections.0/@events.6"/>
+          <actions xsi:type="b2c:EnableAction" target="/13/@contracts.0/@sections.2/@gateways.8"/>
+          <actions xsi:type="b2c:EnableAction" target="/13/@contracts.0/@sections.1/@events.6"/>
+          <actions xsi:type="b2c:SetGlobalAction" var="/13/@contracts.0/@sections.3/@globals.8">
+            <expr stringValue="sbgxPmQ7WJ0GG55Wiro1laYrZpDZQG8Y9cQCTKM1Uk3eC6nMjgQrIoqm2J08be1FW" intValue="-869152873" boolValue="true"/>
+          </actions>
+          <actions xsi:type="b2c:EnableAction" target="/13/@contracts.0/@sections.0/@events.7"/>
+          <actions xsi:type="b2c:DisableAction" target="/3/@gateways.8"/>
+          <actions xsi:type="b2c:DisableAction" target="/13/@contracts.0/@sections.2/@gateways.3"/>
+          <actions xsi:type="b2c:DisableAction" target="/13/@contracts.0/@sections.2/@gateways.2"/>
+        </flowItems>
+        <flowItems xsi:type="b2c:RuleFlow">
+          <actions xsi:type="b2c:SetGlobalAction" var="/13/@contracts.0/@sections.3/@globals.2">
+            <expr stringValue="pmlUM7nP9VqQbj5RW9qBfqP11BRTGt1zsR5NROIzQQMadllPJDvJLEdSaJO" intValue="23041441" boolValue="true"/>
+          </actions>
+          <actions xsi:type="b2c:SetGlobalAction" var="/13/@contracts.0/@sections.3/@globals.1">
+            <expr stringValue="epgI8Gba6GYIrExZaC6CPy17wKiCprOXy22f7lZmp9L6aSCH5nEoWp4BZP" intValue="1681781491" boolValue="true"/>
+          </actions>
+          <actions xsi:type="b2c:SetGlobalAction" var="/13/@contracts.0/@sections.3/@globals.7">
+            <expr stringValue="pcgEvb6U1s2SnXQYDt3dneBYl73Hlylf0LaJ9ULQn8ERZH3IMH49BCGUfKrebHD" intValue="1813826947" boolValue="true"/>
+          </actions>
+          <actions xsi:type="b2c:EnableAction" target="/13/@contracts.0/@sections.0/@events.1"/>
+          <actions xsi:type="b2c:EnableAction" target="/13/@contracts.0/@sections.2/@gateways.0"/>
+          <actions xsi:type="b2c:EnableAction" target="/3/@gateways.0"/>
+          <actions xsi:type="b2c:SetGlobalAction" var="/13/@contracts.0/@sections.3/@globals.6">
+            <expr stringValue="WF3yP80yzPvybJRCDM9rX4yTPTipgJxGigPX9swuh6j7gai6Q4KXvWVrjqr" intValue="-1141162145" boolValue="true"/>
+          </actions>
+        </flowItems>
+      </sections>
+      <sections xsi:type="b2c:OracleTaskSection"/>
+      <sections xsi:type="b2c:GlobalSection"/>
+      <sections xsi:type="b2c:OracleTaskSection"/>
+      <sections xsi:type="b2c:FlowSection"/>
+    </contracts>
+    <contracts name="Em7kwR55JS8Zp0vKPeIbstpZ2lpQVCZH4viOToS5D8Ka6kR5GMMYyT80zOT"/>
+    <contracts name="72xxD1cLnpH3R2u4ZkfzZuz1vKeaj1lMNAbvp8ql7VnPWpXeQb2ULzKL8e7H"/>
+    <contracts name="WzShNWlyEcBFs6YY2ns74QcHpTTQq5n0PQU6FyUg6e1hz8aYdzQ9XTutULsDyCiHqNv0"/>
+    <contracts name="KqHwFg4YuGUtc4c0332wOXen21p6mLC6zt34GV4CbEzeCGlc9OTsd5vhMO87ZNQf"/>
+    <contracts name="1NcV4g3AheVPeQQczGAXjYzthbaWn2gIzF09PQdLEoU54Uh0ximaA7NG2SWXq"/>
+    <contracts name="uPK0cR6hb84M5fFjMaPc3xp17xIQpegTCZJhcc6l9QRIOsqYBcpzAXhANnyq8C"/>
+  </b2c:Model>
+</xmi:XMI>
