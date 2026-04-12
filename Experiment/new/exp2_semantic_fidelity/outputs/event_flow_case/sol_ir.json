@@ -1,0 +1,94 @@
+{
+  "contract": "IOracle",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/event_flow_case/event_flow_case.sol",
+  "globals": [
+    {
+      "name": "Done",
+      "type": "bool"
+    }
+  ],
+  "handlers": [
+    {
+      "name": "StartEvent_1",
+      "language": "solidity",
+      "element_kind": "event",
+      "element_name": "StartEvent_1",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_1"
+      },
+      "guards": [
+        "require(ev.exists, \"event not set\")",
+        "require(ev.state == ElementState.ENABLED, \"event state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Ping"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.StartEvent_1];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.StartEvent_1);\n        inst.messages[MessageKey.Ping].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "Ping_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "Ping",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "Ping"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "MidEvent_1"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.Ping];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.Ping, fireflyTranId);\n        inst.events[EventKey.MidEvent_1].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "EndEvent_1",
+      "language": "solidity",
+      "element_kind": "event",
+      "element_name": "EndEvent_1",
+      "trigger": {
+        "kind": "event_completed",
+        "name": "EndEvent_1"
+      },
+      "guards": [
+        "require(ev.exists, \"event not set\")",
+        "require(ev.state == ElementState.ENABLED, \"event state not allowed\")"
+      ],
+      "actions": [],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.EndEvent_1];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.EndEvent_1);\n\n    }"
+    }
+  ],
+  "elements": {
+    "messages": [
+      "Ping"
+    ],
+    "gateways": [
+      "PlaceholderGateway"
+    ],
+    "events": [
+      "EndEvent_1",
+      "MidEvent_1",
+      "StartEvent_1"
+    ],
+    "businessrules": [
+      "PlaceholderBusinessRule"
+    ]
+  },
+  "unsupported": [],
+  "raw_summary": {
+    "function_count": 37,
+    "event_count": 5
+  }
+}

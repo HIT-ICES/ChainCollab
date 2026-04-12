@@ -1,0 +1,24 @@
+contract InvalidMissingMessageSender {
+    participants {
+        participant Receiver { msp "ReceiverMSP" attributes { role = "receiver" } }
+    }
+    globals {
+        G: bool
+    }
+    messages {
+        message Msg1 from UnknownSender to Receiver { initial state INACTIVE schema "{}" }
+    }
+    gateways {
+    }
+    events {
+        event StartEvent_1 { initial state READY }
+        event EndEvent_1 { initial state INACTIVE }
+    }
+    businessrules {
+    }
+    oracletasks {
+    }
+    flows {
+        start event StartEvent_1 enables Msg1;
+    }
+}

@@ -1,0 +1,199 @@
+assertions:
+  - id: A01_model_has_contract
+    title: 模型至少包含一个 contract
+    dimension: structural
+    mode: positive
+    source:
+      file: src/newTranslator/MDAcheck/check.ocl
+      rule: Model::AtLeastOneContract
+    description: DSL 模型必须至少定义一个合约。
+
+  - id: A02_unique_names_per_kind
+    title: 同类元素名称唯一
+    dimension: structural
+    mode: positive
+    source:
+      file: src/newTranslator/MDAcheck/check.ocl
+      rule: Contract::UniqueNamesPerKind
+    description: participants、globals、messages、gateways、events、businessrules、oracletasks 在各自类别内名称唯一。
+
+  - id: A03_message_sender_receiver_in_contract
+    title: message 的发送方和接收方必须属于本合约
+    dimension: reference
+    mode: both
+    source:
+      file: src/newTranslator/MDAcheck/check.ocl
+      rule: Contract::MessageParticipantsInContract
+    description: message from / to 必须引用本合约内已定义的 participant。
+
+  - id: A04_message_sender_not_receiver
+    title: message 的发送方与接收方不能相同
+    dimension: semantic
+    mode: positive
+    source:
+      file: src/newTranslator/MDAcheck/check.ocl
+      rule: Message::SenderNotReceiver
+    description: 避免退化消息建模。
+
+  - id: A05_rule_mappings_reference_own_globals
+    title: businessrule 映射必须引用本合约 globals
+    dimension: reference
+    mode: both
+    source:
+      file: src/newTranslator/MDAcheck/check.ocl
+      rule: Contract::RuleMappingsReferenceOwnGlobals
+    description: input mapping / output mapping 的 globalRef 必须存在于本合约 globals 中。
+
+  - id: A06_oracle_mappings_reference_own_globals
+    title: oracletask 输出映射必须引用本合约 globals
+    dimension: reference
+    mode: positive
+    source:
+      file: src/newTranslator/MDAcheck/check.ocl
+      rule: Contract::OracleTaskMappingsReferenceOwnGlobals
+    description: oracle task 的 output mapping 必须引用本合约全局变量。
+
+  - id: A07_exactly_one_flow_section
+    title: 合约必须且仅有一个 flow section
+    dimension: structural
+    mode: positive
+    source:
+      file: src/newTranslator/MDAcheck/check.ocl
+      rule: Contract::HasExactlyOneFlowSection
+    description: 为代码生成和验证提供单一流程入口。
+
+  - id: A08_exactly_one_start_flow
+    title: 合约必须且仅有一个 start flow
+    dimension: semantic
+    mode: positive
+    source:
+      file: src/newTranslator/MDAcheck/check.ocl
+      rule: Contract::ExactlyOneStartFlow
+    description: 工作流起点唯一。
+
+  - id: A09_start_event_ready
+    title: start event 必须 READY
+    dimension: semantic
+    mode: positive
+    source:
+      file: src/newTranslator/MDAcheck/check.ocl
+      rule: Contract::StartEventMustBeReady
+    description: 与生成器 start event 语义保持一致。
+
+  - id: A10_start_flow_target_in_contract
+    title: start flow target 必须属于本合约
+    dimension: reference
+    mode: both
+    source:
+      file: src/newTranslator/MDAcheck/check.ocl
+      rule: Contract::StartFlowTargetInContract
+    description: start event enables 的 target 必须引用本合约内元素。
+
+  - id: A11_flow_refs_stay_in_same_contract
+    title: 所有 flow 引用必须局限在本合约内
+    dimension: reference
+    mode: both
+    source:
+      file: src/newTranslator/MDAcheck/check.ocl
+      rule: Contract::FlowRefsStayInSameContract
+    description: 避免 textX 默认作用域导致的跨 contract 串引用。
+
+  - id: A12_actions_reference_own_elements_and_globals
+    title: action 引用的元素与变量必须存在
+    dimension: reference
+    mode: both
+    source:
+      file: src/newTranslator/MDAcheck/check.ocl
+      rule: Contract::ActionsReferenceOwnElementsAndGlobals
+    description: enable / disable 的 target 必须存在，set 的 var 必须存在。
+
+  - id: A13_parallel_join_gateway_type_required
+    title: parallel join 必须绑定 parallel gateway
+    dimension: semantic
+    mode: positive
+    source:
+      file: src/newTranslator/MDAcheck/check.ocl
+      rule: ParallelJoin::ParallelGatewayTypeRequired
+    description: parallel await 的 gateway 类型必须为 parallel。
+
+  - id: A14_parallel_sources_valid
+    title: parallel await 源元素至少两个、互异且存在
+    dimension: reference
+    mode: both
+    source:
+      file: src/newTranslator/MDAcheck/check.ocl
+      rule: ParallelJoin::SourcesAtLeastTwoAndDistinct
+    description: parallel await 的 source 列表必须合法。
+
+  - id: A15_gateway_choose_only_for_exclusive
+    title: choose 分支只能用于 exclusive gateway
+    dimension: semantic
+    mode: positive
+    source:
+      file: src/newTranslator/MDAcheck/check.ocl
+      rule: GatewayFlow::ChooseImpliesExclusiveGateway
+    description: 分支语义只适用于排他网关。
+
+  - id: A16_gateway_flow_mode_unique
+    title: gateway flow 只能二选一使用 then 或 choose
+    dimension: syntax
+    mode: positive
+    source:
+      file: src/newTranslator/MDAcheck/check.ocl
+      rule: GatewayFlow::ExactlyOneGatewayFlowMode
+    description: 不能同时定义 then actions 与 choose branches。
+
+  - id: A17_gateway_type_enum_legal
+    title: gateway type 必须取 grammar 允许值
+    dimension: syntax
+    mode: both
+    source:
+      file: src/newTranslator/DSL/B2CDSL/b2cdsl/b2c.tx
+      rule: GatewayType
+    description: gateway type 只能是 exclusive、event、parallel。
+
+  - id: A18_set_literal_matches_global_type
+    title: set 字面量类型必须匹配目标全局变量类型
+    dimension: semantic
+    mode: positive
+    source:
+      file: src/newTranslator/MDAcheck/check.ocl
+      rule: SetGlobalAction::SetLiteralTypeMatchesGlobalType
+    description: set 的值类型必须与 global type 一致。
+
+  - id: A19_compare_literal_matches_global_type
+    title: gateway compare 分支字面量类型必须匹配变量类型
+    dimension: semantic
+    mode: positive
+    source:
+      file: src/newTranslator/MDAcheck/check.ocl
+      rule: GatewayCompareBranch::CompareLiteralTypeMatchesGlobalType
+    description: compare 分支中的字面量类型必须与被比较变量类型一致。
+
+  - id: A20_gateway_expression_branch_not_supported
+    title: GatewayExpressionBranch 当前代码生成器不支持
+    dimension: codegen_limit
+    mode: negative
+    source:
+      file: src/newTranslator/MDAcheck/check.ocl
+      rule: GatewayExpressionBranch::NotSupportedByCurrentCodeGen
+    description: 当前代码生成器不支持 expression branch，应被判为非法/不支持输入。
+
+negative_generators:
+  missing_flow_target:
+    assertion_ids: [A10_start_flow_target_in_contract, A11_flow_refs_stay_in_same_contract]
+  missing_set_variable:
+    assertion_ids: [A12_actions_reference_own_elements_and_globals]
+  invalid_gateway_type:
+    assertion_ids: [A17_gateway_type_enum_legal]
+  missing_message_trigger:
+    assertion_ids: [A11_flow_refs_stay_in_same_contract]
+  missing_message_sender:
+    assertion_ids: [A03_message_sender_receiver_in_contract]
+  missing_rule_mapping_global:
+    assertion_ids: [A05_rule_mappings_reference_own_globals]
+  missing_parallel_source:
+    assertion_ids: [A11_flow_refs_stay_in_same_contract, A14_parallel_sources_valid]
+  missing_start_event:
+    assertion_ids: [A08_exactly_one_start_flow, A11_flow_refs_stay_in_same_contract]
+

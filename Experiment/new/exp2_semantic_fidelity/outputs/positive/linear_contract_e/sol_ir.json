@@ -1,0 +1,164 @@
+{
+  "contract": "IOracle",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/positive/linear_contract_e/linear_contract_e.sol",
+  "globals": [
+    {
+      "name": "ContinueE",
+      "type": "bool"
+    }
+  ],
+  "handlers": [
+    {
+      "name": "StartEvent_E",
+      "language": "solidity",
+      "element_kind": "event",
+      "element_name": "StartEvent_E",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_E"
+      },
+      "guards": [
+        "require(ev.exists, \"event not set\")",
+        "require(ev.state == ElementState.ENABLED, \"event state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "MsgE1"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.StartEvent_E];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.StartEvent_E);\n        inst.messages[MessageKey.MsgE1].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "MsgE1_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "MsgE1",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "MsgE1"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "GateE"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.MsgE1];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.MsgE1, fireflyTranId);\n        inst.gateways[GatewayKey.GateE].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "MsgE2_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "MsgE2",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "MsgE2"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_E"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.MsgE2];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.MsgE2, fireflyTranId);\n        inst.events[EventKey.EndEvent_E].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "GateE",
+      "language": "solidity",
+      "element_kind": "gateway",
+      "element_name": "GateE",
+      "trigger": {
+        "kind": "gateway_completed",
+        "name": "GateE"
+      },
+      "guards": [
+        "inst.stateMemory.ContinueE == true",
+        "require(g.exists, \"gateway not set\")",
+        "require(g.state == ElementState.ENABLED, \"gateway state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "MsgE2"
+        },
+        {
+          "op": "enable",
+          "target": "EndEvent_E"
+        },
+        {
+          "op": "set",
+          "var": "ContinueE",
+          "value": "= true) {\n            inst.messages[MessageKey.MsgE2].state = ElementState.ENABLED"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "inst.stateMemory.ContinueE == true",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "MsgE2"
+            }
+          ],
+          "else_actions": [
+            {
+              "op": "enable",
+              "target": "EndEvent_E"
+            }
+          ]
+        }
+      ],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Gateway storage g = inst.gateways[GatewayKey.GateE];\n        require(g.exists, \"gateway not set\");\n        require(g.state == ElementState.ENABLED, \"gateway state not allowed\");\n\n        g.state = ElementState.COMPLETED;\n        emit GatewayDone(instanceId, GatewayKey.GateE);\n        if (inst.stateMemory.ContinueE == true) {\n            inst.messages[MessageKey.MsgE2].state = ElementState.ENABLED;\n        }\n        else {\n            inst.events[EventKey.EndEvent_E].state = ElementState.ENABLED;\n        }\n\n    }"
+    },
+    {
+      "name": "EndEvent_E",
+      "language": "solidity",
+      "element_kind": "event",
+      "element_name": "EndEvent_E",
+      "trigger": {
+        "kind": "event_completed",
+        "name": "EndEvent_E"
+      },
+      "guards": [
+        "require(ev.exists, \"event not set\")",
+        "require(ev.state == ElementState.ENABLED, \"event state not allowed\")"
+      ],
+      "actions": [],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.EndEvent_E];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.EndEvent_E);\n\n    }"
+    }
+  ],
+  "elements": {
+    "messages": [
+      "MsgE1",
+      "MsgE2"
+    ],
+    "gateways": [
+      "GateE"
+    ],
+    "events": [
+      "EndEvent_E",
+      "StartEvent_E"
+    ],
+    "businessrules": [
+      "PlaceholderBusinessRule"
+    ]
+  },
+  "unsupported": [],
+  "raw_summary": {
+    "function_count": 38,
+    "event_count": 5
+  }
+}

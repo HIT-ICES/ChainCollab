@@ -1,0 +1,156 @@
+{
+  "contract": "IOracle",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/multi_message_case/multi_message_case.sol",
+  "globals": [
+    {
+      "name": "Flag",
+      "type": "bool"
+    }
+  ],
+  "handlers": [
+    {
+      "name": "StartEvent_1",
+      "language": "solidity",
+      "element_kind": "event",
+      "element_name": "StartEvent_1",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_1"
+      },
+      "guards": [
+        "require(ev.exists, \"event not set\")",
+        "require(ev.state == ElementState.ENABLED, \"event state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "M1"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.StartEvent_1];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.StartEvent_1);\n        inst.messages[MessageKey.M1].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "M1_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "M1",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "M1"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "M2"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.M1];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.M1, fireflyTranId);\n        inst.messages[MessageKey.M2].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "M2_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "M2",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "M2"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "M3"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.M2];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.M2, fireflyTranId);\n        inst.messages[MessageKey.M3].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "M3_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "M3",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "M3"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_1"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.M3];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.M3, fireflyTranId);\n        inst.events[EventKey.EndEvent_1].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "G1",
+      "language": "solidity",
+      "element_kind": "gateway",
+      "element_name": "G1",
+      "trigger": {
+        "kind": "gateway_completed",
+        "name": "G1"
+      },
+      "guards": [
+        "require(g.exists, \"gateway not set\")",
+        "require(g.state == ElementState.ENABLED, \"gateway state not allowed\")"
+      ],
+      "actions": [],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Gateway storage g = inst.gateways[GatewayKey.G1];\n        require(g.exists, \"gateway not set\");\n        require(g.state == ElementState.ENABLED, \"gateway state not allowed\");\n\n        g.state = ElementState.COMPLETED;\n        emit GatewayDone(instanceId, GatewayKey.G1);\n\n    }"
+    },
+    {
+      "name": "EndEvent_1",
+      "language": "solidity",
+      "element_kind": "event",
+      "element_name": "EndEvent_1",
+      "trigger": {
+        "kind": "event_completed",
+        "name": "EndEvent_1"
+      },
+      "guards": [
+        "require(ev.exists, \"event not set\")",
+        "require(ev.state == ElementState.ENABLED, \"event state not allowed\")"
+      ],
+      "actions": [],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.EndEvent_1];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.EndEvent_1);\n\n    }"
+    }
+  ],
+  "elements": {
+    "messages": [
+      "M1",
+      "M2",
+      "M3"
+    ],
+    "gateways": [
+      "G1"
+    ],
+    "events": [
+      "EndEvent_1",
+      "StartEvent_1"
+    ],
+    "businessrules": [
+      "PlaceholderBusinessRule"
+    ]
+  },
+  "unsupported": [],
+  "raw_summary": {
+    "function_count": 39,
+    "event_count": 5
+  }
+}

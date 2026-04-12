@@ -1,0 +1,164 @@
+{
+  "contract": "IOracle",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/basic_linear_case/basic_linear_case.sol",
+  "globals": [
+    {
+      "name": "Approved",
+      "type": "bool"
+    }
+  ],
+  "handlers": [
+    {
+      "name": "StartEvent_1",
+      "language": "solidity",
+      "element_kind": "event",
+      "element_name": "StartEvent_1",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_1"
+      },
+      "guards": [
+        "require(ev.exists, \"event not set\")",
+        "require(ev.state == ElementState.ENABLED, \"event state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Request"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.StartEvent_1];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.StartEvent_1);\n        inst.messages[MessageKey.Request].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "Request_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "Request",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "Request"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Decision"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.Request];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.Request, fireflyTranId);\n        inst.gateways[GatewayKey.Decision].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "Confirm_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "Confirm",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "Confirm"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_1"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.Confirm];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.Confirm, fireflyTranId);\n        inst.events[EventKey.EndEvent_1].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "Decision",
+      "language": "solidity",
+      "element_kind": "gateway",
+      "element_name": "Decision",
+      "trigger": {
+        "kind": "gateway_completed",
+        "name": "Decision"
+      },
+      "guards": [
+        "inst.stateMemory.Approved == true",
+        "require(g.exists, \"gateway not set\")",
+        "require(g.state == ElementState.ENABLED, \"gateway state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Confirm"
+        },
+        {
+          "op": "enable",
+          "target": "EndEvent_1"
+        },
+        {
+          "op": "set",
+          "var": "Approved",
+          "value": "= true) {\n            inst.messages[MessageKey.Confirm].state = ElementState.ENABLED"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "inst.stateMemory.Approved == true",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "Confirm"
+            }
+          ],
+          "else_actions": [
+            {
+              "op": "enable",
+              "target": "EndEvent_1"
+            }
+          ]
+        }
+      ],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Gateway storage g = inst.gateways[GatewayKey.Decision];\n        require(g.exists, \"gateway not set\");\n        require(g.state == ElementState.ENABLED, \"gateway state not allowed\");\n\n        g.state = ElementState.COMPLETED;\n        emit GatewayDone(instanceId, GatewayKey.Decision);\n        if (inst.stateMemory.Approved == true) {\n            inst.messages[MessageKey.Confirm].state = ElementState.ENABLED;\n        }\n        else {\n            inst.events[EventKey.EndEvent_1].state = ElementState.ENABLED;\n        }\n\n    }"
+    },
+    {
+      "name": "EndEvent_1",
+      "language": "solidity",
+      "element_kind": "event",
+      "element_name": "EndEvent_1",
+      "trigger": {
+        "kind": "event_completed",
+        "name": "EndEvent_1"
+      },
+      "guards": [
+        "require(ev.exists, \"event not set\")",
+        "require(ev.state == ElementState.ENABLED, \"event state not allowed\")"
+      ],
+      "actions": [],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.EndEvent_1];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.EndEvent_1);\n\n    }"
+    }
+  ],
+  "elements": {
+    "messages": [
+      "Confirm",
+      "Request"
+    ],
+    "gateways": [
+      "Decision"
+    ],
+    "events": [
+      "EndEvent_1",
+      "StartEvent_1"
+    ],
+    "businessrules": [
+      "PlaceholderBusinessRule"
+    ]
+  },
+  "unsupported": [],
+  "raw_summary": {
+    "function_count": 38,
+    "event_count": 5
+  }
+}

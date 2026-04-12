@@ -1,0 +1,218 @@
+{
+  "contract": "IOracle",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/positive/business_rule_contract_c/business_rule_contract_c.sol",
+  "globals": [
+    {
+      "name": "InputC",
+      "type": "int256"
+    },
+    {
+      "name": "PassedC",
+      "type": "bool"
+    }
+  ],
+  "handlers": [
+    {
+      "name": "RuleC",
+      "language": "solidity",
+      "element_kind": "businessrule",
+      "element_name": "RuleC",
+      "trigger": {
+        "kind": "rule_ready",
+        "name": "RuleC"
+      },
+      "guards": [
+        "require(br.exists, \"business rule not set\")",
+        "require(br.state == ElementState.ENABLED, \"business rule not enabled\")",
+        "require(bytes(br.dmnCid).length != 0, \"dmn cid not set\")",
+        "require(requestId != bytes32(0), \"dmn request failed\")"
+      ],
+      "actions": [],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        BusinessRule storage br = inst.businessRules[BusinessRuleKey.RuleC];\n        require(br.exists, \"business rule not set\");\n        require(br.state == ElementState.ENABLED, \"business rule not enabled\");\n        _checkBusinessRuleCaller(inst, br);\n\n        string memory inputBody = \"\";\n        inputBody = _jsonAppendField(\n            inputBody,\n            _jsonField(\n                \"input\",\n            _jsonInt(inst.stateMemory.InputC)\n            )\n        );\n        string memory inputData = _jsonObject(inputBody);\n        IDmnLite dmnLite = IDmnLite(inst.dmnLiteAddress);\n        require(bytes(br.dmnCid).length != 0, \"dmn cid not set\");\n        bytes32 requestId = dmnLite.requestDMNDecision(\n            inst.dmnEvalUrl,\n            br.dmnCid,\n            br.decisionId,\n            inputData\n        );\n        require(requestId != bytes32(0), \"dmn request failed\");\n        br.requestId = requestId;\n        br.requestedAt = block.timestamp;\n        br.fulfilledAt = 0;\n        br.lastRawResult = \"\";\n        br.state = ElementState.WAITING_FOR_CONFIRMATION;\n        emit BusinessRuleRequested(instanceId, BusinessRuleKey.RuleC, requestId);\n    }"
+    },
+    {
+      "name": "RuleC_Continue",
+      "language": "solidity",
+      "element_kind": "businessrule",
+      "element_name": "RuleC",
+      "trigger": {
+        "kind": "rule_done",
+        "name": "RuleC"
+      },
+      "guards": [
+        "require(br.exists, \"business rule not set\")",
+        "require(br.state == ElementState.WAITING_FOR_CONFIRMATION, \"business rule not waiting\")",
+        "require(br.requestId != bytes32(0), \"business rule not requested\")",
+        "require(exists, \"dmn request missing\")",
+        "require(requester == address(this), \"unexpected dmn requester\")",
+        "require(requestState == DMN_REQUEST_FULFILLED, \"dmn result not ready\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "ChoiceC"
+        },
+        {
+          "op": "set",
+          "var": "PassedC",
+          "value": "_extractJsonBool(raw, \"passed\")"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        BusinessRule storage br = inst.businessRules[BusinessRuleKey.RuleC];\n        require(br.exists, \"business rule not set\");\n        require(br.state == ElementState.WAITING_FOR_CONFIRMATION, \"business rule not waiting\");\n        require(br.requestId != bytes32(0), \"business rule not requested\");\n        _checkBusinessRuleCaller(inst, br);\n\n        IDmnLite dmnLite = IDmnLite(inst.dmnLiteAddress);\n        (\n            uint8 requestState,\n            address requester,\n            ,\n            uint256 fulfilledAt,\n            bool exists\n        ) = dmnLite.getRequestStatus(br.requestId);\n        require(exists, \"dmn request missing\");\n        require(requester == address(this), \"unexpected dmn requester\");\n        require(requestState == DMN_REQUEST_FULFILLED, \"dmn result not ready\");\n\n        string memory raw = dmnLite.getRawByRequestId(br.requestId);\n        br.lastRawResult = raw;\n        br.fulfilledAt = fulfilledAt;\n        inst.stateMemory.PassedC = _extractJsonBool(raw, \"passed\");\n        br.state = ElementState.COMPLETED;\n        inst.gateways[GatewayKey.ChoiceC].state = ElementState.ENABLED;\n\n\n        emit BusinessRuleCompleted(instanceId, BusinessRuleKey.RuleC, br.requestId);\n    }"
+    },
+    {
+      "name": "StartEvent_BRC",
+      "language": "solidity",
+      "element_kind": "event",
+      "element_name": "StartEvent_BRC",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_BRC"
+      },
+      "guards": [
+        "require(ev.exists, \"event not set\")",
+        "require(ev.state == ElementState.ENABLED, \"event state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "SendC"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.StartEvent_BRC];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.StartEvent_BRC);\n        inst.messages[MessageKey.SendC].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "SendC_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "SendC",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "SendC"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "RuleC"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.SendC];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.SendC, fireflyTranId);\n        inst.businessRules[BusinessRuleKey.RuleC].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "NotifyC_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "NotifyC",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "NotifyC"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_BRC"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.NotifyC];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.NotifyC, fireflyTranId);\n        inst.events[EventKey.EndEvent_BRC].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "ChoiceC",
+      "language": "solidity",
+      "element_kind": "gateway",
+      "element_name": "ChoiceC",
+      "trigger": {
+        "kind": "gateway_completed",
+        "name": "ChoiceC"
+      },
+      "guards": [
+        "inst.stateMemory.PassedC == true",
+        "require(g.exists, \"gateway not set\")",
+        "require(g.state == ElementState.ENABLED, \"gateway state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "NotifyC"
+        },
+        {
+          "op": "enable",
+          "target": "EndEvent_BRC"
+        },
+        {
+          "op": "set",
+          "var": "PassedC",
+          "value": "= true) {\n            inst.messages[MessageKey.NotifyC].state = ElementState.ENABLED"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "inst.stateMemory.PassedC == true",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "NotifyC"
+            }
+          ],
+          "else_actions": [
+            {
+              "op": "enable",
+              "target": "EndEvent_BRC"
+            }
+          ]
+        }
+      ],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Gateway storage g = inst.gateways[GatewayKey.ChoiceC];\n        require(g.exists, \"gateway not set\");\n        require(g.state == ElementState.ENABLED, \"gateway state not allowed\");\n\n        g.state = ElementState.COMPLETED;\n        emit GatewayDone(instanceId, GatewayKey.ChoiceC);\n        if (inst.stateMemory.PassedC == true) {\n            inst.messages[MessageKey.NotifyC].state = ElementState.ENABLED;\n        }\n        else {\n            inst.events[EventKey.EndEvent_BRC].state = ElementState.ENABLED;\n        }\n\n    }"
+    },
+    {
+      "name": "EndEvent_BRC",
+      "language": "solidity",
+      "element_kind": "event",
+      "element_name": "EndEvent_BRC",
+      "trigger": {
+        "kind": "event_completed",
+        "name": "EndEvent_BRC"
+      },
+      "guards": [
+        "require(ev.exists, \"event not set\")",
+        "require(ev.state == ElementState.ENABLED, \"event state not allowed\")"
+      ],
+      "actions": [],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.EndEvent_BRC];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.EndEvent_BRC);\n\n    }"
+    }
+  ],
+  "elements": {
+    "messages": [
+      "NotifyC",
+      "SendC"
+    ],
+    "gateways": [
+      "ChoiceC"
+    ],
+    "events": [
+      "EndEvent_BRC",
+      "StartEvent_BRC"
+    ],
+    "businessrules": [
+      "RuleC"
+    ]
+  },
+  "unsupported": [],
+  "raw_summary": {
+    "function_count": 40,
+    "event_count": 5
+  }
+}

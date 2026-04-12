@@ -1,0 +1,158 @@
+{
+  "contract": "LinearContractD",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/positive/linear_contract_d/linear_contract_d.b2c",
+  "participants": [
+    {
+      "name": "LabD",
+      "msp": "LabDMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "attributes": {
+        "role": "lab"
+      }
+    },
+    {
+      "name": "UserD",
+      "msp": "UserDMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "attributes": {
+        "role": "user"
+      }
+    }
+  ],
+  "globals": [
+    {
+      "name": "DeliverD",
+      "type": "bool",
+      "initial_value": null
+    }
+  ],
+  "messages": [
+    {
+      "name": "SubmitD",
+      "from": "UserD",
+      "to": "LabD",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "ReturnD",
+      "from": "LabD",
+      "to": "UserD",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "StartEvent_D",
+      "type": "start",
+      "initial_state": "READY"
+    },
+    {
+      "name": "EndEvent_D",
+      "type": "end",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "GateD",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [],
+  "oracletasks": [],
+  "flows": [
+    {
+      "id": "flow_001",
+      "source_kind": "StartFlow",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_D"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "SubmitD"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_002",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "SubmitD"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "GateD"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_003",
+      "source_kind": "GatewayFlow",
+      "trigger": {
+        "kind": "gateway_completed",
+        "name": "GateD"
+      },
+      "actions": [],
+      "branches": [
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "ReturnD"
+            }
+          ],
+          "condition": {
+            "kind": "compare",
+            "var": "DeliverD",
+            "relation": "==",
+            "value": ""
+          }
+        },
+        {
+          "kind": "GatewayElseBranch",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "EndEvent_D"
+            }
+          ],
+          "condition": {
+            "kind": "else"
+          }
+        }
+      ]
+    },
+    {
+      "id": "flow_004",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "ReturnD"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_D"
+        }
+      ],
+      "branches": []
+    }
+  ],
+  "unsupported": []
+}

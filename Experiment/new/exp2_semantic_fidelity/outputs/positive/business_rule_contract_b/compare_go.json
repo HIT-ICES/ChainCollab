@@ -1,0 +1,104 @@
+{
+  "language": "go",
+  "dsl_source": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/positive/business_rule_contract_b/business_rule_contract_b.b2c",
+  "code_source": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/positive/business_rule_contract_b/business_rule_contract_b.go",
+  "structure": {
+    "globals": {
+      "matched": [
+        "ApprovedB",
+        "ScoreB"
+      ],
+      "missing": [],
+      "extra": [],
+      "unsupported": []
+    },
+    "messages": {
+      "matched": [
+        "ResultB",
+        "SubmitB"
+      ],
+      "missing": [],
+      "extra": [],
+      "unsupported": []
+    },
+    "events": {
+      "matched": [
+        "EndEvent_BRB",
+        "StartEvent_BRB"
+      ],
+      "missing": [],
+      "extra": [],
+      "unsupported": []
+    },
+    "gateways": {
+      "matched": [
+        "ReviewDecisionB"
+      ],
+      "missing": [],
+      "extra": [],
+      "unsupported": []
+    },
+    "businessrules": {
+      "matched": [
+        "RuleB"
+      ],
+      "missing": [],
+      "extra": [],
+      "unsupported": []
+    }
+  },
+  "flow_results": [
+    {
+      "rule_id": "flow_001",
+      "matched": true,
+      "trigger_match": true,
+      "handler": "StartEvent_BRB",
+      "action_match_ratio": 1.0,
+      "missing_actions": [],
+      "notes": []
+    },
+    {
+      "rule_id": "flow_002",
+      "matched": true,
+      "trigger_match": true,
+      "handler": "SubmitB_Complete",
+      "action_match_ratio": 1.0,
+      "missing_actions": [],
+      "notes": []
+    },
+    {
+      "rule_id": "flow_003",
+      "matched": true,
+      "trigger_match": true,
+      "handler": "RuleB_Continue",
+      "action_match_ratio": 1.0,
+      "missing_actions": [],
+      "notes": []
+    },
+    {
+      "rule_id": "flow_004",
+      "matched": true,
+      "trigger_match": true,
+      "handler": "ReviewDecisionB",
+      "action_match_ratio": 1.0,
+      "missing_actions": [],
+      "notes": []
+    },
+    {
+      "rule_id": "flow_005",
+      "matched": true,
+      "trigger_match": true,
+      "handler": "ResultB_Complete",
+      "action_match_ratio": 1.0,
+      "missing_actions": [],
+      "notes": []
+    }
+  ],
+  "summary": {
+    "flow_total": 5,
+    "flow_matched": 5,
+    "flow_coverage": 1.0,
+    "unsupported_constructs": [],
+    "verdict": "PASS"
+  }
+}

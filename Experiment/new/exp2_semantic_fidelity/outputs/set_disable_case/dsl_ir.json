@@ -1,0 +1,194 @@
+{
+  "contract": "SetDisableCase",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/set_disable_case/set_disable_case.b2c",
+  "participants": [
+    {
+      "name": "Buyer",
+      "msp": "BuyerMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "attributes": {
+        "role": "buyer"
+      }
+    },
+    {
+      "name": "Seller",
+      "msp": "SellerMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "attributes": {
+        "role": "seller"
+      }
+    }
+  ],
+  "globals": [
+    {
+      "name": "Counter",
+      "type": "int",
+      "initial_value": null
+    },
+    {
+      "name": "Retry",
+      "type": "bool",
+      "initial_value": null
+    }
+  ],
+  "messages": [
+    {
+      "name": "Offer",
+      "from": "Seller",
+      "to": "Buyer",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Cancel",
+      "from": "Buyer",
+      "to": "Seller",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Accept",
+      "from": "Buyer",
+      "to": "Seller",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "StartEvent_1",
+      "type": "start",
+      "initial_state": "READY"
+    },
+    {
+      "name": "EndEvent_1",
+      "type": "end",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "Decide",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [],
+  "oracletasks": [],
+  "flows": [
+    {
+      "id": "flow_001",
+      "source_kind": "StartFlow",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_1"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Offer"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_002",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "Offer"
+      },
+      "actions": [
+        {
+          "op": "set",
+          "var": "Counter",
+          "value": "''"
+        },
+        {
+          "op": "enable",
+          "target": "Decide"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_003",
+      "source_kind": "GatewayFlow",
+      "trigger": {
+        "kind": "gateway_completed",
+        "name": "Decide"
+      },
+      "actions": [],
+      "branches": [
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "Cancel"
+            }
+          ],
+          "condition": {
+            "kind": "compare",
+            "var": "Retry",
+            "relation": "==",
+            "value": ""
+          }
+        },
+        {
+          "kind": "GatewayElseBranch",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "Accept"
+            }
+          ],
+          "condition": {
+            "kind": "else"
+          }
+        }
+      ]
+    },
+    {
+      "id": "flow_004",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "Cancel"
+      },
+      "actions": [
+        {
+          "op": "disable",
+          "target": "Accept"
+        },
+        {
+          "op": "enable",
+          "target": "EndEvent_1"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_005",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "Accept"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_1"
+        }
+      ],
+      "branches": []
+    }
+  ],
+  "unsupported": []
+}

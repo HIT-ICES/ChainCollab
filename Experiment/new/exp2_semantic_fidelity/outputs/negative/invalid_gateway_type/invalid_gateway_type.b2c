@@ -1,0 +1,27 @@
+contract InvalidGatewayType {
+    participants {
+        participant P1 { msp "P1MSP" attributes { role = "p1" } }
+        participant P2 { msp "P2MSP" attributes { role = "p2" } }
+    }
+    globals {
+        Flag: bool
+    }
+    messages {
+        message Msg1 from P1 to P2 { initial state INACTIVE schema "{}" }
+    }
+    gateways {
+        gateway BadGateway { type xor initial state INACTIVE }
+    }
+    events {
+        event StartEvent_1 { initial state READY }
+        event EndEvent_1 { initial state INACTIVE }
+    }
+    businessrules {
+    }
+    oracletasks {
+    }
+    flows {
+        start event StartEvent_1 enables Msg1;
+        when message Msg1 completed then enable EndEvent_1;
+    }
+}

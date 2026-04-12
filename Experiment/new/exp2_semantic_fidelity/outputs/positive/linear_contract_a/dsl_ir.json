@@ -1,0 +1,158 @@
+{
+  "contract": "LinearContractA",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/positive/linear_contract_a/linear_contract_a.b2c",
+  "participants": [
+    {
+      "name": "SellerA",
+      "msp": "SellerAMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "attributes": {
+        "role": "seller"
+      }
+    },
+    {
+      "name": "BuyerA",
+      "msp": "BuyerAMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "attributes": {
+        "role": "buyer"
+      }
+    }
+  ],
+  "globals": [
+    {
+      "name": "ApprovedA",
+      "type": "bool",
+      "initial_value": null
+    }
+  ],
+  "messages": [
+    {
+      "name": "RequestA",
+      "from": "BuyerA",
+      "to": "SellerA",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "ConfirmA",
+      "from": "SellerA",
+      "to": "BuyerA",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "StartEvent_A",
+      "type": "start",
+      "initial_state": "READY"
+    },
+    {
+      "name": "EndEvent_A",
+      "type": "end",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "DecisionA",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [],
+  "oracletasks": [],
+  "flows": [
+    {
+      "id": "flow_001",
+      "source_kind": "StartFlow",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_A"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "RequestA"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_002",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "RequestA"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "DecisionA"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_003",
+      "source_kind": "GatewayFlow",
+      "trigger": {
+        "kind": "gateway_completed",
+        "name": "DecisionA"
+      },
+      "actions": [],
+      "branches": [
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "ConfirmA"
+            }
+          ],
+          "condition": {
+            "kind": "compare",
+            "var": "ApprovedA",
+            "relation": "==",
+            "value": ""
+          }
+        },
+        {
+          "kind": "GatewayElseBranch",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "EndEvent_A"
+            }
+          ],
+          "condition": {
+            "kind": "else"
+          }
+        }
+      ]
+    },
+    {
+      "id": "flow_004",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "ConfirmA"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_A"
+        }
+      ],
+      "branches": []
+    }
+  ],
+  "unsupported": []
+}

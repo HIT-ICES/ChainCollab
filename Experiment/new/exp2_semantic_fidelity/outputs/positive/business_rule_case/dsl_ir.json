@@ -1,0 +1,197 @@
+{
+  "contract": "BusinessRuleCase",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/positive/business_rule_case/business_rule_case.b2c",
+  "participants": [
+    {
+      "name": "Clerk",
+      "msp": "ClerkMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "attributes": {
+        "role": "clerk"
+      }
+    },
+    {
+      "name": "Reviewer",
+      "msp": "ReviewerMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "attributes": {
+        "role": "reviewer"
+      }
+    }
+  ],
+  "globals": [
+    {
+      "name": "Score",
+      "type": "int",
+      "initial_value": null
+    },
+    {
+      "name": "Approved",
+      "type": "bool",
+      "initial_value": null
+    }
+  ],
+  "messages": [
+    {
+      "name": "Submit",
+      "from": "Clerk",
+      "to": "Reviewer",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "ResultMsg",
+      "from": "Reviewer",
+      "to": "Clerk",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "StartEvent_1",
+      "type": "start",
+      "initial_state": "READY"
+    },
+    {
+      "name": "EndEvent_1",
+      "type": "end",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "ReviewDecision",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [
+    {
+      "name": "RuleA",
+      "referenced_dmn": "rule_a.dmn",
+      "decision": "DecisionA",
+      "input_mapping": [
+        {
+          "param": "score",
+          "global": "Score"
+        }
+      ],
+      "output_mapping": [
+        {
+          "param": "approved",
+          "global": "Approved"
+        }
+      ],
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "oracletasks": [],
+  "flows": [
+    {
+      "id": "flow_001",
+      "source_kind": "StartFlow",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_1"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Submit"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_002",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "Submit"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "RuleA"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_003",
+      "source_kind": "RuleFlow",
+      "trigger": {
+        "kind": "rule_done",
+        "name": "RuleA"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "ReviewDecision"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_004",
+      "source_kind": "GatewayFlow",
+      "trigger": {
+        "kind": "gateway_completed",
+        "name": "ReviewDecision"
+      },
+      "actions": [],
+      "branches": [
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "ResultMsg"
+            }
+          ],
+          "condition": {
+            "kind": "compare",
+            "var": "Approved",
+            "relation": "==",
+            "value": ""
+          }
+        },
+        {
+          "kind": "GatewayElseBranch",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "EndEvent_1"
+            }
+          ],
+          "condition": {
+            "kind": "else"
+          }
+        }
+      ]
+    },
+    {
+      "id": "flow_005",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "ResultMsg"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_1"
+        }
+      ],
+      "branches": []
+    }
+  ],
+  "unsupported": []
+}

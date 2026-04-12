@@ -1,0 +1,26 @@
+contract InvalidMissingSetVariable {
+    participants {
+        participant Buyer { msp "BuyerMSP" attributes { role = "buyer" } }
+        participant Seller { msp "SellerMSP" attributes { role = "seller" } }
+    }
+    globals {
+        Counter: int
+    }
+    messages {
+        message Offer from Seller to Buyer { initial state INACTIVE schema "{}" }
+    }
+    gateways {
+    }
+    events {
+        event StartEvent_1 { initial state READY }
+        event EndEvent_1 { initial state INACTIVE }
+    }
+    businessrules {
+    }
+    oracletasks {
+    }
+    flows {
+        start event StartEvent_1 enables Offer;
+        when message Offer completed then set MissingCounter = 1, enable EndEvent_1;
+    }
+}

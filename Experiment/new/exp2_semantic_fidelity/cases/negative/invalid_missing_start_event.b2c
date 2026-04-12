@@ -1,0 +1,25 @@
+contract InvalidMissingStartEvent {
+    participants {
+        participant A { msp "AMSP" attributes { role = "a" } }
+        participant B { msp "BMSP" attributes { role = "b" } }
+    }
+    globals {
+        Approved: bool
+    }
+    messages {
+        message Request from A to B { initial state INACTIVE schema "{}" }
+    }
+    gateways {
+    }
+    events {
+        event EndEvent_1 { initial state INACTIVE }
+    }
+    businessrules {
+    }
+    oracletasks {
+    }
+    flows {
+        start event MissingStart enables Request;
+        when message Request completed then enable EndEvent_1;
+    }
+}
