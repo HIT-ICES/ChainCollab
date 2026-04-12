@@ -1,0 +1,29 @@
+contract EventFlowCase {
+    participants {
+        participant A { msp "AMSP" attributes { role = "a" } }
+        participant B { msp "BMSP" attributes { role = "b" } }
+    }
+    globals {
+        Done: bool
+    }
+    messages {
+        message Ping from A to B { initial state INACTIVE schema "{}" }
+    }
+    gateways {
+    }
+    events {
+        event StartEvent_1 { initial state READY }
+        event MidEvent_1 { initial state INACTIVE }
+        event EndEvent_1 { initial state INACTIVE }
+    }
+    businessrules {
+    }
+    oracletasks {
+    }
+    flows {
+        start event StartEvent_1 enables Ping;
+        when message Ping completed then enable MidEvent_1;
+        when event MidEvent_1 completed then enable EndEvent_1;
+    }
+}
+

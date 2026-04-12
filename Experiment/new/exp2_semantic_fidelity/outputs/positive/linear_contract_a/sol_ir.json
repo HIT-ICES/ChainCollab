@@ -1,0 +1,164 @@
+{
+  "contract": "IOracle",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/positive/linear_contract_a/linear_contract_a.sol",
+  "globals": [
+    {
+      "name": "ApprovedA",
+      "type": "bool"
+    }
+  ],
+  "handlers": [
+    {
+      "name": "StartEvent_A",
+      "language": "solidity",
+      "element_kind": "event",
+      "element_name": "StartEvent_A",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_A"
+      },
+      "guards": [
+        "require(ev.exists, \"event not set\")",
+        "require(ev.state == ElementState.ENABLED, \"event state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "RequestA"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.StartEvent_A];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.StartEvent_A);\n        inst.messages[MessageKey.RequestA].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "RequestA_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "RequestA",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "RequestA"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "DecisionA"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.RequestA];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.RequestA, fireflyTranId);\n        inst.gateways[GatewayKey.DecisionA].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "ConfirmA_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "ConfirmA",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "ConfirmA"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_A"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.ConfirmA];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.ConfirmA, fireflyTranId);\n        inst.events[EventKey.EndEvent_A].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "DecisionA",
+      "language": "solidity",
+      "element_kind": "gateway",
+      "element_name": "DecisionA",
+      "trigger": {
+        "kind": "gateway_completed",
+        "name": "DecisionA"
+      },
+      "guards": [
+        "inst.stateMemory.ApprovedA == true",
+        "require(g.exists, \"gateway not set\")",
+        "require(g.state == ElementState.ENABLED, \"gateway state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "ConfirmA"
+        },
+        {
+          "op": "enable",
+          "target": "EndEvent_A"
+        },
+        {
+          "op": "set",
+          "var": "ApprovedA",
+          "value": "= true) {\n            inst.messages[MessageKey.ConfirmA].state = ElementState.ENABLED"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "inst.stateMemory.ApprovedA == true",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "ConfirmA"
+            }
+          ],
+          "else_actions": [
+            {
+              "op": "enable",
+              "target": "EndEvent_A"
+            }
+          ]
+        }
+      ],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Gateway storage g = inst.gateways[GatewayKey.DecisionA];\n        require(g.exists, \"gateway not set\");\n        require(g.state == ElementState.ENABLED, \"gateway state not allowed\");\n\n        g.state = ElementState.COMPLETED;\n        emit GatewayDone(instanceId, GatewayKey.DecisionA);\n        if (inst.stateMemory.ApprovedA == true) {\n            inst.messages[MessageKey.ConfirmA].state = ElementState.ENABLED;\n        }\n        else {\n            inst.events[EventKey.EndEvent_A].state = ElementState.ENABLED;\n        }\n\n    }"
+    },
+    {
+      "name": "EndEvent_A",
+      "language": "solidity",
+      "element_kind": "event",
+      "element_name": "EndEvent_A",
+      "trigger": {
+        "kind": "event_completed",
+        "name": "EndEvent_A"
+      },
+      "guards": [
+        "require(ev.exists, \"event not set\")",
+        "require(ev.state == ElementState.ENABLED, \"event state not allowed\")"
+      ],
+      "actions": [],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.EndEvent_A];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.EndEvent_A);\n\n    }"
+    }
+  ],
+  "elements": {
+    "messages": [
+      "ConfirmA",
+      "RequestA"
+    ],
+    "gateways": [
+      "DecisionA"
+    ],
+    "events": [
+      "EndEvent_A",
+      "StartEvent_A"
+    ],
+    "businessrules": [
+      "PlaceholderBusinessRule"
+    ]
+  },
+  "unsupported": [],
+  "raw_summary": {
+    "function_count": 38,
+    "event_count": 5
+  }
+}

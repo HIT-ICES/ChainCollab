@@ -1,0 +1,47 @@
+contract BusinessRuleCase {
+    participants {
+        participant Clerk { msp "ClerkMSP" attributes { role = "clerk" } }
+        participant Reviewer { msp "ReviewerMSP" attributes { role = "reviewer" } }
+    }
+    globals {
+        Score: int
+        Approved: bool
+    }
+    messages {
+        message Submit from Clerk to Reviewer { initial state INACTIVE schema "{}" }
+        message ResultMsg from Reviewer to Clerk { initial state INACTIVE schema "{}" }
+    }
+    gateways {
+        gateway ReviewDecision { type exclusive initial state INACTIVE }
+    }
+    events {
+        event StartEvent_1 { initial state READY }
+        event EndEvent_1 { initial state INACTIVE }
+    }
+    businessrules {
+        businessrule RuleA {
+            dmn "rule_a.dmn"
+            decision "DecisionA"
+            input mapping {
+                score -> Score
+            }
+            output mapping {
+                approved -> Approved
+            }
+            initial state INACTIVE
+        }
+    }
+    oracletasks {
+    }
+    flows {
+        start event StartEvent_1 enables Submit;
+        when message Submit completed then enable RuleA;
+        when businessrule RuleA done then enable ReviewDecision;
+        when gateway ReviewDecision completed choose {
+            if Approved == true then enable ResultMsg;
+            else then enable EndEvent_1;
+        }
+        when message ResultMsg completed then enable EndEvent_1;
+    }
+}
+

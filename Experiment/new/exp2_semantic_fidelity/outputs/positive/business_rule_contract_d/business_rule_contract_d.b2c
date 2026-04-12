@@ -1,0 +1,47 @@
+contract BusinessRuleContractD {
+    participants {
+        participant OfficeD { msp "OfficeDMSP" attributes { role = "office" } }
+        participant StaffD { msp "StaffDMSP" attributes { role = "staff" } }
+    }
+    globals {
+        AmountD: int
+        GrantD: bool
+    }
+    messages {
+        message ApplyD from StaffD to OfficeD { initial state INACTIVE schema "{}" }
+        message ReplyD from OfficeD to StaffD { initial state INACTIVE schema "{}" }
+    }
+    gateways {
+        gateway ChoiceD { type exclusive initial state INACTIVE }
+    }
+    events {
+        event StartEvent_BRD { initial state READY }
+        event EndEvent_BRD { initial state INACTIVE }
+    }
+    businessrules {
+        businessrule RuleD {
+            dmn "rule_d.dmn"
+            decision "DecisionD"
+            input mapping {
+                amount -> AmountD
+            }
+            output mapping {
+                grant -> GrantD
+            }
+            initial state INACTIVE
+        }
+    }
+    oracletasks {
+    }
+    flows {
+        start event StartEvent_BRD enables ApplyD;
+        when message ApplyD completed then enable RuleD;
+        when businessrule RuleD done then enable ChoiceD;
+        when gateway ChoiceD completed choose {
+            if GrantD == true then enable ReplyD;
+            else then enable EndEvent_BRD;
+        }
+        when message ReplyD completed then enable EndEvent_BRD;
+    }
+}
+

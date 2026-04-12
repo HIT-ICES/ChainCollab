@@ -1,0 +1,47 @@
+contract BusinessRuleContractC {
+    participants {
+        participant InitiatorC { msp "InitiatorCMSP" attributes { role = "initiator" } }
+        participant AuditorC { msp "AuditorCMSP" attributes { role = "auditor" } }
+    }
+    globals {
+        InputC: int
+        PassedC: bool
+    }
+    messages {
+        message SendC from InitiatorC to AuditorC { initial state INACTIVE schema "{}" }
+        message NotifyC from AuditorC to InitiatorC { initial state INACTIVE schema "{}" }
+    }
+    gateways {
+        gateway ChoiceC { type exclusive initial state INACTIVE }
+    }
+    events {
+        event StartEvent_BRC { initial state READY }
+        event EndEvent_BRC { initial state INACTIVE }
+    }
+    businessrules {
+        businessrule RuleC {
+            dmn "rule_c.dmn"
+            decision "DecisionC"
+            input mapping {
+                input -> InputC
+            }
+            output mapping {
+                passed -> PassedC
+            }
+            initial state INACTIVE
+        }
+    }
+    oracletasks {
+    }
+    flows {
+        start event StartEvent_BRC enables SendC;
+        when message SendC completed then enable RuleC;
+        when businessrule RuleC done then enable ChoiceC;
+        when gateway ChoiceC completed choose {
+            if PassedC == true then enable NotifyC;
+            else then enable EndEvent_BRC;
+        }
+        when message NotifyC completed then enable EndEvent_BRC;
+    }
+}
+

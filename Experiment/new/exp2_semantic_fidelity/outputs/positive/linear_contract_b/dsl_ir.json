@@ -1,0 +1,158 @@
+{
+  "contract": "LinearContractB",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/positive/linear_contract_b/linear_contract_b.b2c",
+  "participants": [
+    {
+      "name": "ProviderB",
+      "msp": "ProviderBMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "attributes": {
+        "role": "provider"
+      }
+    },
+    {
+      "name": "ClientB",
+      "msp": "ClientBMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "attributes": {
+        "role": "client"
+      }
+    }
+  ],
+  "globals": [
+    {
+      "name": "AcceptedB",
+      "type": "bool",
+      "initial_value": null
+    }
+  ],
+  "messages": [
+    {
+      "name": "QuoteB",
+      "from": "ProviderB",
+      "to": "ClientB",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "AckB",
+      "from": "ClientB",
+      "to": "ProviderB",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "StartEvent_B",
+      "type": "start",
+      "initial_state": "READY"
+    },
+    {
+      "name": "EndEvent_B",
+      "type": "end",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "ChoiceB",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [],
+  "oracletasks": [],
+  "flows": [
+    {
+      "id": "flow_001",
+      "source_kind": "StartFlow",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_B"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "QuoteB"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_002",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "QuoteB"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "ChoiceB"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_003",
+      "source_kind": "GatewayFlow",
+      "trigger": {
+        "kind": "gateway_completed",
+        "name": "ChoiceB"
+      },
+      "actions": [],
+      "branches": [
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "AckB"
+            }
+          ],
+          "condition": {
+            "kind": "compare",
+            "var": "AcceptedB",
+            "relation": "==",
+            "value": ""
+          }
+        },
+        {
+          "kind": "GatewayElseBranch",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "EndEvent_B"
+            }
+          ],
+          "condition": {
+            "kind": "else"
+          }
+        }
+      ]
+    },
+    {
+      "id": "flow_004",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "AckB"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_B"
+        }
+      ],
+      "branches": []
+    }
+  ],
+  "unsupported": []
+}

@@ -1,0 +1,31 @@
+contract InvalidParallelSource {
+    participants {
+        participant A { msp "AMSP" attributes { role = "a" } }
+        participant B { msp "BMSP" attributes { role = "b" } }
+        participant C { msp "CMSP" attributes { role = "c" } }
+    }
+    globals {
+        Ready: bool
+    }
+    messages {
+        message MsgA from A to B { initial state INACTIVE schema "{}" }
+        message MsgB from B to C { initial state INACTIVE schema "{}" }
+    }
+    gateways {
+        gateway ParallelGateway_1 { type parallel initial state INACTIVE }
+        gateway ParallelGateway_2 { type parallel initial state INACTIVE }
+    }
+    events {
+        event StartEvent_1 { initial state READY }
+        event EndEvent_1 { initial state INACTIVE }
+    }
+    businessrules {
+    }
+    oracletasks {
+    }
+    flows {
+        start event StartEvent_1 enables ParallelGateway_1;
+        when gateway ParallelGateway_1 completed then enable MsgA, enable MsgB;
+        parallel gateway ParallelGateway_2 await MsgA, MissingMsg then enable EndEvent_1;
+    }
+}

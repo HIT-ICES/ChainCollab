@@ -1,0 +1,47 @@
+contract BusinessRuleContractE {
+    participants {
+        participant TeamE { msp "TeamEMSP" attributes { role = "team" } }
+        participant LeadE { msp "LeadEMSP" attributes { role = "lead" } }
+    }
+    globals {
+        MetricE: int
+        OkE: bool
+    }
+    messages {
+        message InputE from TeamE to LeadE { initial state INACTIVE schema "{}" }
+        message OutputE from LeadE to TeamE { initial state INACTIVE schema "{}" }
+    }
+    gateways {
+        gateway GateE2 { type exclusive initial state INACTIVE }
+    }
+    events {
+        event StartEvent_BRE { initial state READY }
+        event EndEvent_BRE { initial state INACTIVE }
+    }
+    businessrules {
+        businessrule RuleE {
+            dmn "rule_e.dmn"
+            decision "DecisionE"
+            input mapping {
+                metric -> MetricE
+            }
+            output mapping {
+                ok -> OkE
+            }
+            initial state INACTIVE
+        }
+    }
+    oracletasks {
+    }
+    flows {
+        start event StartEvent_BRE enables InputE;
+        when message InputE completed then enable RuleE;
+        when businessrule RuleE done then enable GateE2;
+        when gateway GateE2 completed choose {
+            if OkE == true then enable OutputE;
+            else then enable EndEvent_BRE;
+        }
+        when message OutputE completed then enable EndEvent_BRE;
+    }
+}
+

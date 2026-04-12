@@ -1,0 +1,34 @@
+contract LinearContractE {
+    participants {
+        participant OrgE1 { msp "OrgE1MSP" attributes { role = "org1" } }
+        participant OrgE2 { msp "OrgE2MSP" attributes { role = "org2" } }
+    }
+    globals {
+        ContinueE: bool
+    }
+    messages {
+        message MsgE1 from OrgE1 to OrgE2 { initial state INACTIVE schema "{}" }
+        message MsgE2 from OrgE2 to OrgE1 { initial state INACTIVE schema "{}" }
+    }
+    gateways {
+        gateway GateE { type exclusive initial state INACTIVE }
+    }
+    events {
+        event StartEvent_E { initial state READY }
+        event EndEvent_E { initial state INACTIVE }
+    }
+    businessrules {
+    }
+    oracletasks {
+    }
+    flows {
+        start event StartEvent_E enables MsgE1;
+        when message MsgE1 completed then enable GateE;
+        when gateway GateE completed choose {
+            if ContinueE == true then enable MsgE2;
+            else then enable EndEvent_E;
+        }
+        when message MsgE2 completed then enable EndEvent_E;
+    }
+}
+

@@ -1,0 +1,195 @@
+{
+  "contract": "IOracle",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/parallel_join_case/parallel_join_case.sol",
+  "globals": [
+    {
+      "name": "Ready",
+      "type": "bool"
+    }
+  ],
+  "handlers": [
+    {
+      "name": "StartEvent_1",
+      "language": "solidity",
+      "element_kind": "event",
+      "element_name": "StartEvent_1",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_1"
+      },
+      "guards": [
+        "require(ev.exists, \"event not set\")",
+        "require(ev.state == ElementState.ENABLED, \"event state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "ParallelGateway_1"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.StartEvent_1];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.StartEvent_1);\n        inst.gateways[GatewayKey.ParallelGateway_1].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "MsgA_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "MsgA",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "MsgA"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "ParallelGateway_2"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.MsgA];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.MsgA, fireflyTranId);\n        inst.gateways[GatewayKey.ParallelGateway_2].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "MsgB_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "MsgB",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "MsgB"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "ParallelGateway_2"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.MsgB];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.MsgB, fireflyTranId);\n        inst.gateways[GatewayKey.ParallelGateway_2].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "MsgC_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "MsgC",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "MsgC"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_1"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.MsgC];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.MsgC, fireflyTranId);\n        inst.events[EventKey.EndEvent_1].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "ParallelGateway_1",
+      "language": "solidity",
+      "element_kind": "gateway",
+      "element_name": "ParallelGateway_1",
+      "trigger": {
+        "kind": "gateway_completed",
+        "name": "ParallelGateway_1"
+      },
+      "guards": [
+        "require(g.exists, \"gateway not set\")",
+        "require(g.state == ElementState.ENABLED, \"gateway state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "MsgA"
+        },
+        {
+          "op": "enable",
+          "target": "MsgB"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Gateway storage g = inst.gateways[GatewayKey.ParallelGateway_1];\n        require(g.exists, \"gateway not set\");\n        require(g.state == ElementState.ENABLED, \"gateway state not allowed\");\n\n        g.state = ElementState.COMPLETED;\n        emit GatewayDone(instanceId, GatewayKey.ParallelGateway_1);\n        inst.messages[MessageKey.MsgA].state = ElementState.ENABLED;\n        inst.messages[MessageKey.MsgB].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "ParallelGateway_2",
+      "language": "solidity",
+      "element_kind": "gateway",
+      "element_name": "ParallelGateway_2",
+      "trigger": {
+        "kind": "gateway_completed",
+        "name": "ParallelGateway_2"
+      },
+      "guards": [
+        "!(inst.messages[MessageKey.MsgA].state == ElementState.COMPLETED && inst.messages[MessageKey.MsgB].state == ElementState.COMPLETED)",
+        "require(g.exists, \"gateway not set\")",
+        "require(g.state == ElementState.ENABLED, \"gateway state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "MsgC"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "!(inst.messages[MessageKey.MsgA].state == ElementState.COMPLETED && inst.messages[MessageKey.MsgB].state == ElementState.COMPLETED)",
+          "actions": [],
+          "else_actions": []
+        }
+      ],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Gateway storage g = inst.gateways[GatewayKey.ParallelGateway_2];\n        require(g.exists, \"gateway not set\");\n        require(g.state == ElementState.ENABLED, \"gateway state not allowed\");\n\n        g.state = ElementState.COMPLETED;\n        emit GatewayDone(instanceId, GatewayKey.ParallelGateway_2);\n        if (!(inst.messages[MessageKey.MsgA].state == ElementState.COMPLETED && inst.messages[MessageKey.MsgB].state == ElementState.COMPLETED)) {\n                    revert(\"Parallel gateway prerequisites not met\");\n                }\n        inst.messages[MessageKey.MsgC].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "EndEvent_1",
+      "language": "solidity",
+      "element_kind": "event",
+      "element_name": "EndEvent_1",
+      "trigger": {
+        "kind": "event_completed",
+        "name": "EndEvent_1"
+      },
+      "guards": [
+        "require(ev.exists, \"event not set\")",
+        "require(ev.state == ElementState.ENABLED, \"event state not allowed\")"
+      ],
+      "actions": [],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.EndEvent_1];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.EndEvent_1);\n\n    }"
+    }
+  ],
+  "elements": {
+    "messages": [
+      "MsgA",
+      "MsgB",
+      "MsgC"
+    ],
+    "gateways": [
+      "ParallelGateway_1",
+      "ParallelGateway_2"
+    ],
+    "events": [
+      "EndEvent_1",
+      "StartEvent_1"
+    ],
+    "businessrules": [
+      "PlaceholderBusinessRule"
+    ]
+  },
+  "unsupported": [],
+  "raw_summary": {
+    "function_count": 40,
+    "event_count": 5
+  }
+}
