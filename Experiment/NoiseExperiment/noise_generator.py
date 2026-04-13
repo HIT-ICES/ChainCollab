@@ -95,7 +95,8 @@ def generate_random_path(
         try:
             random_methods = random.choice(change_method)
         except Exception as e:
-            print(e)
+            random_methods = []
+        
         new_path = random_method(tuple(origin_path), random_methods)
 
     return new_path
