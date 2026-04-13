@@ -6,7 +6,7 @@ This dataset keeps the existing random negatives under [random_negative](/root/c
 
 Current directory contents:
 
-- positives: [positive](/root/code/ChainCollab/src/newTranslator/MDAcheck/datasets/all_ocl_rules_try1/positive), `8` files
+- positives: [positive](/root/code/ChainCollab/src/newTranslator/MDAcheck/datasets/all_ocl_rules_try1/positive), `11` files
 - retained random negatives: [random_negative](/root/code/ChainCollab/src/newTranslator/MDAcheck/datasets/all_ocl_rules_try1/random_negative), `299` files
 - rebuilt mutation negatives: [targeted_negative](/root/code/ChainCollab/src/newTranslator/MDAcheck/datasets/all_ocl_rules_try1/targeted_negative), `140` files
 
@@ -113,7 +113,7 @@ Every OCL rule now has at least `10` negative samples in the combined dataset.
 
 当前目录内容如下：
 
-- 正例目录：[positive](/root/code/ChainCollab/src/newTranslator/MDAcheck/datasets/all_ocl_rules_try1/positive)，共 `8` 个文件
+- 正例目录：[positive](/root/code/ChainCollab/src/newTranslator/MDAcheck/datasets/all_ocl_rules_try1/positive)，共 `11` 个文件
 - 保留下来的随机负例：[random_negative](/root/code/ChainCollab/src/newTranslator/MDAcheck/datasets/all_ocl_rules_try1/random_negative)，共 `299` 个文件
 - 重新构造后的变异负例：[targeted_negative](/root/code/ChainCollab/src/newTranslator/MDAcheck/datasets/all_ocl_rules_try1/targeted_negative)，共 `140` 个文件
 

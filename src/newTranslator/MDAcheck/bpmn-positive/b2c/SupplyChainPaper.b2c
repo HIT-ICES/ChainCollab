@@ -62,6 +62,9 @@ contract GeneratedContract {
 
 
     globals {
+        Confirm1: bool
+        Confirm2: bool
+        Confirm3: string
         DeliveryConfirmation: bool
         FinalPriority: string
         NumberOfUnits: int
@@ -113,11 +116,11 @@ contract GeneratedContract {
         }
         message Message_1dmeexg from Participant_19j1e3o to Participant_19mgbdn {
             initial state INACTIVE
-            schema "{}"
+            schema "{\"properties\":{\"confirm3\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
         }
         message Message_1dzkcn0 from Participant_19j1e3o to Participant_19mgbdn {
             initial state INACTIVE
-            schema "{}"
+            schema "{\"properties\":{\"confirm2\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
         }
         message Message_1io2g9u from Participant_0sa2v7d to Participant_19j1e3o {
             initial state INACTIVE
@@ -125,7 +128,7 @@ contract GeneratedContract {
         }
         message Message_1oxmq1k from Participant_19j1e3o to Participant_19mgbdn {
             initial state INACTIVE
-            schema "{}"
+            schema "{\"properties\":{\"confirm1\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
         }
         message Message_1wswgqu from Participant_0w6qkdf to Participant_19mgbdn {
             initial state INACTIVE
@@ -238,7 +241,7 @@ contract GeneratedContract {
             then enable Message_1dmeexg;
             if FinalPriority == "\"Medium\""
             then enable Message_1dzkcn0;
-            else
+            if FinalPriority == "\"VeryLow\""
             then enable Message_0d2xte5;
 
         }
