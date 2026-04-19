@@ -1,6 +1,6 @@
 {
-  "contract_name": "customer",
-  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/customer/customer.b2c",
+  "contract_name": "GeneratedContract",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/customer/dsl.b2c",
   "participants": [
     {
       "name": "Participant_1080bkg",
@@ -41,6 +41,10 @@
   ],
   "globals": [
     {
+      "name": "VIPpoints",
+      "type": "int"
+    },
+    {
       "name": "Confirmation",
       "type": "bool"
     },
@@ -53,6 +57,10 @@
       "type": "string"
     },
     {
+      "name": "ExternalAvailable",
+      "type": "bool"
+    },
+    {
       "name": "Invoice",
       "type": "bool"
     },
@@ -61,12 +69,12 @@
       "type": "string"
     },
     {
-      "name": "InvoiceType",
-      "type": "string"
+      "name": "InvoiceAvailable",
+      "type": "bool"
     },
     {
-      "name": "InvoiceTypeAvailable",
-      "type": "bool"
+      "name": "InvoiceType",
+      "type": "string"
     },
     {
       "name": "Invoice_data",
@@ -79,14 +87,6 @@
     {
       "name": "Is_available",
       "type": "bool"
-    },
-    {
-      "name": "MembershipId",
-      "type": "int"
-    },
-    {
-      "name": "MembershipLevel",
-      "type": "int"
     },
     {
       "name": "Motivation",
@@ -127,7 +127,7 @@
       "from": "Participant_1080bkg",
       "to": "Participant_0sktaei",
       "initial_state": "INACTIVE",
-      "schema": "{\"properties\":{\"serviceId\":{\"type\":\"string\",\"description\":\"The required service id\"},\"membershipId\":{\"type\":\"number\",\"description\":\"id\"}},\"required\":[\"serviceId\",\"membershipId\"],\"files\":{},\"file required\":[]}"
+      "schema": "{\"properties\":{\"serviceId\":{\"type\":\"string\",\"description\":\"The required service id\"},\"VIPpoints\":{\"type\":\"number\",\"description\":\"points\"}},\"required\":[\"serviceId\",\"VIPpoints\"],\"files\":{},\"file required\":[]}"
     },
     {
       "name": "Message_0m9p3da",
@@ -256,10 +256,6 @@
       "initial_state": "INACTIVE"
     },
     {
-      "name": "Event_08edp7f",
-      "initial_state": "INACTIVE"
-    },
-    {
       "name": "Event_146eii4",
       "initial_state": "INACTIVE"
     },
@@ -275,14 +271,18 @@
       "decision": "Activity_1yl9tfp_DecisionID",
       "input_mapping": [
         {
-          "dmn_param": "membershipId",
-          "global": "MembershipId"
+          "dmn_param": "VIPpoints",
+          "global": "VIPpoints"
+        },
+        {
+          "dmn_param": "need_external_provider",
+          "global": "Need_external_provider"
         }
       ],
       "output_mapping": [
         {
-          "dmn_param": "membershipLevel",
-          "global": "MembershipLevel"
+          "dmn_param": "externalAvailable",
+          "global": "ExternalAvailable"
         }
       ],
       "initial_state": "INACTIVE"
@@ -295,12 +295,16 @@
         {
           "dmn_param": "invoiceType",
           "global": "InvoiceType"
+        },
+        {
+          "dmn_param": "invoice",
+          "global": "Invoice"
         }
       ],
       "output_mapping": [
         {
-          "dmn_param": "invoiceTypeAvailable",
-          "global": "InvoiceTypeAvailable"
+          "dmn_param": "invoiceAvailable",
+          "global": "InvoiceAvailable"
         }
       ],
       "initial_state": "INACTIVE"
@@ -591,24 +595,11 @@
           "actions": [
             {
               "kind": "enable",
-              "target": "Event_08edp7f"
-            }
-          ],
-          "condition_kind": "compare",
-          "var": "Invoice",
-          "relation": "==",
-          "value": ""
-        },
-        {
-          "kind": "GatewayCompareBranch",
-          "actions": [
-            {
-              "kind": "enable",
               "target": "Message_1joj7ca"
             }
           ],
           "condition_kind": "compare",
-          "var": "Invoice",
+          "var": "InvoiceAvailable",
           "relation": "==",
           "value": ""
         },
@@ -621,7 +612,7 @@
             }
           ],
           "condition_kind": "compare",
-          "var": "Invoice",
+          "var": "InvoiceAvailable",
           "relation": "==",
           "value": ""
         }
@@ -645,7 +636,7 @@
             }
           ],
           "condition_kind": "compare",
-          "var": "Need_external_provider",
+          "var": "ExternalAvailable",
           "relation": "==",
           "value": ""
         },
@@ -658,7 +649,7 @@
             }
           ],
           "condition_kind": "compare",
-          "var": "Need_external_provider",
+          "var": "ExternalAvailable",
           "relation": "==",
           "value": ""
         }

@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import shlex
+import shutil
 import subprocess
 import sys
 import urllib.error
@@ -103,13 +104,19 @@ def copy_if_exists(source: Path, target: Path) -> None:
 def discover_case_dirs(cases_dir: Path) -> List[Path]:
     discovered: List[Path] = []
     for path in sorted(cases_dir.iterdir()):
-        if not path.is_dir() or not (path / "input.bpmn").exists():
+        if not path.is_dir():
             continue
         manifest_path = path / "case.json"
+        manifest: Dict[str, Any] = {}
         if manifest_path.exists():
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
             if manifest.get("enabled", True) is False:
                 continue
+        has_bpmn = (path / "input.bpmn").exists()
+        has_b2c = (path / "input.b2c").exists()
+        has_manifest_b2c = bool(manifest.get("source_b2c"))
+        if not (has_bpmn or has_b2c or has_manifest_b2c):
+            continue
         discovered.append(path)
     return discovered
 
@@ -123,9 +130,23 @@ def resolve_case(case_dir: Path) -> Dict[str, Any]:
         "case_dir": case_dir,
         "case_name": manifest.get("case_name") or case_dir.name,
         "description": manifest.get("description", ""),
-        "bpmn": case_dir / "input.bpmn",
+        "bpmn": case_dir / "input.bpmn" if (case_dir / "input.bpmn").exists() else None,
+        "b2c": case_dir / "input.b2c" if (case_dir / "input.b2c").exists() else None,
+        "source_b2c": Path(manifest["source_b2c"]).resolve() if manifest.get("source_b2c") else None,
         "dmn": case_dir / "input.dmn" if (case_dir / "input.dmn").exists() else None,
     }
+
+
+def stage_b2c(case_info: Dict[str, Any], output_path: Path) -> Path:
+    source = case_info.get("source_b2c") or case_info.get("b2c")
+    if not source:
+        raise ValueError(f"No DSL source configured for case {case_info['case_name']}")
+    source_path = Path(source)
+    if not source_path.exists():
+        raise FileNotFoundError(f"Configured DSL source not found: {source_path}")
+    ensure_parent(output_path)
+    shutil.copyfile(source_path, output_path)
+    return output_path
 
 
 def generate_b2c(bpmn_path: Path, output_path: Path, contract_name: str) -> Path:

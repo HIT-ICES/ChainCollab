@@ -1,6 +1,6 @@
 {
-  "contract_name": "Purchase",
-  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/Purchase/Purchase.b2c",
+  "contract_name": "GeneratedContract",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/Purchase/dsl.b2c",
   "participants": [
     {
       "name": "Participant_0oa2za9",
@@ -77,7 +77,7 @@
       "type": "string"
     },
     {
-      "name": "Time",
+      "name": "Time2",
       "type": "string"
     }
   ],
@@ -101,7 +101,7 @@
       "from": "Participant_0oa2za9",
       "to": "Participant_0jwk4tk",
       "initial_state": "INACTIVE",
-      "schema": "{\"properties\":{\"num\":{\"type\":\"string\",\"description\":\"\"},\"time\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+      "schema": "{\"properties\":{\"num\":{\"type\":\"string\",\"description\":\"\"},\"time2\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
     },
     {
       "name": "Message_0mcktm6",
@@ -123,6 +123,13 @@
       "to": "Participant_0jwk4tk",
       "initial_state": "INACTIVE",
       "schema": "{\"properties\":{\"MessageContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_15b83n1",
+      "from": "Participant_0oa2za9",
+      "to": "Participant_0jwk4tk",
+      "initial_state": "INACTIVE",
+      "schema": "{}"
     },
     {
       "name": "Message_1f0gefc",
@@ -295,6 +302,36 @@
       ]
     },
     {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_15b83n1",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_08ms1jj"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_08ms1jj",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0g7m9tf"
+        }
+      ]
+    },
+    {
       "kind": "gateway_flow",
       "trigger": {
         "type": "gateway",
@@ -382,6 +419,19 @@
             {
               "kind": "enable",
               "target": "Message_0g7m9tf"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Discount",
+          "relation": "==",
+          "value": ""
+        },
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_15b83n1"
             }
           ],
           "condition_kind": "compare",

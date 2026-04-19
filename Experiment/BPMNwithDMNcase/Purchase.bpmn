@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xs="http://www.w3.org/2001/XMLSchema" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn2:message id="Message_15b83n1" />
   <bpmn2:message id="Message_08ms1jj" name="sale">
     <bpmn2:documentation>{"properties":{"sale":{"type":"string","description":""}},"required":["sale"],"files":{},"file required":[]}</bpmn2:documentation>
   </bpmn2:message>
@@ -55,7 +56,7 @@
     <bpmn2:documentation>{"properties":{"MessageContent":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
   </bpmn2:message>
   <bpmn2:message id="Message_0g7m9tf" name="ProductMessage">
-    <bpmn2:documentation>{"properties":{"num":{"type":"string","description":""},"time":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:documentation>{"properties":{"num":{"type":"string","description":""},"time2":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
   </bpmn2:message>
   <bpmn2:message id="Message_14wu8ts" name="NotifyMessage2">
     <bpmn2:documentation>{"properties":{"MessageContent":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
@@ -88,6 +89,7 @@
     <bpmn2:participant id="Participant_0oa2za9" name="Client" />
     <bpmn2:participant id="Participant_0jwk4tk" name="Company" />
     <bpmn2:participant id="Participant_0cb2p7d" name="New Participant 1" />
+    <bpmn2:messageFlow id="MessageFlow_0bp7p12" sourceRef="Participant_0oa2za9" targetRef="Participant_0jwk4tk" messageRef="Message_15b83n1" />
     <bpmn2:messageFlow id="MessageFlow_1qi88x8" sourceRef="Participant_0jwk4tk" targetRef="Participant_0oa2za9" messageRef="Message_08ms1jj" />
     <bpmn2:messageFlow id="MessageFlow_0nq8x22" sourceRef="Participant_0jwk4tk" targetRef="Participant_0oa2za9" messageRef="Message_0mcktm6" />
     <bpmn2:messageFlow id="MessageFlow_18hgpre" sourceRef="Participant_0jwk4tk" targetRef="Participant_0oa2za9" messageRef="Message_0q9hvem" />
@@ -170,7 +172,7 @@
       <bpmn2:incoming>Flow_1w7smbz</bpmn2:incoming>
     </bpmn2:endEvent>
     <bpmn2:sequenceFlow id="Flow_1w7smbz" sourceRef="ChoreographyTask_0huz12d" targetRef="Event_194zr5n" />
-    <bpmn2:businessRuleTask id="Activity_12arovy" name="purchase">
+    <bpmn2:businessRuleTask id="Activity_12arovy">
       <bpmn2:documentation>{"inputs":[{"name":"Price","type":"number","description":""}],"outputs":[{"name":"discount","type":"boolean","description":""}]}</bpmn2:documentation>
       <bpmn2:incoming>Flow_0lnnht6</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1ocsrxv</bpmn2:outgoing>
@@ -188,6 +190,7 @@
       <bpmn2:outgoing>Flow_0lon5nm</bpmn2:outgoing>
       <bpmn2:participantRef>Participant_0oa2za9</bpmn2:participantRef>
       <bpmn2:participantRef>Participant_0jwk4tk</bpmn2:participantRef>
+      <bpmn2:messageFlowRef>MessageFlow_0bp7p12</bpmn2:messageFlowRef>
       <bpmn2:messageFlowRef>MessageFlow_1qi88x8</bpmn2:messageFlowRef>
     </bpmn2:choreographyTask>
     <bpmn2:sequenceFlow id="Flow_1j4bvpd" name="discount==true" sourceRef="Gateway_13i0b7w" targetRef="ChoreographyTask_06fwl21" />

@@ -129,7 +129,7 @@ def action_state_value(action_kind: str) -> Optional[str]:
 def summarize_evidence(lines: List[str], fallback: str, *, matched: bool, severity: str = "medium") -> MatchResult:
     return MatchResult(
         matched=matched,
-        evidence=lines[:5],
+        evidence=lines,
         missing_reason="" if matched else fallback,
         severity=severity,
     )

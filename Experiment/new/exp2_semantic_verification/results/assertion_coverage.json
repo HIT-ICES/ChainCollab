@@ -1,0 +1,493 @@
+{
+  "assertion_count": 14,
+  "assertions": [
+    {
+      "id": "SV01",
+      "title": "全局变量应映射到目标语言状态存储结构",
+      "dimension": "structural",
+      "mode": "positive",
+      "targets": [
+        "go",
+        "solidity"
+      ],
+      "source": {
+        "file": "src/newTranslator/CodeGenerator/b2cdsl-go/b2cdsl_go/__init__.py | src/newTranslator/CodeGenerator/b2cdsl-go/templates/contract.go.jinja | src/newTranslator/CodeGenerator/b2cdsl-solidity/b2cdsl_solidity/__init__.py | src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/contract.sol.jinja",
+        "rule": "Go globals / Solidity state_fields 类型映射与状态结构生成"
+      },
+      "description": "DSL 中每个 global 都应在目标代码状态结构中找到对应字段，且类型映射符合生成器预设类型映射表。",
+      "positive_cases_total": 10,
+      "positive_cases_passed": 10,
+      "positive_coverage": 1.0,
+      "negative_cases_total": 0,
+      "negative_cases_failed": 0,
+      "negative_trigger_rate": null,
+      "status": "covered",
+      "positive_pass_cases": [
+        "Blood_analysis",
+        "Hotel_Booking",
+        "ManagementSystem",
+        "Pizza_Order",
+        "Purchase",
+        "Rental_Claim",
+        "SupplyChain",
+        "SupplyChainPaper",
+        "customer",
+        "manufactory"
+      ],
+      "positive_fail_cases": [],
+      "negative_trigger_cases": []
+    },
+    {
+      "id": "SV02",
+      "title": "参与方应映射为访问控制相关结构或检查入口",
+      "dimension": "structural",
+      "mode": "positive",
+      "targets": [
+        "go",
+        "solidity"
+      ],
+      "source": {
+        "file": "src/newTranslator/CodeGenerator/b2cdsl-go/templates/contract.go.jinja | src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/contract.sol.jinja",
+        "rule": "check_participant / check_msp / _checkParticipant"
+      },
+      "description": "DSL 中定义的 participant 在目标代码中应存在可识别的访问控制检查入口或身份校验结构。",
+      "positive_cases_total": 10,
+      "positive_cases_passed": 10,
+      "positive_coverage": 1.0,
+      "negative_cases_total": 0,
+      "negative_cases_failed": 0,
+      "negative_trigger_rate": null,
+      "status": "covered",
+      "positive_pass_cases": [
+        "Blood_analysis",
+        "Hotel_Booking",
+        "ManagementSystem",
+        "Pizza_Order",
+        "Purchase",
+        "Rental_Claim",
+        "SupplyChain",
+        "SupplyChainPaper",
+        "customer",
+        "manufactory"
+      ],
+      "positive_fail_cases": [],
+      "negative_trigger_cases": []
+    },
+    {
+      "id": "SV03",
+      "title": "消息应映射为消息处理结构",
+      "dimension": "structural",
+      "mode": "positive",
+      "targets": [
+        "go",
+        "solidity"
+      ],
+      "source": {
+        "file": "src/newTranslator/CodeGenerator/b2cdsl-go/templates/flows/message_send.go.jinja | src/newTranslator/CodeGenerator/b2cdsl-go/templates/flows/message_complete.go.jinja | src/newTranslator/CodeGenerator/b2cdsl-solidity/b2cdsl_solidity/__init__.py",
+        "rule": "message handler / message key / lifecycle entry generation"
+      },
+      "description": "DSL 中每个 message 至少在目标代码中存在一个对应的消息处理结构，并可被识别为流程消息处理入口。",
+      "positive_cases_total": 10,
+      "positive_cases_passed": 10,
+      "positive_coverage": 1.0,
+      "negative_cases_total": 0,
+      "negative_cases_failed": 0,
+      "negative_trigger_rate": null,
+      "status": "covered",
+      "positive_pass_cases": [
+        "Blood_analysis",
+        "Hotel_Booking",
+        "ManagementSystem",
+        "Pizza_Order",
+        "Purchase",
+        "Rental_Claim",
+        "SupplyChain",
+        "SupplyChainPaper",
+        "customer",
+        "manufactory"
+      ],
+      "positive_fail_cases": [],
+      "negative_trigger_cases": []
+    },
+    {
+      "id": "SV04",
+      "title": "网关应映射为网关相关结构或条件处理入口",
+      "dimension": "structural",
+      "mode": "positive",
+      "targets": [
+        "go",
+        "solidity"
+      ],
+      "source": {
+        "file": "src/newTranslator/CodeGenerator/b2cdsl-go/templates/flows/gateway.go.jinja | src/newTranslator/CodeGenerator/b2cdsl-solidity/b2cdsl_solidity/__init__.py",
+        "rule": "gateway key / branch handler / conditional entry generation"
+      },
+      "description": "DSL 中每个 gateway 在目标代码中存在对应的网关枚举项、处理逻辑或条件入口。",
+      "positive_cases_total": 10,
+      "positive_cases_passed": 10,
+      "positive_coverage": 1.0,
+      "negative_cases_total": 0,
+      "negative_cases_failed": 0,
+      "negative_trigger_rate": null,
+      "status": "covered",
+      "positive_pass_cases": [
+        "Blood_analysis",
+        "Hotel_Booking",
+        "ManagementSystem",
+        "Pizza_Order",
+        "Purchase",
+        "Rental_Claim",
+        "SupplyChain",
+        "SupplyChainPaper",
+        "customer",
+        "manufactory"
+      ],
+      "positive_fail_cases": [],
+      "negative_trigger_cases": []
+    },
+    {
+      "id": "SV05",
+      "title": "事件应映射为事件处理结构",
+      "dimension": "structural",
+      "mode": "positive",
+      "targets": [
+        "go",
+        "solidity"
+      ],
+      "source": {
+        "file": "src/newTranslator/CodeGenerator/b2cdsl-go/templates/flows/start_event.go.jinja | src/newTranslator/CodeGenerator/b2cdsl-go/templates/flows/event.go.jinja | src/newTranslator/CodeGenerator/b2cdsl-solidity/b2cdsl_solidity/__init__.py",
+        "rule": "start / event handler rendering"
+      },
+      "description": "DSL 中每个 event 在目标代码中存在可识别的事件处理结构或启动入口。",
+      "positive_cases_total": 10,
+      "positive_cases_passed": 10,
+      "positive_coverage": 1.0,
+      "negative_cases_total": 0,
+      "negative_cases_failed": 0,
+      "negative_trigger_rate": null,
+      "status": "covered",
+      "positive_pass_cases": [
+        "Blood_analysis",
+        "Hotel_Booking",
+        "ManagementSystem",
+        "Pizza_Order",
+        "Purchase",
+        "Rental_Claim",
+        "SupplyChain",
+        "SupplyChainPaper",
+        "customer",
+        "manufactory"
+      ],
+      "positive_fail_cases": [],
+      "negative_trigger_cases": []
+    },
+    {
+      "id": "SV06",
+      "title": "业务规则应映射为业务规则处理结构",
+      "dimension": "structural",
+      "mode": "positive",
+      "targets": [
+        "go",
+        "solidity"
+      ],
+      "source": {
+        "file": "src/newTranslator/CodeGenerator/b2cdsl-go/templates/contract.go.jinja | src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/contract.sol.jinja",
+        "rule": "businessrule main handler + continue handler generation"
+      },
+      "description": "DSL 中每个 businessrule 在目标代码中存在对应的规则处理结构，至少覆盖请求或继续处理的静态入口。",
+      "positive_cases_total": 10,
+      "positive_cases_passed": 10,
+      "positive_coverage": 1.0,
+      "negative_cases_total": 0,
+      "negative_cases_failed": 0,
+      "negative_trigger_rate": null,
+      "status": "covered",
+      "positive_pass_cases": [
+        "Blood_analysis",
+        "Hotel_Booking",
+        "ManagementSystem",
+        "Pizza_Order",
+        "Purchase",
+        "Rental_Claim",
+        "SupplyChain",
+        "SupplyChainPaper",
+        "customer",
+        "manufactory"
+      ],
+      "positive_fail_cases": [],
+      "negative_trigger_cases": []
+    },
+    {
+      "id": "SV07",
+      "title": "预言机任务应映射为预言机任务处理结构",
+      "dimension": "structural",
+      "mode": "positive",
+      "targets": [
+        "go",
+        "solidity"
+      ],
+      "source": {
+        "file": "src/newTranslator/CodeGenerator/b2cdsl-go/b2cdsl_go/__init__.py | src/newTranslator/CodeGenerator/b2cdsl-solidity/b2cdsl_solidity/__init__.py",
+        "rule": "_render_oracle_tasks and output mapping writeback generation"
+      },
+      "description": "DSL 中每个 oracletask 在目标代码中存在 external 或 compute 任务处理结构与输出写回相关代码证据。",
+      "positive_cases_total": 0,
+      "positive_cases_passed": 0,
+      "positive_coverage": null,
+      "negative_cases_total": 0,
+      "negative_cases_failed": 0,
+      "negative_trigger_rate": null,
+      "status": "unobserved",
+      "positive_pass_cases": [],
+      "positive_fail_cases": [],
+      "negative_trigger_cases": []
+    },
+    {
+      "id": "SV08",
+      "title": "Flow 动作应映射为 enable / disable / set 控制代码",
+      "dimension": "control",
+      "mode": "positive",
+      "targets": [
+        "go",
+        "solidity"
+      ],
+      "source": {
+        "file": "src/newTranslator/CodeGenerator/b2cdsl-go/b2cdsl_go/__init__.py | src/newTranslator/CodeGenerator/b2cdsl-solidity/b2cdsl_solidity/__init__.py",
+        "rule": "_render_action / _change_state_code / set global rendering"
+      },
+      "description": "DSL flow 中的 enable、disable、set 动作可在目标代码 handler 中找到对应状态更新或赋值证据。",
+      "positive_cases_total": 10,
+      "positive_cases_passed": 10,
+      "positive_coverage": 1.0,
+      "negative_cases_total": 0,
+      "negative_cases_failed": 0,
+      "negative_trigger_rate": null,
+      "status": "covered",
+      "positive_pass_cases": [
+        "Blood_analysis",
+        "Hotel_Booking",
+        "ManagementSystem",
+        "Pizza_Order",
+        "Purchase",
+        "Rental_Claim",
+        "SupplyChain",
+        "SupplyChainPaper",
+        "customer",
+        "manufactory"
+      ],
+      "positive_fail_cases": [],
+      "negative_trigger_cases": []
+    },
+    {
+      "id": "SV09",
+      "title": "Go 消息处理函数应包含消息状态推进控制逻辑",
+      "dimension": "control",
+      "mode": "both",
+      "targets": [
+        "go"
+      ],
+      "source": {
+        "file": "src/newTranslator/CodeGenerator/b2cdsl-go/templates/flows/message_send.go.jinja | src/newTranslator/CodeGenerator/b2cdsl-go/templates/flows/message_complete.go.jinja",
+        "rule": "ChangeMsgState or equivalent message state transition"
+      },
+      "description": "DSL message 相关 flow 在 Go handler 中存在明确的消息状态推进证据。",
+      "positive_cases_total": 10,
+      "positive_cases_passed": 10,
+      "positive_coverage": 1.0,
+      "negative_cases_total": 0,
+      "negative_cases_failed": 0,
+      "negative_trigger_rate": null,
+      "status": "positive_only",
+      "positive_pass_cases": [
+        "Blood_analysis",
+        "Hotel_Booking",
+        "ManagementSystem",
+        "Pizza_Order",
+        "Purchase",
+        "Rental_Claim",
+        "SupplyChain",
+        "SupplyChainPaper",
+        "customer",
+        "manufactory"
+      ],
+      "positive_fail_cases": [],
+      "negative_trigger_cases": []
+    },
+    {
+      "id": "SV10",
+      "title": "Solidity 消息处理函数应包含消息状态赋值控制逻辑",
+      "dimension": "control",
+      "mode": "both",
+      "targets": [
+        "solidity"
+      ],
+      "source": {
+        "file": "src/newTranslator/CodeGenerator/b2cdsl-solidity/b2cdsl_solidity/__init__.py",
+        "rule": "m.state = ... or equivalent assignment in message handler"
+      },
+      "description": "DSL message 相关 flow 在 Solidity handler 中存在明确的消息状态推进证据。",
+      "positive_cases_total": 10,
+      "positive_cases_passed": 10,
+      "positive_coverage": 1.0,
+      "negative_cases_total": 0,
+      "negative_cases_failed": 0,
+      "negative_trigger_rate": null,
+      "status": "positive_only",
+      "positive_pass_cases": [
+        "Blood_analysis",
+        "Hotel_Booking",
+        "ManagementSystem",
+        "Pizza_Order",
+        "Purchase",
+        "Rental_Claim",
+        "SupplyChain",
+        "SupplyChainPaper",
+        "customer",
+        "manufactory"
+      ],
+      "positive_fail_cases": [],
+      "negative_trigger_cases": []
+    },
+    {
+      "id": "SV11",
+      "title": "Go 业务规则处理应存在外部规则调用与继续处理控制证据",
+      "dimension": "control",
+      "mode": "both",
+      "targets": [
+        "go"
+      ],
+      "source": {
+        "file": "src/newTranslator/CodeGenerator/b2cdsl-go/templates/contract.go.jinja",
+        "rule": "Invoke_Other_chaincode / Oracle / DMNEngine invocation and continue path"
+      },
+      "description": "Go 代码中存在与 DSL businessrule 对应的规则调用入口，并存在继续处理或结果推进的静态控制逻辑证据。",
+      "positive_cases_total": 10,
+      "positive_cases_passed": 10,
+      "positive_coverage": 1.0,
+      "negative_cases_total": 0,
+      "negative_cases_failed": 0,
+      "negative_trigger_rate": null,
+      "status": "positive_only",
+      "positive_pass_cases": [
+        "Blood_analysis",
+        "Hotel_Booking",
+        "ManagementSystem",
+        "Pizza_Order",
+        "Purchase",
+        "Rental_Claim",
+        "SupplyChain",
+        "SupplyChainPaper",
+        "customer",
+        "manufactory"
+      ],
+      "positive_fail_cases": [],
+      "negative_trigger_cases": []
+    },
+    {
+      "id": "SV12",
+      "title": "Solidity 业务规则处理应存在外部规则服务交互控制证据",
+      "dimension": "control",
+      "mode": "both",
+      "targets": [
+        "solidity"
+      ],
+      "source": {
+        "file": "src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/contract.sol.jinja",
+        "rule": "requestDMNDecision / getRequestStatus / getRawByRequestId lifecycle"
+      },
+      "description": "Solidity 代码中存在与 DSL businessrule 对应的外部规则服务交互入口，且可识别出请求发起与后续状态查询的静态控制逻辑证据。",
+      "positive_cases_total": 10,
+      "positive_cases_passed": 10,
+      "positive_coverage": 1.0,
+      "negative_cases_total": 0,
+      "negative_cases_failed": 0,
+      "negative_trigger_rate": null,
+      "status": "positive_only",
+      "positive_pass_cases": [
+        "Blood_analysis",
+        "Hotel_Booking",
+        "ManagementSystem",
+        "Pizza_Order",
+        "Purchase",
+        "Rental_Claim",
+        "SupplyChain",
+        "SupplyChainPaper",
+        "customer",
+        "manufactory"
+      ],
+      "positive_fail_cases": [],
+      "negative_trigger_cases": []
+    },
+    {
+      "id": "SV13",
+      "title": "Solidity 业务规则处理应存在结果回写控制证据",
+      "dimension": "control",
+      "mode": "both",
+      "targets": [
+        "solidity"
+      ],
+      "source": {
+        "file": "src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/contract.sol.jinja",
+        "rule": "result parsing and inst.stateMemory.<slot> writeback after DMN fetch"
+      },
+      "description": "Solidity 代码中存在将外部规则返回结果解析并写回 DSL output mapping 对应状态字段的静态控制逻辑证据。",
+      "positive_cases_total": 10,
+      "positive_cases_passed": 10,
+      "positive_coverage": 1.0,
+      "negative_cases_total": 0,
+      "negative_cases_failed": 0,
+      "negative_trigger_rate": null,
+      "status": "positive_only",
+      "positive_pass_cases": [
+        "Blood_analysis",
+        "Hotel_Booking",
+        "ManagementSystem",
+        "Pizza_Order",
+        "Purchase",
+        "Rental_Claim",
+        "SupplyChain",
+        "SupplyChainPaper",
+        "customer",
+        "manufactory"
+      ],
+      "positive_fail_cases": [],
+      "negative_trigger_cases": []
+    },
+    {
+      "id": "SV14",
+      "title": "Flow 条件语义应映射为 compare / parallel 条件检查",
+      "dimension": "control",
+      "mode": "both",
+      "targets": [
+        "go",
+        "solidity"
+      ],
+      "source": {
+        "file": "src/newTranslator/CodeGenerator/b2cdsl-go/b2cdsl_go/__init__.py | src/newTranslator/CodeGenerator/b2cdsl-solidity/b2cdsl_solidity/__init__.py",
+        "rule": "_gateway_branch_condition / _parallel_guard_block / _element_ready_check"
+      },
+      "description": "DSL 中 compare branch 与 parallel join 的条件，在目标代码中存在可识别的条件判断或 guard 检查证据。",
+      "positive_cases_total": 10,
+      "positive_cases_passed": 10,
+      "positive_coverage": 1.0,
+      "negative_cases_total": 0,
+      "negative_cases_failed": 0,
+      "negative_trigger_rate": null,
+      "status": "positive_only",
+      "positive_pass_cases": [
+        "Blood_analysis",
+        "Hotel_Booking",
+        "ManagementSystem",
+        "Pizza_Order",
+        "Purchase",
+        "Rental_Claim",
+        "SupplyChain",
+        "SupplyChainPaper",
+        "customer",
+        "manufactory"
+      ],
+      "positive_fail_cases": [],
+      "negative_trigger_cases": []
+    }
+  ]
+}

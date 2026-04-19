@@ -1,0 +1,6425 @@
+{
+  "contracts": [
+    {
+      "name": "IOracle",
+      "kind": "interface"
+    },
+    {
+      "name": "IDmnLite",
+      "kind": "interface"
+    },
+    {
+      "name": "IIdentityRegistry",
+      "kind": "interface"
+    },
+    {
+      "name": "GeneratedContract",
+      "kind": "contract"
+    }
+  ],
+  "state_variables": [
+    {
+      "contract": "GeneratedContract",
+      "name": "ID",
+      "type": "string",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "VIPLevel",
+      "type": "int256",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "VIPcardId",
+      "type": "string",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "VIPpoints",
+      "type": "int256",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Bedrooms",
+      "type": "int256",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Booking_id",
+      "type": "string",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Cancel",
+      "type": "bool",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Confirm",
+      "type": "bool",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Confirmation",
+      "type": "bool",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Date",
+      "type": "string",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Discount1",
+      "type": "int256",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Discount2",
+      "type": "int256",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Motivation",
+      "type": "string",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Payableto",
+      "type": "string",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Quotation",
+      "type": "int256",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "owner",
+      "type": "address",
+      "visibility": "public"
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "isInited",
+      "type": "bool",
+      "visibility": "public"
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "currentInstanceId",
+      "type": "uint256",
+      "visibility": "public"
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "oracle",
+      "type": "UserDefinedTypeName",
+      "visibility": "public"
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "instances",
+      "type": "Mapping",
+      "visibility": "private"
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "DMN_REQUEST_FULFILLED",
+      "type": "uint8",
+      "visibility": "private"
+    }
+  ],
+  "enums": [
+    {
+      "contract": "GeneratedContract",
+      "name": "ElementState",
+      "values": [
+        "DISABLED",
+        "ENABLED",
+        "WAITING_FOR_CONFIRMATION",
+        "COMPLETED"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "ParticipantKey",
+      "values": [
+        "Participant_1080bkg",
+        "Participant_0sktaei"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "MessageKey",
+      "values": [
+        "Message_045i10y",
+        "Message_04ikf2n",
+        "Message_0m9p3da",
+        "Message_0o8eyir",
+        "Message_0r9lypd",
+        "Message_0vlxzcv",
+        "Message_104h2tt",
+        "Message_1em0ee4",
+        "Message_1etcmvl",
+        "Message_1joj7ca",
+        "Message_1ljlm4g",
+        "Message_1nlagx2",
+        "Message_1xm9dxy"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "GatewayKey",
+      "values": [
+        "ExclusiveGateway_106je4z",
+        "ExclusiveGateway_0hs3ztq",
+        "ExclusiveGateway_0nzwv7v",
+        "Gateway_1jhfnrm",
+        "Gateway_1atxr3y",
+        "EventBasedGateway_1fxpmyn"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "EventKey",
+      "values": [
+        "StartEvent_1jtgn3j",
+        "EndEvent_0366pfz",
+        "EndEvent_08edp7f",
+        "EndEvent_146eii4"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "BusinessRuleKey",
+      "values": [
+        "Activity_0b1f7uv"
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "contract": "IOracle",
+      "name": "getExternalData",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "activityId",
+          "type": "string"
+        },
+        {
+          "name": "dataSource",
+          "type": "string"
+        },
+        {
+          "name": "outputKey",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "value",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "IOracle",
+      "name": "runComputeTask",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "activityId",
+          "type": "string"
+        },
+        {
+          "name": "computeScript",
+          "type": "string"
+        },
+        {
+          "name": "outputKey",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "value",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "IDmnLite",
+      "name": "requestDMNDecision",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "url",
+          "type": "string"
+        },
+        {
+          "name": "dmnCid",
+          "type": "string"
+        },
+        {
+          "name": "decisionId",
+          "type": "string"
+        },
+        {
+          "name": "inputData",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "requestId",
+          "type": "bytes32"
+        }
+      ]
+    },
+    {
+      "contract": "IDmnLite",
+      "name": "getRequestStatus",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "requestId",
+          "type": "bytes32"
+        }
+      ],
+      "returns": [
+        {
+          "name": "state",
+          "type": "uint8"
+        },
+        {
+          "name": "requester",
+          "type": "address"
+        },
+        {
+          "name": "createdAt",
+          "type": "uint256"
+        },
+        {
+          "name": "fulfilledAt",
+          "type": "uint256"
+        },
+        {
+          "name": "exists",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "contract": "IDmnLite",
+      "name": "getRawByRequestId",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "requestId",
+          "type": "bytes32"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "IIdentityRegistry",
+      "name": "getIdentityOrg",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "identityAddress",
+          "type": "address"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "constructor",
+      "kind": "constructor",
+      "visibility": "public",
+      "state_mutability": "nonpayable",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "oracleAddress",
+          "type": "address"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "setOracle",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyOwner"
+      ],
+      "parameters": [
+        {
+          "name": "oracleAddress",
+          "type": "address"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "initLedger",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyOwner"
+      ],
+      "parameters": [],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "_getInstance",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": [
+        {
+          "name": "inst",
+          "type": "UserDefinedTypeName"
+        }
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "_checkParticipant",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "inst",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "key",
+          "type": "UserDefinedTypeName"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "_checkBusinessRuleCaller",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "inst",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "br",
+          "type": "UserDefinedTypeName"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "_createParticipant",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "nonpayable",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "inst",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "key",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "name": "org",
+          "type": "string"
+        },
+        {
+          "name": "isMulti",
+          "type": "bool"
+        },
+        {
+          "name": "maxMulti",
+          "type": "uint8"
+        },
+        {
+          "name": "minMulti",
+          "type": "uint8"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "_createMessage",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "nonpayable",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "inst",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "key",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "sendKey",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "recvKey",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "state",
+          "type": "UserDefinedTypeName"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "_createGateway",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "nonpayable",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "inst",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "key",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "state",
+          "type": "UserDefinedTypeName"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "_createActionEvent",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "nonpayable",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "inst",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "key",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "state",
+          "type": "UserDefinedTypeName"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "_createBusinessRule",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "nonpayable",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "inst",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "key",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "config",
+          "type": "UserDefinedTypeName"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "_stringToInt",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "value",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "int256"
+        }
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "_stringToBool",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "value",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "_jsonString",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "value",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "_jsonBool",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "value",
+          "type": "bool"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "_jsonInt",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "value",
+          "type": "int256"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "_jsonField",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "key",
+          "type": "string"
+        },
+        {
+          "name": "encodedValue",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "_jsonAppendField",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "body",
+          "type": "string"
+        },
+        {
+          "name": "field",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "_jsonObject",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "body",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "_skipWhitespace",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "data",
+          "type": "bytes"
+        },
+        {
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "_sliceBytes",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "data",
+          "type": "bytes"
+        },
+        {
+          "name": "start",
+          "type": "uint256"
+        },
+        {
+          "name": "end",
+          "type": "uint256"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "_findJsonValue",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "raw",
+          "type": "string"
+        },
+        {
+          "name": "key",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "start",
+          "type": "uint256"
+        },
+        {
+          "name": "end",
+          "type": "uint256"
+        },
+        {
+          "name": "kind",
+          "type": "uint8"
+        },
+        {
+          "name": "found",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "_extractJsonString",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "raw",
+          "type": "string"
+        },
+        {
+          "name": "key",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "_extractJsonBool",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "raw",
+          "type": "string"
+        },
+        {
+          "name": "key",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "_extractJsonInt",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "raw",
+          "type": "string"
+        },
+        {
+          "name": "key",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "int256"
+        }
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "createInstance",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyOwner",
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "params",
+          "type": "UserDefinedTypeName"
+        }
+      ],
+      "returns": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "getExecutionSnapshot",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": [
+        {
+          "name": "messageStates",
+          "type": "ArrayTypeName"
+        },
+        {
+          "name": "messageFireflyTranIds",
+          "type": "ArrayTypeName"
+        },
+        {
+          "name": "gatewayStates",
+          "type": "ArrayTypeName"
+        },
+        {
+          "name": "eventStates",
+          "type": "ArrayTypeName"
+        },
+        {
+          "name": "businessRuleStates",
+          "type": "ArrayTypeName"
+        },
+        {
+          "name": "businessRuleRequestIds",
+          "type": "ArrayTypeName"
+        }
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Activity_0b1f7uv",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Activity_0b1f7uv_Continue",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "StartEvent_1jtgn3j",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Message_045i10y_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "date",
+          "type": "string"
+        },
+        {
+          "name": "bedrooms",
+          "type": "int256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Message_04ikf2n_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "discount2",
+          "type": "int256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Message_0m9p3da_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "cancel",
+          "type": "bool"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Message_0o8eyir_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "payableto",
+          "type": "string"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Message_0r9lypd_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "confirm",
+          "type": "bool"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Message_0vlxzcv_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "discount1",
+          "type": "int256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Message_104h2tt_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "VIPpoints",
+          "type": "int256"
+        },
+        {
+          "name": "VIPcardId",
+          "type": "string"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Message_1em0ee4_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "quotation",
+          "type": "int256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Message_1etcmvl_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "payableto",
+          "type": "string"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Message_1joj7ca_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "ID",
+          "type": "string"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Message_1ljlm4g_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "booking_id",
+          "type": "string"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Message_1nlagx2_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "confirmation",
+          "type": "bool"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Message_1xm9dxy_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "motivation",
+          "type": "string"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "ExclusiveGateway_106je4z",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "ExclusiveGateway_0hs3ztq",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "ExclusiveGateway_0nzwv7v",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Gateway_1jhfnrm",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "Gateway_1atxr3y",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "EventBasedGateway_1fxpmyn",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "EndEvent_0366pfz",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "EndEvent_08edp7f",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "EndEvent_146eii4",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    }
+  ],
+  "requires": [
+    {
+      "contract": "GeneratedContract",
+      "function": "",
+      "callee": "require",
+      "arguments": [
+        "msg.sender == owner",
+        "not owner"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "",
+      "callee": "require",
+      "arguments": [
+        "isInited",
+        "contract not initialized"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "initLedger",
+      "callee": "require",
+      "arguments": [
+        "!isInited",
+        "already initialized"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_getInstance",
+      "callee": "require",
+      "arguments": [
+        "inst.exists",
+        "instance not found"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_checkParticipant",
+      "callee": "require",
+      "arguments": [
+        "participant.exists",
+        "participant not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_checkParticipant",
+      "callee": "require",
+      "arguments": [
+        "msg.sender == participant.account",
+        "participant not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_checkParticipant",
+      "callee": "require",
+      "arguments": [
+        "inst.identityContractAddress != address",
+        "identity contract not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_checkParticipant",
+      "callee": "require",
+      "arguments": [
+        "keccak256 == keccak256",
+        "participant org not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_checkBusinessRuleCaller",
+      "callee": "require",
+      "arguments": [
+        "br.allowedCaller != address",
+        "business rule caller not configured"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_checkBusinessRuleCaller",
+      "callee": "require",
+      "arguments": [
+        "msg.sender == br.allowedCaller",
+        "business rule caller not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_stringToInt",
+      "callee": "require",
+      "arguments": [
+        "c >= 48 && c <= 57",
+        "invalid int string"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_sliceBytes",
+      "callee": "require",
+      "arguments": [
+        "end >= start",
+        "invalid slice"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonString",
+      "callee": "require",
+      "arguments": [
+        "found && kind == 1",
+        "json string not found"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonBool",
+      "callee": "require",
+      "arguments": [
+        "found && kind == 2",
+        "json bool not found"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonInt",
+      "callee": "require",
+      "arguments": [
+        "found && kind == 3",
+        "json number not found"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "require",
+      "arguments": [
+        "!inst.exists",
+        "instance already exists"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "require",
+      "arguments": [
+        "inst.dmnLiteAddress != address",
+        "dmn lite not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "require",
+      "arguments": [
+        "bytes.length != 0",
+        "dmn eval url not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "callee": "require",
+      "arguments": [
+        "br.exists",
+        "business rule not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "callee": "require",
+      "arguments": [
+        "br.state == ElementState.ENABLED",
+        "business rule not enabled"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "callee": "require",
+      "arguments": [
+        "bytes.length != 0",
+        "dmn cid not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "callee": "require",
+      "arguments": [
+        "requestId != bytes32",
+        "dmn request failed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "callee": "require",
+      "arguments": [
+        "br.exists",
+        "business rule not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "callee": "require",
+      "arguments": [
+        "br.state == ElementState.WAITING_FOR_CONFIRMATION",
+        "business rule not waiting"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "callee": "require",
+      "arguments": [
+        "br.requestId != bytes32",
+        "business rule not requested"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "callee": "require",
+      "arguments": [
+        "exists",
+        "dmn request missing"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "callee": "require",
+      "arguments": [
+        "requester == address",
+        "unexpected dmn requester"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "callee": "require",
+      "arguments": [
+        "requestState == DMN_REQUEST_FULFILLED",
+        "dmn result not ready"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "StartEvent_1jtgn3j",
+      "callee": "require",
+      "arguments": [
+        "ev.exists",
+        "event not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "StartEvent_1jtgn3j",
+      "callee": "require",
+      "arguments": [
+        "ev.state == ElementState.ENABLED",
+        "event state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_045i10y_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_045i10y_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_04ikf2n_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_04ikf2n_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0m9p3da_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0m9p3da_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0o8eyir_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0o8eyir_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0r9lypd_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0r9lypd_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0vlxzcv_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0vlxzcv_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_104h2tt_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_104h2tt_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1em0ee4_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1em0ee4_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1etcmvl_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1etcmvl_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1joj7ca_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1joj7ca_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1ljlm4g_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1ljlm4g_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1nlagx2_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1nlagx2_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1xm9dxy_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1xm9dxy_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_106je4z",
+      "callee": "require",
+      "arguments": [
+        "g.exists",
+        "gateway not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_106je4z",
+      "callee": "require",
+      "arguments": [
+        "g.state == ElementState.ENABLED",
+        "gateway state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_0hs3ztq",
+      "callee": "require",
+      "arguments": [
+        "g.exists",
+        "gateway not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_0hs3ztq",
+      "callee": "require",
+      "arguments": [
+        "g.state == ElementState.ENABLED",
+        "gateway state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_0nzwv7v",
+      "callee": "require",
+      "arguments": [
+        "g.exists",
+        "gateway not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_0nzwv7v",
+      "callee": "require",
+      "arguments": [
+        "g.state == ElementState.ENABLED",
+        "gateway state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Gateway_1jhfnrm",
+      "callee": "require",
+      "arguments": [
+        "g.exists",
+        "gateway not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Gateway_1jhfnrm",
+      "callee": "require",
+      "arguments": [
+        "g.state == ElementState.ENABLED",
+        "gateway state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Gateway_1atxr3y",
+      "callee": "require",
+      "arguments": [
+        "g.exists",
+        "gateway not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Gateway_1atxr3y",
+      "callee": "require",
+      "arguments": [
+        "g.state == ElementState.ENABLED",
+        "gateway state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EventBasedGateway_1fxpmyn",
+      "callee": "require",
+      "arguments": [
+        "g.exists",
+        "gateway not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EventBasedGateway_1fxpmyn",
+      "callee": "require",
+      "arguments": [
+        "g.state == ElementState.ENABLED",
+        "gateway state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EndEvent_0366pfz",
+      "callee": "require",
+      "arguments": [
+        "ev.exists",
+        "event not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EndEvent_0366pfz",
+      "callee": "require",
+      "arguments": [
+        "ev.state == ElementState.ENABLED",
+        "event state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EndEvent_08edp7f",
+      "callee": "require",
+      "arguments": [
+        "ev.exists",
+        "event not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EndEvent_08edp7f",
+      "callee": "require",
+      "arguments": [
+        "ev.state == ElementState.ENABLED",
+        "event state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EndEvent_146eii4",
+      "callee": "require",
+      "arguments": [
+        "ev.exists",
+        "event not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EndEvent_146eii4",
+      "callee": "require",
+      "arguments": [
+        "ev.state == ElementState.ENABLED",
+        "event state not allowed"
+      ]
+    }
+  ],
+  "assignments": [
+    {
+      "contract": "GeneratedContract",
+      "function": "constructor",
+      "lhs": "owner",
+      "rhs": "msg.sender",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "constructor",
+      "lhs": "oracle",
+      "rhs": "IOracle",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "setOracle",
+      "lhs": "oracle",
+      "rhs": "IOracle",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "initLedger",
+      "lhs": "isInited",
+      "rhs": "true",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "initLedger",
+      "lhs": "currentInstanceId",
+      "rhs": "0",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_getInstance",
+      "lhs": "inst",
+      "rhs": "instances[instanceId]",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_createParticipant",
+      "lhs": "inst.participants[key]",
+      "rhs": "Participant",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_createMessage",
+      "lhs": "inst.messages[key]",
+      "rhs": "Message",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_createGateway",
+      "lhs": "inst.gateways[key]",
+      "rhs": "Gateway",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_createActionEvent",
+      "lhs": "inst.events[key]",
+      "rhs": "ActionEvent",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_createBusinessRule",
+      "lhs": "inst.businessRules[key]",
+      "rhs": "BusinessRule",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_stringToInt",
+      "lhs": "negative",
+      "rhs": "true",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_stringToInt",
+      "lhs": "index",
+      "rhs": "1",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_stringToInt",
+      "lhs": "result",
+      "rhs": "result * 10 + int256",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_jsonInt",
+      "lhs": "cursor",
+      "rhs": "10",
+      "operator": "/="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_jsonInt",
+      "lhs": "buffer[index]",
+      "rhs": "bytes1",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_jsonInt",
+      "lhs": "temp",
+      "rhs": "10",
+      "operator": "/="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_jsonInt",
+      "lhs": "buffer[0]",
+      "rhs": "bytes1",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_sliceBytes",
+      "lhs": "out[i - start]",
+      "rhs": "data[i]",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "lhs": "matches",
+      "rhs": "false",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "lhs": "cursor",
+      "rhs": "_skipWhitespace",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "lhs": "instanceId",
+      "rhs": "currentInstanceId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "lhs": "inst.exists",
+      "rhs": "true",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "lhs": "inst.instanceId",
+      "rhs": "instanceId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "lhs": "inst.identityContractAddress",
+      "rhs": "params.identityContractAddress",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "lhs": "inst.dmnLiteAddress",
+      "rhs": "params.dmnLiteAddress",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "lhs": "inst.dmnEvalUrl",
+      "rhs": "params.dmnEvalUrl",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "lhs": "inst.enforceBusinessRuleCaller",
+      "rhs": "params.enforceBusinessRuleCaller",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "lhs": "currentInstanceId",
+      "rhs": "1",
+      "operator": "+="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates",
+      "rhs": "NewExpression",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds",
+      "rhs": "NewExpression",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[0]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[0]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[1]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[1]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[2]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[2]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[3]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[3]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[4]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[4]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[5]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[5]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[6]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[6]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[7]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[7]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[8]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[8]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[9]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[9]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[10]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[10]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[11]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[11]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[12]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[12]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "gatewayStates",
+      "rhs": "NewExpression",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "gatewayStates[0]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "gatewayStates[1]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "gatewayStates[2]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "gatewayStates[3]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "gatewayStates[4]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "gatewayStates[5]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "eventStates",
+      "rhs": "NewExpression",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "eventStates[0]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "eventStates[1]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "eventStates[2]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "eventStates[3]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "businessRuleStates",
+      "rhs": "NewExpression",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "businessRuleRequestIds",
+      "rhs": "NewExpression",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "businessRuleStates[0]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "lhs": "businessRuleRequestIds[0]",
+      "rhs": "br.requestId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "lhs": "inputBody",
+      "rhs": "_jsonAppendField",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "lhs": "br.requestId",
+      "rhs": "requestId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "lhs": "br.requestedAt",
+      "rhs": "block.timestamp",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "lhs": "br.fulfilledAt",
+      "rhs": "0",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "lhs": "br.lastRawResult",
+      "rhs": "",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "lhs": "br.state",
+      "rhs": "ElementState.WAITING_FOR_CONFIRMATION",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "lhs": "br.lastRawResult",
+      "rhs": "raw",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "lhs": "br.fulfilledAt",
+      "rhs": "fulfilledAt",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "lhs": "inst.stateMemory.VIPLevel",
+      "rhs": "_extractJsonInt",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "lhs": "br.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "lhs": "inst.gateways[GatewayKey.Gateway_1jhfnrm].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "StartEvent_1jtgn3j",
+      "lhs": "ev.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "StartEvent_1jtgn3j",
+      "lhs": "inst.gateways[GatewayKey.ExclusiveGateway_0hs3ztq].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_045i10y_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_045i10y_Send",
+      "lhs": "inst.stateMemory.Date",
+      "rhs": "date",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_045i10y_Send",
+      "lhs": "inst.stateMemory.Bedrooms",
+      "rhs": "bedrooms",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_045i10y_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_045i10y_Send",
+      "lhs": "inst.messages[MessageKey.Message_0r9lypd].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_04ikf2n_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_04ikf2n_Send",
+      "lhs": "inst.stateMemory.Discount2",
+      "rhs": "discount2",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_04ikf2n_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_04ikf2n_Send",
+      "lhs": "inst.gateways[GatewayKey.Gateway_1atxr3y].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0m9p3da_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0m9p3da_Send",
+      "lhs": "inst.stateMemory.Cancel",
+      "rhs": "cancel",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0m9p3da_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0m9p3da_Send",
+      "lhs": "inst.gateways[GatewayKey.ExclusiveGateway_0nzwv7v].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0o8eyir_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0o8eyir_Send",
+      "lhs": "inst.stateMemory.Payableto",
+      "rhs": "payableto",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0o8eyir_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0o8eyir_Send",
+      "lhs": "inst.messages[MessageKey.Message_1xm9dxy].state",
+      "rhs": "ElementState.DISABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0o8eyir_Send",
+      "lhs": "inst.messages[MessageKey.Message_104h2tt].state",
+      "rhs": "ElementState.DISABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0o8eyir_Send",
+      "lhs": "inst.messages[MessageKey.Message_1ljlm4g].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0r9lypd_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0r9lypd_Send",
+      "lhs": "inst.stateMemory.Confirm",
+      "rhs": "confirm",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0r9lypd_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0r9lypd_Send",
+      "lhs": "inst.gateways[GatewayKey.ExclusiveGateway_106je4z].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0vlxzcv_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0vlxzcv_Send",
+      "lhs": "inst.stateMemory.Discount1",
+      "rhs": "discount1",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0vlxzcv_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0vlxzcv_Send",
+      "lhs": "inst.gateways[GatewayKey.Gateway_1atxr3y].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_104h2tt_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_104h2tt_Send",
+      "lhs": "inst.stateMemory.VIPpoints",
+      "rhs": "VIPpoints",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_104h2tt_Send",
+      "lhs": "inst.stateMemory.VIPcardId",
+      "rhs": "VIPcardId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_104h2tt_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_104h2tt_Send",
+      "lhs": "inst.messages[MessageKey.Message_0o8eyir].state",
+      "rhs": "ElementState.DISABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_104h2tt_Send",
+      "lhs": "inst.messages[MessageKey.Message_1xm9dxy].state",
+      "rhs": "ElementState.DISABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_104h2tt_Send",
+      "lhs": "inst.businessRules[BusinessRuleKey.Activity_0b1f7uv].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1em0ee4_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1em0ee4_Send",
+      "lhs": "inst.stateMemory.Quotation",
+      "rhs": "quotation",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1em0ee4_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1em0ee4_Send",
+      "lhs": "inst.messages[MessageKey.Message_1nlagx2].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1etcmvl_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1etcmvl_Send",
+      "lhs": "inst.stateMemory.Payableto",
+      "rhs": "payableto",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1etcmvl_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1etcmvl_Send",
+      "lhs": "inst.events[EventKey.EndEvent_146eii4].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1joj7ca_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1joj7ca_Send",
+      "lhs": "inst.stateMemory.ID",
+      "rhs": "ID",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1joj7ca_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1joj7ca_Send",
+      "lhs": "inst.messages[MessageKey.Message_1etcmvl].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1ljlm4g_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1ljlm4g_Send",
+      "lhs": "inst.stateMemory.Booking_id",
+      "rhs": "booking_id",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1ljlm4g_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1ljlm4g_Send",
+      "lhs": "inst.messages[MessageKey.Message_0m9p3da].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1nlagx2_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1nlagx2_Send",
+      "lhs": "inst.stateMemory.Confirmation",
+      "rhs": "confirmation",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1nlagx2_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1nlagx2_Send",
+      "lhs": "inst.gateways[GatewayKey.EventBasedGateway_1fxpmyn].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1xm9dxy_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1xm9dxy_Send",
+      "lhs": "inst.stateMemory.Motivation",
+      "rhs": "motivation",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1xm9dxy_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1xm9dxy_Send",
+      "lhs": "inst.messages[MessageKey.Message_0o8eyir].state",
+      "rhs": "ElementState.DISABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1xm9dxy_Send",
+      "lhs": "inst.messages[MessageKey.Message_104h2tt].state",
+      "rhs": "ElementState.DISABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1xm9dxy_Send",
+      "lhs": "inst.events[EventKey.EndEvent_0366pfz].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_106je4z",
+      "lhs": "g.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_106je4z",
+      "lhs": "inst.gateways[GatewayKey.ExclusiveGateway_0hs3ztq].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_106je4z",
+      "lhs": "inst.messages[MessageKey.Message_1em0ee4].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_0hs3ztq",
+      "lhs": "g.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_0hs3ztq",
+      "lhs": "inst.messages[MessageKey.Message_045i10y].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_0nzwv7v",
+      "lhs": "g.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_0nzwv7v",
+      "lhs": "inst.messages[MessageKey.Message_1joj7ca].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_0nzwv7v",
+      "lhs": "inst.events[EventKey.EndEvent_08edp7f].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Gateway_1jhfnrm",
+      "lhs": "g.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Gateway_1jhfnrm",
+      "lhs": "inst.messages[MessageKey.Message_04ikf2n].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Gateway_1jhfnrm",
+      "lhs": "inst.messages[MessageKey.Message_0vlxzcv].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Gateway_1atxr3y",
+      "lhs": "g.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Gateway_1atxr3y",
+      "lhs": "inst.messages[MessageKey.Message_0o8eyir].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EventBasedGateway_1fxpmyn",
+      "lhs": "g.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EventBasedGateway_1fxpmyn",
+      "lhs": "inst.messages[MessageKey.Message_0o8eyir].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EventBasedGateway_1fxpmyn",
+      "lhs": "inst.messages[MessageKey.Message_1xm9dxy].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EventBasedGateway_1fxpmyn",
+      "lhs": "inst.messages[MessageKey.Message_104h2tt].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EndEvent_0366pfz",
+      "lhs": "ev.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EndEvent_08edp7f",
+      "lhs": "ev.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EndEvent_146eii4",
+      "lhs": "ev.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    }
+  ],
+  "events": [
+    {
+      "contract": "GeneratedContract",
+      "name": "MessageSent",
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "messageKey",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "GatewayDone",
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "gatewayKey",
+          "type": "UserDefinedTypeName"
+        }
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "ActionEventDone",
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "eventKey",
+          "type": "UserDefinedTypeName"
+        }
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "BusinessRuleRequested",
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "ruleKey",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "requestId",
+          "type": "bytes32"
+        }
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "name": "BusinessRuleCompleted",
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "ruleKey",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "requestId",
+          "type": "bytes32"
+        }
+      ]
+    }
+  ],
+  "external_calls": [
+    {
+      "contract": "GeneratedContract",
+      "function": "constructor",
+      "callee": "IOracle",
+      "arguments": [
+        "oracleAddress"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "setOracle",
+      "callee": "IOracle",
+      "arguments": [
+        "oracleAddress"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_checkParticipant",
+      "callee": "IIdentityRegistry.getIdentityOrg",
+      "arguments": [
+        "msg.sender"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_checkParticipant",
+      "callee": "IIdentityRegistry",
+      "arguments": [
+        "inst.identityContractAddress"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_jsonString",
+      "callee": "string.concat",
+      "arguments": [
+        "\"",
+        "value",
+        "\""
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_jsonField",
+      "callee": "string.concat",
+      "arguments": [
+        "_jsonString",
+        ":",
+        "encodedValue"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_jsonAppendField",
+      "callee": "string.concat",
+      "arguments": [
+        "body",
+        ",",
+        "field"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_jsonObject",
+      "callee": "string.concat",
+      "arguments": [
+        "{",
+        "body",
+        "}"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "callee": "dmnLite.requestDMNDecision",
+      "arguments": [
+        "inst.dmnEvalUrl",
+        "br.dmnCid",
+        "br.decisionId",
+        "inputData"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "callee": "dmnLite.getRequestStatus",
+      "arguments": [
+        "br.requestId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "callee": "dmnLite.getRawByRequestId",
+      "arguments": [
+        "br.requestId"
+      ]
+    }
+  ],
+  "calls": [
+    {
+      "contract": "GeneratedContract",
+      "function": "",
+      "callee": "require",
+      "arguments": [
+        "msg.sender == owner",
+        "not owner"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "",
+      "callee": "require",
+      "arguments": [
+        "isInited",
+        "contract not initialized"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "constructor",
+      "callee": "IOracle",
+      "arguments": [
+        "oracleAddress"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "setOracle",
+      "callee": "IOracle",
+      "arguments": [
+        "oracleAddress"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "initLedger",
+      "callee": "require",
+      "arguments": [
+        "!isInited",
+        "already initialized"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_getInstance",
+      "callee": "require",
+      "arguments": [
+        "inst.exists",
+        "instance not found"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_checkParticipant",
+      "callee": "require",
+      "arguments": [
+        "participant.exists",
+        "participant not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_checkParticipant",
+      "callee": "require",
+      "arguments": [
+        "msg.sender == participant.account",
+        "participant not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_checkParticipant",
+      "callee": "require",
+      "arguments": [
+        "inst.identityContractAddress != address",
+        "identity contract not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_checkParticipant",
+      "callee": "address",
+      "arguments": [
+        "0"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_checkParticipant",
+      "callee": "IIdentityRegistry.getIdentityOrg",
+      "arguments": [
+        "msg.sender"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_checkParticipant",
+      "callee": "IIdentityRegistry",
+      "arguments": [
+        "inst.identityContractAddress"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_checkParticipant",
+      "callee": "require",
+      "arguments": [
+        "keccak256 == keccak256",
+        "participant org not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_checkParticipant",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_checkParticipant",
+      "callee": "bytes",
+      "arguments": [
+        "callerOrg"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_checkParticipant",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_checkParticipant",
+      "callee": "bytes",
+      "arguments": [
+        "participant.org"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_checkBusinessRuleCaller",
+      "callee": "require",
+      "arguments": [
+        "br.allowedCaller != address",
+        "business rule caller not configured"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_checkBusinessRuleCaller",
+      "callee": "address",
+      "arguments": [
+        "0"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_checkBusinessRuleCaller",
+      "callee": "require",
+      "arguments": [
+        "msg.sender == br.allowedCaller",
+        "business rule caller not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_createParticipant",
+      "callee": "Participant",
+      "arguments": [
+        "true",
+        "account",
+        "org",
+        "isMulti",
+        "maxMulti",
+        "minMulti"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_createMessage",
+      "callee": "Message",
+      "arguments": [
+        "true",
+        "sendKey",
+        "recvKey",
+        "",
+        "state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_createGateway",
+      "callee": "Gateway",
+      "arguments": [
+        "true",
+        "state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_createActionEvent",
+      "callee": "ActionEvent",
+      "arguments": [
+        "true",
+        "state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_createBusinessRule",
+      "callee": "BusinessRule",
+      "arguments": [
+        "true",
+        "config.dmnCid",
+        "config.dmnHash",
+        "config.decisionId",
+        "config.callerRestricted",
+        "config.allowedCaller",
+        "ElementState.DISABLED",
+        "bytes32",
+        "0",
+        "0",
+        ""
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_createBusinessRule",
+      "callee": "bytes32",
+      "arguments": [
+        "0"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_stringToInt",
+      "callee": "bytes",
+      "arguments": [
+        "value"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_stringToInt",
+      "callee": "bytes1",
+      "arguments": [
+        "-"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_stringToInt",
+      "callee": "uint8",
+      "arguments": [
+        "data[index]"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_stringToInt",
+      "callee": "require",
+      "arguments": [
+        "c >= 48 && c <= 57",
+        "invalid int string"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_stringToInt",
+      "callee": "int256",
+      "arguments": [
+        "uint256"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_stringToInt",
+      "callee": "uint256",
+      "arguments": [
+        "c - 48"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_stringToBool",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_stringToBool",
+      "callee": "bytes",
+      "arguments": [
+        "value"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_stringToBool",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_stringToBool",
+      "callee": "bytes",
+      "arguments": [
+        "true"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_stringToBool",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_stringToBool",
+      "callee": "bytes",
+      "arguments": [
+        "TRUE"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_stringToBool",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_stringToBool",
+      "callee": "bytes",
+      "arguments": [
+        "1"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_jsonString",
+      "callee": "string.concat",
+      "arguments": [
+        "\"",
+        "value",
+        "\""
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_jsonInt",
+      "callee": "uint256",
+      "arguments": [
+        "Conditional"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_jsonInt",
+      "callee": "NewExpression",
+      "arguments": [
+        "totalLength"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_jsonInt",
+      "callee": "bytes1",
+      "arguments": [
+        "uint8"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_jsonInt",
+      "callee": "uint8",
+      "arguments": [
+        "48 + temp % 10"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_jsonInt",
+      "callee": "bytes1",
+      "arguments": [
+        "-"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_jsonInt",
+      "callee": "string",
+      "arguments": [
+        "buffer"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_jsonField",
+      "callee": "string.concat",
+      "arguments": [
+        "_jsonString",
+        ":",
+        "encodedValue"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_jsonField",
+      "callee": "_jsonString",
+      "arguments": [
+        "key"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_jsonAppendField",
+      "callee": "bytes",
+      "arguments": [
+        "body"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_jsonAppendField",
+      "callee": "string.concat",
+      "arguments": [
+        "body",
+        ",",
+        "field"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_jsonObject",
+      "callee": "string.concat",
+      "arguments": [
+        "{",
+        "body",
+        "}"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_sliceBytes",
+      "callee": "require",
+      "arguments": [
+        "end >= start",
+        "invalid slice"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_sliceBytes",
+      "callee": "NewExpression",
+      "arguments": [
+        "end - start"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_sliceBytes",
+      "callee": "string",
+      "arguments": [
+        "out"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "callee": "bytes",
+      "arguments": [
+        "raw"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "callee": "bytes",
+      "arguments": [
+        "key"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "\""
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "\""
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "callee": "_skipWhitespace",
+      "arguments": [
+        "data",
+        "i + keyBytes.length + 2"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        ":"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "callee": "_skipWhitespace",
+      "arguments": [
+        "data",
+        "cursor + 1"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "\""
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "\""
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "\\"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "callee": "revert",
+      "arguments": [
+        "unterminated json string"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "t"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "f"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "a"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "z"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "A"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "Z"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "-"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "0"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "9"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "-"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "."
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "0"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "9"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonString",
+      "callee": "_findJsonValue",
+      "arguments": [
+        "raw",
+        "key"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonString",
+      "callee": "require",
+      "arguments": [
+        "found && kind == 1",
+        "json string not found"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonString",
+      "callee": "_sliceBytes",
+      "arguments": [
+        "bytes",
+        "start",
+        "end"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonString",
+      "callee": "bytes",
+      "arguments": [
+        "raw"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonBool",
+      "callee": "_findJsonValue",
+      "arguments": [
+        "raw",
+        "key"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonBool",
+      "callee": "require",
+      "arguments": [
+        "found && kind == 2",
+        "json bool not found"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonBool",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonBool",
+      "callee": "bytes",
+      "arguments": [
+        "_sliceBytes"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonBool",
+      "callee": "_sliceBytes",
+      "arguments": [
+        "bytes",
+        "start",
+        "end"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonBool",
+      "callee": "bytes",
+      "arguments": [
+        "raw"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonBool",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonBool",
+      "callee": "bytes",
+      "arguments": [
+        "true"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonBool",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonBool",
+      "callee": "bytes",
+      "arguments": [
+        "false"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonBool",
+      "callee": "revert",
+      "arguments": [
+        "invalid json bool"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonInt",
+      "callee": "_findJsonValue",
+      "arguments": [
+        "raw",
+        "key"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonInt",
+      "callee": "require",
+      "arguments": [
+        "found && kind == 3",
+        "json number not found"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonInt",
+      "callee": "_stringToInt",
+      "arguments": [
+        "_sliceBytes"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonInt",
+      "callee": "_sliceBytes",
+      "arguments": [
+        "bytes",
+        "start",
+        "end"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonInt",
+      "callee": "bytes",
+      "arguments": [
+        "raw"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "require",
+      "arguments": [
+        "!inst.exists",
+        "instance already exists"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "require",
+      "arguments": [
+        "inst.dmnLiteAddress != address",
+        "dmn lite not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "address",
+      "arguments": [
+        "0"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "require",
+      "arguments": [
+        "bytes.length != 0",
+        "dmn eval url not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "bytes",
+      "arguments": [
+        "inst.dmnEvalUrl"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createParticipant",
+      "arguments": [
+        "inst",
+        "ParticipantKey.Participant_1080bkg",
+        "params.Participant_1080bkg_account",
+        "params.Participant_1080bkg_org",
+        "false",
+        "0",
+        "0"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createParticipant",
+      "arguments": [
+        "inst",
+        "ParticipantKey.Participant_0sktaei",
+        "params.Participant_0sktaei_account",
+        "params.Participant_0sktaei_org",
+        "false",
+        "0",
+        "0"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createActionEvent",
+      "arguments": [
+        "inst",
+        "EventKey.StartEvent_1jtgn3j",
+        "ElementState.ENABLED"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createActionEvent",
+      "arguments": [
+        "inst",
+        "EventKey.EndEvent_0366pfz",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createActionEvent",
+      "arguments": [
+        "inst",
+        "EventKey.EndEvent_08edp7f",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createActionEvent",
+      "arguments": [
+        "inst",
+        "EventKey.EndEvent_146eii4",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_045i10y",
+        "ParticipantKey.Participant_1080bkg",
+        "ParticipantKey.Participant_0sktaei",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_04ikf2n",
+        "ParticipantKey.Participant_0sktaei",
+        "ParticipantKey.Participant_1080bkg",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_0m9p3da",
+        "ParticipantKey.Participant_1080bkg",
+        "ParticipantKey.Participant_0sktaei",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_0o8eyir",
+        "ParticipantKey.Participant_1080bkg",
+        "ParticipantKey.Participant_0sktaei",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_0r9lypd",
+        "ParticipantKey.Participant_0sktaei",
+        "ParticipantKey.Participant_1080bkg",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_0vlxzcv",
+        "ParticipantKey.Participant_0sktaei",
+        "ParticipantKey.Participant_1080bkg",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_104h2tt",
+        "ParticipantKey.Participant_1080bkg",
+        "ParticipantKey.Participant_0sktaei",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_1em0ee4",
+        "ParticipantKey.Participant_0sktaei",
+        "ParticipantKey.Participant_1080bkg",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_1etcmvl",
+        "ParticipantKey.Participant_0sktaei",
+        "ParticipantKey.Participant_1080bkg",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_1joj7ca",
+        "ParticipantKey.Participant_1080bkg",
+        "ParticipantKey.Participant_0sktaei",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_1ljlm4g",
+        "ParticipantKey.Participant_0sktaei",
+        "ParticipantKey.Participant_1080bkg",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_1nlagx2",
+        "ParticipantKey.Participant_1080bkg",
+        "ParticipantKey.Participant_0sktaei",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_1xm9dxy",
+        "ParticipantKey.Participant_1080bkg",
+        "ParticipantKey.Participant_0sktaei",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createGateway",
+      "arguments": [
+        "inst",
+        "GatewayKey.ExclusiveGateway_106je4z",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createGateway",
+      "arguments": [
+        "inst",
+        "GatewayKey.ExclusiveGateway_0hs3ztq",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createGateway",
+      "arguments": [
+        "inst",
+        "GatewayKey.ExclusiveGateway_0nzwv7v",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createGateway",
+      "arguments": [
+        "inst",
+        "GatewayKey.Gateway_1jhfnrm",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createGateway",
+      "arguments": [
+        "inst",
+        "GatewayKey.Gateway_1atxr3y",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createGateway",
+      "arguments": [
+        "inst",
+        "GatewayKey.EventBasedGateway_1fxpmyn",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "createInstance",
+      "callee": "_createBusinessRule",
+      "arguments": [
+        "inst",
+        "BusinessRuleKey.Activity_0b1f7uv",
+        "params.Activity_0b1f7uv"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "NewExpression",
+      "arguments": [
+        "13"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "NewExpression",
+      "arguments": [
+        "13"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "NewExpression",
+      "arguments": [
+        "6"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "g.state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "g.state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "g.state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "g.state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "g.state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "g.state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "NewExpression",
+      "arguments": [
+        "4"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "ev.state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "ev.state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "ev.state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "ev.state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "NewExpression",
+      "arguments": [
+        "1"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "NewExpression",
+      "arguments": [
+        "1"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "br.state"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "callee": "require",
+      "arguments": [
+        "br.exists",
+        "business rule not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "callee": "require",
+      "arguments": [
+        "br.state == ElementState.ENABLED",
+        "business rule not enabled"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "callee": "_checkBusinessRuleCaller",
+      "arguments": [
+        "inst",
+        "br"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "callee": "_jsonAppendField",
+      "arguments": [
+        "inputBody",
+        "_jsonField"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "callee": "_jsonField",
+      "arguments": [
+        "VIPpoints",
+        "_jsonInt"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "callee": "_jsonInt",
+      "arguments": [
+        "inst.stateMemory.VIPpoints"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "callee": "_jsonObject",
+      "arguments": [
+        "inputBody"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "callee": "IDmnLite",
+      "arguments": [
+        "inst.dmnLiteAddress"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "callee": "require",
+      "arguments": [
+        "bytes.length != 0",
+        "dmn cid not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "callee": "bytes",
+      "arguments": [
+        "br.dmnCid"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "callee": "dmnLite.requestDMNDecision",
+      "arguments": [
+        "inst.dmnEvalUrl",
+        "br.dmnCid",
+        "br.decisionId",
+        "inputData"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "callee": "require",
+      "arguments": [
+        "requestId != bytes32",
+        "dmn request failed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "callee": "bytes32",
+      "arguments": [
+        "0"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv",
+      "callee": "BusinessRuleRequested",
+      "arguments": [
+        "instanceId",
+        "BusinessRuleKey.Activity_0b1f7uv",
+        "requestId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "callee": "require",
+      "arguments": [
+        "br.exists",
+        "business rule not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "callee": "require",
+      "arguments": [
+        "br.state == ElementState.WAITING_FOR_CONFIRMATION",
+        "business rule not waiting"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "callee": "require",
+      "arguments": [
+        "br.requestId != bytes32",
+        "business rule not requested"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "callee": "bytes32",
+      "arguments": [
+        "0"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "callee": "_checkBusinessRuleCaller",
+      "arguments": [
+        "inst",
+        "br"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "callee": "IDmnLite",
+      "arguments": [
+        "inst.dmnLiteAddress"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "callee": "dmnLite.getRequestStatus",
+      "arguments": [
+        "br.requestId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "callee": "require",
+      "arguments": [
+        "exists",
+        "dmn request missing"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "callee": "require",
+      "arguments": [
+        "requester == address",
+        "unexpected dmn requester"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "callee": "address",
+      "arguments": [
+        "this"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "callee": "require",
+      "arguments": [
+        "requestState == DMN_REQUEST_FULFILLED",
+        "dmn result not ready"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "callee": "dmnLite.getRawByRequestId",
+      "arguments": [
+        "br.requestId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "callee": "_extractJsonInt",
+      "arguments": [
+        "raw",
+        "VIPLevel"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Activity_0b1f7uv_Continue",
+      "callee": "BusinessRuleCompleted",
+      "arguments": [
+        "instanceId",
+        "BusinessRuleKey.Activity_0b1f7uv",
+        "br.requestId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "StartEvent_1jtgn3j",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "StartEvent_1jtgn3j",
+      "callee": "require",
+      "arguments": [
+        "ev.exists",
+        "event not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "StartEvent_1jtgn3j",
+      "callee": "require",
+      "arguments": [
+        "ev.state == ElementState.ENABLED",
+        "event state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "StartEvent_1jtgn3j",
+      "callee": "ActionEventDone",
+      "arguments": [
+        "instanceId",
+        "EventKey.StartEvent_1jtgn3j"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_045i10y_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_045i10y_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_045i10y_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_045i10y_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_045i10y_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_045i10y",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_04ikf2n_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_04ikf2n_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_04ikf2n_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_04ikf2n_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_04ikf2n_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_04ikf2n",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0m9p3da_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0m9p3da_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0m9p3da_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0m9p3da_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0m9p3da_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_0m9p3da",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0o8eyir_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0o8eyir_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0o8eyir_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0o8eyir_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0o8eyir_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_0o8eyir",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0r9lypd_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0r9lypd_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0r9lypd_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0r9lypd_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0r9lypd_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_0r9lypd",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0vlxzcv_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0vlxzcv_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0vlxzcv_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0vlxzcv_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_0vlxzcv_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_0vlxzcv",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_104h2tt_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_104h2tt_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_104h2tt_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_104h2tt_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_104h2tt_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_104h2tt",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1em0ee4_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1em0ee4_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1em0ee4_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1em0ee4_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1em0ee4_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_1em0ee4",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1etcmvl_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1etcmvl_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1etcmvl_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1etcmvl_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1etcmvl_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_1etcmvl",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1joj7ca_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1joj7ca_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1joj7ca_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1joj7ca_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1joj7ca_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_1joj7ca",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1ljlm4g_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1ljlm4g_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1ljlm4g_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1ljlm4g_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1ljlm4g_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_1ljlm4g",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1nlagx2_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1nlagx2_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1nlagx2_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1nlagx2_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1nlagx2_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_1nlagx2",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1xm9dxy_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1xm9dxy_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1xm9dxy_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1xm9dxy_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Message_1xm9dxy_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_1xm9dxy",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_106je4z",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_106je4z",
+      "callee": "require",
+      "arguments": [
+        "g.exists",
+        "gateway not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_106je4z",
+      "callee": "require",
+      "arguments": [
+        "g.state == ElementState.ENABLED",
+        "gateway state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_106je4z",
+      "callee": "GatewayDone",
+      "arguments": [
+        "instanceId",
+        "GatewayKey.ExclusiveGateway_106je4z"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_0hs3ztq",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_0hs3ztq",
+      "callee": "require",
+      "arguments": [
+        "g.exists",
+        "gateway not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_0hs3ztq",
+      "callee": "require",
+      "arguments": [
+        "g.state == ElementState.ENABLED",
+        "gateway state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_0hs3ztq",
+      "callee": "GatewayDone",
+      "arguments": [
+        "instanceId",
+        "GatewayKey.ExclusiveGateway_0hs3ztq"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_0nzwv7v",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_0nzwv7v",
+      "callee": "require",
+      "arguments": [
+        "g.exists",
+        "gateway not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_0nzwv7v",
+      "callee": "require",
+      "arguments": [
+        "g.state == ElementState.ENABLED",
+        "gateway state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_0nzwv7v",
+      "callee": "GatewayDone",
+      "arguments": [
+        "instanceId",
+        "GatewayKey.ExclusiveGateway_0nzwv7v"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Gateway_1jhfnrm",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Gateway_1jhfnrm",
+      "callee": "require",
+      "arguments": [
+        "g.exists",
+        "gateway not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Gateway_1jhfnrm",
+      "callee": "require",
+      "arguments": [
+        "g.state == ElementState.ENABLED",
+        "gateway state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Gateway_1jhfnrm",
+      "callee": "GatewayDone",
+      "arguments": [
+        "instanceId",
+        "GatewayKey.Gateway_1jhfnrm"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Gateway_1atxr3y",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Gateway_1atxr3y",
+      "callee": "require",
+      "arguments": [
+        "g.exists",
+        "gateway not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Gateway_1atxr3y",
+      "callee": "require",
+      "arguments": [
+        "g.state == ElementState.ENABLED",
+        "gateway state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Gateway_1atxr3y",
+      "callee": "GatewayDone",
+      "arguments": [
+        "instanceId",
+        "GatewayKey.Gateway_1atxr3y"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EventBasedGateway_1fxpmyn",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EventBasedGateway_1fxpmyn",
+      "callee": "require",
+      "arguments": [
+        "g.exists",
+        "gateway not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EventBasedGateway_1fxpmyn",
+      "callee": "require",
+      "arguments": [
+        "g.state == ElementState.ENABLED",
+        "gateway state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EventBasedGateway_1fxpmyn",
+      "callee": "GatewayDone",
+      "arguments": [
+        "instanceId",
+        "GatewayKey.EventBasedGateway_1fxpmyn"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EndEvent_0366pfz",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EndEvent_0366pfz",
+      "callee": "require",
+      "arguments": [
+        "ev.exists",
+        "event not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EndEvent_0366pfz",
+      "callee": "require",
+      "arguments": [
+        "ev.state == ElementState.ENABLED",
+        "event state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EndEvent_0366pfz",
+      "callee": "ActionEventDone",
+      "arguments": [
+        "instanceId",
+        "EventKey.EndEvent_0366pfz"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EndEvent_08edp7f",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EndEvent_08edp7f",
+      "callee": "require",
+      "arguments": [
+        "ev.exists",
+        "event not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EndEvent_08edp7f",
+      "callee": "require",
+      "arguments": [
+        "ev.state == ElementState.ENABLED",
+        "event state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EndEvent_08edp7f",
+      "callee": "ActionEventDone",
+      "arguments": [
+        "instanceId",
+        "EventKey.EndEvent_08edp7f"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EndEvent_146eii4",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EndEvent_146eii4",
+      "callee": "require",
+      "arguments": [
+        "ev.exists",
+        "event not set"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EndEvent_146eii4",
+      "callee": "require",
+      "arguments": [
+        "ev.state == ElementState.ENABLED",
+        "event state not allowed"
+      ]
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "EndEvent_146eii4",
+      "callee": "ActionEventDone",
+      "arguments": [
+        "instanceId",
+        "EventKey.EndEvent_146eii4"
+      ]
+    }
+  ],
+  "if_conditions": [
+    {
+      "contract": "GeneratedContract",
+      "function": "_checkParticipant",
+      "condition": "!participant.isMulti"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_checkBusinessRuleCaller",
+      "condition": "!inst.enforceBusinessRuleCaller || br.callerRestricted"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_stringToInt",
+      "condition": "data.length == 0"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_stringToInt",
+      "condition": "data[0] == bytes1"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_jsonInt",
+      "condition": "value == 0"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_jsonInt",
+      "condition": "negative"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_jsonAppendField",
+      "condition": "bytes.length == 0"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_skipWhitespace",
+      "condition": "ch != 0x20 && ch != 0x09 && ch != 0x0A && ch != 0x0D"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "condition": "data.length == 0 || keyBytes.length == 0"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "condition": "data[i] != bytes1"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "condition": "data[i + 1 + j] != keyBytes[j]"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "condition": "!matches || data[i + 1 + keyBytes.length] != bytes1"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "condition": "cursor >= data.length || data[cursor] != bytes1"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "condition": "cursor >= data.length"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "condition": "ch == bytes1"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "condition": "data[valueEnd] == bytes1 && valueEnd == valueStart || data[valueEnd - 1] != bytes1"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "condition": "ch == bytes1 || ch == bytes1"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "condition": "c < bytes1 || c > bytes1 && c < bytes1 || c > bytes1"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "condition": "ch == bytes1 || ch >= bytes1 && ch <= bytes1"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_findJsonValue",
+      "condition": "c != bytes1 && c != bytes1 && c < bytes1 || c > bytes1"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonBool",
+      "condition": "hashed == keccak256"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "_extractJsonBool",
+      "condition": "hashed == keccak256"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_106je4z",
+      "condition": "inst.stateMemory.Confirm == true"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_106je4z",
+      "condition": "inst.stateMemory.Confirm == false"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_0nzwv7v",
+      "condition": "inst.stateMemory.Cancel == false"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "ExclusiveGateway_0nzwv7v",
+      "condition": "inst.stateMemory.Cancel == true"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Gateway_1jhfnrm",
+      "condition": "inst.stateMemory.VIPLevel < 3"
+    },
+    {
+      "contract": "GeneratedContract",
+      "function": "Gateway_1jhfnrm",
+      "condition": "inst.stateMemory.VIPLevel == 3"
+    }
+  ],
+  "string_literals": [
+    "\"",
+    ",",
+    "-",
+    ".",
+    "0",
+    "0x09",
+    "0x0A",
+    "0x0D",
+    "0x20",
+    "1",
+    "10",
+    "11",
+    "12",
+    "13",
+    "2",
+    "3",
+    "4",
+    "48",
+    "5",
+    "57",
+    "6",
+    "7",
+    "8",
+    "9",
+    ":",
+    "A",
+    "TRUE",
+    "VIPLevel",
+    "VIPpoints",
+    "Z",
+    "\\",
+    "a",
+    "already initialized",
+    "business rule caller not allowed",
+    "business rule caller not configured",
+    "business rule not enabled",
+    "business rule not requested",
+    "business rule not set",
+    "business rule not waiting",
+    "contract not initialized",
+    "dmn cid not set",
+    "dmn eval url not set",
+    "dmn lite not set",
+    "dmn request failed",
+    "dmn request missing",
+    "dmn result not ready",
+    "event not set",
+    "event state not allowed",
+    "f",
+    "false",
+    "gateway not set",
+    "gateway state not allowed",
+    "identity contract not set",
+    "instance already exists",
+    "instance not found",
+    "invalid int string",
+    "invalid json bool",
+    "invalid slice",
+    "json bool not found",
+    "json number not found",
+    "json string not found",
+    "message not set",
+    "message state not allowed",
+    "not owner",
+    "participant not allowed",
+    "participant not set",
+    "participant org not allowed",
+    "t",
+    "true",
+    "unexpected dmn requester",
+    "unterminated json string",
+    "z",
+    "{",
+    "}"
+  ]
+}

@@ -2,19 +2,21 @@
 
 这个实验项目用于验证：**B2CDSL 中定义的结构语义与控制语义，是否被当前 `newTranslator` 正确保留到 Go 链码和 Solidity 合约中。**
 
-它不是部署工具，也不验证 Fabric / Geth 运行环境；它只关注 **DSL 到目标代码的语义落实正确性**。
+它不是部署工具，也不验证 Fabric / Geth 运行环境；它只关注 **DSL 到目标代码的静态一致性证据**。
+
+当前断言体系已按确认稿 [2025.04.14-实验二断言fix.md](/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/2025.04.14-实验二断言fix.md) 对齐，不再沿用 `check.ocl` 那类目标模型合法性断言。
 
 ## 实验目标
 
-给定一份 BPMN/DMN：
+给定一份 DSL 正例：
 
-1. 调用当前 `newTranslator` 生成最新 `.b2c`
+1. 直接复用 `src/newTranslator/MDAcheck/bpmn-positive/b2c/` 中的正例 `.b2c`
 2. 基于 `.b2c` 继续生成 `.go` 和 `.sol`
 3. 分别解析 B2CDSL、Go AST、Solidity AST
 4. 按 DSL -> Go / Solidity 映射契约做自动校验
 5. 输出结构化报告和批量汇总结果
 
-重点验证的语义包括：
+重点验证的元素与控制语义包括：
 
 - `participants`
 - `globals`
@@ -29,16 +31,33 @@
 
 **B2CDSL 中的关键业务元素，在经过代码生成后，是否仍然能在 Go 链码和 Solidity 合约中找到结构上和控制语义上对应的实现证据。**
 
+它不直接回答：
+
+- Go 与 Solidity 是否运行时行为完全等价
+- 外部 DMN / Oracle 返回值是否具有真实业务语义正确性
+- 链上部署和执行环境差异是否会影响结果
+
 ## 当前验证契约
+
+当前断言分成两组：
+
+- 结构一致性：SV01-SV07
+- 控制语义一致性：SV08-SV14
 
 1. DSL `globals` -> Go `StateMemory` 字段 / Solidity `StateMemory` 槽位或状态变量
 2. DSL `participants` -> Go 身份校验逻辑 / Solidity `_checkParticipant` / `msg.sender` 约束
-3. DSL `message` -> Go `<Message>_Send / <Message>_Complete` / Solidity `<Message>_Send`
+3. DSL `message` -> Go `<Message>_Send / <Message>_Complete` / Solidity 消息处理函数与消息状态字段
 4. DSL `gateway` -> Go `if/switch` / Solidity `if/require`
 5. DSL `event` -> Go 事件入口 / Solidity action event 推进函数
-6. DSL `businessrule` -> Go 规则处理函数或外部调用 / Solidity `IDmnLite` 请求与 continuation 逻辑
+6. DSL `businessrule` -> Go 规则处理函数或外部调用 / Solidity `IDmnLite` 请求、轮询、结果回写与 continuation 逻辑
 7. DSL `oracletask` -> Go action-event 风格处理函数 / Solidity `IOracle` 调用点
 8. DSL `flows` -> 条件逻辑 + 状态迁移 + 变量赋值
+9. Go 消息处理 -> `ChangeMsgState` 或等价推进逻辑
+10. Solidity 消息处理 -> `m.state = ...` 或等价推进逻辑
+11. Go 业务规则 -> 外部规则调用与继续处理控制证据
+12. Solidity 业务规则 -> 请求发起、状态查询、结果读取控制证据
+13. Solidity 业务规则 -> `output mapping` 对应的结果回写控制证据
+14. compare / parallel flow -> 显式条件判断、guard 或 ready 检查
 
 ## 项目特点
 
@@ -55,11 +74,18 @@
 
 ```text
 Experiment/new/exp2_semantic_verification/
+├── ASSERTION_TABLE.md      # 面向 DSL->目标代码语义保真的断言表（可读版）
+├── config/
+│   └── assertion_table.json # 断言表（机器可读）
 ├── cases/                  # case 清单
-│   ├── BikeRental/
-│   └── Blood_analysis/
+│   ├── Blood_analysis/
+│   ├── Hotel_Booking/
+│   └── ...
+├── cases/_legacy_disabled/ # 归档的旧 BPMN 驱动 case，不参与当前批量实验
 ├── results/
 │   ├── cases/              # 单 case 全部中间产物与报告
+│   ├── assertion_coverage.json
+│   ├── assertion_coverage.md
 │   ├── exp2_summary.json
 │   ├── exp2_summary.md
 │   └── run_log.json
@@ -81,22 +107,39 @@ Experiment/new/exp2_semantic_verification/
 一轮完整实验的执行逻辑如下：
 
 1. 从 `cases/` 中读取 case 清单
-2. 对每个 BPMN 调用当前 `newTranslator`，生成新的 `.b2c`
-3. 基于 `.b2c` 调用当前生成链路，生成 `.go` 和 `.sol`
+2. 对每个 case 直接引用 `MDAcheck/bpmn-positive/b2c` 中对应的 `.b2c`
+3. 基于这份 `.b2c` 调用当前生成链路，生成 `.go` 和 `.sol`
 4. 解析 B2CDSL，抽取统一结构 JSON
 5. 解析 Go，抽取统一 AST JSON
 6. 解析 Solidity，抽取统一 AST JSON
 7. 基于映射契约逐项校验 DSL -> Go
 8. 基于映射契约逐项校验 DSL -> Solidity
-9. 输出单 case 报告与批量汇总表
+9. 在单 case 内根据断言表检查该 case 是否满足/违反各条断言
+10. 输出单 case 报告与批量汇总表
+
+断言覆盖统计里，case 默认按 `positive` 处理；如果你要加入负例，请在 `cases/<case>/case.json` 中声明：
+
+```json
+{
+  "case_name": "invalid_xxx",
+  "case_type": "negative"
+}
+```
+
+当前默认数据源是：
+
+- `src/newTranslator/MDAcheck/bpmn-positive/b2c/*.b2c`
+
+当前 `cases/` 目录中的启用 case 名称、目录名和生成产物文件名保持一致。
+旧的 BPMN 驱动样例已归档到 `cases/_legacy_disabled/`，不参与默认批量运行。
 
 这意味着当前实验结果默认反映的是：
 
-- 当前仓库中的 BPMN / DMN 输入
+- `MDAcheck` 已确认通过模型合法性校验的正例 DSL
 - 当前版本的 `newTranslator`
-- 当前重新生成的 `.b2c` / `.go` / `.sol`
+- 基于这些 DSL 重新生成的 `.go` / `.sol`
 
-而不是历史运行目录中遗留的旧产物。
+而不是历史运行目录中遗留的旧产物，也不是实验二自己从 BPMN 重新生成出来的 DSL。
 
 ## 运行方式
 
@@ -164,15 +207,17 @@ cd /root/code/ChainCollab/Experiment/new/exp2_semantic_verification
 
 - `scripts/verify_dsl_go_semantics.py`
   - 执行 DSL -> Go 语义保真校验
-  - 输出 `dsl_go_report.json`
+  - 输出 `go_semantic_report.json`
 
 - `scripts/verify_dsl_sol_semantics.py`
   - 执行 DSL -> Solidity 语义保真校验
-  - 输出 `dsl_sol_report.json`
+  - 输出 `solidity_semantic_report.json`
 
 - `scripts/summary_report.py`
   - 汇总多个 case 的结果
-  - 输出 `exp2_summary.json` 和 `exp2_summary.md`
+  - 优先读取每个 case 已经产出的 `case_assertions.json`
+  - 再按 `config/assertion_table.json` 聚合正/负例断言覆盖
+  - 输出 `exp2_summary.json`、`exp2_summary.md`、`assertion_coverage.json` 和 `assertion_coverage.md`
 
 - `scripts/common.py`
   - 放公共逻辑
@@ -182,22 +227,25 @@ cd /root/code/ChainCollab/Experiment/new/exp2_semantic_verification
 
 每个 case 会输出：
 
-- `results/cases/<case>/<case>.b2c`
+- `results/cases/<case>/dsl.b2c`
   - 当前 `newTranslator` 重新生成的 DSL
-- `results/cases/<case>/<case>.go`
+- `results/cases/<case>/chaincode.go`
   - 当前 `newTranslator` 重新生成的 Go 链码
-- `results/cases/<case>/<case>.sol`
+- `results/cases/<case>/contract.sol`
   - 当前 `newTranslator` 重新生成的 Solidity 合约
 - `results/cases/<case>/dsl_ast.json`
   - B2CDSL 统一解析结果
 - `results/cases/<case>/go_ast.json`
   - Go AST 统一解析结果
-- `results/cases/<case>/sol_ast.json`
+- `results/cases/<case>/solidity_ast.json`
   - Solidity AST 统一解析结果
-- `results/cases/<case>/dsl_go_report.json`
+- `results/cases/<case>/go_semantic_report.json`
   - 单案例 DSL -> Go 结构化验证报告
-- `results/cases/<case>/dsl_sol_report.json`
+- `results/cases/<case>/solidity_semantic_report.json`
   - 单案例 DSL -> Solidity 结构化验证报告
+- `results/cases/<case>/case_assertions.json`
+  - 单案例断言检查结果
+  - 记录该 case 对 `SV01-SV14` 是 `satisfied`、`violated`、`triggered`、`not_triggered` 还是 `unobserved`
 
 批量汇总输出：
 
@@ -207,6 +255,17 @@ cd /root/code/ChainCollab/Experiment/new/exp2_semantic_verification
   - 批量汇总 JSON
 - [exp2_summary.md](/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/exp2_summary.md)
   - Markdown 汇总表
+- [assertion_coverage.json](/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/assertion_coverage.json)
+  - 断言覆盖统计 JSON（按断言 ID 聚合正例通过率与负例触发率）
+- [assertion_coverage.md](/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/assertion_coverage.md)
+  - 断言覆盖统计 Markdown
+
+断言表文件：
+
+- [ASSERTION_TABLE.md](/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/ASSERTION_TABLE.md)
+  - 人类可读的断言体系说明，已与 2025-04-14 确认稿对齐
+- [assertion_table.json](/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/config/assertion_table.json)
+  - 机器可读断言配置
 
 ## 指标说明
 
@@ -302,10 +361,10 @@ cd /root/code/ChainCollab/Experiment/new/exp2_semantic_verification
 
 例如可查看：
 
-- [BikeRental dsl_go_report.json](/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/BikeRental/dsl_go_report.json)
-- [BikeRental dsl_sol_report.json](/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/BikeRental/dsl_sol_report.json)
-- [Blood_analysis dsl_go_report.json](/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/Blood_analysis/dsl_go_report.json)
-- [Blood_analysis dsl_sol_report.json](/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/Blood_analysis/dsl_sol_report.json)
+- [BikeRental go_semantic_report.json](/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/BikeRental/go_semantic_report.json)
+- [BikeRental solidity_semantic_report.json](/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/BikeRental/solidity_semantic_report.json)
+- [Blood_analysis go_semantic_report.json](/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/Blood_analysis/go_semantic_report.json)
+- [Blood_analysis solidity_semantic_report.json](/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/Blood_analysis/solidity_semantic_report.json)
 
 ## 依赖与复用
 

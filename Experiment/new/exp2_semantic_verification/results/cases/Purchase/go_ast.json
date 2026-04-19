@@ -199,7 +199,7 @@
           "type": "string"
         },
         {
-          "name": "Time",
+          "name": "Time2",
           "type": "string"
         }
       ]
@@ -272,7 +272,7 @@
       "type": "string"
     },
     {
-      "name": "Time",
+      "name": "Time2",
       "type": "string"
     }
   ],
@@ -865,6 +865,29 @@
     },
     {
       "name": "Message_14wu8ts_Complete",
+      "receiver": "*SmartContract",
+      "params": [
+        "contractapi.TransactionContextInterface",
+        "string"
+      ],
+      "results": [
+        "error"
+      ]
+    },
+    {
+      "name": "Message_15b83n1_Send",
+      "receiver": "*SmartContract",
+      "params": [
+        "contractapi.TransactionContextInterface",
+        "string",
+        "string"
+      ],
+      "results": [
+        "error"
+      ]
+    },
+    {
+      "name": "Message_15b83n1_Complete",
       "receiver": "*SmartContract",
       "params": [
         "contractapi.TransactionContextInterface",
@@ -1596,6 +1619,30 @@
       "condition": "msg.MsgState != WAITINGFORCONFIRMATION"
     },
     {
+      "function": "Message_15b83n1_Send",
+      "condition": "err != nil"
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "condition": "cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false"
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "condition": "msg.MsgState != ENABLED"
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "condition": "err != nil"
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "condition": "cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false"
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "condition": "msg.MsgState != WAITINGFORCONFIRMATION"
+    },
+    {
       "function": "Message_1f0gefc_Send",
       "condition": "err != nil"
     },
@@ -1662,6 +1709,10 @@
     {
       "function": "Gateway_13i0b7w",
       "condition": "instance.InstanceStateMemory.Discount == false"
+    },
+    {
+      "function": "Gateway_13i0b7w",
+      "condition": "instance.InstanceStateMemory.Discount == true"
     },
     {
       "function": "Event_0e3j88g",
@@ -3820,6 +3871,100 @@
     },
     {
       "function": "Message_14wu8ts_Complete",
+      "lhs": [
+        "errorMessage"
+      ],
+      "rhs": [
+        "fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "lhs": [
+        "stub"
+      ],
+      "rhs": [
+        "ctx.GetStub()"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "lhs": [
+        "instance",
+        "err"
+      ],
+      "rhs": [
+        "cc.GetInstance(ctx, instanceID)"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "lhs": [
+        "msg",
+        "err"
+      ],
+      "rhs": [
+        "cc.ReadMsg(ctx, instanceID, \"Message_15b83n1\")"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "lhs": [
+        "errorMessage"
+      ],
+      "rhs": [
+        "fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "lhs": [
+        "errorMessage"
+      ],
+      "rhs": [
+        "fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "lhs": [
+        "stub"
+      ],
+      "rhs": [
+        "ctx.GetStub()"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "lhs": [
+        "instance",
+        "err"
+      ],
+      "rhs": [
+        "cc.GetInstance(ctx, instanceID)"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "lhs": [
+        "msg",
+        "err"
+      ],
+      "rhs": [
+        "cc.ReadMsg(ctx, instanceID, \"Message_15b83n1\")"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "lhs": [
+        "errorMessage"
+      ],
+      "rhs": [
+        "fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
       "lhs": [
         "errorMessage"
       ],
@@ -6031,6 +6176,104 @@
       ]
     },
     {
+      "function": "Message_15b83n1_Send",
+      "callee": "ctx.GetStub",
+      "args": []
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "callee": "fmt.Sprintf",
+      "args": [
+        "\"Participant %s is not allowed to send the message\"",
+        "msg.SendParticipantID"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "errorMessage"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "callee": "fmt.Errorf",
+      "args": [
+        "errorMessage"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "callee": "fmt.Sprintf",
+      "args": [
+        "\"Message state %s is not allowed\"",
+        "msg.MessageID"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "errorMessage"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "callee": "fmt.Errorf",
+      "args": [
+        "errorMessage"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "callee": "ctx.GetStub",
+      "args": []
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "callee": "fmt.Sprintf",
+      "args": [
+        "\"Participant %s is not allowed to send the message\"",
+        "msg.SendParticipantID"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "callee": "fmt.Println",
+      "args": [
+        "errorMessage"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "callee": "fmt.Errorf",
+      "args": [
+        "errorMessage"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "callee": "fmt.Sprintf",
+      "args": [
+        "\"Event state %s is not allowed\"",
+        "msg.MessageID"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "callee": "fmt.Println",
+      "args": [
+        "errorMessage"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "callee": "fmt.Errorf",
+      "args": [
+        "errorMessage"
+      ]
+    },
+    {
       "function": "Message_1f0gefc_Send",
       "callee": "ctx.GetStub",
       "args": []
@@ -8134,7 +8377,7 @@
         "\"Participant_0jwk4tk\"",
         "\"\"",
         "DISABLED",
-        "`{\"schema\": \"{\\\"properties\\\":{\\\"num\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"},\\\"time\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}`"
+        "`{\"schema\": \"{\\\"properties\\\":{\\\"num\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"},\\\"time2\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}`"
       ]
     },
     {
@@ -8177,6 +8420,20 @@
         "\"\"",
         "DISABLED",
         "`{\"schema\": \"{\\\"properties\\\":{\\\"MessageContent\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}`"
+      ]
+    },
+    {
+      "function": "CreateInstance",
+      "callee": "cc.CreateMessage",
+      "args": [
+        "ctx",
+        "\u0026instance",
+        "\"Message_15b83n1\"",
+        "\"Participant_0oa2za9\"",
+        "\"Participant_0jwk4tk\"",
+        "\"\"",
+        "DISABLED",
+        "`{\"schema\": \"{}\"}`"
       ]
     },
     {
@@ -9418,6 +9675,16 @@
     },
     {
       "function": "Message_08ms1jj_Complete",
+      "callee": "cc.ChangeMsgState",
+      "args": [
+        "ctx",
+        "instance",
+        "\"Message_0g7m9tf\"",
+        "ENABLED"
+      ]
+    },
+    {
+      "function": "Message_08ms1jj_Complete",
       "callee": "cc.SetInstance",
       "args": [
         "ctx",
@@ -10433,6 +10700,258 @@
       ]
     },
     {
+      "function": "Message_15b83n1_Send",
+      "callee": "ctx.GetStub",
+      "args": []
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "callee": "cc.GetInstance",
+      "args": [
+        "ctx",
+        "instanceID"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "callee": "cc.ReadMsg",
+      "args": [
+        "ctx",
+        "instanceID",
+        "\"Message_15b83n1\""
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "callee": "cc.check_participant",
+      "args": [
+        "ctx",
+        "instanceID",
+        "msg.SendParticipantID"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "callee": "fmt.Sprintf",
+      "args": [
+        "\"Participant %s is not allowed to send the message\"",
+        "msg.SendParticipantID"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "errorMessage"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "callee": "fmt.Errorf",
+      "args": [
+        "errorMessage"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "callee": "fmt.Sprintf",
+      "args": [
+        "\"Message state %s is not allowed\"",
+        "msg.MessageID"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "errorMessage"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "callee": "fmt.Errorf",
+      "args": [
+        "errorMessage"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "callee": "cc.ChangeMsgFireflyTranID",
+      "args": [
+        "ctx",
+        "instance",
+        "fireflyTranID",
+        "msg.MessageID"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "callee": "cc.ChangeMsgState",
+      "args": [
+        "ctx",
+        "instance",
+        "\"Message_15b83n1\"",
+        "COMPLETED"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "callee": "stub.SetEvent",
+      "args": [
+        "\"Message_15b83n1\"",
+        "[]byte(\"Message is waiting for confirmation\")"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "callee": "[]byte",
+      "args": [
+        "\"Message is waiting for confirmation\""
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "callee": "cc.SetInstance",
+      "args": [
+        "ctx",
+        "instance"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Send",
+      "callee": "cc.SetInstance",
+      "args": [
+        "ctx",
+        "instance"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "callee": "ctx.GetStub",
+      "args": []
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "callee": "cc.GetInstance",
+      "args": [
+        "ctx",
+        "instanceID"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "callee": "cc.ReadMsg",
+      "args": [
+        "ctx",
+        "instanceID",
+        "\"Message_15b83n1\""
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "callee": "cc.check_participant",
+      "args": [
+        "ctx",
+        "instanceID",
+        "msg.ReceiveParticipantID"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "callee": "fmt.Sprintf",
+      "args": [
+        "\"Participant %s is not allowed to send the message\"",
+        "msg.SendParticipantID"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "callee": "fmt.Println",
+      "args": [
+        "errorMessage"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "callee": "fmt.Errorf",
+      "args": [
+        "errorMessage"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "callee": "fmt.Sprintf",
+      "args": [
+        "\"Event state %s is not allowed\"",
+        "msg.MessageID"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "callee": "fmt.Println",
+      "args": [
+        "errorMessage"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "callee": "fmt.Errorf",
+      "args": [
+        "errorMessage"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "callee": "cc.ChangeMsgState",
+      "args": [
+        "ctx",
+        "instance",
+        "msg.MessageID",
+        "COMPLETED"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "callee": "stub.SetEvent",
+      "args": [
+        "\"Message_15b83n1\"",
+        "[]byte(\"Message has been done\")"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "callee": "[]byte",
+      "args": [
+        "\"Message has been done\""
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "callee": "cc.SetInstance",
+      "args": [
+        "ctx",
+        "instance"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "callee": "cc.ChangeMsgState",
+      "args": [
+        "ctx",
+        "instance",
+        "\"Message_08ms1jj\"",
+        "ENABLED"
+      ]
+    },
+    {
+      "function": "Message_15b83n1_Complete",
+      "callee": "cc.SetInstance",
+      "args": [
+        "ctx",
+        "instance"
+      ]
+    },
+    {
       "function": "Message_1f0gefc_Send",
       "callee": "ctx.GetStub",
       "args": []
@@ -10983,6 +11502,16 @@
     },
     {
       "function": "Gateway_13i0b7w",
+      "callee": "cc.ChangeMsgState",
+      "args": [
+        "ctx",
+        "instance",
+        "\"Message_15b83n1\"",
+        "ENABLED"
+      ]
+    },
+    {
+      "function": "Gateway_13i0b7w",
       "callee": "cc.SetInstance",
       "args": [
         "ctx",
@@ -11339,6 +11868,7 @@
     "Message_0mcktm6",
     "Message_0q9hvem",
     "Message_14wu8ts",
+    "Message_15b83n1",
     "Message_1f0gefc",
     "Oracle:v1",
     "Participant %s does not exist",
@@ -11386,9 +11916,10 @@
     "{\"schema\": \"{\\\"properties\\\":{\\\"MessageContent\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"},\\\"priceOK\\\":{\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"MessageContent\\\",\\\"priceOK\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
     "{\"schema\": \"{\\\"properties\\\":{\\\"MessageContent\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
     "{\"schema\": \"{\\\"properties\\\":{\\\"Price\\\":{\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\"\\\"},\\\"Time\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"Price\\\",\\\"Time\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
-    "{\"schema\": \"{\\\"properties\\\":{\\\"num\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"},\\\"time\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+    "{\"schema\": \"{\\\"properties\\\":{\\\"num\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"},\\\"time2\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
     "{\"schema\": \"{\\\"properties\\\":{\\\"orderContent\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"},\\\"productAvalibale\\\":{\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"is product avaliable\\\"}},\\\"required\\\":[\\\"orderContent\\\",\\\"productAvalibale\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
     "{\"schema\": \"{\\\"properties\\\":{\\\"sale\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"sale\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+    "{\"schema\": \"{}\"}",
     "无法将实例元素转换为ActionEvent",
     "无法将实例元素转换为BusinessRule",
     "无法将实例元素转换为Gateway",

@@ -163,6 +163,10 @@
       "name": "StateMemory",
       "fields": [
         {
+          "name": "VIPpoints",
+          "type": "int"
+        },
+        {
           "name": "Confirmation",
           "type": "bool"
         },
@@ -175,6 +179,10 @@
           "type": "string"
         },
         {
+          "name": "ExternalAvailable",
+          "type": "bool"
+        },
+        {
           "name": "Invoice",
           "type": "bool"
         },
@@ -183,12 +191,12 @@
           "type": "string"
         },
         {
-          "name": "InvoiceType",
-          "type": "string"
+          "name": "InvoiceAvailable",
+          "type": "bool"
         },
         {
-          "name": "InvoiceTypeAvailable",
-          "type": "bool"
+          "name": "InvoiceType",
+          "type": "string"
         },
         {
           "name": "Invoice_data",
@@ -201,14 +209,6 @@
         {
           "name": "Is_available",
           "type": "bool"
-        },
-        {
-          "name": "MembershipId",
-          "type": "int"
-        },
-        {
-          "name": "MembershipLevel",
-          "type": "int"
         },
         {
           "name": "Motivation",
@@ -288,6 +288,10 @@
   ],
   "state_fields": [
     {
+      "name": "VIPpoints",
+      "type": "int"
+    },
+    {
       "name": "Confirmation",
       "type": "bool"
     },
@@ -300,6 +304,10 @@
       "type": "string"
     },
     {
+      "name": "ExternalAvailable",
+      "type": "bool"
+    },
+    {
       "name": "Invoice",
       "type": "bool"
     },
@@ -308,12 +316,12 @@
       "type": "string"
     },
     {
-      "name": "InvoiceType",
-      "type": "string"
+      "name": "InvoiceAvailable",
+      "type": "bool"
     },
     {
-      "name": "InvoiceTypeAvailable",
-      "type": "bool"
+      "name": "InvoiceType",
+      "type": "string"
     },
     {
       "name": "Invoice_data",
@@ -326,14 +334,6 @@
     {
       "name": "Is_available",
       "type": "bool"
-    },
-    {
-      "name": "MembershipId",
-      "type": "int"
-    },
-    {
-      "name": "MembershipLevel",
-      "type": "int"
     },
     {
       "name": "Motivation",
@@ -1218,17 +1218,6 @@
     },
     {
       "name": "Event_0366pfz",
-      "receiver": "*SmartContract",
-      "params": [
-        "contractapi.TransactionContextInterface",
-        "string"
-      ],
-      "results": [
-        "error"
-      ]
-    },
-    {
-      "name": "Event_08edp7f",
       "receiver": "*SmartContract",
       "params": [
         "contractapi.TransactionContextInterface",
@@ -2174,15 +2163,11 @@
     },
     {
       "function": "ExclusiveGateway_0nzwv7v",
-      "condition": "instance.InstanceStateMemory.Invoice == false"
+      "condition": "instance.InstanceStateMemory.InvoiceAvailable == true"
     },
     {
       "function": "ExclusiveGateway_0nzwv7v",
-      "condition": "instance.InstanceStateMemory.Invoice == false"
-    },
-    {
-      "function": "ExclusiveGateway_0nzwv7v",
-      "condition": "instance.InstanceStateMemory.Invoice == false"
+      "condition": "instance.InstanceStateMemory.InvoiceAvailable == false"
     },
     {
       "function": "Gateway_1bhtapl",
@@ -2194,11 +2179,11 @@
     },
     {
       "function": "Gateway_1bhtapl",
-      "condition": "instance.InstanceStateMemory.Need_external_provider == false"
+      "condition": "instance.InstanceStateMemory.ExternalAvailable == true"
     },
     {
       "function": "Gateway_1bhtapl",
-      "condition": "instance.InstanceStateMemory.Need_external_provider == false"
+      "condition": "instance.InstanceStateMemory.ExternalAvailable == false"
     },
     {
       "function": "Gateway_04h9e6e",
@@ -2222,14 +2207,6 @@
     },
     {
       "function": "Event_0366pfz",
-      "condition": "actionEvent.EventState != ENABLED"
-    },
-    {
-      "function": "Event_08edp7f",
-      "condition": "err != nil"
-    },
-    {
-      "function": "Event_08edp7f",
       "condition": "actionEvent.EventState != ENABLED"
     },
     {
@@ -5649,44 +5626,6 @@
       ]
     },
     {
-      "function": "Event_08edp7f",
-      "lhs": [
-        "stub"
-      ],
-      "rhs": [
-        "ctx.GetStub()"
-      ]
-    },
-    {
-      "function": "Event_08edp7f",
-      "lhs": [
-        "instance",
-        "err"
-      ],
-      "rhs": [
-        "cc.GetInstance(ctx, instanceID)"
-      ]
-    },
-    {
-      "function": "Event_08edp7f",
-      "lhs": [
-        "actionEvent",
-        "err"
-      ],
-      "rhs": [
-        "cc.ReadEvent(ctx, instanceID, \"Event_08edp7f\")"
-      ]
-    },
-    {
-      "function": "Event_08edp7f",
-      "lhs": [
-        "errorMessage"
-      ],
-      "rhs": [
-        "fmt.Sprintf(\"Event state %s is not allowed\", actionEvent.EventID)"
-      ]
-    },
-    {
       "function": "Event_146eii4",
       "lhs": [
         "stub"
@@ -8708,33 +8647,6 @@
       ]
     },
     {
-      "function": "Event_08edp7f",
-      "callee": "ctx.GetStub",
-      "args": []
-    },
-    {
-      "function": "Event_08edp7f",
-      "callee": "fmt.Sprintf",
-      "args": [
-        "\"Event state %s is not allowed\"",
-        "actionEvent.EventID"
-      ]
-    },
-    {
-      "function": "Event_08edp7f",
-      "callee": "fmt.Println",
-      "args": [
-        "errorMessage"
-      ]
-    },
-    {
-      "function": "Event_08edp7f",
-      "callee": "fmt.Errorf",
-      "args": [
-        "errorMessage"
-      ]
-    },
-    {
       "function": "Event_146eii4",
       "callee": "ctx.GetStub",
       "args": []
@@ -10579,16 +10491,6 @@
       "args": [
         "ctx",
         "\u0026instance",
-        "\"Event_08edp7f\"",
-        "DISABLED"
-      ]
-    },
-    {
-      "function": "CreateInstance",
-      "callee": "cc.CreateActionEvent",
-      "args": [
-        "ctx",
-        "\u0026instance",
         "\"Event_146eii4\"",
         "DISABLED"
       ]
@@ -10614,7 +10516,7 @@
         "\"Participant_0sktaei\"",
         "\"\"",
         "DISABLED",
-        "`{\"schema\": \"{\\\"properties\\\":{\\\"serviceId\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"The required service id\\\"},\\\"membershipId\\\":{\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\"id\\\"}},\\\"required\\\":[\\\"serviceId\\\",\\\"membershipId\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}`"
+        "`{\"schema\": \"{\\\"properties\\\":{\\\"serviceId\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"The required service id\\\"},\\\"VIPpoints\\\":{\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\"points\\\"}},\\\"required\\\":[\\\"serviceId\\\",\\\"VIPpoints\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}`"
       ]
     },
     {
@@ -15594,16 +15496,6 @@
     },
     {
       "function": "ExclusiveGateway_0nzwv7v",
-      "callee": "cc.ChangeEventState",
-      "args": [
-        "ctx",
-        "instance",
-        "\"Event_08edp7f\"",
-        "ENABLED"
-      ]
-    },
-    {
-      "function": "ExclusiveGateway_0nzwv7v",
       "callee": "cc.ChangeMsgState",
       "args": [
         "ctx",
@@ -16021,91 +15913,6 @@
       ]
     },
     {
-      "function": "Event_08edp7f",
-      "callee": "ctx.GetStub",
-      "args": []
-    },
-    {
-      "function": "Event_08edp7f",
-      "callee": "cc.GetInstance",
-      "args": [
-        "ctx",
-        "instanceID"
-      ]
-    },
-    {
-      "function": "Event_08edp7f",
-      "callee": "cc.ReadEvent",
-      "args": [
-        "ctx",
-        "instanceID",
-        "\"Event_08edp7f\""
-      ]
-    },
-    {
-      "function": "Event_08edp7f",
-      "callee": "fmt.Sprintf",
-      "args": [
-        "\"Event state %s is not allowed\"",
-        "actionEvent.EventID"
-      ]
-    },
-    {
-      "function": "Event_08edp7f",
-      "callee": "fmt.Println",
-      "args": [
-        "errorMessage"
-      ]
-    },
-    {
-      "function": "Event_08edp7f",
-      "callee": "fmt.Errorf",
-      "args": [
-        "errorMessage"
-      ]
-    },
-    {
-      "function": "Event_08edp7f",
-      "callee": "cc.ChangeEventState",
-      "args": [
-        "ctx",
-        "instance",
-        "\"Event_08edp7f\"",
-        "COMPLETED"
-      ]
-    },
-    {
-      "function": "Event_08edp7f",
-      "callee": "stub.SetEvent",
-      "args": [
-        "\"Event_08edp7f\"",
-        "[]byte(\"Event has been completed\")"
-      ]
-    },
-    {
-      "function": "Event_08edp7f",
-      "callee": "[]byte",
-      "args": [
-        "\"Event has been completed\""
-      ]
-    },
-    {
-      "function": "Event_08edp7f",
-      "callee": "cc.SetInstance",
-      "args": [
-        "ctx",
-        "instance"
-      ]
-    },
-    {
-      "function": "Event_08edp7f",
-      "callee": "cc.SetInstance",
-      "args": [
-        "ctx",
-        "instance"
-      ]
-    },
-    {
       "function": "Event_146eii4",
       "callee": "ctx.GetStub",
       "args": []
@@ -16347,7 +16154,6 @@
     "Event state %s is not allowed",
     "EventBasedGateway_1fxpmyn",
     "Event_0366pfz",
-    "Event_08edp7f",
     "Event_143ykco",
     "Event_146eii4",
     "Event_1jtgn3j",
@@ -16438,7 +16244,7 @@
     "{\"schema\": \"{\\\"properties\\\":{\\\"payment amount\\\":{\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\"payment amount\\\"}},\\\"required\\\":[\\\"payment amount\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
     "{\"schema\": \"{\\\"properties\\\":{\\\"product Id\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"Delivered product id\\\"}},\\\"required\\\":[\\\"product Id\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
     "{\"schema\": \"{\\\"properties\\\":{\\\"service plan\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"service plan\\\"},\\\"price_quotation\\\":{\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\"Price quotation\\\"},\\\"need_external_provider\\\":{\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"Whether external service providers are required\\\"}},\\\"required\\\":[\\\"service plan\\\",\\\"price_quotation\\\",\\\"need_external_provider\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
-    "{\"schema\": \"{\\\"properties\\\":{\\\"serviceId\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"The required service id\\\"},\\\"membershipId\\\":{\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\"id\\\"}},\\\"required\\\":[\\\"serviceId\\\",\\\"membershipId\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+    "{\"schema\": \"{\\\"properties\\\":{\\\"serviceId\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"The required service id\\\"},\\\"VIPpoints\\\":{\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\"points\\\"}},\\\"required\\\":[\\\"serviceId\\\",\\\"VIPpoints\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
     "无法将实例元素转换为ActionEvent",
     "无法将实例元素转换为BusinessRule",
     "无法将实例元素转换为Gateway",
