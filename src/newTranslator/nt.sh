@@ -61,7 +61,13 @@ nt-sol-gen() {
     return 1
   fi
   mkdir -p "$NT_B2C_DIR" "$NT_SOL_DIR"
-  textx generate "$b2c_file" --target solidity --overwrite -o "$NT_SOL_DIR" "$@"
+  local output_name
+  output_name="$(basename "${b2c_file%.b2c}.sol")"
+  if command -v python3 >/dev/null 2>&1; then
+    python3 -m generator.b2c_to_solidity "$b2c_file" -o "$NT_SOL_DIR/$output_name" "$@"
+  else
+    python -m generator.b2c_to_solidity "$b2c_file" -o "$NT_SOL_DIR/$output_name" "$@"
+  fi
 }
 
 nt-sol-fmt() {

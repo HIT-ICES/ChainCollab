@@ -568,16 +568,16 @@ const Overview: React.FC = () => {
     try {
       setSetupFabricNetWorkLoading(true)
       await InitEnv(currentEnvId)
-      setSync()
+      await setSync()
       await new Promise((resolve, reject) => {
         setIsJoinModelOpen(true)
         setupCallBackRef.current = resolve
       })
-      setSync()
+      await setSync()
       await StartEnv(currentEnvId)
-      setSync()
+      await setSync()
       await ActivateEnv(currentEnvId, currentOrgId)
-      setSync()
+      await setSync()
     } catch (error: any) {
       message.error(extractErrorMessage(error, "Setup Fabric network failed"))
     } finally {
@@ -1286,7 +1286,7 @@ const Overview: React.FC = () => {
         const label = mode === "lite" ? "Ethereum Chainlink Lite Install" : "Ethereum Chainlink Full Install"
         await startTaskPolling(chainlinkRes.task_id, label)
       }
-      setSync()
+      await setSync()
     } catch (error: any) {
       message.error(extractErrorMessage(error, `Setup Chainlink ${mode} failed`))
     } finally {
@@ -1311,7 +1311,7 @@ const Overview: React.FC = () => {
       if (chainlinkRes?.task_id) {
         await startTaskPolling(chainlinkRes.task_id, "Ethereum Chainlink Lite Clean")
       }
-      setSync()
+      await setSync()
     } catch (error: any) {
       message.error(extractErrorMessage(error, "Clean Chainlink lite failed"))
     } finally {

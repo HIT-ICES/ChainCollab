@@ -41,6 +41,35 @@ class CachedResult:
         self.updated_at = int(time.time() * 1000)
 
 
+def normalize_output_value(value):
+    """Recursively normalize DMN output payload for downstream consumers."""
+    if isinstance(value, list):
+        return [normalize_output_value(item) for item in value]
+    if isinstance(value, dict):
+        return {key: normalize_output_value(item) for key, item in value.items()}
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return text
+
+        previous = None
+        while text and text != previous:
+            previous = text
+            try:
+                parsed = json.loads(text)
+                if isinstance(parsed, str):
+                    text = parsed.strip()
+                    continue
+            except Exception:
+                pass
+
+            if (text.startswith('"') and text.endswith('"')) or \
+               (text.startswith("'") and text.endswith("'")):
+                text = text[1:-1].strip()
+        return text
+    return value
+
+
 @app.route('/api/dmn/health', methods=['GET'])
 def health():
     """Health check endpoint"""
@@ -71,7 +100,9 @@ def evaluate_decision():
         app.logger.info(f"输入数据: {input_data}")
 
         # Evaluate decision
-        result = dmn_engine.evaluate(dmn_content, decision_id, input_data)
+        result = normalize_output_value(
+            dmn_engine.evaluate(dmn_content, decision_id, input_data)
+        )
 
         app.logger.info(f"决策结果: {result}")
 
@@ -108,7 +139,9 @@ def calc_and_cache():
             }), 400
 
         # Evaluate decision
-        result = dmn_engine.evaluate(dmn_content, decision_id, input_data)
+        result = normalize_output_value(
+            dmn_engine.evaluate(dmn_content, decision_id, input_data)
+        )
         raw = json.dumps(result)
         hash_hex = calculate_sha3_hash(raw)
         hash_dec = int(hash_hex, 16) & ((1 << 128) - 1)

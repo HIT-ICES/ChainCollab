@@ -2,6 +2,9 @@ version: "3.8"
 
 services:
   cdmn-node1:
+    build:
+      context: ./cdmn-python-server
+      dockerfile: Dockerfile
     image: chaincollab-cdmn-server:latest
     container_name: cdmn-node1
     restart: unless-stopped
@@ -21,6 +24,9 @@ services:
       - existing_network
 
   cdmn-node2:
+    build:
+      context: ./cdmn-python-server
+      dockerfile: Dockerfile
     image: chaincollab-cdmn-server:latest
     container_name: cdmn-node2
     restart: unless-stopped
@@ -40,6 +46,9 @@ services:
       - existing_network
 
   cdmn-node3:
+    build:
+      context: ./cdmn-python-server
+      dockerfile: Dockerfile
     image: chaincollab-cdmn-server:latest
     container_name: cdmn-node3
     restart: unless-stopped
@@ -59,6 +68,9 @@ services:
       - existing_network
 
   cdmn-node4:
+    build:
+      context: ./cdmn-python-server
+      dockerfile: Dockerfile
     image: chaincollab-cdmn-server:latest
     container_name: cdmn-node4
     restart: unless-stopped

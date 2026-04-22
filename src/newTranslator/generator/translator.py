@@ -83,6 +83,13 @@ def escape_quotes(value: str) -> str:
     return value.replace("\"", "\\\"")
 
 
+def strip_outer_quotes(value: str) -> str:
+    """Remove a single matching pair of surrounding quotes from a literal."""
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+        return value[1:-1]
+    return value
+
+
 def parse_json_documentation(documentation: Optional[str]) -> dict:
     """Parse BPMN documentation JSON safely."""
     if not documentation:
@@ -939,7 +946,8 @@ class ParameterExtractor:
         for relation in ("==", "!=", ">=", "<=", ">", "<"):
             if relation in raw_condition:
                 prop, value = raw_condition.split(relation, 1)
-                return prop.strip(), relation, value.strip()
+                literal = strip_outer_quotes(value.strip())
+                return prop.strip(), relation, literal
         return None
 
     @staticmethod

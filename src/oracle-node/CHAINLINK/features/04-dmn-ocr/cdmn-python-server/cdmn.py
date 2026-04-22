@@ -177,10 +177,7 @@ class DMNEngine:
 
         value_str = value_str.strip()
 
-        # Remove quotes if present
-        if (value_str.startswith('"') and value_str.endswith('"')) or \
-           (value_str.startswith("'") and value_str.endswith("'")):
-            value_str = value_str[1:-1]
+        value_str = self._normalize_string_literal(value_str)
 
         # Try to parse based on type
         if type_ref.lower() in ['number', 'integer', 'double', 'long']:
@@ -201,6 +198,39 @@ class DMNEngine:
 
         # Fallback to string
         return value_str
+
+    def _normalize_string_literal(self, value):
+        """
+        Normalize DMN string literals to plain string values.
+
+        Examples:
+        - '"VeryLow"' -> 'VeryLow'
+        - '\\"VeryLow\\"' -> 'VeryLow'
+        - "'VeryLow'" -> 'VeryLow'
+        """
+        if value is None:
+            return None
+
+        text = str(value).strip()
+        if not text:
+            return text
+
+        previous = None
+        while text and text != previous:
+            previous = text
+            try:
+                parsed = json.loads(text)
+                if isinstance(parsed, str):
+                    text = parsed.strip()
+                    continue
+            except Exception:
+                pass
+
+            if (text.startswith('"') and text.endswith('"')) or \
+               (text.startswith("'") and text.endswith("'")):
+                text = text[1:-1].strip()
+
+        return text
 
     def get_input_info(self, dmn_content):
         """
