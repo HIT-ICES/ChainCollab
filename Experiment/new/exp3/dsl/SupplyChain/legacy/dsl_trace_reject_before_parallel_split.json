@@ -1,0 +1,92 @@
+{
+  "case_name": "SupplyChain",
+  "path_name": "reject_before_parallel_split",
+  "platform": "dsl",
+  "bootstrap": [
+    {
+      "trigger": {
+        "type": "start",
+        "name": "Event_06sexe6"
+      },
+      "state_diff": {
+        "Message_1wswgqu": [
+          "INACTIVE",
+          "READY"
+        ],
+        "Event_06sexe6": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "applied_actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1wswgqu",
+          "from": "INACTIVE",
+          "to": "READY"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "index": 0,
+      "trigger": {
+        "type": "message",
+        "name": "Message_0pm90nx"
+      },
+      "enabled_before": [
+        "Message_1wswgqu"
+      ],
+      "guard_result": false,
+      "payload": {
+        "transport_order": "T-early"
+      },
+      "outputs": {},
+      "accepted": false,
+      "logs": [],
+      "rejection_reason": "element not triggerable: Message_0pm90nx is INACTIVE"
+    }
+  ],
+  "final_state": {
+    "status": "rejected",
+    "reason": "element not triggerable: Message_0pm90nx is INACTIVE",
+    "enabled_elements": [
+      "Message_1wswgqu"
+    ],
+    "element_states": {
+      "Message_04wmlqe": "INACTIVE",
+      "Message_0cba4t6": "INACTIVE",
+      "Message_0d2xte5": "INACTIVE",
+      "Message_0hpha6h": "INACTIVE",
+      "Message_0pm90nx": "INACTIVE",
+      "Message_0ps2yzo": "INACTIVE",
+      "Message_0rwz1km": "INACTIVE",
+      "Message_196q1fj": "INACTIVE",
+      "Message_1ajdm9l": "INACTIVE",
+      "Message_1io2g9u": "INACTIVE",
+      "Message_1wswgqu": "READY",
+      "Gateway_11hmo2k": "INACTIVE",
+      "Gateway_0onpe6x": "INACTIVE",
+      "Gateway_1fbifca": "INACTIVE",
+      "Event_06sexe6": "DONE",
+      "Event_13pbqdz": "INACTIVE",
+      "Event_0eoqvir": "INACTIVE",
+      "Activity_0fbi09z": "INACTIVE"
+    },
+    "globals": {
+      "Self_pickup": null,
+      "Amount": null,
+      "Del_order": null,
+      "Deliver": null,
+      "Fwd_order": null,
+      "Order": null,
+      "Placed_order": null,
+      "Pre_details": null,
+      "Report": null,
+      "Req_details": null,
+      "Transport_order": null,
+      "Waybill": null
+    }
+  }
+}

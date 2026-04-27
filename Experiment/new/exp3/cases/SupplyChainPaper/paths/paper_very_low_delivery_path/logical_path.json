@@ -1,0 +1,115 @@
+{
+  "case_name": "SupplyChainPaper",
+  "description": "Single platform-independent execution path for DSL simulation and Solidity/Geth replay.",
+  "source_b2c": "../../../exp2_semantic_verification/results/cases/SupplyChainPaper/dsl.b2c",
+  "path_name": "paper_very_low_delivery_path",
+  "expect": "accepted",
+  "steps": [
+    {
+      "type": "event",
+      "element": "Event_06sexe6"
+    },
+    {
+      "type": "message",
+      "element": "Message_1wswgqu",
+      "payload": {
+        "orderDetails": "Bulk order for finished goods"
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_1ajdm9l",
+      "payload": {
+        "supplyOrderDetails": "Components and raw materials for bulk order"
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_0onpe6x"
+    },
+    {
+      "type": "message",
+      "element": "Message_0cba4t6",
+      "payload": {
+        "supplyOrderId": "SO-EXP3-001"
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_0pm90nx",
+      "payload": {
+        "transportOrderId": "TO-EXP3-001"
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_1fbifca"
+    },
+    {
+      "type": "message",
+      "element": "Message_0rwz1km",
+      "payload": {
+        "requestId": 101,
+        "numberOfUnits": 1,
+        "urgent": false
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_0hpha6h",
+      "payload": {
+        "requestId": 101,
+        "supplierReputation": 1
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_1io2g9u",
+      "payload": {
+        "waybill": "WB-EXP3-001"
+      }
+    },
+    {
+      "type": "businessrule",
+      "element": "Activity_0rm8bkp",
+      "payload": {},
+      "continue_payload": {},
+      "outputs": {
+        "finalPriority": "\\\"VeryLow\\\""
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_0ep8cuh"
+    },
+    {
+      "type": "message",
+      "element": "Message_0d2xte5",
+      "payload": {
+        "deliveryConfirmation": true
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_1cr0nma"
+    },
+    {
+      "type": "message",
+      "element": "Message_04wmlqe",
+      "payload": {
+        "productionStart": "2026-04-20T20:00:00+08:00"
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_196q1fj",
+      "payload": {
+        "deliveryNote": "DN-EXP3-001"
+      }
+    },
+    {
+      "type": "event",
+      "element": "Event_13pbqdz"
+    }
+  ]
+}

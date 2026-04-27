@@ -1,0 +1,101 @@
+{
+  "case_name": "Hotel_Booking",
+  "path_name": "reject_unenabled_message",
+  "platform": "dsl",
+  "bootstrap": [
+    {
+      "trigger": {
+        "type": "start",
+        "name": "StartEvent_1jtgn3j"
+      },
+      "state_diff": {
+        "ExclusiveGateway_0hs3ztq": [
+          "INACTIVE",
+          "READY"
+        ],
+        "StartEvent_1jtgn3j": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "applied_actions": [
+        {
+          "kind": "enable",
+          "target": "ExclusiveGateway_0hs3ztq",
+          "from": "INACTIVE",
+          "to": "READY"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "index": 0,
+      "trigger": {
+        "type": "message",
+        "name": "Message_0r9lypd"
+      },
+      "enabled_before": [
+        "ExclusiveGateway_0hs3ztq"
+      ],
+      "guard_result": false,
+      "payload": {
+        "confirm": true
+      },
+      "outputs": {},
+      "accepted": false,
+      "logs": [],
+      "rejection_reason": "element not triggerable: Message_0r9lypd is INACTIVE"
+    }
+  ],
+  "final_state": {
+    "status": "rejected",
+    "reason": "element not triggerable: Message_0r9lypd is INACTIVE",
+    "enabled_elements": [
+      "ExclusiveGateway_0hs3ztq"
+    ],
+    "element_states": {
+      "Message_045i10y": "INACTIVE",
+      "Message_04ikf2n": "INACTIVE",
+      "Message_0m9p3da": "INACTIVE",
+      "Message_0o8eyir": "INACTIVE",
+      "Message_0r9lypd": "INACTIVE",
+      "Message_0vlxzcv": "INACTIVE",
+      "Message_104h2tt": "INACTIVE",
+      "Message_1em0ee4": "INACTIVE",
+      "Message_1etcmvl": "INACTIVE",
+      "Message_1joj7ca": "INACTIVE",
+      "Message_1ljlm4g": "INACTIVE",
+      "Message_1nlagx2": "INACTIVE",
+      "Message_1xm9dxy": "INACTIVE",
+      "ExclusiveGateway_106je4z": "INACTIVE",
+      "ExclusiveGateway_0hs3ztq": "READY",
+      "ExclusiveGateway_0nzwv7v": "INACTIVE",
+      "Gateway_1jhfnrm": "INACTIVE",
+      "Gateway_1atxr3y": "INACTIVE",
+      "EventBasedGateway_1fxpmyn": "INACTIVE",
+      "StartEvent_1jtgn3j": "DONE",
+      "EndEvent_0366pfz": "INACTIVE",
+      "EndEvent_08edp7f": "INACTIVE",
+      "EndEvent_146eii4": "INACTIVE",
+      "Activity_0b1f7uv": "INACTIVE"
+    },
+    "globals": {
+      "ID": null,
+      "VIPLevel": null,
+      "VIPcardId": null,
+      "VIPpoints": null,
+      "Bedrooms": null,
+      "Booking_id": null,
+      "Cancel": null,
+      "Confirm": null,
+      "Confirmation": null,
+      "Date": null,
+      "Discount1": null,
+      "Discount2": null,
+      "Motivation": null,
+      "Payableto": null,
+      "Quotation": null
+    }
+  }
+}

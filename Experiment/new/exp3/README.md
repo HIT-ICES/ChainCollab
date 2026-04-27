@@ -1,5 +1,37 @@
 # Exp3: 多平台代码行为一致性实验
 
+## 目录导航
+
+当前实验三已经整理成三条并行视图：
+
+- DSL：
+  [dsl/README.md](/root/code/ChainCollab/Experiment/new/exp3/dsl/README.md)
+- Solidity：
+  [solidity/README.md](/root/code/ChainCollab/Experiment/new/exp3/solidity/README.md)
+- Fabric：
+  [fabric/README.md](/root/code/ChainCollab/Experiment/new/exp3/fabric/README.md)
+- 统一路径输入：
+  [cases/](/root/code/ChainCollab/Experiment/new/exp3/cases)
+
+推荐你之后按下面这个心智模型找文件：
+
+- 看 DSL 参考语义和模拟执行：进 `dsl/`
+- 看 Ethereum / FireFly / Solidity 自动化：进 `solidity/`
+- 看 Fabric 对照执行：进 `fabric/`
+- 看平台无关路径输入：进 `cases/<CaseName>/paths/<PathName>/logical_path.json`
+
+当前目录结构可理解为：
+
+```text
+exp3/
+  dsl/
+  solidity/
+  fabric/
+  cases/
+  outputs/
+  scripts/
+```
+
 ## 实验目标
 
 本实验用于验证：
@@ -340,4 +372,3 @@ exp3/
 
 - 如果当前只做了有界深度、忽略循环，应在结论中明确这一边界
 - 不建议直接宣称“完全行为等价”
-

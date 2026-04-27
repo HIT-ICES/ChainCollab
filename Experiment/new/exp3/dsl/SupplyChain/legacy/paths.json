@@ -1,0 +1,118 @@
+{
+  "case_name": "SupplyChain",
+  "source_b2c": "/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/SupplyChain/dsl.b2c",
+  "paths": [
+    {
+      "path_name": "parallel_delivery_happy_path",
+      "expect": "accepted",
+      "steps": [
+        {
+          "type": "message",
+          "element": "Message_1wswgqu",
+          "payload": {
+            "order": "O-001",
+            "amount": 100
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_1ajdm9l",
+          "payload": {
+            "placed_order": "PO-001"
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_0onpe6x"
+        },
+        {
+          "type": "message",
+          "element": "Message_0cba4t6",
+          "payload": {
+            "fwd_order": "FWD-001"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_0pm90nx",
+          "payload": {
+            "transport_order": "T-001"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_0rwz1km",
+          "payload": {
+            "req_details": "temperature control"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_0hpha6h",
+          "payload": {
+            "pre_details": "packaged"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_1io2g9u",
+          "payload": {
+            "waybill": "WB-001"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_0d2xte5",
+          "payload": {
+            "del_order": "DO-001"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_04wmlqe",
+          "payload": {
+            "report": "report-ok"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_0ps2yzo",
+          "payload": {
+            "self_pickup": true
+          }
+        },
+        {
+          "type": "businessrule",
+          "element": "Activity_0fbi09z",
+          "outputs": {
+            "deliver": "true"
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_11hmo2k"
+        },
+        {
+          "type": "message",
+          "element": "Message_196q1fj",
+          "payload": {
+            "deliver": "truck"
+          }
+        }
+      ]
+    },
+    {
+      "path_name": "reject_before_parallel_split",
+      "expect": "rejected",
+      "steps": [
+        {
+          "type": "message",
+          "element": "Message_0pm90nx",
+          "payload": {
+            "transport_order": "T-early"
+          }
+        }
+      ]
+    }
+  ]
+}

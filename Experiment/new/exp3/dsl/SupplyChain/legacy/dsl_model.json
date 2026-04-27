@@ -1,0 +1,507 @@
+{
+  "contract_name": "GeneratedContract",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/SupplyChain/dsl.b2c",
+  "participants": [
+    {
+      "name": "Participant_0w6qkdf",
+      "msp": "Bulk_buyerMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0
+    },
+    {
+      "name": "Participant_19mgbdn",
+      "msp": "ManufacturerMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0
+    },
+    {
+      "name": "Participant_09cjol2",
+      "msp": "MiddlemanMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0
+    },
+    {
+      "name": "Participant_0sa2v7d",
+      "msp": "SupplierMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0
+    },
+    {
+      "name": "Participant_19j1e3o",
+      "msp": "Special_carrierMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0
+    }
+  ],
+  "globals": [
+    {
+      "name": "Self_pickup",
+      "type": "bool"
+    },
+    {
+      "name": "Amount",
+      "type": "int"
+    },
+    {
+      "name": "Del_order",
+      "type": "string"
+    },
+    {
+      "name": "Deliver",
+      "type": "string"
+    },
+    {
+      "name": "Fwd_order",
+      "type": "string"
+    },
+    {
+      "name": "Order",
+      "type": "string"
+    },
+    {
+      "name": "Placed_order",
+      "type": "string"
+    },
+    {
+      "name": "Pre_details",
+      "type": "string"
+    },
+    {
+      "name": "Report",
+      "type": "string"
+    },
+    {
+      "name": "Req_details",
+      "type": "string"
+    },
+    {
+      "name": "Transport_order",
+      "type": "string"
+    },
+    {
+      "name": "Waybill",
+      "type": "string"
+    }
+  ],
+  "messages": [
+    {
+      "name": "Message_04wmlqe",
+      "from": "Participant_19mgbdn",
+      "to": "Participant_0w6qkdf",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"report\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_0cba4t6",
+      "from": "Participant_0w6qkdf",
+      "to": "Participant_0sa2v7d",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"fwd_order\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_0d2xte5",
+      "from": "Participant_19j1e3o",
+      "to": "Participant_19mgbdn",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"del_order\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_0hpha6h",
+      "from": "Participant_0sa2v7d",
+      "to": "Participant_19j1e3o",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"pre_details\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_0pm90nx",
+      "from": "Participant_0w6qkdf",
+      "to": "Participant_19j1e3o",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"transport_order\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_0ps2yzo",
+      "from": "Participant_0w6qkdf",
+      "to": "Participant_19mgbdn",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"Self_pickup\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"Self_pickup\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_0rwz1km",
+      "from": "Participant_19j1e3o",
+      "to": "Participant_0sa2v7d",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"req_details\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_196q1fj",
+      "from": "Participant_19mgbdn",
+      "to": "Participant_0w6qkdf",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"deliver\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_1ajdm9l",
+      "from": "Participant_19mgbdn",
+      "to": "Participant_09cjol2",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"placed_order\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_1io2g9u",
+      "from": "Participant_0sa2v7d",
+      "to": "Participant_19j1e3o",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"waybill\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_1wswgqu",
+      "from": "Participant_0w6qkdf",
+      "to": "Participant_19mgbdn",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"order\":{\"type\":\"string\",\"description\":\"\"},\"amount\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"order\",\"amount\"],\"files\":{},\"file required\":[]}"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "Gateway_11hmo2k",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Gateway_0onpe6x",
+      "type": "parallel",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Gateway_1fbifca",
+      "type": "parallel",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "Event_06sexe6",
+      "initial_state": "READY"
+    },
+    {
+      "name": "Event_13pbqdz",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Event_0eoqvir",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [
+    {
+      "name": "Activity_0fbi09z",
+      "dmn": "Activity_0fbi09z.dmn",
+      "decision": "Activity_0fbi09z_DecisionID",
+      "input_mapping": [
+        {
+          "dmn_param": "amount",
+          "global": "Amount"
+        },
+        {
+          "dmn_param": "Self_pickup",
+          "global": "Self_pickup"
+        }
+      ],
+      "output_mapping": [
+        {
+          "dmn_param": "deliver",
+          "global": "Deliver"
+        }
+      ],
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "oracletasks": [],
+  "flows": [
+    {
+      "kind": "start_flow",
+      "trigger": {
+        "type": "start",
+        "name": "Event_06sexe6",
+        "state": "ready"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1wswgqu"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_1wswgqu",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1ajdm9l"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_1ajdm9l",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_0onpe6x"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0cba4t6",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1fbifca"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0pm90nx",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1fbifca"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0rwz1km",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0hpha6h"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0hpha6h",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1io2g9u"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_1io2g9u",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0d2xte5"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0d2xte5",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_04wmlqe"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_04wmlqe",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0ps2yzo"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_196q1fj",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Event_13pbqdz"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0ps2yzo",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Activity_0fbi09z"
+        }
+      ]
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "Gateway_11hmo2k",
+        "state": "completed"
+      },
+      "conditions": [
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_196q1fj"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Deliver",
+          "relation": "==",
+          "value": "true"
+        },
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Event_0eoqvir"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "Deliver",
+          "relation": "==",
+          "value": "false"
+        }
+      ],
+      "actions": []
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "Gateway_0onpe6x",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0cba4t6"
+        },
+        {
+          "kind": "enable",
+          "target": "Message_0pm90nx"
+        }
+      ]
+    },
+    {
+      "kind": "parallel_join",
+      "trigger": {
+        "type": "parallel",
+        "name": "Gateway_1fbifca",
+        "state": "await"
+      },
+      "conditions": [
+        {
+          "condition_kind": "await_all",
+          "sources": [
+            "Message_0cba4t6",
+            "Message_0pm90nx"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0rwz1km"
+        }
+      ]
+    },
+    {
+      "kind": "rule_flow",
+      "trigger": {
+        "type": "businessrule",
+        "name": "Activity_0fbi09z",
+        "state": "done"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_11hmo2k"
+        }
+      ]
+    }
+  ]
+}

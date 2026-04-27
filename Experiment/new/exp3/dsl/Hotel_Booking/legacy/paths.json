@@ -1,0 +1,121 @@
+{
+  "case_name": "Hotel_Booking",
+  "source_b2c": "/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/Hotel_Booking/dsl.b2c",
+  "paths": [
+    {
+      "path_name": "vip_discount_happy_path",
+      "expect": "accepted",
+      "steps": [
+        {
+          "type": "gateway",
+          "element": "ExclusiveGateway_0hs3ztq"
+        },
+        {
+          "type": "message",
+          "element": "Message_045i10y",
+          "payload": {
+            "date": "2026-04-20",
+            "bedrooms": 1
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_0r9lypd",
+          "payload": {
+            "confirm": true
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "ExclusiveGateway_106je4z"
+        },
+        {
+          "type": "message",
+          "element": "Message_1em0ee4",
+          "payload": {
+            "quotation": 200
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_1nlagx2",
+          "payload": {
+            "confirmation": true
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "EventBasedGateway_1fxpmyn"
+        },
+        {
+          "type": "message",
+          "element": "Message_104h2tt",
+          "payload": {
+            "vippoints": 500,
+            "vipcardid": "VIP001"
+          }
+        },
+        {
+          "type": "businessrule",
+          "element": "Activity_0b1f7uv",
+          "outputs": {
+            "VIPLevel": 3
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_1jhfnrm"
+        },
+        {
+          "type": "message",
+          "element": "Message_04ikf2n",
+          "payload": {
+            "discount2": 10
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_1atxr3y"
+        },
+        {
+          "type": "message",
+          "element": "Message_0o8eyir",
+          "payload": {
+            "payableto": "Hotel"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_1ljlm4g",
+          "payload": {
+            "booking_id": "BK001"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_0m9p3da",
+          "payload": {
+            "cancel": false
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "ExclusiveGateway_0nzwv7v"
+        }
+      ]
+    },
+    {
+      "path_name": "reject_unenabled_message",
+      "expect": "rejected",
+      "steps": [
+        {
+          "type": "message",
+          "element": "Message_0r9lypd",
+          "payload": {
+            "confirm": true
+          }
+        }
+      ]
+    }
+  ]
+}
