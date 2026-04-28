@@ -4,6 +4,8 @@
 
 当前实验三已经整理成三条并行视图：
 
+- 整体流程图：
+  [实验整体流程图.md](/home/shenxz-lab/code/ChainCollab/Experiment/new/exp3/实验整体流程图.md)
 - DSL：
   [dsl/README.md](/root/code/ChainCollab/Experiment/new/exp3/dsl/README.md)
 - Solidity：
