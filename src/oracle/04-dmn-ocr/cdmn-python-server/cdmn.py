@@ -214,6 +214,11 @@ class DMNEngine:
             parts = expression.split('and')
             return all(self._evaluate_expression(part.strip(), variable, input_data) for part in parts)
 
+        if expression.lower() == 'true':
+            return bool(value) is True
+        if expression.lower() == 'false':
+            return bool(value) is False
+
         # Exact match
         try:
             # Try to parse as number
