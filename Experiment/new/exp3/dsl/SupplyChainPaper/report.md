@@ -4,7 +4,7 @@ Auto materialized from generated DSL executable path.
 
 ## Paths
 
-- `SupplyChainPaper_auto_path_008`: expected `accepted`, actual `accepted`
+- `SupplyChainPaper_auto_path_007`: expected `accepted`, actual `accepted`
 
 ## Notes
 

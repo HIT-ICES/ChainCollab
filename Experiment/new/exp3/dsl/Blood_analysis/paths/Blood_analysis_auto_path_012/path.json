@@ -1,0 +1,69 @@
+{
+  "path_name": "Blood_analysis_auto_path_012",
+  "expect": "accepted",
+  "steps": [
+    {
+      "type": "gateway",
+      "element": "ParallelGateway_1pgjqtw"
+    },
+    {
+      "type": "message",
+      "element": "Message_0wq8mc6",
+      "payload": {
+        "patientData": "sample-patientData"
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_13mh6mk",
+      "payload": {
+        "reportContent": "sample-reportContent"
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_0gswvmq",
+      "payload": {
+        "sample": "sample-sample"
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_1vzqd37",
+      "payload": {
+        "result": "ill"
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_1rqbibd",
+      "payload": {
+        "result": "ill"
+      }
+    },
+    {
+      "type": "businessrule",
+      "element": "Activity_1mj4mr7",
+      "payload": {},
+      "outputs": {
+        "FurtherCheck": true
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_0o8snyv"
+    },
+    {
+      "type": "message",
+      "element": "Message_0gd0z61",
+      "payload": {
+        "furtherCheckPlace": "sample-furtherCheckPlace",
+        "furtherCheckDate": "sample-furtherCheckDate"
+      }
+    },
+    {
+      "type": "event",
+      "element": "EndEvent_110myff"
+    }
+  ]
+}

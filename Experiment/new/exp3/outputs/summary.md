@@ -2,6 +2,6 @@
 
 - Current phase: DSL reference simulator only
 
-## SupplyChainPaper
+## Hotel_Booking
 
-- `SupplyChainPaper_auto_path_008`: expected `accepted`, actual `accepted`
+- `Hotel_Booking_auto_path_018`: expected `accepted`, actual `accepted`

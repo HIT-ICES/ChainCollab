@@ -1,0 +1,2115 @@
+{
+  "schema_version": "exp3.unified_trace.v1",
+  "platform": "dsl",
+  "case_name": "Blood_analysis",
+  "path_name": "Blood_analysis_auto_path_007",
+  "source_trace": "/root/code/ChainCollab/Experiment/new/exp3/dsl/Blood_analysis/paths/Blood_analysis_auto_path_007/dsl_trace.json",
+  "element_order": {
+    "message": [
+      "Message_0gd0z61",
+      "Message_0gswvmq",
+      "Message_0wq8mc6",
+      "Message_13mh6mk",
+      "Message_1rqbibd",
+      "Message_1vzqd37"
+    ],
+    "gateway": [
+      "Gateway_0o8snyv",
+      "ParallelGateway_1pgjqtw",
+      "Gateway_1m6dgym"
+    ],
+    "event": [
+      "StartEvent_0m7hz56",
+      "EndEvent_110myff"
+    ],
+    "businessRule": [
+      "Activity_1mj4mr7"
+    ],
+    "oracletask": []
+  },
+  "raw_steps": [
+    {
+      "index": 0,
+      "phase": "bootstrap",
+      "trigger": {
+        "type": "event",
+        "element": "StartEvent_0m7hz56",
+        "method": "StartEvent_0m7hz56"
+      },
+      "enabled_before": [
+        "StartEvent_0m7hz56"
+      ],
+      "accepted": true,
+      "rejection_reason": "",
+      "payload": {},
+      "outputs": {},
+      "state_diff": {
+        "ParallelGateway_1pgjqtw": [
+          "INACTIVE",
+          "READY"
+        ],
+        "StartEvent_0m7hz56": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "states_after": {
+        "Message_0gd0z61": "INACTIVE",
+        "Message_0gswvmq": "INACTIVE",
+        "Message_0wq8mc6": "INACTIVE",
+        "Message_13mh6mk": "INACTIVE",
+        "Message_1rqbibd": "INACTIVE",
+        "Message_1vzqd37": "INACTIVE",
+        "Gateway_0o8snyv": "INACTIVE",
+        "ParallelGateway_1pgjqtw": "READY",
+        "Gateway_1m6dgym": "INACTIVE",
+        "StartEvent_0m7hz56": "DONE",
+        "EndEvent_110myff": "INACTIVE",
+        "Activity_1mj4mr7": "INACTIVE"
+      },
+      "logs": [],
+      "raw": {
+        "trigger": {
+          "type": "start",
+          "name": "StartEvent_0m7hz56"
+        },
+        "state_diff": {
+          "ParallelGateway_1pgjqtw": [
+            "INACTIVE",
+            "READY"
+          ],
+          "StartEvent_0m7hz56": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "applied_actions": [
+          {
+            "kind": "enable",
+            "target": "ParallelGateway_1pgjqtw",
+            "from": "INACTIVE",
+            "to": "READY"
+          }
+        ]
+      }
+    },
+    {
+      "index": 1,
+      "phase": "execute",
+      "trigger": {
+        "type": "gateway",
+        "element": "ParallelGateway_1pgjqtw",
+        "method": "ParallelGateway_1pgjqtw"
+      },
+      "enabled_before": [
+        "ParallelGateway_1pgjqtw"
+      ],
+      "accepted": true,
+      "rejection_reason": "",
+      "payload": {},
+      "outputs": {},
+      "state_diff": {
+        "Message_0gswvmq": [
+          "INACTIVE",
+          "READY"
+        ],
+        "Message_0wq8mc6": [
+          "INACTIVE",
+          "READY"
+        ],
+        "ParallelGateway_1pgjqtw": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "states_after": {
+        "Message_0gd0z61": "INACTIVE",
+        "Message_0gswvmq": "READY",
+        "Message_0wq8mc6": "READY",
+        "Message_13mh6mk": "INACTIVE",
+        "Message_1rqbibd": "INACTIVE",
+        "Message_1vzqd37": "INACTIVE",
+        "Gateway_0o8snyv": "INACTIVE",
+        "ParallelGateway_1pgjqtw": "DONE",
+        "Gateway_1m6dgym": "INACTIVE",
+        "StartEvent_0m7hz56": "DONE",
+        "EndEvent_110myff": "INACTIVE",
+        "Activity_1mj4mr7": "INACTIVE"
+      },
+      "logs": [
+        "gateway ParallelGateway_1pgjqtw -> DONE"
+      ],
+      "raw": {
+        "index": 0,
+        "trigger": {
+          "type": "gateway",
+          "name": "ParallelGateway_1pgjqtw"
+        },
+        "enabled_before": [
+          "ParallelGateway_1pgjqtw"
+        ],
+        "guard_result": true,
+        "payload": {},
+        "outputs": {},
+        "accepted": true,
+        "logs": [
+          "gateway ParallelGateway_1pgjqtw -> DONE"
+        ],
+        "flow_results": [
+          {
+            "kind": "gateway_flow",
+            "trigger": {
+              "type": "gateway",
+              "name": "ParallelGateway_1pgjqtw",
+              "state": "completed"
+            },
+            "accepted": true,
+            "applied_actions": [
+              {
+                "kind": "enable",
+                "target": "Message_0gswvmq",
+                "from": "INACTIVE",
+                "to": "READY"
+              },
+              {
+                "kind": "enable",
+                "target": "Message_0wq8mc6",
+                "from": "INACTIVE",
+                "to": "READY"
+              }
+            ]
+          }
+        ],
+        "state_diff": {
+          "Message_0gswvmq": [
+            "INACTIVE",
+            "READY"
+          ],
+          "Message_0wq8mc6": [
+            "INACTIVE",
+            "READY"
+          ],
+          "ParallelGateway_1pgjqtw": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {}
+      }
+    },
+    {
+      "index": 2,
+      "phase": "execute",
+      "trigger": {
+        "type": "message",
+        "element": "Message_0wq8mc6",
+        "method": "Message_0wq8mc6"
+      },
+      "enabled_before": [
+        "Message_0gswvmq",
+        "Message_0wq8mc6"
+      ],
+      "accepted": true,
+      "rejection_reason": "",
+      "payload": {
+        "patientData": "sample-patientData"
+      },
+      "outputs": {},
+      "state_diff": {
+        "Message_0wq8mc6": [
+          "READY",
+          "DONE"
+        ],
+        "Message_13mh6mk": [
+          "INACTIVE",
+          "READY"
+        ]
+      },
+      "global_diff": {
+        "PatientData": [
+          null,
+          "sample-patientData"
+        ]
+      },
+      "states_after": {
+        "Message_0gd0z61": "INACTIVE",
+        "Message_0gswvmq": "READY",
+        "Message_0wq8mc6": "DONE",
+        "Message_13mh6mk": "READY",
+        "Message_1rqbibd": "INACTIVE",
+        "Message_1vzqd37": "INACTIVE",
+        "Gateway_0o8snyv": "INACTIVE",
+        "ParallelGateway_1pgjqtw": "DONE",
+        "Gateway_1m6dgym": "INACTIVE",
+        "StartEvent_0m7hz56": "DONE",
+        "EndEvent_110myff": "INACTIVE",
+        "Activity_1mj4mr7": "INACTIVE"
+      },
+      "logs": [
+        "message Message_0wq8mc6 -> DONE",
+        "message payload: set PatientData='sample-patientData'"
+      ],
+      "raw": {
+        "index": 1,
+        "trigger": {
+          "type": "message",
+          "name": "Message_0wq8mc6"
+        },
+        "enabled_before": [
+          "Message_0gswvmq",
+          "Message_0wq8mc6"
+        ],
+        "guard_result": true,
+        "payload": {
+          "patientData": "sample-patientData"
+        },
+        "outputs": {},
+        "accepted": true,
+        "logs": [
+          "message Message_0wq8mc6 -> DONE",
+          "message payload: set PatientData='sample-patientData'"
+        ],
+        "flow_results": [
+          {
+            "kind": "message_flow",
+            "trigger": {
+              "type": "message",
+              "name": "Message_0wq8mc6",
+              "state": "completed"
+            },
+            "accepted": true,
+            "applied_actions": [
+              {
+                "kind": "enable",
+                "target": "Message_13mh6mk",
+                "from": "INACTIVE",
+                "to": "READY"
+              }
+            ]
+          }
+        ],
+        "state_diff": {
+          "Message_0wq8mc6": [
+            "READY",
+            "DONE"
+          ],
+          "Message_13mh6mk": [
+            "INACTIVE",
+            "READY"
+          ]
+        },
+        "global_diff": {
+          "PatientData": [
+            null,
+            "sample-patientData"
+          ]
+        }
+      }
+    },
+    {
+      "index": 3,
+      "phase": "execute",
+      "trigger": {
+        "type": "message",
+        "element": "Message_0gswvmq",
+        "method": "Message_0gswvmq"
+      },
+      "enabled_before": [
+        "Message_0gswvmq",
+        "Message_13mh6mk"
+      ],
+      "accepted": true,
+      "rejection_reason": "",
+      "payload": {
+        "sample": "sample-sample"
+      },
+      "outputs": {},
+      "state_diff": {
+        "Message_0gswvmq": [
+          "READY",
+          "DONE"
+        ],
+        "Message_1vzqd37": [
+          "INACTIVE",
+          "READY"
+        ]
+      },
+      "global_diff": {
+        "Sample": [
+          null,
+          "sample-sample"
+        ]
+      },
+      "states_after": {
+        "Message_0gd0z61": "INACTIVE",
+        "Message_0gswvmq": "DONE",
+        "Message_0wq8mc6": "DONE",
+        "Message_13mh6mk": "READY",
+        "Message_1rqbibd": "INACTIVE",
+        "Message_1vzqd37": "READY",
+        "Gateway_0o8snyv": "INACTIVE",
+        "ParallelGateway_1pgjqtw": "DONE",
+        "Gateway_1m6dgym": "INACTIVE",
+        "StartEvent_0m7hz56": "DONE",
+        "EndEvent_110myff": "INACTIVE",
+        "Activity_1mj4mr7": "INACTIVE"
+      },
+      "logs": [
+        "message Message_0gswvmq -> DONE",
+        "message payload: set Sample='sample-sample'"
+      ],
+      "raw": {
+        "index": 2,
+        "trigger": {
+          "type": "message",
+          "name": "Message_0gswvmq"
+        },
+        "enabled_before": [
+          "Message_0gswvmq",
+          "Message_13mh6mk"
+        ],
+        "guard_result": true,
+        "payload": {
+          "sample": "sample-sample"
+        },
+        "outputs": {},
+        "accepted": true,
+        "logs": [
+          "message Message_0gswvmq -> DONE",
+          "message payload: set Sample='sample-sample'"
+        ],
+        "flow_results": [
+          {
+            "kind": "message_flow",
+            "trigger": {
+              "type": "message",
+              "name": "Message_0gswvmq",
+              "state": "completed"
+            },
+            "accepted": true,
+            "applied_actions": [
+              {
+                "kind": "enable",
+                "target": "Message_1vzqd37",
+                "from": "INACTIVE",
+                "to": "READY"
+              }
+            ]
+          }
+        ],
+        "state_diff": {
+          "Message_0gswvmq": [
+            "READY",
+            "DONE"
+          ],
+          "Message_1vzqd37": [
+            "INACTIVE",
+            "READY"
+          ]
+        },
+        "global_diff": {
+          "Sample": [
+            null,
+            "sample-sample"
+          ]
+        }
+      }
+    },
+    {
+      "index": 4,
+      "phase": "execute",
+      "trigger": {
+        "type": "message",
+        "element": "Message_13mh6mk",
+        "method": "Message_13mh6mk"
+      },
+      "enabled_before": [
+        "Message_13mh6mk",
+        "Message_1vzqd37"
+      ],
+      "accepted": true,
+      "rejection_reason": "",
+      "payload": {
+        "reportContent": "sample-reportContent"
+      },
+      "outputs": {},
+      "state_diff": {
+        "Message_13mh6mk": [
+          "READY",
+          "DONE"
+        ],
+        "Gateway_1m6dgym": [
+          "INACTIVE",
+          "READY"
+        ]
+      },
+      "global_diff": {
+        "ReportContent": [
+          null,
+          "sample-reportContent"
+        ]
+      },
+      "states_after": {
+        "Message_0gd0z61": "INACTIVE",
+        "Message_0gswvmq": "DONE",
+        "Message_0wq8mc6": "DONE",
+        "Message_13mh6mk": "DONE",
+        "Message_1rqbibd": "INACTIVE",
+        "Message_1vzqd37": "READY",
+        "Gateway_0o8snyv": "INACTIVE",
+        "ParallelGateway_1pgjqtw": "DONE",
+        "Gateway_1m6dgym": "READY",
+        "StartEvent_0m7hz56": "DONE",
+        "EndEvent_110myff": "INACTIVE",
+        "Activity_1mj4mr7": "INACTIVE"
+      },
+      "logs": [
+        "message Message_13mh6mk -> DONE",
+        "message payload: set ReportContent='sample-reportContent'"
+      ],
+      "raw": {
+        "index": 3,
+        "trigger": {
+          "type": "message",
+          "name": "Message_13mh6mk"
+        },
+        "enabled_before": [
+          "Message_13mh6mk",
+          "Message_1vzqd37"
+        ],
+        "guard_result": true,
+        "payload": {
+          "reportContent": "sample-reportContent"
+        },
+        "outputs": {},
+        "accepted": true,
+        "logs": [
+          "message Message_13mh6mk -> DONE",
+          "message payload: set ReportContent='sample-reportContent'"
+        ],
+        "flow_results": [
+          {
+            "kind": "message_flow",
+            "trigger": {
+              "type": "message",
+              "name": "Message_13mh6mk",
+              "state": "completed"
+            },
+            "accepted": true,
+            "applied_actions": [
+              {
+                "kind": "enable",
+                "target": "Gateway_1m6dgym",
+                "from": "INACTIVE",
+                "to": "READY"
+              }
+            ]
+          }
+        ],
+        "state_diff": {
+          "Message_13mh6mk": [
+            "READY",
+            "DONE"
+          ],
+          "Gateway_1m6dgym": [
+            "INACTIVE",
+            "READY"
+          ]
+        },
+        "global_diff": {
+          "ReportContent": [
+            null,
+            "sample-reportContent"
+          ]
+        }
+      }
+    },
+    {
+      "index": 5,
+      "phase": "execute",
+      "trigger": {
+        "type": "message",
+        "element": "Message_1vzqd37",
+        "method": "Message_1vzqd37"
+      },
+      "enabled_before": [
+        "Gateway_1m6dgym",
+        "Message_1vzqd37"
+      ],
+      "accepted": true,
+      "rejection_reason": "",
+      "payload": {
+        "result": "healthy"
+      },
+      "outputs": {},
+      "state_diff": {
+        "Message_1rqbibd": [
+          "INACTIVE",
+          "READY"
+        ],
+        "Message_1vzqd37": [
+          "READY",
+          "DONE"
+        ],
+        "Gateway_1m6dgym": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {
+        "Result": [
+          null,
+          "healthy"
+        ]
+      },
+      "states_after": {
+        "Message_0gd0z61": "INACTIVE",
+        "Message_0gswvmq": "DONE",
+        "Message_0wq8mc6": "DONE",
+        "Message_13mh6mk": "DONE",
+        "Message_1rqbibd": "READY",
+        "Message_1vzqd37": "DONE",
+        "Gateway_0o8snyv": "INACTIVE",
+        "ParallelGateway_1pgjqtw": "DONE",
+        "Gateway_1m6dgym": "DONE",
+        "StartEvent_0m7hz56": "DONE",
+        "EndEvent_110myff": "INACTIVE",
+        "Activity_1mj4mr7": "INACTIVE"
+      },
+      "logs": [
+        "message Message_1vzqd37 -> DONE",
+        "message payload: set Result='healthy'"
+      ],
+      "raw": {
+        "index": 4,
+        "trigger": {
+          "type": "message",
+          "name": "Message_1vzqd37"
+        },
+        "enabled_before": [
+          "Gateway_1m6dgym",
+          "Message_1vzqd37"
+        ],
+        "guard_result": true,
+        "payload": {
+          "result": "healthy"
+        },
+        "outputs": {},
+        "accepted": true,
+        "logs": [
+          "message Message_1vzqd37 -> DONE",
+          "message payload: set Result='healthy'"
+        ],
+        "flow_results": [
+          {
+            "kind": "message_flow",
+            "trigger": {
+              "type": "message",
+              "name": "Message_1vzqd37",
+              "state": "completed"
+            },
+            "accepted": true,
+            "applied_actions": [
+              {
+                "kind": "enable",
+                "target": "Gateway_1m6dgym",
+                "from": "READY",
+                "to": "READY"
+              }
+            ]
+          },
+          {
+            "kind": "parallel_join",
+            "gateway": "Gateway_1m6dgym",
+            "sources": [
+              "Message_1vzqd37",
+              "Message_13mh6mk"
+            ],
+            "accepted": true,
+            "applied_actions": [
+              {
+                "kind": "enable",
+                "target": "Message_1rqbibd",
+                "from": "INACTIVE",
+                "to": "READY"
+              }
+            ]
+          }
+        ],
+        "state_diff": {
+          "Message_1rqbibd": [
+            "INACTIVE",
+            "READY"
+          ],
+          "Message_1vzqd37": [
+            "READY",
+            "DONE"
+          ],
+          "Gateway_1m6dgym": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {
+          "Result": [
+            null,
+            "healthy"
+          ]
+        }
+      }
+    },
+    {
+      "index": 7,
+      "phase": "execute",
+      "trigger": {
+        "type": "message",
+        "element": "Message_1rqbibd",
+        "method": "Message_1rqbibd"
+      },
+      "enabled_before": [
+        "Message_1rqbibd"
+      ],
+      "accepted": true,
+      "rejection_reason": "",
+      "payload": {
+        "result": "healthy"
+      },
+      "outputs": {},
+      "state_diff": {
+        "Message_1rqbibd": [
+          "READY",
+          "DONE"
+        ],
+        "Activity_1mj4mr7": [
+          "INACTIVE",
+          "READY"
+        ]
+      },
+      "global_diff": {},
+      "states_after": {
+        "Message_0gd0z61": "INACTIVE",
+        "Message_0gswvmq": "DONE",
+        "Message_0wq8mc6": "DONE",
+        "Message_13mh6mk": "DONE",
+        "Message_1rqbibd": "DONE",
+        "Message_1vzqd37": "DONE",
+        "Gateway_0o8snyv": "INACTIVE",
+        "ParallelGateway_1pgjqtw": "DONE",
+        "Gateway_1m6dgym": "DONE",
+        "StartEvent_0m7hz56": "DONE",
+        "EndEvent_110myff": "INACTIVE",
+        "Activity_1mj4mr7": "READY"
+      },
+      "logs": [
+        "message Message_1rqbibd -> DONE",
+        "message payload: set Result='healthy'"
+      ],
+      "raw": {
+        "index": 5,
+        "trigger": {
+          "type": "message",
+          "name": "Message_1rqbibd"
+        },
+        "enabled_before": [
+          "Message_1rqbibd"
+        ],
+        "guard_result": true,
+        "payload": {
+          "result": "healthy"
+        },
+        "outputs": {},
+        "accepted": true,
+        "logs": [
+          "message Message_1rqbibd -> DONE",
+          "message payload: set Result='healthy'"
+        ],
+        "flow_results": [
+          {
+            "kind": "message_flow",
+            "trigger": {
+              "type": "message",
+              "name": "Message_1rqbibd",
+              "state": "completed"
+            },
+            "accepted": true,
+            "applied_actions": [
+              {
+                "kind": "enable",
+                "target": "Activity_1mj4mr7",
+                "from": "INACTIVE",
+                "to": "READY"
+              }
+            ]
+          }
+        ],
+        "state_diff": {
+          "Message_1rqbibd": [
+            "READY",
+            "DONE"
+          ],
+          "Activity_1mj4mr7": [
+            "INACTIVE",
+            "READY"
+          ]
+        },
+        "global_diff": {}
+      }
+    },
+    {
+      "index": 8,
+      "phase": "execute",
+      "trigger": {
+        "type": "businessrule",
+        "element": "Activity_1mj4mr7",
+        "method": "Activity_1mj4mr7"
+      },
+      "enabled_before": [
+        "Activity_1mj4mr7"
+      ],
+      "accepted": true,
+      "rejection_reason": "",
+      "payload": {},
+      "outputs": {
+        "FurtherCheck": false
+      },
+      "state_diff": {
+        "Gateway_0o8snyv": [
+          "INACTIVE",
+          "READY"
+        ],
+        "Activity_1mj4mr7": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {
+        "FurtherCheck": [
+          null,
+          false
+        ]
+      },
+      "states_after": {
+        "Message_0gd0z61": "INACTIVE",
+        "Message_0gswvmq": "DONE",
+        "Message_0wq8mc6": "DONE",
+        "Message_13mh6mk": "DONE",
+        "Message_1rqbibd": "DONE",
+        "Message_1vzqd37": "DONE",
+        "Gateway_0o8snyv": "READY",
+        "ParallelGateway_1pgjqtw": "DONE",
+        "Gateway_1m6dgym": "DONE",
+        "StartEvent_0m7hz56": "DONE",
+        "EndEvent_110myff": "INACTIVE",
+        "Activity_1mj4mr7": "DONE"
+      },
+      "logs": [
+        "businessrule Activity_1mj4mr7 -> DONE",
+        "businessrule output: set FurtherCheck=False"
+      ],
+      "raw": {
+        "index": 6,
+        "trigger": {
+          "type": "businessrule",
+          "name": "Activity_1mj4mr7"
+        },
+        "enabled_before": [
+          "Activity_1mj4mr7"
+        ],
+        "guard_result": true,
+        "payload": {},
+        "outputs": {
+          "FurtherCheck": false
+        },
+        "accepted": true,
+        "logs": [
+          "businessrule Activity_1mj4mr7 -> DONE",
+          "businessrule output: set FurtherCheck=False"
+        ],
+        "flow_results": [
+          {
+            "kind": "rule_flow",
+            "trigger": {
+              "type": "businessrule",
+              "name": "Activity_1mj4mr7",
+              "state": "done"
+            },
+            "accepted": true,
+            "applied_actions": [
+              {
+                "kind": "enable",
+                "target": "Gateway_0o8snyv",
+                "from": "INACTIVE",
+                "to": "READY"
+              }
+            ]
+          }
+        ],
+        "state_diff": {
+          "Gateway_0o8snyv": [
+            "INACTIVE",
+            "READY"
+          ],
+          "Activity_1mj4mr7": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {
+          "FurtherCheck": [
+            null,
+            false
+          ]
+        }
+      }
+    },
+    {
+      "index": 9,
+      "phase": "execute",
+      "trigger": {
+        "type": "gateway",
+        "element": "Gateway_0o8snyv",
+        "method": "Gateway_0o8snyv"
+      },
+      "enabled_before": [
+        "Gateway_0o8snyv"
+      ],
+      "accepted": true,
+      "rejection_reason": "",
+      "payload": {},
+      "outputs": {},
+      "state_diff": {
+        "Gateway_0o8snyv": [
+          "READY",
+          "DONE"
+        ],
+        "EndEvent_110myff": [
+          "INACTIVE",
+          "READY"
+        ]
+      },
+      "global_diff": {},
+      "states_after": {
+        "Message_0gd0z61": "INACTIVE",
+        "Message_0gswvmq": "DONE",
+        "Message_0wq8mc6": "DONE",
+        "Message_13mh6mk": "DONE",
+        "Message_1rqbibd": "DONE",
+        "Message_1vzqd37": "DONE",
+        "Gateway_0o8snyv": "DONE",
+        "ParallelGateway_1pgjqtw": "DONE",
+        "Gateway_1m6dgym": "DONE",
+        "StartEvent_0m7hz56": "DONE",
+        "EndEvent_110myff": "READY",
+        "Activity_1mj4mr7": "DONE"
+      },
+      "logs": [
+        "gateway Gateway_0o8snyv -> DONE"
+      ],
+      "raw": {
+        "index": 7,
+        "trigger": {
+          "type": "gateway",
+          "name": "Gateway_0o8snyv"
+        },
+        "enabled_before": [
+          "Gateway_0o8snyv"
+        ],
+        "guard_result": true,
+        "payload": {},
+        "outputs": {},
+        "accepted": true,
+        "logs": [
+          "gateway Gateway_0o8snyv -> DONE"
+        ],
+        "flow_results": [
+          {
+            "kind": "gateway_flow",
+            "trigger": {
+              "type": "gateway",
+              "name": "Gateway_0o8snyv",
+              "state": "completed"
+            },
+            "accepted": true,
+            "selected_branch": {
+              "accepted": true,
+              "condition_kind": "compare",
+              "var": "FurtherCheck",
+              "relation": "==",
+              "value": false,
+              "expr": null,
+              "applied_actions": [
+                {
+                  "kind": "enable",
+                  "target": "EndEvent_110myff",
+                  "from": "INACTIVE",
+                  "to": "READY"
+                }
+              ]
+            }
+          }
+        ],
+        "state_diff": {
+          "Gateway_0o8snyv": [
+            "READY",
+            "DONE"
+          ],
+          "EndEvent_110myff": [
+            "INACTIVE",
+            "READY"
+          ]
+        },
+        "global_diff": {}
+      }
+    },
+    {
+      "index": 10,
+      "phase": "execute",
+      "trigger": {
+        "type": "event",
+        "element": "EndEvent_110myff",
+        "method": "EndEvent_110myff"
+      },
+      "enabled_before": [
+        "EndEvent_110myff"
+      ],
+      "accepted": true,
+      "rejection_reason": "",
+      "payload": {},
+      "outputs": {},
+      "state_diff": {
+        "EndEvent_110myff": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "states_after": {
+        "Message_0gd0z61": "INACTIVE",
+        "Message_0gswvmq": "DONE",
+        "Message_0wq8mc6": "DONE",
+        "Message_13mh6mk": "DONE",
+        "Message_1rqbibd": "DONE",
+        "Message_1vzqd37": "DONE",
+        "Gateway_0o8snyv": "DONE",
+        "ParallelGateway_1pgjqtw": "DONE",
+        "Gateway_1m6dgym": "DONE",
+        "StartEvent_0m7hz56": "DONE",
+        "EndEvent_110myff": "DONE",
+        "Activity_1mj4mr7": "DONE"
+      },
+      "logs": [
+        "event EndEvent_110myff -> DONE"
+      ],
+      "raw": {
+        "index": 8,
+        "trigger": {
+          "type": "event",
+          "name": "EndEvent_110myff"
+        },
+        "enabled_before": [
+          "EndEvent_110myff"
+        ],
+        "guard_result": true,
+        "payload": {},
+        "outputs": {},
+        "accepted": true,
+        "logs": [
+          "event EndEvent_110myff -> DONE"
+        ],
+        "flow_results": [],
+        "state_diff": {
+          "EndEvent_110myff": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {}
+      }
+    }
+  ],
+  "steps": [
+    {
+      "index": 0,
+      "phase": "bootstrap",
+      "trigger": {
+        "type": "event",
+        "element": "StartEvent_0m7hz56",
+        "method": "StartEvent_0m7hz56"
+      },
+      "enabled_before": [
+        "StartEvent_0m7hz56"
+      ],
+      "accepted": true,
+      "rejection_reason": "",
+      "payload": {},
+      "outputs": {},
+      "state_diff": {
+        "ParallelGateway_1pgjqtw": [
+          "INACTIVE",
+          "READY"
+        ],
+        "StartEvent_0m7hz56": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "states_after": {
+        "Message_0gd0z61": "INACTIVE",
+        "Message_0gswvmq": "INACTIVE",
+        "Message_0wq8mc6": "INACTIVE",
+        "Message_13mh6mk": "INACTIVE",
+        "Message_1rqbibd": "INACTIVE",
+        "Message_1vzqd37": "INACTIVE",
+        "Gateway_0o8snyv": "INACTIVE",
+        "ParallelGateway_1pgjqtw": "READY",
+        "Gateway_1m6dgym": "INACTIVE",
+        "StartEvent_0m7hz56": "DONE",
+        "EndEvent_110myff": "INACTIVE",
+        "Activity_1mj4mr7": "INACTIVE"
+      },
+      "logs": [],
+      "raw": {
+        "trigger": {
+          "type": "start",
+          "name": "StartEvent_0m7hz56"
+        },
+        "state_diff": {
+          "ParallelGateway_1pgjqtw": [
+            "INACTIVE",
+            "READY"
+          ],
+          "StartEvent_0m7hz56": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "applied_actions": [
+          {
+            "kind": "enable",
+            "target": "ParallelGateway_1pgjqtw",
+            "from": "INACTIVE",
+            "to": "READY"
+          }
+        ]
+      }
+    },
+    {
+      "index": 1,
+      "phase": "execute",
+      "trigger": {
+        "type": "gateway",
+        "element": "ParallelGateway_1pgjqtw",
+        "method": "ParallelGateway_1pgjqtw"
+      },
+      "enabled_before": [
+        "ParallelGateway_1pgjqtw"
+      ],
+      "accepted": true,
+      "rejection_reason": "",
+      "payload": {},
+      "outputs": {},
+      "state_diff": {
+        "Message_0gswvmq": [
+          "INACTIVE",
+          "READY"
+        ],
+        "Message_0wq8mc6": [
+          "INACTIVE",
+          "READY"
+        ],
+        "ParallelGateway_1pgjqtw": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "states_after": {
+        "Message_0gd0z61": "INACTIVE",
+        "Message_0gswvmq": "READY",
+        "Message_0wq8mc6": "READY",
+        "Message_13mh6mk": "INACTIVE",
+        "Message_1rqbibd": "INACTIVE",
+        "Message_1vzqd37": "INACTIVE",
+        "Gateway_0o8snyv": "INACTIVE",
+        "ParallelGateway_1pgjqtw": "DONE",
+        "Gateway_1m6dgym": "INACTIVE",
+        "StartEvent_0m7hz56": "DONE",
+        "EndEvent_110myff": "INACTIVE",
+        "Activity_1mj4mr7": "INACTIVE"
+      },
+      "logs": [
+        "gateway ParallelGateway_1pgjqtw -> DONE"
+      ],
+      "raw": {
+        "index": 0,
+        "trigger": {
+          "type": "gateway",
+          "name": "ParallelGateway_1pgjqtw"
+        },
+        "enabled_before": [
+          "ParallelGateway_1pgjqtw"
+        ],
+        "guard_result": true,
+        "payload": {},
+        "outputs": {},
+        "accepted": true,
+        "logs": [
+          "gateway ParallelGateway_1pgjqtw -> DONE"
+        ],
+        "flow_results": [
+          {
+            "kind": "gateway_flow",
+            "trigger": {
+              "type": "gateway",
+              "name": "ParallelGateway_1pgjqtw",
+              "state": "completed"
+            },
+            "accepted": true,
+            "applied_actions": [
+              {
+                "kind": "enable",
+                "target": "Message_0gswvmq",
+                "from": "INACTIVE",
+                "to": "READY"
+              },
+              {
+                "kind": "enable",
+                "target": "Message_0wq8mc6",
+                "from": "INACTIVE",
+                "to": "READY"
+              }
+            ]
+          }
+        ],
+        "state_diff": {
+          "Message_0gswvmq": [
+            "INACTIVE",
+            "READY"
+          ],
+          "Message_0wq8mc6": [
+            "INACTIVE",
+            "READY"
+          ],
+          "ParallelGateway_1pgjqtw": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {}
+      }
+    },
+    {
+      "index": 2,
+      "phase": "execute",
+      "trigger": {
+        "type": "message",
+        "element": "Message_0wq8mc6",
+        "method": "Message_0wq8mc6"
+      },
+      "enabled_before": [
+        "Message_0gswvmq",
+        "Message_0wq8mc6"
+      ],
+      "accepted": true,
+      "rejection_reason": "",
+      "payload": {
+        "patientData": "sample-patientData"
+      },
+      "outputs": {},
+      "state_diff": {
+        "Message_0wq8mc6": [
+          "READY",
+          "DONE"
+        ],
+        "Message_13mh6mk": [
+          "INACTIVE",
+          "READY"
+        ]
+      },
+      "global_diff": {
+        "PatientData": [
+          null,
+          "sample-patientData"
+        ]
+      },
+      "states_after": {
+        "Message_0gd0z61": "INACTIVE",
+        "Message_0gswvmq": "READY",
+        "Message_0wq8mc6": "DONE",
+        "Message_13mh6mk": "READY",
+        "Message_1rqbibd": "INACTIVE",
+        "Message_1vzqd37": "INACTIVE",
+        "Gateway_0o8snyv": "INACTIVE",
+        "ParallelGateway_1pgjqtw": "DONE",
+        "Gateway_1m6dgym": "INACTIVE",
+        "StartEvent_0m7hz56": "DONE",
+        "EndEvent_110myff": "INACTIVE",
+        "Activity_1mj4mr7": "INACTIVE"
+      },
+      "logs": [
+        "message Message_0wq8mc6 -> DONE",
+        "message payload: set PatientData='sample-patientData'"
+      ],
+      "raw": {
+        "index": 1,
+        "trigger": {
+          "type": "message",
+          "name": "Message_0wq8mc6"
+        },
+        "enabled_before": [
+          "Message_0gswvmq",
+          "Message_0wq8mc6"
+        ],
+        "guard_result": true,
+        "payload": {
+          "patientData": "sample-patientData"
+        },
+        "outputs": {},
+        "accepted": true,
+        "logs": [
+          "message Message_0wq8mc6 -> DONE",
+          "message payload: set PatientData='sample-patientData'"
+        ],
+        "flow_results": [
+          {
+            "kind": "message_flow",
+            "trigger": {
+              "type": "message",
+              "name": "Message_0wq8mc6",
+              "state": "completed"
+            },
+            "accepted": true,
+            "applied_actions": [
+              {
+                "kind": "enable",
+                "target": "Message_13mh6mk",
+                "from": "INACTIVE",
+                "to": "READY"
+              }
+            ]
+          }
+        ],
+        "state_diff": {
+          "Message_0wq8mc6": [
+            "READY",
+            "DONE"
+          ],
+          "Message_13mh6mk": [
+            "INACTIVE",
+            "READY"
+          ]
+        },
+        "global_diff": {
+          "PatientData": [
+            null,
+            "sample-patientData"
+          ]
+        }
+      }
+    },
+    {
+      "index": 3,
+      "phase": "execute",
+      "trigger": {
+        "type": "message",
+        "element": "Message_0gswvmq",
+        "method": "Message_0gswvmq"
+      },
+      "enabled_before": [
+        "Message_0gswvmq",
+        "Message_13mh6mk"
+      ],
+      "accepted": true,
+      "rejection_reason": "",
+      "payload": {
+        "sample": "sample-sample"
+      },
+      "outputs": {},
+      "state_diff": {
+        "Message_0gswvmq": [
+          "READY",
+          "DONE"
+        ],
+        "Message_1vzqd37": [
+          "INACTIVE",
+          "READY"
+        ]
+      },
+      "global_diff": {
+        "Sample": [
+          null,
+          "sample-sample"
+        ]
+      },
+      "states_after": {
+        "Message_0gd0z61": "INACTIVE",
+        "Message_0gswvmq": "DONE",
+        "Message_0wq8mc6": "DONE",
+        "Message_13mh6mk": "READY",
+        "Message_1rqbibd": "INACTIVE",
+        "Message_1vzqd37": "READY",
+        "Gateway_0o8snyv": "INACTIVE",
+        "ParallelGateway_1pgjqtw": "DONE",
+        "Gateway_1m6dgym": "INACTIVE",
+        "StartEvent_0m7hz56": "DONE",
+        "EndEvent_110myff": "INACTIVE",
+        "Activity_1mj4mr7": "INACTIVE"
+      },
+      "logs": [
+        "message Message_0gswvmq -> DONE",
+        "message payload: set Sample='sample-sample'"
+      ],
+      "raw": {
+        "index": 2,
+        "trigger": {
+          "type": "message",
+          "name": "Message_0gswvmq"
+        },
+        "enabled_before": [
+          "Message_0gswvmq",
+          "Message_13mh6mk"
+        ],
+        "guard_result": true,
+        "payload": {
+          "sample": "sample-sample"
+        },
+        "outputs": {},
+        "accepted": true,
+        "logs": [
+          "message Message_0gswvmq -> DONE",
+          "message payload: set Sample='sample-sample'"
+        ],
+        "flow_results": [
+          {
+            "kind": "message_flow",
+            "trigger": {
+              "type": "message",
+              "name": "Message_0gswvmq",
+              "state": "completed"
+            },
+            "accepted": true,
+            "applied_actions": [
+              {
+                "kind": "enable",
+                "target": "Message_1vzqd37",
+                "from": "INACTIVE",
+                "to": "READY"
+              }
+            ]
+          }
+        ],
+        "state_diff": {
+          "Message_0gswvmq": [
+            "READY",
+            "DONE"
+          ],
+          "Message_1vzqd37": [
+            "INACTIVE",
+            "READY"
+          ]
+        },
+        "global_diff": {
+          "Sample": [
+            null,
+            "sample-sample"
+          ]
+        }
+      }
+    },
+    {
+      "index": 4,
+      "phase": "execute",
+      "trigger": {
+        "type": "message",
+        "element": "Message_13mh6mk",
+        "method": "Message_13mh6mk"
+      },
+      "enabled_before": [
+        "Message_13mh6mk",
+        "Message_1vzqd37"
+      ],
+      "accepted": true,
+      "rejection_reason": "",
+      "payload": {
+        "reportContent": "sample-reportContent"
+      },
+      "outputs": {},
+      "state_diff": {
+        "Message_13mh6mk": [
+          "READY",
+          "DONE"
+        ],
+        "Gateway_1m6dgym": [
+          "INACTIVE",
+          "READY"
+        ]
+      },
+      "global_diff": {
+        "ReportContent": [
+          null,
+          "sample-reportContent"
+        ]
+      },
+      "states_after": {
+        "Message_0gd0z61": "INACTIVE",
+        "Message_0gswvmq": "DONE",
+        "Message_0wq8mc6": "DONE",
+        "Message_13mh6mk": "DONE",
+        "Message_1rqbibd": "INACTIVE",
+        "Message_1vzqd37": "READY",
+        "Gateway_0o8snyv": "INACTIVE",
+        "ParallelGateway_1pgjqtw": "DONE",
+        "Gateway_1m6dgym": "READY",
+        "StartEvent_0m7hz56": "DONE",
+        "EndEvent_110myff": "INACTIVE",
+        "Activity_1mj4mr7": "INACTIVE"
+      },
+      "logs": [
+        "message Message_13mh6mk -> DONE",
+        "message payload: set ReportContent='sample-reportContent'"
+      ],
+      "raw": {
+        "index": 3,
+        "trigger": {
+          "type": "message",
+          "name": "Message_13mh6mk"
+        },
+        "enabled_before": [
+          "Message_13mh6mk",
+          "Message_1vzqd37"
+        ],
+        "guard_result": true,
+        "payload": {
+          "reportContent": "sample-reportContent"
+        },
+        "outputs": {},
+        "accepted": true,
+        "logs": [
+          "message Message_13mh6mk -> DONE",
+          "message payload: set ReportContent='sample-reportContent'"
+        ],
+        "flow_results": [
+          {
+            "kind": "message_flow",
+            "trigger": {
+              "type": "message",
+              "name": "Message_13mh6mk",
+              "state": "completed"
+            },
+            "accepted": true,
+            "applied_actions": [
+              {
+                "kind": "enable",
+                "target": "Gateway_1m6dgym",
+                "from": "INACTIVE",
+                "to": "READY"
+              }
+            ]
+          }
+        ],
+        "state_diff": {
+          "Message_13mh6mk": [
+            "READY",
+            "DONE"
+          ],
+          "Gateway_1m6dgym": [
+            "INACTIVE",
+            "READY"
+          ]
+        },
+        "global_diff": {
+          "ReportContent": [
+            null,
+            "sample-reportContent"
+          ]
+        }
+      }
+    },
+    {
+      "index": 5,
+      "phase": "execute",
+      "trigger": {
+        "type": "message",
+        "element": "Message_1vzqd37",
+        "method": "Message_1vzqd37"
+      },
+      "enabled_before": [
+        "Gateway_1m6dgym",
+        "Message_1vzqd37"
+      ],
+      "accepted": true,
+      "rejection_reason": "",
+      "payload": {
+        "result": "healthy"
+      },
+      "outputs": {},
+      "state_diff": {
+        "Message_1vzqd37": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {
+        "Result": [
+          null,
+          "healthy"
+        ]
+      },
+      "states_after": {
+        "Message_0gd0z61": "INACTIVE",
+        "Message_0gswvmq": "DONE",
+        "Message_0wq8mc6": "DONE",
+        "Message_13mh6mk": "DONE",
+        "Message_1rqbibd": "INACTIVE",
+        "Message_1vzqd37": "DONE",
+        "Gateway_0o8snyv": "INACTIVE",
+        "ParallelGateway_1pgjqtw": "DONE",
+        "Gateway_1m6dgym": "READY",
+        "StartEvent_0m7hz56": "DONE",
+        "EndEvent_110myff": "INACTIVE",
+        "Activity_1mj4mr7": "INACTIVE"
+      },
+      "logs": [
+        "message Message_1vzqd37 -> DONE",
+        "message payload: set Result='healthy'"
+      ],
+      "raw": {
+        "index": 4,
+        "trigger": {
+          "type": "message",
+          "name": "Message_1vzqd37"
+        },
+        "enabled_before": [
+          "Gateway_1m6dgym",
+          "Message_1vzqd37"
+        ],
+        "guard_result": true,
+        "payload": {
+          "result": "healthy"
+        },
+        "outputs": {},
+        "accepted": true,
+        "logs": [
+          "message Message_1vzqd37 -> DONE",
+          "message payload: set Result='healthy'"
+        ],
+        "flow_results": [
+          {
+            "kind": "message_flow",
+            "trigger": {
+              "type": "message",
+              "name": "Message_1vzqd37",
+              "state": "completed"
+            },
+            "accepted": true,
+            "applied_actions": [
+              {
+                "kind": "enable",
+                "target": "Gateway_1m6dgym",
+                "from": "READY",
+                "to": "READY"
+              }
+            ]
+          },
+          {
+            "kind": "parallel_join",
+            "gateway": "Gateway_1m6dgym",
+            "sources": [
+              "Message_1vzqd37",
+              "Message_13mh6mk"
+            ],
+            "accepted": true,
+            "applied_actions": [
+              {
+                "kind": "enable",
+                "target": "Message_1rqbibd",
+                "from": "INACTIVE",
+                "to": "READY"
+              }
+            ]
+          }
+        ],
+        "state_diff": {
+          "Message_1rqbibd": [
+            "INACTIVE",
+            "READY"
+          ],
+          "Message_1vzqd37": [
+            "READY",
+            "DONE"
+          ],
+          "Gateway_1m6dgym": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {
+          "Result": [
+            null,
+            "healthy"
+          ]
+        }
+      }
+    },
+    {
+      "index": 6,
+      "phase": "synthetic_parallel_join",
+      "trigger": {
+        "type": "gateway",
+        "element": "Gateway_1m6dgym",
+        "method": "Gateway_1m6dgym"
+      },
+      "enabled_before": [
+        "Gateway_1m6dgym"
+      ],
+      "accepted": true,
+      "rejection_reason": "",
+      "payload": {},
+      "outputs": {},
+      "state_diff": {
+        "Gateway_1m6dgym": [
+          "READY",
+          "DONE"
+        ],
+        "Message_1rqbibd": [
+          "INACTIVE",
+          "READY"
+        ]
+      },
+      "global_diff": {},
+      "states_after": {
+        "Message_0gd0z61": "INACTIVE",
+        "Message_0gswvmq": "DONE",
+        "Message_0wq8mc6": "DONE",
+        "Message_13mh6mk": "DONE",
+        "Message_1rqbibd": "READY",
+        "Message_1vzqd37": "DONE",
+        "Gateway_0o8snyv": "INACTIVE",
+        "ParallelGateway_1pgjqtw": "DONE",
+        "Gateway_1m6dgym": "DONE",
+        "StartEvent_0m7hz56": "DONE",
+        "EndEvent_110myff": "INACTIVE",
+        "Activity_1mj4mr7": "INACTIVE"
+      },
+      "logs": [
+        "synthetic parallel join Gateway_1m6dgym"
+      ],
+      "raw": {
+        "kind": "parallel_join",
+        "gateway": "Gateway_1m6dgym",
+        "sources": [
+          "Message_1vzqd37",
+          "Message_13mh6mk"
+        ],
+        "accepted": true,
+        "applied_actions": [
+          {
+            "kind": "enable",
+            "target": "Message_1rqbibd",
+            "from": "INACTIVE",
+            "to": "READY"
+          }
+        ]
+      }
+    },
+    {
+      "index": 7,
+      "phase": "execute",
+      "trigger": {
+        "type": "message",
+        "element": "Message_1rqbibd",
+        "method": "Message_1rqbibd"
+      },
+      "enabled_before": [
+        "Message_1rqbibd"
+      ],
+      "accepted": true,
+      "rejection_reason": "",
+      "payload": {
+        "result": "healthy"
+      },
+      "outputs": {},
+      "state_diff": {
+        "Message_1rqbibd": [
+          "READY",
+          "DONE"
+        ],
+        "Activity_1mj4mr7": [
+          "INACTIVE",
+          "READY"
+        ]
+      },
+      "global_diff": {},
+      "states_after": {
+        "Message_0gd0z61": "INACTIVE",
+        "Message_0gswvmq": "DONE",
+        "Message_0wq8mc6": "DONE",
+        "Message_13mh6mk": "DONE",
+        "Message_1rqbibd": "DONE",
+        "Message_1vzqd37": "DONE",
+        "Gateway_0o8snyv": "INACTIVE",
+        "ParallelGateway_1pgjqtw": "DONE",
+        "Gateway_1m6dgym": "DONE",
+        "StartEvent_0m7hz56": "DONE",
+        "EndEvent_110myff": "INACTIVE",
+        "Activity_1mj4mr7": "READY"
+      },
+      "logs": [
+        "message Message_1rqbibd -> DONE",
+        "message payload: set Result='healthy'"
+      ],
+      "raw": {
+        "index": 5,
+        "trigger": {
+          "type": "message",
+          "name": "Message_1rqbibd"
+        },
+        "enabled_before": [
+          "Message_1rqbibd"
+        ],
+        "guard_result": true,
+        "payload": {
+          "result": "healthy"
+        },
+        "outputs": {},
+        "accepted": true,
+        "logs": [
+          "message Message_1rqbibd -> DONE",
+          "message payload: set Result='healthy'"
+        ],
+        "flow_results": [
+          {
+            "kind": "message_flow",
+            "trigger": {
+              "type": "message",
+              "name": "Message_1rqbibd",
+              "state": "completed"
+            },
+            "accepted": true,
+            "applied_actions": [
+              {
+                "kind": "enable",
+                "target": "Activity_1mj4mr7",
+                "from": "INACTIVE",
+                "to": "READY"
+              }
+            ]
+          }
+        ],
+        "state_diff": {
+          "Message_1rqbibd": [
+            "READY",
+            "DONE"
+          ],
+          "Activity_1mj4mr7": [
+            "INACTIVE",
+            "READY"
+          ]
+        },
+        "global_diff": {}
+      }
+    },
+    {
+      "index": 8,
+      "phase": "execute",
+      "trigger": {
+        "type": "businessrule",
+        "element": "Activity_1mj4mr7",
+        "method": "Activity_1mj4mr7"
+      },
+      "enabled_before": [
+        "Activity_1mj4mr7"
+      ],
+      "accepted": true,
+      "rejection_reason": "",
+      "payload": {},
+      "outputs": {
+        "FurtherCheck": false
+      },
+      "state_diff": {
+        "Gateway_0o8snyv": [
+          "INACTIVE",
+          "READY"
+        ],
+        "Activity_1mj4mr7": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {
+        "FurtherCheck": [
+          null,
+          false
+        ]
+      },
+      "states_after": {
+        "Message_0gd0z61": "INACTIVE",
+        "Message_0gswvmq": "DONE",
+        "Message_0wq8mc6": "DONE",
+        "Message_13mh6mk": "DONE",
+        "Message_1rqbibd": "DONE",
+        "Message_1vzqd37": "DONE",
+        "Gateway_0o8snyv": "READY",
+        "ParallelGateway_1pgjqtw": "DONE",
+        "Gateway_1m6dgym": "DONE",
+        "StartEvent_0m7hz56": "DONE",
+        "EndEvent_110myff": "INACTIVE",
+        "Activity_1mj4mr7": "DONE"
+      },
+      "logs": [
+        "businessrule Activity_1mj4mr7 -> DONE",
+        "businessrule output: set FurtherCheck=False"
+      ],
+      "raw": {
+        "index": 6,
+        "trigger": {
+          "type": "businessrule",
+          "name": "Activity_1mj4mr7"
+        },
+        "enabled_before": [
+          "Activity_1mj4mr7"
+        ],
+        "guard_result": true,
+        "payload": {},
+        "outputs": {
+          "FurtherCheck": false
+        },
+        "accepted": true,
+        "logs": [
+          "businessrule Activity_1mj4mr7 -> DONE",
+          "businessrule output: set FurtherCheck=False"
+        ],
+        "flow_results": [
+          {
+            "kind": "rule_flow",
+            "trigger": {
+              "type": "businessrule",
+              "name": "Activity_1mj4mr7",
+              "state": "done"
+            },
+            "accepted": true,
+            "applied_actions": [
+              {
+                "kind": "enable",
+                "target": "Gateway_0o8snyv",
+                "from": "INACTIVE",
+                "to": "READY"
+              }
+            ]
+          }
+        ],
+        "state_diff": {
+          "Gateway_0o8snyv": [
+            "INACTIVE",
+            "READY"
+          ],
+          "Activity_1mj4mr7": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {
+          "FurtherCheck": [
+            null,
+            false
+          ]
+        }
+      }
+    },
+    {
+      "index": 9,
+      "phase": "execute",
+      "trigger": {
+        "type": "gateway",
+        "element": "Gateway_0o8snyv",
+        "method": "Gateway_0o8snyv"
+      },
+      "enabled_before": [
+        "Gateway_0o8snyv"
+      ],
+      "accepted": true,
+      "rejection_reason": "",
+      "payload": {},
+      "outputs": {},
+      "state_diff": {
+        "Gateway_0o8snyv": [
+          "READY",
+          "DONE"
+        ],
+        "EndEvent_110myff": [
+          "INACTIVE",
+          "READY"
+        ]
+      },
+      "global_diff": {},
+      "states_after": {
+        "Message_0gd0z61": "INACTIVE",
+        "Message_0gswvmq": "DONE",
+        "Message_0wq8mc6": "DONE",
+        "Message_13mh6mk": "DONE",
+        "Message_1rqbibd": "DONE",
+        "Message_1vzqd37": "DONE",
+        "Gateway_0o8snyv": "DONE",
+        "ParallelGateway_1pgjqtw": "DONE",
+        "Gateway_1m6dgym": "DONE",
+        "StartEvent_0m7hz56": "DONE",
+        "EndEvent_110myff": "READY",
+        "Activity_1mj4mr7": "DONE"
+      },
+      "logs": [
+        "gateway Gateway_0o8snyv -> DONE"
+      ],
+      "raw": {
+        "index": 7,
+        "trigger": {
+          "type": "gateway",
+          "name": "Gateway_0o8snyv"
+        },
+        "enabled_before": [
+          "Gateway_0o8snyv"
+        ],
+        "guard_result": true,
+        "payload": {},
+        "outputs": {},
+        "accepted": true,
+        "logs": [
+          "gateway Gateway_0o8snyv -> DONE"
+        ],
+        "flow_results": [
+          {
+            "kind": "gateway_flow",
+            "trigger": {
+              "type": "gateway",
+              "name": "Gateway_0o8snyv",
+              "state": "completed"
+            },
+            "accepted": true,
+            "selected_branch": {
+              "accepted": true,
+              "condition_kind": "compare",
+              "var": "FurtherCheck",
+              "relation": "==",
+              "value": false,
+              "expr": null,
+              "applied_actions": [
+                {
+                  "kind": "enable",
+                  "target": "EndEvent_110myff",
+                  "from": "INACTIVE",
+                  "to": "READY"
+                }
+              ]
+            }
+          }
+        ],
+        "state_diff": {
+          "Gateway_0o8snyv": [
+            "READY",
+            "DONE"
+          ],
+          "EndEvent_110myff": [
+            "INACTIVE",
+            "READY"
+          ]
+        },
+        "global_diff": {}
+      }
+    },
+    {
+      "index": 10,
+      "phase": "execute",
+      "trigger": {
+        "type": "event",
+        "element": "EndEvent_110myff",
+        "method": "EndEvent_110myff"
+      },
+      "enabled_before": [
+        "EndEvent_110myff"
+      ],
+      "accepted": true,
+      "rejection_reason": "",
+      "payload": {},
+      "outputs": {},
+      "state_diff": {
+        "EndEvent_110myff": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "states_after": {
+        "Message_0gd0z61": "INACTIVE",
+        "Message_0gswvmq": "DONE",
+        "Message_0wq8mc6": "DONE",
+        "Message_13mh6mk": "DONE",
+        "Message_1rqbibd": "DONE",
+        "Message_1vzqd37": "DONE",
+        "Gateway_0o8snyv": "DONE",
+        "ParallelGateway_1pgjqtw": "DONE",
+        "Gateway_1m6dgym": "DONE",
+        "StartEvent_0m7hz56": "DONE",
+        "EndEvent_110myff": "DONE",
+        "Activity_1mj4mr7": "DONE"
+      },
+      "logs": [
+        "event EndEvent_110myff -> DONE"
+      ],
+      "raw": {
+        "index": 8,
+        "trigger": {
+          "type": "event",
+          "name": "EndEvent_110myff"
+        },
+        "enabled_before": [
+          "EndEvent_110myff"
+        ],
+        "guard_result": true,
+        "payload": {},
+        "outputs": {},
+        "accepted": true,
+        "logs": [
+          "event EndEvent_110myff -> DONE"
+        ],
+        "flow_results": [],
+        "state_diff": {
+          "EndEvent_110myff": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {}
+      }
+    }
+  ],
+  "final_state": {
+    "status": "accepted",
+    "reason": "",
+    "enabled_elements": [],
+    "element_states": {
+      "Message_0gd0z61": "INACTIVE",
+      "Message_0gswvmq": "DONE",
+      "Message_0wq8mc6": "DONE",
+      "Message_13mh6mk": "DONE",
+      "Message_1rqbibd": "DONE",
+      "Message_1vzqd37": "DONE",
+      "Gateway_0o8snyv": "DONE",
+      "ParallelGateway_1pgjqtw": "DONE",
+      "Gateway_1m6dgym": "DONE",
+      "StartEvent_0m7hz56": "DONE",
+      "EndEvent_110myff": "DONE",
+      "Activity_1mj4mr7": "DONE"
+    },
+    "globals": {
+      "FurtherCheck": false,
+      "FurtherCheckDate": null,
+      "FurtherCheckPlace": null,
+      "PatientData": "sample-patientData",
+      "ReportContent": "sample-reportContent",
+      "Result": "healthy",
+      "Sample": "sample-sample"
+    }
+  }
+}

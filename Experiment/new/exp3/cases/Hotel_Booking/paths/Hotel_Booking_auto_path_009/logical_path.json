@@ -1,0 +1,111 @@
+{
+  "case_name": "Hotel_Booking",
+  "path_name": "Hotel_Booking_auto_path_009",
+  "description": "Auto materialized from generated DSL executable path.",
+  "source_model": "/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/Hotel_Booking/dsl.b2c",
+  "expect": "accepted",
+  "steps": [
+    {
+      "type": "event",
+      "element": "StartEvent_1jtgn3j"
+    },
+    {
+      "type": "gateway",
+      "element": "ExclusiveGateway_0hs3ztq"
+    },
+    {
+      "type": "message",
+      "element": "Message_045i10y",
+      "payload": {
+        "date": "sample-date",
+        "bedrooms": 1
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_0r9lypd",
+      "payload": {
+        "confirm": true
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "ExclusiveGateway_106je4z"
+    },
+    {
+      "type": "message",
+      "element": "Message_1em0ee4",
+      "payload": {
+        "quotation": 1
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_1nlagx2",
+      "payload": {
+        "confirmation": true
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "EventBasedGateway_1fxpmyn"
+    },
+    {
+      "type": "message",
+      "element": "Message_1xm9dxy",
+      "payload": {
+        "motivation": "sample-motivation"
+      }
+    },
+    {
+      "type": "event",
+      "element": "EndEvent_0366pfz"
+    }
+  ],
+  "generated_path": {
+    "final_enabled_elements": [],
+    "final_element_states": {
+      "Message_045i10y": "DONE",
+      "Message_04ikf2n": "INACTIVE",
+      "Message_0m9p3da": "INACTIVE",
+      "Message_0o8eyir": "INACTIVE",
+      "Message_0r9lypd": "DONE",
+      "Message_0vlxzcv": "INACTIVE",
+      "Message_104h2tt": "INACTIVE",
+      "Message_1em0ee4": "DONE",
+      "Message_1etcmvl": "INACTIVE",
+      "Message_1joj7ca": "INACTIVE",
+      "Message_1ljlm4g": "INACTIVE",
+      "Message_1nlagx2": "DONE",
+      "Message_1xm9dxy": "DONE",
+      "ExclusiveGateway_106je4z": "DONE",
+      "ExclusiveGateway_0hs3ztq": "DONE",
+      "ExclusiveGateway_0nzwv7v": "INACTIVE",
+      "Gateway_1jhfnrm": "INACTIVE",
+      "Gateway_1atxr3y": "INACTIVE",
+      "EventBasedGateway_1fxpmyn": "DONE",
+      "StartEvent_1jtgn3j": "DONE",
+      "EndEvent_0366pfz": "DONE",
+      "EndEvent_08edp7f": "INACTIVE",
+      "EndEvent_146eii4": "INACTIVE",
+      "Activity_0b1f7uv": "INACTIVE"
+    },
+    "final_globals": {
+      "ID": null,
+      "VIPLevel": null,
+      "VIPcardId": null,
+      "VIPpoints": null,
+      "Bedrooms": 1,
+      "Booking_id": null,
+      "Cancel": null,
+      "Confirm": true,
+      "Confirmation": true,
+      "Date": "sample-date",
+      "Discount1": null,
+      "Discount2": null,
+      "Motivation": "sample-motivation",
+      "Payableto": null,
+      "Quotation": 1
+    }
+  }
+}

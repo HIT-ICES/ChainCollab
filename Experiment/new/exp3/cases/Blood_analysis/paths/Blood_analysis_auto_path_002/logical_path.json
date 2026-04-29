@@ -1,0 +1,107 @@
+{
+  "case_name": "Blood_analysis",
+  "path_name": "Blood_analysis_auto_path_002",
+  "description": "Auto materialized from generated DSL executable path.",
+  "source_model": "/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/Blood_analysis/dsl.b2c",
+  "expect": "accepted",
+  "steps": [
+    {
+      "type": "event",
+      "element": "StartEvent_0m7hz56"
+    },
+    {
+      "type": "gateway",
+      "element": "ParallelGateway_1pgjqtw"
+    },
+    {
+      "type": "message",
+      "element": "Message_0gswvmq",
+      "payload": {
+        "sample": "sample-sample"
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_0wq8mc6",
+      "payload": {
+        "patientData": "sample-patientData"
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_13mh6mk",
+      "payload": {
+        "reportContent": "sample-reportContent"
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_1vzqd37",
+      "payload": {
+        "result": "ill"
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_1m6dgym"
+    },
+    {
+      "type": "message",
+      "element": "Message_1rqbibd",
+      "payload": {
+        "result": "ill"
+      }
+    },
+    {
+      "type": "businessrule",
+      "element": "Activity_1mj4mr7",
+      "outputs": {
+        "FurtherCheck": true
+      },
+      "payload": {},
+      "continue_payload": {}
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_0o8snyv"
+    },
+    {
+      "type": "message",
+      "element": "Message_0gd0z61",
+      "payload": {
+        "furtherCheckPlace": "sample-furtherCheckPlace",
+        "furtherCheckDate": "sample-furtherCheckDate"
+      }
+    },
+    {
+      "type": "event",
+      "element": "EndEvent_110myff"
+    }
+  ],
+  "generated_path": {
+    "final_enabled_elements": [],
+    "final_element_states": {
+      "Message_0gd0z61": "DONE",
+      "Message_0gswvmq": "DONE",
+      "Message_0wq8mc6": "DONE",
+      "Message_13mh6mk": "DONE",
+      "Message_1rqbibd": "DONE",
+      "Message_1vzqd37": "DONE",
+      "Gateway_0o8snyv": "DONE",
+      "ParallelGateway_1pgjqtw": "DONE",
+      "Gateway_1m6dgym": "DONE",
+      "StartEvent_0m7hz56": "DONE",
+      "EndEvent_110myff": "DONE",
+      "Activity_1mj4mr7": "DONE"
+    },
+    "final_globals": {
+      "FurtherCheck": true,
+      "FurtherCheckDate": "sample-furtherCheckDate",
+      "FurtherCheckPlace": "sample-furtherCheckPlace",
+      "PatientData": "sample-patientData",
+      "ReportContent": "sample-reportContent",
+      "Result": "sample-result",
+      "Sample": "sample-sample"
+    }
+  }
+}

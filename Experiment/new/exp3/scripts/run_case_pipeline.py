@@ -8,11 +8,13 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict, List, Sequence
 
-from common import CHAINCOLLAB_ROOT, EXP3_ROOT, dump_json, dump_text, load_json
+from common import CHAINCOLLAB_ROOT, EXP3_ROOT, dump_json, dump_text, load_json, normalize_name
+from dmn_input_solver import normalize_literal, synthesize_dmn_inputs
 from parse_b2c import parse_b2c_model
 
 
 DEFAULT_PYTHON = str(CHAINCOLLAB_ROOT / "src" / "newTranslator" / ".venv" / "bin" / "python")
+DEFAULT_DMN_DIR = CHAINCOLLAB_ROOT / "Experiment" / "BPMNwithDMNcase"
 
 
 def load_model(path: Path) -> Dict[str, Any]:
@@ -80,8 +82,94 @@ def with_solidity_businessrule_payloads(step: Dict[str, Any]) -> Dict[str, Any]:
     return item
 
 
-def build_logical_path(generated_path: Dict[str, Any], *, case_name: str, model_path: Path, model: Dict[str, Any]) -> Dict[str, Any]:
+def find_dmn_file(case_name: str, rule: Dict[str, Any], dmn_dir: Path) -> Path | None:
+    if not dmn_dir.exists():
+        return None
+    resource = str(rule.get("dmn") or "").strip()
+    candidates: List[Path] = []
+    if resource:
+        resource_path = Path(resource)
+        candidates.extend(
+            [
+                resource_path,
+                dmn_dir / resource,
+                dmn_dir / resource_path.name,
+            ]
+        )
+    normalized_case = normalize_name(case_name)
+    for path in dmn_dir.glob("*.dmn"):
+        if normalize_name(path.stem) == normalized_case:
+            candidates.append(path)
+    for path in dmn_dir.glob("*.dmn"):
+        if normalized_case and normalized_case in normalize_name(path.stem):
+            candidates.append(path)
+    for path in candidates:
+        if path.exists():
+            return path.resolve()
+    return None
+
+
+def apply_dmn_input_assignments(
+    *,
+    case_name: str,
+    model: Dict[str, Any],
+    steps: List[Dict[str, Any]],
+    dmn_dir: Path,
+) -> None:
+    rules_by_name = {str(rule.get("name") or ""): rule for rule in model.get("businessrules", [])}
+    for index, step in enumerate(steps):
+        if step.get("type") != "businessrule":
+            continue
+        desired_outputs = {
+            str(key): normalize_literal(value)
+            for key, value in (step.get("outputs") or {}).items()
+        }
+        if not desired_outputs:
+            continue
+        rule = rules_by_name.get(str(step.get("element") or ""))
+        if not rule:
+            continue
+        dmn_file = find_dmn_file(case_name, rule, dmn_dir)
+        if not dmn_file:
+            continue
+        assignments = synthesize_dmn_inputs(
+            dmn_file,
+            desired_outputs,
+            decision_id=str(rule.get("decision") or ""),
+        )
+        if not assignments:
+            continue
+
+        mapped_names = {}
+        for mapping in rule.get("input_mapping", []) or []:
+            dmn_param = str(mapping.get("dmn_param") or "")
+            global_name = str(mapping.get("global") or "")
+            if dmn_param in assignments:
+                mapped_names[normalize_name(dmn_param)] = assignments[dmn_param]
+                mapped_names[normalize_name(global_name)] = assignments[dmn_param]
+
+        for prior in steps[:index]:
+            payload = dict(prior.get("payload") or {})
+            changed = False
+            for key in list(payload.keys()):
+                normalized = normalize_name(key)
+                if normalized in mapped_names:
+                    payload[key] = mapped_names[normalized]
+                    changed = True
+            if changed:
+                prior["payload"] = payload
+
+
+def build_logical_path(
+    generated_path: Dict[str, Any],
+    *,
+    case_name: str,
+    model_path: Path,
+    model: Dict[str, Any],
+    dmn_dir: Path,
+) -> Dict[str, Any]:
     body_steps = [with_solidity_businessrule_payloads(step) for step in deepcopy(generated_path.get("steps") or [])]
+    apply_dmn_input_assignments(case_name=case_name, model=model, steps=body_steps, dmn_dir=dmn_dir)
 
     existing_elements = {str(step.get("element") or "") for step in body_steps}
     insertions: List[tuple[int, Dict[str, Any]]] = []
@@ -221,6 +309,11 @@ def main() -> int:
     parser.add_argument("--case-name", required=True, help="Case name, e.g. SupplyChainPaper")
     parser.add_argument("--model", required=True, help="Path to the case .b2c or parsed dsl_model.json")
     parser.add_argument("--solidity-config", required=True, help="Per-case Solidity replay config JSON")
+    parser.add_argument(
+        "--dmn-dir",
+        default=str(DEFAULT_DMN_DIR),
+        help="Directory containing case DMN files used to synthesize executable business-rule inputs",
+    )
     parser.add_argument("--python", default=DEFAULT_PYTHON, help="Python interpreter for exp3 DSL scripts")
     parser.add_argument("--max-depth", type=int, default=64)
     parser.add_argument("--max-paths", type=int, default=1000)
@@ -238,6 +331,7 @@ def main() -> int:
     case_name = args.case_name
     model_path = Path(args.model).resolve()
     solidity_config = Path(args.solidity_config).resolve()
+    dmn_dir = Path(args.dmn_dir).resolve()
     if not model_path.exists():
         raise SystemExit(f"Model not found: {model_path}")
     if not solidity_config.exists():
@@ -257,6 +351,8 @@ def main() -> int:
             case_name,
             "--output",
             str(generated_paths_file),
+            "--dmn-dir",
+            str(dmn_dir),
             "--max-depth",
             str(args.max_depth),
             "--max-paths",
@@ -304,7 +400,13 @@ def main() -> int:
             "status": "started",
         }
         try:
-            logical = build_logical_path(generated_path, case_name=case_name, model_path=model_path, model=model)
+            logical = build_logical_path(
+                generated_path,
+                case_name=case_name,
+                model_path=model_path,
+                model=model,
+                dmn_dir=dmn_dir,
+            )
             dump_json(logical_path, logical)
 
             run_command(
