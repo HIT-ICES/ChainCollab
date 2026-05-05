@@ -1,0 +1,114 @@
+{
+  "case_name": "amazon",
+  "path_name": "amazon_auto_path_002",
+  "description": "Auto materialized from generated DSL executable path.",
+  "source_model": "/root/code/ChainCollab/src/runtime/newTranslator/20260505-065322-090434/amazon3.b2c",
+  "expect": "accepted",
+  "steps": [
+    {
+      "type": "event",
+      "element": "Event_0ojehz6"
+    },
+    {
+      "type": "message",
+      "element": "Message_09krt7c",
+      "payload": {
+        "question name": "sample-question name",
+        "description": "sample-description"
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_0jgq0a6"
+    },
+    {
+      "type": "message",
+      "element": "Message_0ywghlt",
+      "payload": {
+        "serviceType": "sample-serviceType"
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_068kmzv",
+      "payload": {
+        "time": "sample-time",
+        "instance ID": "sample-instance ID",
+        "logs": "sample-logs"
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_0auc3he"
+    },
+    {
+      "type": "message",
+      "element": "Message_12n6jjk",
+      "payload": {
+        "requestType": "sample-requestType",
+        "duration": 15
+      }
+    },
+    {
+      "type": "businessrule",
+      "element": "Activity_0tya4bp",
+      "outputs": {
+        "confirm": false
+      },
+      "payload": {},
+      "continue_payload": {}
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_0ivv4vg"
+    },
+    {
+      "type": "message",
+      "element": "Message_1b1qlzd",
+      "payload": {
+        "reason": "sample-reason",
+        "result": "sample-result"
+      }
+    },
+    {
+      "type": "event",
+      "element": "Event_0dyp0ut"
+    }
+  ],
+  "generated_path": {
+    "final_enabled_elements": [],
+    "final_element_states": {
+      "Message_01jq2zl": "INACTIVE",
+      "Message_068kmzv": "DONE",
+      "Message_076ulzs": "INACTIVE",
+      "Message_09krt7c": "DONE",
+      "Message_0ywghlt": "DONE",
+      "Message_12n6jjk": "DONE",
+      "Message_1b1qlzd": "DONE",
+      "Message_1bhhp1n": "INACTIVE",
+      "Gateway_0auc3he": "DONE",
+      "Gateway_0ivv4vg": "DONE",
+      "Gateway_0jgq0a6": "DONE",
+      "Event_0ojehz6": "DONE",
+      "Event_0ci2gl8": "INACTIVE",
+      "Event_0dyp0ut": "DONE",
+      "Activity_0tya4bp": "DONE"
+    },
+    "final_globals": {
+      "EC2_resource_ID": null,
+      "Amount": null,
+      "Confirm": false,
+      "Description": "sample-description",
+      "Duration": 1,
+      "Instance_ID": "sample-instance ID",
+      "Logs": "sample-logs",
+      "Other_information": null,
+      "Question_name": "sample-question name",
+      "Reason": "sample-reason",
+      "RequestType": "sample-requestType",
+      "Result": "sample-result",
+      "ServiceType": "sample-serviceType",
+      "Time": "sample-time"
+    }
+  }
+}

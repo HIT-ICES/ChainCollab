@@ -1040,6 +1040,8 @@ def main() -> int:
                                 "dmn result not ready" in text
                                 or "state not allowed" in text
                                 or "json string not found" in text
+                                or "execution reverted" in text
+                                or "evm reverted" in text
                             )
                             and continue_try + 1 < continue_attempts
                         ):

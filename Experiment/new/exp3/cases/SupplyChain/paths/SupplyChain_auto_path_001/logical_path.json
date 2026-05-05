@@ -1,0 +1,154 @@
+{
+  "case_name": "SupplyChain",
+  "path_name": "SupplyChain_auto_path_001",
+  "description": "Auto materialized from generated DSL executable path.",
+  "source_model": "/root/code/ChainCollab/src/runtime/newTranslator/20260505-113644-262150/SupplyChain.b2c",
+  "expect": "accepted",
+  "steps": [
+    {
+      "type": "event",
+      "element": "Event_06sexe6"
+    },
+    {
+      "type": "message",
+      "element": "Message_1wswgqu",
+      "payload": {
+        "order": "sample-order",
+        "amount": 11
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_1ajdm9l",
+      "payload": {
+        "placed_order": "sample-placed_order"
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_0onpe6x"
+    },
+    {
+      "type": "message",
+      "element": "Message_0cba4t6",
+      "payload": {
+        "fwd_order": "sample-fwd_order"
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_0pm90nx",
+      "payload": {
+        "transport_order": "sample-transport_order"
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_1fbifca"
+    },
+    {
+      "type": "message",
+      "element": "Message_0rwz1km",
+      "payload": {
+        "req_details": "sample-req_details"
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_0hpha6h",
+      "payload": {
+        "pre_details": "sample-pre_details"
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_1io2g9u",
+      "payload": {
+        "waybill": "sample-waybill"
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_0d2xte5",
+      "payload": {
+        "del_order": "sample-del_order"
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_04wmlqe",
+      "payload": {
+        "report": "sample-report"
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_0ps2yzo",
+      "payload": {
+        "Self_pickup": false
+      }
+    },
+    {
+      "type": "businessrule",
+      "element": "Activity_0fbi09z",
+      "outputs": {
+        "deliver": true
+      },
+      "payload": {},
+      "continue_payload": {}
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_11hmo2k"
+    },
+    {
+      "type": "message",
+      "element": "Message_196q1fj",
+      "payload": {
+        "delivered_product": "sample-delivered_product"
+      }
+    },
+    {
+      "type": "event",
+      "element": "Event_13pbqdz"
+    }
+  ],
+  "generated_path": {
+    "final_enabled_elements": [],
+    "final_element_states": {
+      "Message_04wmlqe": "DONE",
+      "Message_0cba4t6": "DONE",
+      "Message_0d2xte5": "DONE",
+      "Message_0hpha6h": "DONE",
+      "Message_0pm90nx": "DONE",
+      "Message_0ps2yzo": "DONE",
+      "Message_0rwz1km": "DONE",
+      "Message_196q1fj": "DONE",
+      "Message_1ajdm9l": "DONE",
+      "Message_1io2g9u": "DONE",
+      "Message_1wswgqu": "DONE",
+      "Gateway_11hmo2k": "DONE",
+      "Gateway_0onpe6x": "DONE",
+      "Gateway_1fbifca": "DONE",
+      "Event_06sexe6": "DONE",
+      "Event_13pbqdz": "DONE",
+      "Event_0eoqvir": "INACTIVE",
+      "Activity_0fbi09z": "DONE"
+    },
+    "final_globals": {
+      "Self_pickup": true,
+      "Amount": 1,
+      "Del_order": "sample-del_order",
+      "Deliver": true,
+      "Delivered_product": "sample-delivered_product",
+      "Fwd_order": "sample-fwd_order",
+      "Order": "sample-order",
+      "Placed_order": "sample-placed_order",
+      "Pre_details": "sample-pre_details",
+      "Report": "sample-report",
+      "Req_details": "sample-req_details",
+      "Transport_order": "sample-transport_order",
+      "Waybill": "sample-waybill"
+    }
+  }
+}

@@ -1,0 +1,335 @@
+{
+  "case_name": "Purchase",
+  "source_model": "/root/code/ChainCollab/src/runtime/newTranslator/20260505-103656-192406/Purchase.b2c",
+  "path_count": 4,
+  "paths": [
+    {
+      "path_name": "Purchase_auto_path_001",
+      "expect": "accepted",
+      "steps": [
+        {
+          "type": "message",
+          "element": "Message_0q9hvem",
+          "payload": {
+            "orderContent": "sample-orderContent",
+            "productAvalibale": true
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_1ltys0e"
+        },
+        {
+          "type": "message",
+          "element": "Message_1f0gefc",
+          "payload": {
+            "MessageContent": "sample-MessageContent",
+            "priceOK": true
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_025uwvp"
+        },
+        {
+          "type": "message",
+          "element": "Message_0mcktm6",
+          "payload": {
+            "Price": 1,
+            "Time": "sample-Time"
+          }
+        },
+        {
+          "type": "businessrule",
+          "element": "Activity_12arovy",
+          "outputs": {
+            "discount": true
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_13i0b7w"
+        },
+        {
+          "type": "message",
+          "element": "Message_15b83n1",
+          "payload": {}
+        },
+        {
+          "type": "message",
+          "element": "Message_08ms1jj",
+          "payload": {
+            "sale": "sample-sale"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_0g7m9tf",
+          "payload": {
+            "num": "sample-num",
+            "time2": "sample-time2"
+          }
+        },
+        {
+          "type": "event",
+          "element": "Event_1o9guxu"
+        }
+      ],
+      "final_enabled_elements": [],
+      "final_element_states": {
+        "Message_05gz8u0": "INACTIVE",
+        "Message_08ms1jj": "DONE",
+        "Message_0g7m9tf": "DONE",
+        "Message_0mcktm6": "DONE",
+        "Message_0q9hvem": "DONE",
+        "Message_14wu8ts": "INACTIVE",
+        "Message_15b83n1": "DONE",
+        "Message_1f0gefc": "DONE",
+        "Gateway_1ltys0e": "DONE",
+        "Gateway_025uwvp": "DONE",
+        "Gateway_13i0b7w": "DONE",
+        "Event_0ehnwwz": "DONE",
+        "Event_0e3j88g": "INACTIVE",
+        "Event_1o9guxu": "DONE",
+        "Event_194zr5n": "INACTIVE",
+        "Activity_12arovy": "DONE"
+      },
+      "final_globals": {
+        "MessageContent": "sample-MessageContent",
+        "Price": 1,
+        "Time": "sample-Time",
+        "Discount": true,
+        "Num": "sample-num",
+        "OrderContent": "sample-orderContent",
+        "PriceOK": true,
+        "ProductAvalibale": true,
+        "Sale": "sample-sale",
+        "Time2": "sample-time2"
+      }
+    },
+    {
+      "path_name": "Purchase_auto_path_002",
+      "expect": "accepted",
+      "steps": [
+        {
+          "type": "message",
+          "element": "Message_0q9hvem",
+          "payload": {
+            "orderContent": "sample-orderContent",
+            "productAvalibale": true
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_1ltys0e"
+        },
+        {
+          "type": "message",
+          "element": "Message_1f0gefc",
+          "payload": {
+            "MessageContent": "sample-MessageContent",
+            "priceOK": true
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_025uwvp"
+        },
+        {
+          "type": "message",
+          "element": "Message_0mcktm6",
+          "payload": {
+            "Price": 1,
+            "Time": "sample-Time"
+          }
+        },
+        {
+          "type": "businessrule",
+          "element": "Activity_12arovy",
+          "outputs": {
+            "discount": false
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_13i0b7w"
+        },
+        {
+          "type": "message",
+          "element": "Message_0g7m9tf",
+          "payload": {
+            "num": "sample-num",
+            "time2": "sample-time2"
+          }
+        },
+        {
+          "type": "event",
+          "element": "Event_1o9guxu"
+        }
+      ],
+      "final_enabled_elements": [],
+      "final_element_states": {
+        "Message_05gz8u0": "INACTIVE",
+        "Message_08ms1jj": "INACTIVE",
+        "Message_0g7m9tf": "DONE",
+        "Message_0mcktm6": "DONE",
+        "Message_0q9hvem": "DONE",
+        "Message_14wu8ts": "INACTIVE",
+        "Message_15b83n1": "INACTIVE",
+        "Message_1f0gefc": "DONE",
+        "Gateway_1ltys0e": "DONE",
+        "Gateway_025uwvp": "DONE",
+        "Gateway_13i0b7w": "DONE",
+        "Event_0ehnwwz": "DONE",
+        "Event_0e3j88g": "INACTIVE",
+        "Event_1o9guxu": "DONE",
+        "Event_194zr5n": "INACTIVE",
+        "Activity_12arovy": "DONE"
+      },
+      "final_globals": {
+        "MessageContent": "sample-MessageContent",
+        "Price": 1,
+        "Time": "sample-Time",
+        "Discount": false,
+        "Num": "sample-num",
+        "OrderContent": "sample-orderContent",
+        "PriceOK": true,
+        "ProductAvalibale": true,
+        "Sale": null,
+        "Time2": "sample-time2"
+      }
+    },
+    {
+      "path_name": "Purchase_auto_path_003",
+      "expect": "accepted",
+      "steps": [
+        {
+          "type": "message",
+          "element": "Message_0q9hvem",
+          "payload": {
+            "orderContent": "sample-orderContent",
+            "productAvalibale": true
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_1ltys0e"
+        },
+        {
+          "type": "message",
+          "element": "Message_1f0gefc",
+          "payload": {
+            "MessageContent": "sample-MessageContent",
+            "priceOK": false
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_025uwvp"
+        },
+        {
+          "type": "message",
+          "element": "Message_05gz8u0",
+          "payload": {
+            "MessageContent": "sample-MessageContent"
+          }
+        },
+        {
+          "type": "event",
+          "element": "Event_0e3j88g"
+        }
+      ],
+      "final_enabled_elements": [],
+      "final_element_states": {
+        "Message_05gz8u0": "DONE",
+        "Message_08ms1jj": "INACTIVE",
+        "Message_0g7m9tf": "INACTIVE",
+        "Message_0mcktm6": "INACTIVE",
+        "Message_0q9hvem": "DONE",
+        "Message_14wu8ts": "INACTIVE",
+        "Message_15b83n1": "INACTIVE",
+        "Message_1f0gefc": "DONE",
+        "Gateway_1ltys0e": "DONE",
+        "Gateway_025uwvp": "DONE",
+        "Gateway_13i0b7w": "INACTIVE",
+        "Event_0ehnwwz": "DONE",
+        "Event_0e3j88g": "DONE",
+        "Event_1o9guxu": "INACTIVE",
+        "Event_194zr5n": "INACTIVE",
+        "Activity_12arovy": "INACTIVE"
+      },
+      "final_globals": {
+        "MessageContent": "sample-MessageContent",
+        "Price": null,
+        "Time": null,
+        "Discount": null,
+        "Num": null,
+        "OrderContent": "sample-orderContent",
+        "PriceOK": false,
+        "ProductAvalibale": true,
+        "Sale": null,
+        "Time2": null
+      }
+    },
+    {
+      "path_name": "Purchase_auto_path_004",
+      "expect": "accepted",
+      "steps": [
+        {
+          "type": "message",
+          "element": "Message_0q9hvem",
+          "payload": {
+            "orderContent": "sample-orderContent",
+            "productAvalibale": false
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_1ltys0e"
+        },
+        {
+          "type": "message",
+          "element": "Message_14wu8ts",
+          "payload": {
+            "MessageContent": "sample-MessageContent"
+          }
+        },
+        {
+          "type": "event",
+          "element": "Event_194zr5n"
+        }
+      ],
+      "final_enabled_elements": [],
+      "final_element_states": {
+        "Message_05gz8u0": "INACTIVE",
+        "Message_08ms1jj": "INACTIVE",
+        "Message_0g7m9tf": "INACTIVE",
+        "Message_0mcktm6": "INACTIVE",
+        "Message_0q9hvem": "DONE",
+        "Message_14wu8ts": "DONE",
+        "Message_15b83n1": "INACTIVE",
+        "Message_1f0gefc": "INACTIVE",
+        "Gateway_1ltys0e": "DONE",
+        "Gateway_025uwvp": "INACTIVE",
+        "Gateway_13i0b7w": "INACTIVE",
+        "Event_0ehnwwz": "DONE",
+        "Event_0e3j88g": "INACTIVE",
+        "Event_1o9guxu": "INACTIVE",
+        "Event_194zr5n": "DONE",
+        "Activity_12arovy": "INACTIVE"
+      },
+      "final_globals": {
+        "MessageContent": "sample-MessageContent",
+        "Price": null,
+        "Time": null,
+        "Discount": null,
+        "Num": null,
+        "OrderContent": "sample-orderContent",
+        "PriceOK": null,
+        "ProductAvalibale": false,
+        "Sale": null,
+        "Time2": null
+      }
+    }
+  ]
+}

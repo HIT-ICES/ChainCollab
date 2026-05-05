@@ -435,6 +435,9 @@ class FlowPlanner:
             init_flow = element.init_message_flow
             if init_flow:
                 return init_flow.message.id
+            return_flow = element.return_message_flow
+            if return_flow:
+                return return_flow.message.id
             return None
         return element.id
 
@@ -459,14 +462,18 @@ class FlowPlanner:
         mapping: Dict[str, List[str]] = {}
         for task in self._choreography.query_element_with_type(NodeType.CHOREOGRAPHY_TASK):
             init_flow = task.init_message_flow
-            if not init_flow:
+            if not init_flow and not task.return_message_flow:
                 continue
-            init_message = init_flow.message.id
-            if task.return_message_flow:
+            if init_flow and task.return_message_flow:
+                init_message = init_flow.message.id
                 mapping[init_message] = [task.return_message_flow.message.id]
                 mapping[task.return_message_flow.message.id] = self._targets_from_element(task.outgoing.target)
-            else:
+            elif init_flow:
+                init_message = init_flow.message.id
                 mapping[init_message] = self._targets_from_element(task.outgoing.target)
+            else:
+                return_message = task.return_message_flow.message.id
+                mapping[return_message] = self._targets_from_element(task.outgoing.target)
         return mapping
 
     @staticmethod

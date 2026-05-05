@@ -1,0 +1,69 @@
+{
+  "case_name": "manufactory",
+  "description": "Auto materialized from generated DSL executable path.",
+  "source_b2c": "/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/manufactory/dsl.b2c",
+  "paths": [
+    {
+      "path_name": "manufactory_auto_path_003",
+      "expect": "accepted",
+      "steps": [
+        {
+          "type": "message",
+          "element": "Message_00wpjke",
+          "payload": {
+            "QuoteRequest": "sample-QuoteRequest"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_1kazup6",
+          "payload": {
+            "QuoteContent": "sample-QuoteContent"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_1y5d31x",
+          "payload": {
+            "OrderContent": "sample-OrderContent",
+            "OrderAmount": 3
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_085e7pr"
+        },
+        {
+          "type": "message",
+          "element": "Message_0z8kf0j",
+          "payload": {
+            "cancelation": "sample-cancelation"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_0zt8q9t",
+          "payload": {
+            "ConcelAck": "sample-ConcelAck"
+          }
+        },
+        {
+          "type": "businessrule",
+          "element": "Activity_1uktp5z",
+          "payload": {},
+          "outputs": {
+            "CancelFee": false
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_19zzj3s"
+        },
+        {
+          "type": "event",
+          "element": "Event_0awuo5v"
+        }
+      ]
+    }
+  ]
+}

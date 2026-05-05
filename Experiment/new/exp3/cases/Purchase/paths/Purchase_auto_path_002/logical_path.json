@@ -1,0 +1,103 @@
+{
+  "case_name": "Purchase",
+  "path_name": "Purchase_auto_path_002",
+  "description": "Auto materialized from generated DSL executable path.",
+  "source_model": "/root/code/ChainCollab/src/runtime/newTranslator/20260505-103656-192406/Purchase.b2c",
+  "expect": "accepted",
+  "steps": [
+    {
+      "type": "event",
+      "element": "Event_0ehnwwz"
+    },
+    {
+      "type": "message",
+      "element": "Message_0q9hvem",
+      "payload": {
+        "orderContent": "sample-orderContent",
+        "productAvalibale": true
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_1ltys0e"
+    },
+    {
+      "type": "message",
+      "element": "Message_1f0gefc",
+      "payload": {
+        "MessageContent": "sample-MessageContent",
+        "priceOK": true
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_025uwvp"
+    },
+    {
+      "type": "message",
+      "element": "Message_0mcktm6",
+      "payload": {
+        "Price": 999,
+        "Time": "sample-Time"
+      }
+    },
+    {
+      "type": "businessrule",
+      "element": "Activity_12arovy",
+      "outputs": {
+        "discount": false
+      },
+      "payload": {},
+      "continue_payload": {}
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_13i0b7w"
+    },
+    {
+      "type": "message",
+      "element": "Message_0g7m9tf",
+      "payload": {
+        "num": "sample-num",
+        "time2": "sample-time2"
+      }
+    },
+    {
+      "type": "event",
+      "element": "Event_1o9guxu"
+    }
+  ],
+  "generated_path": {
+    "final_enabled_elements": [],
+    "final_element_states": {
+      "Message_05gz8u0": "INACTIVE",
+      "Message_08ms1jj": "INACTIVE",
+      "Message_0g7m9tf": "DONE",
+      "Message_0mcktm6": "DONE",
+      "Message_0q9hvem": "DONE",
+      "Message_14wu8ts": "INACTIVE",
+      "Message_15b83n1": "INACTIVE",
+      "Message_1f0gefc": "DONE",
+      "Gateway_1ltys0e": "DONE",
+      "Gateway_025uwvp": "DONE",
+      "Gateway_13i0b7w": "DONE",
+      "Event_0ehnwwz": "DONE",
+      "Event_0e3j88g": "INACTIVE",
+      "Event_1o9guxu": "DONE",
+      "Event_194zr5n": "INACTIVE",
+      "Activity_12arovy": "DONE"
+    },
+    "final_globals": {
+      "MessageContent": "sample-MessageContent",
+      "Price": 1,
+      "Time": "sample-Time",
+      "Discount": false,
+      "Num": "sample-num",
+      "OrderContent": "sample-orderContent",
+      "PriceOK": true,
+      "ProductAvalibale": true,
+      "Sale": null,
+      "Time2": "sample-time2"
+    }
+  }
+}

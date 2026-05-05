@@ -1,0 +1,96 @@
+{
+  "path_name": "customer_auto_path_002",
+  "expect": "accepted",
+  "steps": [
+    {
+      "type": "gateway",
+      "element": "ExclusiveGateway_0hs3ztq"
+    },
+    {
+      "type": "message",
+      "element": "Message_045i10y",
+      "payload": {
+        "VIPpoints": 9999
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_0r9lypd",
+      "payload": {
+        "is_available": true
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "ExclusiveGateway_106je4z"
+    },
+    {
+      "type": "message",
+      "element": "Message_1em0ee4",
+      "payload": {
+        "need_external_provider": true
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_1nlagx2",
+      "payload": {
+        "confirmation": true
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "EventBasedGateway_1fxpmyn"
+    },
+    {
+      "type": "message",
+      "element": "Message_0o8eyir",
+      "payload": {}
+    },
+    {
+      "type": "businessrule",
+      "element": "Activity_1yl9tfp",
+      "payload": {},
+      "outputs": {
+        "externalAvailable": false
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_1bhtapl"
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_04h9e6e"
+    },
+    {
+      "type": "message",
+      "element": "Message_1ljlm4g",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_0m9p3da",
+      "payload": {
+        "invoice": true,
+        "invoiceType": "sample-invoiceType"
+      }
+    },
+    {
+      "type": "businessrule",
+      "element": "Activity_0ibsbry",
+      "payload": {},
+      "outputs": {
+        "invoiceAvailable": false
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "ExclusiveGateway_0nzwv7v"
+    },
+    {
+      "type": "event",
+      "element": "Event_143ykco"
+    }
+  ]
+}

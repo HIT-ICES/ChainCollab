@@ -1,0 +1,333 @@
+{
+  "case_name": "Rental_Claim",
+  "path_name": "Rental_Claim_auto_path_003",
+  "platform": "dsl",
+  "bootstrap": [
+    {
+      "trigger": {
+        "type": "start",
+        "name": "Event_19zgkxm"
+      },
+      "state_diff": {
+        "Gateway_10ut9pb": [
+          "INACTIVE",
+          "READY"
+        ],
+        "Event_19zgkxm": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "applied_actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_10ut9pb",
+          "from": "INACTIVE",
+          "to": "READY"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "index": 0,
+      "trigger": {
+        "type": "gateway",
+        "name": "Gateway_10ut9pb"
+      },
+      "enabled_before": [
+        "Gateway_10ut9pb"
+      ],
+      "guard_result": true,
+      "payload": {},
+      "outputs": {},
+      "accepted": true,
+      "logs": [
+        "gateway Gateway_10ut9pb -> DONE"
+      ],
+      "flow_results": [
+        {
+          "kind": "gateway_flow",
+          "trigger": {
+            "type": "gateway",
+            "name": "Gateway_10ut9pb",
+            "state": "completed"
+          },
+          "accepted": true,
+          "applied_actions": [
+            {
+              "kind": "enable",
+              "target": "Message_09eyqv0",
+              "from": "INACTIVE",
+              "to": "READY"
+            },
+            {
+              "kind": "enable",
+              "target": "Message_0dckgao",
+              "from": "INACTIVE",
+              "to": "READY"
+            }
+          ]
+        }
+      ],
+      "state_diff": {
+        "Message_09eyqv0": [
+          "INACTIVE",
+          "READY"
+        ],
+        "Message_0dckgao": [
+          "INACTIVE",
+          "READY"
+        ],
+        "Gateway_10ut9pb": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {}
+    },
+    {
+      "index": 1,
+      "trigger": {
+        "type": "message",
+        "name": "Message_0dckgao"
+      },
+      "enabled_before": [
+        "Message_09eyqv0",
+        "Message_0dckgao"
+      ],
+      "guard_result": true,
+      "payload": {
+        "BondContent": "sample-BondContent",
+        "damageNumber": 10
+      },
+      "outputs": {},
+      "accepted": true,
+      "logs": [
+        "message Message_0dckgao -> DONE",
+        "message payload: set BondContent='sample-BondContent'",
+        "message payload: set DamageNumber=10"
+      ],
+      "flow_results": [
+        {
+          "kind": "message_flow",
+          "trigger": {
+            "type": "message",
+            "name": "Message_0dckgao",
+            "state": "completed"
+          },
+          "accepted": true,
+          "applied_actions": [
+            {
+              "kind": "disable",
+              "target": "Message_09eyqv0",
+              "from": "READY",
+              "to": "INACTIVE"
+            },
+            {
+              "kind": "enable",
+              "target": "Activity_0oacu9j",
+              "from": "INACTIVE",
+              "to": "READY"
+            }
+          ]
+        }
+      ],
+      "state_diff": {
+        "Message_09eyqv0": [
+          "READY",
+          "INACTIVE"
+        ],
+        "Message_0dckgao": [
+          "READY",
+          "DONE"
+        ],
+        "Activity_0oacu9j": [
+          "INACTIVE",
+          "READY"
+        ]
+      },
+      "global_diff": {
+        "BondContent": [
+          null,
+          "sample-BondContent"
+        ],
+        "DamageNumber": [
+          null,
+          10
+        ]
+      }
+    },
+    {
+      "index": 2,
+      "trigger": {
+        "type": "businessrule",
+        "name": "Activity_0oacu9j"
+      },
+      "enabled_before": [
+        "Activity_0oacu9j"
+      ],
+      "guard_result": true,
+      "payload": {},
+      "outputs": {
+        "refund": false
+      },
+      "accepted": true,
+      "logs": [
+        "businessrule Activity_0oacu9j -> DONE",
+        "businessrule output: set Refund=False"
+      ],
+      "flow_results": [
+        {
+          "kind": "rule_flow",
+          "trigger": {
+            "type": "businessrule",
+            "name": "Activity_0oacu9j",
+            "state": "done"
+          },
+          "accepted": true,
+          "applied_actions": [
+            {
+              "kind": "enable",
+              "target": "Gateway_11zw5fs",
+              "from": "INACTIVE",
+              "to": "READY"
+            }
+          ]
+        }
+      ],
+      "state_diff": {
+        "Gateway_11zw5fs": [
+          "INACTIVE",
+          "READY"
+        ],
+        "Activity_0oacu9j": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {
+        "Refund": [
+          null,
+          false
+        ]
+      }
+    },
+    {
+      "index": 3,
+      "trigger": {
+        "type": "gateway",
+        "name": "Gateway_11zw5fs"
+      },
+      "enabled_before": [
+        "Gateway_11zw5fs"
+      ],
+      "guard_result": true,
+      "payload": {},
+      "outputs": {},
+      "accepted": true,
+      "logs": [
+        "gateway Gateway_11zw5fs -> DONE"
+      ],
+      "flow_results": [
+        {
+          "kind": "gateway_flow",
+          "trigger": {
+            "type": "gateway",
+            "name": "Gateway_11zw5fs",
+            "state": "completed"
+          },
+          "accepted": true,
+          "selected_branch": {
+            "accepted": true,
+            "condition_kind": "compare",
+            "var": "Refund",
+            "relation": "==",
+            "value": false,
+            "expr": null,
+            "applied_actions": [
+              {
+                "kind": "enable",
+                "target": "Event_0kmeww3",
+                "from": "INACTIVE",
+                "to": "READY"
+              }
+            ]
+          }
+        }
+      ],
+      "state_diff": {
+        "Gateway_11zw5fs": [
+          "READY",
+          "DONE"
+        ],
+        "Event_0kmeww3": [
+          "INACTIVE",
+          "READY"
+        ]
+      },
+      "global_diff": {}
+    },
+    {
+      "index": 4,
+      "trigger": {
+        "type": "event",
+        "name": "Event_0kmeww3"
+      },
+      "enabled_before": [
+        "Event_0kmeww3"
+      ],
+      "guard_result": true,
+      "payload": {},
+      "outputs": {},
+      "accepted": true,
+      "logs": [
+        "event Event_0kmeww3 -> DONE"
+      ],
+      "flow_results": [],
+      "state_diff": {
+        "Event_0kmeww3": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {}
+    }
+  ],
+  "final_state": {
+    "status": "accepted",
+    "reason": "",
+    "enabled_elements": [],
+    "element_states": {
+      "Message_066q5si": "INACTIVE",
+      "Message_09eyqv0": "INACTIVE",
+      "Message_0dckgao": "DONE",
+      "Message_0fm3vfa": "INACTIVE",
+      "Message_0z3zz01": "INACTIVE",
+      "Message_0zoy0sz": "INACTIVE",
+      "Message_1eb4q8q": "INACTIVE",
+      "Message_1im6vvb": "INACTIVE",
+      "Message_1xlzl3n": "INACTIVE",
+      "Gateway_11zw5fs": "DONE",
+      "Gateway_10ut9pb": "DONE",
+      "Gateway_1v1x25n": "INACTIVE",
+      "Event_19zgkxm": "DONE",
+      "Event_1pjpbaw": "INACTIVE",
+      "Event_120hui7": "INACTIVE",
+      "Event_0fzlrii": "INACTIVE",
+      "Event_0kmeww3": "DONE",
+      "Activity_0oacu9j": "DONE"
+    },
+    "globals": {
+      "BondContent": "sample-BondContent",
+      "FileContent": null,
+      "ClaimContent": null,
+      "Content": null,
+      "DamageNumber": 10,
+      "Reason": null,
+      "Refund": false,
+      "Refundbond": null,
+      "Transfer_date": null
+    }
+  }
+}

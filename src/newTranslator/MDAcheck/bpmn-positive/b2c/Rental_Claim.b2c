@@ -166,8 +166,10 @@ contract GeneratedContract {
         then disable Message_09eyqv0, enable Activity_0oacu9j;
         when message Message_1eb4q8q completed
         then enable Gateway_1v1x25n;
+        when message Message_066q5si completed
+        then disable Message_1im6vvb, enable Message_1xlzl3n;
         when message Message_1im6vvb completed
-        then enable Message_0fm3vfa;
+        then disable Message_066q5si, enable Message_0fm3vfa;
         when message Message_1xlzl3n completed
         then enable Event_1pjpbaw;
         when message Message_0fm3vfa completed
@@ -186,7 +188,7 @@ contract GeneratedContract {
         when gateway Gateway_10ut9pb completed
         then enable Message_09eyqv0, enable Message_0dckgao;
         when gateway Gateway_1v1x25n completed
-        then enable Message_1im6vvb;
+        then enable Message_066q5si, enable Message_1im6vvb;
 
         when businessrule Activity_0oacu9j done
         then enable Gateway_11zw5fs;

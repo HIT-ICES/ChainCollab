@@ -1,0 +1,76 @@
+{
+  "case_name": "Rental_Claim",
+  "path_name": "Rental_Claim_auto_path_003",
+  "description": "Auto materialized from generated DSL executable path.",
+  "source_model": "/root/code/ChainCollab/src/runtime/newTranslator/20260505-111532-547918/Rental_Claim.b2c",
+  "expect": "accepted",
+  "steps": [
+    {
+      "type": "event",
+      "element": "Event_19zgkxm"
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_10ut9pb"
+    },
+    {
+      "type": "message",
+      "element": "Message_0dckgao",
+      "payload": {
+        "BondContent": "sample-BondContent",
+        "damageNumber": 10
+      }
+    },
+    {
+      "type": "businessrule",
+      "element": "Activity_0oacu9j",
+      "outputs": {
+        "refund": false
+      },
+      "payload": {},
+      "continue_payload": {}
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_11zw5fs"
+    },
+    {
+      "type": "event",
+      "element": "Event_0kmeww3"
+    }
+  ],
+  "generated_path": {
+    "final_enabled_elements": [],
+    "final_element_states": {
+      "Message_066q5si": "INACTIVE",
+      "Message_09eyqv0": "INACTIVE",
+      "Message_0dckgao": "DONE",
+      "Message_0fm3vfa": "INACTIVE",
+      "Message_0z3zz01": "INACTIVE",
+      "Message_0zoy0sz": "INACTIVE",
+      "Message_1eb4q8q": "INACTIVE",
+      "Message_1im6vvb": "INACTIVE",
+      "Message_1xlzl3n": "INACTIVE",
+      "Gateway_11zw5fs": "DONE",
+      "Gateway_10ut9pb": "DONE",
+      "Gateway_1v1x25n": "INACTIVE",
+      "Event_19zgkxm": "DONE",
+      "Event_1pjpbaw": "INACTIVE",
+      "Event_120hui7": "INACTIVE",
+      "Event_0fzlrii": "INACTIVE",
+      "Event_0kmeww3": "DONE",
+      "Activity_0oacu9j": "DONE"
+    },
+    "final_globals": {
+      "BondContent": "sample-BondContent",
+      "FileContent": null,
+      "ClaimContent": null,
+      "Content": null,
+      "DamageNumber": 1,
+      "Reason": null,
+      "Refund": false,
+      "Refundbond": null,
+      "Transfer_date": null
+    }
+  }
+}

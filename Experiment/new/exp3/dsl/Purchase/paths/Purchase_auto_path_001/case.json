@@ -1,0 +1,81 @@
+{
+  "case_name": "Purchase",
+  "description": "Auto materialized from generated DSL executable path.",
+  "source_b2c": "/root/code/ChainCollab/src/runtime/newTranslator/20260505-103656-192406/Purchase.b2c",
+  "paths": [
+    {
+      "path_name": "Purchase_auto_path_001",
+      "expect": "accepted",
+      "steps": [
+        {
+          "type": "message",
+          "element": "Message_0q9hvem",
+          "payload": {
+            "orderContent": "sample-orderContent",
+            "productAvalibale": true
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_1ltys0e"
+        },
+        {
+          "type": "message",
+          "element": "Message_1f0gefc",
+          "payload": {
+            "MessageContent": "sample-MessageContent",
+            "priceOK": true
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_025uwvp"
+        },
+        {
+          "type": "message",
+          "element": "Message_0mcktm6",
+          "payload": {
+            "Price": 1000,
+            "Time": "sample-Time"
+          }
+        },
+        {
+          "type": "businessrule",
+          "element": "Activity_12arovy",
+          "payload": {},
+          "outputs": {
+            "discount": true
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_13i0b7w"
+        },
+        {
+          "type": "message",
+          "element": "Message_15b83n1",
+          "payload": {}
+        },
+        {
+          "type": "message",
+          "element": "Message_08ms1jj",
+          "payload": {
+            "sale": "sample-sale"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_0g7m9tf",
+          "payload": {
+            "num": "sample-num",
+            "time2": "sample-time2"
+          }
+        },
+        {
+          "type": "event",
+          "element": "Event_1o9guxu"
+        }
+      ]
+    }
+  ]
+}

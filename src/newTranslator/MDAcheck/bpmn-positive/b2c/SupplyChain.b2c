@@ -65,7 +65,8 @@ contract GeneratedContract {
         Self_pickup: bool
         Amount: int
         Del_order: string
-        Deliver: string
+        Deliver: bool
+        Delivered_product: string
         Fwd_order: string
         Order: string
         Placed_order: string
@@ -110,7 +111,7 @@ contract GeneratedContract {
         }
         message Message_196q1fj from Participant_19mgbdn to Participant_0w6qkdf {
             initial state INACTIVE
-            schema "{\"properties\":{\"deliver\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+            schema "{\"properties\":{\"delivered_product\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
         }
         message Message_1ajdm9l from Participant_19mgbdn to Participant_09cjol2 {
             initial state INACTIVE
@@ -217,9 +218,9 @@ contract GeneratedContract {
 
         when gateway Gateway_11hmo2k completed
         choose {
-            if Deliver == "true"
+            if Deliver == true
             then enable Message_196q1fj;
-            if Deliver == "false"
+            if Deliver == false
             then enable Event_0eoqvir;
 
         }

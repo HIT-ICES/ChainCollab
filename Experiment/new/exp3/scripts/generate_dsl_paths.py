@@ -125,9 +125,57 @@ def find_dmn_file(case_name: str, rule: Dict[str, Any], dmn_dir: Path) -> Option
     for path in dmn_dir.glob("*.dmn"):
         if normalized_case and normalized_case in normalize_name(path.stem):
             candidates.append(path)
+    candidates.extend(sorted(dmn_dir.glob("*.dmn")))
+
+    existing: List[Path] = []
+    seen = set()
     for path in candidates:
-        if path.exists():
-            return path.resolve()
+        if not path.exists():
+            continue
+        resolved = path.resolve()
+        if resolved in seen:
+            continue
+        seen.add(resolved)
+        existing.append(resolved)
+    if not existing:
+        return None
+
+    decision_id = str(rule.get("decision") or "")
+    mapped_input_norms = {
+        normalize_name(item.get("dmn_param"))
+        for item in rule.get("input_mapping", []) or []
+        if item.get("dmn_param")
+    }
+    mapped_output_norms = {
+        normalize_name(item.get("dmn_param"))
+        for item in rule.get("output_mapping", []) or []
+        if item.get("dmn_param")
+    }
+
+    def score(path: Path) -> int:
+        try:
+            decisions = parse_dmn(path)
+        except Exception:
+            return 0
+        best = 0
+        for decision in decisions.values():
+            decision_inputs = {normalize_name(item) for item in decision.inputs}
+            decision_outputs = {normalize_name(item) for item in decision.outputs}
+            current = 0
+            if decision_id and decision.decision_id == decision_id:
+                current += 100
+            if mapped_output_norms and mapped_output_norms.issubset(decision_outputs):
+                current += 50
+            if mapped_input_norms and mapped_input_norms.issubset(decision_inputs):
+                current += 20
+            best = max(best, current)
+        return best
+
+    best_path = max(existing, key=score)
+    if score(best_path) > 0:
+        return best_path
+    for path in existing:
+        return path
     return None
 
 

@@ -1,0 +1,302 @@
+{
+  "case_name": "manufactory",
+  "source_model": "/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/manufactory/dsl.b2c",
+  "path_count": 3,
+  "paths": [
+    {
+      "path_name": "manufactory_auto_path_001",
+      "expect": "accepted",
+      "steps": [
+        {
+          "type": "message",
+          "element": "Message_00wpjke",
+          "payload": {
+            "QuoteRequest": "sample-QuoteRequest"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_1kazup6",
+          "payload": {
+            "QuoteContent": "sample-QuoteContent"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_1y5d31x",
+          "payload": {
+            "OrderContent": "sample-OrderContent",
+            "OrderAmount": 1
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_085e7pr"
+        },
+        {
+          "type": "message",
+          "element": "Message_03was4c",
+          "payload": {
+            "confirm message": "sample-confirm message"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_1yln43l",
+          "payload": {
+            "InvoiceContent": "sample-InvoiceContent"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_13l7271",
+          "payload": {
+            "payRecord": "sample-payRecord"
+          }
+        },
+        {
+          "type": "event",
+          "element": "Event_0th6os0"
+        }
+      ],
+      "final_enabled_elements": [],
+      "final_element_states": {
+        "Message_00wpjke": "DONE",
+        "Message_03was4c": "DONE",
+        "Message_05uqcn2": "INACTIVE",
+        "Message_0z8kf0j": "INACTIVE",
+        "Message_0zt8q9t": "INACTIVE",
+        "Message_13l7271": "DONE",
+        "Message_1i5n14f": "INACTIVE",
+        "Message_1kazup6": "DONE",
+        "Message_1y5d31x": "DONE",
+        "Message_1yln43l": "DONE",
+        "Gateway_19zzj3s": "INACTIVE",
+        "Gateway_085e7pr": "DONE",
+        "Event_0okhbce": "DONE",
+        "Event_0th6os0": "DONE",
+        "Event_0awuo5v": "INACTIVE",
+        "Event_0zsq5na": "INACTIVE",
+        "Activity_1uktp5z": "INACTIVE"
+      },
+      "final_globals": {
+        "CancelFee": null,
+        "ConcelAck": null,
+        "Fee": null,
+        "InvoiceContent": "sample-InvoiceContent",
+        "OrderAmount": 1,
+        "OrderContent": "sample-OrderContent",
+        "QuoteContent": "sample-QuoteContent",
+        "QuoteRequest": "sample-QuoteRequest",
+        "Cancelation": null,
+        "Confirm_message": "sample-confirm message",
+        "PayMethod": null,
+        "PayRecord": "sample-payRecord"
+      }
+    },
+    {
+      "path_name": "manufactory_auto_path_002",
+      "expect": "accepted",
+      "steps": [
+        {
+          "type": "message",
+          "element": "Message_00wpjke",
+          "payload": {
+            "QuoteRequest": "sample-QuoteRequest"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_1kazup6",
+          "payload": {
+            "QuoteContent": "sample-QuoteContent"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_1y5d31x",
+          "payload": {
+            "OrderContent": "sample-OrderContent",
+            "OrderAmount": 1
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_085e7pr"
+        },
+        {
+          "type": "message",
+          "element": "Message_0z8kf0j",
+          "payload": {
+            "cancelation": "sample-cancelation"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_0zt8q9t",
+          "payload": {
+            "ConcelAck": "sample-ConcelAck"
+          }
+        },
+        {
+          "type": "businessrule",
+          "element": "Activity_1uktp5z",
+          "outputs": {
+            "CancelFee": true
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_19zzj3s"
+        },
+        {
+          "type": "message",
+          "element": "Message_1i5n14f",
+          "payload": {
+            "Fee": "sample-Fee"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_05uqcn2",
+          "payload": {
+            "payMethod": "sample-payMethod"
+          }
+        },
+        {
+          "type": "event",
+          "element": "Event_0zsq5na"
+        }
+      ],
+      "final_enabled_elements": [],
+      "final_element_states": {
+        "Message_00wpjke": "DONE",
+        "Message_03was4c": "INACTIVE",
+        "Message_05uqcn2": "DONE",
+        "Message_0z8kf0j": "DONE",
+        "Message_0zt8q9t": "DONE",
+        "Message_13l7271": "INACTIVE",
+        "Message_1i5n14f": "DONE",
+        "Message_1kazup6": "DONE",
+        "Message_1y5d31x": "DONE",
+        "Message_1yln43l": "INACTIVE",
+        "Gateway_19zzj3s": "DONE",
+        "Gateway_085e7pr": "DONE",
+        "Event_0okhbce": "DONE",
+        "Event_0th6os0": "INACTIVE",
+        "Event_0awuo5v": "INACTIVE",
+        "Event_0zsq5na": "DONE",
+        "Activity_1uktp5z": "DONE"
+      },
+      "final_globals": {
+        "CancelFee": true,
+        "ConcelAck": "sample-ConcelAck",
+        "Fee": "sample-Fee",
+        "InvoiceContent": null,
+        "OrderAmount": 1,
+        "OrderContent": "sample-OrderContent",
+        "QuoteContent": "sample-QuoteContent",
+        "QuoteRequest": "sample-QuoteRequest",
+        "Cancelation": "sample-cancelation",
+        "Confirm_message": null,
+        "PayMethod": "sample-payMethod",
+        "PayRecord": null
+      }
+    },
+    {
+      "path_name": "manufactory_auto_path_003",
+      "expect": "accepted",
+      "steps": [
+        {
+          "type": "message",
+          "element": "Message_00wpjke",
+          "payload": {
+            "QuoteRequest": "sample-QuoteRequest"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_1kazup6",
+          "payload": {
+            "QuoteContent": "sample-QuoteContent"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_1y5d31x",
+          "payload": {
+            "OrderContent": "sample-OrderContent",
+            "OrderAmount": 1
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_085e7pr"
+        },
+        {
+          "type": "message",
+          "element": "Message_0z8kf0j",
+          "payload": {
+            "cancelation": "sample-cancelation"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_0zt8q9t",
+          "payload": {
+            "ConcelAck": "sample-ConcelAck"
+          }
+        },
+        {
+          "type": "businessrule",
+          "element": "Activity_1uktp5z",
+          "outputs": {
+            "CancelFee": false
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_19zzj3s"
+        },
+        {
+          "type": "event",
+          "element": "Event_0awuo5v"
+        }
+      ],
+      "final_enabled_elements": [],
+      "final_element_states": {
+        "Message_00wpjke": "DONE",
+        "Message_03was4c": "INACTIVE",
+        "Message_05uqcn2": "INACTIVE",
+        "Message_0z8kf0j": "DONE",
+        "Message_0zt8q9t": "DONE",
+        "Message_13l7271": "INACTIVE",
+        "Message_1i5n14f": "INACTIVE",
+        "Message_1kazup6": "DONE",
+        "Message_1y5d31x": "DONE",
+        "Message_1yln43l": "INACTIVE",
+        "Gateway_19zzj3s": "DONE",
+        "Gateway_085e7pr": "DONE",
+        "Event_0okhbce": "DONE",
+        "Event_0th6os0": "INACTIVE",
+        "Event_0awuo5v": "DONE",
+        "Event_0zsq5na": "INACTIVE",
+        "Activity_1uktp5z": "DONE"
+      },
+      "final_globals": {
+        "CancelFee": false,
+        "ConcelAck": "sample-ConcelAck",
+        "Fee": null,
+        "InvoiceContent": null,
+        "OrderAmount": 1,
+        "OrderContent": "sample-OrderContent",
+        "QuoteContent": "sample-QuoteContent",
+        "QuoteRequest": "sample-QuoteRequest",
+        "Cancelation": "sample-cancelation",
+        "Confirm_message": null,
+        "PayMethod": null,
+        "PayRecord": null
+      }
+    }
+  ]
+}

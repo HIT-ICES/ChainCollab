@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Sequence
 
 from common import CHAINCOLLAB_ROOT, EXP3_ROOT, dump_json, dump_text, load_json, normalize_name
-from dmn_input_solver import normalize_literal, synthesize_dmn_inputs
+from dmn_input_solver import normalize_literal, parse_dmn, synthesize_dmn_inputs
 from parse_b2c import parse_b2c_model
 
 
@@ -103,9 +103,57 @@ def find_dmn_file(case_name: str, rule: Dict[str, Any], dmn_dir: Path) -> Path |
     for path in dmn_dir.glob("*.dmn"):
         if normalized_case and normalized_case in normalize_name(path.stem):
             candidates.append(path)
+    candidates.extend(sorted(dmn_dir.glob("*.dmn")))
+
+    existing: List[Path] = []
+    seen = set()
     for path in candidates:
-        if path.exists():
-            return path.resolve()
+        if not path.exists():
+            continue
+        resolved = path.resolve()
+        if resolved in seen:
+            continue
+        seen.add(resolved)
+        existing.append(resolved)
+    if not existing:
+        return None
+
+    decision_id = str(rule.get("decision") or "")
+    mapped_input_norms = {
+        normalize_name(item.get("dmn_param"))
+        for item in rule.get("input_mapping", []) or []
+        if item.get("dmn_param")
+    }
+    mapped_output_norms = {
+        normalize_name(item.get("dmn_param"))
+        for item in rule.get("output_mapping", []) or []
+        if item.get("dmn_param")
+    }
+
+    def score(path: Path) -> int:
+        try:
+            decisions = parse_dmn(path)
+        except Exception:
+            return 0
+        best = 0
+        for decision in decisions.values():
+            decision_inputs = {normalize_name(item) for item in decision.inputs}
+            decision_outputs = {normalize_name(item) for item in decision.outputs}
+            current = 0
+            if decision_id and decision.decision_id == decision_id:
+                current += 100
+            if mapped_output_norms and mapped_output_norms.issubset(decision_outputs):
+                current += 50
+            if mapped_input_norms and mapped_input_norms.issubset(decision_inputs):
+                current += 20
+            best = max(best, current)
+        return best
+
+    best_path = max(existing, key=score)
+    if score(best_path) > 0:
+        return best_path
+    for path in existing:
+        return path
     return None
 
 
@@ -144,9 +192,15 @@ def apply_dmn_input_assignments(
         for mapping in rule.get("input_mapping", []) or []:
             dmn_param = str(mapping.get("dmn_param") or "")
             global_name = str(mapping.get("global") or "")
-            if dmn_param in assignments:
-                mapped_names[normalize_name(dmn_param)] = assignments[dmn_param]
-                mapped_names[normalize_name(global_name)] = assignments[dmn_param]
+            normalized_param = normalize_name(dmn_param)
+            assignments_by_norm = {
+                normalize_name(key): value
+                for key, value in assignments.items()
+            }
+            if normalized_param in assignments_by_norm:
+                value = assignments_by_norm[normalized_param]
+                mapped_names[normalized_param] = value
+                mapped_names[normalize_name(global_name)] = value
 
         for prior in steps[:index]:
             payload = dict(prior.get("payload") or {})
