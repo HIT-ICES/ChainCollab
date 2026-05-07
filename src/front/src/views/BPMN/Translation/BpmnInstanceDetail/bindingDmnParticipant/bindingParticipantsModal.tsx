@@ -436,7 +436,22 @@ export const BindingParticipant = ({ participants, showBindingParticipantMap, se
       const nextMap = new Map(showBindingParticipantMap);
       const nextValueMap = new Map(showBindingParticipantValueMap);
       let autoBoundCount = 0;
-      const firstMembershipId = membershipList[0]?.id || "";
+      const firstParticipantId = participants[0]?.id || "";
+      const firstParticipantValue = firstParticipantId
+        ? ((nextValueMap.get(firstParticipantId) || {}) as bindingValueType)
+        : ({} as bindingValueType);
+      const firstMembershipId =
+        firstParticipantValue.selectedMembershipId || membershipList[0]?.id || "";
+      let referenceBinding: Record<string, any> | null = null;
+
+      if (useFirstMembershipForAll && firstParticipantValue.selectedMembershipId) {
+        referenceBinding = {
+          selectedValidationType: firstParticipantValue.selectedValidationType || "equal",
+          selectedMembershipId: firstParticipantValue.selectedMembershipId || "",
+          selectedUser: firstParticipantValue.selectedUser || "",
+          Attr: firstParticipantValue.Attr || [],
+        };
+      }
 
       for (const participant of participants) {
         const bestMembership = membershipList
@@ -459,14 +474,21 @@ export const BindingParticipant = ({ participants, showBindingParticipantMap, se
         const resolvedMembershipId = useFirstMembershipForAll
           ? selectedMembershipId
           : currentValue.selectedMembershipId || selectedMembershipId;
-        const mergedValue: Record<string, any> = {
-          selectedValidationType: currentValue.selectedValidationType || "equal",
-          selectedMembershipId: resolvedMembershipId,
-          selectedUser: currentValue.selectedUser || "",
-          Attr: currentValue.Attr || [],
-        };
+        const mergedValue: Record<string, any> = useFirstMembershipForAll && referenceBinding
+          ? {
+              selectedValidationType: referenceBinding.selectedValidationType || "equal",
+              selectedMembershipId: referenceBinding.selectedMembershipId || "",
+              selectedUser: referenceBinding.selectedUser || "",
+              Attr: referenceBinding.Attr || [],
+            }
+          : {
+              selectedValidationType: currentValue.selectedValidationType || "equal",
+              selectedMembershipId: resolvedMembershipId,
+              selectedUser: currentValue.selectedUser || "",
+              Attr: currentValue.Attr || [],
+            };
 
-        if (mergedValue.selectedValidationType === "equal" && mergedValue.selectedMembershipId) {
+        if ((!referenceBinding || participant.id === firstParticipantId) && mergedValue.selectedValidationType === "equal" && mergedValue.selectedMembershipId) {
           if (effectiveEnvType === "Ethereum") {
             const identities = await getEthereumIdentityList(effectiveEnvId, mergedValue.selectedMembershipId);
             const identityIds = Array.isArray(identities) ? identities.map((item) => item?.id).filter(Boolean) : [];
@@ -496,6 +518,15 @@ export const BindingParticipant = ({ participants, showBindingParticipantMap, se
               }
             }
           }
+        }
+
+        if (useFirstMembershipForAll && participant.id === firstParticipantId) {
+          referenceBinding = {
+            selectedValidationType: mergedValue.selectedValidationType || "equal",
+            selectedMembershipId: mergedValue.selectedMembershipId || "",
+            selectedUser: mergedValue.selectedUser || "",
+            Attr: mergedValue.Attr || [],
+          };
         }
 
         nextValueMap.set(participant.id, mergedValue);

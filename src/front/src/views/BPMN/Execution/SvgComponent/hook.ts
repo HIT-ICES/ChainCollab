@@ -162,7 +162,7 @@ export const useAllFireflyData = (
         let ignore = false;
         const fetchData = async () => {
             setReady(false);
-            if (!enabled || !coreUrl || !contractName || !bpmnInstanceId || coreUrl === "http://") {
+            if (!enabled || !coreUrl || !contractName || bpmnInstanceId == null || bpmnInstanceId === "" || coreUrl === "http://") {
                 if (!ignore) {
                     setEvents([]);
                     setGateways([]);
