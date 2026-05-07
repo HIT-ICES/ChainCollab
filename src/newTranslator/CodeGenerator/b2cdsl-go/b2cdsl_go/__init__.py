@@ -473,6 +473,11 @@ class FlowRenderer:
                 return None
             return json.dumps(string_value)
 
+        if normalized_type == "string":
+            literal = string_literal()
+            if literal is not None:
+                return literal
+
         if normalized_type == "bool":
             literal = bool_literal()
             if literal is not None:

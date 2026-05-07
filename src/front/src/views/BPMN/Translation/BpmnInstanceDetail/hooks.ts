@@ -14,7 +14,7 @@ export const useBPMNIntanceDetailData = (BPMNInstanceId: string) => {
         const fetchData = async () => {
             const response = await retrieveBPMNInstance(BPMNInstanceId)
             if (ignore) return [[], () => { }]
-            setBPMNInstanceData(response)
+            setBPMNInstanceData(response || {})
         }
         fetchData()
         return () => {
@@ -72,7 +72,12 @@ export const useParticipantsData = (bpmnId: string): [
             // const response = await getParticipantsByContent(bpmnContent)
             const response = await retrieveBPMN(bpmnId)
             if (ignore) return [[], () => { }]
-            setParticipants(JSON.parse(response.participants))
+            const participantsRaw = response?.participants || "[]"
+            try {
+                setParticipants(JSON.parse(participantsRaw))
+            } catch (error) {
+                setParticipants([])
+            }
         }
         fetchData()
         return () => {

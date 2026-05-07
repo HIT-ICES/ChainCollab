@@ -494,20 +494,40 @@ const ParticipantDmnBindingModal = ({
 						);
 					}
 
-					const fabricIdentity = await retrieveFabricIdentity(
-						value.selectedUser,
-					);
-					const fireflyData = await getFireflyList(
-						effectiveEnvId || currentEnvId,
-						null,
-						fabricIdentity.membership,
-					);
-					const fireflyCoreUrl = fireflyData[0].coreURL;
-					const verify = await getFireflyVerify(
-						fireflyCoreUrl,
-						fabricIdentity.firefly_identity_id,
-					);
-					const x509 = verify[0].value.split("::").slice(1).join("::");
+						const fabricIdentity = await retrieveFabricIdentity(
+							value.selectedUser,
+						);
+						if (!fabricIdentity?.membership) {
+							throw new Error(
+								`Participant ${participantNameMap.get(key) || key} fabric identity membership is missing`,
+							);
+						}
+						if (!fabricIdentity?.firefly_identity_id) {
+							throw new Error(
+								`Participant ${participantNameMap.get(key) || key} FireFly identity is missing`,
+							);
+						}
+						const fireflyData = await getFireflyList(
+							effectiveEnvId || currentEnvId,
+							null,
+							fabricIdentity.membership,
+						);
+						if (!fireflyData?.[0]?.coreURL) {
+							throw new Error(
+								`Participant ${participantNameMap.get(key) || key} FireFly core url is missing`,
+							);
+						}
+						const fireflyCoreUrl = fireflyData[0].coreURL;
+						const verify = await getFireflyVerify(
+							fireflyCoreUrl,
+							fabricIdentity.firefly_identity_id,
+						);
+						if (!Array.isArray(verify) || !verify[0]?.value) {
+							throw new Error(
+								`Participant ${participantNameMap.get(key) || key} verifier is missing`,
+							);
+						}
+						const x509 = verify[0].value.split("::").slice(1).join("::");
 					createInstanceParam.push({
 						[key]: {
 							msp: msp,

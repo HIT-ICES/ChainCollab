@@ -983,12 +983,58 @@ const IdentitySelector = ({ identity, setIdentity }) => {
 	const normalizedIdentities = Array.isArray(availableIdentities)
 		? availableIdentities
 		: [];
+	const currentMembershipGroup = normalizedIdentities.find(
+		(item) => item.membership_id === currentMembership,
+	);
+
+	const applyIdentity = async (membershipId: string, fireflyIdentityId: string) => {
+		const selectedMembership = normalizedIdentities.find(
+			(item) => item.membership_id === membershipId,
+		);
+		const the_one = selectedMembership?.identities.find(
+			(item) => item.firefly_identity_id === fireflyIdentityId,
+		);
+		if (!the_one?.core_url || !fireflyIdentityId) {
+			return;
+		}
+		const resolvedIdentity = await getFireflyIdentity(
+			"http://" + the_one.core_url,
+			fireflyIdentityId,
+		);
+
+		setIdentity({
+			name: the_one.name,
+			membership: membershipId,
+			idInFirefly: fireflyIdentityId,
+			core_url: the_one.core_url,
+			identity: resolvedIdentity,
+			msp: the_one.firefly_msp,
+		});
+	};
 
 	useEffect(() => {
 		if (!currentMembership && normalizedIdentities.length > 0) {
 			setCurrentMembership(normalizedIdentities[0].membership_id);
 		}
 	}, [currentMembership, normalizedIdentities]);
+
+	useEffect(() => {
+		if (!currentMembershipGroup?.identities?.length) {
+			return;
+		}
+		const identityExistsInCurrentMembership = currentMembershipGroup.identities.some(
+			(item) => item.firefly_identity_id === identity.idInFirefly,
+		);
+		if (identityExistsInCurrentMembership) {
+			return;
+		}
+		const firstIdentityId =
+			currentMembershipGroup.identities[0]?.firefly_identity_id || "";
+		if (!firstIdentityId) {
+			return;
+		}
+		applyIdentity(currentMembershipGroup.membership_id, firstIdentityId);
+	}, [currentMembershipGroup, identity.idInFirefly]);
 
 	if (isLoading) {
 		return <div>Loading</div>;
@@ -1020,30 +1066,10 @@ const IdentitySelector = ({ identity, setIdentity }) => {
 				style={{ width: 200 }}
 				value={identity.idInFirefly}
 				onChange={async (value) => {
-					const the_one = normalizedIdentities
-						.find((item) => item.membership_id === currentMembership)
-						?.identities.find((item) => item.firefly_identity_id === value);
-					if (!the_one) {
-						return;
-					}
-					const identity = await getFireflyIdentity(
-						"http://" + the_one.core_url,
-						value,
-					);
-
-					setIdentity({
-						name: the_one.name,
-						membership: currentMembership,
-						idInFirefly: value,
-						core_url: the_one.core_url,
-						identity: identity,
-						msp: the_one.firefly_msp,
-					});
+					await applyIdentity(currentMembership, value);
 				}}
 			>
-				{normalizedIdentities
-					.find((item) => item.membership_id === currentMembership)
-					?.identities.map((item) => {
+				{currentMembershipGroup?.identities.map((item) => {
 						return (
 							<Select.Option
 								key={item.firefly_identity_id}

@@ -143,6 +143,40 @@ const scoreMembershipForParticipant = (participantName: string, membershipName: 
   return score;
 };
 
+const getIdentityDisplayName = (identity: any) =>
+  identity?.name ||
+  identity?.name_of_fabric_identity ||
+  identity?.name_of_identity ||
+  "";
+
+const scoreIdentityForParticipant = (participantName: string, identity: any) => {
+  const displayName = getIdentityDisplayName(identity);
+  const signerName = identity?.signer || identity?.name_of_identity || "";
+  return Math.max(
+    scoreMembershipForParticipant(participantName, displayName),
+    scoreMembershipForParticipant(participantName, signerName),
+  );
+};
+
+const pickBestFabricIdentityId = (participantName: string, identities: any[]) => {
+  if (!Array.isArray(identities) || identities.length === 0) {
+    return "";
+  }
+  if (identities.length === 1) {
+    return identities[0]?.id || "";
+  }
+  const bestIdentity = identities
+    .map((identity) => ({
+      identity,
+      score: scoreIdentityForParticipant(participantName, identity),
+    }))
+    .sort((a, b) => b.score - a.score)[0];
+  if (bestIdentity?.identity?.id) {
+    return bestIdentity.identity.id;
+  }
+  return identities[0]?.id || "";
+};
+
 const BindingParticipantComponent = ({ clickedActionIndex, showBindingParticipantMap, setShowBindingParticipantMap, showBindingParticipantValueMap, setShowBindingParticipantValueMap, envId, envType }) => {
 
   const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
@@ -421,31 +455,44 @@ export const BindingParticipant = ({ participants, showBindingParticipantMap, se
               : "";
 
         const currentValue = (nextValueMap.get(participant.id) || {}) as bindingValueType;
-        const selectedUser = useFirstMembershipForAll
-          ? ""
-          : currentValue.selectedUser || "";
+        const previousMembershipId = currentValue.selectedMembershipId || "";
+        const resolvedMembershipId = useFirstMembershipForAll
+          ? selectedMembershipId
+          : currentValue.selectedMembershipId || selectedMembershipId;
         const mergedValue: Record<string, any> = {
           selectedValidationType: currentValue.selectedValidationType || "equal",
-          selectedMembershipId: useFirstMembershipForAll
-            ? selectedMembershipId
-            : currentValue.selectedMembershipId || selectedMembershipId,
-          selectedUser,
+          selectedMembershipId: resolvedMembershipId,
+          selectedUser: currentValue.selectedUser || "",
           Attr: currentValue.Attr || [],
         };
 
-        if (mergedValue.selectedValidationType === "equal" && mergedValue.selectedMembershipId && !mergedValue.selectedUser) {
+        if (mergedValue.selectedValidationType === "equal" && mergedValue.selectedMembershipId) {
           if (effectiveEnvType === "Ethereum") {
             const identities = await getEthereumIdentityList(effectiveEnvId, mergedValue.selectedMembershipId);
-            if (Array.isArray(identities) && identities.length === 1) {
-              mergedValue.selectedUser = identities[0].id;
+            const identityIds = Array.isArray(identities) ? identities.map((item) => item?.id).filter(Boolean) : [];
+            const shouldRematch =
+              !mergedValue.selectedUser ||
+              (previousMembershipId !== mergedValue.selectedMembershipId && !identityIds.includes(mergedValue.selectedUser));
+            if (shouldRematch && identityIds.length === 1) {
+              mergedValue.selectedUser = identityIds[0];
+            } else if (previousMembershipId !== mergedValue.selectedMembershipId && !identityIds.includes(mergedValue.selectedUser)) {
+              mergedValue.selectedUser = "";
             }
           } else {
             const resourceSets = await getResourceSets(effectiveEnvId, null, mergedValue.selectedMembershipId);
             const resourceSet = Array.isArray(resourceSets) && resourceSets.length > 0 ? resourceSets[0] : null;
             if (resourceSet?.id) {
               const identities = await getFabricIdentityList(resourceSet.id);
-              if (Array.isArray(identities) && identities.length === 1) {
-                mergedValue.selectedUser = identities[0].id;
+              if (Array.isArray(identities) && identities.length > 0) {
+                const identityIds = identities.map((item) => item?.id).filter(Boolean);
+                const shouldRematch =
+                  !mergedValue.selectedUser ||
+                  (previousMembershipId !== mergedValue.selectedMembershipId && !identityIds.includes(mergedValue.selectedUser));
+                if (shouldRematch) {
+                  mergedValue.selectedUser = pickBestFabricIdentityId(participant.name, identities);
+                }
+              } else if (previousMembershipId !== mergedValue.selectedMembershipId) {
+                mergedValue.selectedUser = "";
               }
             }
           }

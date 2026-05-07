@@ -14,7 +14,7 @@ export const useBPMNIntanceDetailData = (BPMNInstanceId: string) => {
         const fetchData = async () => {
             const response = await retrieveBPMNInstance(BPMNInstanceId)
             if (ignore) return [[], () => { }]
-            setBPMNInstanceData(response)
+            setBPMNInstanceData(response || {})
         }
         fetchData()
         return () => {

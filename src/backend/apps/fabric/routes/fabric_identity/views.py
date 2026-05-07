@@ -17,22 +17,68 @@ from rest_framework.decorators import authentication_classes, permission_classes
 
 
 class FabricIdentityViewSet(viewsets.ViewSet):
+    def _resolve_firefly_identity_map(self, resource_set):
+        target_firefly = resource_set.firefly.first()
+        if target_firefly is None:
+            return {}
+        try:
+            response = get(
+                f"http://{target_firefly.core_url}/api/v1/identities",
+                params={"limit": 1000},
+                timeout=10,
+            )
+            response.raise_for_status()
+            payload = response.json()
+        except Exception:
+            return {}
+        if not isinstance(payload, list):
+            return {}
+        return {
+            str(item.get("name")): str(item.get("id"))
+            for item in payload
+            if item.get("name") and item.get("id")
+        }
+
+    def _serialize_identity(self, identity, firefly_identity_id: str = ""):
+        data = FabricIdentitySerializer(identity).data
+        data["name"] = identity.name_of_fabric_identity or identity.name_of_identity or ""
+        data["signer"] = identity.name_of_identity or ""
+        data["membership"] = (
+            str(identity.resource_set.membership_id)
+            if identity.resource_set and identity.resource_set.membership_id
+            else ""
+        )
+        data["environment"] = (
+            str(identity.resource_set.environment_id)
+            if identity.resource_set and identity.resource_set.environment_id
+            else ""
+        )
+        data["firefly_identity_id"] = firefly_identity_id or ""
+        return data
 
     # platform method
     def list(self, request):
         resource_set_id = request.query_params.get("resource_set_id")
-        resource_set = ResourceSet.objects.get(id=resource_set_id)
-        queryset = FabricIdentity.objects.filter(membership=resource_set.membership)
-        serializer = FabricIdentitySerializer(queryset, many=True)
-        return Response(serializer.data)
+        resource_set = get_object_or_404(ResourceSet, id=resource_set_id)
+        queryset = FabricIdentity.objects.filter(resource_set=resource_set)
+        firefly_identity_map = self._resolve_firefly_identity_map(resource_set)
+        return Response(
+            [
+                self._serialize_identity(
+                    identity,
+                    firefly_identity_map.get(identity.name_of_identity, ""),
+                )
+                for identity in queryset
+            ]
+        )
 
     # platform method
     def create(self, request):
 
         serializer = FabricIdentityCreateSerializer(data=request.data)
         if serializer.is_valid():
-            resource_set_id = serializer.data["resource_set_id"]
-            resource_set = ResourceSet.objects.get(id=resource_set_id)
+            resource_set_id = serializer.validated_data["resource_set_id"]
+            resource_set = get_object_or_404(ResourceSet, id=resource_set_id)
 
             # register
             target_firefly = resource_set.firefly.get()
@@ -41,11 +87,11 @@ class FabricIdentityViewSet(viewsets.ViewSet):
                     {"error": "firefly not found"}, status=status.HTTP_400_BAD_REQUEST
                 )
             name, secret = target_firefly.register_certificate(
-                name=serializer.data["name_of_identity"],
-                attributes=serializer.data["attributes"],
+                name=serializer.validated_data["name_of_identity"],
+                attributes=serializer.validated_data["attributes"],
             )
             success = target_firefly.enroll_certificate(
-                name, secret, serializer.data["attributes"]
+                name, secret, serializer.validated_data["attributes"]
             )
             if not success:
                 return Response(
@@ -61,23 +107,30 @@ class FabricIdentityViewSet(viewsets.ViewSet):
                 )
 
             fabric_identity = FabricIdentity(
-                name=serializer.data["name_of_fabric_identity"],
-                signer=serializer.data["name_of_identity"],
-                secret=serializer.data["secret_of_identity"],
-                firefly_identity_id=firefly_identity_id,
-                environment=resource_set.environment,
-                membership=resource_set.membership,
+                name_of_fabric_identity=serializer.validated_data["name_of_fabric_identity"],
+                name_of_identity=serializer.validated_data["name_of_identity"],
+                secret_of_identity=serializer.validated_data["secret_of_identity"],
+                attributes=serializer.validated_data["attributes"],
+                resource_set=resource_set,
             )
             fabric_identity.save()
             return Response(
                 {"id": fabric_identity.id},
                 status=status.HTTP_201_CREATED,
             )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, pk=None):
         fabric_identity = FabricIdentity.objects.get(pk=pk)
-        serializer = FabricIdentitySerializer(fabric_identity)
-        return Response(serializer.data)
+        firefly_identity_map = self._resolve_firefly_identity_map(
+            fabric_identity.resource_set
+        )
+        return Response(
+            self._serialize_identity(
+                fabric_identity,
+                firefly_identity_map.get(fabric_identity.name_of_identity, ""),
+            )
+        )
 
     def delete(self, request, pk=None):
         queryset = FabricIdentity.objects.all()
@@ -151,14 +204,15 @@ class FabricIdentityViewSet(viewsets.ViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             fabric_identity = FabricIdentity(
-                name=serializer.data["name_of_fabric_identity"],
-                signer=serializer.data["name_of_identity"],
-                secret=serializer.data["secret_of_identity"],
-                environment=api_secret_key.environment,
-                membership=api_secret_key.membership,
+                name_of_fabric_identity=serializer.data["name_of_fabric_identity"],
+                name_of_identity=serializer.data["name_of_identity"],
+                secret_of_identity=serializer.data["secret_of_identity"],
+                attributes=serializer.data["attributes"],
+                resource_set=resource_set,
             )
             fabric_identity.save()
             return Response(
                 {"id": fabric_identity.id, "secret": secret},
                 status=status.HTTP_201_CREATED,
             )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

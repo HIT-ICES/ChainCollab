@@ -607,15 +607,18 @@ const Overview: React.FC = () => {
   }
 
   const upsertTaskItem = (item: any) => {
-    setTaskItems((prev) => {
-      const idx = prev.findIndex((t) => t.id === item.id)
-      if (idx >= 0) {
-        const next = [...prev]
-        next[idx] = { ...next[idx], ...item }
-        return next
-      }
-      return [...prev, item]
-    })
+    const prev = taskItemsRef.current
+    const idx = prev.findIndex((t) => t.id === item.id)
+    const next = [...prev]
+    if (idx >= 0) {
+      next[idx] = { ...next[idx], ...item }
+    } else {
+      next.push(item)
+    }
+    const sorted = next.sort((a, b) => parseTaskTime(b) - parseTaskTime(a))
+    taskItemsRef.current = sorted
+    setTaskItems(sorted)
+    setTaskMap(buildTaskMap(sorted))
   }
 
   const parseTaskTime = (item: any): number => {
@@ -1034,9 +1037,12 @@ const Overview: React.FC = () => {
 
   const buildTaskMap = (tasks: any[]) => {
     const pickLatest = (types: string[]) => {
-      const candidates = tasks.filter((t) => types.includes(t.type))
+      const candidates = tasks.filter((t) => types.includes(String(t?.type || "").toUpperCase()))
       if (candidates.length === 0) return null
-      const running = candidates.find((t) => t.status === "RUNNING" || t.status === "PENDING")
+      const running = candidates.find((t) => {
+        const status = String(t?.status || "").toUpperCase()
+        return status === "RUNNING" || status === "PENDING"
+      })
       return running || candidates[0]
     }
     const map: Record<string, any> = {}
@@ -1077,7 +1083,21 @@ const Overview: React.FC = () => {
     return value
   }
 
-  const shouldForceRetry = (taskInfo: any) => String(taskInfo?.status || "").toUpperCase() === "FAILED"
+  const isActiveTask = (taskInfo: any) => {
+    const status = String(taskInfo?.status || "").toUpperCase()
+    return status === "PENDING" || status === "RUNNING"
+  }
+  const shouldForceRetry = (taskInfo: any) => ["FAILED", "ERROR"].includes(String(taskInfo?.status || "").toUpperCase())
+  const isSetupDisabled = (statusValue: any, taskInfo: any, prerequisitesReady: boolean = true) => {
+    if (!prerequisitesReady || isActiveTask(taskInfo)) {
+      return true
+    }
+    if (shouldForceRetry(taskInfo)) {
+      return false
+    }
+    const status = String(statusValue || "NO").toUpperCase()
+    return Boolean(status && status !== "NO" && status !== "FAILED")
+  }
   const hasFailedTaskHistory = (types: string[]) =>
     taskItemsRef.current.some(
       (task) =>
@@ -1995,11 +2015,11 @@ const Overview: React.FC = () => {
                 <LoadingButton
                   className="nodrag nopan"
                   size="small"
-                  variant="outlined"
-                  loading={setupFireflyLoading}
-                  onClick={handleSetUpFireflyOnly}
-                  disabled={envInfo.fireflyStatus && envInfo.fireflyStatus !== "NO" && envInfo.fireflyStatus !== "FAILED"}
-                >
+	                  variant="outlined"
+	                  loading={setupFireflyLoading}
+	                  onClick={handleSetUpFireflyOnly}
+	                  disabled={isSetupDisabled(envInfo.fireflyStatus, taskMap.firefly)}
+	                >
                   Setup
                 </LoadingButton>
               }
@@ -2024,11 +2044,11 @@ const Overview: React.FC = () => {
               onSetup={
                 <LoadingButton
                   size="small"
-                  variant="outlined"
-                  loading={setupOracleLoading}
-                  onClick={handleSetUpOracleOnly}
-                  disabled={envInfo.oracleStatus && envInfo.oracleStatus !== "NO" && envInfo.oracleStatus !== "FAILED"}
-                >
+	                  variant="outlined"
+	                  loading={setupOracleLoading}
+	                  onClick={handleSetUpOracleOnly}
+	                  disabled={isSetupDisabled(envInfo.oracleStatus, taskMap.oracle)}
+	                >
                   Setup
                 </LoadingButton>
               }
@@ -2054,14 +2074,14 @@ const Overview: React.FC = () => {
                 <LoadingButton
                   size="small"
                   variant="outlined"
-                  loading={setupDMNLoading}
-                  onClick={handleSetUpDMNOnly}
-                  disabled={
-                    envInfo.fireflyStatus !== "STARTED" ||
-                    envInfo.oracleStatus !== "CHAINCODEINSTALLED" ||
-                    (envInfo.dmnStatus && envInfo.dmnStatus !== "NO" && envInfo.dmnStatus !== "FAILED")
-                  }
-                >
+	                  loading={setupDMNLoading}
+	                  onClick={handleSetUpDMNOnly}
+	                  disabled={isSetupDisabled(
+	                    envInfo.dmnStatus,
+	                    taskMap.dmn,
+	                    envInfo.fireflyStatus === "STARTED" && envInfo.oracleStatus === "CHAINCODEINSTALLED"
+	                  )}
+	                >
                   Setup
                 </LoadingButton>
               }
@@ -2141,16 +2161,15 @@ const Overview: React.FC = () => {
                   <LoadingButton
                     className="nodrag nopan"
                     size="small"
-                    variant="outlined"
-                    loading={setupIdentityContractLoading}
-                    onClick={handleSetupIdentityContract}
-                    disabled={
-                      currentEnvType !== "Ethereum" ||
-                      !ethSystemAccountReady ||
-                      envInfo.fireflyStatus !== "STARTED" ||
-                      (envInfo.identityContractStatus && envInfo.identityContractStatus !== "NO" && envInfo.identityContractStatus !== "FAILED")
-                    }
-                  >
+	                    variant="outlined"
+	                    loading={setupIdentityContractLoading}
+	                    onClick={handleSetupIdentityContract}
+	                    disabled={isSetupDisabled(
+	                      envInfo.identityContractStatus,
+	                      taskMap.identity,
+	                      currentEnvType === "Ethereum" && ethSystemAccountReady && envInfo.fireflyStatus === "STARTED"
+	                    )}
+	                  >
                     Setup
                   </LoadingButton>
                 }
@@ -2184,27 +2203,27 @@ const Overview: React.FC = () => {
                     <LoadingButton
                       className="nodrag nopan"
                       size="small"
-                      variant="outlined"
-                      loading={setupChainlinkMode === "lite"}
-                      onClick={() => handleSetUpChainlinkInstall("lite")}
-                      disabled={
-                        setupChainlinkMode === "full" ||
-                        (envInfo.chainlinkStatus && envInfo.chainlinkStatus !== "NO" && envInfo.chainlinkStatus !== "FAILED")
-                      }
-                    >
+	                      variant="outlined"
+	                      loading={setupChainlinkMode === "lite"}
+	                      onClick={() => handleSetUpChainlinkInstall("lite")}
+	                      disabled={
+	                        setupChainlinkMode === "full" ||
+	                        isSetupDisabled(envInfo.chainlinkStatus, taskMap.dmn || taskMap.oracle)
+	                      }
+	                    >
                       Lite Setup
                     </LoadingButton>
                     <LoadingButton
                       className="nodrag nopan"
                       size="small"
-                      variant="outlined"
-                      loading={setupChainlinkMode === "full"}
-                      onClick={() => handleSetUpChainlinkInstall("full")}
-                      disabled={
-                        setupChainlinkMode === "lite" ||
-                        (envInfo.chainlinkStatus && envInfo.chainlinkStatus !== "NO" && envInfo.chainlinkStatus !== "FAILED")
-                      }
-                    >
+	                      variant="outlined"
+	                      loading={setupChainlinkMode === "full"}
+	                      onClick={() => handleSetUpChainlinkInstall("full")}
+	                      disabled={
+	                        setupChainlinkMode === "lite" ||
+	                        isSetupDisabled(envInfo.chainlinkStatus, taskMap.dmn || taskMap.oracle)
+	                      }
+	                    >
                       Full Setup
                     </LoadingButton>
                     <LoadingButton
@@ -2910,19 +2929,27 @@ const Overview: React.FC = () => {
                 <div>FireFly Core: {dataDetail?.firefly?.core_url || "-"}</div>
                 <Space>
                   <AntdButton
-                    size="small"
-                    loading={setupDataContractLoading}
-                    onClick={handleSetUpDataContractOnly}
-                    disabled={envInfo.chainlinkStatus !== "STARTED" || !!(dataDetail?.contract?.address || ethDataContractAddress)}
-                  >
+	                    size="small"
+	                    loading={setupDataContractLoading}
+	                    onClick={handleSetUpDataContractOnly}
+	                    disabled={isSetupDisabled(
+	                      dataDetail?.contract?.address || ethDataContractAddress ? "STARTED" : "NO",
+	                      taskMap.data,
+	                      envInfo.chainlinkStatus === "STARTED"
+	                    )}
+	                  >
                     Setup Data Contract
                   </AntdButton>
                   <AntdButton
-                    size="small"
-                    loading={setupDataFireflyLoading}
-                    onClick={handleRegisterDataToFirefly}
-                    disabled={envInfo.fireflyStatus !== "STARTED" || !(dataDetail?.contract?.address || ethDataContractAddress) || !!dataDetail?.firefly?.registered}
-                  >
+	                    size="small"
+	                    loading={setupDataFireflyLoading}
+	                    onClick={handleRegisterDataToFirefly}
+	                    disabled={isSetupDisabled(
+	                      dataDetail?.firefly?.registered ? "STARTED" : "NO",
+	                      taskMap.data,
+	                      envInfo.fireflyStatus === "STARTED" && Boolean(dataDetail?.contract?.address || ethDataContractAddress)
+	                    )}
+	                  >
                     Register Data To FireFly
                   </AntdButton>
                 </Space>
@@ -2959,19 +2986,27 @@ const Overview: React.FC = () => {
                 <div>FireFly Core: {computeDetail?.firefly?.core_url || "-"}</div>
                 <Space>
                   <AntdButton
-                    size="small"
-                    loading={setupComputeContractLoading}
-                    onClick={handleSetUpComputeContractOnly}
-                    disabled={envInfo.chainlinkStatus !== "STARTED" || !!(computeDetail?.contract?.address || ethComputeContractAddress)}
-                  >
+	                    size="small"
+	                    loading={setupComputeContractLoading}
+	                    onClick={handleSetUpComputeContractOnly}
+	                    disabled={isSetupDisabled(
+	                      computeDetail?.contract?.address || ethComputeContractAddress ? "STARTED" : "NO",
+	                      taskMap.compute,
+	                      envInfo.chainlinkStatus === "STARTED"
+	                    )}
+	                  >
                     Setup Compute Contract
                   </AntdButton>
                   <AntdButton
-                    size="small"
-                    loading={setupComputeFireflyLoading}
-                    onClick={handleRegisterComputeToFirefly}
-                    disabled={envInfo.fireflyStatus !== "STARTED" || !(computeDetail?.contract?.address || ethComputeContractAddress) || !!computeDetail?.firefly?.registered}
-                  >
+	                    size="small"
+	                    loading={setupComputeFireflyLoading}
+	                    onClick={handleRegisterComputeToFirefly}
+	                    disabled={isSetupDisabled(
+	                      computeDetail?.firefly?.registered ? "STARTED" : "NO",
+	                      taskMap.compute,
+	                      envInfo.fireflyStatus === "STARTED" && Boolean(computeDetail?.contract?.address || ethComputeContractAddress)
+	                    )}
+	                  >
                     Register Compute To FireFly
                   </AntdButton>
                 </Space>
@@ -3008,19 +3043,27 @@ const Overview: React.FC = () => {
                 <div>Relayer Node UI: {relayerNodeStatus?.ui_url || relayerDetail?.node?.ui_url || "-"}</div>
                 <Space wrap>
                   <AntdButton
-                    size="small"
-                    loading={setupRelayerContractLoading}
-                    onClick={handleSetUpRelayerContractOnly}
-                    disabled={envInfo.chainlinkStatus !== "STARTED" || !!(relayerDetail?.contract?.address || ethRelayerContractAddress)}
-                  >
+	                    size="small"
+	                    loading={setupRelayerContractLoading}
+	                    onClick={handleSetUpRelayerContractOnly}
+	                    disabled={isSetupDisabled(
+	                      relayerDetail?.contract?.address || ethRelayerContractAddress ? "STARTED" : "NO",
+	                      taskMap.relayer,
+	                      envInfo.chainlinkStatus === "STARTED"
+	                    )}
+	                  >
                     Setup Relayer Contract
                   </AntdButton>
                   <AntdButton
-                    size="small"
-                    loading={setupRelayerFireflyLoading}
-                    onClick={handleRegisterRelayerToFirefly}
-                    disabled={envInfo.fireflyStatus !== "STARTED" || !(relayerDetail?.contract?.address || ethRelayerContractAddress) || !!relayerDetail?.firefly?.registered}
-                  >
+	                    size="small"
+	                    loading={setupRelayerFireflyLoading}
+	                    onClick={handleRegisterRelayerToFirefly}
+	                    disabled={isSetupDisabled(
+	                      relayerDetail?.firefly?.registered ? "STARTED" : "NO",
+	                      taskMap.relayer,
+	                      envInfo.fireflyStatus === "STARTED" && Boolean(relayerDetail?.contract?.address || ethRelayerContractAddress)
+	                    )}
+	                  >
                     Register Relayer To FireFly
                   </AntdButton>
                   <AntdButton

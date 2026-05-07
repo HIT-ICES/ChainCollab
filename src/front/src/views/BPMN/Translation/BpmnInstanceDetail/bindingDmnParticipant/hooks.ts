@@ -4,8 +4,14 @@ import { useQuery } from 'react-query';
 
 export const useBusinessRulesDataByBpmn = (bpmnId: string) => {
     const { data: dmns = [], isLoading, isError, isSuccess, refetch } = useQuery(['dmns', bpmnId], async () => {
+        if (!bpmnId) {
+            return [];
+        }
         const response = await retrieveBPMN(bpmnId)
-        const bpmnContent = response.bpmnContent
+        const bpmnContent = response?.bpmnContent || ""
+        if (!bpmnContent) {
+            return [];
+        }
         return await getBusinessRulesByContent(
             bpmnContent
         );
@@ -15,8 +21,11 @@ export const useBusinessRulesDataByBpmn = (bpmnId: string) => {
 
 export const useBpmnSvg = (bpmnId: string) => {
     const { data: bpmnSvg = '', isLoading, isError, isSuccess, refetch } = useQuery(['bpmnSvg', bpmnId], async () => {
+        if (!bpmnId) {
+            return "";
+        }
         const response = await retrieveBPMN(bpmnId)
-        return response.svgContent
+        return response?.svgContent || ""
     });
     return [bpmnSvg, { isLoading, isError, isSuccess }, refetch]
 }

@@ -16,6 +16,24 @@ from common.enums import FabricCAOrgType, FabricNodeType
 
 
 class SearchView(viewsets.ViewSet):
+    def _resolve_firefly_identity_map(self, firefly):
+        try:
+            response = get(
+                f"http://{firefly.core_url}/api/v1/identities",
+                params={"limit": 1000},
+                timeout=10,
+            )
+            response.raise_for_status()
+            payload = response.json()
+        except Exception:
+            return {}
+        if not isinstance(payload, list):
+            return {}
+        return {
+            str(item.get("name")): str(item.get("id"))
+            for item in payload
+            if item.get("name") and item.get("id")
+        }
 
     @action(detail=False, methods=["get"], url_path="search-identity-by-org-and-env")
     def searchIdentityByOrgAndEnv(self, request, *args, **kwargs):
@@ -33,7 +51,8 @@ class SearchView(viewsets.ViewSet):
         res = []
         for mem in memberships:
             fabric_identity = FabricIdentity.objects.filter(
-                membership_id=mem.id, environment_id=env_id
+                resource_set__membership_id=mem.id,
+                resource_set__environment_id=env_id,
             )
             resource_set = ResourceSet.objects.filter(
                 environment_id=env_id, membership_id=mem.id
@@ -41,6 +60,7 @@ class SearchView(viewsets.ViewSet):
             if resource_set.exists():
                 firefly = Firefly.objects.get(resource_set_id=resource_set[0].id)
                 core_url = firefly.core_url
+                firefly_identity_map = self._resolve_firefly_identity_map(firefly)
                 fabric_resource_set = FabricResourceSet.objects.get(
                     resource_set_id=resource_set[0].id
                 )
@@ -56,8 +76,11 @@ class SearchView(viewsets.ViewSet):
                         "identities": [
                             {
                                 "identity_id": identity.id,
-                                "name": identity.name,
-                                "firefly_identity_id": identity.firefly_identity_id,
+                                "name": identity.name_of_fabric_identity,
+                                "signer": identity.name_of_identity,
+                                "firefly_identity_id": firefly_identity_map.get(
+                                    identity.name_of_identity, ""
+                                ),
                                 "firefly_msp": msp,
                                 "core_url": core_url,
                             }
