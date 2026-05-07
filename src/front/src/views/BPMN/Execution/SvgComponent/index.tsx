@@ -97,6 +97,106 @@ const getElementId = (element: any): string =>
 	element?.BusinessRuleID ||
 	"";
 
+const getElementStateMeta = (state: number) => {
+	switch (state) {
+		case 1:
+			return { label: "READY", color: "processing" as const };
+		case 2:
+			return { label: "WAIT_CONFIRM", color: "error" as const };
+		case 3:
+			return { label: "DONE", color: "success" as const };
+		default:
+			return { label: "DISABLED", color: "default" as const };
+	}
+};
+
+const getStatePalette = () =>
+	({
+		0: { fill: "#f1f5f9", stroke: "#cbd5e1", opacity: 0.65 },
+		1: { fill: "#dbeafe", stroke: "#2563eb", opacity: 0.95 },
+		2: { fill: "#fee2e2", stroke: "#dc2626", opacity: 0.98 },
+		3: { fill: "#dcfce7", stroke: "#16a34a", opacity: 0.95 },
+	}) as Record<number, { fill: string; stroke: string; opacity: number }>;
+
+const parseElementFormat = (rawFormat: any) => {
+	const parsed =
+		typeof rawFormat === "string"
+			? (() => {
+					try {
+						return JSON.parse(rawFormat);
+					} catch {
+						return {};
+					}
+			  })()
+			: rawFormat || {};
+	const resolved =
+		typeof parsed?.schema === "string"
+			? (() => {
+					try {
+						return JSON.parse(parsed.schema);
+					} catch {
+						return parsed;
+					}
+			  })()
+			: parsed?.schema && typeof parsed.schema === "object"
+			? parsed.schema
+			: parsed;
+	return {
+		properties:
+			resolved && typeof resolved.properties === "object" && resolved.properties !== null
+				? resolved.properties
+				: {},
+		files:
+			resolved && typeof resolved.files === "object" && resolved.files !== null
+				? resolved.files
+				: {},
+		required: Array.isArray(resolved?.required) ? resolved.required : [],
+		fileRequired: Array.isArray(resolved?.["file required"])
+			? resolved["file required"]
+			: [],
+	};
+};
+
+const getSchemaFieldDescription = (fieldDef: any, fallbackName: string) =>
+	String(fieldDef?.description || fieldDef?.title || `${fallbackName} input`).trim();
+
+const buildFormatAutoFilledValues = (
+	format: {
+		properties: Record<string, any>;
+		files: Record<string, any>;
+		required: string[];
+		fileRequired: string[];
+	},
+	elementId: string,
+	instanceId: any,
+) =>
+	Object.entries(format.properties || {}).reduce(
+		(acc, [key, fieldDef]: [string, any]) => {
+			const lowerName = key.toLowerCase();
+			if (fieldDef?.type === "boolean") {
+				acc[key] = false;
+				return acc;
+			}
+			if (fieldDef?.type === "number" || fieldDef?.type === "integer") {
+				acc[key] = 1;
+				return acc;
+			}
+			if (lowerName.endsWith("id") || lowerName.includes("requestid")) {
+				acc[key] = `${elementId || "message"}-${instanceId || 0}`;
+				return acc;
+			}
+			const description = getSchemaFieldDescription(fieldDef, key);
+			acc[key] =
+				description && description !== `${key} input`
+					? description.length > 48
+						? description.slice(0, 48)
+						: description
+					: `sample-${key}`;
+			return acc;
+		},
+		{} as Record<string, any>,
+	);
+
 const parseMockElementsFromSvg = (svgContent?: string) => {
 	if (!svgContent) return [];
 	const seen = new Set<string>();
@@ -159,7 +259,18 @@ const InputComponentForMessage = ({
 	the_identity,
 	onActionRecord,
 }) => {
-	const format = JSON.parse(currentElement.Format);
+	const format = parseElementFormat(currentElement?.Format);
+	const propertyEntries = Object.entries(format.properties || {});
+	const fileEntries = Object.entries(format.files || {});
+	const buildAutoFilledValues = () =>
+		buildFormatAutoFilledValues(
+			format,
+			currentElement?.MessageID || "message",
+			instanceId,
+		);
+	const applyAutoFill = () => {
+		formRef.current?.setFieldsValue(buildAutoFilledValues());
+	};
 
 	const transValue = (key, value) => {
 		if (format.properties[key]?.type === "string") return value;
@@ -271,7 +382,11 @@ const InputComponentForMessage = ({
 
 	useEffect(() => {
 		if (isSender) {
-			// setMessageToConfirm("Please confirm the message to send");
+			if (propertyEntries.length > 0) {
+				setTimeout(() => {
+					formRef.current?.setFieldsValue(buildAutoFilledValues());
+				}, 0);
+			}
 			return;
 		}
 		const fetchData = async () => {
@@ -297,7 +412,7 @@ const InputComponentForMessage = ({
 			}
 		};
 		fetchData();
-	}, [currentElement]);
+	}, [currentElement, isSender]);
 
 	if (!isSender) {
 		return (
@@ -318,12 +433,14 @@ const InputComponentForMessage = ({
 						})}
 				</Typography.Text>
 				<Button
-					style={{ backgroundColor: "mediumspringgreen", marginTop: "10px" }}
+					type="primary"
+					danger
+					style={{ marginTop: "10px" }}
 					onClick={() => {
 						confirmMessage();
 					}}
 				>
-					Confirm
+					Confirm Message
 				</Button>
 			</div>
 		);
@@ -532,58 +649,120 @@ const InputComponentForMessage = ({
 					return res;
 				}}
 			/>
-			<Form
-				layout="horizontal"
-				className={flexContainerStyle}
-				labelCol={{ span: 8 }}
-				wrapperCol={{ span: 16 }}
-				ref={formRef}
-				onFinish={onHandleMessage}
-			>
-				<h1>LOGRES</h1>
-				{Object.keys(format.properties).map((key) => {
-					return (
-						<Form.Item
-							label={key}
-							name={key}
-							key={key}
+				<Form
+					layout="horizontal"
+					className={flexContainerStyle}
+					labelCol={{ span: 8 }}
+					wrapperCol={{ span: 16 }}
+					ref={formRef}
+					onFinish={onHandleMessage}
+				>
+					<h1>LOGRES</h1>
+					<div
+						style={{
+							width: "100%",
+							padding: 12,
+							borderRadius: 10,
+							background: "#f8fafc",
+							border: "1px solid #e2e8f0",
+							marginBottom: 8,
+						}}
+					>
+						<Space wrap size={8}>
+							<Tag color="blue">Params: {propertyEntries.length}</Tag>
+							<Tag color="purple">Files: {fileEntries.length}</Tag>
+							<Tag color="gold">Required: {format.required.length}</Tag>
+							<Button size="small" onClick={applyAutoFill}>
+								Auto Fill
+							</Button>
+						</Space>
+						{propertyEntries.length > 0 ? (
+							<div style={{ marginTop: 10, display: "grid", gap: 8 }}>
+								{propertyEntries.map(([key, fieldDef]: [string, any]) => (
+									<div
+										key={`meta-${key}`}
+										style={{
+											padding: 8,
+											borderRadius: 8,
+											background: "#fff",
+											border: "1px solid #e2e8f0",
+										}}
+									>
+										<Space wrap size={8}>
+											<Typography.Text strong>{key}</Typography.Text>
+											<Tag>{String(fieldDef?.type || "string")}</Tag>
+											{format.required.includes(key) ? (
+												<Tag color="error">required</Tag>
+											) : (
+												<Tag>optional</Tag>
+											)}
+										</Space>
+									<div style={{ marginTop: 4 }}>
+										<Typography.Text type="secondary">
+											{getSchemaFieldDescription(fieldDef, key)}
+										</Typography.Text>
+									</div>
+								</div>
+								))}
+							</div>
+						) : (
+							<div style={{ marginTop: 10 }}>
+								<Typography.Text type="secondary">
+									This message has no editable scalar parameters.
+								</Typography.Text>
+							</div>
+						)}
+					</div>
+					{propertyEntries.map(([key, fieldDef]: [string, any]) => {
+						return (
+							<Form.Item
+								label={key}
+								name={key}
+								key={key}
 							rules={[
 								{
 									required: format.required.includes(key),
 									message: `${key} is required!`,
-								},
-							]}
-						>
-							<div>
-								<Tag>{format.properties[key].type}</Tag>
-								<Input placeholder={format.properties[key].description} />
-							</div>
-						</Form.Item>
-					);
-				})}
-				{Object.keys(format.files).map((key) => {
-					return (
-						<Form.Item
-							label={key}
-							name={key}
-							key={key}
-							rules={[
-								{
-									required: format["file required"].includes(key),
-									message: `${key} is required!`,
-								},
-							]}
-						>
-							<Upload
-								beforeUpload={(file) => {
-									return false;
-								}}
+									},
+								]}
 							>
-								<Button icon={<UploadOutlined />}>Upload</Button>
-							</Upload>
-						</Form.Item>
-					);
-				})}
+								<div>
+									<Tag>{String(fieldDef?.type || "string")}</Tag>
+									<Input placeholder={getSchemaFieldDescription(fieldDef, key)} />
+								</div>
+							</Form.Item>
+						);
+					})}
+					{fileEntries.map(([key, fieldDef]: [string, any]) => {
+						return (
+							<Form.Item
+								label={key}
+								name={key}
+								key={key}
+								rules={[
+									{
+										required: format.fileRequired.includes(key),
+										message: `${key} is required!`,
+									},
+								]}
+							>
+								<div>
+									<div style={{ marginBottom: 6 }}>
+										<Typography.Text type="secondary">
+											{getSchemaFieldDescription(fieldDef, key)}
+										</Typography.Text>
+									</div>
+									<Upload
+										beforeUpload={(file) => {
+											return false;
+										}}
+									>
+										<Button icon={<UploadOutlined />}>Upload</Button>
+									</Upload>
+								</div>
+							</Form.Item>
+						);
+					})}
 				<Form.Item>
 					<Button
 						style={{ backgroundColor: "mediumspringgreen" }}
@@ -646,6 +825,11 @@ const ControlPanel = ({
 }) => {
 	const type = currentElement?.type;
 	const elementId = getElementId(currentElement);
+	const displayName = currentElement?.DisplayName || elementId;
+	const formatInfo = parseElementFormat(currentElement?.Format);
+	const propertyEntries = Object.entries(formatInfo.properties || {});
+	const fileEntries = Object.entries(formatInfo.files || {});
+	const stateMeta = getElementStateMeta(Number(currentElement?.state ?? 0));
 	const isYourTurn = (() => {
 		if (type === "event" || type === "gateway" || type === "businessRule")
 			return currentElement?.state === 1;
@@ -656,13 +840,109 @@ const ControlPanel = ({
 			);
 	})();
 	const showTransactionId = type === "message" && currentElement?.state === 2;
+	const renderCard = (content: React.ReactNode, actionLabel: string) => (
+		<div
+			style={{
+				display: "flex",
+				flexDirection: "column",
+				border: "1px solid #e2e8f0",
+				borderRadius: 10,
+				padding: 12,
+				background: "#f8fafc",
+				minWidth: 320,
+				maxWidth: 520,
+				gap: 10,
+			}}
+			>
+				<Space wrap size={8}>
+					<Tag color="blue">{type}</Tag>
+					<Tag color={stateMeta.color}>{stateMeta.label}</Tag>
+					<Typography.Text strong>{displayName}</Typography.Text>
+					{displayName !== elementId ? <Tag>{elementId}</Tag> : null}
+				</Space>
+			{currentElement?.Documentation ? (
+				<Typography.Text type="secondary">
+					{currentElement.Documentation}
+				</Typography.Text>
+			) : null}
+			{type === "message" ? (
+				<div
+					style={{
+						padding: 10,
+						borderRadius: 8,
+						background: "#fff",
+						border: "1px solid #e2e8f0",
+					}}
+				>
+					<Space wrap size={8}>
+						<Tag color="geekblue">Params: {propertyEntries.length}</Tag>
+						<Tag color="purple">Files: {fileEntries.length}</Tag>
+						<Tag color="gold">Required: {formatInfo.required.length}</Tag>
+					</Space>
+					{propertyEntries.length > 0 ? (
+						<div style={{ marginTop: 8, display: "grid", gap: 6 }}>
+							{propertyEntries.map(([key, fieldDef]: [string, any]) => (
+								<div key={`summary-${elementId}-${key}`}>
+									<Typography.Text>
+										{key}
+										{" "}
+										<Tag>{String(fieldDef?.type || "string")}</Tag>
+									</Typography.Text>
+									<div>
+										<Typography.Text type="secondary">
+											{getSchemaFieldDescription(fieldDef, key)}
+										</Typography.Text>
+									</div>
+								</div>
+							))}
+						</div>
+					) : (
+						<div style={{ marginTop: 8 }}>
+							<Typography.Text type="secondary">
+								This message has no editable scalar parameters.
+							</Typography.Text>
+						</div>
+					)}
+				</div>
+			) : null}
+			{type === "businessRule" &&
+			(Array.isArray(currentElement?.Inputs) || Array.isArray(currentElement?.Outputs)) ? (
+				<div
+					style={{
+						padding: 10,
+						borderRadius: 8,
+						background: "#fff",
+						border: "1px solid #e2e8f0",
+					}}
+				>
+					{Array.isArray(currentElement?.Inputs) && currentElement.Inputs.length > 0 ? (
+						<Typography.Text type="secondary">
+							Inputs: {currentElement.Inputs.map((item: any) => item?.name || item).join(", ")}
+						</Typography.Text>
+					) : null}
+					{Array.isArray(currentElement?.Outputs) && currentElement.Outputs.length > 0 ? (
+						<div style={{ marginTop: 6 }}>
+							<Typography.Text type="secondary">
+								Outputs: {currentElement.Outputs.map((item: any) => item?.name || item).join(", ")}
+							</Typography.Text>
+						</div>
+					) : null}
+				</div>
+			) : null}
+			<div>
+				<Typography.Text type="secondary">{actionLabel}</Typography.Text>
+			</div>
+			{content}
+		</div>
+	);
 
 	if (!isYourTurn) return null;
 
-	if (executionMode === "mock") {
-		const isMessageConfirm = type === "message" && currentElement?.state === 2;
-		const isProcessing = mockProcessingElementId === elementId;
-		return (
+		if (executionMode === "mock") {
+			const isMessageConfirm = type === "message" && currentElement?.state === 2;
+			const isProcessing = mockProcessingElementId === elementId;
+			const mockStateMeta = getElementStateMeta(Number(currentElement?.state ?? 0));
+			return (
 			<div
 				style={{
 					display: "flex",
@@ -675,18 +955,17 @@ const ControlPanel = ({
 					gap: 8,
 				}}
 			>
-				<Typography.Text strong>
-					{type} · {elementId}
-				</Typography.Text>
-				<Tag color={isMessageConfirm ? "orange" : "blue"}>
-					{isMessageConfirm ? "WAIT_CONFIRM" : "READY"}
-				</Tag>
-				<Button
-					type="primary"
-					loading={isProcessing}
-					onClick={() =>
-						onMockAction?.(currentElement, isMessageConfirm ? "confirm" : "execute")
-					}
+					<Typography.Text strong>
+						{type} · {elementId}
+					</Typography.Text>
+					<Tag color={mockStateMeta.color}>{mockStateMeta.label}</Tag>
+					<Button
+						type="primary"
+						danger={isMessageConfirm}
+						loading={isProcessing}
+						onClick={() =>
+							onMockAction?.(currentElement, isMessageConfirm ? "confirm" : "execute")
+						}
 				>
 					{isMessageConfirm ? "Mock Confirm" : "Mock Execute"}
 				</Button>
@@ -739,22 +1018,18 @@ const ControlPanel = ({
 	};
 
 	if (type === "event")
-		return (
-			<div
-				style={{
-					display: "flex",
-					flexDirection: "column",
-				}}
-			>
-				<Button
-					style={{ backgroundColor: "mediumspringgreen" }}
-					onClick={() => {
-						onHandleEvent();
-					}}
-				>
-					Next
-				</Button>
-			</div>
+		return renderCard(
+			<div style={{ display: "flex", flexDirection: "column" }}>
+					<Button
+						style={{ backgroundColor: "mediumspringgreen" }}
+						onClick={() => {
+							onHandleEvent();
+						}}
+					>
+						Next
+					</Button>
+				</div>,
+			"Execute event",
 		);
 
 	const onHandleGateway = async () => {
@@ -800,22 +1075,18 @@ const ControlPanel = ({
 	};
 
 	if (type === "gateway")
-		return (
-			<div
-				style={{
-					display: "flex",
-					flexDirection: "column",
-				}}
-			>
-				<Button
-					style={{ backgroundColor: "mediumspringgreen" }}
-					onClick={() => {
-						onHandleGateway();
-					}}
-				>
-					Next
-				</Button>
-			</div>
+		return renderCard(
+			<div style={{ display: "flex", flexDirection: "column" }}>
+					<Button
+						style={{ backgroundColor: "mediumspringgreen" }}
+						onClick={() => {
+							onHandleGateway();
+						}}
+					>
+						Next
+					</Button>
+				</div>,
+			"Execute gateway",
 		);
 
 	const onHandleBusinessRule = async (output={}) => {
@@ -861,24 +1132,19 @@ const ControlPanel = ({
 	};
 
 	if (type === "businessRule")
-		return (
-			<div
-				style={{
-					display: "flex",
-					flexDirection: "column",
-				}}
-			>
-				<Button
-					style={{ backgroundColor: "mediumspringgreen" }}
-					onClick={() => {
-						onHandleBusinessRule().catch((error: any) => {
-							message.error(error?.message || "Business rule invoke failed");
+		return renderCard(
+			<div style={{ display: "flex", flexDirection: "column" }}>
+					<Button
+						style={{ backgroundColor: "mediumspringgreen" }}
+						onClick={() => {
+							onHandleBusinessRule().catch((error: any) => {
+								message.error(error?.message || "Business rule invoke failed");
 						});
 					}}
 				>
 					Next
 				</Button>
-				<TestComponentV2
+					<TestComponentV2
 					processFunc={async (readFromRedis) => {
 						const output = {};
 						const data = await onHandleBusinessRule(output);
@@ -945,32 +1211,36 @@ const ControlPanel = ({
 							}
 						]
 						return res;
-					}}
-				/>
-			</div>
+						}}
+					/>
+				</div>,
+			currentElement?.state === 2 ? "Continue business rule" : "Request DMN",
 		);
 
 	if (type === "message")
-		return (
+		return renderCard(
 			<div>
 				{showTransactionId ? (
-					<div>Transaction ID: {currentElement.FireflyTranID}</div>
+					<div style={{ marginBottom: 8 }}>
+						<Typography.Text type="secondary">
+							Transaction ID: {currentElement.FireflyTranID}
+						</Typography.Text>
+					</div>
 				) : null}
-				{currentElement.Format && currentElement.Format !== "{}" ? (
-						<InputComponentForMessage
-							currentElement={currentElement}
-							contractName={contractName}
-							coreURL={coreURL}
-							bpmnName={bpmnName}
-							contractMethodDes={contractMethodDes}
-							bpmn={bpmn}
-							bpmnInstance={bpmnInstance}
-						instanceId={instanceId}
-						the_identity={identity}
-						onActionRecord={onActionRecord}
-					/>
-				) : null}
-			</div>
+				<InputComponentForMessage
+					currentElement={currentElement}
+					contractName={contractName}
+					coreURL={coreURL}
+					bpmnName={bpmnName}
+					contractMethodDes={contractMethodDes}
+					bpmn={bpmn}
+					bpmnInstance={bpmnInstance}
+					instanceId={instanceId}
+					the_identity={identity}
+					onActionRecord={onActionRecord}
+				/>
+			</div>,
+			showTransactionId ? "Confirm message" : "Send message",
 		);
 };
 
@@ -1431,12 +1701,7 @@ const buildSvgStyleForElements = (
 		acc[item.elementId] = item.status;
 		return acc;
 	}, {} as Record<string, string>);
-	const palette = {
-		0: { fill: "#f1f5f9", stroke: "#cbd5e1", opacity: 0.65 },
-		1: { fill: "#dbeafe", stroke: "#2563eb", opacity: 0.95 },
-		2: { fill: "#fef3c7", stroke: "#d97706", opacity: 0.95 },
-		3: { fill: "#dcfce7", stroke: "#16a34a", opacity: 0.95 },
-	} as Record<number, { fill: string; stroke: string; opacity: number }>;
+	const palette = getStatePalette();
 
 	const styles = { "& svg": {} as Record<string, any> };
 	elementList.forEach((item) => {
@@ -2061,7 +2326,7 @@ const EthereumExecutionView = ({
 				<Tag color="purple">API: {apiBaseUrl || "-"}</Tag>
 				<Tag color="cyan">Methods: {methods.length}</Tag>
 				<Tag color="processing">Ready: {stateCounter.ready}</Tag>
-				<Tag color="orange">Waiting: {stateCounter.confirm}</Tag>
+					<Tag color="error">Waiting: {stateCounter.confirm}</Tag>
 				<Tag color="success">Done: {stateCounter.done}</Tag>
 				<Tag color="default">Disabled: {stateCounter.disabled}</Tag>
 				<Tag color="geekblue">Actionable: {actionableElements.length}</Tag>
@@ -2784,12 +3049,7 @@ const ExecutionPage = (props) => {
 			acc[item.elementId] = item.status;
 			return acc;
 		}, {} as Record<string, string>);
-		const palette = {
-			0: { fill: "#f1f5f9", stroke: "#cbd5e1", opacity: 0.65 },
-			1: { fill: "#dbeafe", stroke: "#2563eb", opacity: 0.95 },
-			2: { fill: "#fef3c7", stroke: "#d97706", opacity: 0.95 },
-			3: { fill: "#dcfce7", stroke: "#16a34a", opacity: 0.95 },
-		} as Record<number, { fill: string; stroke: string; opacity: number }>;
+			const palette = getStatePalette();
 
 		const generateStylesWithMsgList = (msgList) => {
 			const styles = { "& svg": {} as Record<string, any> };
@@ -3018,7 +3278,7 @@ const ExecutionPage = (props) => {
 						FireFly: {executionMode === "mock" ? "SKIPPED (MOCK)" : fireflyMeta?.connected ? "CONNECTED" : "DISCONNECTED"}
 					</Tag>
 					<Tag color="blue">Ready: {stateCounter.ready}</Tag>
-					<Tag color="orange">Wait Confirm: {stateCounter.confirm}</Tag>
+					<Tag color="error">Wait Confirm: {stateCounter.confirm}</Tag>
 					<Tag color="default">Disabled: {stateCounter.disabled}</Tag>
 					<Tag color="purple">Done: {stateCounter.done}</Tag>
 					<Tag color="cyan">Actionable: {currentElements.length}</Tag>
@@ -3243,14 +3503,14 @@ const ExecutionPage = (props) => {
 
 			{/* <Tag color="blue">Participant: {" " + getParticipantName(participant)}</Tag> */}
 
-			<div
-				style={{
-					display: "flex",
-					flexWrap: "wrap",
-					gap: 12,
-					marginTop: 20,
-					padding: 12,
-					border: "1px solid #e2e8f0",
+				<div
+					style={{
+						display: "grid",
+						gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+						gap: 16,
+						marginTop: 20,
+						padding: 12,
+						border: "1px solid #e2e8f0",
 					borderRadius: 10,
 					background: "#ffffff",
 				}}
