@@ -55,8 +55,8 @@ const ParticipantDmnBindingModal = ({
 	const currentConsortiumId = useAppSelector(
 		(state) => state.consortium.currentConsortiumId,
 	);
-	const [effectiveEnvId, setEffectiveEnvId] = useState("");
-	const [effectiveEnvType, setEffectiveEnvType] = useState("");
+	const [effectiveEnvId, setEffectiveEnvId] = useState<string | null>(null);
+	const [effectiveEnvType, setEffectiveEnvType] = useState<string | null>(null);
 	const [errorMessage, setErrorMessage] = useState("");
 	const [participants, syncParticipants] = useParticipantsData(bpmnId);
 	const [businessRules] = useBusinessRulesDataByBpmn(bpmnId);
@@ -336,8 +336,9 @@ const ParticipantDmnBindingModal = ({
 					? "Ethereum"
 					: bpmn.environment
 						? "Fabric"
-						: currentEnvType;
-				const nextEnvId = bpmn.eth_environment || bpmn.environment || currentEnvId || "";
+						: currentEnvType || null;
+				const nextEnvId =
+					bpmn.eth_environment || bpmn.environment || currentEnvId || null;
 				setEffectiveEnvType(nextEnvType);
 				setEffectiveEnvId(nextEnvId);
 
@@ -691,17 +692,23 @@ const ParticipantDmnBindingModal = ({
 						style={{ flex: "0 1 65%", paddingLeft: "10px", height: "600px" }}
 					>
 						<h2>Binding Participants</h2>
-						<BindingParticipant
-							participants={participants}
-							showBindingParticipantMap={showBindingParticipantMap}
-							setShowBindingParticipantMap={setShowBindingParticipantMap}
-							showBindingParticipantValueMap={showBindingParticipantValueMap}
-							setShowBindingParticipantValueMap={
-								setShowBindingParticipantValueMap
-							}
-							envId={effectiveEnvId}
-							envType={effectiveEnvType}
-						/>
+						{effectiveEnvType ? (
+							<BindingParticipant
+								participants={participants}
+								showBindingParticipantMap={showBindingParticipantMap}
+								setShowBindingParticipantMap={setShowBindingParticipantMap}
+								showBindingParticipantValueMap={showBindingParticipantValueMap}
+								setShowBindingParticipantValueMap={
+									setShowBindingParticipantValueMap
+								}
+								envId={effectiveEnvId || undefined}
+								envType={effectiveEnvType}
+							/>
+						) : (
+							<div style={{ color: "#64748b", paddingTop: "8px" }}>
+								正在解析 BPMN 绑定环境...
+							</div>
+						)}
 					</div>
 				</div>
 				<Button

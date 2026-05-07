@@ -181,8 +181,8 @@ const BindingParticipantComponent = ({ clickedActionIndex, showBindingParticipan
 
   const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
   const currentEnvType = useAppSelector((state) => state.env.currentEnvType);
-  const effectiveEnvId = envId || currentEnvId;
-  const effectiveEnvType = envType || currentEnvType;
+  const effectiveEnvId = typeof envId === "string" && envId.length > 0 ? envId : currentEnvId;
+  const effectiveEnvType = typeof envType === "string" && envType.length > 0 ? envType : currentEnvType;
 
   // fetch datas
   const [identities, { isLoading, isError, isSuccess }, refetch] = effectiveEnvType === "Ethereum"
@@ -366,8 +366,8 @@ export const BindingParticipant = ({ participants, showBindingParticipantMap, se
   const [useFirstMembershipForAll, setUseFirstMembershipForAll] = useState(false);
   const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
   const currentEnvType = useAppSelector((state) => state.env.currentEnvType);
-  const effectiveEnvId = envId || currentEnvId;
-  const effectiveEnvType = envType || currentEnvType;
+  const effectiveEnvId = typeof envId === "string" && envId.length > 0 ? envId : currentEnvId;
+  const effectiveEnvType = typeof envType === "string" && envType.length > 0 ? envType : currentEnvType;
   const consortiumId = useAppSelector(
     (state) => state.consortium
   ).currentConsortiumId;
