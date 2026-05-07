@@ -575,47 +575,55 @@ def stop_stack():
 
 
 def restart_backend_service():
+    restart_named_service("backend")
+
+
+def restart_new_translator_service():
+    restart_named_service("newTranslator")
+
+
+def restart_named_service(service_name: str):
     ensure_runtime_dir()
     entries = read_pid_file()
-    backend_pid = entries.get("backend")
-    if backend_pid is not None:
-        stop_pid(backend_pid, "backend")
+    service_pid = entries.get(service_name)
+    if service_pid is not None:
+        stop_pid(service_pid, service_name)
     else:
-        print("[dev] backend PID not found in runtime file; checking port 8000")
+        print(f"[dev] {service_name} PID not found in runtime file; checking port")
 
-    backend_port = SERVICE_PORTS["backend"]
-    if not port_is_available(backend_port):
-        holders = pids_for_port(backend_port)
+    service_port = SERVICE_PORTS[service_name]
+    if not port_is_available(service_port):
+        holders = pids_for_port(service_port)
         if holders:
-            print(f"[dev] terminating processes holding port {backend_port}: {holders}")
+            print(f"[dev] terminating processes holding port {service_port}: {holders}")
             terminate_pids(holders)
-        if not port_is_available(backend_port):
-            print(f"[dev] Port {backend_port} still in use; backend restart aborted")
+        if not port_is_available(service_port):
+            print(f"[dev] Port {service_port} still in use; {service_name} restart aborted")
             sys.exit(1)
 
-    spec = SERVICE_DEFS["backend"]
+    spec = SERVICE_DEFS[service_name]
     devtools = spec["devtools"]
     if not devtools.exists():
-        print(f"[dev] backend devtools not found at {devtools}")
+        print(f"[dev] {service_name} devtools not found at {devtools}")
         sys.exit(1)
 
     pid = spawn_service(
-        "backend",
+        service_name,
         [sys.executable, str(devtools), *spec["args"]],
         cwd=devtools.parent,
-        log_path=LOG_FILES["backend"],
+        log_path=LOG_FILES[service_name],
         log_to_file=True,
         pipe_logs=False,
         env=spec["env"],
         startup_wait=0.0,
     )
     if not pid_is_running(pid):
-        print("[dev] backend failed to start")
+        print(f"[dev] {service_name} failed to start")
         sys.exit(1)
 
-    entries["backend"] = pid
+    entries[service_name] = pid
     write_pid_file(entries)
-    print(f"[dev] backend restarted (PID {pid})")
+    print(f"[dev] {service_name} restarted (PID {pid})")
 
 
 def show_status():
@@ -727,6 +735,7 @@ def build_parser() -> argparse.ArgumentParser:
             "  devtools.sh status\n"
             "  devtools.sh backend\n"
             "  devtools.sh backend-restart\n"
+            "  devtools.sh new-translator-restart\n"
             "  devtools.sh front help\n"
             "  devtools.sh front dev -- --host 0.0.0.0\n"
             "  devtools.sh host cello.com org.com\n"
@@ -765,6 +774,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     sub.add_parser("status", help="Show process and port status for core stack.")
     sub.add_parser("backend-restart", help="Restart only backend and update runtime PID file.")
+    sub.add_parser("new-translator-restart", help="Restart only newTranslator and update runtime PID file.")
     front_parser = sub.add_parser("front", help="Proxy to front_devtools.sh.")
     front_parser.add_argument("extra", nargs=argparse.REMAINDER)
     agent_parser = sub.add_parser("agent", help="Proxy to agent_devtools.sh.")
@@ -812,6 +822,7 @@ def main():
         "down": stop_stack,
         "status": show_status,
         "backend-restart": restart_backend_service,
+        "new-translator-restart": restart_new_translator_service,
     }
 
     passthrough = {

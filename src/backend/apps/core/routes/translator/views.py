@@ -24,6 +24,9 @@ class TranslatorProxyViewSet(viewsets.ViewSet):
                 target=serializer.validated_data.get("target") or "go",
                 artifact_name=serializer.validated_data.get("artifact_name"),
                 persist_to_runtime=True,
+                message_confirmation_mode=serializer.validated_data.get(
+                    "message_confirmation_mode", "explicit"
+                ),
             )
         except NewTranslatorError as exc:
             return Response({"message": str(exc)}, status=status.HTTP_400_BAD_REQUEST)

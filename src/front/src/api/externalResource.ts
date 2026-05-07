@@ -263,12 +263,20 @@ export const getMapInfoofBPMNInstance = async (bpmnInstanceId: string, bpmnId: s
     }
 }
 
-export const packageBpmn = async (chaincodeContent: string, ffiContent: string, orgId: string, bpmnId: string, consortiumId: string = '1') => {
+export const packageBpmn = async (
+    chaincodeContent: string,
+    ffiContent: string,
+    orgId: string,
+    bpmnId: string,
+    consortiumId: string = '1',
+    messageConfirmationMode: "explicit" | "implicit" = "explicit",
+) => {
     try {
         const response = await api.post(`/consortiums/${consortiumId}/bpmns/${bpmnId}/package`, {
             chaincodeContent: chaincodeContent,
             ffiContent: ffiContent,
-            orgId: orgId
+            orgId: orgId,
+            message_confirmation_mode: messageConfirmationMode,
         })
         return response.data;
     } catch (error) {
@@ -281,11 +289,13 @@ export const generateBpmnArtifacts = async (
     target: "go" | "solidity",
     consortiumId: string = "1",
     artifactName?: string,
+    messageConfirmationMode: "explicit" | "implicit" = "explicit",
 ) => {
     try {
         const response = await api.post(`/consortiums/${consortiumId}/bpmns/${bpmnId}/generate`, {
             target,
             artifact_name: artifactName,
+            message_confirmation_mode: messageConfirmationMode,
         });
         return response.data;
     } catch (error) {
@@ -370,12 +380,20 @@ export const deployEthContract = async (contractId: string, envId: string, names
     }
 }
 
-export const packageBpmnToInstance = async (chaincodeContent: string, ffiContent: string, bpmnInstanceId, orgId: string, bpmnId: string = '1') => {
+export const packageBpmnToInstance = async (
+    chaincodeContent: string,
+    ffiContent: string,
+    bpmnInstanceId,
+    orgId: string,
+    bpmnId: string = '1',
+    messageConfirmationMode: "explicit" | "implicit" = "explicit",
+) => {
     try {
         const response = await api.post(`bpmns/${bpmnId}/bpmn-instances/${bpmnInstanceId}/package`, {
             chaincodeContent: chaincodeContent,
             ffiContent: ffiContent,
-            orgId: orgId
+            orgId: orgId,
+            message_confirmation_mode: messageConfirmationMode,
         })
         return response.data;
     } catch (error) {

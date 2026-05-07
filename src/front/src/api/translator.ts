@@ -1,10 +1,15 @@
 import api from './apiConfig.ts';
 
-export const generateChaincode = async (bpmnContent: string, target: "go" | "solidity" = "go") => {
+export const generateChaincode = async (
+    bpmnContent: string,
+    target: "go" | "solidity" = "go",
+    messageConfirmationMode: "explicit" | "implicit" = "explicit",
+) => {
     try {
         const response = await api.post(`/translator/chaincode/generate`, {
             bpmnContent,
             target,
+            message_confirmation_mode: messageConfirmationMode,
         });
         return response.data;
     } catch (error) {

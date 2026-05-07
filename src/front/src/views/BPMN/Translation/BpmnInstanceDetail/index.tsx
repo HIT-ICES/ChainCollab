@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Card, Row, Col, Button, Typography, Steps, Modal, TableProps, Table, Select, Input, Tag } from "antd"
+import { Card, Row, Col, Button, Typography, Steps, Modal, TableProps, Table, Select, Input, Tag, Segmented } from "antd"
 import { useLocation, useNavigate } from "react-router-dom";
 import { BindingModal } from "./bindingModel"
 import { retrieveBPMN, packageBpmnToInstance, updateBPMNInstanceStatus, updateBPMNInstanceFireflyUrl, generateBpmnArtifacts } from "@/api/externalResource"
@@ -117,6 +117,7 @@ const BPMNInstanceOverview = () => {
     const currentEnvType = useAppSelector((state) => state.env.currentEnvType);
 
     const [buttonLoading, setButtonLoading] = useState(false);
+    const [messageConfirmationMode, setMessageConfirmationMode] = useState<"explicit" | "implicit">("explicit");
     const [isExecuteModalOpen, setIsExecuteModalOpen] = useState(false);
     const onExecute = () => {
         setIsExecuteModalOpen(true);
@@ -128,7 +129,14 @@ const BPMNInstanceOverview = () => {
     const ModifyModal = () => {
 
         const onModify = async () => {
-            await packageBpmnToInstance(chainCodeContentForModify, ffiContentForModify, bpmnInstanceId, currentOrgId);
+            await packageBpmnToInstance(
+                chainCodeContentForModify,
+                ffiContentForModify,
+                bpmnInstanceId,
+                currentOrgId,
+                instance.bpmn || '1',
+                messageConfirmationMode,
+            );
             syncInstance()
             setButtonLoading(false);
         }
@@ -193,7 +201,9 @@ const BPMNInstanceOverview = () => {
             const res = await generateBpmnArtifacts(
                 bpmn.id,
                 target,
-                currentConsortiumId || "1"
+                currentConsortiumId || "1",
+                undefined,
+                target === "go" ? messageConfirmationMode : "explicit",
             );
             const generated = res?.data || {};
             const chaincode_content = generated.chaincodeContent || "";
@@ -217,7 +227,9 @@ const BPMNInstanceOverview = () => {
             const res = await generateBpmnArtifacts(
                 bpmn.id,
                 isEthereum ? "solidity" : "go",
-                currentConsortiumId || "1"
+                currentConsortiumId || "1",
+                undefined,
+                isEthereum ? "explicit" : messageConfirmationMode,
             );
             record.push({ index: i + 1, timeCost: res?.data?.timeCost || "" });
         }
@@ -350,8 +362,23 @@ const BPMNInstanceOverview = () => {
                     justify="end"
                     style={{ width: "100%", height: "100%" }}
                 >
+                    {currentEnvType !== "Ethereum" ? (
+                        <Col flex="auto" style={{ textAlign: "left" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                                <Typography.Text type="secondary">消息确认模式</Typography.Text>
+                                <Segmented
+                                    value={messageConfirmationMode}
+                                    onChange={(value) => setMessageConfirmationMode(value as "explicit" | "implicit")}
+                                    options={[
+                                        { label: "需要确认", value: "explicit" },
+                                        { label: "发送即完成", value: "implicit" },
+                                    ]}
+                                />
+                            </div>
+                        </Col>
+                    ) : null}
                     <Col
-                        flex="auto"
+                        flex={currentEnvType !== "Ethereum" ? "none" : "auto"}
                         style={{ textAlign: "right", marginRight: "0px" }}
                     >
                         {/* <Button type="primary"

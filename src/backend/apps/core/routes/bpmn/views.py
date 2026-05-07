@@ -37,7 +37,11 @@ from xml.etree import ElementTree as ET
 # from api.routes.bpmn  import BpmnCreateBody
 from rest_framework import viewsets, status
 from requests import delete, get, post
-from apps.core.services import NewTranslatorClient, NewTranslatorError
+from apps.core.services import (
+    NewTranslatorClient,
+    NewTranslatorError,
+    transform_go_message_confirmation,
+)
 from common.lib.ethereum.identity_flow import IdentityContractFlow
 from common.lib.ethereum.firefly_contracts import (
     abi_event_names,
@@ -404,6 +408,9 @@ class BPMNViewsSet(viewsets.ModelViewSet):
                 target=target,
                 artifact_name=artifact_name,
                 persist_to_runtime=True,
+                message_confirmation_mode=serializer.validated_data.get(
+                    "message_confirmation_mode", "explicit"
+                ),
             )
 
             bpmn.chaincode_content = generated.get("chaincodeContent") or ""
@@ -460,12 +467,20 @@ class BPMNViewsSet(viewsets.ModelViewSet):
             chaincodeContent = request.data.get("chaincodeContent") or bpmn.chaincode_content
             ffiContent = request.data.get("ffiContent") or bpmn.ffiContent
             env_id = bpmn.environment.id
+            message_confirmation_mode = request.data.get(
+                "message_confirmation_mode", "explicit"
+            )
 
             if not chaincodeContent:
                 return Response(
                     err("No generated chaincode content found for this BPMN."),
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+
+            chaincodeContent = transform_go_message_confirmation(
+                chaincodeContent,
+                mode=message_confirmation_mode,
+            )
 
             with open(
                 BPMN_CHAINCODE_STORE + "/chaincode-go-bpmn/chaincode/smartcontract.go",
