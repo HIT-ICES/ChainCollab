@@ -160,6 +160,160 @@ const parseElementFormat = (rawFormat: any) => {
 const getSchemaFieldDescription = (fieldDef: any, fallbackName: string) =>
 	String(fieldDef?.description || fieldDef?.title || `${fallbackName} input`).trim();
 
+const normalizeUploadValue = (event: any) => {
+	if (Array.isArray(event)) {
+		return event;
+	}
+	return event?.fileList || [];
+};
+
+const extractOriginFile = (value: any) => {
+	if (!value) {
+		return null;
+	}
+	if (value instanceof File || value instanceof Blob) {
+		return value;
+	}
+	if (Array.isArray(value)) {
+		const lastItem = value[value.length - 1];
+		return lastItem?.originFileObj || lastItem?.file || null;
+	}
+	return value?.originFileObj || value?.file || null;
+};
+
+const inferFabricFieldType = (fieldDef: any, methodParam?: any) => {
+	const raw = String(
+		fieldDef?.type ||
+			methodParam?.schema?.type ||
+			methodParam?.type ||
+			"",
+	).toLowerCase();
+	if (raw === "boolean" || raw === "bool") return "boolean";
+	if (raw === "number" || raw === "integer" || raw === "int") return "number";
+	return "string";
+};
+
+const findMethodParamByFieldName = (methodDef: any, key: string) =>
+	(methodDef?.params || []).find((param: any) => {
+		const name = String(param?.name || "");
+		return name === key || name.toLowerCase() === key.toLowerCase();
+	}) || null;
+
+const resolveParticipantBindingDefault = (
+	fieldName: string,
+	participantBindings: Record<string, any>,
+) => {
+	const lowerName = fieldName.toLowerCase();
+	for (const [participantId, binding] of Object.entries(participantBindings || {})) {
+		const participantLower = participantId.toLowerCase();
+		if (lowerName === participantLower || lowerName === `${participantLower}_participant`) {
+			return (
+				(binding as any)?.signer ||
+				(binding as any)?.name ||
+				(binding as any)?.address ||
+				(binding as any)?.org_name ||
+				(binding as any)?.msp ||
+				""
+			);
+		}
+		if (
+			lowerName === `${participantLower}_org` ||
+			lowerName === `${participantLower}org`
+		) {
+			return (binding as any)?.org_name || (binding as any)?.msp || "";
+		}
+		if (
+			lowerName === `${participantLower}_msp` ||
+			lowerName === `${participantLower}msp`
+		) {
+			return (binding as any)?.msp || (binding as any)?.org_name || "";
+		}
+		if (
+			lowerName === `${participantLower}_identity` ||
+			lowerName === `${participantLower}identity` ||
+			lowerName === `${participantLower}_signer`
+		) {
+			return (
+				(binding as any)?.signer ||
+				(binding as any)?.name ||
+				(binding as any)?.firefly_identity_id ||
+				""
+			);
+		}
+	}
+	return "";
+};
+
+const getFabricFieldDefaultValue = ({
+	fieldName,
+	fieldDef,
+	methodParam,
+	elementId,
+	instanceId,
+	identity,
+	executionBindings,
+}: {
+	fieldName: string;
+	fieldDef?: any;
+	methodParam?: any;
+	elementId: string;
+	instanceId: any;
+	identity?: any;
+	executionBindings?: any;
+}) => {
+	const lowerName = String(fieldName || "").toLowerCase();
+	const fieldType = inferFabricFieldType(fieldDef, methodParam);
+	const participantBindings = executionBindings?.participants || {};
+	const participantDefault = resolveParticipantBindingDefault(
+		fieldName,
+		participantBindings,
+	);
+	if (lowerName === "instanceid" || lowerName === "instance_id") {
+		return String(instanceId || 0);
+	}
+	if (lowerName.includes("fireflytran")) {
+		return `ff-${instanceId || 0}-${elementId || "message"}`;
+	}
+	if (fieldType === "boolean") {
+		return false;
+	}
+	if (fieldType === "number") {
+		return 1;
+	}
+	if (participantDefault) {
+		return participantDefault;
+	}
+	if (lowerName.includes("membership")) {
+		return identity?.membership || "";
+	}
+	if (lowerName.endsWith("msp") || lowerName.includes("_msp")) {
+		return identity?.msp || "";
+	}
+	if (
+		lowerName.endsWith("org") ||
+		lowerName.includes("_org") ||
+		lowerName.includes("organization")
+	) {
+		return identity?.msp || "";
+	}
+	if (
+		lowerName.includes("identity") ||
+		lowerName.includes("participant") ||
+		lowerName.includes("signer")
+	) {
+		return identity?.name || "";
+	}
+	if (lowerName.endsWith("id") || lowerName.includes("requestid")) {
+		return `${elementId || "message"}-${instanceId || 0}`;
+	}
+	const description = getSchemaFieldDescription(fieldDef, fieldName);
+	return description && description !== `${fieldName} input`
+		? description.length > 48
+			? description.slice(0, 48)
+			: description
+		: `sample-${fieldName}`;
+};
+
 const buildFormatAutoFilledValues = (
 	format: {
 		properties: Record<string, any>;
@@ -169,29 +323,21 @@ const buildFormatAutoFilledValues = (
 	},
 	elementId: string,
 	instanceId: any,
+	methodDef?: any,
+	executionBindings?: any,
+	identity?: any,
 ) =>
 	Object.entries(format.properties || {}).reduce(
 		(acc, [key, fieldDef]: [string, any]) => {
-			const lowerName = key.toLowerCase();
-			if (fieldDef?.type === "boolean") {
-				acc[key] = false;
-				return acc;
-			}
-			if (fieldDef?.type === "number" || fieldDef?.type === "integer") {
-				acc[key] = 1;
-				return acc;
-			}
-			if (lowerName.endsWith("id") || lowerName.includes("requestid")) {
-				acc[key] = `${elementId || "message"}-${instanceId || 0}`;
-				return acc;
-			}
-			const description = getSchemaFieldDescription(fieldDef, key);
-			acc[key] =
-				description && description !== `${key} input`
-					? description.length > 48
-						? description.slice(0, 48)
-						: description
-					: `sample-${key}`;
+			acc[key] = getFabricFieldDefaultValue({
+				fieldName: key,
+				fieldDef,
+				methodParam: findMethodParamByFieldName(methodDef, key),
+				elementId,
+				instanceId,
+				identity,
+				executionBindings,
+			});
 			return acc;
 		},
 		{} as Record<string, any>,
@@ -262,14 +408,37 @@ const InputComponentForMessage = ({
 	const format = parseElementFormat(currentElement?.Format);
 	const propertyEntries = Object.entries(format.properties || {});
 	const fileEntries = Object.entries(format.files || {});
+	const [form] = Form.useForm();
 	const buildAutoFilledValues = () =>
 		buildFormatAutoFilledValues(
 			format,
 			currentElement?.MessageID || "message",
 			instanceId,
+			(contractMethodDes.methods || []).find((item: any) => item?.name === methodName),
+			bpmnInstance?.execution_bindings || {},
+			the_identity,
 		);
+	const fillEmptyFieldsWithDefaults = () => {
+		const defaults = buildAutoFilledValues();
+		const currentValues = form.getFieldsValue();
+		const nextValues = { ...currentValues };
+		let changed = false;
+		for (const [key, value] of Object.entries(defaults)) {
+			if (
+				nextValues[key] === undefined ||
+				nextValues[key] === null ||
+				nextValues[key] === ""
+			) {
+				nextValues[key] = value;
+				changed = true;
+			}
+		}
+		if (changed) {
+			form.setFieldsValue(nextValues);
+		}
+	};
 	const applyAutoFill = () => {
-		formRef.current?.setFieldsValue(buildAutoFilledValues());
+		form.setFieldsValue(buildAutoFilledValues());
 	};
 
 	const transValue = (key, value) => {
@@ -279,7 +448,6 @@ const InputComponentForMessage = ({
 		return value;
 	};
 
-	const formRef = useRef(null);
 	const isSender = currentElement.state === 1;
 	const methodName =
 		currentElement.MessageID + (isSender ? "_Send" : "_Complete");
@@ -384,7 +552,7 @@ const InputComponentForMessage = ({
 		if (isSender) {
 			if (propertyEntries.length > 0) {
 				setTimeout(() => {
-					formRef.current?.setFieldsValue(buildAutoFilledValues());
+					fillEmptyFieldsWithDefaults();
 				}, 0);
 			}
 			return;
@@ -412,7 +580,17 @@ const InputComponentForMessage = ({
 			}
 		};
 		fetchData();
-	}, [currentElement, isSender]);
+	}, [
+		currentElement,
+		isSender,
+		propertyEntries.length,
+		instanceId,
+		bpmnInstance?.execution_bindings,
+		the_identity?.name,
+		the_identity?.membership,
+		the_identity?.msp,
+		form,
+	]);
 
 	if (!isSender) {
 		return (
@@ -459,18 +637,18 @@ const InputComponentForMessage = ({
 		try {
 			const Identity = "did:firefly:" + the_identity?.name;
 
-			let file_ids = [];
-			for (let key in format.files) {
-				const file = values[key];
-				if (file) {
-					const res = await TimeDecorator(
-						fireflyFileTransfer,
-						"File",
-						"default/data",
-					)(coreURL, file.file);
-					file_ids.push(res.id);
+				let file_ids = [];
+				for (let key in format.files) {
+					const file = extractOriginFile(values[key]);
+					if (file) {
+						const res = await TimeDecorator(
+							fireflyFileTransfer,
+							"File",
+							"default/data",
+						)(coreURL, file);
+						file_ids.push(res.id);
+					}
 				}
-			}
 			if (file_ids.length > 0) {
 				await new Promise((resolve) => setTimeout(resolve, 2000));
 			}
@@ -591,13 +769,13 @@ const InputComponentForMessage = ({
 			}}
 		>
 				<TestComponentV2
-					processFunc={async () => {
-						const output_obj = {};
-						try {
-							await onHandleMessage(formRef.current.getFieldsValue(), output_obj);
-						} catch (error) {
-							return {};
-						}
+								processFunc={async () => {
+									const output_obj = {};
+									try {
+										await onHandleMessage(form.getFieldsValue(), output_obj);
+									} catch (error) {
+										return {};
+									}
 						const core_url = coreURL;
 					await sleep(3000);
 					const message = await getMessageWithId(
@@ -649,14 +827,14 @@ const InputComponentForMessage = ({
 					return res;
 				}}
 			/>
-				<Form
-					layout="horizontal"
-					className={flexContainerStyle}
-					labelCol={{ span: 8 }}
-					wrapperCol={{ span: 16 }}
-					ref={formRef}
-					onFinish={onHandleMessage}
-				>
+					<Form
+						form={form}
+						layout="horizontal"
+						className={flexContainerStyle}
+						labelCol={{ span: 8 }}
+						wrapperCol={{ span: 16 }}
+						onFinish={onHandleMessage}
+					>
 					<h1>LOGRES</h1>
 					<div
 						style={{
@@ -735,32 +913,37 @@ const InputComponentForMessage = ({
 					})}
 					{fileEntries.map(([key, fieldDef]: [string, any]) => {
 						return (
-							<Form.Item
-								label={key}
-								name={key}
-								key={key}
-								rules={[
-									{
-										required: format.fileRequired.includes(key),
-										message: `${key} is required!`,
-									},
-								]}
-							>
-								<div>
-									<div style={{ marginBottom: 6 }}>
-										<Typography.Text type="secondary">
-											{getSchemaFieldDescription(fieldDef, key)}
-										</Typography.Text>
+								<Form.Item
+									label={key}
+									key={key}
+								>
+									<div>
+										<div style={{ marginBottom: 6 }}>
+											<Typography.Text type="secondary">
+												{getSchemaFieldDescription(fieldDef, key)}
+											</Typography.Text>
+										</div>
+										<Form.Item
+											name={key}
+											noStyle
+											valuePropName="fileList"
+											getValueFromEvent={normalizeUploadValue}
+											rules={[
+												{
+													required: format.fileRequired.includes(key),
+													message: `${key} is required!`,
+												},
+											]}
+										>
+											<Upload
+												maxCount={1}
+												beforeUpload={() => false}
+											>
+											<Button icon={<UploadOutlined />}>Upload</Button>
+											</Upload>
+										</Form.Item>
 									</div>
-									<Upload
-										beforeUpload={(file) => {
-											return false;
-										}}
-									>
-										<Button icon={<UploadOutlined />}>Upload</Button>
-									</Upload>
-								</div>
-							</Form.Item>
+								</Form.Item>
 						);
 					})}
 				<Form.Item>
