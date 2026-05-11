@@ -1,0 +1,119 @@
+{
+  "main_decision_id": "Decision_0zwjfyy",
+  "decisions": [
+    {
+      "id": "decision_0tybghz",
+      "name": "Initial Priority Decision",
+      "is_main": false,
+      "information_requirements": [
+        {
+          "id": "InformationRequirement_1yax2nr",
+          "type": "requiredInput",
+          "ref": "InputData_0x10kua"
+        },
+        {
+          "id": "InformationRequirement_0968tcf",
+          "type": "requiredInput",
+          "ref": "InputData_19y9i1v"
+        }
+      ],
+      "inputs": [
+        {
+          "id": "input1",
+          "label": "numberOfUnits",
+          "expression_id": "inputExpression1",
+          "typeRef": "number",
+          "text": "numberOfUnits"
+        },
+        {
+          "id": "InputClause_0pvns0w",
+          "label": "urgent",
+          "expression_id": "LiteralExpression_08nncbj",
+          "typeRef": "boolean",
+          "text": "urgent"
+        }
+      ],
+      "outputs": [
+        {
+          "id": "output1",
+          "name": "initialPriority",
+          "label": "initialPriority",
+          "type": "string"
+        }
+      ],
+      "deep_inputs": [
+        {
+          "id": "input1",
+          "label": "numberOfUnits",
+          "expression_id": "inputExpression1",
+          "typeRef": "number",
+          "text": "numberOfUnits"
+        },
+        {
+          "id": "InputClause_0pvns0w",
+          "label": "urgent",
+          "expression_id": "LiteralExpression_08nncbj",
+          "typeRef": "boolean",
+          "text": "urgent"
+        }
+      ]
+    },
+    {
+      "id": "Decision_0zwjfyy",
+      "name": "Final Priority Adjustment Decision",
+      "is_main": true,
+      "information_requirements": [
+        {
+          "id": "InformationRequirement_0hefcti",
+          "type": "requiredDecision",
+          "ref": "decision_0tybghz"
+        },
+        {
+          "id": "InformationRequirement_1o26uw3",
+          "type": "requiredInput",
+          "ref": "InputData_01mbjhm"
+        }
+      ],
+      "inputs": [
+        {
+          "id": "InputClause_14snh1s",
+          "label": "initialPriority",
+          "expression_id": "LiteralExpression_0zgz0u7",
+          "typeRef": "string",
+          "text": "initialPriority"
+        },
+        {
+          "id": "InputClause_0r7er56",
+          "label": "supplierReputation",
+          "expression_id": "LiteralExpression_14je7bl",
+          "typeRef": "number",
+          "text": "supplierReputation"
+        }
+      ],
+      "outputs": [
+        {
+          "id": "OutputClause_0ugy0r3",
+          "name": "finalPriority",
+          "label": "finalPriority",
+          "type": "string"
+        }
+      ],
+      "deep_inputs": [
+        {
+          "id": "InputClause_14snh1s",
+          "label": "initialPriority",
+          "expression_id": "LiteralExpression_0zgz0u7",
+          "typeRef": "string",
+          "text": "initialPriority"
+        },
+        {
+          "id": "InputClause_0r7er56",
+          "label": "supplierReputation",
+          "expression_id": "LiteralExpression_14je7bl",
+          "typeRef": "number",
+          "text": "supplierReputation"
+        }
+      ]
+    }
+  ]
+}

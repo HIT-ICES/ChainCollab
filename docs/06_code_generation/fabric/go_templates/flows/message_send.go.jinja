@@ -1,0 +1,37 @@
+func (cc *SmartContract) {{ message_name }}_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string{% if more_parameters %}{{ more_parameters }}{% endif %}) error {
+	stub := ctx.GetStub()
+	instance, err := cc.GetInstance(ctx, instanceID)
+	msg, err := cc.ReadMsg(ctx, instanceID, "{{ message_name }}")
+	if err != nil {
+		return err
+	}
+
+	//
+	if cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {
+		errorMessage := fmt.Sprintf("Participant %s is not allowed to send the message", msg.SendParticipantID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	if msg.MsgState != ENABLED {
+		errorMessage := fmt.Sprintf("Message state %s is not allowed", msg.MessageID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
+{% if state_change_block %}
+{{ state_change_block }}
+{% endif %}
+{% if parameter_assignments %}
+{{ parameter_assignments }}
+{% endif %}
+	stub.SetEvent("{{ message_name }}", []byte("Message is waiting for confirmation"))
+	cc.SetInstance(ctx, instance)
+{% if after_hooks %}
+{{ after_hooks }}
+{% endif %}
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+

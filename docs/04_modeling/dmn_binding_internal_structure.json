@@ -1,0 +1,75 @@
+{
+  "bindingSource": "BPMN BusinessRuleTask + documentation JSON + rule.id naming convention",
+  "bpmnRuleTask": {
+    "id": "Activity_0fbi09z",
+    "name": "",
+    "incoming": "Flow_1hbgb5i",
+    "outgoing": "Flow_0i9c5yv",
+    "documentation": {
+      "inputs": [
+        {
+          "name": "amount",
+          "type": "number",
+          "description": ""
+        },
+        {
+          "name": "Self_pickup",
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "outputs": [
+        {
+          "name": "deliver",
+          "type": "boolean",
+          "description": ""
+        }
+      ]
+    }
+  },
+  "inferredDmnBinding": {
+    "dmnResource": "Activity_0fbi09z.dmn",
+    "decisionID": "Activity_0fbi09z_DecisionID",
+    "bindingMode": "implicit-by-rule-id"
+  },
+  "dslBusinessRule": {
+    "name": "Activity_0fbi09z",
+    "initialState": "INACTIVE",
+    "inputMappings": [
+      {
+        "dmnParam": "amount",
+        "globalRef": "Amount"
+      },
+      {
+        "dmnParam": "Self_pickup",
+        "globalRef": "Self_pickup"
+      }
+    ],
+    "outputMappings": [
+      {
+        "dmnParam": "deliver",
+        "globalRef": "Deliver"
+      }
+    ]
+  },
+  "downstreamFlowEffect": {
+    "afterRuleDone": "enable Gateway_11hmo2k",
+    "gatewayBranches": [
+      {
+        "condition": "Deliver == true",
+        "target": "ChoreographyTask_1q3p8t2"
+      },
+      {
+        "condition": "Deliver == false",
+        "target": "Event_0eoqvir"
+      }
+    ]
+  },
+  "failureHandling": {
+    "invalidDocumentationJson": "fallback to empty mapping sets",
+    "missingExplicitDmnPath": "derive from rule.id",
+    "missingExplicitDecisionId": "derive from rule.id",
+    "strictValidationAtBindingTime": false
+  }
+}
+

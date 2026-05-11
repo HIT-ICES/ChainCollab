@@ -1,0 +1,97 @@
+newTranslator/
+├── README.md
+├── 模型驱动原理文档.md
+├── DSL详细描述.md
+├── nt.sh
+├── requirements.txt
+├── generator/
+│   ├── translator.py
+│   ├── bpmn_to_dsl.py
+│   ├── b2c_to_solidity.py
+│   ├── split_mode.py
+│   ├── config.py
+│   ├── bindings.json
+│   ├── parser/
+│   │   ├── choreography_parser/
+│   │   │   ├── parser.py
+│   │   │   ├── elements.py
+│   │   │   └── protocals.py
+│   │   └── dmn_parser/
+│   │       └── parser.py
+│   ├── resource/
+│   │   ├── chaincode.go
+│   │   ├── chaincode.sol
+│   │   ├── dmn.xml
+│   │   └── bpmn_add/
+│   └── snippet/
+│       ├── newSnippet/
+│       └── chaincode_snippet/
+├── service/
+│   └── api.py
+├── dashboard/
+│   ├── package.json
+│   ├── vite.config.ts
+│   └── src/
+│       ├── App.tsx
+│       ├── config.ts
+│       ├── index.css
+│       ├── main.tsx
+│       ├── theme.ts
+│       ├── components/
+│       │   └── TranslatorWorkbench.tsx
+│       └── services/
+│           └── translator.ts
+├── DSL/
+│   └── B2CDSL/
+│       ├── pyproject.toml
+│       ├── README.md
+│       └── b2cdsl/
+│           ├── __init__.py
+│           └── b2c.tx
+├── CodeGenerator/
+│   ├── b2cdsl-go/
+│   │   ├── pyproject.toml
+│   │   ├── README.md
+│   │   ├── b2cdsl_go/
+│   │   │   └── __init__.py
+│   │   └── templates/
+│   │       ├── contract.go.jinja
+│   │       ├── actions/
+│   │       └── flows/
+│   └── b2cdsl-solidity/
+│       ├── pyproject.toml
+│       ├── README.md
+│       ├── b2cdsl_solidity/
+│       │   └── __init__.py
+│       └── templates/
+│           └── contract.sol.jinja
+├── subgraph_analysis/
+│   ├── README.md
+│   ├── analyze_bpmn_sese.py
+│   ├── annotate_bpmn_groups.py
+│   ├── resources/
+│   └── output/
+├── MDAcheck/
+│   ├── 校验规则汇总.md
+│   ├── 目录生成过程说明.md
+│   ├── bpmn-positive/
+│   ├── bpmn-mutations/
+│   ├── datasets/
+│   ├── ocl-report-bpmn-mutations/
+│   └── ocl-report-bpmn-positives/
+├── example/
+│   ├── chaincode.b2c
+│   ├── chaincode.go
+│   └── contracts/
+├── build/
+│   ├── bpmn/
+│   ├── b2c/
+│   ├── chaincode/
+│   ├── solidity/
+│   ├── split_demo/
+│   ├── split_demo2/
+│   └── split_toggle_test/
+└── 其他目录
+    ├── .venv/               # 本地 Python 虚拟环境
+    ├── dashboard/node_modules/
+    └── __pycache__/         # Python 缓存
