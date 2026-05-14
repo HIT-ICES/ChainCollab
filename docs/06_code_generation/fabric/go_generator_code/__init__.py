@@ -1,0 +1,688 @@
+from __future__ import annotations
+
+import json
+from functools import partial
+from pathlib import Path
+from typing import Any, List, Optional
+import shutil
+
+from jinja2 import Environment, FileSystemLoader
+from textx import generator
+from textx.generators import gen_file, get_output_filename
+
+__version__ = "0.1.0.dev"
+
+
+def _template_env() -> Environment:
+    templates_dir = Path(__file__).resolve().parents[1] / "templates"
+    return Environment(loader=FileSystemLoader(str(templates_dir)), trim_blocks=True, lstrip_blocks=True)
+
+
+TEMPLATE_ENV = _template_env()
+RESOURCE_ROOT = Path(__file__).resolve().parents[3] / "generator" / "resource"
+CONTRACT_TEMPLATE = "contract.go.jinja"
+START_EVENT_TEMPLATE = "flows/start_event.go.jinja"
+MESSAGE_SEND_TEMPLATE = "flows/message_send.go.jinja"
+MESSAGE_COMPLETE_TEMPLATE = "flows/message_complete.go.jinja"
+SET_GLOBAL_TEMPLATE = "actions/set_global_variable.go.jinja"
+
+B2C_TO_GO_TYPE = {
+    "string": "string",
+    "int": "int",
+    "bool": "bool",
+    "float": "float64",
+}
+
+STATE_ALIAS = {
+    None: "DISABLED",
+    "INACTIVE": "DISABLED",
+    "READY": "ENABLED",
+    "PENDING_CONFIRMATION": "WAITINGFORCONFIRMATION",
+    "DONE": "COMPLETED",
+}
+
+BASE_IMPORTS = [
+    "encoding/json",
+    "errors",
+    "fmt",
+    "strconv",
+    "reflect",
+    "crypto/sha256",
+    "encoding/hex",
+    "github.com/hyperledger/fabric-chaincode-go/shim",
+    "github.com/hyperledger/fabric-contract-api-go/contractapi",
+]
+ORACLE_IMPORT = "IBC/Oracle/oracle"
+
+
+def public_the_name(name: str) -> str:
+    return "".join(name[:1].upper() + name[1:]) if name else name
+
+
+class DSLContractAdapter:
+    def __init__(self, contract: Any):
+        self.contract = contract
+        self.participants: List[Any] = []
+        self.globals: List[Any] = []
+        self.messages: List[Any] = []
+        self.gateways: List[Any] = []
+        self.events: List[Any] = []
+        self.business_rules: List[Any] = []
+        self.oracle_tasks: List[Any] = []
+        self.flow_items: List[Any] = []
+        self._collect_sections()
+
+    def _collect_sections(self):
+        for section in getattr(self.contract, "sections", []):
+            cls_name = section.__class__.__name__
+            if cls_name == "ParticipantSection":
+                self.participants.extend(getattr(section, "participants", []))
+            elif cls_name == "GlobalSection":
+                self.globals.extend(getattr(section, "globals", []))
+            elif cls_name == "MessageSection":
+                self.messages.extend(getattr(section, "messages", []))
+            elif cls_name == "GatewaySection":
+                self.gateways.extend(getattr(section, "gateways", []))
+            elif cls_name == "EventSection":
+                self.events.extend(getattr(section, "events", []))
+            elif cls_name == "BusinessRuleSection":
+                self.business_rules.extend(getattr(section, "rules", []))
+            elif cls_name == "OracleTaskSection":
+                self.oracle_tasks.extend(getattr(section, "tasks", []))
+            elif cls_name == "FlowSection":
+                self.flow_items.extend(getattr(section, "flowItems", []))
+
+    @property
+    def start_event_id(self) -> Optional[str]:
+        ready_events = [event for event in self.events if STATE_ALIAS.get(getattr(event, "initialState", None)) == "ENABLED"]
+        if ready_events:
+            return ready_events[0].name
+        start_flows = [flow for flow in self.flow_items if flow.__class__.__name__ == "StartFlow"]
+        if start_flows:
+            return start_flows[0].start.name
+        if self.events:
+            return self.events[0].name
+        return None
+
+    @property
+    def end_event_ids(self) -> List[str]:
+        start_id = self.start_event_id
+        return [event.name for event in self.events if event.name != start_id]
+
+
+class FlowRenderer:
+    def __init__(
+        self,
+        adapter: DSLContractAdapter,
+        template_env: Environment,
+        global_type_map: dict[str, str],
+    ):
+        self.adapter = adapter
+        self.template_env = template_env
+        self.global_type_map = global_type_map
+        self.start_event_actions: dict[str, List[str]] = {}
+        self.message_actions: dict[tuple[str, str], List[str]] = {}
+        self.gateway_actions: dict[str, List[str]] = {}
+        self.gateway_branch_blocks: dict[str, str] = {}
+        self.parallel_requirements: dict[str, dict[str, Any]] = {}
+        self.event_actions: dict[str, List[str]] = {}
+        self.rule_actions: dict[tuple[str, str], List[str]] = {}
+        self.oracle_actions: dict[tuple[str, str], List[str]] = {}
+        self._collect_flow_actions()
+
+    def render_blocks(self) -> List[str]:
+        codes: List[str] = []
+        codes.extend(self._render_start_events())
+        codes.extend(self._render_messages())
+        codes.extend(self._render_gateways())
+        codes.extend(self._render_oracle_tasks())
+        codes.extend(self._render_events())
+        return [code.strip() for code in codes if code.strip()]
+
+    def rule_done_actions(self) -> dict[str, str]:
+        done_actions: dict[str, str] = {}
+        for (rule_name, condition), actions in self.rule_actions.items():
+            if condition == "done":
+                done_actions[rule_name] = "".join(actions)
+        return done_actions
+
+    def _collect_flow_actions(self):
+        for flow in self.adapter.flow_items:
+            cls_name = flow.__class__.__name__
+            if cls_name == "StartFlow":
+                target_element = self._resolve_target(getattr(flow, "target", None))
+                if not target_element:
+                    continue
+                change_code = self._change_state_code(target_element, "ENABLED")
+                self._append_action(self.start_event_actions, flow.start.name, change_code)
+            elif cls_name == "MessageFlow":
+                actions = self._join_actions(getattr(flow, "actions", []))
+                condition = getattr(flow, "msgCond", "sent")
+                self._append_action(self.message_actions, (flow.msg.name, condition), actions)
+            elif cls_name == "GatewayFlow":
+                branches = getattr(flow, "branches", None)
+                if branches:
+                    branch_block = self._render_gateway_branches(flow.gtw.name, branches)
+                    if branch_block:
+                        self.gateway_branch_blocks[flow.gtw.name] = branch_block
+                else:
+                    actions = self._join_actions(getattr(flow, "actions", []))
+                    self._append_action(self.gateway_actions, flow.gtw.name, actions)
+            elif cls_name == "ParallelJoin":
+                actions = self._join_actions(getattr(flow, "actions", []))
+                sources = getattr(flow, "sources", [])
+                self.parallel_requirements[flow.gtw.name] = {
+                    "sources": sources,
+                    "actions": actions,
+                }
+            elif cls_name == "RuleFlow":
+                actions = self._join_actions(getattr(flow, "actions", []))
+                condition = getattr(flow, "ruleCond", "done")
+                self._append_action(self.rule_actions, (flow.rule.name, condition), actions)
+            elif cls_name == "OracleTaskFlow":
+                actions = self._join_actions(getattr(flow, "actions", []))
+                self._append_action(self.oracle_actions, (flow.task.name, "done"), actions)
+            elif cls_name == "EventFlow":
+                actions = self._join_actions(getattr(flow, "actions", []))
+                self._append_action(self.event_actions, flow.ev.name, actions)
+
+    def _render_start_events(self) -> List[str]:
+        blocks: List[str] = []
+        for event_name, actions in self.start_event_actions.items():
+            blocks.append(
+                self._render_template(
+                    START_EVENT_TEMPLATE,
+                    event_name=event_name,
+                    next_state_block="".join(actions),
+                    pre_activate_hooks="",
+                    after_hooks="",
+                )
+            )
+        return blocks
+
+    def _render_messages(self) -> List[str]:
+        blocks: List[str] = []
+        for message in self.adapter.messages:
+            msg_name = message.name
+            send_actions = "".join(self.message_actions.get((msg_name, "sent"), []))
+            complete_actions = "".join(self.message_actions.get((msg_name, "completed"), []))
+            blocks.append(
+                self._render_template(
+                    MESSAGE_SEND_TEMPLATE,
+                    message_name=msg_name,
+                    after_hooks=send_actions,
+                    state_change_block=self._change_state_code(message, "COMPLETED"),
+                    more_parameters="",
+                    parameter_assignments="",
+                )
+            )
+            blocks.append(
+                self._render_template(
+                    MESSAGE_COMPLETE_TEMPLATE,
+                    message_name=msg_name,
+                    next_state_block=complete_actions,
+                    pre_activate_hooks="",
+                    after_hooks="",
+                )
+            )
+        return blocks
+
+    def _render_gateways(self) -> List[str]:
+        blocks: List[str] = []
+        for gateway in self.adapter.gateways:
+            normal_actions = "".join(self.gateway_actions.get(gateway.name, []))
+            conditional_block = self.gateway_branch_blocks.get(gateway.name, "")
+            join_info = self.parallel_requirements.get(gateway.name)
+            join_guard = ""
+            if join_info:
+                join_guard = self._parallel_guard_block(join_info.get("sources", []))
+                normal_actions = join_info.get("actions", "") + normal_actions
+            action_block = conditional_block or normal_actions
+            blocks.append(
+                self._render_template(
+                    "flows/gateway.go.jinja",
+                    gateway_name=gateway.name,
+                    action_block=action_block,
+                    conditional_block=conditional_block,
+                    parallel_guard=join_guard,
+                )
+            )
+        return blocks
+
+    def _render_oracle_tasks(self) -> List[str]:
+        blocks: List[str] = []
+        for task in self.adapter.oracle_tasks:
+            output_mappings = getattr(task, "outputMappings", []) or []
+            params: List[tuple[str, str, str]] = []
+            assignments: List[dict[str, str]] = []
+            for mapping in output_mappings:
+                global_ref = getattr(mapping, "globalRef", None)
+                global_name = getattr(global_ref, "name", "")
+                if not global_name:
+                    continue
+                param_name = public_the_name(
+                    (getattr(mapping, "dmnParam", "") or global_name).strip()
+                )
+                go_type = B2C_TO_GO_TYPE.get(
+                    self.global_type_map.get(global_name, "string"),
+                    "string",
+                )
+                params.append((go_type, param_name, global_name))
+                assignments.append(
+                    {
+                        "name": public_the_name(global_name),
+                        "value": param_name,
+                    }
+                )
+
+            param_sig = ""
+            if params:
+                param_sig = ", " + ", ".join(f"{name} {go_type}" for go_type, name, _ in params)
+
+            set_globals = ""
+            if assignments:
+                set_globals = self._render_template(
+                    SET_GLOBAL_TEMPLATE,
+                    assignments=assignments,
+                )
+
+            done_actions = "".join(self.oracle_actions.get((task.name, "done"), []))
+            body = f"""func (cc *SmartContract) {task.name}(ctx contractapi.TransactionContextInterface, instanceID string{param_sig}) error {{
+    stub := ctx.GetStub()
+
+    instance, err := cc.GetInstance(ctx, instanceID)
+    if err != nil {{
+        return err
+    }}
+
+    oracleTask, err := cc.ReadEvent(ctx, instanceID, "{task.name}")
+    if err != nil {{
+        return err
+    }}
+
+    if oracleTask.EventState != ENABLED {{
+        errorMessage := fmt.Sprintf("Oracle task state %s is not allowed", oracleTask.EventID)
+        fmt.Println(errorMessage)
+        return fmt.Errorf(errorMessage)
+    }}
+
+    cc.ChangeEventState(ctx, instance, "{task.name}", COMPLETED)
+{self._indent(set_globals, 1)}{self._indent(done_actions, 1)}    stub.SetEvent("{task.name}", []byte("Oracle task has been completed"))
+    err = cc.SetInstance(ctx, instance)
+    if err != nil {{
+        return err
+    }}
+
+    return nil
+}}"""
+            blocks.append(body)
+        return blocks
+
+    def _render_events(self) -> List[str]:
+        blocks: List[str] = []
+        start_event_names = set(self.start_event_actions.keys())
+        for event in self.adapter.events:
+            if event.name in start_event_names:
+                continue
+            actions = "".join(self.event_actions.get(event.name, []))
+            blocks.append(
+                self._render_template(
+                    "flows/event.go.jinja",
+                    event_name=event.name,
+                    action_block=actions,
+                )
+            )
+        return blocks
+
+    def _append_action(self, store: dict, key: Any, action: str):
+        if not action:
+            return
+        store.setdefault(key, []).append(action)
+
+    def _resolve_target(self, flow_target: Any) -> Optional[Any]:
+        if flow_target is None:
+            return None
+        return getattr(flow_target, "target", flow_target)
+
+    def _join_actions(self, actions: List[Any]) -> str:
+        rendered = [self._render_action(action) for action in actions]
+        rendered = [code for code in rendered if code]
+        return "".join(rendered)
+
+    def _render_action(self, action: Any) -> Optional[str]:
+        cls_name = action.__class__.__name__
+        if cls_name == "EnableAction":
+            return self._change_state_code(action.target, "ENABLED")
+        if cls_name == "DisableAction":
+            return self._change_state_code(action.target, "DISABLED")
+        if cls_name == "SetGlobalAction":
+            var_name = getattr(action.var, "name", "")
+            literal = self._literal_value(
+                action.expr, self.global_type_map.get(var_name)
+            )
+            assignment = {
+                "name": public_the_name(action.var.name),
+                "value": literal,
+            }
+            return self._render_template(SET_GLOBAL_TEMPLATE, assignments=[assignment])
+        return None
+
+    def _render_gateway_branches(self, gateway_name: str, branches: List[Any]) -> str:
+        rendered_blocks: List[str] = []
+        prepared: List[tuple[Optional[str], bool, str]] = []
+        for branch in branches:
+            actions = self._join_actions(getattr(branch, "actions", []))
+            if not actions.strip():
+                continue
+            condition, is_else = self._gateway_branch_condition(branch)
+            if condition is None and not is_else:
+                continue
+            prepared.append((condition, is_else, actions))
+
+        for index, (condition, is_else, actions) in enumerate(prepared):
+            if index == 0:
+                clause = f" {condition}" if condition else ""
+                header = "\tif true {\n" if is_else else f"\tif{clause} {{\n"
+            else:
+                if is_else:
+                    header = "\t} else {\n"
+                else:
+                    clause = f" {condition}" if condition else ""
+                    header = f"\t}} else if{clause} {{\n"
+            rendered_blocks.append(header)
+            rendered_blocks.append(self._indent(actions, 1))
+        if rendered_blocks:
+            rendered_blocks.append("\t}\n")
+        return "".join(rendered_blocks)
+
+    def _gateway_branch_condition(self, branch: Any) -> tuple[Optional[str], bool]:
+        cls_name = branch.__class__.__name__
+        if cls_name == "GatewayCompareBranch":
+            var_name = getattr(branch.var, "name", "")
+            field = f"instance.InstanceStateMemory.{public_the_name(var_name)}"
+            literal = self._literal_value(branch.value, self.global_type_map.get(var_name))
+            return f"{field} {branch.relation} {literal}", False
+        if cls_name == "GatewayElseBranch":
+            return None, True
+        return None, False
+
+    def _parallel_guard_block(self, sources: List[Any]) -> str:
+        checks = [self._element_ready_check(source) for source in sources]
+        checks = [check for check in checks if check]
+        if not checks:
+            return ""
+        condition = " && ".join(checks)
+        block = "\tif !(" + condition + ") {\n"
+        block += '\t\treturn fmt.Errorf("Parallel gateway prerequisite not met")\n'
+        block += "\t}\n"
+        return block
+
+    def _element_ready_check(self, element: Any) -> Optional[str]:
+        cls_name = element.__class__.__name__
+        name = getattr(element, "name", "")
+        if not name:
+            return None
+        if cls_name == "Message":
+            return f'instance.InstanceMessages["{name}"].MsgState == COMPLETED'
+        if cls_name == "Gateway":
+            return f'instance.InstanceGateways["{name}"].GatewayState == COMPLETED'
+        if cls_name == "Event":
+            return f'instance.InstanceActionEvents["{name}"].EventState == COMPLETED'
+        if cls_name == "BusinessRule":
+            return f'instance.InstanceBusinessRules["{name}"].State == COMPLETED'
+        if cls_name == "OracleTask":
+            return f'instance.InstanceActionEvents["{name}"].EventState == COMPLETED'
+        return None
+
+    def _indent(self, code: str, depth: int = 1) -> str:
+        prefix = "\t" * depth
+        stripped = code.strip("\n")
+        if not stripped:
+            return ""
+        return "".join(f"{prefix}{line}\n" for line in stripped.splitlines())
+
+    def _literal_value(self, expr: Any, target_type: Optional[str] = None) -> str:
+        def pick_attr(names: List[str]) -> Any:
+            for name in names:
+                value = getattr(expr, name, None)
+                if value is not None:
+                    return value
+            return None
+
+        normalized_type = (target_type or "").lower()
+
+        def bool_literal() -> Optional[str]:
+            bool_value = pick_attr(["boolValue", "boolvalue"])
+            if bool_value is None:
+                return None
+            if isinstance(bool_value, str):
+                lowered = bool_value.lower()
+                if lowered in ("true", "false"):
+                    return lowered
+            return "true" if bool_value else "false"
+
+        def int_literal() -> Optional[str]:
+            int_value = pick_attr(["intValue", "intvalue"])
+            if int_value is None:
+                return None
+            return str(int_value)
+
+        def string_literal() -> Optional[str]:
+            string_value = pick_attr(["stringValue", "stringvalue"])
+            if string_value is None:
+                return None
+            return json.dumps(string_value)
+
+        if normalized_type == "string":
+            literal = string_literal()
+            if literal is not None:
+                return literal
+
+        if normalized_type == "bool":
+            literal = bool_literal()
+            if literal is not None:
+                return literal
+
+        if normalized_type in ("int", "float"):
+            literal = int_literal()
+            if literal is not None:
+                return literal
+
+        generic_value = pick_attr(["value"])
+        if generic_value is not None:
+            if isinstance(generic_value, bool):
+                return "true" if generic_value else "false"
+            if isinstance(generic_value, (int, float)):
+                return str(generic_value)
+            if isinstance(generic_value, str):
+                lowered = generic_value.lower()
+                if target_type and target_type.lower() == "bool" and lowered in ("true", "false"):
+                    return lowered
+                if target_type and target_type.lower() in ("int", "float"):
+                    return generic_value
+                return json.dumps(generic_value)
+
+        literal = bool_literal()
+        if literal is not None:
+            return literal
+
+        literal = int_literal()
+        if literal is not None:
+            return literal
+
+        literal = string_literal()
+        if literal is not None:
+            return literal
+
+        if normalized_type == "bool":
+            return "false"
+        if normalized_type in ("int", "float"):
+            return "0"
+        return json.dumps("")
+
+    def _change_state_code(self, element: Any, state: str) -> str:
+        cls_name = element.__class__.__name__
+        if cls_name == "Message":
+            return f"\tcc.ChangeMsgState(ctx, instance, \"{element.name}\", {state})\n"
+        if cls_name == "Gateway":
+            return f"\tcc.ChangeGtwState(ctx, instance, \"{element.name}\", {state})\n"
+        if cls_name == "Event":
+            return f"\tcc.ChangeEventState(ctx, instance, \"{element.name}\", {state})\n"
+        if cls_name == "BusinessRule":
+            return f"\tcc.ChangeBusinessRuleState(ctx, instance, \"{element.name}\", {state})\n"
+        if cls_name == "OracleTask":
+            return f"\tcc.ChangeEventState(ctx, instance, \"{element.name}\", {state})\n"
+        return ""
+
+    def _render_template(self, template_name: str, **context: Any) -> str:
+        template = self.template_env.get_template(template_name)
+        rendered = template.render(**context).strip()
+        return rendered + ("\n" if rendered else "")
+
+
+class GoChaincodeRenderer:
+    def __init__(self, adapter: DSLContractAdapter, template_env: Environment):
+        self.adapter = adapter
+        self.template_env = template_env
+        self.flow_renderer = FlowRenderer(
+            adapter, template_env, self._global_type_map()
+        )
+
+    def build_context(self) -> dict:
+        flow_functions = self.flow_renderer.render_blocks()
+        rule_done_actions = self.flow_renderer.rule_done_actions()
+        return {
+            "package_name": "chaincode",
+            "imports": self._imports(),
+            "globals": self._state_memory_fields(),
+            "init_params": self._init_parameter_fields(),
+            "create_instance": self._create_instance_payload(),
+            "business_rules": self._business_rule_payload(rule_done_actions),
+            "flow_functions": flow_functions,
+        }
+
+    def _imports(self) -> List[str]:
+        imports = list(BASE_IMPORTS)
+        if self.adapter.business_rules:
+            imports.append("strings")
+            imports.append(ORACLE_IMPORT)
+        return imports
+
+    def _global_type_map(self) -> dict[str, str]:
+        return {
+            getattr(global_var, "name", ""): getattr(global_var, "type", "string")
+            for global_var in self.adapter.globals
+        }
+
+    def _state_memory_fields(self) -> List[dict]:
+        return [
+            {
+                "name": public_the_name(global_var.name),
+                "type": B2C_TO_GO_TYPE.get(global_var.type, "string"),
+            }
+            for global_var in self.adapter.globals
+        ]
+
+    def _init_parameter_fields(self) -> List[dict]:
+        payload: List[dict] = []
+        for participant in self.adapter.participants:
+            payload.append({"name": public_the_name(participant.name), "type": "Participant"})
+        for rule in self.adapter.business_rules:
+            capital = public_the_name(rule.name)
+            payload.extend(
+                [
+                    {"name": f"{capital}_DecisionID", "type": "string"},
+                    {"name": f"{capital}_ParamMapping", "type": "map[string]string"},
+                    {"name": f"{capital}_Content", "type": "string"},
+                ]
+            )
+        return payload
+
+    def _create_instance_payload(self) -> dict:
+        start_event = self.adapter.start_event_id or "StartEvent"
+        end_events = self.adapter.end_event_ids
+        return {
+            "start_event": start_event,
+            "end_events": end_events,
+            "oracle_tasks": [task.name for task in self.adapter.oracle_tasks],
+            "messages": [
+                {
+                    "name": message.name,
+                    "sender": message.sender.name,
+                    "receiver": message.receiver.name,
+                    "properties": json.dumps({"schema": getattr(message, "schema", "") or ""}),
+                }
+                for message in self.adapter.messages
+            ],
+            "gateways": [gateway.name for gateway in self.adapter.gateways],
+            "participants": [
+                {
+                    "id": participant.name,
+                    "field_name": public_the_name(participant.name),
+                    "multi_maximum": getattr(participant, "multiMax", 0) or 0,
+                    "multi_minimum": getattr(participant, "multiMin", 0) or 0,
+                }
+                for participant in self.adapter.participants
+            ],
+            "business_rules": [
+                {
+                    "name": rule.name,
+                    "field_name": public_the_name(rule.name),
+                }
+                for rule in self.adapter.business_rules
+            ],
+        }
+
+    def _business_rule_payload(self, rule_done_actions: dict[str, str]) -> List[dict]:
+        payload: List[dict] = []
+        for rule in self.adapter.business_rules:
+            payload.append(
+                {
+                    "name": rule.name,
+                    "done_actions": rule_done_actions.get(rule.name, ""),
+                }
+            )
+        return payload
+
+
+@generator("b2c", "go")
+def b2c_generate_go(metamodel, model, output_path, overwrite, debug, **custom_args):
+    output_file = get_output_filename(model._tx_filename, output_path, "go")
+    gen_file(
+        model._tx_filename,
+        output_file,
+        partial(generator_callback, model, output_file),
+        overwrite,
+    )
+
+
+def generator_callback(model, output_file):
+    if not getattr(model, "contracts", None):
+        raise ValueError("No contracts defined in the provided B2C DSL model.")
+    contract = model.contracts[0]
+    adapter = DSLContractAdapter(contract)
+    renderer = GoChaincodeRenderer(adapter, TEMPLATE_ENV)
+    context = renderer.build_context()
+    template = TEMPLATE_ENV.get_template(CONTRACT_TEMPLATE)
+    rendered = template.render(**context).strip()
+    output_path = Path(output_file)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(rendered + "\n", encoding="utf8")
+    _ensure_go_scaffold(output_path.parent)
+
+
+def _ensure_go_scaffold(target_dir: Path) -> None:
+    """Copy go.mod/go.sum and oracle dependency into the output directory."""
+    if not RESOURCE_ROOT.exists():
+        return
+    for filename in ("go.mod", "go.sum"):
+        src = RESOURCE_ROOT / filename
+        if src.exists():
+            shutil.copy2(src, target_dir / filename)
+    contracts_src = RESOURCE_ROOT / "contracts" / "oracle-go"
+    if contracts_src.exists():
+        contracts_dest = target_dir / "contracts" / "Oracle"
+        contracts_dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(contracts_src, contracts_dest, dirs_exist_ok=True)
+
+    

@@ -1,0 +1,117 @@
+{
+  "contract": "SupplyChain",
+  "trace_name": "deliver_true_path",
+  "input_globals": {
+    "Amount": 320,
+    "Self_pickup": false
+  },
+  "steps": [
+    {
+      "step": 1,
+      "trigger": "start event Event_06sexe6",
+      "effect": [
+        "Event_06sexe6 -> DONE",
+        "Message_1wswgqu -> READY"
+      ]
+    },
+    {
+      "step": 2,
+      "trigger": "Message_1wswgqu_Send",
+      "effect": [
+        "Message_1wswgqu -> PENDING_CONFIRMATION",
+        "Order := \"PO-001\"",
+        "Amount := 320"
+      ]
+    },
+    {
+      "step": 3,
+      "trigger": "Message_1wswgqu_Complete",
+      "effect": [
+        "Message_1wswgqu -> DONE",
+        "Message_1ajdm9l -> READY"
+      ]
+    },
+    {
+      "step": 4,
+      "trigger": "Message_1ajdm9l_Complete",
+      "effect": [
+        "Message_1ajdm9l -> DONE",
+        "Gateway_0onpe6x -> READY"
+      ]
+    },
+    {
+      "step": 5,
+      "trigger": "Gateway_0onpe6x",
+      "effect": [
+        "Gateway_0onpe6x -> DONE",
+        "Message_0cba4t6 -> READY",
+        "Message_0pm90nx -> READY"
+      ]
+    },
+    {
+      "step": 6,
+      "trigger": "Message_0cba4t6_Complete",
+      "effect": [
+        "Message_0cba4t6 -> DONE"
+      ]
+    },
+    {
+      "step": 7,
+      "trigger": "Message_0pm90nx_Complete",
+      "effect": [
+        "Message_0pm90nx -> DONE",
+        "Gateway_1fbifca join condition satisfied"
+      ]
+    },
+    {
+      "step": 8,
+      "trigger": "Gateway_1fbifca",
+      "effect": [
+        "Gateway_1fbifca -> DONE",
+        "Message_0rwz1km -> READY"
+      ]
+    },
+    {
+      "step": 9,
+      "trigger": "Message_0rwz1km_Complete -> Message_0hpha6h_Complete -> Message_1io2g9u_Complete -> Message_0d2xte5_Complete -> Message_04wmlqe_Complete -> Message_0ps2yzo_Complete",
+      "effect": [
+        "Activity_0fbi09z -> READY",
+        "Self_pickup := false"
+      ]
+    },
+    {
+      "step": 10,
+      "trigger": "Activity_0fbi09z",
+      "effect": [
+        "Activity_0fbi09z -> DONE",
+        "Deliver := true",
+        "Gateway_11hmo2k -> READY"
+      ]
+    },
+    {
+      "step": 11,
+      "trigger": "Gateway_11hmo2k",
+      "guard": "Deliver == true",
+      "effect": [
+        "Gateway_11hmo2k -> DONE",
+        "Message_196q1fj -> READY"
+      ]
+    },
+    {
+      "step": 12,
+      "trigger": "Message_196q1fj_Complete",
+      "effect": [
+        "Message_196q1fj -> DONE",
+        "Event_13pbqdz -> READY"
+      ]
+    },
+    {
+      "step": 13,
+      "trigger": "Event_13pbqdz",
+      "effect": [
+        "Event_13pbqdz -> DONE",
+        "instance completed"
+      ]
+    }
+  ]
+}

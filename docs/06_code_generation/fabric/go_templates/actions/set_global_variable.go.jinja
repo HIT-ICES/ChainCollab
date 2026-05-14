@@ -1,0 +1,13 @@
+    globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
+    if readGloabolError != nil {
+        fmt.Println(readGloabolError.Error())
+        return readGloabolError
+    }
+{% for assignment in assignments %}
+    globalMemory.{{ assignment.name }} = {{ assignment.value }}
+{% endfor %}
+    setGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)
+    if setGloabolErrror != nil {
+        fmt.Println(setGloabolErrror.Error())
+        return setGloabolErrror
+    }
