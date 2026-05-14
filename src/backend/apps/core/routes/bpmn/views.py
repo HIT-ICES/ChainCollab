@@ -480,6 +480,7 @@ class BPMNViewsSet(viewsets.ModelViewSet):
             chaincodeContent = transform_go_message_confirmation(
                 chaincodeContent,
                 mode=message_confirmation_mode,
+                ffi_content=ffiContent,
             )
 
             with open(

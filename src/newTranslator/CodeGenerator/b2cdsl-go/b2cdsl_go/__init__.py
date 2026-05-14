@@ -33,6 +33,14 @@ B2C_TO_GO_TYPE = {
     "float": "float64",
 }
 
+JSON_SCHEMA_TO_GO_TYPE = {
+    "string": "string",
+    "number": "int",
+    "integer": "int",
+    "boolean": "bool",
+    "bool": "bool",
+}
+
 STATE_ALIAS = {
     None: "DISABLED",
     "INACTIVE": "DISABLED",
@@ -206,14 +214,15 @@ class FlowRenderer:
             msg_name = message.name
             send_actions = "".join(self.message_actions.get((msg_name, "sent"), []))
             complete_actions = "".join(self.message_actions.get((msg_name, "completed"), []))
+            parameters, assignments = self._message_payload_bindings(message)
             blocks.append(
                 self._render_template(
                     MESSAGE_SEND_TEMPLATE,
                     message_name=msg_name,
                     after_hooks=send_actions,
                     state_change_block=self._change_state_code(message, "COMPLETED"),
-                    more_parameters="",
-                    parameter_assignments="",
+                    more_parameters=self._render_message_parameters(parameters),
+                    parameter_assignments=self._render_message_parameter_assignments(assignments),
                 )
             )
             blocks.append(
@@ -226,6 +235,46 @@ class FlowRenderer:
                 )
             )
         return blocks
+
+    def _message_payload_bindings(self, message: Any) -> tuple[List[dict], List[dict]]:
+        schema_text = getattr(message, "schema", "") or ""
+        if not schema_text:
+            return [], []
+        try:
+            schema = json.loads(schema_text)
+        except Exception:
+            return [], []
+        properties = schema.get("properties") or {}
+        if not isinstance(properties, dict):
+            return [], []
+
+        properties_by_field = {
+            public_the_name(str(raw_name)): (str(raw_name), definition)
+            for raw_name, definition in properties.items()
+            if isinstance(definition, dict)
+        }
+        parameters: List[dict] = []
+        assignments: List[dict] = []
+        for global_var in self.adapter.globals:
+            field_name = public_the_name(getattr(global_var, "name", ""))
+            if field_name not in properties_by_field:
+                continue
+            raw_name, definition = properties_by_field[field_name]
+            global_type = getattr(global_var, "type", "string")
+            go_type = B2C_TO_GO_TYPE.get(global_type, JSON_SCHEMA_TO_GO_TYPE.get(str(definition.get("type") or "string"), "string"))
+            parameters.append({"name": str(raw_name), "type": go_type})
+            assignments.append({"name": field_name, "value": str(raw_name)})
+        return parameters, assignments
+
+    def _render_message_parameters(self, parameters: List[dict]) -> str:
+        if not parameters:
+            return ""
+        return "".join(f", {item['name']} {item['type']}" for item in parameters)
+
+    def _render_message_parameter_assignments(self, assignments: List[dict]) -> str:
+        if not assignments:
+            return ""
+        return self._render_template(SET_GLOBAL_TEMPLATE, assignments=assignments)
 
     def _render_gateways(self) -> List[str]:
         blocks: List[str] = []

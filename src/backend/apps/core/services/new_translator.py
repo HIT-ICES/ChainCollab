@@ -90,6 +90,7 @@ class NewTranslatorClient:
         chaincode_content = transform_go_message_confirmation(
             chaincode_content,
             mode=message_confirmation_mode,
+            ffi_content=ffi_content,
         )
         return {
             "target": "go",
