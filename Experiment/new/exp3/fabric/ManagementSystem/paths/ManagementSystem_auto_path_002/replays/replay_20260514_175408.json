@@ -1,0 +1,2613 @@
+{
+  "config_path": "/root/code/ChainCollab/Experiment/new/exp3/fabric/fabric_replay_config.from_frontend_param.json",
+  "platform": "fabric",
+  "api_base": "http://127.0.0.1:5000/api/v1/namespaces/default/apis/ManagementSystem-ee817b",
+  "api_info": {
+    "id": "9f82e991-3a35-4be4-a3e8-a322c98fe049",
+    "namespace": "default",
+    "interface": {
+      "id": "c61fedc6-2a7c-4701-9e33-eebf6842af66"
+    },
+    "location": {
+      "channel": "default",
+      "chaincode": "ManagementSystem"
+    },
+    "name": "ManagementSystem-ee817b",
+    "message": "22a3956e-f92e-436c-988b-6ab3653a289b",
+    "urls": {
+      "openapi": "http://127.0.0.1:5000/api/v1/namespaces/default/apis/ManagementSystem-ee817b/api/swagger.json",
+      "ui": "http://127.0.0.1:5000/api/v1/namespaces/default/apis/ManagementSystem-ee817b/api"
+    }
+  },
+  "interface": {
+    "id": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+    "name": "ManagementSystem-ee817b",
+    "version": "1.0"
+  },
+  "create_response": {
+    "id": "082910a6-0230-4917-8646-83aa41870c4f",
+    "namespace": "default",
+    "tx": "da0cf223-5b75-4c53-85d9-335409743bc0",
+    "type": "blockchain_invoke",
+    "status": "Succeeded",
+    "plugin": "fabric",
+    "input": {
+      "input": {
+        "initParametersBytes": "{\"Participant_0ykkst0\": {\"msp\": \"Atlas-kxm-aegis-kxm.org.comMSP\", \"attributes\": {}, \"isMulti\": false, \"multiMaximum\": 0, \"multiMinimum\": 0, \"x509\": \"eDUwOTo6Q049dXNlcjIsT1U9Y2xpZW50OjpDTj1jYS5BdGxhcy1LWE0tQWVnaXMtS1hNLm9yZy5jb20sT1U9RmFicmljLE89QXRsYXMtS1hNLUFlZ2lzLUtYTS5vcmcuY29tLFNUPU5vcnRoIENhcm9saW5hLEM9VVM=@Atlas-kxm-aegis-kxm.org.comMSP\"}, \"Participant_1be5jmm\": {\"msp\": \"Atlas-kxm-aegis-kxm.org.comMSP\", \"attributes\": {}, \"isMulti\": false, \"multiMaximum\": 0, \"multiMinimum\": 0, \"x509\": \"eDUwOTo6Q049dXNlcjIsT1U9Y2xpZW50OjpDTj1jYS5BdGxhcy1LWE0tQWVnaXMtS1hNLm9yZy5jb20sT1U9RmFicmljLE89QXRsYXMtS1hNLUFlZ2lzLUtYTS5vcmcuY29tLFNUPU5vcnRoIENhcm9saW5hLEM9VVM=@Atlas-kxm-aegis-kxm.org.comMSP\"}, \"Participant_0a0qr98\": {\"msp\": \"Atlas-kxm-aegis-kxm.org.comMSP\", \"attributes\": {}, \"isMulti\": false, \"multiMaximum\": 0, \"multiMinimum\": 0, \"x509\": \"eDUwOTo6Q049dXNlcjIsT1U9Y2xpZW50OjpDTj1jYS5BdGxhcy1LWE0tQWVnaXMtS1hNLm9yZy5jb20sT1U9RmFicmljLE89QXRsYXMtS1hNLUFlZ2lzLUtYTS5vcmcuY29tLFNUPU5vcnRoIENhcm9saW5hLEM9VVM=@Atlas-kxm-aegis-kxm.org.comMSP\"}, \"Activity_18dcm0h_DecisionID\": \"decision_0tybghz\", \"Activity_18dcm0h_ParamMapping\": {\"quality\": \"quality\", \"qualified\": \"qualified\"}, \"Activity_18dcm0h_Content\": \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\\n<definitions xmlns=\\\"https://www.omg.org/spec/DMN/20191111/MODEL/\\\" xmlns:biodi=\\\"http://bpmn.io/schema/dmn/biodi/2.0\\\" xmlns:dmndi=\\\"https://www.omg.org/spec/DMN/20191111/DMNDI/\\\" xmlns:dc=\\\"http://www.omg.org/spec/DMN/20180521/DC/\\\" id=\\\"definitions_1olsuce\\\" name=\\\"definitions\\\" namespace=\\\"http://camunda.org/schema/1.0/dmn\\\" exporter=\\\"dmn-js (https://demo.bpmn.io/dmn)\\\" exporterVersion=\\\"16.4.0\\\">\\n  <decision id=\\\"decision_0tybghz\\\" name=\\\"\\\">\\n    <decisionTable id=\\\"decisionTable_1v3tii8\\\">\\n      <input id=\\\"input1\\\" label=\\\"quality\\\" biodi:width=\\\"192\\\">\\n        <inputExpression id=\\\"inputExpression1\\\" typeRef=\\\"string\\\">\\n          <text>quality</text>\\n        </inputExpression>\\n      </input>\\n      <output id=\\\"output1\\\" label=\\\"qualified\\\" name=\\\"qualified\\\" typeRef=\\\"boolean\\\" />\\n      <rule id=\\\"DecisionRule_0dnof7z\\\">\\n        <inputEntry id=\\\"UnaryTests_0mmzh0q\\\">\\n          <text>\\\"best\\\"</text>\\n        </inputEntry>\\n        <outputEntry id=\\\"LiteralExpression_1kbdd5i\\\">\\n          <text>true</text>\\n        </outputEntry>\\n      </rule>\\n      <rule id=\\\"DecisionRule_0xxfgna\\\">\\n        <inputEntry id=\\\"UnaryTests_1tw65tl\\\">\\n          <text>\\\"good\\\"</text>\\n        </inputEntry>\\n        <outputEntry id=\\\"LiteralExpression_0xdzb8n\\\">\\n          <text>true</text>\\n        </outputEntry>\\n      </rule>\\n      <rule id=\\\"DecisionRule_02on05e\\\">\\n        <inputEntry id=\\\"UnaryTests_1e1puqk\\\">\\n          <text>\\\"bad\\\"</text>\\n        </inputEntry>\\n        <outputEntry id=\\\"LiteralExpression_086dqxb\\\">\\n          <text>false</text>\\n        </outputEntry>\\n      </rule>\\n    </decisionTable>\\n  </decision>\\n  <dmndi:DMNDI>\\n    <dmndi:DMNDiagram id=\\\"DMNDiagram_03lm1vd\\\">\\n      <dmndi:DMNShape id=\\\"DMNShape_1si2mol\\\" dmnElementRef=\\\"decision_0tybghz\\\">\\n        <dc:Bounds height=\\\"80\\\" width=\\\"180\\\" x=\\\"150\\\" y=\\\"150\\\" />\\n      </dmndi:DMNShape>\\n    </dmndi:DMNDiagram>\\n  </dmndi:DMNDI>\\n</definitions>\\n\"}"
+      },
+      "interface": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+      "key": "Atlas-kxm-aegis-kxm.org.comMSP::x509::CN=org_5f01ea,OU=client::CN=ca.Atlas-KXM-Aegis-KXM.org.com,OU=Fabric,O=Atlas-KXM-Aegis-KXM.org.com,ST=North Carolina,C=US",
+      "location": {
+        "chaincode": "ManagementSystem",
+        "channel": "default"
+      },
+      "method": {
+        "description": "Create a new instance",
+        "id": "f5af92fe-0c2a-453f-9fd1-8d4e9cc4b877",
+        "interface": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+        "name": "CreateInstance",
+        "namespace": "default",
+        "params": [
+          {
+            "name": "initParametersBytes",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "pathname": "CreateInstance",
+        "returns": []
+      },
+      "methodPath": "CreateInstance",
+      "options": null,
+      "type": "invoke"
+    },
+    "output": {
+      "headers": {
+        "requestId": "default:082910a6-0230-4917-8646-83aa41870c4f",
+        "type": "TransactionSuccess"
+      },
+      "transactionHash": "13ecb87f8f413c07bf9bc20066ff17ff8289b20e1f13839e77fd9150961737ee"
+    },
+    "created": "2026-05-14T09:53:23.998421592Z",
+    "updated": "2026-05-14T09:53:23.998421592Z",
+    "detail": {
+      "error": "FF10284: Error from fabconnect: Must specify the channel"
+    }
+  },
+  "instance_created_event": {
+    "id": "aadb3d20-4369-49ca-8395-5f854b3a4e08",
+    "source": "fabric",
+    "namespace": "default",
+    "name": "InstanceCreated",
+    "listener": "36445790-726e-409c-bf8d-3c769009d78f",
+    "protocolId": "000000000049/13ecb87f8f413c07bf9bc20066ff17ff8289b20e1f13839e77fd9150961737ee",
+    "output": {
+      "Activity_18dcm0h": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<definitions xmlns=\"https://www.omg.org/spec/DMN/20191111/MODEL/\" xmlns:biodi=\"http://bpmn.io/schema/dmn/biodi/2.0\" xmlns:dmndi=\"https://www.omg.org/spec/DMN/20191111/DMNDI/\" xmlns:dc=\"http://www.omg.org/spec/DMN/20180521/DC/\" id=\"definitions_1olsuce\" name=\"definitions\" namespace=\"http://camunda.org/schema/1.0/dmn\" exporter=\"dmn-js (https://demo.bpmn.io/dmn)\" exporterVersion=\"16.4.0\">\n  <decision id=\"decision_0tybghz\" name=\"\">\n    <decisionTable id=\"decisionTable_1v3tii8\">\n      <input id=\"input1\" label=\"quality\" biodi:width=\"192\">\n        <inputExpression id=\"inputExpression1\" typeRef=\"string\">\n          <text>quality</text>\n        </inputExpression>\n      </input>\n      <output id=\"output1\" label=\"qualified\" name=\"qualified\" typeRef=\"boolean\" />\n      <rule id=\"DecisionRule_0dnof7z\">\n        <inputEntry id=\"UnaryTests_0mmzh0q\">\n          <text>\"best\"</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_1kbdd5i\">\n          <text>true</text>\n        </outputEntry>\n      </rule>\n      <rule id=\"DecisionRule_0xxfgna\">\n        <inputEntry id=\"UnaryTests_1tw65tl\">\n          <text>\"good\"</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_0xdzb8n\">\n          <text>true</text>\n        </outputEntry>\n      </rule>\n      <rule id=\"DecisionRule_02on05e\">\n        <inputEntry id=\"UnaryTests_1e1puqk\">\n          <text>\"bad\"</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_086dqxb\">\n          <text>false</text>\n        </outputEntry>\n      </rule>\n    </decisionTable>\n  </decision>\n  <dmndi:DMNDI>\n    <dmndi:DMNDiagram id=\"DMNDiagram_03lm1vd\">\n      <dmndi:DMNShape id=\"DMNShape_1si2mol\" dmnElementRef=\"decision_0tybghz\">\n        <dc:Bounds height=\"80\" width=\"180\" x=\"150\" y=\"150\" />\n      </dmndi:DMNShape>\n    </dmndi:DMNDiagram>\n  </dmndi:DMNDI>\n</definitions>\n",
+      "InstanceID": "5"
+    },
+    "info": {
+      "blockNumber": 49,
+      "chaincodeId": "ManagementSystem",
+      "eventIndex": 0,
+      "eventName": "InstanceCreated",
+      "subId": "sb-51174f2c-96f8-48f6-7550-58f368a0517d",
+      "timestamp": 1778752404010300400,
+      "transactionId": "13ecb87f8f413c07bf9bc20066ff17ff8289b20e1f13839e77fd9150961737ee",
+      "transactionIndex": 0
+    },
+    "timestamp": "2026-05-14T09:53:24.0103004Z",
+    "tx": {
+      "blockchainId": "13ecb87f8f413c07bf9bc20066ff17ff8289b20e1f13839e77fd9150961737ee"
+    }
+  },
+  "instance_id": "5",
+  "default_signer": "Atlas-kxm-aegis-kxm.org.comMSP::x509::CN=user2,OU=client::CN=ca.Atlas-KXM-Aegis-KXM.org.com,OU=Fabric,O=Atlas-KXM-Aegis-KXM.org.com,ST=North Carolina,C=US",
+  "steps": [
+    {
+      "element_type": "event",
+      "element_id": "Event_1y0sgtz",
+      "method": "Event_1y0sgtz",
+      "signer": "",
+      "payload": {
+        "InstanceID": "5"
+      },
+      "response": {
+        "id": "23dcf6d1-c3fd-494f-ac56-1498e7f23d66",
+        "namespace": "default",
+        "tx": "5f8dd43c-d3f4-4600-a9b7-dec3b94ba351",
+        "type": "blockchain_invoke",
+        "status": "Succeeded",
+        "plugin": "fabric",
+        "input": {
+          "input": {
+            "InstanceID": "5"
+          },
+          "interface": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+          "key": "Atlas-kxm-aegis-kxm.org.comMSP::x509::CN=org_5f01ea,OU=client::CN=ca.Atlas-KXM-Aegis-KXM.org.com,OU=Fabric,O=Atlas-KXM-Aegis-KXM.org.com,ST=North Carolina,C=US",
+          "location": {
+            "chaincode": "ManagementSystem",
+            "channel": "default"
+          },
+          "method": {
+            "description": "",
+            "id": "6db3197a-3377-470f-a197-6e4fa8652b74",
+            "interface": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+            "name": "Event_1y0sgtz",
+            "namespace": "default",
+            "params": [
+              {
+                "name": "InstanceID",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "pathname": "Event_1y0sgtz",
+            "returns": []
+          },
+          "methodPath": "Event_1y0sgtz",
+          "options": null,
+          "type": "invoke"
+        },
+        "output": {
+          "headers": {
+            "requestId": "default:23dcf6d1-c3fd-494f-ac56-1498e7f23d66",
+            "type": "TransactionSuccess"
+          },
+          "transactionHash": "f5e1d6fb530a1bcacc228917edbd193eece1fc354bb5e31e0976904861c13360"
+        },
+        "created": "2026-05-14T09:53:27.41834538Z",
+        "updated": "2026-05-14T09:53:27.41834538Z",
+        "detail": {
+          "error": "FF10284: Error from fabconnect: Must specify the channel"
+        }
+      },
+      "snapshot_after": {
+        "messageIds": [
+          "Message_094ld7m",
+          "Message_1ejkslm",
+          "Message_1h1vc49",
+          "Message_1tiyc35",
+          "Message_02echpq",
+          "Message_02ng01e"
+        ],
+        "messageStates": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "messageFireflyTranIds": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "gatewayIds": [
+          "Gateway_067p6u8",
+          "Gateway_0e7k79c",
+          "Gateway_1fl1t0k"
+        ],
+        "gatewayStates": [
+          0,
+          0,
+          0
+        ],
+        "eventIds": [
+          "Event_1pm2yw6",
+          "Event_1u0cugu",
+          "Event_1y0sgtz"
+        ],
+        "eventStates": [
+          0,
+          0,
+          3
+        ],
+        "businessRuleIds": [
+          "Activity_18dcm0h"
+        ],
+        "businessRuleStates": [
+          0
+        ],
+        "businessRuleRequestIds": [
+          ""
+        ],
+        "raw": {
+          "messages": [
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"quality\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"quality\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_094ld7m",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"Content\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1ejkslm",
+              "MsgState": 1,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0a0qr98"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"id\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"id\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1h1vc49",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_0ykkst0",
+              "SendMspID": "Participant_1be5jmm"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"content3\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1tiyc35",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"content2\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_02echpq",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"complete\\\":{\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"complete\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_02ng01e",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_0ykkst0",
+              "SendMspID": "Participant_1be5jmm"
+            }
+          ],
+          "gateways": [
+            {
+              "GatewayID": "Gateway_067p6u8",
+              "GatewayState": 0
+            },
+            {
+              "GatewayID": "Gateway_0e7k79c",
+              "GatewayState": 0
+            },
+            {
+              "GatewayID": "Gateway_1fl1t0k",
+              "GatewayState": 0
+            }
+          ],
+          "events": [
+            {
+              "EventID": "Event_1pm2yw6",
+              "EventState": 0
+            },
+            {
+              "EventID": "Event_1u0cugu",
+              "EventState": 0
+            },
+            {
+              "EventID": "Event_1y0sgtz",
+              "EventState": 3
+            }
+          ],
+          "businessRules": [
+            {
+              "BusinessRuleID": "Activity_18dcm0h",
+              "DecisionID": "decision_0tybghz",
+              "Hash": "657652c69b4bbdc2a0872a6adc069ae65e3845c57d57bc7d9374a48a894be6f9",
+              "ParamMapping": {
+                "qualified": "qualified",
+                "quality": "quality"
+              },
+              "State": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "element_type": "message",
+      "element_id": "Message_1ejkslm",
+      "method": "Message_1ejkslm_Send",
+      "signer": "Atlas-kxm-aegis-kxm.org.comMSP::x509::CN=user2,OU=client::CN=ca.Atlas-KXM-Aegis-KXM.org.com,OU=Fabric,O=Atlas-KXM-Aegis-KXM.org.com,ST=North Carolina,C=US",
+      "payload": {
+        "InstanceID": "5",
+        "FireFlyTran": "c72bffaa-cf11-4e0f-8018-decc4bfefb26",
+        "Content": "sample-Content"
+      },
+      "response": {
+        "id": "f36428bd-483f-4d62-99e8-6637220676d7",
+        "namespace": "default",
+        "tx": "1d3f3f62-9aae-4b6b-9baa-97169fe0d83d",
+        "type": "blockchain_invoke",
+        "status": "Succeeded",
+        "plugin": "fabric",
+        "input": {
+          "input": {
+            "Content": "sample-Content",
+            "FireFlyTran": "c72bffaa-cf11-4e0f-8018-decc4bfefb26",
+            "InstanceID": "5"
+          },
+          "interface": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+          "key": "Atlas-kxm-aegis-kxm.org.comMSP::x509::CN=user2,OU=client::CN=ca.Atlas-KXM-Aegis-KXM.org.com,OU=Fabric,O=Atlas-KXM-Aegis-KXM.org.com,ST=North Carolina,C=US",
+          "location": {
+            "chaincode": "ManagementSystem",
+            "channel": "default"
+          },
+          "method": {
+            "description": "",
+            "id": "55826b8c-6b0c-4add-a64a-95cbc6809228",
+            "interface": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+            "name": "Message_1ejkslm_Send",
+            "namespace": "default",
+            "params": [
+              {
+                "name": "InstanceID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "FireFlyTran",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "Content",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "pathname": "Message_1ejkslm_Send",
+            "returns": []
+          },
+          "methodPath": "Message_1ejkslm_Send",
+          "options": null,
+          "type": "invoke"
+        },
+        "output": {
+          "headers": {
+            "requestId": "default:f36428bd-483f-4d62-99e8-6637220676d7",
+            "type": "TransactionSuccess"
+          },
+          "transactionHash": "941fd8260df1ba37aa8c6e023ae53e9229b736448386cb17fc8d7200bb639ce1"
+        },
+        "created": "2026-05-14T09:53:31.110643314Z",
+        "updated": "2026-05-14T09:53:31.110643314Z",
+        "detail": {
+          "error": "FF10284: Error from fabconnect: Must specify the channel"
+        }
+      },
+      "snapshot_after": {
+        "messageIds": [
+          "Message_02ng01e",
+          "Message_094ld7m",
+          "Message_1ejkslm",
+          "Message_1h1vc49",
+          "Message_1tiyc35",
+          "Message_02echpq"
+        ],
+        "messageStates": [
+          0,
+          0,
+          3,
+          0,
+          0,
+          0
+        ],
+        "messageFireflyTranIds": [
+          "",
+          "",
+          "c72bffaa-cf11-4e0f-8018-decc4bfefb26",
+          "",
+          "",
+          ""
+        ],
+        "gatewayIds": [
+          "Gateway_067p6u8",
+          "Gateway_0e7k79c",
+          "Gateway_1fl1t0k"
+        ],
+        "gatewayStates": [
+          0,
+          1,
+          0
+        ],
+        "eventIds": [
+          "Event_1y0sgtz",
+          "Event_1pm2yw6",
+          "Event_1u0cugu"
+        ],
+        "eventStates": [
+          3,
+          0,
+          0
+        ],
+        "businessRuleIds": [
+          "Activity_18dcm0h"
+        ],
+        "businessRuleStates": [
+          0
+        ],
+        "businessRuleRequestIds": [
+          ""
+        ],
+        "raw": {
+          "messages": [
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"complete\\\":{\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"complete\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_02ng01e",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_0ykkst0",
+              "SendMspID": "Participant_1be5jmm"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"quality\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"quality\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_094ld7m",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "c72bffaa-cf11-4e0f-8018-decc4bfefb26",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"Content\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1ejkslm",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0a0qr98"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"id\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"id\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1h1vc49",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_0ykkst0",
+              "SendMspID": "Participant_1be5jmm"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"content3\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1tiyc35",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"content2\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_02echpq",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            }
+          ],
+          "gateways": [
+            {
+              "GatewayID": "Gateway_067p6u8",
+              "GatewayState": 0
+            },
+            {
+              "GatewayID": "Gateway_0e7k79c",
+              "GatewayState": 1
+            },
+            {
+              "GatewayID": "Gateway_1fl1t0k",
+              "GatewayState": 0
+            }
+          ],
+          "events": [
+            {
+              "EventID": "Event_1y0sgtz",
+              "EventState": 3
+            },
+            {
+              "EventID": "Event_1pm2yw6",
+              "EventState": 0
+            },
+            {
+              "EventID": "Event_1u0cugu",
+              "EventState": 0
+            }
+          ],
+          "businessRules": [
+            {
+              "BusinessRuleID": "Activity_18dcm0h",
+              "DecisionID": "decision_0tybghz",
+              "Hash": "657652c69b4bbdc2a0872a6adc069ae65e3845c57d57bc7d9374a48a894be6f9",
+              "ParamMapping": {
+                "qualified": "qualified",
+                "quality": "quality"
+              },
+              "State": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "element_type": "gateway",
+      "element_id": "Gateway_0e7k79c",
+      "method": "Gateway_0e7k79c",
+      "signer": "",
+      "payload": {
+        "InstanceID": "5"
+      },
+      "response": {
+        "id": "9135a592-448a-4dc0-bdbb-18744ecc92ed",
+        "namespace": "default",
+        "tx": "751c9670-9441-47c8-a77c-d0b9d1558760",
+        "type": "blockchain_invoke",
+        "status": "Succeeded",
+        "plugin": "fabric",
+        "input": {
+          "input": {
+            "InstanceID": "5"
+          },
+          "interface": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+          "key": "Atlas-kxm-aegis-kxm.org.comMSP::x509::CN=org_5f01ea,OU=client::CN=ca.Atlas-KXM-Aegis-KXM.org.com,OU=Fabric,O=Atlas-KXM-Aegis-KXM.org.com,ST=North Carolina,C=US",
+          "location": {
+            "chaincode": "ManagementSystem",
+            "channel": "default"
+          },
+          "method": {
+            "description": "",
+            "id": "711f065c-64d2-424b-8576-7ee5bc26b7f7",
+            "interface": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+            "name": "Gateway_0e7k79c",
+            "namespace": "default",
+            "params": [
+              {
+                "name": "InstanceID",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "pathname": "Gateway_0e7k79c",
+            "returns": []
+          },
+          "methodPath": "Gateway_0e7k79c",
+          "options": null,
+          "type": "invoke"
+        },
+        "output": {
+          "headers": {
+            "requestId": "default:9135a592-448a-4dc0-bdbb-18744ecc92ed",
+            "type": "TransactionSuccess"
+          },
+          "transactionHash": "c981a42dde47223f33554a2fb6caa1b3c9da14543d41126aada2c4282cdd5964"
+        },
+        "created": "2026-05-14T09:53:35.056203658Z",
+        "updated": "2026-05-14T09:53:35.056203658Z",
+        "detail": {
+          "error": "FF10284: Error from fabconnect: Must specify the channel"
+        }
+      },
+      "snapshot_after": {
+        "messageIds": [
+          "Message_02echpq",
+          "Message_02ng01e",
+          "Message_094ld7m",
+          "Message_1ejkslm",
+          "Message_1h1vc49",
+          "Message_1tiyc35"
+        ],
+        "messageStates": [
+          1,
+          0,
+          0,
+          3,
+          0,
+          1
+        ],
+        "messageFireflyTranIds": [
+          "",
+          "",
+          "",
+          "c72bffaa-cf11-4e0f-8018-decc4bfefb26",
+          "",
+          ""
+        ],
+        "gatewayIds": [
+          "Gateway_0e7k79c",
+          "Gateway_1fl1t0k",
+          "Gateway_067p6u8"
+        ],
+        "gatewayStates": [
+          3,
+          0,
+          0
+        ],
+        "eventIds": [
+          "Event_1pm2yw6",
+          "Event_1u0cugu",
+          "Event_1y0sgtz"
+        ],
+        "eventStates": [
+          0,
+          0,
+          3
+        ],
+        "businessRuleIds": [
+          "Activity_18dcm0h"
+        ],
+        "businessRuleStates": [
+          0
+        ],
+        "businessRuleRequestIds": [
+          ""
+        ],
+        "raw": {
+          "messages": [
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"content2\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_02echpq",
+              "MsgState": 1,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"complete\\\":{\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"complete\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_02ng01e",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_0ykkst0",
+              "SendMspID": "Participant_1be5jmm"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"quality\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"quality\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_094ld7m",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "c72bffaa-cf11-4e0f-8018-decc4bfefb26",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"Content\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1ejkslm",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0a0qr98"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"id\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"id\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1h1vc49",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_0ykkst0",
+              "SendMspID": "Participant_1be5jmm"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"content3\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1tiyc35",
+              "MsgState": 1,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            }
+          ],
+          "gateways": [
+            {
+              "GatewayID": "Gateway_0e7k79c",
+              "GatewayState": 3
+            },
+            {
+              "GatewayID": "Gateway_1fl1t0k",
+              "GatewayState": 0
+            },
+            {
+              "GatewayID": "Gateway_067p6u8",
+              "GatewayState": 0
+            }
+          ],
+          "events": [
+            {
+              "EventID": "Event_1pm2yw6",
+              "EventState": 0
+            },
+            {
+              "EventID": "Event_1u0cugu",
+              "EventState": 0
+            },
+            {
+              "EventID": "Event_1y0sgtz",
+              "EventState": 3
+            }
+          ],
+          "businessRules": [
+            {
+              "BusinessRuleID": "Activity_18dcm0h",
+              "DecisionID": "decision_0tybghz",
+              "Hash": "657652c69b4bbdc2a0872a6adc069ae65e3845c57d57bc7d9374a48a894be6f9",
+              "ParamMapping": {
+                "qualified": "qualified",
+                "quality": "quality"
+              },
+              "State": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "element_type": "message",
+      "element_id": "Message_02echpq",
+      "method": "Message_02echpq_Send",
+      "signer": "Atlas-kxm-aegis-kxm.org.comMSP::x509::CN=user2,OU=client::CN=ca.Atlas-KXM-Aegis-KXM.org.com,OU=Fabric,O=Atlas-KXM-Aegis-KXM.org.com,ST=North Carolina,C=US",
+      "payload": {
+        "InstanceID": "5",
+        "FireFlyTran": "cd89dcff-3199-48c8-9967-39ea7cd0d7ab",
+        "content2": "sample-content2"
+      },
+      "response": {
+        "id": "bc79f4c0-780b-4999-b43a-6898dec62fd5",
+        "namespace": "default",
+        "tx": "bb1c8207-bad7-4cda-991d-f250f1a90088",
+        "type": "blockchain_invoke",
+        "status": "Succeeded",
+        "plugin": "fabric",
+        "input": {
+          "input": {
+            "FireFlyTran": "cd89dcff-3199-48c8-9967-39ea7cd0d7ab",
+            "InstanceID": "5",
+            "content2": "sample-content2"
+          },
+          "interface": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+          "key": "Atlas-kxm-aegis-kxm.org.comMSP::x509::CN=user2,OU=client::CN=ca.Atlas-KXM-Aegis-KXM.org.com,OU=Fabric,O=Atlas-KXM-Aegis-KXM.org.com,ST=North Carolina,C=US",
+          "location": {
+            "chaincode": "ManagementSystem",
+            "channel": "default"
+          },
+          "method": {
+            "description": "",
+            "id": "0068479d-d7a6-4b64-b21d-69f5fae62b5c",
+            "interface": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+            "name": "Message_02echpq_Send",
+            "namespace": "default",
+            "params": [
+              {
+                "name": "InstanceID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "FireFlyTran",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "content2",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "pathname": "Message_02echpq_Send",
+            "returns": []
+          },
+          "methodPath": "Message_02echpq_Send",
+          "options": null,
+          "type": "invoke"
+        },
+        "output": {
+          "headers": {
+            "requestId": "default:bc79f4c0-780b-4999-b43a-6898dec62fd5",
+            "type": "TransactionSuccess"
+          },
+          "transactionHash": "fee25cc91f44ab29eb4d3a34d8918b627da026d5063ad8d0c2bf9879412f4f61"
+        },
+        "created": "2026-05-14T09:53:39.016496392Z",
+        "updated": "2026-05-14T09:53:39.016496392Z",
+        "detail": {
+          "error": "FF10284: Error from fabconnect: Must specify the channel"
+        }
+      },
+      "snapshot_after": {
+        "messageIds": [
+          "Message_02echpq",
+          "Message_02ng01e",
+          "Message_094ld7m",
+          "Message_1ejkslm",
+          "Message_1h1vc49",
+          "Message_1tiyc35"
+        ],
+        "messageStates": [
+          3,
+          0,
+          0,
+          3,
+          0,
+          0
+        ],
+        "messageFireflyTranIds": [
+          "cd89dcff-3199-48c8-9967-39ea7cd0d7ab",
+          "",
+          "",
+          "c72bffaa-cf11-4e0f-8018-decc4bfefb26",
+          "",
+          ""
+        ],
+        "gatewayIds": [
+          "Gateway_067p6u8",
+          "Gateway_0e7k79c",
+          "Gateway_1fl1t0k"
+        ],
+        "gatewayStates": [
+          1,
+          3,
+          0
+        ],
+        "eventIds": [
+          "Event_1u0cugu",
+          "Event_1y0sgtz",
+          "Event_1pm2yw6"
+        ],
+        "eventStates": [
+          0,
+          3,
+          0
+        ],
+        "businessRuleIds": [
+          "Activity_18dcm0h"
+        ],
+        "businessRuleStates": [
+          0
+        ],
+        "businessRuleRequestIds": [
+          ""
+        ],
+        "raw": {
+          "messages": [
+            {
+              "FireflyTranID": "cd89dcff-3199-48c8-9967-39ea7cd0d7ab",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"content2\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_02echpq",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"complete\\\":{\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"complete\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_02ng01e",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_0ykkst0",
+              "SendMspID": "Participant_1be5jmm"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"quality\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"quality\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_094ld7m",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "c72bffaa-cf11-4e0f-8018-decc4bfefb26",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"Content\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1ejkslm",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0a0qr98"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"id\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"id\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1h1vc49",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_0ykkst0",
+              "SendMspID": "Participant_1be5jmm"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"content3\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1tiyc35",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            }
+          ],
+          "gateways": [
+            {
+              "GatewayID": "Gateway_067p6u8",
+              "GatewayState": 1
+            },
+            {
+              "GatewayID": "Gateway_0e7k79c",
+              "GatewayState": 3
+            },
+            {
+              "GatewayID": "Gateway_1fl1t0k",
+              "GatewayState": 0
+            }
+          ],
+          "events": [
+            {
+              "EventID": "Event_1u0cugu",
+              "EventState": 0
+            },
+            {
+              "EventID": "Event_1y0sgtz",
+              "EventState": 3
+            },
+            {
+              "EventID": "Event_1pm2yw6",
+              "EventState": 0
+            }
+          ],
+          "businessRules": [
+            {
+              "BusinessRuleID": "Activity_18dcm0h",
+              "DecisionID": "decision_0tybghz",
+              "Hash": "657652c69b4bbdc2a0872a6adc069ae65e3845c57d57bc7d9374a48a894be6f9",
+              "ParamMapping": {
+                "qualified": "qualified",
+                "quality": "quality"
+              },
+              "State": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "element_type": "gateway",
+      "element_id": "Gateway_067p6u8",
+      "method": "Gateway_067p6u8",
+      "signer": "",
+      "payload": {
+        "InstanceID": "5"
+      },
+      "response": {
+        "id": "3ea9ebdd-ac1a-454c-8369-fcc10c6a218f",
+        "namespace": "default",
+        "tx": "f675e019-23d1-435a-bad5-3365e0aee985",
+        "type": "blockchain_invoke",
+        "status": "Succeeded",
+        "plugin": "fabric",
+        "input": {
+          "input": {
+            "InstanceID": "5"
+          },
+          "interface": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+          "key": "Atlas-kxm-aegis-kxm.org.comMSP::x509::CN=org_5f01ea,OU=client::CN=ca.Atlas-KXM-Aegis-KXM.org.com,OU=Fabric,O=Atlas-KXM-Aegis-KXM.org.com,ST=North Carolina,C=US",
+          "location": {
+            "chaincode": "ManagementSystem",
+            "channel": "default"
+          },
+          "method": {
+            "description": "",
+            "id": "1bbe3466-7f53-4fd7-b227-6472922cd0cc",
+            "interface": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+            "name": "Gateway_067p6u8",
+            "namespace": "default",
+            "params": [
+              {
+                "name": "InstanceID",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "pathname": "Gateway_067p6u8",
+            "returns": []
+          },
+          "methodPath": "Gateway_067p6u8",
+          "options": null,
+          "type": "invoke"
+        },
+        "output": {
+          "headers": {
+            "requestId": "default:3ea9ebdd-ac1a-454c-8369-fcc10c6a218f",
+            "type": "TransactionSuccess"
+          },
+          "transactionHash": "9469f850f7c70ca29ec17e1c9eac542e47c51985feab4d9d3c117ce1dfaa3ec9"
+        },
+        "created": "2026-05-14T09:53:42.669137714Z",
+        "updated": "2026-05-14T09:53:42.669137714Z",
+        "detail": {
+          "error": "FF10284: Error from fabconnect: Must specify the channel"
+        }
+      },
+      "snapshot_after": {
+        "messageIds": [
+          "Message_1h1vc49",
+          "Message_1tiyc35",
+          "Message_02echpq",
+          "Message_02ng01e",
+          "Message_094ld7m",
+          "Message_1ejkslm"
+        ],
+        "messageStates": [
+          0,
+          0,
+          3,
+          1,
+          0,
+          3
+        ],
+        "messageFireflyTranIds": [
+          "",
+          "",
+          "cd89dcff-3199-48c8-9967-39ea7cd0d7ab",
+          "",
+          "",
+          "c72bffaa-cf11-4e0f-8018-decc4bfefb26"
+        ],
+        "gatewayIds": [
+          "Gateway_0e7k79c",
+          "Gateway_1fl1t0k",
+          "Gateway_067p6u8"
+        ],
+        "gatewayStates": [
+          3,
+          0,
+          3
+        ],
+        "eventIds": [
+          "Event_1pm2yw6",
+          "Event_1u0cugu",
+          "Event_1y0sgtz"
+        ],
+        "eventStates": [
+          0,
+          0,
+          3
+        ],
+        "businessRuleIds": [
+          "Activity_18dcm0h"
+        ],
+        "businessRuleStates": [
+          0
+        ],
+        "businessRuleRequestIds": [
+          ""
+        ],
+        "raw": {
+          "messages": [
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"id\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"id\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1h1vc49",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_0ykkst0",
+              "SendMspID": "Participant_1be5jmm"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"content3\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1tiyc35",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "cd89dcff-3199-48c8-9967-39ea7cd0d7ab",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"content2\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_02echpq",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"complete\\\":{\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"complete\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_02ng01e",
+              "MsgState": 1,
+              "ReceiveMspID": "Participant_0ykkst0",
+              "SendMspID": "Participant_1be5jmm"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"quality\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"quality\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_094ld7m",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "c72bffaa-cf11-4e0f-8018-decc4bfefb26",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"Content\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1ejkslm",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0a0qr98"
+            }
+          ],
+          "gateways": [
+            {
+              "GatewayID": "Gateway_0e7k79c",
+              "GatewayState": 3
+            },
+            {
+              "GatewayID": "Gateway_1fl1t0k",
+              "GatewayState": 0
+            },
+            {
+              "GatewayID": "Gateway_067p6u8",
+              "GatewayState": 3
+            }
+          ],
+          "events": [
+            {
+              "EventID": "Event_1pm2yw6",
+              "EventState": 0
+            },
+            {
+              "EventID": "Event_1u0cugu",
+              "EventState": 0
+            },
+            {
+              "EventID": "Event_1y0sgtz",
+              "EventState": 3
+            }
+          ],
+          "businessRules": [
+            {
+              "BusinessRuleID": "Activity_18dcm0h",
+              "DecisionID": "decision_0tybghz",
+              "Hash": "657652c69b4bbdc2a0872a6adc069ae65e3845c57d57bc7d9374a48a894be6f9",
+              "ParamMapping": {
+                "qualified": "qualified",
+                "quality": "quality"
+              },
+              "State": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "element_type": "message",
+      "element_id": "Message_02ng01e",
+      "method": "Message_02ng01e_Send",
+      "signer": "Atlas-kxm-aegis-kxm.org.comMSP::x509::CN=user2,OU=client::CN=ca.Atlas-KXM-Aegis-KXM.org.com,OU=Fabric,O=Atlas-KXM-Aegis-KXM.org.com,ST=North Carolina,C=US",
+      "payload": {
+        "InstanceID": "5",
+        "FireFlyTran": "e7f12237-4d01-4a84-ab93-33e71187f66c",
+        "complete": true
+      },
+      "response": {
+        "id": "9f856d0c-e94d-4a5b-89a1-f31ae472a1a2",
+        "namespace": "default",
+        "tx": "71291d9b-9192-4304-9b8a-deb6aed418ac",
+        "type": "blockchain_invoke",
+        "status": "Succeeded",
+        "plugin": "fabric",
+        "input": {
+          "input": {
+            "FireFlyTran": "e7f12237-4d01-4a84-ab93-33e71187f66c",
+            "InstanceID": "5",
+            "complete": true
+          },
+          "interface": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+          "key": "Atlas-kxm-aegis-kxm.org.comMSP::x509::CN=user2,OU=client::CN=ca.Atlas-KXM-Aegis-KXM.org.com,OU=Fabric,O=Atlas-KXM-Aegis-KXM.org.com,ST=North Carolina,C=US",
+          "location": {
+            "chaincode": "ManagementSystem",
+            "channel": "default"
+          },
+          "method": {
+            "description": "",
+            "id": "a3afb63b-3d9a-4b55-80b6-8e0358edb241",
+            "interface": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+            "name": "Message_02ng01e_Send",
+            "namespace": "default",
+            "params": [
+              {
+                "name": "InstanceID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "FireFlyTran",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "complete",
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            ],
+            "pathname": "Message_02ng01e_Send",
+            "returns": []
+          },
+          "methodPath": "Message_02ng01e_Send",
+          "options": null,
+          "type": "invoke"
+        },
+        "output": {
+          "headers": {
+            "requestId": "default:9f856d0c-e94d-4a5b-89a1-f31ae472a1a2",
+            "type": "TransactionSuccess"
+          },
+          "transactionHash": "f66e044d2264d892acfcab2f274b88cf68363ce30eafce11ec17d9d3ee98dded"
+        },
+        "created": "2026-05-14T09:53:44.127249794Z",
+        "updated": "2026-05-14T09:53:44.127249794Z",
+        "detail": {
+          "error": "FF10284: Error from fabconnect: Must specify the channel"
+        }
+      },
+      "snapshot_after": {
+        "messageIds": [
+          "Message_094ld7m",
+          "Message_1ejkslm",
+          "Message_1h1vc49",
+          "Message_1tiyc35",
+          "Message_02echpq",
+          "Message_02ng01e"
+        ],
+        "messageStates": [
+          1,
+          3,
+          0,
+          0,
+          3,
+          3
+        ],
+        "messageFireflyTranIds": [
+          "",
+          "c72bffaa-cf11-4e0f-8018-decc4bfefb26",
+          "",
+          "",
+          "cd89dcff-3199-48c8-9967-39ea7cd0d7ab",
+          "e7f12237-4d01-4a84-ab93-33e71187f66c"
+        ],
+        "gatewayIds": [
+          "Gateway_1fl1t0k",
+          "Gateway_067p6u8",
+          "Gateway_0e7k79c"
+        ],
+        "gatewayStates": [
+          0,
+          3,
+          3
+        ],
+        "eventIds": [
+          "Event_1pm2yw6",
+          "Event_1u0cugu",
+          "Event_1y0sgtz"
+        ],
+        "eventStates": [
+          0,
+          0,
+          3
+        ],
+        "businessRuleIds": [
+          "Activity_18dcm0h"
+        ],
+        "businessRuleStates": [
+          0
+        ],
+        "businessRuleRequestIds": [
+          ""
+        ],
+        "raw": {
+          "messages": [
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"quality\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"quality\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_094ld7m",
+              "MsgState": 1,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "c72bffaa-cf11-4e0f-8018-decc4bfefb26",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"Content\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1ejkslm",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0a0qr98"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"id\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"id\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1h1vc49",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_0ykkst0",
+              "SendMspID": "Participant_1be5jmm"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"content3\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1tiyc35",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "cd89dcff-3199-48c8-9967-39ea7cd0d7ab",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"content2\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_02echpq",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "e7f12237-4d01-4a84-ab93-33e71187f66c",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"complete\\\":{\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"complete\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_02ng01e",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_0ykkst0",
+              "SendMspID": "Participant_1be5jmm"
+            }
+          ],
+          "gateways": [
+            {
+              "GatewayID": "Gateway_1fl1t0k",
+              "GatewayState": 0
+            },
+            {
+              "GatewayID": "Gateway_067p6u8",
+              "GatewayState": 3
+            },
+            {
+              "GatewayID": "Gateway_0e7k79c",
+              "GatewayState": 3
+            }
+          ],
+          "events": [
+            {
+              "EventID": "Event_1pm2yw6",
+              "EventState": 0
+            },
+            {
+              "EventID": "Event_1u0cugu",
+              "EventState": 0
+            },
+            {
+              "EventID": "Event_1y0sgtz",
+              "EventState": 3
+            }
+          ],
+          "businessRules": [
+            {
+              "BusinessRuleID": "Activity_18dcm0h",
+              "DecisionID": "decision_0tybghz",
+              "Hash": "657652c69b4bbdc2a0872a6adc069ae65e3845c57d57bc7d9374a48a894be6f9",
+              "ParamMapping": {
+                "qualified": "qualified",
+                "quality": "quality"
+              },
+              "State": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "element_type": "message",
+      "element_id": "Message_094ld7m",
+      "method": "Message_094ld7m_Send",
+      "signer": "Atlas-kxm-aegis-kxm.org.comMSP::x509::CN=user2,OU=client::CN=ca.Atlas-KXM-Aegis-KXM.org.com,OU=Fabric,O=Atlas-KXM-Aegis-KXM.org.com,ST=North Carolina,C=US",
+      "payload": {
+        "InstanceID": "5",
+        "FireFlyTran": "bab77e3f-e136-413b-9eee-5d7bc81d7828",
+        "quality": "bad"
+      },
+      "response": {
+        "id": "33df5e05-2839-4ee2-876b-0c1af84895c9",
+        "namespace": "default",
+        "tx": "5555906b-b65f-46e0-8b67-99ce6c57de07",
+        "type": "blockchain_invoke",
+        "status": "Succeeded",
+        "plugin": "fabric",
+        "input": {
+          "input": {
+            "FireFlyTran": "bab77e3f-e136-413b-9eee-5d7bc81d7828",
+            "InstanceID": "5",
+            "quality": "bad"
+          },
+          "interface": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+          "key": "Atlas-kxm-aegis-kxm.org.comMSP::x509::CN=user2,OU=client::CN=ca.Atlas-KXM-Aegis-KXM.org.com,OU=Fabric,O=Atlas-KXM-Aegis-KXM.org.com,ST=North Carolina,C=US",
+          "location": {
+            "chaincode": "ManagementSystem",
+            "channel": "default"
+          },
+          "method": {
+            "description": "",
+            "id": "4bf517c0-3991-4001-bc81-470524bbda4f",
+            "interface": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+            "name": "Message_094ld7m_Send",
+            "namespace": "default",
+            "params": [
+              {
+                "name": "InstanceID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "FireFlyTran",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "quality",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "pathname": "Message_094ld7m_Send",
+            "returns": []
+          },
+          "methodPath": "Message_094ld7m_Send",
+          "options": null,
+          "type": "invoke"
+        },
+        "output": {
+          "headers": {
+            "requestId": "default:33df5e05-2839-4ee2-876b-0c1af84895c9",
+            "type": "TransactionSuccess"
+          },
+          "transactionHash": "a0fed3ded0dcdea147faf671833f63de00798df6fc9969a87832d138ab20790b"
+        },
+        "created": "2026-05-14T09:53:47.933149384Z",
+        "updated": "2026-05-14T09:53:47.933149384Z",
+        "detail": {
+          "error": "FF10284: Error from fabconnect: Must specify the channel"
+        }
+      },
+      "snapshot_after": {
+        "messageIds": [
+          "Message_094ld7m",
+          "Message_1ejkslm",
+          "Message_1h1vc49",
+          "Message_1tiyc35",
+          "Message_02echpq",
+          "Message_02ng01e"
+        ],
+        "messageStates": [
+          3,
+          3,
+          0,
+          0,
+          3,
+          3
+        ],
+        "messageFireflyTranIds": [
+          "bab77e3f-e136-413b-9eee-5d7bc81d7828",
+          "c72bffaa-cf11-4e0f-8018-decc4bfefb26",
+          "",
+          "",
+          "cd89dcff-3199-48c8-9967-39ea7cd0d7ab",
+          "e7f12237-4d01-4a84-ab93-33e71187f66c"
+        ],
+        "gatewayIds": [
+          "Gateway_067p6u8",
+          "Gateway_0e7k79c",
+          "Gateway_1fl1t0k"
+        ],
+        "gatewayStates": [
+          3,
+          3,
+          0
+        ],
+        "eventIds": [
+          "Event_1pm2yw6",
+          "Event_1u0cugu",
+          "Event_1y0sgtz"
+        ],
+        "eventStates": [
+          0,
+          0,
+          3
+        ],
+        "businessRuleIds": [
+          "Activity_18dcm0h"
+        ],
+        "businessRuleStates": [
+          1
+        ],
+        "businessRuleRequestIds": [
+          ""
+        ],
+        "raw": {
+          "messages": [
+            {
+              "FireflyTranID": "bab77e3f-e136-413b-9eee-5d7bc81d7828",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"quality\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"quality\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_094ld7m",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "c72bffaa-cf11-4e0f-8018-decc4bfefb26",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"Content\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1ejkslm",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0a0qr98"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"id\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"id\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1h1vc49",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_0ykkst0",
+              "SendMspID": "Participant_1be5jmm"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"content3\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1tiyc35",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "cd89dcff-3199-48c8-9967-39ea7cd0d7ab",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"content2\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_02echpq",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "e7f12237-4d01-4a84-ab93-33e71187f66c",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"complete\\\":{\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"complete\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_02ng01e",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_0ykkst0",
+              "SendMspID": "Participant_1be5jmm"
+            }
+          ],
+          "gateways": [
+            {
+              "GatewayID": "Gateway_067p6u8",
+              "GatewayState": 3
+            },
+            {
+              "GatewayID": "Gateway_0e7k79c",
+              "GatewayState": 3
+            },
+            {
+              "GatewayID": "Gateway_1fl1t0k",
+              "GatewayState": 0
+            }
+          ],
+          "events": [
+            {
+              "EventID": "Event_1pm2yw6",
+              "EventState": 0
+            },
+            {
+              "EventID": "Event_1u0cugu",
+              "EventState": 0
+            },
+            {
+              "EventID": "Event_1y0sgtz",
+              "EventState": 3
+            }
+          ],
+          "businessRules": [
+            {
+              "BusinessRuleID": "Activity_18dcm0h",
+              "DecisionID": "decision_0tybghz",
+              "Hash": "657652c69b4bbdc2a0872a6adc069ae65e3845c57d57bc7d9374a48a894be6f9",
+              "ParamMapping": {
+                "qualified": "qualified",
+                "quality": "quality"
+              },
+              "State": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "element_type": "businessRule",
+      "element_id": "Activity_18dcm0h",
+      "method": "Activity_18dcm0h",
+      "signer": "",
+      "payload": {
+        "InstanceID": "5"
+      },
+      "response": {
+        "id": "2c848b19-1b34-4f87-82f4-0598c21b1e87",
+        "namespace": "default",
+        "tx": "377f5715-80d2-4eae-9695-65670f86459f",
+        "type": "blockchain_invoke",
+        "status": "Succeeded",
+        "plugin": "fabric",
+        "input": {
+          "input": {
+            "InstanceID": "5"
+          },
+          "interface": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+          "key": "Atlas-kxm-aegis-kxm.org.comMSP::x509::CN=org_5f01ea,OU=client::CN=ca.Atlas-KXM-Aegis-KXM.org.com,OU=Fabric,O=Atlas-KXM-Aegis-KXM.org.com,ST=North Carolina,C=US",
+          "location": {
+            "chaincode": "ManagementSystem",
+            "channel": "default"
+          },
+          "method": {
+            "description": "",
+            "id": "d43c6f1a-c069-475b-8014-5843fdd25038",
+            "interface": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+            "name": "Activity_18dcm0h",
+            "namespace": "default",
+            "params": [
+              {
+                "name": "InstanceID",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "pathname": "Activity_18dcm0h",
+            "returns": []
+          },
+          "methodPath": "Activity_18dcm0h",
+          "options": null,
+          "type": "invoke"
+        },
+        "output": {
+          "headers": {
+            "requestId": "default:2c848b19-1b34-4f87-82f4-0598c21b1e87",
+            "type": "TransactionSuccess"
+          },
+          "transactionHash": "a389755169ba7cbafd5b3572dc058ef0612bde743ed3196887041b5c3ed8a148"
+        },
+        "created": "2026-05-14T09:53:51.627372034Z",
+        "updated": "2026-05-14T09:53:51.627372034Z",
+        "detail": {
+          "error": "FF10284: Error from fabconnect: Must specify the channel"
+        }
+      },
+      "snapshot_after": {
+        "messageIds": [
+          "Message_094ld7m",
+          "Message_1ejkslm",
+          "Message_1h1vc49",
+          "Message_1tiyc35",
+          "Message_02echpq",
+          "Message_02ng01e"
+        ],
+        "messageStates": [
+          3,
+          3,
+          0,
+          0,
+          3,
+          3
+        ],
+        "messageFireflyTranIds": [
+          "bab77e3f-e136-413b-9eee-5d7bc81d7828",
+          "c72bffaa-cf11-4e0f-8018-decc4bfefb26",
+          "",
+          "",
+          "cd89dcff-3199-48c8-9967-39ea7cd0d7ab",
+          "e7f12237-4d01-4a84-ab93-33e71187f66c"
+        ],
+        "gatewayIds": [
+          "Gateway_067p6u8",
+          "Gateway_0e7k79c",
+          "Gateway_1fl1t0k"
+        ],
+        "gatewayStates": [
+          3,
+          3,
+          1
+        ],
+        "eventIds": [
+          "Event_1pm2yw6",
+          "Event_1u0cugu",
+          "Event_1y0sgtz"
+        ],
+        "eventStates": [
+          0,
+          0,
+          3
+        ],
+        "businessRuleIds": [
+          "Activity_18dcm0h"
+        ],
+        "businessRuleStates": [
+          3
+        ],
+        "businessRuleRequestIds": [
+          ""
+        ],
+        "raw": {
+          "messages": [
+            {
+              "FireflyTranID": "bab77e3f-e136-413b-9eee-5d7bc81d7828",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"quality\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"quality\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_094ld7m",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "c72bffaa-cf11-4e0f-8018-decc4bfefb26",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"Content\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1ejkslm",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0a0qr98"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"id\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"id\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1h1vc49",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_0ykkst0",
+              "SendMspID": "Participant_1be5jmm"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"content3\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1tiyc35",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "cd89dcff-3199-48c8-9967-39ea7cd0d7ab",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"content2\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_02echpq",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "e7f12237-4d01-4a84-ab93-33e71187f66c",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"complete\\\":{\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"complete\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_02ng01e",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_0ykkst0",
+              "SendMspID": "Participant_1be5jmm"
+            }
+          ],
+          "gateways": [
+            {
+              "GatewayID": "Gateway_067p6u8",
+              "GatewayState": 3
+            },
+            {
+              "GatewayID": "Gateway_0e7k79c",
+              "GatewayState": 3
+            },
+            {
+              "GatewayID": "Gateway_1fl1t0k",
+              "GatewayState": 1
+            }
+          ],
+          "events": [
+            {
+              "EventID": "Event_1pm2yw6",
+              "EventState": 0
+            },
+            {
+              "EventID": "Event_1u0cugu",
+              "EventState": 0
+            },
+            {
+              "EventID": "Event_1y0sgtz",
+              "EventState": 3
+            }
+          ],
+          "businessRules": [
+            {
+              "BusinessRuleID": "Activity_18dcm0h",
+              "DecisionID": "decision_0tybghz",
+              "Hash": "657652c69b4bbdc2a0872a6adc069ae65e3845c57d57bc7d9374a48a894be6f9",
+              "ParamMapping": {
+                "qualified": "qualified",
+                "quality": "quality"
+              },
+              "State": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "element_type": "gateway",
+      "element_id": "Gateway_1fl1t0k",
+      "method": "Gateway_1fl1t0k",
+      "signer": "",
+      "payload": {
+        "InstanceID": "5"
+      },
+      "response": {
+        "id": "b3114a50-1a31-4853-a19b-a18282e2a164",
+        "namespace": "default",
+        "tx": "29380de2-c781-4693-a981-c55c7a97e220",
+        "type": "blockchain_invoke",
+        "status": "Succeeded",
+        "plugin": "fabric",
+        "input": {
+          "input": {
+            "InstanceID": "5"
+          },
+          "interface": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+          "key": "Atlas-kxm-aegis-kxm.org.comMSP::x509::CN=org_5f01ea,OU=client::CN=ca.Atlas-KXM-Aegis-KXM.org.com,OU=Fabric,O=Atlas-KXM-Aegis-KXM.org.com,ST=North Carolina,C=US",
+          "location": {
+            "chaincode": "ManagementSystem",
+            "channel": "default"
+          },
+          "method": {
+            "description": "",
+            "id": "6dc92150-0eee-48c1-810a-1fa68df8c5c5",
+            "interface": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+            "name": "Gateway_1fl1t0k",
+            "namespace": "default",
+            "params": [
+              {
+                "name": "InstanceID",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "pathname": "Gateway_1fl1t0k",
+            "returns": []
+          },
+          "methodPath": "Gateway_1fl1t0k",
+          "options": null,
+          "type": "invoke"
+        },
+        "output": {
+          "headers": {
+            "requestId": "default:b3114a50-1a31-4853-a19b-a18282e2a164",
+            "type": "TransactionSuccess"
+          },
+          "transactionHash": "ce12597201e44e9bfd4cd213dfeb0b58786dfb7a548dde9ab7d5ab2849185c91"
+        },
+        "created": "2026-05-14T09:53:57.644814879Z",
+        "updated": "2026-05-14T09:53:57.644814879Z",
+        "detail": {
+          "error": "FF10284: Error from fabconnect: Must specify the channel"
+        }
+      },
+      "snapshot_after": {
+        "messageIds": [
+          "Message_1h1vc49",
+          "Message_1tiyc35",
+          "Message_02echpq",
+          "Message_02ng01e",
+          "Message_094ld7m",
+          "Message_1ejkslm"
+        ],
+        "messageStates": [
+          1,
+          0,
+          3,
+          3,
+          3,
+          3
+        ],
+        "messageFireflyTranIds": [
+          "",
+          "",
+          "cd89dcff-3199-48c8-9967-39ea7cd0d7ab",
+          "e7f12237-4d01-4a84-ab93-33e71187f66c",
+          "bab77e3f-e136-413b-9eee-5d7bc81d7828",
+          "c72bffaa-cf11-4e0f-8018-decc4bfefb26"
+        ],
+        "gatewayIds": [
+          "Gateway_067p6u8",
+          "Gateway_0e7k79c",
+          "Gateway_1fl1t0k"
+        ],
+        "gatewayStates": [
+          3,
+          3,
+          3
+        ],
+        "eventIds": [
+          "Event_1pm2yw6",
+          "Event_1u0cugu",
+          "Event_1y0sgtz"
+        ],
+        "eventStates": [
+          0,
+          0,
+          3
+        ],
+        "businessRuleIds": [
+          "Activity_18dcm0h"
+        ],
+        "businessRuleStates": [
+          3
+        ],
+        "businessRuleRequestIds": [
+          ""
+        ],
+        "raw": {
+          "messages": [
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"id\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"id\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1h1vc49",
+              "MsgState": 1,
+              "ReceiveMspID": "Participant_0ykkst0",
+              "SendMspID": "Participant_1be5jmm"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"content3\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1tiyc35",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "cd89dcff-3199-48c8-9967-39ea7cd0d7ab",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"content2\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_02echpq",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "e7f12237-4d01-4a84-ab93-33e71187f66c",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"complete\\\":{\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"complete\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_02ng01e",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_0ykkst0",
+              "SendMspID": "Participant_1be5jmm"
+            },
+            {
+              "FireflyTranID": "bab77e3f-e136-413b-9eee-5d7bc81d7828",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"quality\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"quality\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_094ld7m",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "c72bffaa-cf11-4e0f-8018-decc4bfefb26",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"Content\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1ejkslm",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0a0qr98"
+            }
+          ],
+          "gateways": [
+            {
+              "GatewayID": "Gateway_067p6u8",
+              "GatewayState": 3
+            },
+            {
+              "GatewayID": "Gateway_0e7k79c",
+              "GatewayState": 3
+            },
+            {
+              "GatewayID": "Gateway_1fl1t0k",
+              "GatewayState": 3
+            }
+          ],
+          "events": [
+            {
+              "EventID": "Event_1pm2yw6",
+              "EventState": 0
+            },
+            {
+              "EventID": "Event_1u0cugu",
+              "EventState": 0
+            },
+            {
+              "EventID": "Event_1y0sgtz",
+              "EventState": 3
+            }
+          ],
+          "businessRules": [
+            {
+              "BusinessRuleID": "Activity_18dcm0h",
+              "DecisionID": "decision_0tybghz",
+              "Hash": "657652c69b4bbdc2a0872a6adc069ae65e3845c57d57bc7d9374a48a894be6f9",
+              "ParamMapping": {
+                "qualified": "qualified",
+                "quality": "quality"
+              },
+              "State": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "element_type": "message",
+      "element_id": "Message_1h1vc49",
+      "method": "Message_1h1vc49_Send",
+      "signer": "Atlas-kxm-aegis-kxm.org.comMSP::x509::CN=user2,OU=client::CN=ca.Atlas-KXM-Aegis-KXM.org.com,OU=Fabric,O=Atlas-KXM-Aegis-KXM.org.com,ST=North Carolina,C=US",
+      "payload": {
+        "InstanceID": "5",
+        "FireFlyTran": "c7d99b36-cd88-4dd3-b7ca-1b3b5891746e",
+        "id": "sample-id"
+      },
+      "response": {
+        "id": "39070745-c3df-4918-a2d7-601c8a5897a0",
+        "namespace": "default",
+        "tx": "6f48b3e7-f75d-4ad0-8bb2-461f80ff7b8a",
+        "type": "blockchain_invoke",
+        "status": "Succeeded",
+        "plugin": "fabric",
+        "input": {
+          "input": {
+            "FireFlyTran": "c7d99b36-cd88-4dd3-b7ca-1b3b5891746e",
+            "InstanceID": "5",
+            "id": "sample-id"
+          },
+          "interface": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+          "key": "Atlas-kxm-aegis-kxm.org.comMSP::x509::CN=user2,OU=client::CN=ca.Atlas-KXM-Aegis-KXM.org.com,OU=Fabric,O=Atlas-KXM-Aegis-KXM.org.com,ST=North Carolina,C=US",
+          "location": {
+            "chaincode": "ManagementSystem",
+            "channel": "default"
+          },
+          "method": {
+            "description": "",
+            "id": "70d6ceb0-a403-42df-b8c4-27246351c5c6",
+            "interface": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+            "name": "Message_1h1vc49_Send",
+            "namespace": "default",
+            "params": [
+              {
+                "name": "InstanceID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "FireFlyTran",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "pathname": "Message_1h1vc49_Send",
+            "returns": []
+          },
+          "methodPath": "Message_1h1vc49_Send",
+          "options": null,
+          "type": "invoke"
+        },
+        "output": {
+          "headers": {
+            "requestId": "default:39070745-c3df-4918-a2d7-601c8a5897a0",
+            "type": "TransactionSuccess"
+          },
+          "transactionHash": "4a7ba8aee9d02e93d7b91b694df3cb641a07375ec1e9fd2d400bd314994ed377"
+        },
+        "created": "2026-05-14T09:54:01.30561192Z",
+        "updated": "2026-05-14T09:54:01.30561192Z",
+        "detail": {
+          "error": "FF10284: Error from fabconnect: Must specify the channel"
+        }
+      },
+      "snapshot_after": {
+        "messageIds": [
+          "Message_02echpq",
+          "Message_02ng01e",
+          "Message_094ld7m",
+          "Message_1ejkslm",
+          "Message_1h1vc49",
+          "Message_1tiyc35"
+        ],
+        "messageStates": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          0
+        ],
+        "messageFireflyTranIds": [
+          "cd89dcff-3199-48c8-9967-39ea7cd0d7ab",
+          "e7f12237-4d01-4a84-ab93-33e71187f66c",
+          "bab77e3f-e136-413b-9eee-5d7bc81d7828",
+          "c72bffaa-cf11-4e0f-8018-decc4bfefb26",
+          "c7d99b36-cd88-4dd3-b7ca-1b3b5891746e",
+          ""
+        ],
+        "gatewayIds": [
+          "Gateway_0e7k79c",
+          "Gateway_1fl1t0k",
+          "Gateway_067p6u8"
+        ],
+        "gatewayStates": [
+          3,
+          3,
+          3
+        ],
+        "eventIds": [
+          "Event_1pm2yw6",
+          "Event_1u0cugu",
+          "Event_1y0sgtz"
+        ],
+        "eventStates": [
+          1,
+          0,
+          3
+        ],
+        "businessRuleIds": [
+          "Activity_18dcm0h"
+        ],
+        "businessRuleStates": [
+          3
+        ],
+        "businessRuleRequestIds": [
+          ""
+        ],
+        "raw": {
+          "messages": [
+            {
+              "FireflyTranID": "cd89dcff-3199-48c8-9967-39ea7cd0d7ab",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"content2\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_02echpq",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "e7f12237-4d01-4a84-ab93-33e71187f66c",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"complete\\\":{\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"complete\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_02ng01e",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_0ykkst0",
+              "SendMspID": "Participant_1be5jmm"
+            },
+            {
+              "FireflyTranID": "bab77e3f-e136-413b-9eee-5d7bc81d7828",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"quality\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"quality\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_094ld7m",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "c72bffaa-cf11-4e0f-8018-decc4bfefb26",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"Content\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1ejkslm",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0a0qr98"
+            },
+            {
+              "FireflyTranID": "c7d99b36-cd88-4dd3-b7ca-1b3b5891746e",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"id\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"id\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1h1vc49",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_0ykkst0",
+              "SendMspID": "Participant_1be5jmm"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"content3\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1tiyc35",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            }
+          ],
+          "gateways": [
+            {
+              "GatewayID": "Gateway_0e7k79c",
+              "GatewayState": 3
+            },
+            {
+              "GatewayID": "Gateway_1fl1t0k",
+              "GatewayState": 3
+            },
+            {
+              "GatewayID": "Gateway_067p6u8",
+              "GatewayState": 3
+            }
+          ],
+          "events": [
+            {
+              "EventID": "Event_1pm2yw6",
+              "EventState": 1
+            },
+            {
+              "EventID": "Event_1u0cugu",
+              "EventState": 0
+            },
+            {
+              "EventID": "Event_1y0sgtz",
+              "EventState": 3
+            }
+          ],
+          "businessRules": [
+            {
+              "BusinessRuleID": "Activity_18dcm0h",
+              "DecisionID": "decision_0tybghz",
+              "Hash": "657652c69b4bbdc2a0872a6adc069ae65e3845c57d57bc7d9374a48a894be6f9",
+              "ParamMapping": {
+                "qualified": "qualified",
+                "quality": "quality"
+              },
+              "State": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "element_type": "event",
+      "element_id": "Event_1pm2yw6",
+      "method": "Event_1pm2yw6",
+      "signer": "",
+      "payload": {
+        "InstanceID": "5"
+      },
+      "response": {
+        "id": "c73b8fec-d6da-4077-8bbf-8efc9deb3d6f",
+        "namespace": "default",
+        "tx": "0d0b5c2b-0360-4ca2-ba69-41cd517d262c",
+        "type": "blockchain_invoke",
+        "status": "Succeeded",
+        "plugin": "fabric",
+        "input": {
+          "input": {
+            "InstanceID": "5"
+          },
+          "interface": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+          "key": "Atlas-kxm-aegis-kxm.org.comMSP::x509::CN=org_5f01ea,OU=client::CN=ca.Atlas-KXM-Aegis-KXM.org.com,OU=Fabric,O=Atlas-KXM-Aegis-KXM.org.com,ST=North Carolina,C=US",
+          "location": {
+            "chaincode": "ManagementSystem",
+            "channel": "default"
+          },
+          "method": {
+            "description": "",
+            "id": "bc421dfd-0335-459b-bcda-cfa43f42824f",
+            "interface": "c61fedc6-2a7c-4701-9e33-eebf6842af66",
+            "name": "Event_1pm2yw6",
+            "namespace": "default",
+            "params": [
+              {
+                "name": "InstanceID",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "pathname": "Event_1pm2yw6",
+            "returns": []
+          },
+          "methodPath": "Event_1pm2yw6",
+          "options": null,
+          "type": "invoke"
+        },
+        "output": {
+          "headers": {
+            "requestId": "default:c73b8fec-d6da-4077-8bbf-8efc9deb3d6f",
+            "type": "TransactionSuccess"
+          },
+          "transactionHash": "184b4340a58dee305e2a74ff9c2e2ccdbdf215cb06c02d24728972f6d633a878"
+        },
+        "created": "2026-05-14T09:54:05.113564407Z",
+        "updated": "2026-05-14T09:54:05.113564407Z",
+        "detail": {
+          "error": "FF10284: Error from fabconnect: Must specify the channel"
+        }
+      },
+      "snapshot_after": {
+        "messageIds": [
+          "Message_02ng01e",
+          "Message_094ld7m",
+          "Message_1ejkslm",
+          "Message_1h1vc49",
+          "Message_1tiyc35",
+          "Message_02echpq"
+        ],
+        "messageStates": [
+          3,
+          3,
+          3,
+          3,
+          0,
+          3
+        ],
+        "messageFireflyTranIds": [
+          "e7f12237-4d01-4a84-ab93-33e71187f66c",
+          "bab77e3f-e136-413b-9eee-5d7bc81d7828",
+          "c72bffaa-cf11-4e0f-8018-decc4bfefb26",
+          "c7d99b36-cd88-4dd3-b7ca-1b3b5891746e",
+          "",
+          "cd89dcff-3199-48c8-9967-39ea7cd0d7ab"
+        ],
+        "gatewayIds": [
+          "Gateway_067p6u8",
+          "Gateway_0e7k79c",
+          "Gateway_1fl1t0k"
+        ],
+        "gatewayStates": [
+          3,
+          3,
+          3
+        ],
+        "eventIds": [
+          "Event_1pm2yw6",
+          "Event_1u0cugu",
+          "Event_1y0sgtz"
+        ],
+        "eventStates": [
+          3,
+          0,
+          3
+        ],
+        "businessRuleIds": [
+          "Activity_18dcm0h"
+        ],
+        "businessRuleStates": [
+          3
+        ],
+        "businessRuleRequestIds": [
+          ""
+        ],
+        "raw": {
+          "messages": [
+            {
+              "FireflyTranID": "e7f12237-4d01-4a84-ab93-33e71187f66c",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"complete\\\":{\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"complete\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_02ng01e",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_0ykkst0",
+              "SendMspID": "Participant_1be5jmm"
+            },
+            {
+              "FireflyTranID": "bab77e3f-e136-413b-9eee-5d7bc81d7828",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"quality\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"quality\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_094ld7m",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "c72bffaa-cf11-4e0f-8018-decc4bfefb26",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"Content\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1ejkslm",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0a0qr98"
+            },
+            {
+              "FireflyTranID": "c7d99b36-cd88-4dd3-b7ca-1b3b5891746e",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"id\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"id\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1h1vc49",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_0ykkst0",
+              "SendMspID": "Participant_1be5jmm"
+            },
+            {
+              "FireflyTranID": "",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"content3\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_1tiyc35",
+              "MsgState": 0,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            },
+            {
+              "FireflyTranID": "cd89dcff-3199-48c8-9967-39ea7cd0d7ab",
+              "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"content2\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+              "MessageID": "Message_02echpq",
+              "MsgState": 3,
+              "ReceiveMspID": "Participant_1be5jmm",
+              "SendMspID": "Participant_0ykkst0"
+            }
+          ],
+          "gateways": [
+            {
+              "GatewayID": "Gateway_067p6u8",
+              "GatewayState": 3
+            },
+            {
+              "GatewayID": "Gateway_0e7k79c",
+              "GatewayState": 3
+            },
+            {
+              "GatewayID": "Gateway_1fl1t0k",
+              "GatewayState": 3
+            }
+          ],
+          "events": [
+            {
+              "EventID": "Event_1pm2yw6",
+              "EventState": 3
+            },
+            {
+              "EventID": "Event_1u0cugu",
+              "EventState": 0
+            },
+            {
+              "EventID": "Event_1y0sgtz",
+              "EventState": 3
+            }
+          ],
+          "businessRules": [
+            {
+              "BusinessRuleID": "Activity_18dcm0h",
+              "DecisionID": "decision_0tybghz",
+              "Hash": "657652c69b4bbdc2a0872a6adc069ae65e3845c57d57bc7d9374a48a894be6f9",
+              "ParamMapping": {
+                "qualified": "qualified",
+                "quality": "quality"
+              },
+              "State": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "final_snapshot": {
+    "messageIds": [
+      "Message_02ng01e",
+      "Message_094ld7m",
+      "Message_1ejkslm",
+      "Message_1h1vc49",
+      "Message_1tiyc35",
+      "Message_02echpq"
+    ],
+    "messageStates": [
+      3,
+      3,
+      3,
+      3,
+      0,
+      3
+    ],
+    "messageFireflyTranIds": [
+      "e7f12237-4d01-4a84-ab93-33e71187f66c",
+      "bab77e3f-e136-413b-9eee-5d7bc81d7828",
+      "c72bffaa-cf11-4e0f-8018-decc4bfefb26",
+      "c7d99b36-cd88-4dd3-b7ca-1b3b5891746e",
+      "",
+      "cd89dcff-3199-48c8-9967-39ea7cd0d7ab"
+    ],
+    "gatewayIds": [
+      "Gateway_067p6u8",
+      "Gateway_0e7k79c",
+      "Gateway_1fl1t0k"
+    ],
+    "gatewayStates": [
+      3,
+      3,
+      3
+    ],
+    "eventIds": [
+      "Event_1pm2yw6",
+      "Event_1u0cugu",
+      "Event_1y0sgtz"
+    ],
+    "eventStates": [
+      3,
+      0,
+      3
+    ],
+    "businessRuleIds": [
+      "Activity_18dcm0h"
+    ],
+    "businessRuleStates": [
+      3
+    ],
+    "businessRuleRequestIds": [
+      ""
+    ],
+    "raw": {
+      "messages": [
+        {
+          "FireflyTranID": "e7f12237-4d01-4a84-ab93-33e71187f66c",
+          "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"complete\\\":{\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"complete\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+          "MessageID": "Message_02ng01e",
+          "MsgState": 3,
+          "ReceiveMspID": "Participant_0ykkst0",
+          "SendMspID": "Participant_1be5jmm"
+        },
+        {
+          "FireflyTranID": "bab77e3f-e136-413b-9eee-5d7bc81d7828",
+          "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"quality\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"quality\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+          "MessageID": "Message_094ld7m",
+          "MsgState": 3,
+          "ReceiveMspID": "Participant_1be5jmm",
+          "SendMspID": "Participant_0ykkst0"
+        },
+        {
+          "FireflyTranID": "c72bffaa-cf11-4e0f-8018-decc4bfefb26",
+          "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"Content\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+          "MessageID": "Message_1ejkslm",
+          "MsgState": 3,
+          "ReceiveMspID": "Participant_1be5jmm",
+          "SendMspID": "Participant_0a0qr98"
+        },
+        {
+          "FireflyTranID": "c7d99b36-cd88-4dd3-b7ca-1b3b5891746e",
+          "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"id\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"id\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+          "MessageID": "Message_1h1vc49",
+          "MsgState": 3,
+          "ReceiveMspID": "Participant_0ykkst0",
+          "SendMspID": "Participant_1be5jmm"
+        },
+        {
+          "FireflyTranID": "",
+          "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"content3\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+          "MessageID": "Message_1tiyc35",
+          "MsgState": 0,
+          "ReceiveMspID": "Participant_1be5jmm",
+          "SendMspID": "Participant_0ykkst0"
+        },
+        {
+          "FireflyTranID": "cd89dcff-3199-48c8-9967-39ea7cd0d7ab",
+          "Format": "{\"schema\": \"{\\\"properties\\\":{\\\"content2\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+          "MessageID": "Message_02echpq",
+          "MsgState": 3,
+          "ReceiveMspID": "Participant_1be5jmm",
+          "SendMspID": "Participant_0ykkst0"
+        }
+      ],
+      "gateways": [
+        {
+          "GatewayID": "Gateway_067p6u8",
+          "GatewayState": 3
+        },
+        {
+          "GatewayID": "Gateway_0e7k79c",
+          "GatewayState": 3
+        },
+        {
+          "GatewayID": "Gateway_1fl1t0k",
+          "GatewayState": 3
+        }
+      ],
+      "events": [
+        {
+          "EventID": "Event_1pm2yw6",
+          "EventState": 3
+        },
+        {
+          "EventID": "Event_1u0cugu",
+          "EventState": 0
+        },
+        {
+          "EventID": "Event_1y0sgtz",
+          "EventState": 3
+        }
+      ],
+      "businessRules": [
+        {
+          "BusinessRuleID": "Activity_18dcm0h",
+          "DecisionID": "decision_0tybghz",
+          "Hash": "657652c69b4bbdc2a0872a6adc069ae65e3845c57d57bc7d9374a48a894be6f9",
+          "ParamMapping": {
+            "qualified": "qualified",
+            "quality": "quality"
+          },
+          "State": 3
+        }
+      ]
+    }
+  },
+  "success": true
+}

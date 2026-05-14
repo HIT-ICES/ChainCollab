@@ -1,0 +1,57 @@
+{
+  "firefly_core_url": "http://127.0.0.1:5001",
+  "event_core_urls": [
+    "http://127.0.0.1:5000",
+    "http://127.0.0.1:5001"
+  ],
+  "namespace": "default",
+  "api_name": "amazon-b83d5d",
+  "chaincode": "amazon",
+  "default_signer": "Atlas-nc1-aegis-nc1.org.comMSP::x509::CN=user2,OU=client::CN=ca.Atlas-NC1-Aegis-NC1.org.com,OU=Fabric,O=Atlas-NC1-Aegis-NC1.org.com,ST=North Carolina,C=US",
+  "create_instance_signer": "",
+  "create_instance_params": {
+     
+  "Participant_12df78t": {
+    "msp": "Atlas-nc1-aegis-nc1.org.comMSP",
+    "attributes": {},
+    "isMulti": false,
+    "multiMaximum": 0,
+    "multiMinimum": 0,
+    "x509": "eDUwOTo6Q049dXNlcjIsT1U9Y2xpZW50OjpDTj1jYS5BdGxhcy1OQzEtQWVnaXMtTkMxLm9yZy5jb20sT1U9RmFicmljLE89QXRsYXMtTkMxLUFlZ2lzLU5DMS5vcmcuY29tLFNUPU5vcnRoIENhcm9saW5hLEM9VVM=@Atlas-nc1-aegis-nc1.org.comMSP"
+  },
+  "Participant_1p9owwo": {
+    "msp": "Atlas-nc1-aegis-nc1.org.comMSP",
+    "attributes": {},
+    "isMulti": false,
+    "multiMaximum": 0,
+    "multiMinimum": 0,
+    "x509": "eDUwOTo6Q049dXNlcjIsT1U9Y2xpZW50OjpDTj1jYS5BdGxhcy1OQzEtQWVnaXMtTkMxLm9yZy5jb20sT1U9RmFicmljLE89QXRsYXMtTkMxLUFlZ2lzLU5DMS5vcmcuY29tLFNUPU5vcnRoIENhcm9saW5hLEM9VVM=@Atlas-nc1-aegis-nc1.org.comMSP"
+  },
+  "Activity_0tya4bp_DecisionID": "decision_0tybghz",
+  "Activity_0tya4bp_ParamMapping": {
+    "duration": "duration",
+    "requestType": "requestType",
+    "confirm": "confirm"
+  },
+  "Activity_0tya4bp_Content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<definitions xmlns=\"https://www.omg.org/spec/DMN/20191111/MODEL/\" xmlns:biodi=\"http://bpmn.io/schema/dmn/biodi/2.0\" xmlns:dmndi=\"https://www.omg.org/spec/DMN/20191111/DMNDI/\" xmlns:dc=\"http://www.omg.org/spec/DMN/20180521/DC/\" id=\"definitions_1olsuce\" name=\"definitions\" namespace=\"http://camunda.org/schema/1.0/dmn\" exporter=\"dmn-js (https://demo.bpmn.io/dmn)\" exporterVersion=\"16.4.0\">\n  <decision id=\"decision_0tybghz\" name=\"\">\n    <decisionTable id=\"decisionTable_1v3tii8\">\n      <input id=\"input1\" label=\"type\">\n        <inputExpression id=\"inputExpression1\" typeRef=\"string\">\n          <text>requestType</text>\n        </inputExpression>\n      </input>\n      <input id=\"InputClause_13zdqxt\" label=\"time1\">\n        <inputExpression id=\"LiteralExpression_0rrdy7t\" typeRef=\"number\">\n          <text>duration</text>\n        </inputExpression>\n      </input>\n      <output id=\"output1\" label=\"result\" name=\"confirm\" typeRef=\"boolean\" biodi:width=\"192\" />\n      <rule id=\"DecisionRule_1r65y9z\">\n        <inputEntry id=\"UnaryTests_1rwno5x\">\n          <text>\"regional\"</text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_003p3ha\">\n          <text>&lt;=14</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_0gp3uiy\">\n          <text>true</text>\n        </outputEntry>\n      </rule>\n      <rule id=\"DecisionRule_1fln0yt\">\n        <inputEntry id=\"UnaryTests_13vbd5q\">\n          <text>\"instance\"</text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_1mgjp5n\">\n          <text>&lt;=14</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_1d9kue8\">\n          <text>true</text>\n        </outputEntry>\n      </rule>\n      <rule id=\"DecisionRule_1j0q6wd\">\n        <inputEntry id=\"UnaryTests_0zqtejc\">\n          <text></text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_0wfawmf\">\n          <text>&gt;14</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_1be20tj\">\n          <text>false</text>\n        </outputEntry>\n      </rule>\n    </decisionTable>\n  </decision>\n  <dmndi:DMNDI>\n    <dmndi:DMNDiagram id=\"DMNDiagram_1qni1u0\">\n      <dmndi:DMNShape id=\"DMNShape_071dwnf\" dmnElementRef=\"decision_0tybghz\">\n        <dc:Bounds height=\"80\" width=\"180\" x=\"150\" y=\"150\" />\n      </dmndi:DMNShape>\n    </dmndi:DMNDiagram>\n  </dmndi:DMNDI>\n</definitions>\n"
+
+    },
+  "participant_signers": {
+    "Participant_09cjol2": "",
+    "Participant_0sa2v7d": "",
+    "Participant_0w6qkdf": "",
+    "Participant_19j1e3o": "",
+    "Participant_19mgbdn": ""
+  },
+  "signer_overrides": {},
+  "action_overrides": {},
+  "target_wait_retries": 80,
+  "target_wait_seconds": 1.5,
+  "instance_wait_retries": 60,
+  "instance_wait_seconds": 1.5,
+  "operation_wait_retries": 80,
+  "operation_wait_seconds": 1.0,
+  "business_rule_auto_continue_wait_retries": 10,
+  "business_rule_auto_continue_wait_seconds": 1.5,
+  "execution_sequence_file": "/root/code/ChainCollab/Experiment/new/exp3/solidity/SupplyChainPaper/paths/SupplyChainPaper_auto_path_004/execution_sequence.json"
+}
