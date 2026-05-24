@@ -1,0 +1,483 @@
+{
+  "schema_version": "exp1c.ubts.v1",
+  "case_name": "Rental_Claim",
+  "model_type": "bpmn",
+  "formalism": "UBTS/GLSTS JSON implementation",
+  "participants": [
+    {
+      "id": "Participant_1exbsak",
+      "name": "Landlord",
+      "is_multi": false,
+      "metadata": {
+        "msp": "LandlordMSP",
+        "x509": "",
+        "attributes": {
+          "role": "Landlord"
+        }
+      }
+    },
+    {
+      "id": "Participant_0h34s41",
+      "name": "RBO",
+      "is_multi": false,
+      "metadata": {
+        "msp": "RBOMSP",
+        "x509": "",
+        "attributes": {
+          "role": "RBO"
+        }
+      }
+    },
+    {
+      "id": "Participant_0wvo0aa",
+      "name": "Tenant",
+      "is_multi": false,
+      "metadata": {
+        "msp": "TenantMSP",
+        "x509": "",
+        "attributes": {
+          "role": "Tenant"
+        }
+      }
+    }
+  ],
+  "nodes": [
+    {
+      "id": "Message_066q5si",
+      "type": "message",
+      "sender": "Participant_0h34s41",
+      "receiver": "Participant_0wvo0aa",
+      "schema": "{\"properties\":{\"reason\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"reason\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_09eyqv0",
+      "type": "message",
+      "sender": "Participant_1exbsak",
+      "receiver": "Participant_0h34s41",
+      "schema": "{\"properties\":{\"FileContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_0dckgao",
+      "type": "message",
+      "sender": "Participant_1exbsak",
+      "receiver": "Participant_0h34s41",
+      "schema": "{\"properties\":{\"BondContent\":{\"type\":\"string\",\"description\":\"\"},\"damageNumber\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"BondContent\",\"damageNumber\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_0fm3vfa",
+      "type": "message",
+      "sender": "Participant_0h34s41",
+      "receiver": "Participant_1exbsak",
+      "schema": "{\"properties\":{\"transferDate\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"transferDate\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_0z3zz01",
+      "type": "message",
+      "sender": "Participant_0wvo0aa",
+      "receiver": "Participant_0h34s41",
+      "schema": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_0zoy0sz",
+      "type": "message",
+      "sender": "Participant_0h34s41",
+      "receiver": "Participant_0wvo0aa",
+      "schema": "{\"properties\":{\"refundbond\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"refundbond\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_1eb4q8q",
+      "type": "message",
+      "sender": "Participant_0h34s41",
+      "receiver": "Participant_0wvo0aa",
+      "schema": "{\"properties\":{\"claimContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_1im6vvb",
+      "type": "message",
+      "sender": "Participant_0wvo0aa",
+      "receiver": "Participant_0h34s41",
+      "schema": "{\"properties\":{\"content\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_1xlzl3n",
+      "type": "message",
+      "sender": "Participant_0h34s41",
+      "receiver": "Participant_1exbsak",
+      "schema": "{\"properties\":{\"reason\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"reason\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Gateway_11zw5fs",
+      "type": "gateway",
+      "gateway_type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Gateway_10ut9pb",
+      "type": "gateway",
+      "gateway_type": "event",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Gateway_1v1x25n",
+      "type": "gateway",
+      "gateway_type": "event",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Event_19zgkxm",
+      "type": "event",
+      "initial_state": "READY"
+    },
+    {
+      "id": "Event_1pjpbaw",
+      "type": "event",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Event_120hui7",
+      "type": "event",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Event_0fzlrii",
+      "type": "event",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Event_0kmeww3",
+      "type": "event",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Activity_0oacu9j",
+      "type": "businessrule",
+      "inputs": [
+        [
+          "damageNumber",
+          "DamageNumber"
+        ]
+      ],
+      "outputs": [
+        [
+          "refund",
+          "Refund"
+        ]
+      ],
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "globals": {
+    "BondContent": "string",
+    "FileContent": "string",
+    "ClaimContent": "string",
+    "Content": "string",
+    "DamageNumber": "int",
+    "Reason": "string",
+    "Refund": "bool",
+    "Refundbond": "int",
+    "TransferDate": "string"
+  },
+  "dmn_outputs": {
+    "refund": [
+      "false",
+      "true"
+    ]
+  },
+  "transitions": [
+    {
+      "id": "r_001",
+      "template_kind": "start",
+      "trigger": "Event_19zgkxm",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Gateway_10ut9pb"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_002",
+      "template_kind": "message",
+      "trigger": "Message_09eyqv0",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "disable",
+          "target": "Message_0dckgao"
+        },
+        {
+          "op": "enable",
+          "target": "Message_1eb4q8q"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_003",
+      "template_kind": "message",
+      "trigger": "Message_0dckgao",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "disable",
+          "target": "Message_09eyqv0"
+        },
+        {
+          "op": "enable",
+          "target": "Activity_0oacu9j"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_004",
+      "template_kind": "message",
+      "trigger": "Message_1eb4q8q",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Gateway_1v1x25n"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_005",
+      "template_kind": "message",
+      "trigger": "Message_0z3zz01",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "disable",
+          "target": "Message_1im6vvb"
+        },
+        {
+          "op": "enable",
+          "target": "Message_066q5si"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_006",
+      "template_kind": "message",
+      "trigger": "Message_066q5si",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_1xlzl3n"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_007",
+      "template_kind": "message",
+      "trigger": "Message_1im6vvb",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "disable",
+          "target": "Message_0z3zz01"
+        },
+        {
+          "op": "enable",
+          "target": "Message_0fm3vfa"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_008",
+      "template_kind": "message",
+      "trigger": "Message_1xlzl3n",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Event_1pjpbaw"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_009",
+      "template_kind": "message",
+      "trigger": "Message_0fm3vfa",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Event_120hui7"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_010",
+      "template_kind": "message",
+      "trigger": "Message_0zoy0sz",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Event_0fzlrii"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_011",
+      "template_kind": "gateway",
+      "trigger": "Gateway_10ut9pb",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_09eyqv0"
+        },
+        {
+          "op": "enable",
+          "target": "Message_0dckgao"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_012",
+      "template_kind": "gateway",
+      "trigger": "Gateway_1v1x25n",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_0z3zz01"
+        },
+        {
+          "op": "enable",
+          "target": "Message_1im6vvb"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_013",
+      "template_kind": "gateway_choose",
+      "trigger": "Gateway_11zw5fs",
+      "guard": null,
+      "actions": [],
+      "branches": [
+        {
+          "guard": "Refund == true",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "Message_0zoy0sz"
+            }
+          ]
+        },
+        {
+          "guard": "Refund == false",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "Event_0kmeww3"
+            }
+          ]
+        }
+      ],
+      "sources": []
+    },
+    {
+      "id": "r_014",
+      "template_kind": "businessrule",
+      "trigger": "Activity_0oacu9j",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Gateway_11zw5fs"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_015",
+      "template_kind": "end_event",
+      "trigger": "Event_1pjpbaw",
+      "guard": null,
+      "actions": [],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_016",
+      "template_kind": "end_event",
+      "trigger": "Event_120hui7",
+      "guard": null,
+      "actions": [],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_017",
+      "template_kind": "end_event",
+      "trigger": "Event_0fzlrii",
+      "guard": null,
+      "actions": [],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_018",
+      "template_kind": "end_event",
+      "trigger": "Event_0kmeww3",
+      "guard": null,
+      "actions": [],
+      "branches": [],
+      "sources": []
+    }
+  ],
+  "start_nodes": [
+    "Event_19zgkxm"
+  ],
+  "end_nodes": [
+    "Event_1pjpbaw",
+    "Event_120hui7",
+    "Event_0fzlrii",
+    "Event_0kmeww3"
+  ],
+  "state_model": [
+    "INIT",
+    "READY",
+    "PENDING_CONFIRMATION",
+    "DONE",
+    "INACTIVE"
+  ]
+}

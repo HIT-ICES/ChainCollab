@@ -1,0 +1,353 @@
+{
+  "schema_version": "exp1c.ubts.v1",
+  "case_name": "Blood_analysis",
+  "model_type": "bpmn",
+  "formalism": "UBTS/GLSTS JSON implementation",
+  "participants": [
+    {
+      "id": "Participant_0ggs0ck",
+      "name": "Gynecologist",
+      "is_multi": false,
+      "metadata": {
+        "msp": "GynecologistMSP",
+        "x509": "",
+        "attributes": {
+          "role": "Gynecologist"
+        }
+      }
+    },
+    {
+      "id": "Participant_1v6wnpq",
+      "name": "Lab",
+      "is_multi": false,
+      "metadata": {
+        "msp": "LabMSP",
+        "x509": "",
+        "attributes": {
+          "role": "Lab"
+        }
+      }
+    },
+    {
+      "id": "Participant_0tkhpj2",
+      "name": "Hospital",
+      "is_multi": false,
+      "metadata": {
+        "msp": "HospitalMSP",
+        "x509": "",
+        "attributes": {
+          "role": "Hospital"
+        }
+      }
+    }
+  ],
+  "nodes": [
+    {
+      "id": "Message_0gd0z61",
+      "type": "message",
+      "sender": "Participant_0tkhpj2",
+      "receiver": "Participant_0ggs0ck",
+      "schema": "{\"properties\":{\"furtherCheckPlace\":{\"type\":\"string\",\"description\":\"\"},\"furtherCheckDate\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"furtherCheckPlace\",\"furtherCheckDate\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_0gswvmq",
+      "type": "message",
+      "sender": "Participant_0ggs0ck",
+      "receiver": "Participant_1v6wnpq",
+      "schema": "{\"properties\":{\"sample\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"sample\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_0wq8mc6",
+      "type": "message",
+      "sender": "Participant_0ggs0ck",
+      "receiver": "Participant_0tkhpj2",
+      "schema": "{\"properties\":{\"patientData\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"patientData\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_13mh6mk",
+      "type": "message",
+      "sender": "Participant_0tkhpj2",
+      "receiver": "Participant_0ggs0ck",
+      "schema": "{\"properties\":{\"reportContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"reportContent\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_1rqbibd",
+      "type": "message",
+      "sender": "Participant_0ggs0ck",
+      "receiver": "Participant_0tkhpj2",
+      "schema": "{\"properties\":{\"result\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"result\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_1vzqd37",
+      "type": "message",
+      "sender": "Participant_1v6wnpq",
+      "receiver": "Participant_0ggs0ck",
+      "schema": "{\"properties\":{\"result\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"result\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Gateway_0o8snyv",
+      "type": "gateway",
+      "gateway_type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "ParallelGateway_1pgjqtw",
+      "type": "gateway",
+      "gateway_type": "parallel",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Gateway_1m6dgym",
+      "type": "gateway",
+      "gateway_type": "parallel",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "StartEvent_0m7hz56",
+      "type": "event",
+      "initial_state": "READY"
+    },
+    {
+      "id": "EndEvent_110myff",
+      "type": "event",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Activity_1mj4mr7",
+      "type": "businessrule",
+      "inputs": [
+        [
+          "result",
+          "Result"
+        ]
+      ],
+      "outputs": [
+        [
+          "FurtherCheck",
+          "FurtherCheck"
+        ]
+      ],
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "globals": {
+    "FurtherCheck": "bool",
+    "FurtherCheckDate": "string",
+    "FurtherCheckPlace": "string",
+    "PatientData": "string",
+    "ReportContent": "string",
+    "Result": "string",
+    "Sample": "string"
+  },
+  "dmn_outputs": {
+    "FurtherCheck": [
+      "false",
+      "true"
+    ]
+  },
+  "transitions": [
+    {
+      "id": "r_001",
+      "template_kind": "start",
+      "trigger": "StartEvent_0m7hz56",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "ParallelGateway_1pgjqtw"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_002",
+      "template_kind": "message",
+      "trigger": "Message_0gswvmq",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_1vzqd37"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_003",
+      "template_kind": "message",
+      "trigger": "Message_0wq8mc6",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_13mh6mk"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_004",
+      "template_kind": "message",
+      "trigger": "Message_1vzqd37",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Gateway_1m6dgym"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_005",
+      "template_kind": "message",
+      "trigger": "Message_1rqbibd",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Activity_1mj4mr7"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_006",
+      "template_kind": "message",
+      "trigger": "Message_0gd0z61",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_110myff"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_007",
+      "template_kind": "message",
+      "trigger": "Message_13mh6mk",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Gateway_1m6dgym"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_008",
+      "template_kind": "gateway",
+      "trigger": "ParallelGateway_1pgjqtw",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_0gswvmq"
+        },
+        {
+          "op": "enable",
+          "target": "Message_0wq8mc6"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_009",
+      "template_kind": "gateway_choose",
+      "trigger": "Gateway_0o8snyv",
+      "guard": null,
+      "actions": [],
+      "branches": [
+        {
+          "guard": "FurtherCheck == false",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "EndEvent_110myff"
+            }
+          ]
+        },
+        {
+          "guard": "FurtherCheck == true",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "Message_0gd0z61"
+            }
+          ]
+        }
+      ],
+      "sources": []
+    },
+    {
+      "id": "r_010",
+      "template_kind": "parallel_join",
+      "trigger": "Gateway_1m6dgym",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_1rqbibd"
+        }
+      ],
+      "branches": [],
+      "sources": [
+        "Message_1vzqd37",
+        "Message_13mh6mk"
+      ]
+    },
+    {
+      "id": "r_011",
+      "template_kind": "businessrule",
+      "trigger": "Activity_1mj4mr7",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Gateway_0o8snyv"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_012",
+      "template_kind": "end_event",
+      "trigger": "EndEvent_110myff",
+      "guard": null,
+      "actions": [],
+      "branches": [],
+      "sources": []
+    }
+  ],
+  "start_nodes": [
+    "StartEvent_0m7hz56"
+  ],
+  "end_nodes": [
+    "EndEvent_110myff"
+  ],
+  "state_model": [
+    "INIT",
+    "READY",
+    "PENDING_CONFIRMATION",
+    "DONE",
+    "INACTIVE"
+  ]
+}

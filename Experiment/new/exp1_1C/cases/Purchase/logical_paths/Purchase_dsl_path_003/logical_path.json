@@ -1,0 +1,122 @@
+{
+  "case_name": "Purchase",
+  "path_name": "Purchase_dsl_path_003",
+  "description": "Auto materialized from BPMN/DSL consistent path by exp1_1C.",
+  "source_model": "/root/code/ChainCollab/Experiment/new/exp1_1C/cases/Purchase/translator/dsl.b2c",
+  "expect": "accepted",
+  "steps": [
+    {
+      "type": "event",
+      "element": "Event_0ehnwwz",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_0q9hvem",
+      "payload": {
+        "orderContent": "sample-orderContent",
+        "productAvalibale": "true"
+      },
+      "guard": "completed",
+      "outputs": {
+        "ProductAvalibale": "true"
+      },
+      "sender": "Participant_0jwk4tk",
+      "receiver": "Participant_0oa2za9"
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_1ltys0e",
+      "payload": {},
+      "guard": "ProductAvalibale == true"
+    },
+    {
+      "type": "message",
+      "element": "Message_1f0gefc",
+      "payload": {
+        "MessageContent": "sample-MessageContent",
+        "priceOK": "true"
+      },
+      "guard": "completed",
+      "outputs": {
+        "PriceOK": "true"
+      },
+      "sender": "Participant_0oa2za9",
+      "receiver": "Participant_0jwk4tk"
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_025uwvp",
+      "payload": {},
+      "guard": "PriceOK == true"
+    },
+    {
+      "type": "message",
+      "element": "Message_0mcktm6",
+      "payload": {
+        "Price": 1,
+        "Time": "sample-Time"
+      },
+      "guard": "completed",
+      "sender": "Participant_0jwk4tk",
+      "receiver": "Participant_0oa2za9"
+    },
+    {
+      "type": "businessrule",
+      "element": "Activity_12arovy",
+      "payload": {},
+      "guard": "dmn:decision_table_rows",
+      "outputs": {
+        "Discount": "false"
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_13i0b7w",
+      "payload": {},
+      "guard": "Discount == false"
+    },
+    {
+      "type": "message",
+      "element": "Message_0g7m9tf",
+      "payload": {
+        "num": "sample-num",
+        "time2": "sample-time2"
+      },
+      "guard": "completed",
+      "sender": "Participant_0oa2za9",
+      "receiver": "Participant_0jwk4tk"
+    },
+    {
+      "type": "event",
+      "element": "Event_1o9guxu",
+      "payload": {}
+    }
+  ],
+  "generated_path": {
+    "final_enabled_elements": [],
+    "final_element_states": {
+      "Message_05gz8u0": "INACTIVE",
+      "Message_08ms1jj": "INACTIVE",
+      "Message_0g7m9tf": "DONE",
+      "Message_0mcktm6": "DONE",
+      "Message_0q9hvem": "DONE",
+      "Message_14wu8ts": "INACTIVE",
+      "Message_15b83n1": "INACTIVE",
+      "Message_1f0gefc": "DONE",
+      "Gateway_1ltys0e": "DONE",
+      "Gateway_025uwvp": "DONE",
+      "Gateway_13i0b7w": "DONE",
+      "Event_0ehnwwz": "DONE",
+      "Event_0e3j88g": "INACTIVE",
+      "Event_1o9guxu": "DONE",
+      "Event_194zr5n": "INACTIVE",
+      "Activity_12arovy": "DONE"
+    },
+    "final_globals": {
+      "ProductAvalibale": "true",
+      "PriceOK": "true",
+      "Discount": "false"
+    }
+  }
+}

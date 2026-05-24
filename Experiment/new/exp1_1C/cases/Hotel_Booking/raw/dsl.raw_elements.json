@@ -1,0 +1,278 @@
+[
+  {
+    "id": "Participant_1080bkg",
+    "name": "Client",
+    "is_multi": false,
+    "metadata": {
+      "msp": "ClientMSP",
+      "x509": "",
+      "attributes": {
+        "role": "Client"
+      }
+    }
+  },
+  {
+    "id": "Participant_0sktaei",
+    "name": "Hotel",
+    "is_multi": false,
+    "metadata": {
+      "msp": "HotelMSP",
+      "x509": "",
+      "attributes": {
+        "role": "Hotel"
+      }
+    }
+  },
+  {
+    "id": "Message_045i10y",
+    "type": "message",
+    "sender": "Participant_1080bkg",
+    "receiver": "Participant_0sktaei",
+    "schema": "{\"properties\":{\"date\":{\"type\":\"string\",\"description\":\"\"},\"bedrooms\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"date\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_04ikf2n",
+    "type": "message",
+    "sender": "Participant_0sktaei",
+    "receiver": "Participant_1080bkg",
+    "schema": "{\"properties\":{\"discount2\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0m9p3da",
+    "type": "message",
+    "sender": "Participant_1080bkg",
+    "receiver": "Participant_0sktaei",
+    "schema": "{\"properties\":{\"cancel\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"cancel\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0o8eyir",
+    "type": "message",
+    "sender": "Participant_1080bkg",
+    "receiver": "Participant_0sktaei",
+    "schema": "{\"properties\":{\"payableto\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"payableto\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0r9lypd",
+    "type": "message",
+    "sender": "Participant_0sktaei",
+    "receiver": "Participant_1080bkg",
+    "schema": "{\"properties\":{\"confirm\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"confirm\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0vlxzcv",
+    "type": "message",
+    "sender": "Participant_0sktaei",
+    "receiver": "Participant_1080bkg",
+    "schema": "{\"properties\":{\"discount1\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"discount1\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_104h2tt",
+    "type": "message",
+    "sender": "Participant_1080bkg",
+    "receiver": "Participant_0sktaei",
+    "schema": "{\"properties\":{\"VIPpoints\":{\"type\":\"number\",\"description\":\"\"},\"VIPcardId\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"VIPpoints\",\"VIPcardId\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1em0ee4",
+    "type": "message",
+    "sender": "Participant_0sktaei",
+    "receiver": "Participant_1080bkg",
+    "schema": "{\"properties\":{\"quotation\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"quotation\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1etcmvl",
+    "type": "message",
+    "sender": "Participant_0sktaei",
+    "receiver": "Participant_1080bkg",
+    "schema": "{\"properties\":{\"payableto\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"payableto\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1joj7ca",
+    "type": "message",
+    "sender": "Participant_1080bkg",
+    "receiver": "Participant_0sktaei",
+    "schema": "{\"properties\":{\"ID\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"ID\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1ljlm4g",
+    "type": "message",
+    "sender": "Participant_0sktaei",
+    "receiver": "Participant_1080bkg",
+    "schema": "{\"properties\":{\"booking_id\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"booking_id\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1nlagx2",
+    "type": "message",
+    "sender": "Participant_1080bkg",
+    "receiver": "Participant_0sktaei",
+    "schema": "{\"properties\":{\"confirmation\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"confirmation\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1xm9dxy",
+    "type": "message",
+    "sender": "Participant_1080bkg",
+    "receiver": "Participant_0sktaei",
+    "schema": "{\"properties\":{\"motivation\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"motivation\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "ExclusiveGateway_106je4z",
+    "type": "gateway",
+    "gateway_type": "exclusive",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "ExclusiveGateway_0hs3ztq",
+    "type": "gateway",
+    "gateway_type": "exclusive",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "ExclusiveGateway_0nzwv7v",
+    "type": "gateway",
+    "gateway_type": "exclusive",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_1jhfnrm",
+    "type": "gateway",
+    "gateway_type": "exclusive",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_1atxr3y",
+    "type": "gateway",
+    "gateway_type": "exclusive",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "EventBasedGateway_1fxpmyn",
+    "type": "gateway",
+    "gateway_type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "StartEvent_1jtgn3j",
+    "type": "event",
+    "initial_state": "READY"
+  },
+  {
+    "id": "EndEvent_0366pfz",
+    "type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "EndEvent_08edp7f",
+    "type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "EndEvent_146eii4",
+    "type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Activity_0b1f7uv",
+    "type": "businessrule",
+    "inputs": [
+      [
+        "VIPpoints",
+        "VIPpoints"
+      ]
+    ],
+    "outputs": [
+      [
+        "VIPLevel",
+        "VIPLevel"
+      ]
+    ],
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "ID",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "VIPLevel",
+    "type": "global",
+    "dsl_type": "int"
+  },
+  {
+    "id": "VIPcardId",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "VIPpoints",
+    "type": "global",
+    "dsl_type": "int"
+  },
+  {
+    "id": "Bedrooms",
+    "type": "global",
+    "dsl_type": "int"
+  },
+  {
+    "id": "Booking_id",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Cancel",
+    "type": "global",
+    "dsl_type": "bool"
+  },
+  {
+    "id": "Confirm",
+    "type": "global",
+    "dsl_type": "bool"
+  },
+  {
+    "id": "Confirmation",
+    "type": "global",
+    "dsl_type": "bool"
+  },
+  {
+    "id": "Date",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Discount1",
+    "type": "global",
+    "dsl_type": "int"
+  },
+  {
+    "id": "Discount2",
+    "type": "global",
+    "dsl_type": "int"
+  },
+  {
+    "id": "Motivation",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Payableto",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Quotation",
+    "type": "global",
+    "dsl_type": "int"
+  }
+]

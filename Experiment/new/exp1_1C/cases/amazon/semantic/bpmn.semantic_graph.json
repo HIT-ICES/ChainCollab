@@ -1,0 +1,416 @@
+{
+  "schema_version": "exp1c.ubts.v1",
+  "case_name": "amazon",
+  "model_type": "bpmn",
+  "formalism": "UBTS/GLSTS JSON implementation",
+  "participants": [
+    {
+      "id": "Participant_1p9owwo",
+      "name": "amazon support center",
+      "is_multi": false,
+      "metadata": {
+        "msp": "Amazon_support_centerMSP",
+        "x509": "",
+        "attributes": {
+          "role": "amazon support center"
+        }
+      }
+    },
+    {
+      "id": "Participant_12df78t",
+      "name": "customer",
+      "is_multi": false,
+      "metadata": {
+        "msp": "CustomerMSP",
+        "x509": "",
+        "attributes": {
+          "role": "customer"
+        }
+      }
+    }
+  ],
+  "nodes": [
+    {
+      "id": "Message_01jq2zl",
+      "type": "message",
+      "sender": "Participant_1p9owwo",
+      "receiver": "Participant_12df78t",
+      "schema": "{\"properties\":{\"amount\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"amount\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_068kmzv",
+      "type": "message",
+      "sender": "Participant_12df78t",
+      "receiver": "Participant_1p9owwo",
+      "schema": "{\"properties\":{\"time\":{\"type\":\"string\",\"description\":\"\"},\"instance ID\":{\"type\":\"string\",\"description\":\"\"},\"logs\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"time\",\"instance ID\",\"logs\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_076ulzs",
+      "type": "message",
+      "sender": "Participant_12df78t",
+      "receiver": "Participant_1p9owwo",
+      "schema": "{\"properties\":{\"time\":{\"type\":\"string\",\"description\":\"\"},\"description\":{\"type\":\"string\",\"description\":\"\"},\"EC2 resource ID\":{\"type\":\"string\",\"description\":\"\"},\"logs\":{\"type\":\"string\",\"description\":\"\"},\"other information\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"time\",\"description\",\"EC2 resource ID\",\"logs\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_09krt7c",
+      "type": "message",
+      "sender": "Participant_12df78t",
+      "receiver": "Participant_1p9owwo",
+      "schema": "{\"properties\":{\"question name\":{\"type\":\"string\",\"description\":\"\"},\"description\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"question name\",\"description\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_0ywghlt",
+      "type": "message",
+      "sender": "Participant_12df78t",
+      "receiver": "Participant_1p9owwo",
+      "schema": "{\"properties\":{\"serviceType\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"serviceType\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_12n6jjk",
+      "type": "message",
+      "sender": "Participant_12df78t",
+      "receiver": "Participant_1p9owwo",
+      "schema": "{\"properties\":{\"requestType\":{\"type\":\"string\",\"description\":\"\"},\"duration\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"requestType\",\"duration\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_1b1qlzd",
+      "type": "message",
+      "sender": "Participant_1p9owwo",
+      "receiver": "Participant_12df78t",
+      "schema": "{\"properties\":{\"reason\":{\"type\":\"string\",\"description\":\"\"},\"result\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"reason\",\"result\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_1bhhp1n",
+      "type": "message",
+      "sender": "Participant_12df78t",
+      "receiver": "Participant_1p9owwo",
+      "schema": "{\"properties\":{\"serviceType\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"serviceType\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Gateway_0auc3he",
+      "type": "gateway",
+      "gateway_type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Gateway_0ivv4vg",
+      "type": "gateway",
+      "gateway_type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Gateway_0jgq0a6",
+      "type": "gateway",
+      "gateway_type": "event",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Event_0ojehz6",
+      "type": "event",
+      "initial_state": "READY"
+    },
+    {
+      "id": "Event_0ci2gl8",
+      "type": "event",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Event_0dyp0ut",
+      "type": "event",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Activity_0tya4bp",
+      "type": "businessrule",
+      "inputs": [
+        [
+          "duration",
+          "Duration"
+        ],
+        [
+          "requestType",
+          "RequestType"
+        ]
+      ],
+      "outputs": [
+        [
+          "confirm",
+          "Confirm"
+        ]
+      ],
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "globals": {
+    "EC2_resource_ID": "string",
+    "Amount": "int",
+    "Confirm": "bool",
+    "Description": "string",
+    "Duration": "int",
+    "Instance_ID": "string",
+    "Logs": "string",
+    "Other_information": "string",
+    "Question_name": "string",
+    "Reason": "string",
+    "RequestType": "string",
+    "Result": "string",
+    "ServiceType": "string",
+    "Time": "string"
+  },
+  "dmn_outputs": {
+    "confirm": [
+      "false",
+      "true"
+    ]
+  },
+  "transitions": [
+    {
+      "id": "r_001",
+      "template_kind": "start",
+      "trigger": "Event_0ojehz6",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_09krt7c"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_002",
+      "template_kind": "message",
+      "trigger": "Message_09krt7c",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Gateway_0jgq0a6"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_003",
+      "template_kind": "message",
+      "trigger": "Message_0ywghlt",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "disable",
+          "target": "Message_1bhhp1n"
+        },
+        {
+          "op": "enable",
+          "target": "Message_068kmzv"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_004",
+      "template_kind": "message",
+      "trigger": "Message_1bhhp1n",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "disable",
+          "target": "Message_0ywghlt"
+        },
+        {
+          "op": "enable",
+          "target": "Message_076ulzs"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_005",
+      "template_kind": "message",
+      "trigger": "Message_068kmzv",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Gateway_0auc3he"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_006",
+      "template_kind": "message",
+      "trigger": "Message_076ulzs",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Gateway_0auc3he"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_007",
+      "template_kind": "message",
+      "trigger": "Message_12n6jjk",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Activity_0tya4bp"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_008",
+      "template_kind": "message",
+      "trigger": "Message_1b1qlzd",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Event_0dyp0ut"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_009",
+      "template_kind": "message",
+      "trigger": "Message_01jq2zl",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Event_0ci2gl8"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_010",
+      "template_kind": "gateway",
+      "trigger": "Gateway_0auc3he",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_12n6jjk"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_011",
+      "template_kind": "gateway",
+      "trigger": "Gateway_0jgq0a6",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_0ywghlt"
+        },
+        {
+          "op": "enable",
+          "target": "Message_1bhhp1n"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_012",
+      "template_kind": "gateway_choose",
+      "trigger": "Gateway_0ivv4vg",
+      "guard": null,
+      "actions": [],
+      "branches": [
+        {
+          "guard": "Confirm == false",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "Message_1b1qlzd"
+            }
+          ]
+        },
+        {
+          "guard": "Confirm == true",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "Message_01jq2zl"
+            }
+          ]
+        }
+      ],
+      "sources": []
+    },
+    {
+      "id": "r_013",
+      "template_kind": "businessrule",
+      "trigger": "Activity_0tya4bp",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Gateway_0ivv4vg"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_014",
+      "template_kind": "end_event",
+      "trigger": "Event_0ci2gl8",
+      "guard": null,
+      "actions": [],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_015",
+      "template_kind": "end_event",
+      "trigger": "Event_0dyp0ut",
+      "guard": null,
+      "actions": [],
+      "branches": [],
+      "sources": []
+    }
+  ],
+  "start_nodes": [
+    "Event_0ojehz6"
+  ],
+  "end_nodes": [
+    "Event_0ci2gl8",
+    "Event_0dyp0ut"
+  ],
+  "state_model": [
+    "INIT",
+    "READY",
+    "PENDING_CONFIRMATION",
+    "DONE",
+    "INACTIVE"
+  ]
+}

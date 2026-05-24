@@ -1,0 +1,192 @@
+[
+  {
+    "id": "MessageFlow_0axr6ym",
+    "type": "bpmn:messageFlow",
+    "source": "Participant_0tkhpj2",
+    "target": "Participant_0ggs0ck",
+    "attrs": {
+      "message": "Message_13mh6mk",
+      "name": ""
+    }
+  },
+  {
+    "id": "MessageFlow_1ueexfr",
+    "type": "bpmn:messageFlow",
+    "source": "Participant_0tkhpj2",
+    "target": "Participant_0ggs0ck",
+    "attrs": {
+      "message": "Message_0gd0z61",
+      "name": ""
+    }
+  },
+  {
+    "id": "MessageFlow_09o9s93",
+    "type": "bpmn:messageFlow",
+    "source": "Participant_0ggs0ck",
+    "target": "Participant_0tkhpj2",
+    "attrs": {
+      "message": "Message_1rqbibd",
+      "name": ""
+    }
+  },
+  {
+    "id": "MessageFlow_0r5mbr1",
+    "type": "bpmn:messageFlow",
+    "source": "Participant_1v6wnpq",
+    "target": "Participant_0ggs0ck",
+    "attrs": {
+      "message": "Message_1vzqd37",
+      "name": ""
+    }
+  },
+  {
+    "id": "MessageFlow_0vz56a0",
+    "type": "bpmn:messageFlow",
+    "source": "Participant_0ggs0ck",
+    "target": "Participant_0tkhpj2",
+    "attrs": {
+      "message": "Message_0wq8mc6",
+      "name": ""
+    }
+  },
+  {
+    "id": "MessageFlow_16uaf5s",
+    "type": "bpmn:messageFlow",
+    "source": "Participant_0ggs0ck",
+    "target": "Participant_1v6wnpq",
+    "attrs": {
+      "message": "Message_0gswvmq",
+      "name": ""
+    }
+  },
+  {
+    "id": "SequenceFlow_003ukt2",
+    "type": "bpmn:sequenceFlow",
+    "source": "StartEvent_0m7hz56",
+    "target": "ParallelGateway_1pgjqtw",
+    "attrs": {
+      "name": "",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "SequenceFlow_1508by9",
+    "type": "bpmn:sequenceFlow",
+    "source": "ParallelGateway_1pgjqtw",
+    "target": "ChoreographyTask_10lckh7",
+    "attrs": {
+      "name": "",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "SequenceFlow_0vcyll2",
+    "type": "bpmn:sequenceFlow",
+    "source": "ParallelGateway_1pgjqtw",
+    "target": "ChoreographyTask_131v44n",
+    "attrs": {
+      "name": "",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "SequenceFlow_1pwdk1i",
+    "type": "bpmn:sequenceFlow",
+    "source": "ChoreographyTask_10lckh7",
+    "target": "ChoreographyTask_1732eky",
+    "attrs": {
+      "name": "",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "SequenceFlow_1muj86l",
+    "type": "bpmn:sequenceFlow",
+    "source": "ChoreographyTask_1bkb191",
+    "target": "Activity_1mj4mr7",
+    "attrs": {
+      "name": "",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "Flow_0xlfi9k",
+    "type": "bpmn:sequenceFlow",
+    "source": "Activity_1mj4mr7",
+    "target": "Gateway_0o8snyv",
+    "attrs": {
+      "name": "",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "Flow_1mgir0p",
+    "type": "bpmn:sequenceFlow",
+    "source": "Gateway_0o8snyv",
+    "target": "EndEvent_110myff",
+    "attrs": {
+      "name": "FurtherCheck==false",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "Flow_0yz57zs",
+    "type": "bpmn:sequenceFlow",
+    "source": "Gateway_0o8snyv",
+    "target": "ChoreographyTask_1qmxi43",
+    "attrs": {
+      "name": "FurtherCheck==true",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "Flow_0nnch33",
+    "type": "bpmn:sequenceFlow",
+    "source": "ChoreographyTask_1qmxi43",
+    "target": "EndEvent_110myff",
+    "attrs": {
+      "name": "",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "Flow_140jch4",
+    "type": "bpmn:sequenceFlow",
+    "source": "ChoreographyTask_1732eky",
+    "target": "Gateway_1m6dgym",
+    "attrs": {
+      "name": "",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "Flow_02kp0tj",
+    "type": "bpmn:sequenceFlow",
+    "source": "ChoreographyTask_0rxioe7",
+    "target": "Gateway_1m6dgym",
+    "attrs": {
+      "name": "",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "Flow_1f4e65t",
+    "type": "bpmn:sequenceFlow",
+    "source": "Gateway_1m6dgym",
+    "target": "ChoreographyTask_1bkb191",
+    "attrs": {
+      "name": "",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "Flow_1o58bqb",
+    "type": "bpmn:sequenceFlow",
+    "source": "ChoreographyTask_131v44n",
+    "target": "ChoreographyTask_0rxioe7",
+    "attrs": {
+      "name": "",
+      "condition_expression": null
+    }
+  }
+]

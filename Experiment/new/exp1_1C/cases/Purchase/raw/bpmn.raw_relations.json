@@ -1,0 +1,232 @@
+[
+  {
+    "id": "MessageFlow_0bp7p12",
+    "type": "bpmn:messageFlow",
+    "source": "Participant_0oa2za9",
+    "target": "Participant_0jwk4tk",
+    "attrs": {
+      "message": "Message_15b83n1",
+      "name": ""
+    }
+  },
+  {
+    "id": "MessageFlow_1qi88x8",
+    "type": "bpmn:messageFlow",
+    "source": "Participant_0jwk4tk",
+    "target": "Participant_0oa2za9",
+    "attrs": {
+      "message": "Message_08ms1jj",
+      "name": ""
+    }
+  },
+  {
+    "id": "MessageFlow_0nq8x22",
+    "type": "bpmn:messageFlow",
+    "source": "Participant_0jwk4tk",
+    "target": "Participant_0oa2za9",
+    "attrs": {
+      "message": "Message_0mcktm6",
+      "name": ""
+    }
+  },
+  {
+    "id": "MessageFlow_18hgpre",
+    "type": "bpmn:messageFlow",
+    "source": "Participant_0jwk4tk",
+    "target": "Participant_0oa2za9",
+    "attrs": {
+      "message": "Message_0q9hvem",
+      "name": ""
+    }
+  },
+  {
+    "id": "MessageFlow_0s1vo46",
+    "type": "bpmn:messageFlow",
+    "source": "Participant_0jwk4tk",
+    "target": "Participant_0oa2za9",
+    "attrs": {
+      "message": "Message_05gz8u0",
+      "name": ""
+    }
+  },
+  {
+    "id": "MessageFlow_0tb3its",
+    "type": "bpmn:messageFlow",
+    "source": "Participant_0oa2za9",
+    "target": "Participant_0jwk4tk",
+    "attrs": {
+      "message": "Message_0g7m9tf",
+      "name": ""
+    }
+  },
+  {
+    "id": "MessageFlow_0m4bfnr",
+    "type": "bpmn:messageFlow",
+    "source": "Participant_0oa2za9",
+    "target": "Participant_0jwk4tk",
+    "attrs": {
+      "message": "Message_14wu8ts",
+      "name": ""
+    }
+  },
+  {
+    "id": "MessageFlow_0xexblk",
+    "type": "bpmn:messageFlow",
+    "source": "Participant_0oa2za9",
+    "target": "Participant_0jwk4tk",
+    "attrs": {
+      "message": "Message_1f0gefc",
+      "name": ""
+    }
+  },
+  {
+    "id": "Flow_0ylolin",
+    "type": "bpmn:sequenceFlow",
+    "source": "Event_0ehnwwz",
+    "target": "ChoreographyTask_1d8axmm",
+    "attrs": {
+      "name": "",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "Flow_1a8wuhd",
+    "type": "bpmn:sequenceFlow",
+    "source": "ChoreographyTask_1d8axmm",
+    "target": "Gateway_1ltys0e",
+    "attrs": {
+      "name": "",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "Flow_07aezih",
+    "type": "bpmn:sequenceFlow",
+    "source": "Gateway_1ltys0e",
+    "target": "ChoreographyTask_01rdy6m",
+    "attrs": {
+      "name": "productAvalibale==true",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "Flow_0qarc3k",
+    "type": "bpmn:sequenceFlow",
+    "source": "Gateway_1ltys0e",
+    "target": "ChoreographyTask_0huz12d",
+    "attrs": {
+      "name": "productAvalibale==false",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "Flow_0r96jzq",
+    "type": "bpmn:sequenceFlow",
+    "source": "ChoreographyTask_01rdy6m",
+    "target": "Gateway_025uwvp",
+    "attrs": {
+      "name": "",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "Flow_1alyrr0",
+    "type": "bpmn:sequenceFlow",
+    "source": "Gateway_025uwvp",
+    "target": "ChoreographyTask_13g05bg",
+    "attrs": {
+      "name": "priceOK==true",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "Flow_1eug3xo",
+    "type": "bpmn:sequenceFlow",
+    "source": "Gateway_025uwvp",
+    "target": "ChoreographyTask_1k9vb6k",
+    "attrs": {
+      "name": "priceOK==false",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "Flow_0zetv07",
+    "type": "bpmn:sequenceFlow",
+    "source": "ChoreographyTask_1k9vb6k",
+    "target": "Event_0e3j88g",
+    "attrs": {
+      "name": "",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "Flow_0qasdjj",
+    "type": "bpmn:sequenceFlow",
+    "source": "ChoreographyTask_1yl8kdd",
+    "target": "Event_1o9guxu",
+    "attrs": {
+      "name": "",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "Flow_1w7smbz",
+    "type": "bpmn:sequenceFlow",
+    "source": "ChoreographyTask_0huz12d",
+    "target": "Event_194zr5n",
+    "attrs": {
+      "name": "",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "Flow_0lnnht6",
+    "type": "bpmn:sequenceFlow",
+    "source": "ChoreographyTask_13g05bg",
+    "target": "Activity_12arovy",
+    "attrs": {
+      "name": "",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "Flow_1ocsrxv",
+    "type": "bpmn:sequenceFlow",
+    "source": "Activity_12arovy",
+    "target": "Gateway_13i0b7w",
+    "attrs": {
+      "name": "",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "Flow_0jqgl6j",
+    "type": "bpmn:sequenceFlow",
+    "source": "Gateway_13i0b7w",
+    "target": "ChoreographyTask_1yl8kdd",
+    "attrs": {
+      "name": "discount==false",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "Flow_1j4bvpd",
+    "type": "bpmn:sequenceFlow",
+    "source": "Gateway_13i0b7w",
+    "target": "ChoreographyTask_06fwl21",
+    "attrs": {
+      "name": "discount==true",
+      "condition_expression": null
+    }
+  },
+  {
+    "id": "Flow_0lon5nm",
+    "type": "bpmn:sequenceFlow",
+    "source": "ChoreographyTask_06fwl21",
+    "target": "ChoreographyTask_1yl8kdd",
+    "attrs": {
+      "name": "",
+      "condition_expression": null
+    }
+  }
+]

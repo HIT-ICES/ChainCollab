@@ -1,0 +1,214 @@
+[
+  {
+    "id": "Participant_1p9owwo",
+    "name": "amazon support center",
+    "is_multi": false,
+    "metadata": {
+      "msp": "Amazon_support_centerMSP",
+      "x509": "",
+      "attributes": {
+        "role": "amazon support center"
+      }
+    }
+  },
+  {
+    "id": "Participant_12df78t",
+    "name": "customer",
+    "is_multi": false,
+    "metadata": {
+      "msp": "CustomerMSP",
+      "x509": "",
+      "attributes": {
+        "role": "customer"
+      }
+    }
+  },
+  {
+    "id": "Message_01jq2zl",
+    "type": "message",
+    "sender": "Participant_1p9owwo",
+    "receiver": "Participant_12df78t",
+    "schema": "{\"properties\":{\"amount\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"amount\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_068kmzv",
+    "type": "message",
+    "sender": "Participant_12df78t",
+    "receiver": "Participant_1p9owwo",
+    "schema": "{\"properties\":{\"time\":{\"type\":\"string\",\"description\":\"\"},\"instance ID\":{\"type\":\"string\",\"description\":\"\"},\"logs\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"time\",\"instance ID\",\"logs\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_076ulzs",
+    "type": "message",
+    "sender": "Participant_12df78t",
+    "receiver": "Participant_1p9owwo",
+    "schema": "{\"properties\":{\"time\":{\"type\":\"string\",\"description\":\"\"},\"description\":{\"type\":\"string\",\"description\":\"\"},\"EC2 resource ID\":{\"type\":\"string\",\"description\":\"\"},\"logs\":{\"type\":\"string\",\"description\":\"\"},\"other information\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"time\",\"description\",\"EC2 resource ID\",\"logs\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_09krt7c",
+    "type": "message",
+    "sender": "Participant_12df78t",
+    "receiver": "Participant_1p9owwo",
+    "schema": "{\"properties\":{\"question name\":{\"type\":\"string\",\"description\":\"\"},\"description\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"question name\",\"description\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0ywghlt",
+    "type": "message",
+    "sender": "Participant_12df78t",
+    "receiver": "Participant_1p9owwo",
+    "schema": "{\"properties\":{\"serviceType\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"serviceType\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_12n6jjk",
+    "type": "message",
+    "sender": "Participant_12df78t",
+    "receiver": "Participant_1p9owwo",
+    "schema": "{\"properties\":{\"requestType\":{\"type\":\"string\",\"description\":\"\"},\"duration\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"requestType\",\"duration\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1b1qlzd",
+    "type": "message",
+    "sender": "Participant_1p9owwo",
+    "receiver": "Participant_12df78t",
+    "schema": "{\"properties\":{\"reason\":{\"type\":\"string\",\"description\":\"\"},\"result\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"reason\",\"result\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1bhhp1n",
+    "type": "message",
+    "sender": "Participant_12df78t",
+    "receiver": "Participant_1p9owwo",
+    "schema": "{\"properties\":{\"serviceType\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"serviceType\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_0auc3he",
+    "type": "gateway",
+    "gateway_type": "exclusive",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_0ivv4vg",
+    "type": "gateway",
+    "gateway_type": "exclusive",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_0jgq0a6",
+    "type": "gateway",
+    "gateway_type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Event_0ojehz6",
+    "type": "event",
+    "initial_state": "READY"
+  },
+  {
+    "id": "Event_0ci2gl8",
+    "type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Event_0dyp0ut",
+    "type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Activity_0tya4bp",
+    "type": "businessrule",
+    "inputs": [
+      [
+        "duration",
+        "Duration"
+      ],
+      [
+        "requestType",
+        "RequestType"
+      ]
+    ],
+    "outputs": [
+      [
+        "confirm",
+        "Confirm"
+      ]
+    ],
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "EC2_resource_ID",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Amount",
+    "type": "global",
+    "dsl_type": "int"
+  },
+  {
+    "id": "Confirm",
+    "type": "global",
+    "dsl_type": "bool"
+  },
+  {
+    "id": "Description",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Duration",
+    "type": "global",
+    "dsl_type": "int"
+  },
+  {
+    "id": "Instance_ID",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Logs",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Other_information",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Question_name",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Reason",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "RequestType",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Result",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "ServiceType",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Time",
+    "type": "global",
+    "dsl_type": "string"
+  }
+]

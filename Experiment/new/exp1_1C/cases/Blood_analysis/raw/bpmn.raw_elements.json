@@ -1,0 +1,298 @@
+[
+  {
+    "id": "Message_13mh6mk",
+    "type": "bpmn:message",
+    "name": "report",
+    "attrs": {
+      "id": "Message_13mh6mk",
+      "name": "report",
+      "documentation": "{\"properties\":{\"reportContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"reportContent\"],\"files\":{},\"file required\":[]}",
+      "documentation_json": {
+        "properties": {
+          "reportContent": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "reportContent"
+        ],
+        "files": {},
+        "file required": []
+      }
+    }
+  },
+  {
+    "id": "Message_0gd0z61",
+    "type": "bpmn:message",
+    "name": "furtherCheck",
+    "attrs": {
+      "id": "Message_0gd0z61",
+      "name": "furtherCheck",
+      "documentation": "{\"properties\":{\"furtherCheckPlace\":{\"type\":\"string\",\"description\":\"\"},\"furtherCheckDate\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"furtherCheckPlace\",\"furtherCheckDate\"],\"files\":{},\"file required\":[]}",
+      "documentation_json": {
+        "properties": {
+          "furtherCheckPlace": {
+            "type": "string",
+            "description": ""
+          },
+          "furtherCheckDate": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "furtherCheckPlace",
+          "furtherCheckDate"
+        ],
+        "files": {},
+        "file required": []
+      }
+    }
+  },
+  {
+    "id": "Message_1rqbibd",
+    "type": "bpmn:message",
+    "name": "bloodResults",
+    "attrs": {
+      "id": "Message_1rqbibd",
+      "name": "bloodResults",
+      "documentation": "{\"properties\":{\"result\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"result\"],\"files\":{},\"file required\":[]}",
+      "documentation_json": {
+        "properties": {
+          "result": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "files": {},
+        "file required": []
+      }
+    }
+  },
+  {
+    "id": "Message_1vzqd37",
+    "type": "bpmn:message",
+    "name": "result",
+    "attrs": {
+      "id": "Message_1vzqd37",
+      "name": "result",
+      "documentation": "{\"properties\":{\"result\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"result\"],\"files\":{},\"file required\":[]}",
+      "documentation_json": {
+        "properties": {
+          "result": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "files": {},
+        "file required": []
+      }
+    }
+  },
+  {
+    "id": "Message_0wq8mc6",
+    "type": "bpmn:message",
+    "name": "data",
+    "attrs": {
+      "id": "Message_0wq8mc6",
+      "name": "data",
+      "documentation": "{\"properties\":{\"patientData\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"patientData\"],\"files\":{},\"file required\":[]}",
+      "documentation_json": {
+        "properties": {
+          "patientData": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "patientData"
+        ],
+        "files": {},
+        "file required": []
+      }
+    }
+  },
+  {
+    "id": "Message_0gswvmq",
+    "type": "bpmn:message",
+    "name": "sample",
+    "attrs": {
+      "id": "Message_0gswvmq",
+      "name": "sample",
+      "documentation": "{\"properties\":{\"sample\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"sample\"],\"files\":{},\"file required\":[]}",
+      "documentation_json": {
+        "properties": {
+          "sample": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "sample"
+        ],
+        "files": {},
+        "file required": []
+      }
+    }
+  },
+  {
+    "id": "Participant_0ggs0ck",
+    "type": "bpmn:participant",
+    "name": "Gynecologist",
+    "attrs": {
+      "id": "Participant_0ggs0ck",
+      "name": "Gynecologist"
+    }
+  },
+  {
+    "id": "Participant_1v6wnpq",
+    "type": "bpmn:participant",
+    "name": "Lab",
+    "attrs": {
+      "id": "Participant_1v6wnpq",
+      "name": "Lab"
+    }
+  },
+  {
+    "id": "Participant_0tkhpj2",
+    "type": "bpmn:participant",
+    "name": "Hospital",
+    "attrs": {
+      "id": "Participant_0tkhpj2",
+      "name": "Hospital"
+    }
+  },
+  {
+    "id": "StartEvent_0m7hz56",
+    "type": "bpmn:startEvent",
+    "name": "",
+    "attrs": {
+      "id": "StartEvent_0m7hz56"
+    }
+  },
+  {
+    "id": "ParallelGateway_1pgjqtw",
+    "type": "bpmn:parallelGateway",
+    "name": "",
+    "attrs": {
+      "id": "ParallelGateway_1pgjqtw"
+    }
+  },
+  {
+    "id": "ChoreographyTask_10lckh7",
+    "type": "bpmn:choreographyTask",
+    "name": "Take sample",
+    "attrs": {
+      "id": "ChoreographyTask_10lckh7",
+      "name": "Take sample",
+      "initiatingParticipantRef": "Participant_0ggs0ck"
+    }
+  },
+  {
+    "id": "ChoreographyTask_131v44n",
+    "type": "bpmn:choreographyTask",
+    "name": "Give patient data",
+    "attrs": {
+      "id": "ChoreographyTask_131v44n",
+      "name": "Give patient data",
+      "initiatingParticipantRef": "Participant_0ggs0ck"
+    }
+  },
+  {
+    "id": "ChoreographyTask_1732eky",
+    "type": "bpmn:choreographyTask",
+    "name": "Give result",
+    "attrs": {
+      "id": "ChoreographyTask_1732eky",
+      "name": "Give result",
+      "initiatingParticipantRef": "Participant_1v6wnpq"
+    }
+  },
+  {
+    "id": "ChoreographyTask_1bkb191",
+    "type": "bpmn:choreographyTask",
+    "name": "Blood test results",
+    "attrs": {
+      "id": "ChoreographyTask_1bkb191",
+      "name": "Blood test results",
+      "initiatingParticipantRef": "Participant_0ggs0ck"
+    }
+  },
+  {
+    "id": "EndEvent_110myff",
+    "type": "bpmn:endEvent",
+    "name": "",
+    "attrs": {
+      "id": "EndEvent_110myff"
+    }
+  },
+  {
+    "id": "Activity_1mj4mr7",
+    "type": "bpmn:businessRuleTask",
+    "name": "blood",
+    "attrs": {
+      "id": "Activity_1mj4mr7",
+      "name": "blood",
+      "documentation": "{\"inputs\":[{\"name\":\"result\",\"type\":\"string\",\"description\":\"\"}],\"outputs\":[{\"name\":\"FurtherCheck\",\"type\":\"boolean\",\"description\":\"\"}]}",
+      "documentation_json": {
+        "inputs": [
+          {
+            "name": "result",
+            "type": "string",
+            "description": ""
+          }
+        ],
+        "outputs": [
+          {
+            "name": "FurtherCheck",
+            "type": "boolean",
+            "description": ""
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "Gateway_0o8snyv",
+    "type": "bpmn:exclusiveGateway",
+    "name": "",
+    "attrs": {
+      "id": "Gateway_0o8snyv"
+    }
+  },
+  {
+    "id": "ChoreographyTask_1qmxi43",
+    "type": "bpmn:choreographyTask",
+    "name": "DoFurtherCheck",
+    "attrs": {
+      "id": "ChoreographyTask_1qmxi43",
+      "name": "DoFurtherCheck",
+      "initiatingParticipantRef": "Participant_0tkhpj2"
+    }
+  },
+  {
+    "id": "Gateway_1m6dgym",
+    "type": "bpmn:parallelGateway",
+    "name": "",
+    "attrs": {
+      "id": "Gateway_1m6dgym"
+    }
+  },
+  {
+    "id": "ChoreographyTask_0rxioe7",
+    "type": "bpmn:choreographyTask",
+    "name": "report",
+    "attrs": {
+      "id": "ChoreographyTask_0rxioe7",
+      "name": "report",
+      "initiatingParticipantRef": "Participant_0tkhpj2"
+    }
+  }
+]

@@ -1,0 +1,215 @@
+[
+  {
+    "id": "Participant_1xq1vsc",
+    "name": "Manufacturer",
+    "is_multi": false,
+    "metadata": {
+      "msp": "ManufacturerMSP",
+      "x509": "",
+      "attributes": {
+        "role": "Manufacturer"
+      }
+    }
+  },
+  {
+    "id": "Participant_05g5xih",
+    "name": "Customer",
+    "is_multi": false,
+    "metadata": {
+      "msp": "CustomerMSP",
+      "x509": "",
+      "attributes": {
+        "role": "Customer"
+      }
+    }
+  },
+  {
+    "id": "Message_00wpjke",
+    "type": "message",
+    "sender": "Participant_1xq1vsc",
+    "receiver": "Participant_05g5xih",
+    "schema": "{\"properties\":{\"QuoteRequest\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"QuoteRequest\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_03was4c",
+    "type": "message",
+    "sender": "Participant_1xq1vsc",
+    "receiver": "Participant_05g5xih",
+    "schema": "{\"properties\":{\"confirm message\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"confirm message\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_05uqcn2",
+    "type": "message",
+    "sender": "Participant_1xq1vsc",
+    "receiver": "Participant_05g5xih",
+    "schema": "{\"properties\":{\"payMethod\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0z8kf0j",
+    "type": "message",
+    "sender": "Participant_1xq1vsc",
+    "receiver": "Participant_05g5xih",
+    "schema": "{\"properties\":{\"cancelation\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"cancelation\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0zt8q9t",
+    "type": "message",
+    "sender": "Participant_05g5xih",
+    "receiver": "Participant_1xq1vsc",
+    "schema": "{\"properties\":{\"ConcelAck\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"ConcelAck\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_13l7271",
+    "type": "message",
+    "sender": "Participant_1xq1vsc",
+    "receiver": "Participant_05g5xih",
+    "schema": "{\"properties\":{\"payRecord\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1i5n14f",
+    "type": "message",
+    "sender": "Participant_05g5xih",
+    "receiver": "Participant_1xq1vsc",
+    "schema": "{\"properties\":{\"Fee\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1kazup6",
+    "type": "message",
+    "sender": "Participant_05g5xih",
+    "receiver": "Participant_1xq1vsc",
+    "schema": "{\"properties\":{\"QuoteContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"QuoteContent\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1y5d31x",
+    "type": "message",
+    "sender": "Participant_05g5xih",
+    "receiver": "Participant_1xq1vsc",
+    "schema": "{\"properties\":{\"OrderContent\":{\"type\":\"string\",\"description\":\"\"},\"OrderAmount\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"OrderContent\",\"OrderAmount\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1yln43l",
+    "type": "message",
+    "sender": "Participant_05g5xih",
+    "receiver": "Participant_1xq1vsc",
+    "schema": "{\"properties\":{\"InvoiceContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_19zzj3s",
+    "type": "gateway",
+    "gateway_type": "exclusive",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_085e7pr",
+    "type": "gateway",
+    "gateway_type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Event_0okhbce",
+    "type": "event",
+    "initial_state": "READY"
+  },
+  {
+    "id": "Event_0th6os0",
+    "type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Event_0awuo5v",
+    "type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Event_0zsq5na",
+    "type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Activity_1uktp5z",
+    "type": "businessrule",
+    "inputs": [
+      [
+        "OrderAmount",
+        "OrderAmount"
+      ]
+    ],
+    "outputs": [
+      [
+        "CancelFee",
+        "CancelFee"
+      ]
+    ],
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "CancelFee",
+    "type": "global",
+    "dsl_type": "bool"
+  },
+  {
+    "id": "ConcelAck",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Fee",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "InvoiceContent",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "OrderAmount",
+    "type": "global",
+    "dsl_type": "int"
+  },
+  {
+    "id": "OrderContent",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "QuoteContent",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "QuoteRequest",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Cancelation",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Confirm_message",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "PayMethod",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "PayRecord",
+    "type": "global",
+    "dsl_type": "string"
+  }
+]

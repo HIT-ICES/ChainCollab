@@ -1,0 +1,171 @@
+{
+  "case_name": "SupplyChain",
+  "path_name": "SupplyChain_dsl_path_002",
+  "description": "Auto materialized from BPMN/DSL consistent path by exp1_1C.",
+  "source_model": "/root/code/ChainCollab/Experiment/new/exp1_1C/cases/SupplyChain/translator/dsl.b2c",
+  "expect": "accepted",
+  "steps": [
+    {
+      "type": "event",
+      "element": "Event_06sexe6",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_1wswgqu",
+      "payload": {
+        "order": "sample-order",
+        "amount": 1
+      },
+      "guard": "completed",
+      "sender": "Participant_0w6qkdf",
+      "receiver": "Participant_19mgbdn"
+    },
+    {
+      "type": "message",
+      "element": "Message_1ajdm9l",
+      "payload": {
+        "placed_order": "sample-placed_order"
+      },
+      "guard": "completed",
+      "sender": "Participant_19mgbdn",
+      "receiver": "Participant_09cjol2"
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_0onpe6x",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_0pm90nx",
+      "payload": {
+        "transport_order": "sample-transport_order"
+      },
+      "guard": "completed",
+      "sender": "Participant_0w6qkdf",
+      "receiver": "Participant_19j1e3o"
+    },
+    {
+      "type": "message",
+      "element": "Message_0cba4t6",
+      "payload": {
+        "fwd_order": "sample-fwd_order"
+      },
+      "guard": "completed",
+      "sender": "Participant_0w6qkdf",
+      "receiver": "Participant_0sa2v7d"
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_1fbifca",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_0rwz1km",
+      "payload": {
+        "req_details": "sample-req_details"
+      },
+      "guard": "completed",
+      "sender": "Participant_19j1e3o",
+      "receiver": "Participant_0sa2v7d"
+    },
+    {
+      "type": "message",
+      "element": "Message_0hpha6h",
+      "payload": {
+        "pre_details": "sample-pre_details"
+      },
+      "guard": "completed",
+      "sender": "Participant_0sa2v7d",
+      "receiver": "Participant_19j1e3o"
+    },
+    {
+      "type": "message",
+      "element": "Message_1io2g9u",
+      "payload": {
+        "waybill": "sample-waybill"
+      },
+      "guard": "completed",
+      "sender": "Participant_0sa2v7d",
+      "receiver": "Participant_19j1e3o"
+    },
+    {
+      "type": "message",
+      "element": "Message_0d2xte5",
+      "payload": {
+        "del_order": "sample-del_order"
+      },
+      "guard": "completed",
+      "sender": "Participant_19j1e3o",
+      "receiver": "Participant_19mgbdn"
+    },
+    {
+      "type": "message",
+      "element": "Message_04wmlqe",
+      "payload": {
+        "report": "sample-report"
+      },
+      "guard": "completed",
+      "sender": "Participant_19mgbdn",
+      "receiver": "Participant_0w6qkdf"
+    },
+    {
+      "type": "message",
+      "element": "Message_0ps2yzo",
+      "payload": {
+        "Self_pickup": true
+      },
+      "guard": "completed",
+      "sender": "Participant_0w6qkdf",
+      "receiver": "Participant_19mgbdn"
+    },
+    {
+      "type": "businessrule",
+      "element": "Activity_0fbi09z",
+      "payload": {},
+      "guard": "dmn:decision_table_rows",
+      "outputs": {
+        "Deliver": "false"
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_11hmo2k",
+      "payload": {},
+      "guard": "Deliver == false"
+    },
+    {
+      "type": "event",
+      "element": "Event_0eoqvir",
+      "payload": {}
+    }
+  ],
+  "generated_path": {
+    "final_enabled_elements": [],
+    "final_element_states": {
+      "Message_04wmlqe": "DONE",
+      "Message_0cba4t6": "DONE",
+      "Message_0d2xte5": "DONE",
+      "Message_0hpha6h": "DONE",
+      "Message_0pm90nx": "DONE",
+      "Message_0ps2yzo": "DONE",
+      "Message_0rwz1km": "DONE",
+      "Message_196q1fj": "INACTIVE",
+      "Message_1ajdm9l": "DONE",
+      "Message_1io2g9u": "DONE",
+      "Message_1wswgqu": "DONE",
+      "Gateway_11hmo2k": "DONE",
+      "Gateway_0onpe6x": "DONE",
+      "Gateway_1fbifca": "DONE",
+      "Event_06sexe6": "DONE",
+      "Event_13pbqdz": "INACTIVE",
+      "Event_0eoqvir": "DONE",
+      "Activity_0fbi09z": "DONE"
+    },
+    "final_globals": {
+      "Deliver": "false"
+    }
+  }
+}

@@ -1,0 +1,166 @@
+[
+  {
+    "id": "Participant_0ggs0ck",
+    "name": "Gynecologist",
+    "is_multi": false,
+    "metadata": {
+      "msp": "GynecologistMSP",
+      "x509": "",
+      "attributes": {
+        "role": "Gynecologist"
+      }
+    }
+  },
+  {
+    "id": "Participant_1v6wnpq",
+    "name": "Lab",
+    "is_multi": false,
+    "metadata": {
+      "msp": "LabMSP",
+      "x509": "",
+      "attributes": {
+        "role": "Lab"
+      }
+    }
+  },
+  {
+    "id": "Participant_0tkhpj2",
+    "name": "Hospital",
+    "is_multi": false,
+    "metadata": {
+      "msp": "HospitalMSP",
+      "x509": "",
+      "attributes": {
+        "role": "Hospital"
+      }
+    }
+  },
+  {
+    "id": "Message_0gd0z61",
+    "type": "message",
+    "sender": "Participant_0tkhpj2",
+    "receiver": "Participant_0ggs0ck",
+    "schema": "{\"properties\":{\"furtherCheckPlace\":{\"type\":\"string\",\"description\":\"\"},\"furtherCheckDate\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"furtherCheckPlace\",\"furtherCheckDate\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0gswvmq",
+    "type": "message",
+    "sender": "Participant_0ggs0ck",
+    "receiver": "Participant_1v6wnpq",
+    "schema": "{\"properties\":{\"sample\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"sample\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0wq8mc6",
+    "type": "message",
+    "sender": "Participant_0ggs0ck",
+    "receiver": "Participant_0tkhpj2",
+    "schema": "{\"properties\":{\"patientData\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"patientData\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_13mh6mk",
+    "type": "message",
+    "sender": "Participant_0tkhpj2",
+    "receiver": "Participant_0ggs0ck",
+    "schema": "{\"properties\":{\"reportContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"reportContent\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1rqbibd",
+    "type": "message",
+    "sender": "Participant_0ggs0ck",
+    "receiver": "Participant_0tkhpj2",
+    "schema": "{\"properties\":{\"result\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"result\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1vzqd37",
+    "type": "message",
+    "sender": "Participant_1v6wnpq",
+    "receiver": "Participant_0ggs0ck",
+    "schema": "{\"properties\":{\"result\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"result\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_0o8snyv",
+    "type": "gateway",
+    "gateway_type": "exclusive",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "ParallelGateway_1pgjqtw",
+    "type": "gateway",
+    "gateway_type": "parallel",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_1m6dgym",
+    "type": "gateway",
+    "gateway_type": "parallel",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "StartEvent_0m7hz56",
+    "type": "event",
+    "initial_state": "READY"
+  },
+  {
+    "id": "EndEvent_110myff",
+    "type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Activity_1mj4mr7",
+    "type": "businessrule",
+    "inputs": [
+      [
+        "result",
+        "Result"
+      ]
+    ],
+    "outputs": [
+      [
+        "FurtherCheck",
+        "FurtherCheck"
+      ]
+    ],
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "FurtherCheck",
+    "type": "global",
+    "dsl_type": "bool"
+  },
+  {
+    "id": "FurtherCheckDate",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "FurtherCheckPlace",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "PatientData",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "ReportContent",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Result",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Sample",
+    "type": "global",
+    "dsl_type": "string"
+  }
+]

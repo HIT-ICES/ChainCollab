@@ -1,0 +1,122 @@
+{
+  "case_name": "amazon",
+  "path_name": "amazon_dsl_path_001",
+  "description": "Auto materialized from BPMN/DSL consistent path by exp1_1C.",
+  "source_model": "/root/code/ChainCollab/Experiment/new/exp1_1C/cases/amazon/translator/dsl.b2c",
+  "expect": "accepted",
+  "steps": [
+    {
+      "type": "event",
+      "element": "Event_0ojehz6",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_09krt7c",
+      "payload": {
+        "question name": "sample-question name",
+        "description": "sample-description"
+      },
+      "guard": "completed",
+      "sender": "Participant_12df78t",
+      "receiver": "Participant_1p9owwo"
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_0jgq0a6",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_0ywghlt",
+      "payload": {
+        "serviceType": "sample-serviceType"
+      },
+      "guard": "completed",
+      "sender": "Participant_12df78t",
+      "receiver": "Participant_1p9owwo"
+    },
+    {
+      "type": "message",
+      "element": "Message_068kmzv",
+      "payload": {
+        "time": "sample-time",
+        "instance ID": "sample-instance ID",
+        "logs": "sample-logs"
+      },
+      "guard": "completed",
+      "sender": "Participant_12df78t",
+      "receiver": "Participant_1p9owwo"
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_0auc3he",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_12n6jjk",
+      "payload": {
+        "requestType": "sample-requestType",
+        "duration": 1
+      },
+      "guard": "completed",
+      "sender": "Participant_12df78t",
+      "receiver": "Participant_1p9owwo"
+    },
+    {
+      "type": "businessrule",
+      "element": "Activity_0tya4bp",
+      "payload": {},
+      "guard": "dmn:decision_table_rows",
+      "outputs": {
+        "Confirm": "false"
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_0ivv4vg",
+      "payload": {},
+      "guard": "Confirm == false"
+    },
+    {
+      "type": "message",
+      "element": "Message_1b1qlzd",
+      "payload": {
+        "reason": "sample-reason",
+        "result": "sample-result"
+      },
+      "guard": "completed",
+      "sender": "Participant_1p9owwo",
+      "receiver": "Participant_12df78t"
+    },
+    {
+      "type": "event",
+      "element": "Event_0dyp0ut",
+      "payload": {}
+    }
+  ],
+  "generated_path": {
+    "final_enabled_elements": [],
+    "final_element_states": {
+      "Message_01jq2zl": "INACTIVE",
+      "Message_068kmzv": "DONE",
+      "Message_076ulzs": "INACTIVE",
+      "Message_09krt7c": "DONE",
+      "Message_0ywghlt": "DONE",
+      "Message_12n6jjk": "DONE",
+      "Message_1b1qlzd": "DONE",
+      "Message_1bhhp1n": "INACTIVE",
+      "Gateway_0auc3he": "DONE",
+      "Gateway_0ivv4vg": "DONE",
+      "Gateway_0jgq0a6": "DONE",
+      "Event_0ojehz6": "DONE",
+      "Event_0ci2gl8": "INACTIVE",
+      "Event_0dyp0ut": "DONE",
+      "Activity_0tya4bp": "DONE"
+    },
+    "final_globals": {
+      "Confirm": "false"
+    }
+  }
+}

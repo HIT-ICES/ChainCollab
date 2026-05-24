@@ -1,0 +1,115 @@
+{
+  "case_name": "manufactory",
+  "path_name": "manufactory_dsl_path_002",
+  "description": "Auto materialized from BPMN/DSL consistent path by exp1_1C.",
+  "source_model": "/root/code/ChainCollab/Experiment/new/exp1_1C/cases/manufactory/translator/dsl.b2c",
+  "expect": "accepted",
+  "steps": [
+    {
+      "type": "event",
+      "element": "Event_0okhbce",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_00wpjke",
+      "payload": {
+        "QuoteRequest": "sample-QuoteRequest"
+      },
+      "guard": "completed",
+      "sender": "Participant_1xq1vsc",
+      "receiver": "Participant_05g5xih"
+    },
+    {
+      "type": "message",
+      "element": "Message_1kazup6",
+      "payload": {
+        "QuoteContent": "sample-QuoteContent"
+      },
+      "guard": "completed",
+      "sender": "Participant_05g5xih",
+      "receiver": "Participant_1xq1vsc"
+    },
+    {
+      "type": "message",
+      "element": "Message_1y5d31x",
+      "payload": {
+        "OrderContent": "sample-OrderContent",
+        "OrderAmount": 1
+      },
+      "guard": "completed",
+      "sender": "Participant_05g5xih",
+      "receiver": "Participant_1xq1vsc"
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_085e7pr",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_0z8kf0j",
+      "payload": {
+        "cancelation": "sample-cancelation"
+      },
+      "guard": "completed",
+      "sender": "Participant_1xq1vsc",
+      "receiver": "Participant_05g5xih"
+    },
+    {
+      "type": "message",
+      "element": "Message_0zt8q9t",
+      "payload": {
+        "ConcelAck": "sample-ConcelAck"
+      },
+      "guard": "completed",
+      "sender": "Participant_05g5xih",
+      "receiver": "Participant_1xq1vsc"
+    },
+    {
+      "type": "businessrule",
+      "element": "Activity_1uktp5z",
+      "payload": {},
+      "guard": "dmn:decision_table_rows",
+      "outputs": {
+        "CancelFee": "false"
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_19zzj3s",
+      "payload": {},
+      "guard": "CancelFee == false"
+    },
+    {
+      "type": "event",
+      "element": "Event_0awuo5v",
+      "payload": {}
+    }
+  ],
+  "generated_path": {
+    "final_enabled_elements": [],
+    "final_element_states": {
+      "Message_00wpjke": "DONE",
+      "Message_03was4c": "INACTIVE",
+      "Message_05uqcn2": "INACTIVE",
+      "Message_0z8kf0j": "DONE",
+      "Message_0zt8q9t": "DONE",
+      "Message_13l7271": "INACTIVE",
+      "Message_1i5n14f": "INACTIVE",
+      "Message_1kazup6": "DONE",
+      "Message_1y5d31x": "DONE",
+      "Message_1yln43l": "INACTIVE",
+      "Gateway_19zzj3s": "DONE",
+      "Gateway_085e7pr": "DONE",
+      "Event_0okhbce": "DONE",
+      "Event_0th6os0": "INACTIVE",
+      "Event_0awuo5v": "DONE",
+      "Event_0zsq5na": "INACTIVE",
+      "Activity_1uktp5z": "DONE"
+    },
+    "final_globals": {
+      "CancelFee": "false"
+    }
+  }
+}

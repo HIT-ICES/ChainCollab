@@ -1,0 +1,119 @@
+{
+  "schema_version": "exp1c.normalized_trace.v1",
+  "model_type": "bpmn",
+  "case_name": "Purchase",
+  "path_id": "bpmn_path_001",
+  "trace_signature": "0f0b74853e58a9fd",
+  "steps": [
+    {
+      "enabled_before": [
+        "Event_0ehnwwz"
+      ],
+      "trigger": "Event_0ehnwwz",
+      "guard_result": true,
+      "state_diff": {
+        "Event_0ehnwwz": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "enabled_after": [
+        "Message_0q9hvem"
+      ]
+    },
+    {
+      "enabled_before": [
+        "Message_0q9hvem"
+      ],
+      "trigger": "Message_0q9hvem",
+      "guard_result": true,
+      "state_diff": {
+        "Message_0q9hvem": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {
+        "ProductAvalibale": "false"
+      },
+      "enabled_after": [
+        "Gateway_1ltys0e"
+      ]
+    },
+    {
+      "enabled_before": [
+        "Gateway_1ltys0e"
+      ],
+      "trigger": "Gateway_1ltys0e",
+      "guard_result": true,
+      "state_diff": {
+        "Gateway_1ltys0e": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "enabled_after": [
+        "Message_14wu8ts"
+      ]
+    },
+    {
+      "enabled_before": [
+        "Message_14wu8ts"
+      ],
+      "trigger": "Message_14wu8ts",
+      "guard_result": true,
+      "state_diff": {
+        "Message_14wu8ts": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "enabled_after": [
+        "Event_194zr5n"
+      ]
+    },
+    {
+      "enabled_before": [
+        "Event_194zr5n"
+      ],
+      "trigger": "Event_194zr5n",
+      "guard_result": true,
+      "state_diff": {
+        "Event_194zr5n": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "enabled_after": []
+    }
+  ],
+  "final_state": {
+    "status": "COMPLETED",
+    "element_states": {
+      "Message_05gz8u0": "INACTIVE",
+      "Message_08ms1jj": "INACTIVE",
+      "Message_0g7m9tf": "INACTIVE",
+      "Message_0mcktm6": "INACTIVE",
+      "Message_0q9hvem": "DONE",
+      "Message_14wu8ts": "DONE",
+      "Message_15b83n1": "INACTIVE",
+      "Message_1f0gefc": "INACTIVE",
+      "Gateway_1ltys0e": "DONE",
+      "Gateway_025uwvp": "INACTIVE",
+      "Gateway_13i0b7w": "INACTIVE",
+      "Event_0ehnwwz": "DONE",
+      "Event_0e3j88g": "INACTIVE",
+      "Event_1o9guxu": "INACTIVE",
+      "Event_194zr5n": "DONE",
+      "Activity_12arovy": "INACTIVE"
+    },
+    "enabled_elements": [],
+    "globals": {
+      "ProductAvalibale": "false"
+    }
+  }
+}

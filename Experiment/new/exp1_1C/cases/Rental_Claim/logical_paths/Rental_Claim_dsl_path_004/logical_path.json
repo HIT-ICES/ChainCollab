@@ -1,0 +1,101 @@
+{
+  "case_name": "Rental_Claim",
+  "path_name": "Rental_Claim_dsl_path_004",
+  "description": "Auto materialized from BPMN/DSL consistent path by exp1_1C.",
+  "source_model": "/root/code/ChainCollab/Experiment/new/exp1_1C/cases/Rental_Claim/translator/dsl.b2c",
+  "expect": "accepted",
+  "steps": [
+    {
+      "type": "event",
+      "element": "Event_19zgkxm",
+      "payload": {}
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_10ut9pb",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_09eyqv0",
+      "payload": {
+        "FileContent": "sample-FileContent"
+      },
+      "guard": "completed",
+      "sender": "Participant_1exbsak",
+      "receiver": "Participant_0h34s41"
+    },
+    {
+      "type": "message",
+      "element": "Message_1eb4q8q",
+      "payload": {
+        "claimContent": "sample-claimContent"
+      },
+      "guard": "completed",
+      "sender": "Participant_0h34s41",
+      "receiver": "Participant_0wvo0aa"
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_1v1x25n",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_0z3zz01",
+      "payload": {},
+      "guard": "completed",
+      "sender": "Participant_0wvo0aa",
+      "receiver": "Participant_0h34s41"
+    },
+    {
+      "type": "message",
+      "element": "Message_066q5si",
+      "payload": {
+        "reason": "sample-reason"
+      },
+      "guard": "completed",
+      "sender": "Participant_0h34s41",
+      "receiver": "Participant_0wvo0aa"
+    },
+    {
+      "type": "message",
+      "element": "Message_1xlzl3n",
+      "payload": {
+        "reason": "sample-reason"
+      },
+      "guard": "completed",
+      "sender": "Participant_0h34s41",
+      "receiver": "Participant_1exbsak"
+    },
+    {
+      "type": "event",
+      "element": "Event_1pjpbaw",
+      "payload": {}
+    }
+  ],
+  "generated_path": {
+    "final_enabled_elements": [],
+    "final_element_states": {
+      "Message_066q5si": "DONE",
+      "Message_09eyqv0": "DONE",
+      "Message_0dckgao": "INACTIVE",
+      "Message_0fm3vfa": "INACTIVE",
+      "Message_0z3zz01": "DONE",
+      "Message_0zoy0sz": "INACTIVE",
+      "Message_1eb4q8q": "DONE",
+      "Message_1im6vvb": "INACTIVE",
+      "Message_1xlzl3n": "DONE",
+      "Gateway_11zw5fs": "INACTIVE",
+      "Gateway_10ut9pb": "DONE",
+      "Gateway_1v1x25n": "DONE",
+      "Event_19zgkxm": "DONE",
+      "Event_1pjpbaw": "DONE",
+      "Event_120hui7": "INACTIVE",
+      "Event_0fzlrii": "INACTIVE",
+      "Event_0kmeww3": "INACTIVE",
+      "Activity_0oacu9j": "INACTIVE"
+    },
+    "final_globals": {}
+  }
+}

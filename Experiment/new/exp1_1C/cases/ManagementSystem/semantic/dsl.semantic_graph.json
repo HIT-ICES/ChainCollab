@@ -1,0 +1,373 @@
+{
+  "schema_version": "exp1c.ubts.v1",
+  "case_name": "ManagementSystem",
+  "model_type": "dsl",
+  "formalism": "UBTS/GLSTS JSON implementation",
+  "participants": [
+    {
+      "id": "Participant_0ykkst0",
+      "name": "Registered Contributor",
+      "is_multi": false,
+      "metadata": {
+        "msp": "Registered_ContributorMSP",
+        "x509": "",
+        "attributes": {
+          "role": "Registered Contributor"
+        }
+      }
+    },
+    {
+      "id": "Participant_1be5jmm",
+      "name": "Worker",
+      "is_multi": false,
+      "metadata": {
+        "msp": "WorkerMSP",
+        "x509": "",
+        "attributes": {
+          "role": "Worker"
+        }
+      }
+    },
+    {
+      "id": "Participant_0a0qr98",
+      "name": "Unregistered Contributor",
+      "is_multi": false,
+      "metadata": {
+        "msp": "Unregistered_ContributorMSP",
+        "x509": "",
+        "attributes": {
+          "role": "Unregistered Contributor"
+        }
+      }
+    }
+  ],
+  "nodes": [
+    {
+      "id": "Message_02echpq",
+      "type": "message",
+      "sender": "Participant_0ykkst0",
+      "receiver": "Participant_1be5jmm",
+      "schema": "{\"properties\":{\"content2\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_02ng01e",
+      "type": "message",
+      "sender": "Participant_1be5jmm",
+      "receiver": "Participant_0ykkst0",
+      "schema": "{\"properties\":{\"complete\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"complete\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_094ld7m",
+      "type": "message",
+      "sender": "Participant_0ykkst0",
+      "receiver": "Participant_1be5jmm",
+      "schema": "{\"properties\":{\"quality\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"quality\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_1ejkslm",
+      "type": "message",
+      "sender": "Participant_0a0qr98",
+      "receiver": "Participant_1be5jmm",
+      "schema": "{\"properties\":{\"Content\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_1h1vc49",
+      "type": "message",
+      "sender": "Participant_1be5jmm",
+      "receiver": "Participant_0ykkst0",
+      "schema": "{\"properties\":{\"id\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"id\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_1tiyc35",
+      "type": "message",
+      "sender": "Participant_0ykkst0",
+      "receiver": "Participant_1be5jmm",
+      "schema": "{\"properties\":{\"content3\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Gateway_067p6u8",
+      "type": "gateway",
+      "gateway_type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Gateway_1fl1t0k",
+      "type": "gateway",
+      "gateway_type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Gateway_0e7k79c",
+      "type": "gateway",
+      "gateway_type": "event",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Event_1y0sgtz",
+      "type": "event",
+      "initial_state": "READY"
+    },
+    {
+      "id": "Event_1u0cugu",
+      "type": "event",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Event_1pm2yw6",
+      "type": "event",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Activity_18dcm0h",
+      "type": "businessrule",
+      "inputs": [
+        [
+          "quality",
+          "Quality"
+        ]
+      ],
+      "outputs": [
+        [
+          "qualified",
+          "Qualified"
+        ]
+      ],
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "globals": {
+    "Content": "string",
+    "Complete": "bool",
+    "Content2": "string",
+    "Content3": "string",
+    "Id": "string",
+    "Qualified": "bool",
+    "Quality": "string"
+  },
+  "dmn_outputs": {
+    "qualified": [
+      "false",
+      "true"
+    ]
+  },
+  "transitions": [
+    {
+      "id": "r_001",
+      "template_kind": "start",
+      "trigger": "Event_1y0sgtz",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_1ejkslm"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_002",
+      "template_kind": "message",
+      "trigger": "Message_1ejkslm",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Gateway_0e7k79c"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_003",
+      "template_kind": "message",
+      "trigger": "Message_02echpq",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "disable",
+          "target": "Message_1tiyc35"
+        },
+        {
+          "op": "enable",
+          "target": "Gateway_067p6u8"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_004",
+      "template_kind": "message",
+      "trigger": "Message_1tiyc35",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "disable",
+          "target": "Message_02echpq"
+        },
+        {
+          "op": "enable",
+          "target": "Gateway_067p6u8"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_005",
+      "template_kind": "message",
+      "trigger": "Message_02ng01e",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_094ld7m"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_006",
+      "template_kind": "message",
+      "trigger": "Message_094ld7m",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Activity_18dcm0h"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_007",
+      "template_kind": "message",
+      "trigger": "Message_1h1vc49",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Event_1pm2yw6"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_008",
+      "template_kind": "gateway",
+      "trigger": "Gateway_067p6u8",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_02ng01e"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_009",
+      "template_kind": "gateway",
+      "trigger": "Gateway_0e7k79c",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_02echpq"
+        },
+        {
+          "op": "enable",
+          "target": "Message_1tiyc35"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_010",
+      "template_kind": "gateway_choose",
+      "trigger": "Gateway_1fl1t0k",
+      "guard": null,
+      "actions": [],
+      "branches": [
+        {
+          "guard": "Qualified == true",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "Event_1u0cugu"
+            }
+          ]
+        },
+        {
+          "guard": "Qualified == false",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "Message_1h1vc49"
+            }
+          ]
+        }
+      ],
+      "sources": []
+    },
+    {
+      "id": "r_011",
+      "template_kind": "businessrule",
+      "trigger": "Activity_18dcm0h",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Gateway_1fl1t0k"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_012",
+      "template_kind": "end_event",
+      "trigger": "Event_1u0cugu",
+      "guard": null,
+      "actions": [],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_013",
+      "template_kind": "end_event",
+      "trigger": "Event_1pm2yw6",
+      "guard": null,
+      "actions": [],
+      "branches": [],
+      "sources": []
+    }
+  ],
+  "start_nodes": [
+    "Event_1y0sgtz"
+  ],
+  "end_nodes": [
+    "Event_1u0cugu",
+    "Event_1pm2yw6"
+  ],
+  "state_model": [
+    "INIT",
+    "READY",
+    "PENDING_CONFIRMATION",
+    "DONE",
+    "INACTIVE"
+  ]
+}

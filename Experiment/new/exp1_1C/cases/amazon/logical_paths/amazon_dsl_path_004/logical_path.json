@@ -1,0 +1,123 @@
+{
+  "case_name": "amazon",
+  "path_name": "amazon_dsl_path_004",
+  "description": "Auto materialized from BPMN/DSL consistent path by exp1_1C.",
+  "source_model": "/root/code/ChainCollab/Experiment/new/exp1_1C/cases/amazon/translator/dsl.b2c",
+  "expect": "accepted",
+  "steps": [
+    {
+      "type": "event",
+      "element": "Event_0ojehz6",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_09krt7c",
+      "payload": {
+        "question name": "sample-question name",
+        "description": "sample-description"
+      },
+      "guard": "completed",
+      "sender": "Participant_12df78t",
+      "receiver": "Participant_1p9owwo"
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_0jgq0a6",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_1bhhp1n",
+      "payload": {
+        "serviceType": "sample-serviceType"
+      },
+      "guard": "completed",
+      "sender": "Participant_12df78t",
+      "receiver": "Participant_1p9owwo"
+    },
+    {
+      "type": "message",
+      "element": "Message_076ulzs",
+      "payload": {
+        "time": "sample-time",
+        "description": "sample-description",
+        "EC2 resource ID": "sample-EC2 resource ID",
+        "logs": "sample-logs",
+        "other information": "sample-other information"
+      },
+      "guard": "completed",
+      "sender": "Participant_12df78t",
+      "receiver": "Participant_1p9owwo"
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_0auc3he",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_12n6jjk",
+      "payload": {
+        "requestType": "sample-requestType",
+        "duration": 1
+      },
+      "guard": "completed",
+      "sender": "Participant_12df78t",
+      "receiver": "Participant_1p9owwo"
+    },
+    {
+      "type": "businessrule",
+      "element": "Activity_0tya4bp",
+      "payload": {},
+      "guard": "dmn:decision_table_rows",
+      "outputs": {
+        "Confirm": "true"
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_0ivv4vg",
+      "payload": {},
+      "guard": "Confirm == true"
+    },
+    {
+      "type": "message",
+      "element": "Message_01jq2zl",
+      "payload": {
+        "amount": 1
+      },
+      "guard": "completed",
+      "sender": "Participant_1p9owwo",
+      "receiver": "Participant_12df78t"
+    },
+    {
+      "type": "event",
+      "element": "Event_0ci2gl8",
+      "payload": {}
+    }
+  ],
+  "generated_path": {
+    "final_enabled_elements": [],
+    "final_element_states": {
+      "Message_01jq2zl": "DONE",
+      "Message_068kmzv": "INACTIVE",
+      "Message_076ulzs": "DONE",
+      "Message_09krt7c": "DONE",
+      "Message_0ywghlt": "INACTIVE",
+      "Message_12n6jjk": "DONE",
+      "Message_1b1qlzd": "INACTIVE",
+      "Message_1bhhp1n": "DONE",
+      "Gateway_0auc3he": "DONE",
+      "Gateway_0ivv4vg": "DONE",
+      "Gateway_0jgq0a6": "DONE",
+      "Event_0ojehz6": "DONE",
+      "Event_0ci2gl8": "DONE",
+      "Event_0dyp0ut": "INACTIVE",
+      "Activity_0tya4bp": "DONE"
+    },
+    "final_globals": {
+      "Confirm": "true"
+    }
+  }
+}

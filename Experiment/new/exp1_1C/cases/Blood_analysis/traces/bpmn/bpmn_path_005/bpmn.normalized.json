@@ -1,0 +1,224 @@
+{
+  "schema_version": "exp1c.normalized_trace.v1",
+  "model_type": "bpmn",
+  "case_name": "Blood_analysis",
+  "path_id": "bpmn_path_005",
+  "trace_signature": "841c910fe96c623c",
+  "steps": [
+    {
+      "enabled_before": [
+        "StartEvent_0m7hz56"
+      ],
+      "trigger": "StartEvent_0m7hz56",
+      "guard_result": true,
+      "state_diff": {
+        "StartEvent_0m7hz56": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "enabled_after": [
+        "ParallelGateway_1pgjqtw"
+      ]
+    },
+    {
+      "enabled_before": [
+        "ParallelGateway_1pgjqtw"
+      ],
+      "trigger": "ParallelGateway_1pgjqtw",
+      "guard_result": true,
+      "state_diff": {
+        "ParallelGateway_1pgjqtw": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "enabled_after": [
+        "Message_0gswvmq",
+        "Message_0wq8mc6"
+      ]
+    },
+    {
+      "enabled_before": [
+        "Message_0gswvmq",
+        "Message_0wq8mc6"
+      ],
+      "trigger": "Message_0wq8mc6",
+      "guard_result": true,
+      "state_diff": {
+        "Message_0wq8mc6": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "enabled_after": [
+        "Message_0gswvmq",
+        "Message_13mh6mk"
+      ]
+    },
+    {
+      "enabled_before": [
+        "Message_0gswvmq",
+        "Message_13mh6mk"
+      ],
+      "trigger": "Message_0gswvmq",
+      "guard_result": true,
+      "state_diff": {
+        "Message_0gswvmq": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "enabled_after": [
+        "Message_13mh6mk",
+        "Message_1vzqd37"
+      ]
+    },
+    {
+      "enabled_before": [
+        "Message_13mh6mk",
+        "Message_1vzqd37"
+      ],
+      "trigger": "Message_13mh6mk",
+      "guard_result": true,
+      "state_diff": {
+        "Message_13mh6mk": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "enabled_after": [
+        "Gateway_1m6dgym",
+        "Message_1vzqd37"
+      ]
+    },
+    {
+      "enabled_before": [
+        "Message_1vzqd37"
+      ],
+      "trigger": "Message_1vzqd37",
+      "guard_result": true,
+      "state_diff": {
+        "Message_1vzqd37": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "enabled_after": [
+        "Gateway_1m6dgym"
+      ]
+    },
+    {
+      "enabled_before": [
+        "Gateway_1m6dgym"
+      ],
+      "trigger": "Gateway_1m6dgym",
+      "guard_result": true,
+      "state_diff": {
+        "Gateway_1m6dgym": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "enabled_after": [
+        "Message_1rqbibd"
+      ]
+    },
+    {
+      "enabled_before": [
+        "Message_1rqbibd"
+      ],
+      "trigger": "Message_1rqbibd",
+      "guard_result": true,
+      "state_diff": {
+        "Message_1rqbibd": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "enabled_after": [
+        "Activity_1mj4mr7"
+      ]
+    },
+    {
+      "enabled_before": [
+        "Activity_1mj4mr7"
+      ],
+      "trigger": "Activity_1mj4mr7",
+      "guard_result": true,
+      "state_diff": {
+        "Activity_1mj4mr7": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {
+        "FurtherCheck": "false"
+      },
+      "enabled_after": [
+        "Gateway_0o8snyv"
+      ]
+    },
+    {
+      "enabled_before": [
+        "Gateway_0o8snyv"
+      ],
+      "trigger": "Gateway_0o8snyv",
+      "guard_result": true,
+      "state_diff": {
+        "Gateway_0o8snyv": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "enabled_after": [
+        "EndEvent_110myff"
+      ]
+    },
+    {
+      "enabled_before": [
+        "EndEvent_110myff"
+      ],
+      "trigger": "EndEvent_110myff",
+      "guard_result": true,
+      "state_diff": {
+        "EndEvent_110myff": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "enabled_after": []
+    }
+  ],
+  "final_state": {
+    "status": "COMPLETED",
+    "element_states": {
+      "Message_0gd0z61": "INACTIVE",
+      "Message_0gswvmq": "DONE",
+      "Message_0wq8mc6": "DONE",
+      "Message_13mh6mk": "DONE",
+      "Message_1rqbibd": "DONE",
+      "Message_1vzqd37": "DONE",
+      "Gateway_0o8snyv": "DONE",
+      "ParallelGateway_1pgjqtw": "DONE",
+      "Gateway_1m6dgym": "DONE",
+      "StartEvent_0m7hz56": "DONE",
+      "EndEvent_110myff": "DONE",
+      "Activity_1mj4mr7": "DONE"
+    },
+    "enabled_elements": [],
+    "globals": {
+      "FurtherCheck": "false"
+    }
+  }
+}

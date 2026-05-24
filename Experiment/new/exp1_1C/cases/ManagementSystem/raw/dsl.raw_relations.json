@@ -1,0 +1,144 @@
+[
+  {
+    "kind": "start",
+    "trigger": "Event_1y0sgtz",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Message_1ejkslm"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_1ejkslm",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Gateway_0e7k79c"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_02echpq",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "disable",
+        "target": "Message_1tiyc35"
+      },
+      {
+        "op": "enable",
+        "target": "Gateway_067p6u8"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_1tiyc35",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "disable",
+        "target": "Message_02echpq"
+      },
+      {
+        "op": "enable",
+        "target": "Gateway_067p6u8"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_02ng01e",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Message_094ld7m"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_094ld7m",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Activity_18dcm0h"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_1h1vc49",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Event_1pm2yw6"
+      }
+    ]
+  },
+  {
+    "kind": "gateway",
+    "trigger": "Gateway_067p6u8",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Message_02ng01e"
+      }
+    ]
+  },
+  {
+    "kind": "gateway",
+    "trigger": "Gateway_0e7k79c",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Message_02echpq"
+      },
+      {
+        "op": "enable",
+        "target": "Message_1tiyc35"
+      }
+    ]
+  },
+  {
+    "kind": "gateway_choose",
+    "trigger": "Gateway_1fl1t0k",
+    "branches": [
+      {
+        "guard": "Qualified == true",
+        "actions": [
+          {
+            "op": "enable",
+            "target": "Event_1u0cugu"
+          }
+        ]
+      },
+      {
+        "guard": "Qualified == false",
+        "actions": [
+          {
+            "op": "enable",
+            "target": "Message_1h1vc49"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "businessrule",
+    "trigger": "Activity_18dcm0h",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Gateway_1fl1t0k"
+      }
+    ]
+  }
+]
