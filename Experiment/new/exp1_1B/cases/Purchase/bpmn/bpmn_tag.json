@@ -1,0 +1,1453 @@
+{
+  "tag_version": "0.1.0",
+  "case_name": "Purchase",
+  "model_type": "bpmn",
+  "source_file": "/root/code/ChainCollab/Experiment/BPMNwithDMNcase/Purchase.bpmn",
+  "extractor": {
+    "name": "extract_bpmn_structure",
+    "version": "0.1.0",
+    "implementation_basis": [
+      "src/newTranslator/generator/parser/choreography_parser/parser.py",
+      "src/newTranslator/generator/parser/choreography_parser/elements.py"
+    ]
+  },
+  "nodes": [
+    {
+      "id": "Participant_0oa2za9",
+      "type": "bpmn:participant",
+      "name": "Client",
+      "attrs": {
+        "is_multi": false,
+        "multi_minimum": 0,
+        "multi_maximum": 0
+      }
+    },
+    {
+      "id": "Participant_0jwk4tk",
+      "type": "bpmn:participant",
+      "name": "Company",
+      "attrs": {
+        "is_multi": false,
+        "multi_minimum": 0,
+        "multi_maximum": 0
+      }
+    },
+    {
+      "id": "Participant_0cb2p7d",
+      "type": "bpmn:participant",
+      "name": "New Participant 1",
+      "attrs": {
+        "is_multi": false,
+        "multi_minimum": 0,
+        "multi_maximum": 0
+      }
+    },
+    {
+      "id": "Message_15b83n1",
+      "type": "bpmn:message",
+      "name": "",
+      "attrs": {
+        "documentation": "{}"
+      }
+    },
+    {
+      "id": "Message_08ms1jj",
+      "type": "bpmn:message",
+      "name": "sale",
+      "attrs": {
+        "documentation": "{\"properties\":{\"sale\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"sale\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_08ms1jj__property__sale",
+      "type": "bpmn:messageProperty",
+      "name": "sale",
+      "attrs": {
+        "name": "sale",
+        "global_name": "Sale",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_08ms1jj",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_0mcktm6",
+      "type": "bpmn:message",
+      "name": "PaymentContent",
+      "attrs": {
+        "documentation": "{\"properties\":{\"Price\":{\"type\":\"number\",\"description\":\"\"},\"Time\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"Price\",\"Time\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_0mcktm6__property__Price",
+      "type": "bpmn:messageProperty",
+      "name": "Price",
+      "attrs": {
+        "name": "Price",
+        "global_name": "Price",
+        "type": "number",
+        "dsl_type": "int",
+        "description": "",
+        "owner": "Message_0mcktm6",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_0mcktm6__property__Time",
+      "type": "bpmn:messageProperty",
+      "name": "Time",
+      "attrs": {
+        "name": "Time",
+        "global_name": "Time",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_0mcktm6",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_0q9hvem",
+      "type": "bpmn:message",
+      "name": "OrderContent",
+      "attrs": {
+        "documentation": "{\"properties\":{\"orderContent\":{\"type\":\"string\",\"description\":\"\"},\"productAvalibale\":{\"type\":\"boolean\",\"description\":\"is product avaliable\"}},\"required\":[\"orderContent\",\"productAvalibale\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_0q9hvem__property__orderContent",
+      "type": "bpmn:messageProperty",
+      "name": "orderContent",
+      "attrs": {
+        "name": "orderContent",
+        "global_name": "OrderContent",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_0q9hvem",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_0q9hvem__property__productAvalibale",
+      "type": "bpmn:messageProperty",
+      "name": "productAvalibale",
+      "attrs": {
+        "name": "productAvalibale",
+        "global_name": "ProductAvalibale",
+        "type": "boolean",
+        "dsl_type": "bool",
+        "description": "is product avaliable",
+        "owner": "Message_0q9hvem",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_05gz8u0",
+      "type": "bpmn:message",
+      "name": "NotifyMessage3",
+      "attrs": {
+        "documentation": "{\"properties\":{\"MessageContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_05gz8u0__property__MessageContent",
+      "type": "bpmn:messageProperty",
+      "name": "MessageContent",
+      "attrs": {
+        "name": "MessageContent",
+        "global_name": "MessageContent",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_05gz8u0",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_0g7m9tf",
+      "type": "bpmn:message",
+      "name": "ProductMessage",
+      "attrs": {
+        "documentation": "{\"properties\":{\"num\":{\"type\":\"string\",\"description\":\"\"},\"time2\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_0g7m9tf__property__num",
+      "type": "bpmn:messageProperty",
+      "name": "num",
+      "attrs": {
+        "name": "num",
+        "global_name": "Num",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_0g7m9tf",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_0g7m9tf__property__time2",
+      "type": "bpmn:messageProperty",
+      "name": "time2",
+      "attrs": {
+        "name": "time2",
+        "global_name": "Time2",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_0g7m9tf",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_14wu8ts",
+      "type": "bpmn:message",
+      "name": "NotifyMessage2",
+      "attrs": {
+        "documentation": "{\"properties\":{\"MessageContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_14wu8ts__property__MessageContent",
+      "type": "bpmn:messageProperty",
+      "name": "MessageContent",
+      "attrs": {
+        "name": "MessageContent",
+        "global_name": "MessageContent",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_14wu8ts",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_1f0gefc",
+      "type": "bpmn:message",
+      "name": "NotifyMessage1",
+      "attrs": {
+        "documentation": "{\"properties\":{\"MessageContent\":{\"type\":\"string\",\"description\":\"\"},\"priceOK\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"MessageContent\",\"priceOK\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_1f0gefc__property__MessageContent",
+      "type": "bpmn:messageProperty",
+      "name": "MessageContent",
+      "attrs": {
+        "name": "MessageContent",
+        "global_name": "MessageContent",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_1f0gefc",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_1f0gefc__property__priceOK",
+      "type": "bpmn:messageProperty",
+      "name": "priceOK",
+      "attrs": {
+        "name": "priceOK",
+        "global_name": "PriceOK",
+        "type": "boolean",
+        "dsl_type": "bool",
+        "description": "",
+        "owner": "Message_1f0gefc",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Event_0ehnwwz",
+      "type": "bpmn:startEvent",
+      "name": "",
+      "attrs": {
+        "incoming": [],
+        "outgoing": [
+          "Flow_0ylolin"
+        ]
+      }
+    },
+    {
+      "id": "Event_0e3j88g",
+      "type": "bpmn:endEvent",
+      "name": "No product purchased/sold",
+      "attrs": {
+        "incoming": [
+          "Flow_0zetv07"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Event_1o9guxu",
+      "type": "bpmn:endEvent",
+      "name": "Product purchased/sold",
+      "attrs": {
+        "incoming": [
+          "Flow_0qasdjj"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Event_194zr5n",
+      "type": "bpmn:endEvent",
+      "name": "No product purchased/sold",
+      "attrs": {
+        "incoming": [
+          "Flow_1w7smbz"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Gateway_1ltys0e",
+      "type": "bpmn:exclusiveGateway",
+      "name": "Is product available?",
+      "attrs": {
+        "incoming": [
+          "Flow_1a8wuhd"
+        ],
+        "outgoing": [
+          "Flow_07aezih",
+          "Flow_0qarc3k"
+        ]
+      }
+    },
+    {
+      "id": "Gateway_025uwvp",
+      "type": "bpmn:exclusiveGateway",
+      "name": "Is price ok?",
+      "attrs": {
+        "incoming": [
+          "Flow_0r96jzq"
+        ],
+        "outgoing": [
+          "Flow_1alyrr0",
+          "Flow_1eug3xo"
+        ]
+      }
+    },
+    {
+      "id": "Gateway_13i0b7w",
+      "type": "bpmn:exclusiveGateway",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "Flow_1ocsrxv"
+        ],
+        "outgoing": [
+          "Flow_0jqgl6j",
+          "Flow_1j4bvpd"
+        ]
+      }
+    },
+    {
+      "id": "Activity_12arovy",
+      "type": "bpmn:businessRuleTask",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "Flow_0lnnht6"
+        ],
+        "outgoing": [
+          "Flow_1ocsrxv"
+        ],
+        "documentation": "{\"inputs\":[{\"name\":\"Price\",\"type\":\"number\",\"description\":\"\"}],\"outputs\":[{\"name\":\"discount\",\"type\":\"boolean\",\"description\":\"\"}]}"
+      }
+    },
+    {
+      "id": "Activity_12arovy__input__Price",
+      "type": "bpmn:businessRuleParameter",
+      "name": "Price",
+      "attrs": {
+        "name": "Price",
+        "global_name": "Price",
+        "direction": "input",
+        "type": "number",
+        "dsl_type": "int",
+        "owner": "Activity_12arovy"
+      }
+    },
+    {
+      "id": "Activity_12arovy__output__discount",
+      "type": "bpmn:businessRuleParameter",
+      "name": "discount",
+      "attrs": {
+        "name": "discount",
+        "global_name": "Discount",
+        "direction": "output",
+        "type": "boolean",
+        "dsl_type": "bool",
+        "owner": "Activity_12arovy"
+      }
+    },
+    {
+      "id": "ChoreographyTask_1d8axmm",
+      "type": "bpmn:choreographyTask",
+      "name": "Send order",
+      "attrs": {
+        "incoming": "Flow_0ylolin",
+        "outgoing": "Flow_1a8wuhd",
+        "participants": [
+          "Participant_0oa2za9",
+          "Participant_0jwk4tk"
+        ],
+        "initiatingParticipantRef": "Participant_0jwk4tk",
+        "messageFlowRefs": [
+          "MessageFlow_18hgpre"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_01rdy6m",
+      "type": "bpmn:choreographyTask",
+      "name": "Notify product available",
+      "attrs": {
+        "incoming": "Flow_07aezih",
+        "outgoing": "Flow_0r96jzq",
+        "participants": [
+          "Participant_0oa2za9",
+          "Participant_0jwk4tk"
+        ],
+        "initiatingParticipantRef": "Participant_0oa2za9",
+        "messageFlowRefs": [
+          "MessageFlow_0xexblk"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_0huz12d",
+      "type": "bpmn:choreographyTask",
+      "name": "Notify product not available",
+      "attrs": {
+        "incoming": "Flow_0qarc3k",
+        "outgoing": "Flow_1w7smbz",
+        "participants": [
+          "Participant_0oa2za9",
+          "Participant_0jwk4tk"
+        ],
+        "initiatingParticipantRef": "Participant_0oa2za9",
+        "messageFlowRefs": [
+          "MessageFlow_0m4bfnr"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_13g05bg",
+      "type": "bpmn:choreographyTask",
+      "name": "Send payment",
+      "attrs": {
+        "incoming": "Flow_1alyrr0",
+        "outgoing": "Flow_0lnnht6",
+        "participants": [
+          "Participant_0oa2za9",
+          "Participant_0jwk4tk"
+        ],
+        "initiatingParticipantRef": "Participant_0jwk4tk",
+        "messageFlowRefs": [
+          "MessageFlow_0nq8x22"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_1k9vb6k",
+      "type": "bpmn:choreographyTask",
+      "name": "Notify payment refused",
+      "attrs": {
+        "incoming": "Flow_1eug3xo",
+        "outgoing": "Flow_0zetv07",
+        "participants": [
+          "Participant_0oa2za9",
+          "Participant_0jwk4tk"
+        ],
+        "initiatingParticipantRef": "Participant_0jwk4tk",
+        "messageFlowRefs": [
+          "MessageFlow_0s1vo46"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_1yl8kdd",
+      "type": "bpmn:choreographyTask",
+      "name": "Send Product",
+      "attrs": {
+        "incoming": "Flow_0jqgl6j",
+        "outgoing": "Flow_0qasdjj",
+        "participants": [
+          "Participant_0oa2za9",
+          "Participant_0jwk4tk"
+        ],
+        "initiatingParticipantRef": "Participant_0oa2za9",
+        "messageFlowRefs": [
+          "MessageFlow_0tb3its"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_06fwl21",
+      "type": "bpmn:choreographyTask",
+      "name": "sale",
+      "attrs": {
+        "incoming": "Flow_1j4bvpd",
+        "outgoing": "Flow_0lon5nm",
+        "participants": [
+          "Participant_0oa2za9",
+          "Participant_0jwk4tk"
+        ],
+        "initiatingParticipantRef": "Participant_0oa2za9",
+        "messageFlowRefs": [
+          "MessageFlow_0bp7p12",
+          "MessageFlow_1qi88x8"
+        ]
+      }
+    },
+    {
+      "id": "Flow_07aezih__condition__ProductAvalibale",
+      "type": "bpmn:sequenceConditionVariable",
+      "name": "productAvalibale",
+      "attrs": {
+        "name": "productAvalibale",
+        "relation": "==",
+        "value": "true",
+        "global_name": "ProductAvalibale",
+        "dsl_type": "string",
+        "sequenceFlow": "Flow_07aezih"
+      }
+    },
+    {
+      "id": "Flow_0qarc3k__condition__ProductAvalibale",
+      "type": "bpmn:sequenceConditionVariable",
+      "name": "productAvalibale",
+      "attrs": {
+        "name": "productAvalibale",
+        "relation": "==",
+        "value": "false",
+        "global_name": "ProductAvalibale",
+        "dsl_type": "string",
+        "sequenceFlow": "Flow_0qarc3k"
+      }
+    },
+    {
+      "id": "Flow_1alyrr0__condition__PriceOK",
+      "type": "bpmn:sequenceConditionVariable",
+      "name": "priceOK",
+      "attrs": {
+        "name": "priceOK",
+        "relation": "==",
+        "value": "true",
+        "global_name": "PriceOK",
+        "dsl_type": "string",
+        "sequenceFlow": "Flow_1alyrr0"
+      }
+    },
+    {
+      "id": "Flow_1eug3xo__condition__PriceOK",
+      "type": "bpmn:sequenceConditionVariable",
+      "name": "priceOK",
+      "attrs": {
+        "name": "priceOK",
+        "relation": "==",
+        "value": "false",
+        "global_name": "PriceOK",
+        "dsl_type": "string",
+        "sequenceFlow": "Flow_1eug3xo"
+      }
+    },
+    {
+      "id": "Flow_0jqgl6j__condition__Discount",
+      "type": "bpmn:sequenceConditionVariable",
+      "name": "discount",
+      "attrs": {
+        "name": "discount",
+        "relation": "==",
+        "value": "false",
+        "global_name": "Discount",
+        "dsl_type": "string",
+        "sequenceFlow": "Flow_0jqgl6j"
+      }
+    },
+    {
+      "id": "Flow_1j4bvpd__condition__Discount",
+      "type": "bpmn:sequenceConditionVariable",
+      "name": "discount",
+      "attrs": {
+        "name": "discount",
+        "relation": "==",
+        "value": "true",
+        "global_name": "Discount",
+        "dsl_type": "string",
+        "sequenceFlow": "Flow_1j4bvpd"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "MessageFlow_0bp7p12",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_0oa2za9",
+      "target": "Participant_0jwk4tk",
+      "attrs": {
+        "message": "Message_15b83n1",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_0bp7p12__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_0bp7p12",
+      "target": "Message_15b83n1",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_1qi88x8",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_0jwk4tk",
+      "target": "Participant_0oa2za9",
+      "attrs": {
+        "message": "Message_08ms1jj",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_1qi88x8__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_1qi88x8",
+      "target": "Message_08ms1jj",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_0nq8x22",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_0jwk4tk",
+      "target": "Participant_0oa2za9",
+      "attrs": {
+        "message": "Message_0mcktm6",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_0nq8x22__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_0nq8x22",
+      "target": "Message_0mcktm6",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_18hgpre",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_0jwk4tk",
+      "target": "Participant_0oa2za9",
+      "attrs": {
+        "message": "Message_0q9hvem",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_18hgpre__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_18hgpre",
+      "target": "Message_0q9hvem",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_0s1vo46",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_0jwk4tk",
+      "target": "Participant_0oa2za9",
+      "attrs": {
+        "message": "Message_05gz8u0",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_0s1vo46__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_0s1vo46",
+      "target": "Message_05gz8u0",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_0tb3its",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_0oa2za9",
+      "target": "Participant_0jwk4tk",
+      "attrs": {
+        "message": "Message_0g7m9tf",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_0tb3its__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_0tb3its",
+      "target": "Message_0g7m9tf",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_0m4bfnr",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_0oa2za9",
+      "target": "Participant_0jwk4tk",
+      "attrs": {
+        "message": "Message_14wu8ts",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_0m4bfnr__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_0m4bfnr",
+      "target": "Message_14wu8ts",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_0xexblk",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_0oa2za9",
+      "target": "Participant_0jwk4tk",
+      "attrs": {
+        "message": "Message_1f0gefc",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_0xexblk__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_0xexblk",
+      "target": "Message_1f0gefc",
+      "attrs": {}
+    },
+    {
+      "id": "Message_08ms1jj__documentationProperty__sale",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_08ms1jj",
+      "target": "Message_08ms1jj__property__sale",
+      "attrs": {}
+    },
+    {
+      "id": "Message_0mcktm6__documentationProperty__Price",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_0mcktm6",
+      "target": "Message_0mcktm6__property__Price",
+      "attrs": {}
+    },
+    {
+      "id": "Message_0mcktm6__documentationProperty__Time",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_0mcktm6",
+      "target": "Message_0mcktm6__property__Time",
+      "attrs": {}
+    },
+    {
+      "id": "Message_0q9hvem__documentationProperty__orderContent",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_0q9hvem",
+      "target": "Message_0q9hvem__property__orderContent",
+      "attrs": {}
+    },
+    {
+      "id": "Message_0q9hvem__documentationProperty__productAvalibale",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_0q9hvem",
+      "target": "Message_0q9hvem__property__productAvalibale",
+      "attrs": {}
+    },
+    {
+      "id": "Message_05gz8u0__documentationProperty__MessageContent",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_05gz8u0",
+      "target": "Message_05gz8u0__property__MessageContent",
+      "attrs": {}
+    },
+    {
+      "id": "Message_0g7m9tf__documentationProperty__num",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_0g7m9tf",
+      "target": "Message_0g7m9tf__property__num",
+      "attrs": {}
+    },
+    {
+      "id": "Message_0g7m9tf__documentationProperty__time2",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_0g7m9tf",
+      "target": "Message_0g7m9tf__property__time2",
+      "attrs": {}
+    },
+    {
+      "id": "Message_14wu8ts__documentationProperty__MessageContent",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_14wu8ts",
+      "target": "Message_14wu8ts__property__MessageContent",
+      "attrs": {}
+    },
+    {
+      "id": "Message_1f0gefc__documentationProperty__MessageContent",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_1f0gefc",
+      "target": "Message_1f0gefc__property__MessageContent",
+      "attrs": {}
+    },
+    {
+      "id": "Message_1f0gefc__documentationProperty__priceOK",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_1f0gefc",
+      "target": "Message_1f0gefc__property__priceOK",
+      "attrs": {}
+    },
+    {
+      "id": "Activity_12arovy__documentationInput__Price",
+      "type": "bpmn:documentationInput",
+      "source": "Activity_12arovy",
+      "target": "Activity_12arovy__input__Price",
+      "attrs": {}
+    },
+    {
+      "id": "Activity_12arovy__documentationOutput__discount",
+      "type": "bpmn:documentationOutput",
+      "source": "Activity_12arovy",
+      "target": "Activity_12arovy__output__discount",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1d8axmm__participantRef__Participant_0oa2za9",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_1d8axmm",
+      "target": "Participant_0oa2za9",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1d8axmm__participantRef__Participant_0jwk4tk",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_1d8axmm",
+      "target": "Participant_0jwk4tk",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1d8axmm__initiatingParticipant__Participant_0jwk4tk",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_1d8axmm",
+      "target": "Participant_0jwk4tk",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1d8axmm__messageFlowRef__MessageFlow_18hgpre",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_1d8axmm",
+      "target": "MessageFlow_18hgpre",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_01rdy6m__participantRef__Participant_0oa2za9",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_01rdy6m",
+      "target": "Participant_0oa2za9",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_01rdy6m__participantRef__Participant_0jwk4tk",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_01rdy6m",
+      "target": "Participant_0jwk4tk",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_01rdy6m__initiatingParticipant__Participant_0oa2za9",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_01rdy6m",
+      "target": "Participant_0oa2za9",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_01rdy6m__messageFlowRef__MessageFlow_0xexblk",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_01rdy6m",
+      "target": "MessageFlow_0xexblk",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0huz12d__participantRef__Participant_0oa2za9",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_0huz12d",
+      "target": "Participant_0oa2za9",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0huz12d__participantRef__Participant_0jwk4tk",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_0huz12d",
+      "target": "Participant_0jwk4tk",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0huz12d__initiatingParticipant__Participant_0oa2za9",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_0huz12d",
+      "target": "Participant_0oa2za9",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0huz12d__messageFlowRef__MessageFlow_0m4bfnr",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_0huz12d",
+      "target": "MessageFlow_0m4bfnr",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_13g05bg__participantRef__Participant_0oa2za9",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_13g05bg",
+      "target": "Participant_0oa2za9",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_13g05bg__participantRef__Participant_0jwk4tk",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_13g05bg",
+      "target": "Participant_0jwk4tk",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_13g05bg__initiatingParticipant__Participant_0jwk4tk",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_13g05bg",
+      "target": "Participant_0jwk4tk",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_13g05bg__messageFlowRef__MessageFlow_0nq8x22",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_13g05bg",
+      "target": "MessageFlow_0nq8x22",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1k9vb6k__participantRef__Participant_0oa2za9",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_1k9vb6k",
+      "target": "Participant_0oa2za9",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1k9vb6k__participantRef__Participant_0jwk4tk",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_1k9vb6k",
+      "target": "Participant_0jwk4tk",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1k9vb6k__initiatingParticipant__Participant_0jwk4tk",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_1k9vb6k",
+      "target": "Participant_0jwk4tk",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1k9vb6k__messageFlowRef__MessageFlow_0s1vo46",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_1k9vb6k",
+      "target": "MessageFlow_0s1vo46",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1yl8kdd__participantRef__Participant_0oa2za9",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_1yl8kdd",
+      "target": "Participant_0oa2za9",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1yl8kdd__participantRef__Participant_0jwk4tk",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_1yl8kdd",
+      "target": "Participant_0jwk4tk",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1yl8kdd__initiatingParticipant__Participant_0oa2za9",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_1yl8kdd",
+      "target": "Participant_0oa2za9",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1yl8kdd__messageFlowRef__MessageFlow_0tb3its",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_1yl8kdd",
+      "target": "MessageFlow_0tb3its",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_06fwl21__participantRef__Participant_0oa2za9",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_06fwl21",
+      "target": "Participant_0oa2za9",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_06fwl21__participantRef__Participant_0jwk4tk",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_06fwl21",
+      "target": "Participant_0jwk4tk",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_06fwl21__initiatingParticipant__Participant_0oa2za9",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_06fwl21",
+      "target": "Participant_0oa2za9",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_06fwl21__messageFlowRef__MessageFlow_0bp7p12",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_06fwl21",
+      "target": "MessageFlow_0bp7p12",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_06fwl21__messageFlowRef__MessageFlow_1qi88x8",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_06fwl21",
+      "target": "MessageFlow_1qi88x8",
+      "attrs": {}
+    },
+    {
+      "id": "Flow_0ylolin",
+      "type": "bpmn:sequenceFlow",
+      "source": "Event_0ehnwwz",
+      "target": "ChoreographyTask_1d8axmm",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_1a8wuhd",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_1d8axmm",
+      "target": "Gateway_1ltys0e",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_07aezih",
+      "type": "bpmn:sequenceFlow",
+      "source": "Gateway_1ltys0e",
+      "target": "ChoreographyTask_01rdy6m",
+      "attrs": {
+        "name": "productAvalibale==true",
+        "condition_expression": "productAvalibale==true"
+      }
+    },
+    {
+      "id": "Flow_07aezih__condition",
+      "type": "bpmn:condition",
+      "source": "Flow_07aezih",
+      "target": "Flow_07aezih__condition__ProductAvalibale",
+      "attrs": {}
+    },
+    {
+      "id": "Flow_0qarc3k",
+      "type": "bpmn:sequenceFlow",
+      "source": "Gateway_1ltys0e",
+      "target": "ChoreographyTask_0huz12d",
+      "attrs": {
+        "name": "productAvalibale==false",
+        "condition_expression": "productAvalibale==false"
+      }
+    },
+    {
+      "id": "Flow_0qarc3k__condition",
+      "type": "bpmn:condition",
+      "source": "Flow_0qarc3k",
+      "target": "Flow_0qarc3k__condition__ProductAvalibale",
+      "attrs": {}
+    },
+    {
+      "id": "Flow_0r96jzq",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_01rdy6m",
+      "target": "Gateway_025uwvp",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_1alyrr0",
+      "type": "bpmn:sequenceFlow",
+      "source": "Gateway_025uwvp",
+      "target": "ChoreographyTask_13g05bg",
+      "attrs": {
+        "name": "priceOK==true",
+        "condition_expression": "priceOK==true"
+      }
+    },
+    {
+      "id": "Flow_1alyrr0__condition",
+      "type": "bpmn:condition",
+      "source": "Flow_1alyrr0",
+      "target": "Flow_1alyrr0__condition__PriceOK",
+      "attrs": {}
+    },
+    {
+      "id": "Flow_1eug3xo",
+      "type": "bpmn:sequenceFlow",
+      "source": "Gateway_025uwvp",
+      "target": "ChoreographyTask_1k9vb6k",
+      "attrs": {
+        "name": "priceOK==false",
+        "condition_expression": "priceOK==false"
+      }
+    },
+    {
+      "id": "Flow_1eug3xo__condition",
+      "type": "bpmn:condition",
+      "source": "Flow_1eug3xo",
+      "target": "Flow_1eug3xo__condition__PriceOK",
+      "attrs": {}
+    },
+    {
+      "id": "Flow_0zetv07",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_1k9vb6k",
+      "target": "Event_0e3j88g",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_0qasdjj",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_1yl8kdd",
+      "target": "Event_1o9guxu",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_1w7smbz",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_0huz12d",
+      "target": "Event_194zr5n",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_0lnnht6",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_13g05bg",
+      "target": "Activity_12arovy",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_1ocsrxv",
+      "type": "bpmn:sequenceFlow",
+      "source": "Activity_12arovy",
+      "target": "Gateway_13i0b7w",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_0jqgl6j",
+      "type": "bpmn:sequenceFlow",
+      "source": "Gateway_13i0b7w",
+      "target": "ChoreographyTask_1yl8kdd",
+      "attrs": {
+        "name": "discount==false",
+        "condition_expression": "discount==false"
+      }
+    },
+    {
+      "id": "Flow_0jqgl6j__condition",
+      "type": "bpmn:condition",
+      "source": "Flow_0jqgl6j",
+      "target": "Flow_0jqgl6j__condition__Discount",
+      "attrs": {}
+    },
+    {
+      "id": "Flow_1j4bvpd",
+      "type": "bpmn:sequenceFlow",
+      "source": "Gateway_13i0b7w",
+      "target": "ChoreographyTask_06fwl21",
+      "attrs": {
+        "name": "discount==true",
+        "condition_expression": "discount==true"
+      }
+    },
+    {
+      "id": "Flow_1j4bvpd__condition",
+      "type": "bpmn:condition",
+      "source": "Flow_1j4bvpd",
+      "target": "Flow_1j4bvpd__condition__Discount",
+      "attrs": {}
+    },
+    {
+      "id": "Flow_0lon5nm",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_06fwl21",
+      "target": "ChoreographyTask_1yl8kdd",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    }
+  ],
+  "derived": [
+    {
+      "id": "Derive_Sale",
+      "type": "bpmn:message_property",
+      "target": "Sale",
+      "sources": [
+        "Message_08ms1jj"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "sale",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_Price",
+      "type": "bpmn:message_property",
+      "target": "Price",
+      "sources": [
+        "Message_0mcktm6"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "Price",
+        "type": "number",
+        "dsl_type": "int"
+      }
+    },
+    {
+      "id": "Derive_Time",
+      "type": "bpmn:message_property",
+      "target": "Time",
+      "sources": [
+        "Message_0mcktm6"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "Time",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_OrderContent",
+      "type": "bpmn:message_property",
+      "target": "OrderContent",
+      "sources": [
+        "Message_0q9hvem"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "orderContent",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_ProductAvalibale",
+      "type": "bpmn:message_property",
+      "target": "ProductAvalibale",
+      "sources": [
+        "Message_0q9hvem"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "productAvalibale",
+        "type": "boolean",
+        "dsl_type": "bool"
+      }
+    },
+    {
+      "id": "Derive_MessageContent",
+      "type": "bpmn:message_property",
+      "target": "MessageContent",
+      "sources": [
+        "Message_05gz8u0"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "MessageContent",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_Num",
+      "type": "bpmn:message_property",
+      "target": "Num",
+      "sources": [
+        "Message_0g7m9tf"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "num",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_Time2",
+      "type": "bpmn:message_property",
+      "target": "Time2",
+      "sources": [
+        "Message_0g7m9tf"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "time2",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_MessageContent",
+      "type": "bpmn:message_property",
+      "target": "MessageContent",
+      "sources": [
+        "Message_14wu8ts"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "MessageContent",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_MessageContent",
+      "type": "bpmn:message_property",
+      "target": "MessageContent",
+      "sources": [
+        "Message_1f0gefc"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "MessageContent",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_PriceOK",
+      "type": "bpmn:message_property",
+      "target": "PriceOK",
+      "sources": [
+        "Message_1f0gefc"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "priceOK",
+        "type": "boolean",
+        "dsl_type": "bool"
+      }
+    },
+    {
+      "id": "Derive_ProductAvalibale",
+      "type": "bpmn:condition_variable",
+      "target": "ProductAvalibale",
+      "sources": [
+        "Flow_07aezih"
+      ],
+      "rule": "SequenceConditionVariable2GlobalVar",
+      "attrs": {
+        "name": "productAvalibale",
+        "relation": "==",
+        "value": "true"
+      }
+    },
+    {
+      "id": "Derive_ProductAvalibale",
+      "type": "bpmn:condition_variable",
+      "target": "ProductAvalibale",
+      "sources": [
+        "Flow_0qarc3k"
+      ],
+      "rule": "SequenceConditionVariable2GlobalVar",
+      "attrs": {
+        "name": "productAvalibale",
+        "relation": "==",
+        "value": "false"
+      }
+    },
+    {
+      "id": "Derive_PriceOK",
+      "type": "bpmn:condition_variable",
+      "target": "PriceOK",
+      "sources": [
+        "Flow_1alyrr0"
+      ],
+      "rule": "SequenceConditionVariable2GlobalVar",
+      "attrs": {
+        "name": "priceOK",
+        "relation": "==",
+        "value": "true"
+      }
+    },
+    {
+      "id": "Derive_PriceOK",
+      "type": "bpmn:condition_variable",
+      "target": "PriceOK",
+      "sources": [
+        "Flow_1eug3xo"
+      ],
+      "rule": "SequenceConditionVariable2GlobalVar",
+      "attrs": {
+        "name": "priceOK",
+        "relation": "==",
+        "value": "false"
+      }
+    },
+    {
+      "id": "Derive_Discount",
+      "type": "bpmn:condition_variable",
+      "target": "Discount",
+      "sources": [
+        "Flow_0jqgl6j"
+      ],
+      "rule": "SequenceConditionVariable2GlobalVar",
+      "attrs": {
+        "name": "discount",
+        "relation": "==",
+        "value": "false"
+      }
+    },
+    {
+      "id": "Derive_Discount",
+      "type": "bpmn:condition_variable",
+      "target": "Discount",
+      "sources": [
+        "Flow_1j4bvpd"
+      ],
+      "rule": "SequenceConditionVariable2GlobalVar",
+      "attrs": {
+        "name": "discount",
+        "relation": "==",
+        "value": "true"
+      }
+    }
+  ],
+  "warnings": []
+}

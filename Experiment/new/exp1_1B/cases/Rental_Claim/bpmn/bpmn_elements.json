@@ -1,0 +1,530 @@
+[
+  {
+    "id": "Participant_1exbsak",
+    "type": "bpmn:participant",
+    "name": "Landlord",
+    "attrs": {
+      "is_multi": false,
+      "multi_minimum": 0,
+      "multi_maximum": 0
+    }
+  },
+  {
+    "id": "Participant_0h34s41",
+    "type": "bpmn:participant",
+    "name": "RBO",
+    "attrs": {
+      "is_multi": false,
+      "multi_minimum": 0,
+      "multi_maximum": 0
+    }
+  },
+  {
+    "id": "Participant_0wvo0aa",
+    "type": "bpmn:participant",
+    "name": "Tenant",
+    "attrs": {
+      "is_multi": false,
+      "multi_minimum": 0,
+      "multi_maximum": 0
+    }
+  },
+  {
+    "id": "Message_066q5si",
+    "type": "bpmn:message",
+    "name": "dispute no",
+    "attrs": {
+      "documentation": "{\"properties\":{\"reason\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"reason\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_066q5si__property__reason",
+    "type": "bpmn:messageProperty",
+    "name": "reason",
+    "attrs": {
+      "name": "reason",
+      "global_name": "Reason",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_066q5si",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0zoy0sz",
+    "type": "bpmn:message",
+    "name": "transfer details",
+    "attrs": {
+      "documentation": "{\"properties\":{\"refundbond\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"refundbond\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0zoy0sz__property__refundbond",
+    "type": "bpmn:messageProperty",
+    "name": "refundbond",
+    "attrs": {
+      "name": "refundbond",
+      "global_name": "Refundbond",
+      "type": "number",
+      "dsl_type": "int",
+      "description": "",
+      "owner": "Message_0zoy0sz",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0fm3vfa",
+    "type": "bpmn:message",
+    "name": "transfer details",
+    "attrs": {
+      "documentation": "{\"properties\":{\"transferDate\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"transferDate\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0fm3vfa__property__transferDate",
+    "type": "bpmn:messageProperty",
+    "name": "transferDate",
+    "attrs": {
+      "name": "transferDate",
+      "global_name": "TransferDate",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_0fm3vfa",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0z3zz01",
+    "type": "bpmn:message",
+    "name": "DisputeMessage",
+    "attrs": {
+      "documentation": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1xlzl3n",
+    "type": "bpmn:message",
+    "name": "dispute no to Landlord",
+    "attrs": {
+      "documentation": "{\"properties\":{\"reason\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"reason\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1xlzl3n__property__reason",
+    "type": "bpmn:messageProperty",
+    "name": "reason",
+    "attrs": {
+      "name": "reason",
+      "global_name": "Reason",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_1xlzl3n",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_1im6vvb",
+    "type": "bpmn:message",
+    "name": "AcceptMessage",
+    "attrs": {
+      "documentation": "{\"properties\":{\"content\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1im6vvb__property__content",
+    "type": "bpmn:messageProperty",
+    "name": "content",
+    "attrs": {
+      "name": "content",
+      "global_name": "Content",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_1im6vvb",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_1eb4q8q",
+    "type": "bpmn:message",
+    "name": "NotifyMessage",
+    "attrs": {
+      "documentation": "{\"properties\":{\"claimContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1eb4q8q__property__claimContent",
+    "type": "bpmn:messageProperty",
+    "name": "claimContent",
+    "attrs": {
+      "name": "claimContent",
+      "global_name": "ClaimContent",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_1eb4q8q",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0dckgao",
+    "type": "bpmn:message",
+    "name": "BondMessage",
+    "attrs": {
+      "documentation": "{\"properties\":{\"BondContent\":{\"type\":\"string\",\"description\":\"\"},\"damageNumber\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"BondContent\",\"damageNumber\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0dckgao__property__BondContent",
+    "type": "bpmn:messageProperty",
+    "name": "BondContent",
+    "attrs": {
+      "name": "BondContent",
+      "global_name": "BondContent",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_0dckgao",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0dckgao__property__damageNumber",
+    "type": "bpmn:messageProperty",
+    "name": "damageNumber",
+    "attrs": {
+      "name": "damageNumber",
+      "global_name": "DamageNumber",
+      "type": "number",
+      "dsl_type": "int",
+      "description": "",
+      "owner": "Message_0dckgao",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_09eyqv0",
+    "type": "bpmn:message",
+    "name": "ClaimMessage",
+    "attrs": {
+      "documentation": "{\"properties\":{\"FileContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_09eyqv0__property__FileContent",
+    "type": "bpmn:messageProperty",
+    "name": "FileContent",
+    "attrs": {
+      "name": "FileContent",
+      "global_name": "FileContent",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_09eyqv0",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Event_19zgkxm",
+    "type": "bpmn:startEvent",
+    "name": "",
+    "attrs": {
+      "incoming": [],
+      "outgoing": [
+        "Flow_19ins4a"
+      ]
+    }
+  },
+  {
+    "id": "Event_1pjpbaw",
+    "type": "bpmn:endEvent",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_0egs1v2"
+      ],
+      "outgoing": []
+    }
+  },
+  {
+    "id": "Event_120hui7",
+    "type": "bpmn:endEvent",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_0o5gtvq"
+      ],
+      "outgoing": []
+    }
+  },
+  {
+    "id": "Event_0fzlrii",
+    "type": "bpmn:endEvent",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_17unuh5"
+      ],
+      "outgoing": []
+    }
+  },
+  {
+    "id": "Event_0kmeww3",
+    "type": "bpmn:endEvent",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_1qaf5vz"
+      ],
+      "outgoing": []
+    }
+  },
+  {
+    "id": "Gateway_11zw5fs",
+    "type": "bpmn:exclusiveGateway",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_031eu99"
+      ],
+      "outgoing": [
+        "Flow_0y14mvn",
+        "Flow_1qaf5vz"
+      ]
+    }
+  },
+  {
+    "id": "Gateway_10ut9pb",
+    "type": "bpmn:eventBasedGateway",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_19ins4a"
+      ],
+      "outgoing": [
+        "Flow_0lkbsyo",
+        "Flow_1iufu41"
+      ]
+    }
+  },
+  {
+    "id": "Gateway_1v1x25n",
+    "type": "bpmn:eventBasedGateway",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_0fgdigm"
+      ],
+      "outgoing": [
+        "Flow_1avw32l",
+        "Flow_11p3bkq"
+      ]
+    }
+  },
+  {
+    "id": "Activity_0oacu9j",
+    "type": "bpmn:businessRuleTask",
+    "name": "rental",
+    "attrs": {
+      "incoming": [
+        "Flow_0nmk6of"
+      ],
+      "outgoing": [
+        "Flow_031eu99"
+      ],
+      "documentation": "{\"inputs\":[{\"name\":\"damageNumber\",\"type\":\"number\",\"description\":\"\"}],\"outputs\":[{\"name\":\"refund\",\"type\":\"boolean\",\"description\":\"\"}]}"
+    }
+  },
+  {
+    "id": "Activity_0oacu9j__input__damageNumber",
+    "type": "bpmn:businessRuleParameter",
+    "name": "damageNumber",
+    "attrs": {
+      "name": "damageNumber",
+      "global_name": "DamageNumber",
+      "direction": "input",
+      "type": "number",
+      "dsl_type": "int",
+      "owner": "Activity_0oacu9j"
+    }
+  },
+  {
+    "id": "Activity_0oacu9j__output__refund",
+    "type": "bpmn:businessRuleParameter",
+    "name": "refund",
+    "attrs": {
+      "name": "refund",
+      "global_name": "Refund",
+      "direction": "output",
+      "type": "boolean",
+      "dsl_type": "bool",
+      "owner": "Activity_0oacu9j"
+    }
+  },
+  {
+    "id": "ChoreographyTask_0s00q5x",
+    "type": "bpmn:choreographyTask",
+    "name": "file claim for bond",
+    "attrs": {
+      "incoming": "Flow_0lkbsyo",
+      "outgoing": "Flow_0yzurtc",
+      "participants": [
+        "Participant_1exbsak",
+        "Participant_0h34s41"
+      ],
+      "initiatingParticipantRef": "Participant_1exbsak",
+      "messageFlowRefs": [
+        "MessageFlow_1n15r2t"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_1klnbrq",
+    "type": "bpmn:choreographyTask",
+    "name": "release bond",
+    "attrs": {
+      "incoming": "Flow_1iufu41",
+      "outgoing": "Flow_0nmk6of",
+      "participants": [
+        "Participant_1exbsak",
+        "Participant_0h34s41"
+      ],
+      "initiatingParticipantRef": "Participant_1exbsak",
+      "messageFlowRefs": [
+        "MessageFlow_0sdxrhc"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_1bq32w6",
+    "type": "bpmn:choreographyTask",
+    "name": "notify tenant of claim",
+    "attrs": {
+      "incoming": "Flow_0yzurtc",
+      "outgoing": "Flow_0fgdigm",
+      "participants": [
+        "Participant_0h34s41",
+        "Participant_0wvo0aa"
+      ],
+      "initiatingParticipantRef": "Participant_0h34s41",
+      "messageFlowRefs": [
+        "MessageFlow_0at4lhp"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_037mvh7",
+    "type": "bpmn:choreographyTask",
+    "name": "file dispute",
+    "attrs": {
+      "incoming": "Flow_1avw32l",
+      "outgoing": "Flow_0m8fma4",
+      "participants": [
+        "Participant_0wvo0aa",
+        "Participant_0h34s41"
+      ],
+      "initiatingParticipantRef": "Participant_0wvo0aa",
+      "messageFlowRefs": [
+        "MessageFlow_0z3zz01",
+        "MessageFlow_15va0gc"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_022o4en",
+    "type": "bpmn:choreographyTask",
+    "name": "accept claim",
+    "attrs": {
+      "incoming": "Flow_11p3bkq",
+      "outgoing": "Flow_1o6ux25",
+      "participants": [
+        "Participant_0wvo0aa",
+        "Participant_0h34s41"
+      ],
+      "initiatingParticipantRef": "Participant_0wvo0aa",
+      "messageFlowRefs": [
+        "MessageFlow_0r2pw6g"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_1ebjrqa",
+    "type": "bpmn:choreographyTask",
+    "name": "notify landloard",
+    "attrs": {
+      "incoming": "Flow_0m8fma4",
+      "outgoing": "Flow_0egs1v2",
+      "participants": [
+        "Participant_0h34s41",
+        "Participant_1exbsak"
+      ],
+      "initiatingParticipantRef": "Participant_0h34s41",
+      "messageFlowRefs": [
+        "MessageFlow_17z2nsy"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_00q9tuv",
+    "type": "bpmn:choreographyTask",
+    "name": "transfer bond to lanlord",
+    "attrs": {
+      "incoming": "Flow_1o6ux25",
+      "outgoing": "Flow_0o5gtvq",
+      "participants": [
+        "Participant_0h34s41",
+        "Participant_1exbsak"
+      ],
+      "initiatingParticipantRef": "Participant_0h34s41",
+      "messageFlowRefs": [
+        "MessageFlow_0tilk7g"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_1hbf1v1",
+    "type": "bpmn:choreographyTask",
+    "name": "refund bond to tenant",
+    "attrs": {
+      "incoming": "Flow_0y14mvn",
+      "outgoing": "Flow_17unuh5",
+      "participants": [
+        "Participant_0h34s41",
+        "Participant_0wvo0aa"
+      ],
+      "initiatingParticipantRef": "Participant_0h34s41",
+      "messageFlowRefs": [
+        "MessageFlow_1t25u50"
+      ]
+    }
+  },
+  {
+    "id": "Flow_0y14mvn__condition__Refund",
+    "type": "bpmn:sequenceConditionVariable",
+    "name": "refund",
+    "attrs": {
+      "name": "refund",
+      "relation": "==",
+      "value": "true",
+      "global_name": "Refund",
+      "dsl_type": "string",
+      "sequenceFlow": "Flow_0y14mvn"
+    }
+  },
+  {
+    "id": "Flow_1qaf5vz__condition__Refund",
+    "type": "bpmn:sequenceConditionVariable",
+    "name": "refund",
+    "attrs": {
+      "name": "refund",
+      "relation": "==",
+      "value": "false",
+      "global_name": "Refund",
+      "dsl_type": "string",
+      "sequenceFlow": "Flow_1qaf5vz"
+    }
+  }
+]

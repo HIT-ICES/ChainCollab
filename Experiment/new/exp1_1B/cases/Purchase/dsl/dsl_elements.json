@@ -1,0 +1,511 @@
+[
+  {
+    "id": "Purchase",
+    "type": "dsl:contract",
+    "name": "Purchase",
+    "attrs": {}
+  },
+  {
+    "id": "Participant_0oa2za9__attr__role",
+    "type": "dsl:attribute",
+    "name": "role",
+    "attrs": {
+      "key": "role",
+      "value": "Client"
+    }
+  },
+  {
+    "id": "Participant_0oa2za9",
+    "type": "dsl:participant",
+    "name": "Participant_0oa2za9",
+    "attrs": {
+      "msp": "ClientMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": {
+        "role": "Client"
+      }
+    }
+  },
+  {
+    "id": "Participant_0jwk4tk__attr__role",
+    "type": "dsl:attribute",
+    "name": "role",
+    "attrs": {
+      "key": "role",
+      "value": "Company"
+    }
+  },
+  {
+    "id": "Participant_0jwk4tk",
+    "type": "dsl:participant",
+    "name": "Participant_0jwk4tk",
+    "attrs": {
+      "msp": "CompanyMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": {
+        "role": "Company"
+      }
+    }
+  },
+  {
+    "id": "Participant_0cb2p7d__attr__role",
+    "type": "dsl:attribute",
+    "name": "role",
+    "attrs": {
+      "key": "role",
+      "value": "New Participant 1"
+    }
+  },
+  {
+    "id": "Participant_0cb2p7d",
+    "type": "dsl:participant",
+    "name": "Participant_0cb2p7d",
+    "attrs": {
+      "msp": "New_Participant_1MSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": {
+        "role": "New Participant 1"
+      }
+    }
+  },
+  {
+    "id": "MessageContent",
+    "type": "dsl:global",
+    "name": "MessageContent",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "Price",
+    "type": "dsl:global",
+    "name": "Price",
+    "attrs": {
+      "type": "int"
+    }
+  },
+  {
+    "id": "Time",
+    "type": "dsl:global",
+    "name": "Time",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "Discount",
+    "type": "dsl:global",
+    "name": "Discount",
+    "attrs": {
+      "type": "bool"
+    }
+  },
+  {
+    "id": "Num",
+    "type": "dsl:global",
+    "name": "Num",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "OrderContent",
+    "type": "dsl:global",
+    "name": "OrderContent",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "PriceOK",
+    "type": "dsl:global",
+    "name": "PriceOK",
+    "attrs": {
+      "type": "bool"
+    }
+  },
+  {
+    "id": "ProductAvalibale",
+    "type": "dsl:global",
+    "name": "ProductAvalibale",
+    "attrs": {
+      "type": "bool"
+    }
+  },
+  {
+    "id": "Sale",
+    "type": "dsl:global",
+    "name": "Sale",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "Time2",
+    "type": "dsl:global",
+    "name": "Time2",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "Message_05gz8u0",
+    "type": "dsl:message",
+    "name": "Message_05gz8u0",
+    "attrs": {
+      "sender": "Participant_0jwk4tk",
+      "receiver": "Participant_0oa2za9",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"MessageContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_08ms1jj",
+    "type": "dsl:message",
+    "name": "Message_08ms1jj",
+    "attrs": {
+      "sender": "Participant_0jwk4tk",
+      "receiver": "Participant_0oa2za9",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"sale\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"sale\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0g7m9tf",
+    "type": "dsl:message",
+    "name": "Message_0g7m9tf",
+    "attrs": {
+      "sender": "Participant_0oa2za9",
+      "receiver": "Participant_0jwk4tk",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"num\":{\"type\":\"string\",\"description\":\"\"},\"time2\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0mcktm6",
+    "type": "dsl:message",
+    "name": "Message_0mcktm6",
+    "attrs": {
+      "sender": "Participant_0jwk4tk",
+      "receiver": "Participant_0oa2za9",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"Price\":{\"type\":\"number\",\"description\":\"\"},\"Time\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"Price\",\"Time\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0q9hvem",
+    "type": "dsl:message",
+    "name": "Message_0q9hvem",
+    "attrs": {
+      "sender": "Participant_0jwk4tk",
+      "receiver": "Participant_0oa2za9",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"orderContent\":{\"type\":\"string\",\"description\":\"\"},\"productAvalibale\":{\"type\":\"boolean\",\"description\":\"is product avaliable\"}},\"required\":[\"orderContent\",\"productAvalibale\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_14wu8ts",
+    "type": "dsl:message",
+    "name": "Message_14wu8ts",
+    "attrs": {
+      "sender": "Participant_0oa2za9",
+      "receiver": "Participant_0jwk4tk",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"MessageContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_15b83n1",
+    "type": "dsl:message",
+    "name": "Message_15b83n1",
+    "attrs": {
+      "sender": "Participant_0oa2za9",
+      "receiver": "Participant_0jwk4tk",
+      "initialState": "INACTIVE",
+      "schema": "{}"
+    }
+  },
+  {
+    "id": "Message_1f0gefc",
+    "type": "dsl:message",
+    "name": "Message_1f0gefc",
+    "attrs": {
+      "sender": "Participant_0oa2za9",
+      "receiver": "Participant_0jwk4tk",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"MessageContent\":{\"type\":\"string\",\"description\":\"\"},\"priceOK\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"MessageContent\",\"priceOK\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Gateway_1ltys0e",
+    "type": "dsl:gateway",
+    "name": "Gateway_1ltys0e",
+    "attrs": {
+      "gatewayType": "exclusive",
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Gateway_025uwvp",
+    "type": "dsl:gateway",
+    "name": "Gateway_025uwvp",
+    "attrs": {
+      "gatewayType": "exclusive",
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Gateway_13i0b7w",
+    "type": "dsl:gateway",
+    "name": "Gateway_13i0b7w",
+    "attrs": {
+      "gatewayType": "exclusive",
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Event_0ehnwwz",
+    "type": "dsl:event",
+    "name": "Event_0ehnwwz",
+    "attrs": {
+      "initialState": "READY"
+    }
+  },
+  {
+    "id": "Event_0e3j88g",
+    "type": "dsl:event",
+    "name": "Event_0e3j88g",
+    "attrs": {
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Event_1o9guxu",
+    "type": "dsl:event",
+    "name": "Event_1o9guxu",
+    "attrs": {
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Event_194zr5n",
+    "type": "dsl:event",
+    "name": "Event_194zr5n",
+    "attrs": {
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Activity_12arovy",
+    "type": "dsl:businessrule",
+    "name": "Activity_12arovy",
+    "attrs": {
+      "dmnResource": "Activity_12arovy.dmn",
+      "decisionID": "Activity_12arovy_DecisionID",
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Activity_12arovy__input__Price",
+    "type": "dsl:paramMapping",
+    "name": "Price",
+    "attrs": {
+      "dmnParam": "Price",
+      "globalRef": "Price",
+      "direction": "input"
+    }
+  },
+  {
+    "id": "Activity_12arovy__output__discount",
+    "type": "dsl:paramMapping",
+    "name": "discount",
+    "attrs": {
+      "dmnParam": "discount",
+      "globalRef": "Discount",
+      "direction": "output"
+    }
+  },
+  {
+    "id": "start__Event_0ehnwwz__Message_0q9hvem",
+    "type": "dsl:startFlow",
+    "name": "start__Event_0ehnwwz__Message_0q9hvem",
+    "attrs": {
+      "start": "Event_0ehnwwz",
+      "target": "Message_0q9hvem"
+    }
+  },
+  {
+    "id": "messageFlow__Message_0q9hvem__69",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_0q9hvem__69",
+    "attrs": {
+      "message": "Message_0q9hvem",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_1f0gefc__153",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_1f0gefc__153",
+    "attrs": {
+      "message": "Message_1f0gefc",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_14wu8ts__237",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_14wu8ts__237",
+    "attrs": {
+      "message": "Message_14wu8ts",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_0mcktm6__319",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_0mcktm6__319",
+    "attrs": {
+      "message": "Message_0mcktm6",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_05gz8u0__404",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_05gz8u0__404",
+    "attrs": {
+      "message": "Message_05gz8u0",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_0g7m9tf__486",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_0g7m9tf__486",
+    "attrs": {
+      "message": "Message_0g7m9tf",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_15b83n1__568",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_15b83n1__568",
+    "attrs": {
+      "message": "Message_15b83n1",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_08ms1jj__652",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_08ms1jj__652",
+    "attrs": {
+      "message": "Message_08ms1jj",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "ruleFlow__Activity_12arovy__1418",
+    "type": "dsl:ruleFlow",
+    "name": "ruleFlow__Activity_12arovy__1418",
+    "attrs": {
+      "businessrule": "Activity_12arovy",
+      "ruleCond": "done"
+    }
+  },
+  {
+    "id": "gatewayChoose__Gateway_1ltys0e__737",
+    "type": "dsl:gatewayFlow",
+    "name": "gatewayChoose__Gateway_1ltys0e__737",
+    "attrs": {
+      "gateway": "Gateway_1ltys0e",
+      "condition": "completed",
+      "mode": "choose"
+    }
+  },
+  {
+    "id": "gatewayChoose__Gateway_1ltys0e__737__branch__0",
+    "type": "dsl:gatewayCompareBranch",
+    "name": "gatewayChoose__Gateway_1ltys0e__737__branch__0",
+    "attrs": {
+      "branch_kind": "if",
+      "condition": "ProductAvalibale == true"
+    }
+  },
+  {
+    "id": "gatewayChoose__Gateway_1ltys0e__737__branch__1",
+    "type": "dsl:gatewayCompareBranch",
+    "name": "gatewayChoose__Gateway_1ltys0e__737__branch__1",
+    "attrs": {
+      "branch_kind": "if",
+      "condition": "ProductAvalibale == false"
+    }
+  },
+  {
+    "id": "gatewayChoose__Gateway_025uwvp__975",
+    "type": "dsl:gatewayFlow",
+    "name": "gatewayChoose__Gateway_025uwvp__975",
+    "attrs": {
+      "gateway": "Gateway_025uwvp",
+      "condition": "completed",
+      "mode": "choose"
+    }
+  },
+  {
+    "id": "gatewayChoose__Gateway_025uwvp__975__branch__0",
+    "type": "dsl:gatewayCompareBranch",
+    "name": "gatewayChoose__Gateway_025uwvp__975__branch__0",
+    "attrs": {
+      "branch_kind": "if",
+      "condition": "PriceOK == true"
+    }
+  },
+  {
+    "id": "gatewayChoose__Gateway_025uwvp__975__branch__1",
+    "type": "dsl:gatewayCompareBranch",
+    "name": "gatewayChoose__Gateway_025uwvp__975__branch__1",
+    "attrs": {
+      "branch_kind": "if",
+      "condition": "PriceOK == false"
+    }
+  },
+  {
+    "id": "gatewayChoose__Gateway_13i0b7w__1195",
+    "type": "dsl:gatewayFlow",
+    "name": "gatewayChoose__Gateway_13i0b7w__1195",
+    "attrs": {
+      "gateway": "Gateway_13i0b7w",
+      "condition": "completed",
+      "mode": "choose"
+    }
+  },
+  {
+    "id": "gatewayChoose__Gateway_13i0b7w__1195__branch__0",
+    "type": "dsl:gatewayCompareBranch",
+    "name": "gatewayChoose__Gateway_13i0b7w__1195__branch__0",
+    "attrs": {
+      "branch_kind": "if",
+      "condition": "Discount == false"
+    }
+  },
+  {
+    "id": "gatewayChoose__Gateway_13i0b7w__1195__branch__1",
+    "type": "dsl:gatewayCompareBranch",
+    "name": "gatewayChoose__Gateway_13i0b7w__1195__branch__1",
+    "attrs": {
+      "branch_kind": "if",
+      "condition": "Discount == true"
+    }
+  }
+]

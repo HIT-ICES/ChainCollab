@@ -1,0 +1,668 @@
+{
+  "contract_version": "0.1.0",
+  "name": "default_bpmn_to_b2cdsl_structure_mapping",
+  "scope": "Experiment 1B BPMN-to-DSL structural consistency",
+  "source": {
+    "model": "BPMN choreography",
+    "implementation_basis": [
+      "src/newTranslator/generator/parser/choreography_parser/elements.py",
+      "src/newTranslator/generator/parser/choreography_parser/parser.py",
+      "src/newTranslator/generator/translator.py"
+    ]
+  },
+  "target": {
+    "model": "B2CDSL",
+    "implementation_basis": [
+      "src/newTranslator/DSL/B2CDSL/b2cdsl/b2c.tx",
+      "src/newTranslator/MDAcheck/b2c.ecore",
+      "src/newTranslator/generator/snippet/newSnippet/snippets.json"
+    ]
+  },
+  "id_policy": {
+    "default_match_priority": [
+      "translator_trace",
+      "same_id",
+      "bpmn_message_ref",
+      "normalized_id",
+      "type_name_context"
+    ],
+    "preserve_bpmn_ids_where_translator_does": true,
+    "notes": [
+      "newTranslator normally emits participant, message, gateway, event, businessrule and oracletask DSL names from BPMN element ids.",
+      "BPMN messageFlow itself does not become a DSL node; its messageRef becomes the DSL message node.",
+      "BPMN choreographyTask itself does not become a DSL node; it is represented through its init/return message flows and flow rules."
+    ]
+  },
+  "type_aliases": {
+    "bpmn:DataTask": "bpmn:receiveTask",
+    "dsl:businessRule": "dsl:businessrule",
+    "dsl:oracleTask": "dsl:oracletask"
+  },
+  "element_rules": [
+    {
+      "rule_name": "Participant2Participant",
+      "source_type": "bpmn:participant",
+      "target_type": "dsl:participant",
+      "cardinality": "1:1",
+      "match": {
+        "source_id": "id",
+        "target_id": "id"
+      },
+      "attribute_checks": [
+        { "source": "id", "target": "id" },
+        { "source": "id", "target": "name" },
+        { "source": "is_multi", "target": "isMulti" },
+        { "source": "multi_minimum", "target": "multiMin" },
+        { "source": "multi_maximum", "target": "multiMax" }
+      ],
+      "derived_target_attributes": {
+        "msp": "bindings.json or public_the_name(name_or_id) + 'MSP'",
+        "x509": "bindings.json or empty string",
+        "attributes": "bindings.json or { role: participant.name_or_id }",
+        "source_name": "BPMN participant.name is not emitted as DSL participant.name; it is used as name_hint for default msp/attributes"
+      },
+      "required": true
+    },
+    {
+      "rule_name": "MessageRef2Message",
+      "source_type": "bpmn:message",
+      "source_context": "referenced by bpmn:messageFlow.messageRef",
+      "target_type": "dsl:message",
+      "cardinality": "1:1",
+      "match": {
+        "source_id": "id",
+        "target_id": "id"
+      },
+      "attribute_checks": [
+        { "source": "id", "target": "id" },
+        { "source": "id", "target": "name" },
+        { "source": "documentation", "target": "schema", "normalizer": "summarize_message_schema + JSON compacting + quote escaping" }
+      ],
+      "ignored_source_attributes": [
+        {
+          "attribute": "name",
+          "reason": "newTranslator emits DSL message name from BPMN message id, not BPMN message.name"
+        }
+      ],
+      "required": true
+    },
+    {
+      "rule_name": "MessageFlowEndpoints2MessageParticipants",
+      "source_type": "bpmn:messageFlow",
+      "target_type": "dsl:message",
+      "cardinality": "1:1 via messageRef",
+      "match": {
+        "source_attr": "message",
+        "target_id": "id"
+      },
+      "attribute_map": {
+        "source": "sender",
+        "target": "receiver",
+        "message": "id"
+      },
+      "required": true
+    },
+    {
+      "rule_name": "StartEvent2Event",
+      "source_type": "bpmn:startEvent",
+      "target_type": "dsl:event",
+      "cardinality": "1:1",
+      "match": {
+        "source_id": "id",
+        "target_id": "id"
+      },
+      "attribute_checks": [
+        { "source": "id", "target": "id" },
+        { "source": "id", "target": "name" }
+      ],
+      "ignored_source_attributes": [
+        {
+          "attribute": "name",
+          "reason": "newTranslator emits DSL event name from BPMN startEvent id"
+        }
+      ],
+      "target_expected_attributes": {
+        "initialState": "READY"
+      },
+      "required": true
+    },
+    {
+      "rule_name": "EndEvent2Event",
+      "source_type": "bpmn:endEvent",
+      "target_type": "dsl:event",
+      "cardinality": "1:1",
+      "match": {
+        "source_id": "id",
+        "target_id": "id"
+      },
+      "attribute_checks": [
+        { "source": "id", "target": "id" },
+        { "source": "id", "target": "name" }
+      ],
+      "ignored_source_attributes": [
+        {
+          "attribute": "name",
+          "reason": "newTranslator emits DSL event name from BPMN endEvent id"
+        }
+      ],
+      "target_expected_attributes": {
+        "initialState": "INACTIVE"
+      },
+      "required": true
+    },
+    {
+      "rule_name": "ExclusiveGateway2Gateway",
+      "source_type": "bpmn:exclusiveGateway",
+      "target_type": "dsl:gateway",
+      "cardinality": "1:1",
+      "match": {
+        "source_id": "id",
+        "target_id": "id"
+      },
+      "attribute_checks": [
+        { "source": "id", "target": "id" },
+        { "source": "id", "target": "name" }
+      ],
+      "ignored_source_attributes": [
+        {
+          "attribute": "name",
+          "reason": "newTranslator emits DSL gateway name from BPMN gateway id"
+        }
+      ],
+      "target_expected_attributes": {
+        "gatewayType": "exclusive",
+        "initialState": "INACTIVE"
+      },
+      "required": true
+    },
+    {
+      "rule_name": "ParallelGateway2Gateway",
+      "source_type": "bpmn:parallelGateway",
+      "target_type": "dsl:gateway",
+      "cardinality": "1:1",
+      "match": {
+        "source_id": "id",
+        "target_id": "id"
+      },
+      "attribute_checks": [
+        { "source": "id", "target": "id" },
+        { "source": "id", "target": "name" }
+      ],
+      "ignored_source_attributes": [
+        {
+          "attribute": "name",
+          "reason": "newTranslator emits DSL gateway name from BPMN gateway id"
+        }
+      ],
+      "target_expected_attributes": {
+        "gatewayType": "parallel",
+        "initialState": "INACTIVE"
+      },
+      "required": true
+    },
+    {
+      "rule_name": "EventBasedGateway2Gateway",
+      "source_type": "bpmn:eventBasedGateway",
+      "target_type": "dsl:gateway",
+      "cardinality": "1:1",
+      "match": {
+        "source_id": "id",
+        "target_id": "id"
+      },
+      "attribute_checks": [
+        { "source": "id", "target": "id" },
+        { "source": "id", "target": "name" }
+      ],
+      "ignored_source_attributes": [
+        {
+          "attribute": "name",
+          "reason": "newTranslator emits DSL gateway name from BPMN gateway id"
+        }
+      ],
+      "target_expected_attributes": {
+        "gatewayType": "event",
+        "initialState": "INACTIVE"
+      },
+      "required": true
+    },
+    {
+      "rule_name": "BusinessRuleTask2BusinessRule",
+      "source_type": "bpmn:businessRuleTask",
+      "target_type": "dsl:businessrule",
+      "cardinality": "1:1",
+      "match": {
+        "source_id": "id",
+        "target_id": "id"
+      },
+      "attribute_checks": [
+        { "source": "id", "target": "id" },
+        { "source": "id", "target": "name" },
+        { "source": "documentation.inputs[].name", "target": "inputMappings[].dmnParam" },
+        { "source": "public_the_name(documentation.inputs[].name)", "target": "inputMappings[].globalRef" },
+        { "source": "documentation.outputs[].name", "target": "outputMappings[].dmnParam" },
+        { "source": "public_the_name(documentation.outputs[].name)", "target": "outputMappings[].globalRef" }
+      ],
+      "ignored_source_attributes": [
+        {
+          "attribute": "name",
+          "reason": "newTranslator emits DSL businessrule name from BPMN businessRuleTask id"
+        }
+      ],
+      "target_expected_attributes": {
+        "dmnResource": "{source.id}.dmn",
+        "decisionID": "{source.id}_DecisionID",
+        "initialState": "INACTIVE"
+      },
+      "required": true
+    },
+    {
+      "rule_name": "ReceiveTask2OracleTask",
+      "source_type": "bpmn:receiveTask",
+      "target_type": "dsl:oracletask",
+      "cardinality": "1:1",
+      "match": {
+        "source_id": "id",
+        "target_id": "id"
+      },
+      "attribute_checks": [
+        { "source": "id", "target": "id" },
+        { "source": "id", "target": "name" },
+        { "source": "documentation.oracleTaskType", "target": "oracleType", "default": "external-data" },
+        { "source": "documentation.dataSource", "target": "dataSource", "default": "" },
+        { "source": "documentation.computeScript", "target": "computeScript", "default": "" },
+        { "source": "documentation.outputMappings[].name", "target": "outputMappings[].dmnParam", "default": "{source.id}_result" },
+        { "source": "public_the_name(documentation.outputMappings[].globalRef_or_name)", "target": "outputMappings[].globalRef", "default": "public_the_name({source.id}_result)" }
+      ],
+      "ignored_source_attributes": [
+        {
+          "attribute": "name",
+          "reason": "newTranslator emits DSL oracletask name from BPMN receiveTask id"
+        }
+      ],
+      "target_defaults": {
+        "oracleType": "external-data",
+        "initialState": "INACTIVE"
+      },
+      "required": false
+    },
+    {
+      "rule_name": "ScriptTask2OracleTask",
+      "source_type": "bpmn:scriptTask",
+      "target_type": "dsl:oracletask",
+      "cardinality": "1:1",
+      "match": {
+        "source_id": "id",
+        "target_id": "id"
+      },
+      "attribute_checks": [
+        { "source": "id", "target": "id" },
+        { "source": "id", "target": "name" },
+        { "source": "documentation.oracleTaskType", "target": "oracleType", "default": "compute-task" },
+        { "source": "documentation.dataSource", "target": "dataSource", "default": "" },
+        { "source": "documentation.computeScript", "target": "computeScript", "default": "script body fallback if documentation is absent" },
+        { "source": "documentation.outputMappings[].name", "target": "outputMappings[].dmnParam", "default": "{source.id}_result" },
+        { "source": "public_the_name(documentation.outputMappings[].globalRef_or_name)", "target": "outputMappings[].globalRef", "default": "public_the_name({source.id}_result)" }
+      ],
+      "ignored_source_attributes": [
+        {
+          "attribute": "name",
+          "reason": "newTranslator emits DSL oracletask name from BPMN scriptTask id"
+        }
+      ],
+      "target_defaults": {
+        "oracleType": "compute-task",
+        "initialState": "INACTIVE"
+      },
+      "required": false
+    },
+    {
+      "rule_name": "MessageProperty2GlobalVar",
+      "source_type": "bpmn:messageProperty",
+      "source_context": "message.documentation.properties",
+      "target_type": "dsl:global",
+      "cardinality": "n:1 by property name",
+      "match": {
+        "source_attr": "name",
+        "target_id": "public_the_name(name)"
+      },
+      "attribute_map": {
+        "name": "name",
+        "type": "type"
+      },
+      "normalizers": {
+        "name": "public_the_name",
+        "type": "map_bpmn_type"
+      },
+      "required": false
+    },
+    {
+      "rule_name": "BusinessRuleIO2GlobalVar",
+      "source_type": "bpmn:businessRuleParameter",
+      "source_context": "businessRuleTask.documentation.inputs/outputs",
+      "target_type": "dsl:global",
+      "cardinality": "n:1 by parameter name",
+      "match": {
+        "source_attr": "name",
+        "target_id": "public_the_name(name)"
+      },
+      "attribute_map": {
+        "name": "name",
+        "type": "type"
+      },
+      "normalizers": {
+        "name": "public_the_name",
+        "type": "map_bpmn_type"
+      },
+      "required": false
+    },
+    {
+      "rule_name": "SequenceConditionVariable2GlobalVar",
+      "source_type": "bpmn:sequenceConditionVariable",
+      "source_context": "sequenceFlow.conditionExpression or sequenceFlow.name",
+      "target_type": "dsl:global",
+      "cardinality": "n:1 by variable name",
+      "match": {
+        "source_attr": "name",
+        "target_id": "public_the_name(name)"
+      },
+      "attribute_map": {
+        "name": "name",
+        "type": "type"
+      },
+      "normalizers": {
+        "name": "public_the_name",
+        "type": "infer_literal_type then map_bpmn_type"
+      },
+      "required": false
+    }
+  ],
+  "non_direct_element_rules": [
+    {
+      "rule_name": "ChoreographyTaskExpansion",
+      "source_type": "bpmn:choreographyTask",
+      "target_type": "none",
+      "status": "expanded",
+      "expansion": [
+        "init messageFlow.messageRef -> dsl:message",
+        "optional return messageFlow.messageRef -> dsl:message",
+        "sequence successor relation -> dsl flow action"
+      ],
+      "check_strategy": "do not require a dsl node with choreographyTask.id; verify participant/messageFlowRef/sequence relation preservation instead"
+    },
+    {
+      "rule_name": "MessageFlowNoDirectNode",
+      "source_type": "bpmn:messageFlow",
+      "target_type": "none",
+      "status": "represented_by_message_node_and_sender_receiver_attrs",
+      "check_strategy": "trace bpmn:messageFlow.messageRef to dsl:message.id and compare source/target with sender/receiver"
+    }
+  ],
+  "relation_rules": [
+    {
+      "rule_name": "StartEventSequence2StartFlow",
+      "source_relation": "bpmn:sequenceFlow",
+      "source_pattern": {
+        "source_type": "bpmn:startEvent",
+        "target": "activation_target(sequenceFlow.target)"
+      },
+      "target_relation": "dsl:start_enables",
+      "target_pattern": {
+        "source": "dsl:event(source.id)",
+        "target": "activation_target(sequenceFlow.target)"
+      },
+      "preserve_direction": true,
+      "required": true
+    },
+    {
+      "rule_name": "ChoreographyTaskMessageOrder2MessageFlow",
+      "source_relation": "bpmn:choreographyTask.messageFlowRef",
+      "source_pattern": {
+        "init_message": "messageFlow whose source is initiatingParticipantRef",
+        "return_message": "messageFlow whose target is initiatingParticipantRef"
+      },
+      "target_relation": "dsl:enable",
+      "target_pattern": {
+        "generated_edges": [
+          "if init_message and return_message: dsl:enable init_message.messageRef -> return_message.messageRef",
+          "if init_message and no return_message: dsl:enable init_message.messageRef -> activation_target(choreographyTask.outgoing.target)",
+          "if return_message: dsl:enable return_message.messageRef -> activation_target(choreographyTask.outgoing.target)"
+        ],
+        "attrs": {
+          "trigger_type": "message",
+          "trigger_condition": "completed",
+          "flow_item": "MessageFlow"
+        }
+      },
+      "preserve_direction": true,
+      "required": true
+    },
+    {
+      "rule_name": "SequenceFlow2FlowEnable",
+      "source_relation": "bpmn:sequenceFlow",
+      "applicability": "fallback only; use specialized rules for start events, choreography-task message expansion, conditional gateway branches, parallel joins, business rules, and oracle tasks",
+      "source_pattern": {
+        "source": "activation_target(sequenceFlow.source)",
+        "target": "activation_target(sequenceFlow.target)"
+      },
+      "target_relation": "dsl:enable",
+      "target_pattern": {
+        "source": "source activation flow item",
+        "target": "target flow element",
+        "attrs": {
+          "action": "enable"
+        }
+      },
+      "preserve_direction": true,
+      "required": false,
+      "notes": "Do not apply this as a universal requirement for every BPMN sequenceFlow. newTranslator emits different DSL flow forms depending on source/target element type."
+    },
+    {
+      "rule_name": "EventBasedGatewayBranches2DisableEnable",
+      "source_relation": "bpmn:eventBasedGateway.branch",
+      "source_pattern": {
+        "branches": "activation_target(each outgoing.target)"
+      },
+      "target_relation": "dsl:disable + dsl:enable",
+      "target_pattern": {
+        "when": "chosen branch message completed",
+        "disable_edges": "dsl:disable from chosen branch message to other branch messages",
+        "enable_edges": "dsl:enable from chosen branch message to successor of chosen branch",
+        "attrs": {
+          "trigger_type": "message",
+          "trigger_condition": "completed",
+          "flow_item": "MessageFlow"
+        }
+      },
+      "preserve_branch_exclusion": true,
+      "required": false
+    },
+    {
+      "rule_name": "ExclusiveGatewayCondition2GatewayBranch",
+      "source_relation": "bpmn:sequenceFlow.condition",
+      "source_pattern": {
+        "gateway": "exclusiveGateway",
+        "outgoing": "sequenceFlow",
+        "condition": "conditionExpression or sequenceFlow.name"
+      },
+      "target_relation": "dsl:gateway_branch",
+      "target_pattern": {
+        "gateway": "same gateway id",
+        "condition": "public_the_name(name) relation literal",
+        "edge": "dsl:gateway_branch from gateway to activation_target(sequenceFlow.target)",
+        "attrs": {
+          "branch_kind": "if or else",
+          "condition": "normalized condition text",
+          "action": "enable"
+        }
+      },
+      "preserve_condition_text": "normalized structural preservation only",
+      "required": false
+    },
+    {
+      "rule_name": "ParallelGatewayJoin2ParallelJoin",
+      "source_relation": "bpmn:parallelGateway.join",
+      "source_pattern": {
+        "gateway": "parallelGateway with more than one incoming",
+        "sources": "activation_target(each incoming.source)",
+        "targets": "activation_target(each outgoing.target)"
+      },
+      "target_relation": "dsl:parallel_join_source + dsl:enable",
+      "target_pattern": {
+        "gateway": "same gateway id",
+        "sources": "dsl:parallel_join_source edges from each activation source to gateway",
+        "actions": "dsl:enable edges from gateway to each target",
+        "attrs": {
+          "flow_item": "ParallelJoin"
+        }
+      },
+      "preserve_source_set": true,
+      "required": false
+    },
+    {
+      "rule_name": "BusinessRuleSequence2RuleFlow",
+      "source_relation": "bpmn:sequenceFlow",
+      "source_pattern": {
+        "source_type": "bpmn:businessRuleTask",
+        "target": "activation_target(sequenceFlow.target)"
+      },
+      "target_relation": "dsl:enable",
+      "target_pattern": {
+        "source": "dsl:businessrule(source.id)",
+        "condition": "done",
+        "target": "activation_target(sequenceFlow.target)",
+        "attrs": {
+          "trigger_type": "businessrule",
+          "trigger_condition": "done",
+          "flow_item": "RuleFlow"
+        }
+      },
+      "preserve_direction": true,
+      "required": false
+    },
+    {
+      "rule_name": "OracleTaskSequence2OracleTaskFlow",
+      "source_relation": "bpmn:sequenceFlow",
+      "source_pattern": {
+        "source_type": "bpmn:receiveTask|bpmn:scriptTask",
+        "target": "activation_target(sequenceFlow.target)"
+      },
+      "target_relation": "dsl:enable",
+      "target_pattern": {
+        "source": "dsl:oracletask(source.id)",
+        "condition": "done",
+        "target": "activation_target(sequenceFlow.target)",
+        "attrs": {
+          "trigger_type": "oracletask",
+          "trigger_condition": "done",
+          "flow_item": "OracleTaskFlow"
+        }
+      },
+      "preserve_direction": true,
+      "required": false
+    },
+    {
+      "rule_name": "MessageFlowEndpoints2SenderReceiver",
+      "source_relation": "bpmn:messageFlow",
+      "source_pattern": {
+        "message": "messageRef",
+        "source": "sourceRef",
+        "target": "targetRef"
+      },
+      "target_relation": "dsl:message_sender + dsl:message_receiver",
+      "target_pattern": {
+        "message": "dsl:message(messageRef)",
+        "sender_edge": "dsl:message_sender from messageRef to sourceRef",
+        "receiver_edge": "dsl:message_receiver from messageRef to targetRef"
+      },
+      "preserve_direction": true,
+      "required": true
+    }
+  ],
+  "activation_target_policy": {
+    "function_name_in_newTranslator": "FlowPlanner._activation_target",
+    "rules": [
+      {
+        "source_type": "bpmn:choreographyTask",
+        "target": "init_message_flow.message.id if present, else return_message_flow.message.id"
+      },
+      {
+        "source_type": "*",
+        "target": "source.id"
+      }
+    ]
+  },
+  "allowed_synthetic_targets": [
+    {
+      "type": "dsl:global",
+      "reason": "derived from BPMN message documentation, business rule I/O, oracle output mappings, or sequence-flow condition variables"
+    },
+    {
+      "type": "dsl:participant.msp",
+      "reason": "derived from generator bindings/default identity policy"
+    },
+    {
+      "type": "dsl:participant.x509",
+      "reason": "derived from generator bindings/default identity policy"
+    },
+    {
+      "type": "dsl:participant.attributes",
+      "reason": "derived from generator bindings/default role policy"
+    }
+  ],
+  "ignored_or_non_convertible_sources": [
+    {
+      "type": "bpmn:choreographyTask",
+      "reason": "expanded structurally into message and flow relations, not emitted as a DSL node"
+    },
+    {
+      "type": "bpmn:messageFlow",
+      "reason": "represented by dsl:message sender/receiver and message flow relations, not emitted as a DSL node"
+    },
+    {
+      "type": "bpmn:sequenceFlow",
+      "reason": "represented by DSL flow items and actions, not emitted as a DSL node"
+    }
+  ],
+  "normalization": {
+    "identifier": [
+      "strip whitespace",
+      "compare exact BPMN ids before normalized ids",
+      "public_the_name for inferred global variable names"
+    ],
+    "type": {
+      "string": "string",
+      "number": "int",
+      "integer": "int",
+      "boolean": "bool",
+      "float": "float64",
+      "float64": "float64"
+    },
+    "type_compatibility_note": "This follows newTranslator.map_bpmn_type. The current B2CDSL grammar lists float, so a later DSL parser may need to treat float64 and float as equivalent or the translator should be normalized.",
+    "state": {
+      "DISABLED": "INACTIVE",
+      "ENABLED": "READY",
+      "WAITINGFORCONFIRMATION": "PENDING_CONFIRMATION",
+      "COMPLETED": "DONE"
+    },
+    "condition": [
+      "strip outer quotes from BPMN literals",
+      "split by ==, !=, >=, <=, >, <",
+      "normalize variable name with public_the_name",
+      "preserve operator and literal value"
+    ],
+    "schema": [
+      "if message documentation has properties/files, compare compact JSON string",
+      "otherwise compare raw documentation text",
+      "escape double quotes for DSL text but compare unescaped logical values"
+    ]
+  },
+  "pass_policy": {
+    "structural_consistency_requires": [
+      "all required element rules pass",
+      "all required relation rules pass",
+      "no undeclared critical DSL target node exists",
+      "non-direct BPMN elements are either represented by relation rules or declared non-convertible"
+    ],
+    "path_traceability_is_additional": true
+  }
+}

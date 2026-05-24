@@ -1,0 +1,459 @@
+[
+  {
+    "id": "Pizza_Order",
+    "type": "dsl:contract",
+    "name": "Pizza_Order",
+    "attrs": {}
+  },
+  {
+    "id": "Participant_1ssz56y__attr__role",
+    "type": "dsl:attribute",
+    "name": "role",
+    "attrs": {
+      "key": "role",
+      "value": "Customer"
+    }
+  },
+  {
+    "id": "Participant_1ssz56y",
+    "type": "dsl:participant",
+    "name": "Participant_1ssz56y",
+    "attrs": {
+      "msp": "CustomerMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": {
+        "role": "Customer"
+      }
+    }
+  },
+  {
+    "id": "Participant_1f296fx__attr__role",
+    "type": "dsl:attribute",
+    "name": "role",
+    "attrs": {
+      "key": "role",
+      "value": "Pizza Place"
+    }
+  },
+  {
+    "id": "Participant_1f296fx",
+    "type": "dsl:participant",
+    "name": "Participant_1f296fx",
+    "attrs": {
+      "msp": "Pizza_PlaceMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": {
+        "role": "Pizza Place"
+      }
+    }
+  },
+  {
+    "id": "Participant_0szm9kv__attr__role",
+    "type": "dsl:attribute",
+    "name": "role",
+    "attrs": {
+      "key": "role",
+      "value": "Delivery Driver"
+    }
+  },
+  {
+    "id": "Participant_0szm9kv",
+    "type": "dsl:participant",
+    "name": "Participant_0szm9kv",
+    "attrs": {
+      "msp": "Delivery_DriverMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": {
+        "role": "Delivery Driver"
+      }
+    }
+  },
+  {
+    "id": "Address",
+    "type": "dsl:global",
+    "name": "Address",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "DeliveryInfomation",
+    "type": "dsl:global",
+    "name": "DeliveryInfomation",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "OrderContent",
+    "type": "dsl:global",
+    "name": "OrderContent",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "PickUpTime",
+    "type": "dsl:global",
+    "name": "PickUpTime",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "Signature",
+    "type": "dsl:global",
+    "name": "Signature",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "BikePrepare",
+    "type": "dsl:global",
+    "name": "BikePrepare",
+    "attrs": {
+      "type": "bool"
+    }
+  },
+  {
+    "id": "CarPrepare",
+    "type": "dsl:global",
+    "name": "CarPrepare",
+    "attrs": {
+      "type": "bool"
+    }
+  },
+  {
+    "id": "Distance",
+    "type": "dsl:global",
+    "name": "Distance",
+    "attrs": {
+      "type": "int"
+    }
+  },
+  {
+    "id": "Message_0gm7yco",
+    "type": "dsl:message",
+    "name": "Message_0gm7yco",
+    "attrs": {
+      "sender": "Participant_1f296fx",
+      "receiver": "Participant_1ssz56y",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"PickUpTime\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"PickUpTime\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0nc7bj9",
+    "type": "dsl:message",
+    "name": "Message_0nc7bj9",
+    "attrs": {
+      "sender": "Participant_1f296fx",
+      "receiver": "Participant_1ssz56y",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"bikePrepare\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"bikePrepare\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0phlgzx",
+    "type": "dsl:message",
+    "name": "Message_0phlgzx",
+    "attrs": {
+      "sender": "Participant_1f296fx",
+      "receiver": "Participant_0szm9kv",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"DeliveryInfomation\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_10c1p7j",
+    "type": "dsl:message",
+    "name": "Message_10c1p7j",
+    "attrs": {
+      "sender": "Participant_1ssz56y",
+      "receiver": "Participant_1f296fx",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"Address\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"Address\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1hi03zn",
+    "type": "dsl:message",
+    "name": "Message_1hi03zn",
+    "attrs": {
+      "sender": "Participant_1ssz56y",
+      "receiver": "Participant_0szm9kv",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"Signature\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"Signature\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1kyybzd",
+    "type": "dsl:message",
+    "name": "Message_1kyybzd",
+    "attrs": {
+      "sender": "Participant_1f296fx",
+      "receiver": "Participant_1ssz56y",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"carPrepare\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"carPrepare\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1l76ppu",
+    "type": "dsl:message",
+    "name": "Message_1l76ppu",
+    "attrs": {
+      "sender": "Participant_1f296fx",
+      "receiver": "Participant_1ssz56y",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"Signature\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1wwub0e",
+    "type": "dsl:message",
+    "name": "Message_1wwub0e",
+    "attrs": {
+      "sender": "Participant_1ssz56y",
+      "receiver": "Participant_1f296fx",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"OrderContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"OrderContent\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Gateway_0ckb278",
+    "type": "dsl:gateway",
+    "name": "Gateway_0ckb278",
+    "attrs": {
+      "gatewayType": "exclusive",
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Gateway_18xv5wc",
+    "type": "dsl:gateway",
+    "name": "Gateway_18xv5wc",
+    "attrs": {
+      "gatewayType": "exclusive",
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Gateway_1rwnujh",
+    "type": "dsl:gateway",
+    "name": "Gateway_1rwnujh",
+    "attrs": {
+      "gatewayType": "exclusive",
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Gateway_1k9qf30",
+    "type": "dsl:gateway",
+    "name": "Gateway_1k9qf30",
+    "attrs": {
+      "gatewayType": "event",
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Event_17c6iyi",
+    "type": "dsl:event",
+    "name": "Event_17c6iyi",
+    "attrs": {
+      "initialState": "READY"
+    }
+  },
+  {
+    "id": "Event_1bxai2s",
+    "type": "dsl:event",
+    "name": "Event_1bxai2s",
+    "attrs": {
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Activity_0pzravo",
+    "type": "dsl:businessrule",
+    "name": "Activity_0pzravo",
+    "attrs": {
+      "dmnResource": "Activity_0pzravo.dmn",
+      "decisionID": "Activity_0pzravo_DecisionID",
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Activity_0pzravo__input__Address",
+    "type": "dsl:paramMapping",
+    "name": "Address",
+    "attrs": {
+      "dmnParam": "Address",
+      "globalRef": "Address",
+      "direction": "input"
+    }
+  },
+  {
+    "id": "Activity_0pzravo__output__distance",
+    "type": "dsl:paramMapping",
+    "name": "distance",
+    "attrs": {
+      "dmnParam": "distance",
+      "globalRef": "Distance",
+      "direction": "output"
+    }
+  },
+  {
+    "id": "start__Event_17c6iyi__Message_1wwub0e",
+    "type": "dsl:startFlow",
+    "name": "start__Event_17c6iyi__Message_1wwub0e",
+    "attrs": {
+      "start": "Event_17c6iyi",
+      "target": "Message_1wwub0e"
+    }
+  },
+  {
+    "id": "messageFlow__Message_1wwub0e__69",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_1wwub0e__69",
+    "attrs": {
+      "message": "Message_1wwub0e",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_10c1p7j__153",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_10c1p7j__153",
+    "attrs": {
+      "message": "Message_10c1p7j",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_0gm7yco__263",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_0gm7yco__263",
+    "attrs": {
+      "message": "Message_0gm7yco",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_0nc7bj9__372",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_0nc7bj9__372",
+    "attrs": {
+      "message": "Message_0nc7bj9",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_1kyybzd__456",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_1kyybzd__456",
+    "attrs": {
+      "message": "Message_1kyybzd",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_0phlgzx__540",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_0phlgzx__540",
+    "attrs": {
+      "message": "Message_0phlgzx",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_1hi03zn__624",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_1hi03zn__624",
+    "attrs": {
+      "message": "Message_1hi03zn",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_1l76ppu__708",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_1l76ppu__708",
+    "attrs": {
+      "message": "Message_1l76ppu",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "ruleFlow__Activity_0pzravo__1284",
+    "type": "dsl:ruleFlow",
+    "name": "ruleFlow__Activity_0pzravo__1284",
+    "attrs": {
+      "businessrule": "Activity_0pzravo",
+      "ruleCond": "done"
+    }
+  },
+  {
+    "id": "gatewayFlow__Gateway_18xv5wc__1009",
+    "type": "dsl:gatewayFlow",
+    "name": "gatewayFlow__Gateway_18xv5wc__1009",
+    "attrs": {
+      "gateway": "Gateway_18xv5wc",
+      "condition": "completed"
+    }
+  },
+  {
+    "id": "gatewayFlow__Gateway_1rwnujh__1093",
+    "type": "dsl:gatewayFlow",
+    "name": "gatewayFlow__Gateway_1rwnujh__1093",
+    "attrs": {
+      "gateway": "Gateway_1rwnujh",
+      "condition": "completed"
+    }
+  },
+  {
+    "id": "gatewayFlow__Gateway_1k9qf30__1175",
+    "type": "dsl:gatewayFlow",
+    "name": "gatewayFlow__Gateway_1k9qf30__1175",
+    "attrs": {
+      "gateway": "Gateway_1k9qf30",
+      "condition": "completed"
+    }
+  },
+  {
+    "id": "gatewayChoose__Gateway_0ckb278__793",
+    "type": "dsl:gatewayFlow",
+    "name": "gatewayChoose__Gateway_0ckb278__793",
+    "attrs": {
+      "gateway": "Gateway_0ckb278",
+      "condition": "completed",
+      "mode": "choose"
+    }
+  },
+  {
+    "id": "gatewayChoose__Gateway_0ckb278__793__branch__0",
+    "type": "dsl:gatewayCompareBranch",
+    "name": "gatewayChoose__Gateway_0ckb278__793__branch__0",
+    "attrs": {
+      "branch_kind": "if",
+      "condition": "Distance >= 10"
+    }
+  },
+  {
+    "id": "gatewayChoose__Gateway_0ckb278__793__branch__1",
+    "type": "dsl:gatewayCompareBranch",
+    "name": "gatewayChoose__Gateway_0ckb278__793__branch__1",
+    "attrs": {
+      "branch_kind": "if",
+      "condition": "Distance < 10"
+    }
+  }
+]

@@ -1,0 +1,614 @@
+[
+  {
+    "id": "Participant_1p9owwo",
+    "type": "bpmn:participant",
+    "name": "amazon support center",
+    "attrs": {
+      "is_multi": false,
+      "multi_minimum": 0,
+      "multi_maximum": 0
+    }
+  },
+  {
+    "id": "Participant_12df78t",
+    "type": "bpmn:participant",
+    "name": "customer",
+    "attrs": {
+      "is_multi": false,
+      "multi_minimum": 0,
+      "multi_maximum": 0
+    }
+  },
+  {
+    "id": "Message_1b1qlzd",
+    "type": "bpmn:message",
+    "name": "Notification of application failure",
+    "attrs": {
+      "documentation": "{\"properties\":{\"reason\":{\"type\":\"string\",\"description\":\"\"},\"result\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"reason\",\"result\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1b1qlzd__property__reason",
+    "type": "bpmn:messageProperty",
+    "name": "reason",
+    "attrs": {
+      "name": "reason",
+      "global_name": "Reason",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_1b1qlzd",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_1b1qlzd__property__result",
+    "type": "bpmn:messageProperty",
+    "name": "result",
+    "attrs": {
+      "name": "result",
+      "global_name": "Result",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_1b1qlzd",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_01jq2zl",
+    "type": "bpmn:message",
+    "name": "send Deduction amount",
+    "attrs": {
+      "documentation": "{\"properties\":{\"amount\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"amount\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_01jq2zl__property__amount",
+    "type": "bpmn:messageProperty",
+    "name": "amount",
+    "attrs": {
+      "name": "amount",
+      "global_name": "Amount",
+      "type": "number",
+      "dsl_type": "int",
+      "description": "",
+      "owner": "Message_01jq2zl",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_12n6jjk",
+    "type": "bpmn:message",
+    "name": "submit form",
+    "attrs": {
+      "documentation": "{\"properties\":{\"requestType\":{\"type\":\"string\",\"description\":\"\"},\"duration\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"requestType\",\"duration\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_12n6jjk__property__requestType",
+    "type": "bpmn:messageProperty",
+    "name": "requestType",
+    "attrs": {
+      "name": "requestType",
+      "global_name": "RequestType",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_12n6jjk",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_12n6jjk__property__duration",
+    "type": "bpmn:messageProperty",
+    "name": "duration",
+    "attrs": {
+      "name": "duration",
+      "global_name": "Duration",
+      "type": "number",
+      "dsl_type": "int",
+      "description": "",
+      "owner": "Message_12n6jjk",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_076ulzs",
+    "type": "bpmn:message",
+    "name": "details1",
+    "attrs": {
+      "documentation": "{\"properties\":{\"time\":{\"type\":\"string\",\"description\":\"\"},\"description\":{\"type\":\"string\",\"description\":\"\"},\"EC2 resource ID\":{\"type\":\"string\",\"description\":\"\"},\"logs\":{\"type\":\"string\",\"description\":\"\"},\"other information\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"time\",\"description\",\"EC2 resource ID\",\"logs\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_076ulzs__property__time",
+    "type": "bpmn:messageProperty",
+    "name": "time",
+    "attrs": {
+      "name": "time",
+      "global_name": "Time",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_076ulzs",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_076ulzs__property__description",
+    "type": "bpmn:messageProperty",
+    "name": "description",
+    "attrs": {
+      "name": "description",
+      "global_name": "Description",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_076ulzs",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_076ulzs__property__EC2 resource ID",
+    "type": "bpmn:messageProperty",
+    "name": "EC2 resource ID",
+    "attrs": {
+      "name": "EC2 resource ID",
+      "global_name": "EC2_resource_ID",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_076ulzs",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_076ulzs__property__logs",
+    "type": "bpmn:messageProperty",
+    "name": "logs",
+    "attrs": {
+      "name": "logs",
+      "global_name": "Logs",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_076ulzs",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_076ulzs__property__other information",
+    "type": "bpmn:messageProperty",
+    "name": "other information",
+    "attrs": {
+      "name": "other information",
+      "global_name": "Other_information",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_076ulzs",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_068kmzv",
+    "type": "bpmn:message",
+    "name": "details2",
+    "attrs": {
+      "documentation": "{\"properties\":{\"time\":{\"type\":\"string\",\"description\":\"\"},\"instance ID\":{\"type\":\"string\",\"description\":\"\"},\"logs\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"time\",\"instance ID\",\"logs\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_068kmzv__property__time",
+    "type": "bpmn:messageProperty",
+    "name": "time",
+    "attrs": {
+      "name": "time",
+      "global_name": "Time",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_068kmzv",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_068kmzv__property__instance ID",
+    "type": "bpmn:messageProperty",
+    "name": "instance ID",
+    "attrs": {
+      "name": "instance ID",
+      "global_name": "Instance_ID",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_068kmzv",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_068kmzv__property__logs",
+    "type": "bpmn:messageProperty",
+    "name": "logs",
+    "attrs": {
+      "name": "logs",
+      "global_name": "Logs",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_068kmzv",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_09krt7c",
+    "type": "bpmn:message",
+    "name": "create questions",
+    "attrs": {
+      "documentation": "{\"properties\":{\"question name\":{\"type\":\"string\",\"description\":\"\"},\"description\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"question name\",\"description\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_09krt7c__property__question name",
+    "type": "bpmn:messageProperty",
+    "name": "question name",
+    "attrs": {
+      "name": "question name",
+      "global_name": "Question_name",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_09krt7c",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_09krt7c__property__description",
+    "type": "bpmn:messageProperty",
+    "name": "description",
+    "attrs": {
+      "name": "description",
+      "global_name": "Description",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_09krt7c",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_1bhhp1n",
+    "type": "bpmn:message",
+    "name": "Regional level application",
+    "attrs": {
+      "documentation": "{\"properties\":{\"serviceType\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"serviceType\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1bhhp1n__property__serviceType",
+    "type": "bpmn:messageProperty",
+    "name": "serviceType",
+    "attrs": {
+      "name": "serviceType",
+      "global_name": "ServiceType",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_1bhhp1n",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0ywghlt",
+    "type": "bpmn:message",
+    "name": "instance level application",
+    "attrs": {
+      "documentation": "{\"properties\":{\"serviceType\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"serviceType\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0ywghlt__property__serviceType",
+    "type": "bpmn:messageProperty",
+    "name": "serviceType",
+    "attrs": {
+      "name": "serviceType",
+      "global_name": "ServiceType",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_0ywghlt",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Event_0ojehz6",
+    "type": "bpmn:startEvent",
+    "name": "",
+    "attrs": {
+      "incoming": [],
+      "outgoing": [
+        "Flow_0bbli9z"
+      ]
+    }
+  },
+  {
+    "id": "Event_0ci2gl8",
+    "type": "bpmn:endEvent",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_1niv4wa"
+      ],
+      "outgoing": []
+    }
+  },
+  {
+    "id": "Event_0dyp0ut",
+    "type": "bpmn:endEvent",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_092fqzb"
+      ],
+      "outgoing": []
+    }
+  },
+  {
+    "id": "Gateway_0auc3he",
+    "type": "bpmn:exclusiveGateway",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_0ezj4h3",
+        "Flow_1qyvyn9"
+      ],
+      "outgoing": [
+        "Flow_0rawiic"
+      ]
+    }
+  },
+  {
+    "id": "Gateway_0ivv4vg",
+    "type": "bpmn:exclusiveGateway",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_1m6mf5r"
+      ],
+      "outgoing": [
+        "Flow_06m03vj",
+        "Flow_17hhdvo"
+      ]
+    }
+  },
+  {
+    "id": "Gateway_0jgq0a6",
+    "type": "bpmn:eventBasedGateway",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_0dtlny7"
+      ],
+      "outgoing": [
+        "Flow_1kx9uv2",
+        "Flow_0td67i7"
+      ]
+    }
+  },
+  {
+    "id": "Activity_0tya4bp",
+    "type": "bpmn:businessRuleTask",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_1bh56yy"
+      ],
+      "outgoing": [
+        "Flow_1m6mf5r"
+      ],
+      "documentation": "{\"inputs\":[{\"name\":\"duration\",\"type\":\"number\",\"description\":\"\"},{\"name\":\"requestType\",\"type\":\"string\",\"description\":\"\"}],\"outputs\":[{\"name\":\"confirm\",\"type\":\"boolean\",\"description\":\"\"}]}"
+    }
+  },
+  {
+    "id": "Activity_0tya4bp__input__duration",
+    "type": "bpmn:businessRuleParameter",
+    "name": "duration",
+    "attrs": {
+      "name": "duration",
+      "global_name": "Duration",
+      "direction": "input",
+      "type": "number",
+      "dsl_type": "int",
+      "owner": "Activity_0tya4bp"
+    }
+  },
+  {
+    "id": "Activity_0tya4bp__input__requestType",
+    "type": "bpmn:businessRuleParameter",
+    "name": "requestType",
+    "attrs": {
+      "name": "requestType",
+      "global_name": "RequestType",
+      "direction": "input",
+      "type": "string",
+      "dsl_type": "string",
+      "owner": "Activity_0tya4bp"
+    }
+  },
+  {
+    "id": "Activity_0tya4bp__output__confirm",
+    "type": "bpmn:businessRuleParameter",
+    "name": "confirm",
+    "attrs": {
+      "name": "confirm",
+      "global_name": "Confirm",
+      "direction": "output",
+      "type": "boolean",
+      "dsl_type": "bool",
+      "owner": "Activity_0tya4bp"
+    }
+  },
+  {
+    "id": "ChoreographyTask_15hdy0f",
+    "type": "bpmn:choreographyTask",
+    "name": "submit question",
+    "attrs": {
+      "incoming": "Flow_0bbli9z",
+      "outgoing": "Flow_0dtlny7",
+      "participants": [
+        "Participant_12df78t",
+        "Participant_1p9owwo"
+      ],
+      "initiatingParticipantRef": "Participant_12df78t",
+      "messageFlowRefs": [
+        "MessageFlow_1lf21qb"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_0qvin75",
+    "type": "bpmn:choreographyTask",
+    "name": "instance level  application",
+    "attrs": {
+      "incoming": "Flow_1kx9uv2",
+      "outgoing": "Flow_1mhr2rd",
+      "participants": [
+        "Participant_12df78t",
+        "Participant_1p9owwo"
+      ],
+      "initiatingParticipantRef": "Participant_12df78t",
+      "messageFlowRefs": [
+        "MessageFlow_1urma6e"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_0qv0nys",
+    "type": "bpmn:choreographyTask",
+    "name": "Regional level application",
+    "attrs": {
+      "incoming": "Flow_0td67i7",
+      "outgoing": "Flow_05fmni9",
+      "participants": [
+        "Participant_12df78t",
+        "Participant_1p9owwo"
+      ],
+      "initiatingParticipantRef": "Participant_12df78t",
+      "messageFlowRefs": [
+        "MessageFlow_0khz8el"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_1xe5w82",
+    "type": "bpmn:choreographyTask",
+    "name": "level1 details",
+    "attrs": {
+      "incoming": "Flow_1mhr2rd",
+      "outgoing": "Flow_0ezj4h3",
+      "participants": [
+        "Participant_12df78t",
+        "Participant_1p9owwo"
+      ],
+      "initiatingParticipantRef": "Participant_12df78t",
+      "messageFlowRefs": [
+        "MessageFlow_1nqrrp6"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_08v8azc",
+    "type": "bpmn:choreographyTask",
+    "name": "level2 detail",
+    "attrs": {
+      "incoming": "Flow_05fmni9",
+      "outgoing": "Flow_1qyvyn9",
+      "participants": [
+        "Participant_12df78t",
+        "Participant_1p9owwo"
+      ],
+      "initiatingParticipantRef": "Participant_12df78t",
+      "messageFlowRefs": [
+        "MessageFlow_1haf3pl"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_14x309o",
+    "type": "bpmn:choreographyTask",
+    "name": "submit",
+    "attrs": {
+      "incoming": "Flow_0rawiic",
+      "outgoing": "Flow_1bh56yy",
+      "participants": [
+        "Participant_12df78t",
+        "Participant_1p9owwo"
+      ],
+      "initiatingParticipantRef": "Participant_12df78t",
+      "messageFlowRefs": [
+        "MessageFlow_05bvd7t"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_0wtdaho",
+    "type": "bpmn:choreographyTask",
+    "name": "fail",
+    "attrs": {
+      "incoming": "Flow_06m03vj",
+      "outgoing": "Flow_092fqzb",
+      "participants": [
+        "Participant_1p9owwo",
+        "Participant_12df78t"
+      ],
+      "initiatingParticipantRef": "Participant_1p9owwo",
+      "messageFlowRefs": [
+        "MessageFlow_13hle13"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_09o0tby",
+    "type": "bpmn:choreographyTask",
+    "name": "send",
+    "attrs": {
+      "incoming": "Flow_17hhdvo",
+      "outgoing": "Flow_1niv4wa",
+      "participants": [
+        "Participant_1p9owwo",
+        "Participant_12df78t"
+      ],
+      "initiatingParticipantRef": "Participant_1p9owwo",
+      "messageFlowRefs": [
+        "MessageFlow_191vfqw"
+      ]
+    }
+  },
+  {
+    "id": "Flow_06m03vj__condition__Confirm",
+    "type": "bpmn:sequenceConditionVariable",
+    "name": "confirm",
+    "attrs": {
+      "name": "confirm",
+      "relation": "==",
+      "value": "false",
+      "global_name": "Confirm",
+      "dsl_type": "string",
+      "sequenceFlow": "Flow_06m03vj"
+    }
+  },
+  {
+    "id": "Flow_17hhdvo__condition__Confirm",
+    "type": "bpmn:sequenceConditionVariable",
+    "name": "confirm",
+    "attrs": {
+      "name": "confirm",
+      "relation": "==",
+      "value": "true",
+      "global_name": "Confirm",
+      "dsl_type": "string",
+      "sequenceFlow": "Flow_17hhdvo"
+    }
+  }
+]

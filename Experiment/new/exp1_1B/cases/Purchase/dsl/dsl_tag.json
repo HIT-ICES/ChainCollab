@@ -1,0 +1,1209 @@
+{
+  "tag_version": "0.1.0",
+  "case_name": "Purchase",
+  "model_type": "dsl",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp1_1B/cases/Purchase/dsl/Purchase.b2c",
+  "extractor": {
+    "name": "extract_dsl_structure",
+    "version": "0.1.0",
+    "implementation_basis": [
+      "src/newTranslator/DSL/B2CDSL/b2cdsl/b2c.tx",
+      "src/newTranslator/MDAcheck/b2c.ecore"
+    ]
+  },
+  "nodes": [
+    {
+      "id": "Purchase",
+      "type": "dsl:contract",
+      "name": "Purchase",
+      "attrs": {}
+    },
+    {
+      "id": "Participant_0oa2za9__attr__role",
+      "type": "dsl:attribute",
+      "name": "role",
+      "attrs": {
+        "key": "role",
+        "value": "Client"
+      }
+    },
+    {
+      "id": "Participant_0oa2za9",
+      "type": "dsl:participant",
+      "name": "Participant_0oa2za9",
+      "attrs": {
+        "msp": "ClientMSP",
+        "x509": "",
+        "isMulti": false,
+        "multiMin": 0,
+        "multiMax": 0,
+        "attributes": {
+          "role": "Client"
+        }
+      }
+    },
+    {
+      "id": "Participant_0jwk4tk__attr__role",
+      "type": "dsl:attribute",
+      "name": "role",
+      "attrs": {
+        "key": "role",
+        "value": "Company"
+      }
+    },
+    {
+      "id": "Participant_0jwk4tk",
+      "type": "dsl:participant",
+      "name": "Participant_0jwk4tk",
+      "attrs": {
+        "msp": "CompanyMSP",
+        "x509": "",
+        "isMulti": false,
+        "multiMin": 0,
+        "multiMax": 0,
+        "attributes": {
+          "role": "Company"
+        }
+      }
+    },
+    {
+      "id": "Participant_0cb2p7d__attr__role",
+      "type": "dsl:attribute",
+      "name": "role",
+      "attrs": {
+        "key": "role",
+        "value": "New Participant 1"
+      }
+    },
+    {
+      "id": "Participant_0cb2p7d",
+      "type": "dsl:participant",
+      "name": "Participant_0cb2p7d",
+      "attrs": {
+        "msp": "New_Participant_1MSP",
+        "x509": "",
+        "isMulti": false,
+        "multiMin": 0,
+        "multiMax": 0,
+        "attributes": {
+          "role": "New Participant 1"
+        }
+      }
+    },
+    {
+      "id": "MessageContent",
+      "type": "dsl:global",
+      "name": "MessageContent",
+      "attrs": {
+        "type": "string"
+      }
+    },
+    {
+      "id": "Price",
+      "type": "dsl:global",
+      "name": "Price",
+      "attrs": {
+        "type": "int"
+      }
+    },
+    {
+      "id": "Time",
+      "type": "dsl:global",
+      "name": "Time",
+      "attrs": {
+        "type": "string"
+      }
+    },
+    {
+      "id": "Discount",
+      "type": "dsl:global",
+      "name": "Discount",
+      "attrs": {
+        "type": "bool"
+      }
+    },
+    {
+      "id": "Num",
+      "type": "dsl:global",
+      "name": "Num",
+      "attrs": {
+        "type": "string"
+      }
+    },
+    {
+      "id": "OrderContent",
+      "type": "dsl:global",
+      "name": "OrderContent",
+      "attrs": {
+        "type": "string"
+      }
+    },
+    {
+      "id": "PriceOK",
+      "type": "dsl:global",
+      "name": "PriceOK",
+      "attrs": {
+        "type": "bool"
+      }
+    },
+    {
+      "id": "ProductAvalibale",
+      "type": "dsl:global",
+      "name": "ProductAvalibale",
+      "attrs": {
+        "type": "bool"
+      }
+    },
+    {
+      "id": "Sale",
+      "type": "dsl:global",
+      "name": "Sale",
+      "attrs": {
+        "type": "string"
+      }
+    },
+    {
+      "id": "Time2",
+      "type": "dsl:global",
+      "name": "Time2",
+      "attrs": {
+        "type": "string"
+      }
+    },
+    {
+      "id": "Message_05gz8u0",
+      "type": "dsl:message",
+      "name": "Message_05gz8u0",
+      "attrs": {
+        "sender": "Participant_0jwk4tk",
+        "receiver": "Participant_0oa2za9",
+        "initialState": "INACTIVE",
+        "schema": "{\"properties\":{\"MessageContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_08ms1jj",
+      "type": "dsl:message",
+      "name": "Message_08ms1jj",
+      "attrs": {
+        "sender": "Participant_0jwk4tk",
+        "receiver": "Participant_0oa2za9",
+        "initialState": "INACTIVE",
+        "schema": "{\"properties\":{\"sale\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"sale\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_0g7m9tf",
+      "type": "dsl:message",
+      "name": "Message_0g7m9tf",
+      "attrs": {
+        "sender": "Participant_0oa2za9",
+        "receiver": "Participant_0jwk4tk",
+        "initialState": "INACTIVE",
+        "schema": "{\"properties\":{\"num\":{\"type\":\"string\",\"description\":\"\"},\"time2\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_0mcktm6",
+      "type": "dsl:message",
+      "name": "Message_0mcktm6",
+      "attrs": {
+        "sender": "Participant_0jwk4tk",
+        "receiver": "Participant_0oa2za9",
+        "initialState": "INACTIVE",
+        "schema": "{\"properties\":{\"Price\":{\"type\":\"number\",\"description\":\"\"},\"Time\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"Price\",\"Time\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_0q9hvem",
+      "type": "dsl:message",
+      "name": "Message_0q9hvem",
+      "attrs": {
+        "sender": "Participant_0jwk4tk",
+        "receiver": "Participant_0oa2za9",
+        "initialState": "INACTIVE",
+        "schema": "{\"properties\":{\"orderContent\":{\"type\":\"string\",\"description\":\"\"},\"productAvalibale\":{\"type\":\"boolean\",\"description\":\"is product avaliable\"}},\"required\":[\"orderContent\",\"productAvalibale\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_14wu8ts",
+      "type": "dsl:message",
+      "name": "Message_14wu8ts",
+      "attrs": {
+        "sender": "Participant_0oa2za9",
+        "receiver": "Participant_0jwk4tk",
+        "initialState": "INACTIVE",
+        "schema": "{\"properties\":{\"MessageContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_15b83n1",
+      "type": "dsl:message",
+      "name": "Message_15b83n1",
+      "attrs": {
+        "sender": "Participant_0oa2za9",
+        "receiver": "Participant_0jwk4tk",
+        "initialState": "INACTIVE",
+        "schema": "{}"
+      }
+    },
+    {
+      "id": "Message_1f0gefc",
+      "type": "dsl:message",
+      "name": "Message_1f0gefc",
+      "attrs": {
+        "sender": "Participant_0oa2za9",
+        "receiver": "Participant_0jwk4tk",
+        "initialState": "INACTIVE",
+        "schema": "{\"properties\":{\"MessageContent\":{\"type\":\"string\",\"description\":\"\"},\"priceOK\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"MessageContent\",\"priceOK\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Gateway_1ltys0e",
+      "type": "dsl:gateway",
+      "name": "Gateway_1ltys0e",
+      "attrs": {
+        "gatewayType": "exclusive",
+        "initialState": "INACTIVE"
+      }
+    },
+    {
+      "id": "Gateway_025uwvp",
+      "type": "dsl:gateway",
+      "name": "Gateway_025uwvp",
+      "attrs": {
+        "gatewayType": "exclusive",
+        "initialState": "INACTIVE"
+      }
+    },
+    {
+      "id": "Gateway_13i0b7w",
+      "type": "dsl:gateway",
+      "name": "Gateway_13i0b7w",
+      "attrs": {
+        "gatewayType": "exclusive",
+        "initialState": "INACTIVE"
+      }
+    },
+    {
+      "id": "Event_0ehnwwz",
+      "type": "dsl:event",
+      "name": "Event_0ehnwwz",
+      "attrs": {
+        "initialState": "READY"
+      }
+    },
+    {
+      "id": "Event_0e3j88g",
+      "type": "dsl:event",
+      "name": "Event_0e3j88g",
+      "attrs": {
+        "initialState": "INACTIVE"
+      }
+    },
+    {
+      "id": "Event_1o9guxu",
+      "type": "dsl:event",
+      "name": "Event_1o9guxu",
+      "attrs": {
+        "initialState": "INACTIVE"
+      }
+    },
+    {
+      "id": "Event_194zr5n",
+      "type": "dsl:event",
+      "name": "Event_194zr5n",
+      "attrs": {
+        "initialState": "INACTIVE"
+      }
+    },
+    {
+      "id": "Activity_12arovy",
+      "type": "dsl:businessrule",
+      "name": "Activity_12arovy",
+      "attrs": {
+        "dmnResource": "Activity_12arovy.dmn",
+        "decisionID": "Activity_12arovy_DecisionID",
+        "initialState": "INACTIVE"
+      }
+    },
+    {
+      "id": "Activity_12arovy__input__Price",
+      "type": "dsl:paramMapping",
+      "name": "Price",
+      "attrs": {
+        "dmnParam": "Price",
+        "globalRef": "Price",
+        "direction": "input"
+      }
+    },
+    {
+      "id": "Activity_12arovy__output__discount",
+      "type": "dsl:paramMapping",
+      "name": "discount",
+      "attrs": {
+        "dmnParam": "discount",
+        "globalRef": "Discount",
+        "direction": "output"
+      }
+    },
+    {
+      "id": "start__Event_0ehnwwz__Message_0q9hvem",
+      "type": "dsl:startFlow",
+      "name": "start__Event_0ehnwwz__Message_0q9hvem",
+      "attrs": {
+        "start": "Event_0ehnwwz",
+        "target": "Message_0q9hvem"
+      }
+    },
+    {
+      "id": "messageFlow__Message_0q9hvem__69",
+      "type": "dsl:messageFlow",
+      "name": "messageFlow__Message_0q9hvem__69",
+      "attrs": {
+        "message": "Message_0q9hvem",
+        "msgCond": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_1f0gefc__153",
+      "type": "dsl:messageFlow",
+      "name": "messageFlow__Message_1f0gefc__153",
+      "attrs": {
+        "message": "Message_1f0gefc",
+        "msgCond": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_14wu8ts__237",
+      "type": "dsl:messageFlow",
+      "name": "messageFlow__Message_14wu8ts__237",
+      "attrs": {
+        "message": "Message_14wu8ts",
+        "msgCond": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_0mcktm6__319",
+      "type": "dsl:messageFlow",
+      "name": "messageFlow__Message_0mcktm6__319",
+      "attrs": {
+        "message": "Message_0mcktm6",
+        "msgCond": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_05gz8u0__404",
+      "type": "dsl:messageFlow",
+      "name": "messageFlow__Message_05gz8u0__404",
+      "attrs": {
+        "message": "Message_05gz8u0",
+        "msgCond": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_0g7m9tf__486",
+      "type": "dsl:messageFlow",
+      "name": "messageFlow__Message_0g7m9tf__486",
+      "attrs": {
+        "message": "Message_0g7m9tf",
+        "msgCond": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_15b83n1__568",
+      "type": "dsl:messageFlow",
+      "name": "messageFlow__Message_15b83n1__568",
+      "attrs": {
+        "message": "Message_15b83n1",
+        "msgCond": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_08ms1jj__652",
+      "type": "dsl:messageFlow",
+      "name": "messageFlow__Message_08ms1jj__652",
+      "attrs": {
+        "message": "Message_08ms1jj",
+        "msgCond": "completed"
+      }
+    },
+    {
+      "id": "ruleFlow__Activity_12arovy__1418",
+      "type": "dsl:ruleFlow",
+      "name": "ruleFlow__Activity_12arovy__1418",
+      "attrs": {
+        "businessrule": "Activity_12arovy",
+        "ruleCond": "done"
+      }
+    },
+    {
+      "id": "gatewayChoose__Gateway_1ltys0e__737",
+      "type": "dsl:gatewayFlow",
+      "name": "gatewayChoose__Gateway_1ltys0e__737",
+      "attrs": {
+        "gateway": "Gateway_1ltys0e",
+        "condition": "completed",
+        "mode": "choose"
+      }
+    },
+    {
+      "id": "gatewayChoose__Gateway_1ltys0e__737__branch__0",
+      "type": "dsl:gatewayCompareBranch",
+      "name": "gatewayChoose__Gateway_1ltys0e__737__branch__0",
+      "attrs": {
+        "branch_kind": "if",
+        "condition": "ProductAvalibale == true"
+      }
+    },
+    {
+      "id": "gatewayChoose__Gateway_1ltys0e__737__branch__1",
+      "type": "dsl:gatewayCompareBranch",
+      "name": "gatewayChoose__Gateway_1ltys0e__737__branch__1",
+      "attrs": {
+        "branch_kind": "if",
+        "condition": "ProductAvalibale == false"
+      }
+    },
+    {
+      "id": "gatewayChoose__Gateway_025uwvp__975",
+      "type": "dsl:gatewayFlow",
+      "name": "gatewayChoose__Gateway_025uwvp__975",
+      "attrs": {
+        "gateway": "Gateway_025uwvp",
+        "condition": "completed",
+        "mode": "choose"
+      }
+    },
+    {
+      "id": "gatewayChoose__Gateway_025uwvp__975__branch__0",
+      "type": "dsl:gatewayCompareBranch",
+      "name": "gatewayChoose__Gateway_025uwvp__975__branch__0",
+      "attrs": {
+        "branch_kind": "if",
+        "condition": "PriceOK == true"
+      }
+    },
+    {
+      "id": "gatewayChoose__Gateway_025uwvp__975__branch__1",
+      "type": "dsl:gatewayCompareBranch",
+      "name": "gatewayChoose__Gateway_025uwvp__975__branch__1",
+      "attrs": {
+        "branch_kind": "if",
+        "condition": "PriceOK == false"
+      }
+    },
+    {
+      "id": "gatewayChoose__Gateway_13i0b7w__1195",
+      "type": "dsl:gatewayFlow",
+      "name": "gatewayChoose__Gateway_13i0b7w__1195",
+      "attrs": {
+        "gateway": "Gateway_13i0b7w",
+        "condition": "completed",
+        "mode": "choose"
+      }
+    },
+    {
+      "id": "gatewayChoose__Gateway_13i0b7w__1195__branch__0",
+      "type": "dsl:gatewayCompareBranch",
+      "name": "gatewayChoose__Gateway_13i0b7w__1195__branch__0",
+      "attrs": {
+        "branch_kind": "if",
+        "condition": "Discount == false"
+      }
+    },
+    {
+      "id": "gatewayChoose__Gateway_13i0b7w__1195__branch__1",
+      "type": "dsl:gatewayCompareBranch",
+      "name": "gatewayChoose__Gateway_13i0b7w__1195__branch__1",
+      "attrs": {
+        "branch_kind": "if",
+        "condition": "Discount == true"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "Participant_0oa2za9__participant_attribute__role",
+      "type": "dsl:participant_attribute",
+      "source": "Participant_0oa2za9",
+      "target": "Participant_0oa2za9__attr__role",
+      "attrs": {}
+    },
+    {
+      "id": "Purchase__contains__Participant_0oa2za9",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "Participant_0oa2za9",
+      "attrs": {
+        "section": "participants"
+      }
+    },
+    {
+      "id": "Participant_0jwk4tk__participant_attribute__role",
+      "type": "dsl:participant_attribute",
+      "source": "Participant_0jwk4tk",
+      "target": "Participant_0jwk4tk__attr__role",
+      "attrs": {}
+    },
+    {
+      "id": "Purchase__contains__Participant_0jwk4tk",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "Participant_0jwk4tk",
+      "attrs": {
+        "section": "participants"
+      }
+    },
+    {
+      "id": "Participant_0cb2p7d__participant_attribute__role",
+      "type": "dsl:participant_attribute",
+      "source": "Participant_0cb2p7d",
+      "target": "Participant_0cb2p7d__attr__role",
+      "attrs": {}
+    },
+    {
+      "id": "Purchase__contains__Participant_0cb2p7d",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "Participant_0cb2p7d",
+      "attrs": {
+        "section": "participants"
+      }
+    },
+    {
+      "id": "Purchase__contains__MessageContent",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "MessageContent",
+      "attrs": {
+        "section": "globals"
+      }
+    },
+    {
+      "id": "Purchase__contains__Price",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "Price",
+      "attrs": {
+        "section": "globals"
+      }
+    },
+    {
+      "id": "Purchase__contains__Time",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "Time",
+      "attrs": {
+        "section": "globals"
+      }
+    },
+    {
+      "id": "Purchase__contains__Discount",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "Discount",
+      "attrs": {
+        "section": "globals"
+      }
+    },
+    {
+      "id": "Purchase__contains__Num",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "Num",
+      "attrs": {
+        "section": "globals"
+      }
+    },
+    {
+      "id": "Purchase__contains__OrderContent",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "OrderContent",
+      "attrs": {
+        "section": "globals"
+      }
+    },
+    {
+      "id": "Purchase__contains__PriceOK",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "PriceOK",
+      "attrs": {
+        "section": "globals"
+      }
+    },
+    {
+      "id": "Purchase__contains__ProductAvalibale",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "ProductAvalibale",
+      "attrs": {
+        "section": "globals"
+      }
+    },
+    {
+      "id": "Purchase__contains__Sale",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "Sale",
+      "attrs": {
+        "section": "globals"
+      }
+    },
+    {
+      "id": "Purchase__contains__Time2",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "Time2",
+      "attrs": {
+        "section": "globals"
+      }
+    },
+    {
+      "id": "Message_05gz8u0__sender",
+      "type": "dsl:message_sender",
+      "source": "Message_05gz8u0",
+      "target": "Participant_0jwk4tk",
+      "attrs": {}
+    },
+    {
+      "id": "Message_05gz8u0__receiver",
+      "type": "dsl:message_receiver",
+      "source": "Message_05gz8u0",
+      "target": "Participant_0oa2za9",
+      "attrs": {}
+    },
+    {
+      "id": "Purchase__contains__Message_05gz8u0",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "Message_05gz8u0",
+      "attrs": {
+        "section": "messages"
+      }
+    },
+    {
+      "id": "Message_08ms1jj__sender",
+      "type": "dsl:message_sender",
+      "source": "Message_08ms1jj",
+      "target": "Participant_0jwk4tk",
+      "attrs": {}
+    },
+    {
+      "id": "Message_08ms1jj__receiver",
+      "type": "dsl:message_receiver",
+      "source": "Message_08ms1jj",
+      "target": "Participant_0oa2za9",
+      "attrs": {}
+    },
+    {
+      "id": "Purchase__contains__Message_08ms1jj",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "Message_08ms1jj",
+      "attrs": {
+        "section": "messages"
+      }
+    },
+    {
+      "id": "Message_0g7m9tf__sender",
+      "type": "dsl:message_sender",
+      "source": "Message_0g7m9tf",
+      "target": "Participant_0oa2za9",
+      "attrs": {}
+    },
+    {
+      "id": "Message_0g7m9tf__receiver",
+      "type": "dsl:message_receiver",
+      "source": "Message_0g7m9tf",
+      "target": "Participant_0jwk4tk",
+      "attrs": {}
+    },
+    {
+      "id": "Purchase__contains__Message_0g7m9tf",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "Message_0g7m9tf",
+      "attrs": {
+        "section": "messages"
+      }
+    },
+    {
+      "id": "Message_0mcktm6__sender",
+      "type": "dsl:message_sender",
+      "source": "Message_0mcktm6",
+      "target": "Participant_0jwk4tk",
+      "attrs": {}
+    },
+    {
+      "id": "Message_0mcktm6__receiver",
+      "type": "dsl:message_receiver",
+      "source": "Message_0mcktm6",
+      "target": "Participant_0oa2za9",
+      "attrs": {}
+    },
+    {
+      "id": "Purchase__contains__Message_0mcktm6",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "Message_0mcktm6",
+      "attrs": {
+        "section": "messages"
+      }
+    },
+    {
+      "id": "Message_0q9hvem__sender",
+      "type": "dsl:message_sender",
+      "source": "Message_0q9hvem",
+      "target": "Participant_0jwk4tk",
+      "attrs": {}
+    },
+    {
+      "id": "Message_0q9hvem__receiver",
+      "type": "dsl:message_receiver",
+      "source": "Message_0q9hvem",
+      "target": "Participant_0oa2za9",
+      "attrs": {}
+    },
+    {
+      "id": "Purchase__contains__Message_0q9hvem",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "Message_0q9hvem",
+      "attrs": {
+        "section": "messages"
+      }
+    },
+    {
+      "id": "Message_14wu8ts__sender",
+      "type": "dsl:message_sender",
+      "source": "Message_14wu8ts",
+      "target": "Participant_0oa2za9",
+      "attrs": {}
+    },
+    {
+      "id": "Message_14wu8ts__receiver",
+      "type": "dsl:message_receiver",
+      "source": "Message_14wu8ts",
+      "target": "Participant_0jwk4tk",
+      "attrs": {}
+    },
+    {
+      "id": "Purchase__contains__Message_14wu8ts",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "Message_14wu8ts",
+      "attrs": {
+        "section": "messages"
+      }
+    },
+    {
+      "id": "Message_15b83n1__sender",
+      "type": "dsl:message_sender",
+      "source": "Message_15b83n1",
+      "target": "Participant_0oa2za9",
+      "attrs": {}
+    },
+    {
+      "id": "Message_15b83n1__receiver",
+      "type": "dsl:message_receiver",
+      "source": "Message_15b83n1",
+      "target": "Participant_0jwk4tk",
+      "attrs": {}
+    },
+    {
+      "id": "Purchase__contains__Message_15b83n1",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "Message_15b83n1",
+      "attrs": {
+        "section": "messages"
+      }
+    },
+    {
+      "id": "Message_1f0gefc__sender",
+      "type": "dsl:message_sender",
+      "source": "Message_1f0gefc",
+      "target": "Participant_0oa2za9",
+      "attrs": {}
+    },
+    {
+      "id": "Message_1f0gefc__receiver",
+      "type": "dsl:message_receiver",
+      "source": "Message_1f0gefc",
+      "target": "Participant_0jwk4tk",
+      "attrs": {}
+    },
+    {
+      "id": "Purchase__contains__Message_1f0gefc",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "Message_1f0gefc",
+      "attrs": {
+        "section": "messages"
+      }
+    },
+    {
+      "id": "Purchase__contains__Gateway_1ltys0e",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "Gateway_1ltys0e",
+      "attrs": {
+        "section": "gateways"
+      }
+    },
+    {
+      "id": "Purchase__contains__Gateway_025uwvp",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "Gateway_025uwvp",
+      "attrs": {
+        "section": "gateways"
+      }
+    },
+    {
+      "id": "Purchase__contains__Gateway_13i0b7w",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "Gateway_13i0b7w",
+      "attrs": {
+        "section": "gateways"
+      }
+    },
+    {
+      "id": "Purchase__contains__Event_0ehnwwz",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "Event_0ehnwwz",
+      "attrs": {
+        "section": "events"
+      }
+    },
+    {
+      "id": "Purchase__contains__Event_0e3j88g",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "Event_0e3j88g",
+      "attrs": {
+        "section": "events"
+      }
+    },
+    {
+      "id": "Purchase__contains__Event_1o9guxu",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "Event_1o9guxu",
+      "attrs": {
+        "section": "events"
+      }
+    },
+    {
+      "id": "Purchase__contains__Event_194zr5n",
+      "type": "dsl:contains",
+      "source": "Purchase",
+      "target": "Event_194zr5n",
+      "attrs": {
+        "section": "events"
+      }
+    },
+    {
+      "id": "Activity_12arovy__input__Price",
+      "type": "dsl:businessrule_input",
+      "source": "Activity_12arovy",
+      "target": "Price",
+      "attrs": {
+        "dmnParam": "Price"
+      }
+    },
+    {
+      "id": "Activity_12arovy__input__Price__globalRef",
+      "type": "dsl:param_global_ref",
+      "source": "Activity_12arovy__input__Price",
+      "target": "Price",
+      "attrs": {}
+    },
+    {
+      "id": "Activity_12arovy__output__discount",
+      "type": "dsl:businessrule_output",
+      "source": "Activity_12arovy",
+      "target": "Discount",
+      "attrs": {
+        "dmnParam": "discount"
+      }
+    },
+    {
+      "id": "Activity_12arovy__output__discount__globalRef",
+      "type": "dsl:param_global_ref",
+      "source": "Activity_12arovy__output__discount",
+      "target": "Discount",
+      "attrs": {}
+    },
+    {
+      "id": "start__Event_0ehnwwz__Message_0q9hvem",
+      "type": "dsl:start_enables",
+      "source": "Event_0ehnwwz",
+      "target": "Message_0q9hvem",
+      "attrs": {
+        "flow_item": "StartFlow"
+      }
+    },
+    {
+      "id": "messageFlow__Message_0q9hvem__69__trigger",
+      "type": "dsl:flow_trigger",
+      "source": "messageFlow__Message_0q9hvem__69",
+      "target": "Message_0q9hvem",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_0q9hvem__69__enable__0__Gateway_1ltys0e",
+      "type": "dsl:enable",
+      "source": "Message_0q9hvem",
+      "target": "Gateway_1ltys0e",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed",
+        "flow_item": "MessageFlow",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "messageFlow__Message_1f0gefc__153__trigger",
+      "type": "dsl:flow_trigger",
+      "source": "messageFlow__Message_1f0gefc__153",
+      "target": "Message_1f0gefc",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_1f0gefc__153__enable__0__Gateway_025uwvp",
+      "type": "dsl:enable",
+      "source": "Message_1f0gefc",
+      "target": "Gateway_025uwvp",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed",
+        "flow_item": "MessageFlow",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "messageFlow__Message_14wu8ts__237__trigger",
+      "type": "dsl:flow_trigger",
+      "source": "messageFlow__Message_14wu8ts__237",
+      "target": "Message_14wu8ts",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_14wu8ts__237__enable__0__Event_194zr5n",
+      "type": "dsl:enable",
+      "source": "Message_14wu8ts",
+      "target": "Event_194zr5n",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed",
+        "flow_item": "MessageFlow",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "messageFlow__Message_0mcktm6__319__trigger",
+      "type": "dsl:flow_trigger",
+      "source": "messageFlow__Message_0mcktm6__319",
+      "target": "Message_0mcktm6",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_0mcktm6__319__enable__0__Activity_12arovy",
+      "type": "dsl:enable",
+      "source": "Message_0mcktm6",
+      "target": "Activity_12arovy",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed",
+        "flow_item": "MessageFlow",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "messageFlow__Message_05gz8u0__404__trigger",
+      "type": "dsl:flow_trigger",
+      "source": "messageFlow__Message_05gz8u0__404",
+      "target": "Message_05gz8u0",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_05gz8u0__404__enable__0__Event_0e3j88g",
+      "type": "dsl:enable",
+      "source": "Message_05gz8u0",
+      "target": "Event_0e3j88g",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed",
+        "flow_item": "MessageFlow",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "messageFlow__Message_0g7m9tf__486__trigger",
+      "type": "dsl:flow_trigger",
+      "source": "messageFlow__Message_0g7m9tf__486",
+      "target": "Message_0g7m9tf",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_0g7m9tf__486__enable__0__Event_1o9guxu",
+      "type": "dsl:enable",
+      "source": "Message_0g7m9tf",
+      "target": "Event_1o9guxu",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed",
+        "flow_item": "MessageFlow",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "messageFlow__Message_15b83n1__568__trigger",
+      "type": "dsl:flow_trigger",
+      "source": "messageFlow__Message_15b83n1__568",
+      "target": "Message_15b83n1",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_15b83n1__568__enable__0__Message_08ms1jj",
+      "type": "dsl:enable",
+      "source": "Message_15b83n1",
+      "target": "Message_08ms1jj",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed",
+        "flow_item": "MessageFlow",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "messageFlow__Message_08ms1jj__652__trigger",
+      "type": "dsl:flow_trigger",
+      "source": "messageFlow__Message_08ms1jj__652",
+      "target": "Message_08ms1jj",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_08ms1jj__652__enable__0__Message_0g7m9tf",
+      "type": "dsl:enable",
+      "source": "Message_08ms1jj",
+      "target": "Message_0g7m9tf",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed",
+        "flow_item": "MessageFlow",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "ruleFlow__Activity_12arovy__1418__enable__0__Gateway_13i0b7w",
+      "type": "dsl:enable",
+      "source": "Activity_12arovy",
+      "target": "Gateway_13i0b7w",
+      "attrs": {
+        "trigger_type": "businessrule",
+        "trigger_condition": "done",
+        "flow_item": "RuleFlow",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "gatewayChoose__Gateway_1ltys0e__737__branch__0__gateway_branch__0__Message_1f0gefc",
+      "type": "dsl:gateway_branch",
+      "source": "Gateway_1ltys0e",
+      "target": "Message_1f0gefc",
+      "attrs": {
+        "branch_kind": "if",
+        "condition": "ProductAvalibale == true",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "gatewayChoose__Gateway_1ltys0e__737__branch__1__gateway_branch__0__Message_14wu8ts",
+      "type": "dsl:gateway_branch",
+      "source": "Gateway_1ltys0e",
+      "target": "Message_14wu8ts",
+      "attrs": {
+        "branch_kind": "if",
+        "condition": "ProductAvalibale == false",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "gatewayChoose__Gateway_025uwvp__975__branch__0__gateway_branch__0__Message_0mcktm6",
+      "type": "dsl:gateway_branch",
+      "source": "Gateway_025uwvp",
+      "target": "Message_0mcktm6",
+      "attrs": {
+        "branch_kind": "if",
+        "condition": "PriceOK == true",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "gatewayChoose__Gateway_025uwvp__975__branch__1__gateway_branch__0__Message_05gz8u0",
+      "type": "dsl:gateway_branch",
+      "source": "Gateway_025uwvp",
+      "target": "Message_05gz8u0",
+      "attrs": {
+        "branch_kind": "if",
+        "condition": "PriceOK == false",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "gatewayChoose__Gateway_13i0b7w__1195__branch__0__gateway_branch__0__Message_0g7m9tf",
+      "type": "dsl:gateway_branch",
+      "source": "Gateway_13i0b7w",
+      "target": "Message_0g7m9tf",
+      "attrs": {
+        "branch_kind": "if",
+        "condition": "Discount == false",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "gatewayChoose__Gateway_13i0b7w__1195__branch__1__gateway_branch__0__Message_15b83n1",
+      "type": "dsl:gateway_branch",
+      "source": "Gateway_13i0b7w",
+      "target": "Message_15b83n1",
+      "attrs": {
+        "branch_kind": "if",
+        "condition": "Discount == true",
+        "action": "enable"
+      }
+    }
+  ],
+  "derived": [],
+  "warnings": []
+}

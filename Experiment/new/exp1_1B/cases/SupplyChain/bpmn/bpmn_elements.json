@@ -1,0 +1,649 @@
+[
+  {
+    "id": "Participant_0w6qkdf",
+    "type": "bpmn:participant",
+    "name": "Bulk buyer",
+    "attrs": {
+      "is_multi": false,
+      "multi_minimum": 0,
+      "multi_maximum": 0
+    }
+  },
+  {
+    "id": "Participant_19mgbdn",
+    "type": "bpmn:participant",
+    "name": "Manufacturer",
+    "attrs": {
+      "is_multi": false,
+      "multi_minimum": 0,
+      "multi_maximum": 0
+    }
+  },
+  {
+    "id": "Participant_09cjol2",
+    "type": "bpmn:participant",
+    "name": "Middleman",
+    "attrs": {
+      "is_multi": false,
+      "multi_minimum": 0,
+      "multi_maximum": 0
+    }
+  },
+  {
+    "id": "Participant_0sa2v7d",
+    "type": "bpmn:participant",
+    "name": "Supplier",
+    "attrs": {
+      "is_multi": false,
+      "multi_minimum": 0,
+      "multi_maximum": 0
+    }
+  },
+  {
+    "id": "Participant_19j1e3o",
+    "type": "bpmn:participant",
+    "name": "Special carrier",
+    "attrs": {
+      "is_multi": false,
+      "multi_minimum": 0,
+      "multi_maximum": 0
+    }
+  },
+  {
+    "id": "Message_0ps2yzo",
+    "type": "bpmn:message",
+    "name": "Self_pickup",
+    "attrs": {
+      "documentation": "{\"properties\":{\"Self_pickup\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"Self_pickup\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0ps2yzo__property__Self_pickup",
+    "type": "bpmn:messageProperty",
+    "name": "Self_pickup",
+    "attrs": {
+      "name": "Self_pickup",
+      "global_name": "Self_pickup",
+      "type": "boolean",
+      "dsl_type": "bool",
+      "description": "",
+      "owner": "Message_0ps2yzo",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_196q1fj",
+    "type": "bpmn:message",
+    "name": "deliverd_product",
+    "attrs": {
+      "documentation": "{\"properties\":{\"delivered_product\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_196q1fj__property__delivered_product",
+    "type": "bpmn:messageProperty",
+    "name": "delivered_product",
+    "attrs": {
+      "name": "delivered_product",
+      "global_name": "Delivered_product",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_196q1fj",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_04wmlqe",
+    "type": "bpmn:message",
+    "name": "report",
+    "attrs": {
+      "documentation": "{\"properties\":{\"report\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_04wmlqe__property__report",
+    "type": "bpmn:messageProperty",
+    "name": "report",
+    "attrs": {
+      "name": "report",
+      "global_name": "Report",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_04wmlqe",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0d2xte5",
+    "type": "bpmn:message",
+    "name": "deliverd_order",
+    "attrs": {
+      "documentation": "{\"properties\":{\"del_order\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0d2xte5__property__del_order",
+    "type": "bpmn:messageProperty",
+    "name": "del_order",
+    "attrs": {
+      "name": "del_order",
+      "global_name": "Del_order",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_0d2xte5",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_1io2g9u",
+    "type": "bpmn:message",
+    "name": "waybill",
+    "attrs": {
+      "documentation": "{\"properties\":{\"waybill\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1io2g9u__property__waybill",
+    "type": "bpmn:messageProperty",
+    "name": "waybill",
+    "attrs": {
+      "name": "waybill",
+      "global_name": "Waybill",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_1io2g9u",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0hpha6h",
+    "type": "bpmn:message",
+    "name": "provided_details",
+    "attrs": {
+      "documentation": "{\"properties\":{\"pre_details\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0hpha6h__property__pre_details",
+    "type": "bpmn:messageProperty",
+    "name": "pre_details",
+    "attrs": {
+      "name": "pre_details",
+      "global_name": "Pre_details",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_0hpha6h",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0rwz1km",
+    "type": "bpmn:message",
+    "name": "requested_details",
+    "attrs": {
+      "documentation": "{\"properties\":{\"req_details\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0rwz1km__property__req_details",
+    "type": "bpmn:messageProperty",
+    "name": "req_details",
+    "attrs": {
+      "name": "req_details",
+      "global_name": "Req_details",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_0rwz1km",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0pm90nx",
+    "type": "bpmn:message",
+    "name": "transport_order",
+    "attrs": {
+      "documentation": "{\"properties\":{\"transport_order\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0pm90nx__property__transport_order",
+    "type": "bpmn:messageProperty",
+    "name": "transport_order",
+    "attrs": {
+      "name": "transport_order",
+      "global_name": "Transport_order",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_0pm90nx",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0cba4t6",
+    "type": "bpmn:message",
+    "name": "fwd_order",
+    "attrs": {
+      "documentation": "{\"properties\":{\"fwd_order\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0cba4t6__property__fwd_order",
+    "type": "bpmn:messageProperty",
+    "name": "fwd_order",
+    "attrs": {
+      "name": "fwd_order",
+      "global_name": "Fwd_order",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_0cba4t6",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_1ajdm9l",
+    "type": "bpmn:message",
+    "name": "placed_order",
+    "attrs": {
+      "documentation": "{\"properties\":{\"placed_order\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1ajdm9l__property__placed_order",
+    "type": "bpmn:messageProperty",
+    "name": "placed_order",
+    "attrs": {
+      "name": "placed_order",
+      "global_name": "Placed_order",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_1ajdm9l",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_1wswgqu",
+    "type": "bpmn:message",
+    "name": "order",
+    "attrs": {
+      "documentation": "{\"properties\":{\"order\":{\"type\":\"string\",\"description\":\"\"},\"amount\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"order\",\"amount\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1wswgqu__property__order",
+    "type": "bpmn:messageProperty",
+    "name": "order",
+    "attrs": {
+      "name": "order",
+      "global_name": "Order",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_1wswgqu",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_1wswgqu__property__amount",
+    "type": "bpmn:messageProperty",
+    "name": "amount",
+    "attrs": {
+      "name": "amount",
+      "global_name": "Amount",
+      "type": "number",
+      "dsl_type": "int",
+      "description": "",
+      "owner": "Message_1wswgqu",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Event_06sexe6",
+    "type": "bpmn:startEvent",
+    "name": "",
+    "attrs": {
+      "incoming": [],
+      "outgoing": [
+        "Flow_1btgvf6"
+      ]
+    }
+  },
+  {
+    "id": "Event_13pbqdz",
+    "type": "bpmn:endEvent",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_17gtrvu"
+      ],
+      "outgoing": []
+    }
+  },
+  {
+    "id": "Event_0eoqvir",
+    "type": "bpmn:endEvent",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_1m6p4a5"
+      ],
+      "outgoing": []
+    }
+  },
+  {
+    "id": "Gateway_11hmo2k",
+    "type": "bpmn:exclusiveGateway",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_0i9c5yv"
+      ],
+      "outgoing": [
+        "Flow_08e1j3x",
+        "Flow_1m6p4a5"
+      ]
+    }
+  },
+  {
+    "id": "Gateway_0onpe6x",
+    "type": "bpmn:parallelGateway",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_0by1ery"
+      ],
+      "outgoing": [
+        "Flow_0fs2i4x",
+        "Flow_1wyrozo"
+      ]
+    }
+  },
+  {
+    "id": "Gateway_1fbifca",
+    "type": "bpmn:parallelGateway",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_1azhglw",
+        "Flow_1tvz6lc"
+      ],
+      "outgoing": [
+        "Flow_0gtd6v3"
+      ]
+    }
+  },
+  {
+    "id": "Activity_0fbi09z",
+    "type": "bpmn:businessRuleTask",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_1hbgb5i"
+      ],
+      "outgoing": [
+        "Flow_0i9c5yv"
+      ],
+      "documentation": "{\"inputs\":[{\"name\":\"amount\",\"type\":\"number\",\"description\":\"\"},{\"name\":\"Self_pickup\",\"type\":\"boolean\",\"description\":\"\"}],\"outputs\":[{\"name\":\"deliver\",\"type\":\"boolean\",\"description\":\"\"}]}"
+    }
+  },
+  {
+    "id": "Activity_0fbi09z__input__amount",
+    "type": "bpmn:businessRuleParameter",
+    "name": "amount",
+    "attrs": {
+      "name": "amount",
+      "global_name": "Amount",
+      "direction": "input",
+      "type": "number",
+      "dsl_type": "int",
+      "owner": "Activity_0fbi09z"
+    }
+  },
+  {
+    "id": "Activity_0fbi09z__input__Self_pickup",
+    "type": "bpmn:businessRuleParameter",
+    "name": "Self_pickup",
+    "attrs": {
+      "name": "Self_pickup",
+      "global_name": "Self_pickup",
+      "direction": "input",
+      "type": "boolean",
+      "dsl_type": "bool",
+      "owner": "Activity_0fbi09z"
+    }
+  },
+  {
+    "id": "Activity_0fbi09z__output__deliver",
+    "type": "bpmn:businessRuleParameter",
+    "name": "deliver",
+    "attrs": {
+      "name": "deliver",
+      "global_name": "Deliver",
+      "direction": "output",
+      "type": "boolean",
+      "dsl_type": "bool",
+      "owner": "Activity_0fbi09z"
+    }
+  },
+  {
+    "id": "ChoreographyTask_0tyax7p",
+    "type": "bpmn:choreographyTask",
+    "name": "Order goods",
+    "attrs": {
+      "incoming": "Flow_1btgvf6",
+      "outgoing": "Flow_06esz8k",
+      "participants": [
+        "Participant_0w6qkdf",
+        "Participant_19mgbdn"
+      ],
+      "initiatingParticipantRef": "Participant_0w6qkdf",
+      "messageFlowRefs": [
+        "MessageFlow_06374xt"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_0m4d50p",
+    "type": "bpmn:choreographyTask",
+    "name": "Place order for supplies",
+    "attrs": {
+      "incoming": "Flow_06esz8k",
+      "outgoing": "Flow_0by1ery",
+      "participants": [
+        "Participant_19mgbdn",
+        "Participant_09cjol2"
+      ],
+      "initiatingParticipantRef": "Participant_19mgbdn",
+      "messageFlowRefs": [
+        "MessageFlow_1vbejzn"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_0i0ht39",
+    "type": "bpmn:choreographyTask",
+    "name": "Forward order for supplies",
+    "attrs": {
+      "incoming": "Flow_0fs2i4x",
+      "outgoing": "Flow_1azhglw",
+      "participants": [
+        "Participant_0w6qkdf",
+        "Participant_0sa2v7d"
+      ],
+      "initiatingParticipantRef": "Participant_0w6qkdf",
+      "messageFlowRefs": [
+        "MessageFlow_1m81z4l"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_145bktk",
+    "type": "bpmn:choreographyTask",
+    "name": "Forward order for transport",
+    "attrs": {
+      "incoming": "Flow_1wyrozo",
+      "outgoing": "Flow_1tvz6lc",
+      "participants": [
+        "Participant_0w6qkdf",
+        "Participant_19j1e3o"
+      ],
+      "initiatingParticipantRef": "Participant_0w6qkdf",
+      "messageFlowRefs": [
+        "MessageFlow_1541zid"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_1cceq4q",
+    "type": "bpmn:choreographyTask",
+    "name": "Request details",
+    "attrs": {
+      "incoming": "Flow_0gtd6v3",
+      "outgoing": "Flow_0imjwmb",
+      "participants": [
+        "Participant_19j1e3o",
+        "Participant_0sa2v7d"
+      ],
+      "initiatingParticipantRef": "Participant_19j1e3o",
+      "messageFlowRefs": [
+        "MessageFlow_087ue4t"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_1tkm8jm",
+    "type": "bpmn:choreographyTask",
+    "name": "Provide details",
+    "attrs": {
+      "incoming": "Flow_0imjwmb",
+      "outgoing": "Flow_01tqmsw",
+      "participants": [
+        "Participant_0sa2v7d",
+        "Participant_19j1e3o"
+      ],
+      "initiatingParticipantRef": "Participant_0sa2v7d",
+      "messageFlowRefs": [
+        "MessageFlow_0tx6stl"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_0q1fvry",
+    "type": "bpmn:choreographyTask",
+    "name": "Send waybill",
+    "attrs": {
+      "incoming": "Flow_01tqmsw",
+      "outgoing": "Flow_0uwk8jt",
+      "participants": [
+        "Participant_0sa2v7d",
+        "Participant_19j1e3o"
+      ],
+      "initiatingParticipantRef": "Participant_0sa2v7d",
+      "messageFlowRefs": [
+        "MessageFlow_12csdsd"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_0p8dcch",
+    "type": "bpmn:choreographyTask",
+    "name": "Deliver supplies",
+    "attrs": {
+      "incoming": "Flow_0uwk8jt",
+      "outgoing": "Flow_0xru5eh",
+      "participants": [
+        "Participant_19j1e3o",
+        "Participant_19mgbdn"
+      ],
+      "initiatingParticipantRef": "Participant_19j1e3o",
+      "messageFlowRefs": [
+        "MessageFlow_1wk4rp7"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_0s4ig1m",
+    "type": "bpmn:choreographyTask",
+    "name": "Report start of production",
+    "attrs": {
+      "incoming": "Flow_0xru5eh",
+      "outgoing": "Flow_1r9e0fl",
+      "participants": [
+        "Participant_19mgbdn",
+        "Participant_0w6qkdf"
+      ],
+      "initiatingParticipantRef": "Participant_19mgbdn",
+      "messageFlowRefs": [
+        "MessageFlow_0g6c3ic"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_1q3p8t2",
+    "type": "bpmn:choreographyTask",
+    "name": "Deliver goods",
+    "attrs": {
+      "incoming": "Flow_08e1j3x",
+      "outgoing": "Flow_17gtrvu",
+      "participants": [
+        "Participant_19mgbdn",
+        "Participant_0w6qkdf"
+      ],
+      "initiatingParticipantRef": "Participant_19mgbdn",
+      "messageFlowRefs": [
+        "MessageFlow_1wmjt89"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_1ynktv4",
+    "type": "bpmn:choreographyTask",
+    "name": "New Activity",
+    "attrs": {
+      "incoming": "Flow_1r9e0fl",
+      "outgoing": "Flow_1hbgb5i",
+      "participants": [
+        "Participant_0w6qkdf",
+        "Participant_19mgbdn"
+      ],
+      "initiatingParticipantRef": "Participant_0w6qkdf",
+      "messageFlowRefs": [
+        "MessageFlow_0rvr6ld"
+      ]
+    }
+  },
+  {
+    "id": "Flow_08e1j3x__condition__Deliver",
+    "type": "bpmn:sequenceConditionVariable",
+    "name": "deliver",
+    "attrs": {
+      "name": "deliver",
+      "relation": "==",
+      "value": "true",
+      "global_name": "Deliver",
+      "dsl_type": "string",
+      "sequenceFlow": "Flow_08e1j3x"
+    }
+  },
+  {
+    "id": "Flow_1m6p4a5__condition__Deliver",
+    "type": "bpmn:sequenceConditionVariable",
+    "name": "deliver",
+    "attrs": {
+      "name": "deliver",
+      "relation": "==",
+      "value": "false",
+      "global_name": "Deliver",
+      "dsl_type": "string",
+      "sequenceFlow": "Flow_1m6p4a5"
+    }
+  }
+]

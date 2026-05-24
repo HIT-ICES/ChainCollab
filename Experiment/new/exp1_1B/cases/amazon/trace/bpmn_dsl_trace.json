@@ -1,0 +1,601 @@
+{
+  "case_name": "amazon",
+  "contract": "default_bpmn_to_b2cdsl_structure_mapping",
+  "links": [
+    {
+      "source_id": "Participant_1p9owwo",
+      "source_type": "bpmn:participant",
+      "target_id": "Participant_1p9owwo",
+      "target_type": "dsl:participant",
+      "rule_name": "Participant2Participant",
+      "status": "matched",
+      "match_method": "same_id"
+    },
+    {
+      "source_id": "Participant_12df78t",
+      "source_type": "bpmn:participant",
+      "target_id": "Participant_12df78t",
+      "target_type": "dsl:participant",
+      "rule_name": "Participant2Participant",
+      "status": "matched",
+      "match_method": "same_id"
+    },
+    {
+      "source_id": "Message_1b1qlzd",
+      "source_type": "bpmn:message",
+      "target_id": "Message_1b1qlzd",
+      "target_type": "dsl:message",
+      "rule_name": "MessageRef2Message",
+      "status": "matched",
+      "match_method": "same_id"
+    },
+    {
+      "source_id": "Message_01jq2zl",
+      "source_type": "bpmn:message",
+      "target_id": "Message_01jq2zl",
+      "target_type": "dsl:message",
+      "rule_name": "MessageRef2Message",
+      "status": "matched",
+      "match_method": "same_id"
+    },
+    {
+      "source_id": "Message_12n6jjk",
+      "source_type": "bpmn:message",
+      "target_id": "Message_12n6jjk",
+      "target_type": "dsl:message",
+      "rule_name": "MessageRef2Message",
+      "status": "matched",
+      "match_method": "same_id"
+    },
+    {
+      "source_id": "Message_076ulzs",
+      "source_type": "bpmn:message",
+      "target_id": "Message_076ulzs",
+      "target_type": "dsl:message",
+      "rule_name": "MessageRef2Message",
+      "status": "matched",
+      "match_method": "same_id"
+    },
+    {
+      "source_id": "Message_068kmzv",
+      "source_type": "bpmn:message",
+      "target_id": "Message_068kmzv",
+      "target_type": "dsl:message",
+      "rule_name": "MessageRef2Message",
+      "status": "matched",
+      "match_method": "same_id"
+    },
+    {
+      "source_id": "Message_09krt7c",
+      "source_type": "bpmn:message",
+      "target_id": "Message_09krt7c",
+      "target_type": "dsl:message",
+      "rule_name": "MessageRef2Message",
+      "status": "matched",
+      "match_method": "same_id"
+    },
+    {
+      "source_id": "Message_1bhhp1n",
+      "source_type": "bpmn:message",
+      "target_id": "Message_1bhhp1n",
+      "target_type": "dsl:message",
+      "rule_name": "MessageRef2Message",
+      "status": "matched",
+      "match_method": "same_id"
+    },
+    {
+      "source_id": "Message_0ywghlt",
+      "source_type": "bpmn:message",
+      "target_id": "Message_0ywghlt",
+      "target_type": "dsl:message",
+      "rule_name": "MessageRef2Message",
+      "status": "matched",
+      "match_method": "same_id"
+    },
+    {
+      "source_id": "Event_0ojehz6",
+      "source_type": "bpmn:startEvent",
+      "target_id": "Event_0ojehz6",
+      "target_type": "dsl:event",
+      "rule_name": "StartEvent2Event",
+      "status": "matched",
+      "match_method": "same_id"
+    },
+    {
+      "source_id": "Event_0ci2gl8",
+      "source_type": "bpmn:endEvent",
+      "target_id": "Event_0ci2gl8",
+      "target_type": "dsl:event",
+      "rule_name": "EndEvent2Event",
+      "status": "matched",
+      "match_method": "same_id"
+    },
+    {
+      "source_id": "Event_0dyp0ut",
+      "source_type": "bpmn:endEvent",
+      "target_id": "Event_0dyp0ut",
+      "target_type": "dsl:event",
+      "rule_name": "EndEvent2Event",
+      "status": "matched",
+      "match_method": "same_id"
+    },
+    {
+      "source_id": "Gateway_0auc3he",
+      "source_type": "bpmn:exclusiveGateway",
+      "target_id": "Gateway_0auc3he",
+      "target_type": "dsl:gateway",
+      "rule_name": "ExclusiveGateway2Gateway",
+      "status": "matched",
+      "match_method": "same_id"
+    },
+    {
+      "source_id": "Gateway_0ivv4vg",
+      "source_type": "bpmn:exclusiveGateway",
+      "target_id": "Gateway_0ivv4vg",
+      "target_type": "dsl:gateway",
+      "rule_name": "ExclusiveGateway2Gateway",
+      "status": "matched",
+      "match_method": "same_id"
+    },
+    {
+      "source_id": "Gateway_0jgq0a6",
+      "source_type": "bpmn:eventBasedGateway",
+      "target_id": "Gateway_0jgq0a6",
+      "target_type": "dsl:gateway",
+      "rule_name": "EventBasedGateway2Gateway",
+      "status": "matched",
+      "match_method": "same_id"
+    },
+    {
+      "source_id": "Activity_0tya4bp",
+      "source_type": "bpmn:businessRuleTask",
+      "target_id": "Activity_0tya4bp",
+      "target_type": "dsl:businessrule",
+      "rule_name": "BusinessRuleTask2BusinessRule",
+      "status": "matched",
+      "match_method": "same_id"
+    },
+    {
+      "source_id": "Derive_Reason",
+      "source_type": "bpmn:message_property",
+      "target_id": "Reason",
+      "target_type": "dsl:global",
+      "rule_name": "MessageProperty2GlobalVar",
+      "status": "matched",
+      "match_method": "derived_target",
+      "source_refs": [
+        "Message_1b1qlzd"
+      ]
+    },
+    {
+      "source_id": "Derive_Result",
+      "source_type": "bpmn:message_property",
+      "target_id": "Result",
+      "target_type": "dsl:global",
+      "rule_name": "MessageProperty2GlobalVar",
+      "status": "matched",
+      "match_method": "derived_target",
+      "source_refs": [
+        "Message_1b1qlzd"
+      ]
+    },
+    {
+      "source_id": "Derive_Amount",
+      "source_type": "bpmn:message_property",
+      "target_id": "Amount",
+      "target_type": "dsl:global",
+      "rule_name": "MessageProperty2GlobalVar",
+      "status": "matched",
+      "match_method": "derived_target",
+      "source_refs": [
+        "Message_01jq2zl"
+      ]
+    },
+    {
+      "source_id": "Derive_RequestType",
+      "source_type": "bpmn:message_property",
+      "target_id": "RequestType",
+      "target_type": "dsl:global",
+      "rule_name": "MessageProperty2GlobalVar",
+      "status": "matched",
+      "match_method": "derived_target",
+      "source_refs": [
+        "Message_12n6jjk"
+      ]
+    },
+    {
+      "source_id": "Derive_Duration",
+      "source_type": "bpmn:message_property",
+      "target_id": "Duration",
+      "target_type": "dsl:global",
+      "rule_name": "MessageProperty2GlobalVar",
+      "status": "matched",
+      "match_method": "derived_target",
+      "source_refs": [
+        "Message_12n6jjk"
+      ]
+    },
+    {
+      "source_id": "Derive_Time",
+      "source_type": "bpmn:message_property",
+      "target_id": "Time",
+      "target_type": "dsl:global",
+      "rule_name": "MessageProperty2GlobalVar",
+      "status": "matched",
+      "match_method": "derived_target",
+      "source_refs": [
+        "Message_076ulzs"
+      ]
+    },
+    {
+      "source_id": "Derive_Description",
+      "source_type": "bpmn:message_property",
+      "target_id": "Description",
+      "target_type": "dsl:global",
+      "rule_name": "MessageProperty2GlobalVar",
+      "status": "matched",
+      "match_method": "derived_target",
+      "source_refs": [
+        "Message_076ulzs"
+      ]
+    },
+    {
+      "source_id": "Derive_EC2_resource_ID",
+      "source_type": "bpmn:message_property",
+      "target_id": "EC2_resource_ID",
+      "target_type": "dsl:global",
+      "rule_name": "MessageProperty2GlobalVar",
+      "status": "matched",
+      "match_method": "derived_target",
+      "source_refs": [
+        "Message_076ulzs"
+      ]
+    },
+    {
+      "source_id": "Derive_Logs",
+      "source_type": "bpmn:message_property",
+      "target_id": "Logs",
+      "target_type": "dsl:global",
+      "rule_name": "MessageProperty2GlobalVar",
+      "status": "matched",
+      "match_method": "derived_target",
+      "source_refs": [
+        "Message_076ulzs"
+      ]
+    },
+    {
+      "source_id": "Derive_Other_information",
+      "source_type": "bpmn:message_property",
+      "target_id": "Other_information",
+      "target_type": "dsl:global",
+      "rule_name": "MessageProperty2GlobalVar",
+      "status": "matched",
+      "match_method": "derived_target",
+      "source_refs": [
+        "Message_076ulzs"
+      ]
+    },
+    {
+      "source_id": "Derive_Time",
+      "source_type": "bpmn:message_property",
+      "target_id": "Time",
+      "target_type": "dsl:global",
+      "rule_name": "MessageProperty2GlobalVar",
+      "status": "matched",
+      "match_method": "derived_target",
+      "source_refs": [
+        "Message_068kmzv"
+      ]
+    },
+    {
+      "source_id": "Derive_Instance_ID",
+      "source_type": "bpmn:message_property",
+      "target_id": "Instance_ID",
+      "target_type": "dsl:global",
+      "rule_name": "MessageProperty2GlobalVar",
+      "status": "matched",
+      "match_method": "derived_target",
+      "source_refs": [
+        "Message_068kmzv"
+      ]
+    },
+    {
+      "source_id": "Derive_Logs",
+      "source_type": "bpmn:message_property",
+      "target_id": "Logs",
+      "target_type": "dsl:global",
+      "rule_name": "MessageProperty2GlobalVar",
+      "status": "matched",
+      "match_method": "derived_target",
+      "source_refs": [
+        "Message_068kmzv"
+      ]
+    },
+    {
+      "source_id": "Derive_Question_name",
+      "source_type": "bpmn:message_property",
+      "target_id": "Question_name",
+      "target_type": "dsl:global",
+      "rule_name": "MessageProperty2GlobalVar",
+      "status": "matched",
+      "match_method": "derived_target",
+      "source_refs": [
+        "Message_09krt7c"
+      ]
+    },
+    {
+      "source_id": "Derive_Description",
+      "source_type": "bpmn:message_property",
+      "target_id": "Description",
+      "target_type": "dsl:global",
+      "rule_name": "MessageProperty2GlobalVar",
+      "status": "matched",
+      "match_method": "derived_target",
+      "source_refs": [
+        "Message_09krt7c"
+      ]
+    },
+    {
+      "source_id": "Derive_ServiceType",
+      "source_type": "bpmn:message_property",
+      "target_id": "ServiceType",
+      "target_type": "dsl:global",
+      "rule_name": "MessageProperty2GlobalVar",
+      "status": "matched",
+      "match_method": "derived_target",
+      "source_refs": [
+        "Message_1bhhp1n"
+      ]
+    },
+    {
+      "source_id": "Derive_ServiceType",
+      "source_type": "bpmn:message_property",
+      "target_id": "ServiceType",
+      "target_type": "dsl:global",
+      "rule_name": "MessageProperty2GlobalVar",
+      "status": "matched",
+      "match_method": "derived_target",
+      "source_refs": [
+        "Message_0ywghlt"
+      ]
+    },
+    {
+      "source_id": "Derive_Confirm",
+      "source_type": "bpmn:condition_variable",
+      "target_id": "Confirm",
+      "target_type": "dsl:global",
+      "rule_name": "SequenceConditionVariable2GlobalVar",
+      "status": "matched",
+      "match_method": "derived_target",
+      "source_refs": [
+        "Flow_06m03vj"
+      ]
+    },
+    {
+      "source_id": "Derive_Confirm",
+      "source_type": "bpmn:condition_variable",
+      "target_id": "Confirm",
+      "target_type": "dsl:global",
+      "rule_name": "SequenceConditionVariable2GlobalVar",
+      "status": "matched",
+      "match_method": "derived_target",
+      "source_refs": [
+        "Flow_17hhdvo"
+      ]
+    }
+  ],
+  "relation_links": [
+    {
+      "source_id": "MessageFlow_13hle13",
+      "source_type": "bpmn:messageFlow",
+      "target_id": "Message_1b1qlzd",
+      "target_type": "dsl:message",
+      "rule_name": "MessageFlowEndpoints2MessageParticipants",
+      "status": "matched",
+      "match_method": "messageRef"
+    },
+    {
+      "source_id": "MessageFlow_191vfqw",
+      "source_type": "bpmn:messageFlow",
+      "target_id": "Message_01jq2zl",
+      "target_type": "dsl:message",
+      "rule_name": "MessageFlowEndpoints2MessageParticipants",
+      "status": "matched",
+      "match_method": "messageRef"
+    },
+    {
+      "source_id": "MessageFlow_05bvd7t",
+      "source_type": "bpmn:messageFlow",
+      "target_id": "Message_12n6jjk",
+      "target_type": "dsl:message",
+      "rule_name": "MessageFlowEndpoints2MessageParticipants",
+      "status": "matched",
+      "match_method": "messageRef"
+    },
+    {
+      "source_id": "MessageFlow_1haf3pl",
+      "source_type": "bpmn:messageFlow",
+      "target_id": "Message_076ulzs",
+      "target_type": "dsl:message",
+      "rule_name": "MessageFlowEndpoints2MessageParticipants",
+      "status": "matched",
+      "match_method": "messageRef"
+    },
+    {
+      "source_id": "MessageFlow_1nqrrp6",
+      "source_type": "bpmn:messageFlow",
+      "target_id": "Message_068kmzv",
+      "target_type": "dsl:message",
+      "rule_name": "MessageFlowEndpoints2MessageParticipants",
+      "status": "matched",
+      "match_method": "messageRef"
+    },
+    {
+      "source_id": "MessageFlow_1lf21qb",
+      "source_type": "bpmn:messageFlow",
+      "target_id": "Message_09krt7c",
+      "target_type": "dsl:message",
+      "rule_name": "MessageFlowEndpoints2MessageParticipants",
+      "status": "matched",
+      "match_method": "messageRef"
+    },
+    {
+      "source_id": "MessageFlow_0khz8el",
+      "source_type": "bpmn:messageFlow",
+      "target_id": "Message_1bhhp1n",
+      "target_type": "dsl:message",
+      "rule_name": "MessageFlowEndpoints2MessageParticipants",
+      "status": "matched",
+      "match_method": "messageRef"
+    },
+    {
+      "source_id": "MessageFlow_1urma6e",
+      "source_type": "bpmn:messageFlow",
+      "target_id": "Message_0ywghlt",
+      "target_type": "dsl:message",
+      "rule_name": "MessageFlowEndpoints2MessageParticipants",
+      "status": "matched",
+      "match_method": "messageRef"
+    }
+  ],
+  "unmatched_sources": [],
+  "unmatched_targets": [],
+  "represented_sources": [
+    {
+      "source_id": "MessageFlow_13hle13",
+      "source_type": "bpmn:messageFlow",
+      "represented_by": [
+        "Message_1b1qlzd"
+      ],
+      "rule_name": "MessageFlowNoDirectNode"
+    },
+    {
+      "source_id": "MessageFlow_191vfqw",
+      "source_type": "bpmn:messageFlow",
+      "represented_by": [
+        "Message_01jq2zl"
+      ],
+      "rule_name": "MessageFlowNoDirectNode"
+    },
+    {
+      "source_id": "MessageFlow_05bvd7t",
+      "source_type": "bpmn:messageFlow",
+      "represented_by": [
+        "Message_12n6jjk"
+      ],
+      "rule_name": "MessageFlowNoDirectNode"
+    },
+    {
+      "source_id": "MessageFlow_1haf3pl",
+      "source_type": "bpmn:messageFlow",
+      "represented_by": [
+        "Message_076ulzs"
+      ],
+      "rule_name": "MessageFlowNoDirectNode"
+    },
+    {
+      "source_id": "MessageFlow_1nqrrp6",
+      "source_type": "bpmn:messageFlow",
+      "represented_by": [
+        "Message_068kmzv"
+      ],
+      "rule_name": "MessageFlowNoDirectNode"
+    },
+    {
+      "source_id": "MessageFlow_1lf21qb",
+      "source_type": "bpmn:messageFlow",
+      "represented_by": [
+        "Message_09krt7c"
+      ],
+      "rule_name": "MessageFlowNoDirectNode"
+    },
+    {
+      "source_id": "MessageFlow_0khz8el",
+      "source_type": "bpmn:messageFlow",
+      "represented_by": [
+        "Message_1bhhp1n"
+      ],
+      "rule_name": "MessageFlowNoDirectNode"
+    },
+    {
+      "source_id": "MessageFlow_1urma6e",
+      "source_type": "bpmn:messageFlow",
+      "represented_by": [
+        "Message_0ywghlt"
+      ],
+      "rule_name": "MessageFlowNoDirectNode"
+    },
+    {
+      "source_id": "ChoreographyTask_15hdy0f",
+      "source_type": "bpmn:choreographyTask",
+      "represented_by": [
+        "Message_09krt7c"
+      ],
+      "rule_name": "ChoreographyTaskExpansion",
+      "status": "matched"
+    },
+    {
+      "source_id": "ChoreographyTask_0qvin75",
+      "source_type": "bpmn:choreographyTask",
+      "represented_by": [
+        "Message_0ywghlt"
+      ],
+      "rule_name": "ChoreographyTaskExpansion",
+      "status": "matched"
+    },
+    {
+      "source_id": "ChoreographyTask_0qv0nys",
+      "source_type": "bpmn:choreographyTask",
+      "represented_by": [
+        "Message_1bhhp1n"
+      ],
+      "rule_name": "ChoreographyTaskExpansion",
+      "status": "matched"
+    },
+    {
+      "source_id": "ChoreographyTask_1xe5w82",
+      "source_type": "bpmn:choreographyTask",
+      "represented_by": [
+        "Message_068kmzv"
+      ],
+      "rule_name": "ChoreographyTaskExpansion",
+      "status": "matched"
+    },
+    {
+      "source_id": "ChoreographyTask_08v8azc",
+      "source_type": "bpmn:choreographyTask",
+      "represented_by": [
+        "Message_076ulzs"
+      ],
+      "rule_name": "ChoreographyTaskExpansion",
+      "status": "matched"
+    },
+    {
+      "source_id": "ChoreographyTask_14x309o",
+      "source_type": "bpmn:choreographyTask",
+      "represented_by": [
+        "Message_12n6jjk"
+      ],
+      "rule_name": "ChoreographyTaskExpansion",
+      "status": "matched"
+    },
+    {
+      "source_id": "ChoreographyTask_0wtdaho",
+      "source_type": "bpmn:choreographyTask",
+      "represented_by": [
+        "Message_1b1qlzd"
+      ],
+      "rule_name": "ChoreographyTaskExpansion",
+      "status": "matched"
+    },
+    {
+      "source_id": "ChoreographyTask_09o0tby",
+      "source_type": "bpmn:choreographyTask",
+      "represented_by": [
+        "Message_01jq2zl"
+      ],
+      "rule_name": "ChoreographyTaskExpansion",
+      "status": "matched"
+    }
+  ]
+}

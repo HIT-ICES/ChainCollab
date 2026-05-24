@@ -1,0 +1,1935 @@
+{
+  "tag_version": "0.1.0",
+  "case_name": "Hotel_Booking",
+  "model_type": "bpmn",
+  "source_file": "/root/code/ChainCollab/Experiment/BPMNwithDMNcase/Hotel Booking.bpmn",
+  "extractor": {
+    "name": "extract_bpmn_structure",
+    "version": "0.1.0",
+    "implementation_basis": [
+      "src/newTranslator/generator/parser/choreography_parser/parser.py",
+      "src/newTranslator/generator/parser/choreography_parser/elements.py"
+    ]
+  },
+  "nodes": [
+    {
+      "id": "Participant_1080bkg",
+      "type": "bpmn:participant",
+      "name": "Client",
+      "attrs": {
+        "is_multi": false,
+        "multi_minimum": 0,
+        "multi_maximum": 0
+      }
+    },
+    {
+      "id": "Participant_0sktaei",
+      "type": "bpmn:participant",
+      "name": "Hotel",
+      "attrs": {
+        "is_multi": false,
+        "multi_minimum": 0,
+        "multi_maximum": 0
+      }
+    },
+    {
+      "id": "Message_04ikf2n",
+      "type": "bpmn:message",
+      "name": "discountInfo",
+      "attrs": {
+        "documentation": "{\"properties\":{\"discount2\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_04ikf2n__property__discount2",
+      "type": "bpmn:messageProperty",
+      "name": "discount2",
+      "attrs": {
+        "name": "discount2",
+        "global_name": "Discount2",
+        "type": "number",
+        "dsl_type": "int",
+        "description": "",
+        "owner": "Message_04ikf2n",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_0vlxzcv",
+      "type": "bpmn:message",
+      "name": "discountInfo",
+      "attrs": {
+        "documentation": "{\"properties\":{\"discount1\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"discount1\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_0vlxzcv__property__discount1",
+      "type": "bpmn:messageProperty",
+      "name": "discount1",
+      "attrs": {
+        "name": "discount1",
+        "global_name": "Discount1",
+        "type": "number",
+        "dsl_type": "int",
+        "description": "",
+        "owner": "Message_0vlxzcv",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_104h2tt",
+      "type": "bpmn:message",
+      "name": "haveVIPCard",
+      "attrs": {
+        "documentation": "{\"properties\":{\"VIPpoints\":{\"type\":\"number\",\"description\":\"\"},\"VIPcardId\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"VIPpoints\",\"VIPcardId\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_104h2tt__property__VIPpoints",
+      "type": "bpmn:messageProperty",
+      "name": "VIPpoints",
+      "attrs": {
+        "name": "VIPpoints",
+        "global_name": "VIPpoints",
+        "type": "number",
+        "dsl_type": "int",
+        "description": "",
+        "owner": "Message_104h2tt",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_104h2tt__property__VIPcardId",
+      "type": "bpmn:messageProperty",
+      "name": "VIPcardId",
+      "attrs": {
+        "name": "VIPcardId",
+        "global_name": "VIPcardId",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_104h2tt",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_0m9p3da",
+      "type": "bpmn:message",
+      "name": "cancel_order",
+      "attrs": {
+        "documentation": "{\"properties\":{\"cancel\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"cancel\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_0m9p3da__property__cancel",
+      "type": "bpmn:messageProperty",
+      "name": "cancel",
+      "attrs": {
+        "name": "cancel",
+        "global_name": "Cancel",
+        "type": "boolean",
+        "dsl_type": "bool",
+        "description": "",
+        "owner": "Message_0m9p3da",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_1etcmvl",
+      "type": "bpmn:message",
+      "name": "payment1",
+      "attrs": {
+        "documentation": "{\"properties\":{\"payableto\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"payableto\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_1etcmvl__property__payableto",
+      "type": "bpmn:messageProperty",
+      "name": "payableto",
+      "attrs": {
+        "name": "payableto",
+        "global_name": "Payableto",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_1etcmvl",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_1joj7ca",
+      "type": "bpmn:message",
+      "name": "ask_refund",
+      "attrs": {
+        "documentation": "{\"properties\":{\"ID\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"ID\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_1joj7ca__property__ID",
+      "type": "bpmn:messageProperty",
+      "name": "ID",
+      "attrs": {
+        "name": "ID",
+        "global_name": "ID",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_1joj7ca",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_1ljlm4g",
+      "type": "bpmn:message",
+      "name": "Give_ID",
+      "attrs": {
+        "documentation": "{\"properties\":{\"booking_id\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"booking_id\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_1ljlm4g__property__booking_id",
+      "type": "bpmn:messageProperty",
+      "name": "booking_id",
+      "attrs": {
+        "name": "booking_id",
+        "global_name": "Booking_id",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_1ljlm4g",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_1xm9dxy",
+      "type": "bpmn:message",
+      "name": "Cancel_order",
+      "attrs": {
+        "documentation": "{\"properties\":{\"motivation\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"motivation\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_1xm9dxy__property__motivation",
+      "type": "bpmn:messageProperty",
+      "name": "motivation",
+      "attrs": {
+        "name": "motivation",
+        "global_name": "Motivation",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_1xm9dxy",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_0o8eyir",
+      "type": "bpmn:message",
+      "name": "payment0",
+      "attrs": {
+        "documentation": "{\"properties\":{\"payableto\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"payableto\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_0o8eyir__property__payableto",
+      "type": "bpmn:messageProperty",
+      "name": "payableto",
+      "attrs": {
+        "name": "payableto",
+        "global_name": "Payableto",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_0o8eyir",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_1nlagx2",
+      "type": "bpmn:message",
+      "name": "Book_room",
+      "attrs": {
+        "documentation": "{\"properties\":{\"confirmation\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"confirmation\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_1nlagx2__property__confirmation",
+      "type": "bpmn:messageProperty",
+      "name": "confirmation",
+      "attrs": {
+        "name": "confirmation",
+        "global_name": "Confirmation",
+        "type": "boolean",
+        "dsl_type": "bool",
+        "description": "",
+        "owner": "Message_1nlagx2",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_1em0ee4",
+      "type": "bpmn:message",
+      "name": "Price_quotation",
+      "attrs": {
+        "documentation": "{\"properties\":{\"quotation\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"quotation\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_1em0ee4__property__quotation",
+      "type": "bpmn:messageProperty",
+      "name": "quotation",
+      "attrs": {
+        "name": "quotation",
+        "global_name": "Quotation",
+        "type": "number",
+        "dsl_type": "int",
+        "description": "",
+        "owner": "Message_1em0ee4",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_0r9lypd",
+      "type": "bpmn:message",
+      "name": "Give_availability",
+      "attrs": {
+        "documentation": "{\"properties\":{\"confirm\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"confirm\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_0r9lypd__property__confirm",
+      "type": "bpmn:messageProperty",
+      "name": "confirm",
+      "attrs": {
+        "name": "confirm",
+        "global_name": "Confirm",
+        "type": "boolean",
+        "dsl_type": "bool",
+        "description": "",
+        "owner": "Message_0r9lypd",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_045i10y",
+      "type": "bpmn:message",
+      "name": "Check_room",
+      "attrs": {
+        "documentation": "{\"properties\":{\"date\":{\"type\":\"string\",\"description\":\"\"},\"bedrooms\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"date\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_045i10y__property__date",
+      "type": "bpmn:messageProperty",
+      "name": "date",
+      "attrs": {
+        "name": "date",
+        "global_name": "Date",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_045i10y",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_045i10y__property__bedrooms",
+      "type": "bpmn:messageProperty",
+      "name": "bedrooms",
+      "attrs": {
+        "name": "bedrooms",
+        "global_name": "Bedrooms",
+        "type": "number",
+        "dsl_type": "int",
+        "description": "",
+        "owner": "Message_045i10y",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "StartEvent_1jtgn3j",
+      "type": "bpmn:startEvent",
+      "name": "",
+      "attrs": {
+        "incoming": [],
+        "outgoing": [
+          "SequenceFlow_17yeafe"
+        ]
+      }
+    },
+    {
+      "id": "EndEvent_0366pfz",
+      "type": "bpmn:endEvent",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "SequenceFlow_0pgfk71"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "EndEvent_08edp7f",
+      "type": "bpmn:endEvent",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "SequenceFlow_0t7qsuf"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "EndEvent_146eii4",
+      "type": "bpmn:endEvent",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "SequenceFlow_1fe2fxr"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "ExclusiveGateway_106je4z",
+      "type": "bpmn:exclusiveGateway",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "SequenceFlow_0b2npyd"
+        ],
+        "outgoing": [
+          "SequenceFlow_10il97h",
+          "SequenceFlow_14sd0ji"
+        ]
+      }
+    },
+    {
+      "id": "ExclusiveGateway_0hs3ztq",
+      "type": "bpmn:exclusiveGateway",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "SequenceFlow_14sd0ji",
+          "SequenceFlow_17yeafe"
+        ],
+        "outgoing": [
+          "SequenceFlow_01sam3q"
+        ]
+      }
+    },
+    {
+      "id": "ExclusiveGateway_0nzwv7v",
+      "type": "bpmn:exclusiveGateway",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "SequenceFlow_0nxtqz1"
+        ],
+        "outgoing": [
+          "SequenceFlow_0t7qsuf",
+          "SequenceFlow_1f6x9dz"
+        ]
+      }
+    },
+    {
+      "id": "Gateway_1jhfnrm",
+      "type": "bpmn:exclusiveGateway",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "Flow_0webz0z"
+        ],
+        "outgoing": [
+          "Flow_0y0y9gl",
+          "Flow_0rr6350"
+        ]
+      }
+    },
+    {
+      "id": "Gateway_1atxr3y",
+      "type": "bpmn:exclusiveGateway",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "Flow_0y464ks",
+          "Flow_0hg4qa0"
+        ],
+        "outgoing": [
+          "Flow_16ta1pu"
+        ]
+      }
+    },
+    {
+      "id": "EventBasedGateway_1fxpmyn",
+      "type": "bpmn:eventBasedGateway",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "SequenceFlow_1bi5p2u"
+        ],
+        "outgoing": [
+          "SequenceFlow_1erfsjw",
+          "SequenceFlow_0cvalmr",
+          "Flow_00urpax"
+        ]
+      }
+    },
+    {
+      "id": "Activity_0b1f7uv",
+      "type": "bpmn:businessRuleTask",
+      "name": "vipSale",
+      "attrs": {
+        "incoming": [
+          "Flow_1byvr2b"
+        ],
+        "outgoing": [
+          "Flow_0webz0z"
+        ],
+        "documentation": "{\"inputs\":[{\"name\":\"VIPpoints\",\"type\":\"number\",\"description\":\"\"}],\"outputs\":[{\"name\":\"VIPLevel\",\"type\":\"number\",\"description\":\"\"}]}"
+      }
+    },
+    {
+      "id": "Activity_0b1f7uv__input__VIPpoints",
+      "type": "bpmn:businessRuleParameter",
+      "name": "VIPpoints",
+      "attrs": {
+        "name": "VIPpoints",
+        "global_name": "VIPpoints",
+        "direction": "input",
+        "type": "number",
+        "dsl_type": "int",
+        "owner": "Activity_0b1f7uv"
+      }
+    },
+    {
+      "id": "Activity_0b1f7uv__output__VIPLevel",
+      "type": "bpmn:businessRuleParameter",
+      "name": "VIPLevel",
+      "attrs": {
+        "name": "VIPLevel",
+        "global_name": "VIPLevel",
+        "direction": "output",
+        "type": "number",
+        "dsl_type": "int",
+        "owner": "Activity_0b1f7uv"
+      }
+    },
+    {
+      "id": "ChoreographyTask_1jv6c24",
+      "type": "bpmn:choreographyTask",
+      "name": "Accept_booking",
+      "attrs": {
+        "incoming": "SequenceFlow_01sam3q",
+        "outgoing": "SequenceFlow_0b2npyd",
+        "participants": [
+          "Participant_1080bkg",
+          "Participant_0sktaei"
+        ],
+        "initiatingParticipantRef": "Participant_1080bkg",
+        "messageFlowRefs": [
+          "MessageFlow_19g4eua",
+          "MessageFlow_0zxzleu"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_13nkbkb",
+      "type": "bpmn:choreographyTask",
+      "name": "Confirmation",
+      "attrs": {
+        "incoming": "SequenceFlow_10il97h",
+        "outgoing": "SequenceFlow_1bi5p2u",
+        "participants": [
+          "Participant_0sktaei",
+          "Participant_1080bkg"
+        ],
+        "initiatingParticipantRef": "Participant_0sktaei",
+        "messageFlowRefs": [
+          "MessageFlow_1o6utvb",
+          "MessageFlow_1bermr1"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_177ikw5",
+      "type": "bpmn:choreographyTask",
+      "name": "Accept payment",
+      "attrs": {
+        "incoming": "SequenceFlow_1erfsjw",
+        "outgoing": "SequenceFlow_17ntv68",
+        "participants": [
+          "Participant_1080bkg",
+          "Participant_0sktaei"
+        ],
+        "initiatingParticipantRef": "Participant_1080bkg",
+        "messageFlowRefs": [
+          "MessageFlow_1o7kyb6"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_09lf521",
+      "type": "bpmn:choreographyTask",
+      "name": "Reject order",
+      "attrs": {
+        "incoming": "SequenceFlow_0cvalmr",
+        "outgoing": "SequenceFlow_0pgfk71",
+        "participants": [
+          "Participant_1080bkg",
+          "Participant_0sktaei"
+        ],
+        "initiatingParticipantRef": "Participant_1080bkg",
+        "messageFlowRefs": [
+          "MessageFlow_0z9qel3"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_0suxm4u",
+      "type": "bpmn:choreographyTask",
+      "name": "Booking confirmation",
+      "attrs": {
+        "incoming": "SequenceFlow_17ntv68",
+        "outgoing": "SequenceFlow_0nxtqz1",
+        "participants": [
+          "Participant_0sktaei",
+          "Participant_1080bkg"
+        ],
+        "initiatingParticipantRef": "Participant_0sktaei",
+        "messageFlowRefs": [
+          "MessageFlow_1lxxqv0",
+          "MessageFlow_0dy2v5w"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_1iimt7t",
+      "type": "bpmn:choreographyTask",
+      "name": "Refund request",
+      "attrs": {
+        "incoming": "SequenceFlow_1f6x9dz",
+        "outgoing": "SequenceFlow_1fe2fxr",
+        "participants": [
+          "Participant_1080bkg",
+          "Participant_0sktaei"
+        ],
+        "initiatingParticipantRef": "Participant_1080bkg",
+        "messageFlowRefs": [
+          "MessageFlow_0fb4qv7",
+          "MessageFlow_13k266b"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_0yime3t",
+      "type": "bpmn:choreographyTask",
+      "name": "membership",
+      "attrs": {
+        "incoming": "Flow_00urpax",
+        "outgoing": "Flow_1byvr2b",
+        "participants": [
+          "Participant_1080bkg",
+          "Participant_0sktaei"
+        ],
+        "initiatingParticipantRef": "Participant_1080bkg",
+        "messageFlowRefs": [
+          "MessageFlow_1tuimjy"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_1jk0ir4",
+      "type": "bpmn:choreographyTask",
+      "name": "discount1",
+      "attrs": {
+        "incoming": "Flow_0y0y9gl",
+        "outgoing": "Flow_0y464ks",
+        "participants": [
+          "Participant_0sktaei",
+          "Participant_1080bkg"
+        ],
+        "initiatingParticipantRef": "Participant_0sktaei",
+        "messageFlowRefs": [
+          "MessageFlow_1lnn8yt"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_0oyz7te",
+      "type": "bpmn:choreographyTask",
+      "name": "discount2",
+      "attrs": {
+        "incoming": "Flow_0rr6350",
+        "outgoing": "Flow_0hg4qa0",
+        "participants": [
+          "Participant_0sktaei",
+          "Participant_1080bkg"
+        ],
+        "initiatingParticipantRef": "Participant_0sktaei",
+        "messageFlowRefs": [
+          "MessageFlow_1sdd689"
+        ]
+      }
+    },
+    {
+      "id": "SequenceFlow_10il97h__condition__Confirm",
+      "type": "bpmn:sequenceConditionVariable",
+      "name": "confirm",
+      "attrs": {
+        "name": "confirm",
+        "relation": "==",
+        "value": "true",
+        "global_name": "Confirm",
+        "dsl_type": "string",
+        "sequenceFlow": "SequenceFlow_10il97h"
+      }
+    },
+    {
+      "id": "SequenceFlow_14sd0ji__condition__Confirm",
+      "type": "bpmn:sequenceConditionVariable",
+      "name": "confirm",
+      "attrs": {
+        "name": "confirm",
+        "relation": "==",
+        "value": "false",
+        "global_name": "Confirm",
+        "dsl_type": "string",
+        "sequenceFlow": "SequenceFlow_14sd0ji"
+      }
+    },
+    {
+      "id": "SequenceFlow_0t7qsuf__condition__Cancel",
+      "type": "bpmn:sequenceConditionVariable",
+      "name": "cancel",
+      "attrs": {
+        "name": "cancel",
+        "relation": "==",
+        "value": "false",
+        "global_name": "Cancel",
+        "dsl_type": "string",
+        "sequenceFlow": "SequenceFlow_0t7qsuf"
+      }
+    },
+    {
+      "id": "SequenceFlow_1f6x9dz__condition__Cancel",
+      "type": "bpmn:sequenceConditionVariable",
+      "name": "cancel",
+      "attrs": {
+        "name": "cancel",
+        "relation": "==",
+        "value": "true",
+        "global_name": "Cancel",
+        "dsl_type": "string",
+        "sequenceFlow": "SequenceFlow_1f6x9dz"
+      }
+    },
+    {
+      "id": "Flow_0y0y9gl__condition__VIPLevel",
+      "type": "bpmn:sequenceConditionVariable",
+      "name": "VIPLevel",
+      "attrs": {
+        "name": "VIPLevel",
+        "relation": "<",
+        "value": "3",
+        "global_name": "VIPLevel",
+        "dsl_type": "string",
+        "sequenceFlow": "Flow_0y0y9gl"
+      }
+    },
+    {
+      "id": "Flow_0rr6350__condition__VIPLevel",
+      "type": "bpmn:sequenceConditionVariable",
+      "name": "VIPLevel",
+      "attrs": {
+        "name": "VIPLevel",
+        "relation": "==",
+        "value": "3",
+        "global_name": "VIPLevel",
+        "dsl_type": "string",
+        "sequenceFlow": "Flow_0rr6350"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "MessageFlow_1sdd689",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_0sktaei",
+      "target": "Participant_1080bkg",
+      "attrs": {
+        "message": "Message_04ikf2n",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_1sdd689__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_1sdd689",
+      "target": "Message_04ikf2n",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_1lnn8yt",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_0sktaei",
+      "target": "Participant_1080bkg",
+      "attrs": {
+        "message": "Message_0vlxzcv",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_1lnn8yt__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_1lnn8yt",
+      "target": "Message_0vlxzcv",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_1tuimjy",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_1080bkg",
+      "target": "Participant_0sktaei",
+      "attrs": {
+        "message": "Message_104h2tt",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_1tuimjy__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_1tuimjy",
+      "target": "Message_104h2tt",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_1lxxqv0",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_1080bkg",
+      "target": "Participant_0sktaei",
+      "attrs": {
+        "message": "Message_0m9p3da",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_1lxxqv0__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_1lxxqv0",
+      "target": "Message_0m9p3da",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_0fb4qv7",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_0sktaei",
+      "target": "Participant_1080bkg",
+      "attrs": {
+        "message": "Message_1etcmvl",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_0fb4qv7__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_0fb4qv7",
+      "target": "Message_1etcmvl",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_13k266b",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_1080bkg",
+      "target": "Participant_0sktaei",
+      "attrs": {
+        "message": "Message_1joj7ca",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_13k266b__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_13k266b",
+      "target": "Message_1joj7ca",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_0dy2v5w",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_0sktaei",
+      "target": "Participant_1080bkg",
+      "attrs": {
+        "message": "Message_1ljlm4g",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_0dy2v5w__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_0dy2v5w",
+      "target": "Message_1ljlm4g",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_0z9qel3",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_1080bkg",
+      "target": "Participant_0sktaei",
+      "attrs": {
+        "message": "Message_1xm9dxy",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_0z9qel3__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_0z9qel3",
+      "target": "Message_1xm9dxy",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_1o7kyb6",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_1080bkg",
+      "target": "Participant_0sktaei",
+      "attrs": {
+        "message": "Message_0o8eyir",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_1o7kyb6__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_1o7kyb6",
+      "target": "Message_0o8eyir",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_1o6utvb",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_1080bkg",
+      "target": "Participant_0sktaei",
+      "attrs": {
+        "message": "Message_1nlagx2",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_1o6utvb__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_1o6utvb",
+      "target": "Message_1nlagx2",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_1bermr1",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_0sktaei",
+      "target": "Participant_1080bkg",
+      "attrs": {
+        "message": "Message_1em0ee4",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_1bermr1__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_1bermr1",
+      "target": "Message_1em0ee4",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_19g4eua",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_0sktaei",
+      "target": "Participant_1080bkg",
+      "attrs": {
+        "message": "Message_0r9lypd",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_19g4eua__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_19g4eua",
+      "target": "Message_0r9lypd",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_0zxzleu",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_1080bkg",
+      "target": "Participant_0sktaei",
+      "attrs": {
+        "message": "Message_045i10y",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_0zxzleu__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_0zxzleu",
+      "target": "Message_045i10y",
+      "attrs": {}
+    },
+    {
+      "id": "Message_04ikf2n__documentationProperty__discount2",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_04ikf2n",
+      "target": "Message_04ikf2n__property__discount2",
+      "attrs": {}
+    },
+    {
+      "id": "Message_0vlxzcv__documentationProperty__discount1",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_0vlxzcv",
+      "target": "Message_0vlxzcv__property__discount1",
+      "attrs": {}
+    },
+    {
+      "id": "Message_104h2tt__documentationProperty__VIPpoints",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_104h2tt",
+      "target": "Message_104h2tt__property__VIPpoints",
+      "attrs": {}
+    },
+    {
+      "id": "Message_104h2tt__documentationProperty__VIPcardId",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_104h2tt",
+      "target": "Message_104h2tt__property__VIPcardId",
+      "attrs": {}
+    },
+    {
+      "id": "Message_0m9p3da__documentationProperty__cancel",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_0m9p3da",
+      "target": "Message_0m9p3da__property__cancel",
+      "attrs": {}
+    },
+    {
+      "id": "Message_1etcmvl__documentationProperty__payableto",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_1etcmvl",
+      "target": "Message_1etcmvl__property__payableto",
+      "attrs": {}
+    },
+    {
+      "id": "Message_1joj7ca__documentationProperty__ID",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_1joj7ca",
+      "target": "Message_1joj7ca__property__ID",
+      "attrs": {}
+    },
+    {
+      "id": "Message_1ljlm4g__documentationProperty__booking_id",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_1ljlm4g",
+      "target": "Message_1ljlm4g__property__booking_id",
+      "attrs": {}
+    },
+    {
+      "id": "Message_1xm9dxy__documentationProperty__motivation",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_1xm9dxy",
+      "target": "Message_1xm9dxy__property__motivation",
+      "attrs": {}
+    },
+    {
+      "id": "Message_0o8eyir__documentationProperty__payableto",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_0o8eyir",
+      "target": "Message_0o8eyir__property__payableto",
+      "attrs": {}
+    },
+    {
+      "id": "Message_1nlagx2__documentationProperty__confirmation",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_1nlagx2",
+      "target": "Message_1nlagx2__property__confirmation",
+      "attrs": {}
+    },
+    {
+      "id": "Message_1em0ee4__documentationProperty__quotation",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_1em0ee4",
+      "target": "Message_1em0ee4__property__quotation",
+      "attrs": {}
+    },
+    {
+      "id": "Message_0r9lypd__documentationProperty__confirm",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_0r9lypd",
+      "target": "Message_0r9lypd__property__confirm",
+      "attrs": {}
+    },
+    {
+      "id": "Message_045i10y__documentationProperty__date",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_045i10y",
+      "target": "Message_045i10y__property__date",
+      "attrs": {}
+    },
+    {
+      "id": "Message_045i10y__documentationProperty__bedrooms",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_045i10y",
+      "target": "Message_045i10y__property__bedrooms",
+      "attrs": {}
+    },
+    {
+      "id": "Activity_0b1f7uv__documentationInput__VIPpoints",
+      "type": "bpmn:documentationInput",
+      "source": "Activity_0b1f7uv",
+      "target": "Activity_0b1f7uv__input__VIPpoints",
+      "attrs": {}
+    },
+    {
+      "id": "Activity_0b1f7uv__documentationOutput__VIPLevel",
+      "type": "bpmn:documentationOutput",
+      "source": "Activity_0b1f7uv",
+      "target": "Activity_0b1f7uv__output__VIPLevel",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1jv6c24__participantRef__Participant_1080bkg",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_1jv6c24",
+      "target": "Participant_1080bkg",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1jv6c24__participantRef__Participant_0sktaei",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_1jv6c24",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1jv6c24__initiatingParticipant__Participant_1080bkg",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_1jv6c24",
+      "target": "Participant_1080bkg",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1jv6c24__messageFlowRef__MessageFlow_19g4eua",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_1jv6c24",
+      "target": "MessageFlow_19g4eua",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1jv6c24__messageFlowRef__MessageFlow_0zxzleu",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_1jv6c24",
+      "target": "MessageFlow_0zxzleu",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_13nkbkb__participantRef__Participant_0sktaei",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_13nkbkb",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_13nkbkb__participantRef__Participant_1080bkg",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_13nkbkb",
+      "target": "Participant_1080bkg",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_13nkbkb__initiatingParticipant__Participant_0sktaei",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_13nkbkb",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_13nkbkb__messageFlowRef__MessageFlow_1o6utvb",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_13nkbkb",
+      "target": "MessageFlow_1o6utvb",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_13nkbkb__messageFlowRef__MessageFlow_1bermr1",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_13nkbkb",
+      "target": "MessageFlow_1bermr1",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_177ikw5__participantRef__Participant_1080bkg",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_177ikw5",
+      "target": "Participant_1080bkg",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_177ikw5__participantRef__Participant_0sktaei",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_177ikw5",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_177ikw5__initiatingParticipant__Participant_1080bkg",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_177ikw5",
+      "target": "Participant_1080bkg",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_177ikw5__messageFlowRef__MessageFlow_1o7kyb6",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_177ikw5",
+      "target": "MessageFlow_1o7kyb6",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_09lf521__participantRef__Participant_1080bkg",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_09lf521",
+      "target": "Participant_1080bkg",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_09lf521__participantRef__Participant_0sktaei",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_09lf521",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_09lf521__initiatingParticipant__Participant_1080bkg",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_09lf521",
+      "target": "Participant_1080bkg",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_09lf521__messageFlowRef__MessageFlow_0z9qel3",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_09lf521",
+      "target": "MessageFlow_0z9qel3",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0suxm4u__participantRef__Participant_0sktaei",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_0suxm4u",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0suxm4u__participantRef__Participant_1080bkg",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_0suxm4u",
+      "target": "Participant_1080bkg",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0suxm4u__initiatingParticipant__Participant_0sktaei",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_0suxm4u",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0suxm4u__messageFlowRef__MessageFlow_1lxxqv0",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_0suxm4u",
+      "target": "MessageFlow_1lxxqv0",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0suxm4u__messageFlowRef__MessageFlow_0dy2v5w",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_0suxm4u",
+      "target": "MessageFlow_0dy2v5w",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1iimt7t__participantRef__Participant_1080bkg",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_1iimt7t",
+      "target": "Participant_1080bkg",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1iimt7t__participantRef__Participant_0sktaei",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_1iimt7t",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1iimt7t__initiatingParticipant__Participant_1080bkg",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_1iimt7t",
+      "target": "Participant_1080bkg",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1iimt7t__messageFlowRef__MessageFlow_0fb4qv7",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_1iimt7t",
+      "target": "MessageFlow_0fb4qv7",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1iimt7t__messageFlowRef__MessageFlow_13k266b",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_1iimt7t",
+      "target": "MessageFlow_13k266b",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0yime3t__participantRef__Participant_1080bkg",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_0yime3t",
+      "target": "Participant_1080bkg",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0yime3t__participantRef__Participant_0sktaei",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_0yime3t",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0yime3t__initiatingParticipant__Participant_1080bkg",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_0yime3t",
+      "target": "Participant_1080bkg",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0yime3t__messageFlowRef__MessageFlow_1tuimjy",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_0yime3t",
+      "target": "MessageFlow_1tuimjy",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1jk0ir4__participantRef__Participant_0sktaei",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_1jk0ir4",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1jk0ir4__participantRef__Participant_1080bkg",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_1jk0ir4",
+      "target": "Participant_1080bkg",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1jk0ir4__initiatingParticipant__Participant_0sktaei",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_1jk0ir4",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1jk0ir4__messageFlowRef__MessageFlow_1lnn8yt",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_1jk0ir4",
+      "target": "MessageFlow_1lnn8yt",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0oyz7te__participantRef__Participant_0sktaei",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_0oyz7te",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0oyz7te__participantRef__Participant_1080bkg",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_0oyz7te",
+      "target": "Participant_1080bkg",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0oyz7te__initiatingParticipant__Participant_0sktaei",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_0oyz7te",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0oyz7te__messageFlowRef__MessageFlow_1sdd689",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_0oyz7te",
+      "target": "MessageFlow_1sdd689",
+      "attrs": {}
+    },
+    {
+      "id": "SequenceFlow_0b2npyd",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_1jv6c24",
+      "target": "ExclusiveGateway_106je4z",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "SequenceFlow_10il97h",
+      "type": "bpmn:sequenceFlow",
+      "source": "ExclusiveGateway_106je4z",
+      "target": "ChoreographyTask_13nkbkb",
+      "attrs": {
+        "name": "confirm==true",
+        "condition_expression": "confirm==true"
+      }
+    },
+    {
+      "id": "SequenceFlow_10il97h__condition",
+      "type": "bpmn:condition",
+      "source": "SequenceFlow_10il97h",
+      "target": "SequenceFlow_10il97h__condition__Confirm",
+      "attrs": {}
+    },
+    {
+      "id": "SequenceFlow_01sam3q",
+      "type": "bpmn:sequenceFlow",
+      "source": "ExclusiveGateway_0hs3ztq",
+      "target": "ChoreographyTask_1jv6c24",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "SequenceFlow_14sd0ji",
+      "type": "bpmn:sequenceFlow",
+      "source": "ExclusiveGateway_106je4z",
+      "target": "ExclusiveGateway_0hs3ztq",
+      "attrs": {
+        "name": "confirm==false",
+        "condition_expression": "confirm==false"
+      }
+    },
+    {
+      "id": "SequenceFlow_14sd0ji__condition",
+      "type": "bpmn:condition",
+      "source": "SequenceFlow_14sd0ji",
+      "target": "SequenceFlow_14sd0ji__condition__Confirm",
+      "attrs": {}
+    },
+    {
+      "id": "SequenceFlow_17yeafe",
+      "type": "bpmn:sequenceFlow",
+      "source": "StartEvent_1jtgn3j",
+      "target": "ExclusiveGateway_0hs3ztq",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "SequenceFlow_1bi5p2u",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_13nkbkb",
+      "target": "EventBasedGateway_1fxpmyn",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "SequenceFlow_1erfsjw",
+      "type": "bpmn:sequenceFlow",
+      "source": "EventBasedGateway_1fxpmyn",
+      "target": "ChoreographyTask_177ikw5",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "SequenceFlow_0cvalmr",
+      "type": "bpmn:sequenceFlow",
+      "source": "EventBasedGateway_1fxpmyn",
+      "target": "ChoreographyTask_09lf521",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "SequenceFlow_0pgfk71",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_09lf521",
+      "target": "EndEvent_0366pfz",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "SequenceFlow_17ntv68",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_177ikw5",
+      "target": "ChoreographyTask_0suxm4u",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "SequenceFlow_0nxtqz1",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_0suxm4u",
+      "target": "ExclusiveGateway_0nzwv7v",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "SequenceFlow_0t7qsuf",
+      "type": "bpmn:sequenceFlow",
+      "source": "ExclusiveGateway_0nzwv7v",
+      "target": "EndEvent_08edp7f",
+      "attrs": {
+        "name": "cancel==false",
+        "condition_expression": "cancel==false"
+      }
+    },
+    {
+      "id": "SequenceFlow_0t7qsuf__condition",
+      "type": "bpmn:condition",
+      "source": "SequenceFlow_0t7qsuf",
+      "target": "SequenceFlow_0t7qsuf__condition__Cancel",
+      "attrs": {}
+    },
+    {
+      "id": "SequenceFlow_1f6x9dz",
+      "type": "bpmn:sequenceFlow",
+      "source": "ExclusiveGateway_0nzwv7v",
+      "target": "ChoreographyTask_1iimt7t",
+      "attrs": {
+        "name": "cancel==true",
+        "condition_expression": "cancel==true"
+      }
+    },
+    {
+      "id": "SequenceFlow_1f6x9dz__condition",
+      "type": "bpmn:condition",
+      "source": "SequenceFlow_1f6x9dz",
+      "target": "SequenceFlow_1f6x9dz__condition__Cancel",
+      "attrs": {}
+    },
+    {
+      "id": "SequenceFlow_1fe2fxr",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_1iimt7t",
+      "target": "EndEvent_146eii4",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_00urpax",
+      "type": "bpmn:sequenceFlow",
+      "source": "EventBasedGateway_1fxpmyn",
+      "target": "ChoreographyTask_0yime3t",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_1byvr2b",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_0yime3t",
+      "target": "Activity_0b1f7uv",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_0webz0z",
+      "type": "bpmn:sequenceFlow",
+      "source": "Activity_0b1f7uv",
+      "target": "Gateway_1jhfnrm",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_0y0y9gl",
+      "type": "bpmn:sequenceFlow",
+      "source": "Gateway_1jhfnrm",
+      "target": "ChoreographyTask_1jk0ir4",
+      "attrs": {
+        "name": "VIPLevel<3",
+        "condition_expression": "VIPLevel<3"
+      }
+    },
+    {
+      "id": "Flow_0y0y9gl__condition",
+      "type": "bpmn:condition",
+      "source": "Flow_0y0y9gl",
+      "target": "Flow_0y0y9gl__condition__VIPLevel",
+      "attrs": {}
+    },
+    {
+      "id": "Flow_0rr6350",
+      "type": "bpmn:sequenceFlow",
+      "source": "Gateway_1jhfnrm",
+      "target": "ChoreographyTask_0oyz7te",
+      "attrs": {
+        "name": "VIPLevel==3",
+        "condition_expression": "VIPLevel==3"
+      }
+    },
+    {
+      "id": "Flow_0rr6350__condition",
+      "type": "bpmn:condition",
+      "source": "Flow_0rr6350",
+      "target": "Flow_0rr6350__condition__VIPLevel",
+      "attrs": {}
+    },
+    {
+      "id": "Flow_0y464ks",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_1jk0ir4",
+      "target": "Gateway_1atxr3y",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_0hg4qa0",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_0oyz7te",
+      "target": "Gateway_1atxr3y",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_16ta1pu",
+      "type": "bpmn:sequenceFlow",
+      "source": "Gateway_1atxr3y",
+      "target": "ChoreographyTask_177ikw5",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    }
+  ],
+  "derived": [
+    {
+      "id": "Derive_Discount2",
+      "type": "bpmn:message_property",
+      "target": "Discount2",
+      "sources": [
+        "Message_04ikf2n"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "discount2",
+        "type": "number",
+        "dsl_type": "int"
+      }
+    },
+    {
+      "id": "Derive_Discount1",
+      "type": "bpmn:message_property",
+      "target": "Discount1",
+      "sources": [
+        "Message_0vlxzcv"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "discount1",
+        "type": "number",
+        "dsl_type": "int"
+      }
+    },
+    {
+      "id": "Derive_VIPpoints",
+      "type": "bpmn:message_property",
+      "target": "VIPpoints",
+      "sources": [
+        "Message_104h2tt"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "VIPpoints",
+        "type": "number",
+        "dsl_type": "int"
+      }
+    },
+    {
+      "id": "Derive_VIPcardId",
+      "type": "bpmn:message_property",
+      "target": "VIPcardId",
+      "sources": [
+        "Message_104h2tt"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "VIPcardId",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_Cancel",
+      "type": "bpmn:message_property",
+      "target": "Cancel",
+      "sources": [
+        "Message_0m9p3da"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "cancel",
+        "type": "boolean",
+        "dsl_type": "bool"
+      }
+    },
+    {
+      "id": "Derive_Payableto",
+      "type": "bpmn:message_property",
+      "target": "Payableto",
+      "sources": [
+        "Message_1etcmvl"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "payableto",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_ID",
+      "type": "bpmn:message_property",
+      "target": "ID",
+      "sources": [
+        "Message_1joj7ca"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "ID",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_Booking_id",
+      "type": "bpmn:message_property",
+      "target": "Booking_id",
+      "sources": [
+        "Message_1ljlm4g"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "booking_id",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_Motivation",
+      "type": "bpmn:message_property",
+      "target": "Motivation",
+      "sources": [
+        "Message_1xm9dxy"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "motivation",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_Payableto",
+      "type": "bpmn:message_property",
+      "target": "Payableto",
+      "sources": [
+        "Message_0o8eyir"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "payableto",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_Confirmation",
+      "type": "bpmn:message_property",
+      "target": "Confirmation",
+      "sources": [
+        "Message_1nlagx2"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "confirmation",
+        "type": "boolean",
+        "dsl_type": "bool"
+      }
+    },
+    {
+      "id": "Derive_Quotation",
+      "type": "bpmn:message_property",
+      "target": "Quotation",
+      "sources": [
+        "Message_1em0ee4"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "quotation",
+        "type": "number",
+        "dsl_type": "int"
+      }
+    },
+    {
+      "id": "Derive_Confirm",
+      "type": "bpmn:message_property",
+      "target": "Confirm",
+      "sources": [
+        "Message_0r9lypd"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "confirm",
+        "type": "boolean",
+        "dsl_type": "bool"
+      }
+    },
+    {
+      "id": "Derive_Date",
+      "type": "bpmn:message_property",
+      "target": "Date",
+      "sources": [
+        "Message_045i10y"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "date",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_Bedrooms",
+      "type": "bpmn:message_property",
+      "target": "Bedrooms",
+      "sources": [
+        "Message_045i10y"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "bedrooms",
+        "type": "number",
+        "dsl_type": "int"
+      }
+    },
+    {
+      "id": "Derive_Confirm",
+      "type": "bpmn:condition_variable",
+      "target": "Confirm",
+      "sources": [
+        "SequenceFlow_10il97h"
+      ],
+      "rule": "SequenceConditionVariable2GlobalVar",
+      "attrs": {
+        "name": "confirm",
+        "relation": "==",
+        "value": "true"
+      }
+    },
+    {
+      "id": "Derive_Confirm",
+      "type": "bpmn:condition_variable",
+      "target": "Confirm",
+      "sources": [
+        "SequenceFlow_14sd0ji"
+      ],
+      "rule": "SequenceConditionVariable2GlobalVar",
+      "attrs": {
+        "name": "confirm",
+        "relation": "==",
+        "value": "false"
+      }
+    },
+    {
+      "id": "Derive_Cancel",
+      "type": "bpmn:condition_variable",
+      "target": "Cancel",
+      "sources": [
+        "SequenceFlow_0t7qsuf"
+      ],
+      "rule": "SequenceConditionVariable2GlobalVar",
+      "attrs": {
+        "name": "cancel",
+        "relation": "==",
+        "value": "false"
+      }
+    },
+    {
+      "id": "Derive_Cancel",
+      "type": "bpmn:condition_variable",
+      "target": "Cancel",
+      "sources": [
+        "SequenceFlow_1f6x9dz"
+      ],
+      "rule": "SequenceConditionVariable2GlobalVar",
+      "attrs": {
+        "name": "cancel",
+        "relation": "==",
+        "value": "true"
+      }
+    },
+    {
+      "id": "Derive_VIPLevel",
+      "type": "bpmn:condition_variable",
+      "target": "VIPLevel",
+      "sources": [
+        "Flow_0y0y9gl"
+      ],
+      "rule": "SequenceConditionVariable2GlobalVar",
+      "attrs": {
+        "name": "VIPLevel",
+        "relation": "<",
+        "value": "3"
+      }
+    },
+    {
+      "id": "Derive_VIPLevel",
+      "type": "bpmn:condition_variable",
+      "target": "VIPLevel",
+      "sources": [
+        "Flow_0rr6350"
+      ],
+      "rule": "SequenceConditionVariable2GlobalVar",
+      "attrs": {
+        "name": "VIPLevel",
+        "relation": "==",
+        "value": "3"
+      }
+    }
+  ],
+  "warnings": []
+}

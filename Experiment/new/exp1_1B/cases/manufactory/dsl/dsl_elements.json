@@ -1,0 +1,487 @@
+[
+  {
+    "id": "manufactory",
+    "type": "dsl:contract",
+    "name": "manufactory",
+    "attrs": {}
+  },
+  {
+    "id": "Participant_1xq1vsc__attr__role",
+    "type": "dsl:attribute",
+    "name": "role",
+    "attrs": {
+      "key": "role",
+      "value": "Manufacturer"
+    }
+  },
+  {
+    "id": "Participant_1xq1vsc",
+    "type": "dsl:participant",
+    "name": "Participant_1xq1vsc",
+    "attrs": {
+      "msp": "ManufacturerMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": {
+        "role": "Manufacturer"
+      }
+    }
+  },
+  {
+    "id": "Participant_05g5xih__attr__role",
+    "type": "dsl:attribute",
+    "name": "role",
+    "attrs": {
+      "key": "role",
+      "value": "Customer"
+    }
+  },
+  {
+    "id": "Participant_05g5xih",
+    "type": "dsl:participant",
+    "name": "Participant_05g5xih",
+    "attrs": {
+      "msp": "CustomerMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": {
+        "role": "Customer"
+      }
+    }
+  },
+  {
+    "id": "CancelFee",
+    "type": "dsl:global",
+    "name": "CancelFee",
+    "attrs": {
+      "type": "bool"
+    }
+  },
+  {
+    "id": "ConcelAck",
+    "type": "dsl:global",
+    "name": "ConcelAck",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "Fee",
+    "type": "dsl:global",
+    "name": "Fee",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "InvoiceContent",
+    "type": "dsl:global",
+    "name": "InvoiceContent",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "OrderAmount",
+    "type": "dsl:global",
+    "name": "OrderAmount",
+    "attrs": {
+      "type": "int"
+    }
+  },
+  {
+    "id": "OrderContent",
+    "type": "dsl:global",
+    "name": "OrderContent",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "QuoteContent",
+    "type": "dsl:global",
+    "name": "QuoteContent",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "QuoteRequest",
+    "type": "dsl:global",
+    "name": "QuoteRequest",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "Cancelation",
+    "type": "dsl:global",
+    "name": "Cancelation",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "Confirm_message",
+    "type": "dsl:global",
+    "name": "Confirm_message",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "PayMethod",
+    "type": "dsl:global",
+    "name": "PayMethod",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "PayRecord",
+    "type": "dsl:global",
+    "name": "PayRecord",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "Message_00wpjke",
+    "type": "dsl:message",
+    "name": "Message_00wpjke",
+    "attrs": {
+      "sender": "Participant_1xq1vsc",
+      "receiver": "Participant_05g5xih",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"QuoteRequest\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"QuoteRequest\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_03was4c",
+    "type": "dsl:message",
+    "name": "Message_03was4c",
+    "attrs": {
+      "sender": "Participant_1xq1vsc",
+      "receiver": "Participant_05g5xih",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"confirm message\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"confirm message\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_05uqcn2",
+    "type": "dsl:message",
+    "name": "Message_05uqcn2",
+    "attrs": {
+      "sender": "Participant_1xq1vsc",
+      "receiver": "Participant_05g5xih",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"payMethod\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0z8kf0j",
+    "type": "dsl:message",
+    "name": "Message_0z8kf0j",
+    "attrs": {
+      "sender": "Participant_1xq1vsc",
+      "receiver": "Participant_05g5xih",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"cancelation\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"cancelation\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0zt8q9t",
+    "type": "dsl:message",
+    "name": "Message_0zt8q9t",
+    "attrs": {
+      "sender": "Participant_05g5xih",
+      "receiver": "Participant_1xq1vsc",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"ConcelAck\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"ConcelAck\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_13l7271",
+    "type": "dsl:message",
+    "name": "Message_13l7271",
+    "attrs": {
+      "sender": "Participant_1xq1vsc",
+      "receiver": "Participant_05g5xih",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"payRecord\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1i5n14f",
+    "type": "dsl:message",
+    "name": "Message_1i5n14f",
+    "attrs": {
+      "sender": "Participant_05g5xih",
+      "receiver": "Participant_1xq1vsc",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"Fee\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1kazup6",
+    "type": "dsl:message",
+    "name": "Message_1kazup6",
+    "attrs": {
+      "sender": "Participant_05g5xih",
+      "receiver": "Participant_1xq1vsc",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"QuoteContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"QuoteContent\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1y5d31x",
+    "type": "dsl:message",
+    "name": "Message_1y5d31x",
+    "attrs": {
+      "sender": "Participant_05g5xih",
+      "receiver": "Participant_1xq1vsc",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"OrderContent\":{\"type\":\"string\",\"description\":\"\"},\"OrderAmount\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"OrderContent\",\"OrderAmount\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1yln43l",
+    "type": "dsl:message",
+    "name": "Message_1yln43l",
+    "attrs": {
+      "sender": "Participant_05g5xih",
+      "receiver": "Participant_1xq1vsc",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"InvoiceContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Gateway_19zzj3s",
+    "type": "dsl:gateway",
+    "name": "Gateway_19zzj3s",
+    "attrs": {
+      "gatewayType": "exclusive",
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Gateway_085e7pr",
+    "type": "dsl:gateway",
+    "name": "Gateway_085e7pr",
+    "attrs": {
+      "gatewayType": "event",
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Event_0okhbce",
+    "type": "dsl:event",
+    "name": "Event_0okhbce",
+    "attrs": {
+      "initialState": "READY"
+    }
+  },
+  {
+    "id": "Event_0th6os0",
+    "type": "dsl:event",
+    "name": "Event_0th6os0",
+    "attrs": {
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Event_0awuo5v",
+    "type": "dsl:event",
+    "name": "Event_0awuo5v",
+    "attrs": {
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Event_0zsq5na",
+    "type": "dsl:event",
+    "name": "Event_0zsq5na",
+    "attrs": {
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Activity_1uktp5z",
+    "type": "dsl:businessrule",
+    "name": "Activity_1uktp5z",
+    "attrs": {
+      "dmnResource": "Activity_1uktp5z.dmn",
+      "decisionID": "Activity_1uktp5z_DecisionID",
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Activity_1uktp5z__input__OrderAmount",
+    "type": "dsl:paramMapping",
+    "name": "OrderAmount",
+    "attrs": {
+      "dmnParam": "OrderAmount",
+      "globalRef": "OrderAmount",
+      "direction": "input"
+    }
+  },
+  {
+    "id": "Activity_1uktp5z__output__CancelFee",
+    "type": "dsl:paramMapping",
+    "name": "CancelFee",
+    "attrs": {
+      "dmnParam": "CancelFee",
+      "globalRef": "CancelFee",
+      "direction": "output"
+    }
+  },
+  {
+    "id": "start__Event_0okhbce__Message_00wpjke",
+    "type": "dsl:startFlow",
+    "name": "start__Event_0okhbce__Message_00wpjke",
+    "attrs": {
+      "start": "Event_0okhbce",
+      "target": "Message_00wpjke"
+    }
+  },
+  {
+    "id": "messageFlow__Message_00wpjke__69",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_00wpjke__69",
+    "attrs": {
+      "message": "Message_00wpjke",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_1kazup6__153",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_1kazup6__153",
+    "attrs": {
+      "message": "Message_1kazup6",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_1y5d31x__237",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_1y5d31x__237",
+    "attrs": {
+      "message": "Message_1y5d31x",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_0z8kf0j__321",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_0z8kf0j__321",
+    "attrs": {
+      "message": "Message_0z8kf0j",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_0zt8q9t__430",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_0zt8q9t__430",
+    "attrs": {
+      "message": "Message_0zt8q9t",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_03was4c__515",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_03was4c__515",
+    "attrs": {
+      "message": "Message_03was4c",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_1yln43l__624",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_1yln43l__624",
+    "attrs": {
+      "message": "Message_1yln43l",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_13l7271__708",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_13l7271__708",
+    "attrs": {
+      "message": "Message_13l7271",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_1i5n14f__790",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_1i5n14f__790",
+    "attrs": {
+      "message": "Message_1i5n14f",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_05uqcn2__874",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_05uqcn2__874",
+    "attrs": {
+      "message": "Message_05uqcn2",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "ruleFlow__Activity_1uktp5z__1288",
+    "type": "dsl:ruleFlow",
+    "name": "ruleFlow__Activity_1uktp5z__1288",
+    "attrs": {
+      "businessrule": "Activity_1uktp5z",
+      "ruleCond": "done"
+    }
+  },
+  {
+    "id": "gatewayFlow__Gateway_085e7pr__1179",
+    "type": "dsl:gatewayFlow",
+    "name": "gatewayFlow__Gateway_085e7pr__1179",
+    "attrs": {
+      "gateway": "Gateway_085e7pr",
+      "condition": "completed"
+    }
+  },
+  {
+    "id": "gatewayChoose__Gateway_19zzj3s__957",
+    "type": "dsl:gatewayFlow",
+    "name": "gatewayChoose__Gateway_19zzj3s__957",
+    "attrs": {
+      "gateway": "Gateway_19zzj3s",
+      "condition": "completed",
+      "mode": "choose"
+    }
+  },
+  {
+    "id": "gatewayChoose__Gateway_19zzj3s__957__branch__0",
+    "type": "dsl:gatewayCompareBranch",
+    "name": "gatewayChoose__Gateway_19zzj3s__957__branch__0",
+    "attrs": {
+      "branch_kind": "if",
+      "condition": "CancelFee == false"
+    }
+  },
+  {
+    "id": "gatewayChoose__Gateway_19zzj3s__957__branch__1",
+    "type": "dsl:gatewayCompareBranch",
+    "name": "gatewayChoose__Gateway_19zzj3s__957__branch__1",
+    "attrs": {
+      "branch_kind": "if",
+      "condition": "CancelFee == true"
+    }
+  }
+]

@@ -1,0 +1,696 @@
+[
+  {
+    "id": "SupplyChainPaper",
+    "type": "dsl:contract",
+    "name": "SupplyChainPaper",
+    "attrs": {}
+  },
+  {
+    "id": "Participant_0w6qkdf__attr__role",
+    "type": "dsl:attribute",
+    "name": "role",
+    "attrs": {
+      "key": "role",
+      "value": "Bulk buyer"
+    }
+  },
+  {
+    "id": "Participant_0w6qkdf",
+    "type": "dsl:participant",
+    "name": "Participant_0w6qkdf",
+    "attrs": {
+      "msp": "Bulk_buyerMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": {
+        "role": "Bulk buyer"
+      }
+    }
+  },
+  {
+    "id": "Participant_19mgbdn__attr__role",
+    "type": "dsl:attribute",
+    "name": "role",
+    "attrs": {
+      "key": "role",
+      "value": "Manufacturer"
+    }
+  },
+  {
+    "id": "Participant_19mgbdn",
+    "type": "dsl:participant",
+    "name": "Participant_19mgbdn",
+    "attrs": {
+      "msp": "ManufacturerMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": {
+        "role": "Manufacturer"
+      }
+    }
+  },
+  {
+    "id": "Participant_09cjol2__attr__role",
+    "type": "dsl:attribute",
+    "name": "role",
+    "attrs": {
+      "key": "role",
+      "value": "Middleman"
+    }
+  },
+  {
+    "id": "Participant_09cjol2",
+    "type": "dsl:participant",
+    "name": "Participant_09cjol2",
+    "attrs": {
+      "msp": "MiddlemanMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": {
+        "role": "Middleman"
+      }
+    }
+  },
+  {
+    "id": "Participant_0sa2v7d__attr__role",
+    "type": "dsl:attribute",
+    "name": "role",
+    "attrs": {
+      "key": "role",
+      "value": "Supplier"
+    }
+  },
+  {
+    "id": "Participant_0sa2v7d",
+    "type": "dsl:participant",
+    "name": "Participant_0sa2v7d",
+    "attrs": {
+      "msp": "SupplierMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": {
+        "role": "Supplier"
+      }
+    }
+  },
+  {
+    "id": "Participant_19j1e3o__attr__role",
+    "type": "dsl:attribute",
+    "name": "role",
+    "attrs": {
+      "key": "role",
+      "value": "Special carrier"
+    }
+  },
+  {
+    "id": "Participant_19j1e3o",
+    "type": "dsl:participant",
+    "name": "Participant_19j1e3o",
+    "attrs": {
+      "msp": "Special_carrierMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": {
+        "role": "Special carrier"
+      }
+    }
+  },
+  {
+    "id": "Confirm1",
+    "type": "dsl:global",
+    "name": "Confirm1",
+    "attrs": {
+      "type": "bool"
+    }
+  },
+  {
+    "id": "Confirm2",
+    "type": "dsl:global",
+    "name": "Confirm2",
+    "attrs": {
+      "type": "bool"
+    }
+  },
+  {
+    "id": "Confirm3",
+    "type": "dsl:global",
+    "name": "Confirm3",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "DeliveryConfirmation",
+    "type": "dsl:global",
+    "name": "DeliveryConfirmation",
+    "attrs": {
+      "type": "bool"
+    }
+  },
+  {
+    "id": "FinalPriority",
+    "type": "dsl:global",
+    "name": "FinalPriority",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "NumberOfUnits",
+    "type": "dsl:global",
+    "name": "NumberOfUnits",
+    "attrs": {
+      "type": "int"
+    }
+  },
+  {
+    "id": "OrderDetails",
+    "type": "dsl:global",
+    "name": "OrderDetails",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "ProductionStart",
+    "type": "dsl:global",
+    "name": "ProductionStart",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "RequestId",
+    "type": "dsl:global",
+    "name": "RequestId",
+    "attrs": {
+      "type": "int"
+    }
+  },
+  {
+    "id": "SupplierReputation",
+    "type": "dsl:global",
+    "name": "SupplierReputation",
+    "attrs": {
+      "type": "int"
+    }
+  },
+  {
+    "id": "SupplyOrderDetails",
+    "type": "dsl:global",
+    "name": "SupplyOrderDetails",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "SupplyOrderId",
+    "type": "dsl:global",
+    "name": "SupplyOrderId",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "TransportOrderId",
+    "type": "dsl:global",
+    "name": "TransportOrderId",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "Urgent",
+    "type": "dsl:global",
+    "name": "Urgent",
+    "attrs": {
+      "type": "bool"
+    }
+  },
+  {
+    "id": "Message_04wmlqe",
+    "type": "dsl:message",
+    "name": "Message_04wmlqe",
+    "attrs": {
+      "sender": "Participant_19mgbdn",
+      "receiver": "Participant_0w6qkdf",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"productionStart\":{\"type\":\"string\",\"description\":\"Notification of the commencement of production, including the date and time\"}},\"required\":[\"productionStart\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0cba4t6",
+    "type": "dsl:message",
+    "name": "Message_0cba4t6",
+    "attrs": {
+      "sender": "Participant_09cjol2",
+      "receiver": "Participant_0sa2v7d",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"supplyOrderId\":{\"type\":\"string\",\"description\":\" Identifier of the supply order being forwarded\"}},\"required\":[\"supplyOrderId\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0d2xte5",
+    "type": "dsl:message",
+    "name": "Message_0d2xte5",
+    "attrs": {
+      "sender": "Participant_19j1e3o",
+      "receiver": "Participant_19mgbdn",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"deliveryConfirmation\":{\"type\":\"boolean\",\"description\":\"Confirmation of whether the supplies have been successfully delivered\"}},\"required\":[\"deliveryConfirmation\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0hpha6h",
+    "type": "dsl:message",
+    "name": "Message_0hpha6h",
+    "attrs": {
+      "sender": "Participant_0sa2v7d",
+      "receiver": "Participant_19j1e3o",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"requestId\":{\"type\":\"number\",\"description\":\"Unique identifier of the request for additional details \"},\"supplierReputation\":{\"type\":\"number\",\"description\":\"A numerical rating representing the supplier's reputation.\"}},\"required\":[\"requestId\",\"supplierReputation\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0pm90nx",
+    "type": "dsl:message",
+    "name": "Message_0pm90nx",
+    "attrs": {
+      "sender": "Participant_09cjol2",
+      "receiver": "Participant_19j1e3o",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"transportOrderId\":{\"type\":\"string\",\"description\":\"Identifier of the transport order being forwarded\"}},\"required\":[\"transportOrderId\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0rwz1km",
+    "type": "dsl:message",
+    "name": "Message_0rwz1km",
+    "attrs": {
+      "sender": "Participant_19j1e3o",
+      "receiver": "Participant_0sa2v7d",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"requestId\":{\"type\":\"number\",\"description\":\" Unique identifier of the request for additional details \"},\"numberOfUnits\":{\"type\":\"number\",\"description\":\" Total number of units in the order requested\"},\"urgent\":{\"type\":\"boolean\",\"description\":\"Indicates whether the order requires urgent delivery.\"}},\"required\":[\"requestId\",\"numberOfUnits\",\"urgent\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_196q1fj",
+    "type": "dsl:message",
+    "name": "Message_196q1fj",
+    "attrs": {
+      "sender": "Participant_19mgbdn",
+      "receiver": "Participant_0w6qkdf",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{},\"required\":[],\"files\":{\"deliveryNote\":{\"type\":\"file\",\"description\":\"A document confirming the delivery of goods\"}},\"file required\":[\"deliveryNote\"]}"
+    }
+  },
+  {
+    "id": "Message_1ajdm9l",
+    "type": "dsl:message",
+    "name": "Message_1ajdm9l",
+    "attrs": {
+      "sender": "Participant_19mgbdn",
+      "receiver": "Participant_09cjol2",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"supplyOrderDetails\":{\"type\":\"string\",\"description\":\" Details of the supplies needed\"}},\"required\":[\"supplyOrderDetails\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1dmeexg",
+    "type": "dsl:message",
+    "name": "Message_1dmeexg",
+    "attrs": {
+      "sender": "Participant_19j1e3o",
+      "receiver": "Participant_19mgbdn",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"confirm3\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1dzkcn0",
+    "type": "dsl:message",
+    "name": "Message_1dzkcn0",
+    "attrs": {
+      "sender": "Participant_19j1e3o",
+      "receiver": "Participant_19mgbdn",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"confirm2\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1io2g9u",
+    "type": "dsl:message",
+    "name": "Message_1io2g9u",
+    "attrs": {
+      "sender": "Participant_0sa2v7d",
+      "receiver": "Participant_19j1e3o",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{},\"required\":[],\"files\":{\"waybill\":{\"type\":\"file\",\"description\":\"Digital or physical waybill document，detailing the shipment contents and destination.\"}},\"file required\":[\"waybill\"]}"
+    }
+  },
+  {
+    "id": "Message_1oxmq1k",
+    "type": "dsl:message",
+    "name": "Message_1oxmq1k",
+    "attrs": {
+      "sender": "Participant_19j1e3o",
+      "receiver": "Participant_19mgbdn",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"confirm1\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1wswgqu",
+    "type": "dsl:message",
+    "name": "Message_1wswgqu",
+    "attrs": {
+      "sender": "Participant_0w6qkdf",
+      "receiver": "Participant_19mgbdn",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"orderDetails\":{\"type\":\"string\",\"description\":\"Detailed list of goods ordered\"}},\"required\":[\"orderDetails\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Gateway_1cr0nma",
+    "type": "dsl:gateway",
+    "name": "Gateway_1cr0nma",
+    "attrs": {
+      "gatewayType": "exclusive",
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Gateway_0ep8cuh",
+    "type": "dsl:gateway",
+    "name": "Gateway_0ep8cuh",
+    "attrs": {
+      "gatewayType": "exclusive",
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Gateway_0onpe6x",
+    "type": "dsl:gateway",
+    "name": "Gateway_0onpe6x",
+    "attrs": {
+      "gatewayType": "parallel",
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Gateway_1fbifca",
+    "type": "dsl:gateway",
+    "name": "Gateway_1fbifca",
+    "attrs": {
+      "gatewayType": "parallel",
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Event_06sexe6",
+    "type": "dsl:event",
+    "name": "Event_06sexe6",
+    "attrs": {
+      "initialState": "READY"
+    }
+  },
+  {
+    "id": "Event_13pbqdz",
+    "type": "dsl:event",
+    "name": "Event_13pbqdz",
+    "attrs": {
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Activity_0rm8bkp",
+    "type": "dsl:businessrule",
+    "name": "Activity_0rm8bkp",
+    "attrs": {
+      "dmnResource": "Activity_0rm8bkp.dmn",
+      "decisionID": "Activity_0rm8bkp_DecisionID",
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Activity_0rm8bkp__input__numberOfUnits",
+    "type": "dsl:paramMapping",
+    "name": "numberOfUnits",
+    "attrs": {
+      "dmnParam": "numberOfUnits",
+      "globalRef": "NumberOfUnits",
+      "direction": "input"
+    }
+  },
+  {
+    "id": "Activity_0rm8bkp__input__urgent",
+    "type": "dsl:paramMapping",
+    "name": "urgent",
+    "attrs": {
+      "dmnParam": "urgent",
+      "globalRef": "Urgent",
+      "direction": "input"
+    }
+  },
+  {
+    "id": "Activity_0rm8bkp__input__supplierReputation",
+    "type": "dsl:paramMapping",
+    "name": "supplierReputation",
+    "attrs": {
+      "dmnParam": "supplierReputation",
+      "globalRef": "SupplierReputation",
+      "direction": "input"
+    }
+  },
+  {
+    "id": "Activity_0rm8bkp__output__finalPriority",
+    "type": "dsl:paramMapping",
+    "name": "finalPriority",
+    "attrs": {
+      "dmnParam": "finalPriority",
+      "globalRef": "FinalPriority",
+      "direction": "output"
+    }
+  },
+  {
+    "id": "start__Event_06sexe6__Message_1wswgqu",
+    "type": "dsl:startFlow",
+    "name": "start__Event_06sexe6__Message_1wswgqu",
+    "attrs": {
+      "start": "Event_06sexe6",
+      "target": "Message_1wswgqu"
+    }
+  },
+  {
+    "id": "messageFlow__Message_1wswgqu__69",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_1wswgqu__69",
+    "attrs": {
+      "message": "Message_1wswgqu",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_1ajdm9l__153",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_1ajdm9l__153",
+    "attrs": {
+      "message": "Message_1ajdm9l",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_0cba4t6__237",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_0cba4t6__237",
+    "attrs": {
+      "message": "Message_0cba4t6",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_0pm90nx__321",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_0pm90nx__321",
+    "attrs": {
+      "message": "Message_0pm90nx",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_0rwz1km__405",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_0rwz1km__405",
+    "attrs": {
+      "message": "Message_0rwz1km",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_0hpha6h__489",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_0hpha6h__489",
+    "attrs": {
+      "message": "Message_0hpha6h",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_1io2g9u__573",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_1io2g9u__573",
+    "attrs": {
+      "message": "Message_1io2g9u",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_0d2xte5__658",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_0d2xte5__658",
+    "attrs": {
+      "message": "Message_0d2xte5",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_04wmlqe__742",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_04wmlqe__742",
+    "attrs": {
+      "message": "Message_04wmlqe",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_196q1fj__826",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_196q1fj__826",
+    "attrs": {
+      "message": "Message_196q1fj",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_1oxmq1k__908",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_1oxmq1k__908",
+    "attrs": {
+      "message": "Message_1oxmq1k",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_1dzkcn0__992",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_1dzkcn0__992",
+    "attrs": {
+      "message": "Message_1dzkcn0",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_1dmeexg__1076",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_1dmeexg__1076",
+    "attrs": {
+      "message": "Message_1dmeexg",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "ruleFlow__Activity_0rm8bkp__1871",
+    "type": "dsl:ruleFlow",
+    "name": "ruleFlow__Activity_0rm8bkp__1871",
+    "attrs": {
+      "businessrule": "Activity_0rm8bkp",
+      "ruleCond": "done"
+    }
+  },
+  {
+    "id": "gatewayFlow__Gateway_1cr0nma__1161",
+    "type": "dsl:gatewayFlow",
+    "name": "gatewayFlow__Gateway_1cr0nma__1161",
+    "attrs": {
+      "gateway": "Gateway_1cr0nma",
+      "condition": "completed"
+    }
+  },
+  {
+    "id": "gatewayFlow__Gateway_0onpe6x__1644",
+    "type": "dsl:gatewayFlow",
+    "name": "gatewayFlow__Gateway_0onpe6x__1644",
+    "attrs": {
+      "gateway": "Gateway_0onpe6x",
+      "condition": "completed"
+    }
+  },
+  {
+    "id": "gatewayChoose__Gateway_0ep8cuh__1245",
+    "type": "dsl:gatewayFlow",
+    "name": "gatewayChoose__Gateway_0ep8cuh__1245",
+    "attrs": {
+      "gateway": "Gateway_0ep8cuh",
+      "condition": "completed",
+      "mode": "choose"
+    }
+  },
+  {
+    "id": "gatewayChoose__Gateway_0ep8cuh__1245__branch__0",
+    "type": "dsl:gatewayCompareBranch",
+    "name": "gatewayChoose__Gateway_0ep8cuh__1245__branch__0",
+    "attrs": {
+      "branch_kind": "if",
+      "condition": "FinalPriority == \"Low\""
+    }
+  },
+  {
+    "id": "gatewayChoose__Gateway_0ep8cuh__1245__branch__1",
+    "type": "dsl:gatewayCompareBranch",
+    "name": "gatewayChoose__Gateway_0ep8cuh__1245__branch__1",
+    "attrs": {
+      "branch_kind": "if",
+      "condition": "FinalPriority == \"High\""
+    }
+  },
+  {
+    "id": "gatewayChoose__Gateway_0ep8cuh__1245__branch__2",
+    "type": "dsl:gatewayCompareBranch",
+    "name": "gatewayChoose__Gateway_0ep8cuh__1245__branch__2",
+    "attrs": {
+      "branch_kind": "if",
+      "condition": "FinalPriority == \"Medium\""
+    }
+  },
+  {
+    "id": "gatewayChoose__Gateway_0ep8cuh__1245__branch__3",
+    "type": "dsl:gatewayCompareBranch",
+    "name": "gatewayChoose__Gateway_0ep8cuh__1245__branch__3",
+    "attrs": {
+      "branch_kind": "if",
+      "condition": "FinalPriority == \"VeryLow\""
+    }
+  },
+  {
+    "id": "parallelJoin__Gateway_1fbifca__1753",
+    "type": "dsl:parallelJoin",
+    "name": "parallelJoin__Gateway_1fbifca__1753",
+    "attrs": {
+      "gateway": "Gateway_1fbifca",
+      "sources": [
+        "Message_0cba4t6",
+        "Message_0pm90nx"
+      ]
+    }
+  }
+]

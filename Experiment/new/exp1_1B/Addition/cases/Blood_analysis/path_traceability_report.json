@@ -1,0 +1,4886 @@
+{
+  "case_name": "Blood_analysis",
+  "exp3_path_traceability_status": "PASS",
+  "logical_paths_dir": "/root/code/ChainCollab/Experiment/new/exp3/cases/Blood_analysis/paths",
+  "dsl_tag": "/root/code/ChainCollab/Experiment/new/exp1_1B/cases/Blood_analysis/dsl/dsl_tag.json",
+  "trace": "/root/code/ChainCollab/Experiment/new/exp1_1B/cases/Blood_analysis/trace/bpmn_dsl_trace.json",
+  "logical_paths": 12,
+  "logical_path_steps": 138,
+  "traceable_logical_path_steps": 138,
+  "untraceable_logical_path_steps": 0,
+  "overall_path_traceability": 1.0,
+  "paths": [
+    {
+      "path_name": "Blood_analysis_auto_path_001",
+      "logical_path_file": "/root/code/ChainCollab/Experiment/new/exp3/cases/Blood_analysis/paths/Blood_analysis_auto_path_001/logical_path.json",
+      "expect": "accepted",
+      "total_steps": 11,
+      "traceable_steps": 11,
+      "untraceable_steps": [],
+      "path_traceability": 1.0,
+      "steps": [
+        {
+          "step_index": 0,
+          "step_type": "event",
+          "element_id": "StartEvent_0m7hz56",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "StartEvent_0m7hz56",
+              "source_type": "bpmn:startEvent",
+              "target_id": "StartEvent_0m7hz56",
+              "target_type": "dsl:event",
+              "rule_name": "StartEvent2Event",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 1,
+          "step_type": "gateway",
+          "element_id": "ParallelGateway_1pgjqtw",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "ParallelGateway_1pgjqtw",
+              "source_type": "bpmn:parallelGateway",
+              "target_id": "ParallelGateway_1pgjqtw",
+              "target_type": "dsl:gateway",
+              "rule_name": "ParallelGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 2,
+          "step_type": "message",
+          "element_id": "Message_0gswvmq",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0gswvmq",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0gswvmq",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_16uaf5s",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gswvmq",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_16uaf5s",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gswvmq",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_10lckh7",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0gswvmq",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 3,
+          "step_type": "message",
+          "element_id": "Message_0wq8mc6",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0wq8mc6",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0vz56a0",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0vz56a0",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_131v44n",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 4,
+          "step_type": "message",
+          "element_id": "Message_13mh6mk",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_13mh6mk",
+              "source_type": "bpmn:message",
+              "target_id": "Message_13mh6mk",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0axr6ym",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_13mh6mk",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0axr6ym",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_13mh6mk",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_0rxioe7",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_13mh6mk",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 5,
+          "step_type": "message",
+          "element_id": "Message_1vzqd37",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_1vzqd37",
+              "source_type": "bpmn:message",
+              "target_id": "Message_1vzqd37",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0r5mbr1",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1vzqd37",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0r5mbr1",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1vzqd37",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1732eky",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_1vzqd37",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 6,
+          "step_type": "gateway",
+          "element_id": "Gateway_1m6dgym",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Gateway_1m6dgym",
+              "source_type": "bpmn:parallelGateway",
+              "target_id": "Gateway_1m6dgym",
+              "target_type": "dsl:gateway",
+              "rule_name": "ParallelGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 7,
+          "step_type": "message",
+          "element_id": "Message_1rqbibd",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_1rqbibd",
+              "source_type": "bpmn:message",
+              "target_id": "Message_1rqbibd",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_09o9s93",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1rqbibd",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_09o9s93",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1rqbibd",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1bkb191",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_1rqbibd",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 8,
+          "step_type": "businessrule",
+          "element_id": "Activity_1mj4mr7",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Activity_1mj4mr7",
+              "source_type": "bpmn:businessRuleTask",
+              "target_id": "Activity_1mj4mr7",
+              "target_type": "dsl:businessrule",
+              "rule_name": "BusinessRuleTask2BusinessRule",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 9,
+          "step_type": "gateway",
+          "element_id": "Gateway_0o8snyv",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Gateway_0o8snyv",
+              "source_type": "bpmn:exclusiveGateway",
+              "target_id": "Gateway_0o8snyv",
+              "target_type": "dsl:gateway",
+              "rule_name": "ExclusiveGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 10,
+          "step_type": "event",
+          "element_id": "EndEvent_110myff",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "EndEvent_110myff",
+              "source_type": "bpmn:endEvent",
+              "target_id": "EndEvent_110myff",
+              "target_type": "dsl:event",
+              "rule_name": "EndEvent2Event",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path_name": "Blood_analysis_auto_path_002",
+      "logical_path_file": "/root/code/ChainCollab/Experiment/new/exp3/cases/Blood_analysis/paths/Blood_analysis_auto_path_002/logical_path.json",
+      "expect": "accepted",
+      "total_steps": 12,
+      "traceable_steps": 12,
+      "untraceable_steps": [],
+      "path_traceability": 1.0,
+      "steps": [
+        {
+          "step_index": 0,
+          "step_type": "event",
+          "element_id": "StartEvent_0m7hz56",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "StartEvent_0m7hz56",
+              "source_type": "bpmn:startEvent",
+              "target_id": "StartEvent_0m7hz56",
+              "target_type": "dsl:event",
+              "rule_name": "StartEvent2Event",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 1,
+          "step_type": "gateway",
+          "element_id": "ParallelGateway_1pgjqtw",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "ParallelGateway_1pgjqtw",
+              "source_type": "bpmn:parallelGateway",
+              "target_id": "ParallelGateway_1pgjqtw",
+              "target_type": "dsl:gateway",
+              "rule_name": "ParallelGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 2,
+          "step_type": "message",
+          "element_id": "Message_0gswvmq",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0gswvmq",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0gswvmq",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_16uaf5s",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gswvmq",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_16uaf5s",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gswvmq",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_10lckh7",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0gswvmq",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 3,
+          "step_type": "message",
+          "element_id": "Message_0wq8mc6",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0wq8mc6",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0vz56a0",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0vz56a0",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_131v44n",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 4,
+          "step_type": "message",
+          "element_id": "Message_13mh6mk",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_13mh6mk",
+              "source_type": "bpmn:message",
+              "target_id": "Message_13mh6mk",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0axr6ym",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_13mh6mk",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0axr6ym",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_13mh6mk",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_0rxioe7",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_13mh6mk",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 5,
+          "step_type": "message",
+          "element_id": "Message_1vzqd37",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_1vzqd37",
+              "source_type": "bpmn:message",
+              "target_id": "Message_1vzqd37",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0r5mbr1",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1vzqd37",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0r5mbr1",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1vzqd37",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1732eky",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_1vzqd37",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 6,
+          "step_type": "gateway",
+          "element_id": "Gateway_1m6dgym",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Gateway_1m6dgym",
+              "source_type": "bpmn:parallelGateway",
+              "target_id": "Gateway_1m6dgym",
+              "target_type": "dsl:gateway",
+              "rule_name": "ParallelGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 7,
+          "step_type": "message",
+          "element_id": "Message_1rqbibd",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_1rqbibd",
+              "source_type": "bpmn:message",
+              "target_id": "Message_1rqbibd",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_09o9s93",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1rqbibd",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_09o9s93",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1rqbibd",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1bkb191",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_1rqbibd",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 8,
+          "step_type": "businessrule",
+          "element_id": "Activity_1mj4mr7",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Activity_1mj4mr7",
+              "source_type": "bpmn:businessRuleTask",
+              "target_id": "Activity_1mj4mr7",
+              "target_type": "dsl:businessrule",
+              "rule_name": "BusinessRuleTask2BusinessRule",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 9,
+          "step_type": "gateway",
+          "element_id": "Gateway_0o8snyv",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Gateway_0o8snyv",
+              "source_type": "bpmn:exclusiveGateway",
+              "target_id": "Gateway_0o8snyv",
+              "target_type": "dsl:gateway",
+              "rule_name": "ExclusiveGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 10,
+          "step_type": "message",
+          "element_id": "Message_0gd0z61",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0gd0z61",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0gd0z61",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_1ueexfr",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gd0z61",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_1ueexfr",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gd0z61",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1qmxi43",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0gd0z61",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 11,
+          "step_type": "event",
+          "element_id": "EndEvent_110myff",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "EndEvent_110myff",
+              "source_type": "bpmn:endEvent",
+              "target_id": "EndEvent_110myff",
+              "target_type": "dsl:event",
+              "rule_name": "EndEvent2Event",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path_name": "Blood_analysis_auto_path_003",
+      "logical_path_file": "/root/code/ChainCollab/Experiment/new/exp3/cases/Blood_analysis/paths/Blood_analysis_auto_path_003/logical_path.json",
+      "expect": "accepted",
+      "total_steps": 11,
+      "traceable_steps": 11,
+      "untraceable_steps": [],
+      "path_traceability": 1.0,
+      "steps": [
+        {
+          "step_index": 0,
+          "step_type": "event",
+          "element_id": "StartEvent_0m7hz56",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "StartEvent_0m7hz56",
+              "source_type": "bpmn:startEvent",
+              "target_id": "StartEvent_0m7hz56",
+              "target_type": "dsl:event",
+              "rule_name": "StartEvent2Event",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 1,
+          "step_type": "gateway",
+          "element_id": "ParallelGateway_1pgjqtw",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "ParallelGateway_1pgjqtw",
+              "source_type": "bpmn:parallelGateway",
+              "target_id": "ParallelGateway_1pgjqtw",
+              "target_type": "dsl:gateway",
+              "rule_name": "ParallelGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 2,
+          "step_type": "message",
+          "element_id": "Message_0gswvmq",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0gswvmq",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0gswvmq",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_16uaf5s",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gswvmq",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_16uaf5s",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gswvmq",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_10lckh7",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0gswvmq",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 3,
+          "step_type": "message",
+          "element_id": "Message_0wq8mc6",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0wq8mc6",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0vz56a0",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0vz56a0",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_131v44n",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 4,
+          "step_type": "message",
+          "element_id": "Message_1vzqd37",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_1vzqd37",
+              "source_type": "bpmn:message",
+              "target_id": "Message_1vzqd37",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0r5mbr1",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1vzqd37",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0r5mbr1",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1vzqd37",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1732eky",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_1vzqd37",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 5,
+          "step_type": "message",
+          "element_id": "Message_13mh6mk",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_13mh6mk",
+              "source_type": "bpmn:message",
+              "target_id": "Message_13mh6mk",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0axr6ym",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_13mh6mk",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0axr6ym",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_13mh6mk",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_0rxioe7",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_13mh6mk",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 6,
+          "step_type": "gateway",
+          "element_id": "Gateway_1m6dgym",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Gateway_1m6dgym",
+              "source_type": "bpmn:parallelGateway",
+              "target_id": "Gateway_1m6dgym",
+              "target_type": "dsl:gateway",
+              "rule_name": "ParallelGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 7,
+          "step_type": "message",
+          "element_id": "Message_1rqbibd",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_1rqbibd",
+              "source_type": "bpmn:message",
+              "target_id": "Message_1rqbibd",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_09o9s93",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1rqbibd",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_09o9s93",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1rqbibd",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1bkb191",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_1rqbibd",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 8,
+          "step_type": "businessrule",
+          "element_id": "Activity_1mj4mr7",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Activity_1mj4mr7",
+              "source_type": "bpmn:businessRuleTask",
+              "target_id": "Activity_1mj4mr7",
+              "target_type": "dsl:businessrule",
+              "rule_name": "BusinessRuleTask2BusinessRule",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 9,
+          "step_type": "gateway",
+          "element_id": "Gateway_0o8snyv",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Gateway_0o8snyv",
+              "source_type": "bpmn:exclusiveGateway",
+              "target_id": "Gateway_0o8snyv",
+              "target_type": "dsl:gateway",
+              "rule_name": "ExclusiveGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 10,
+          "step_type": "event",
+          "element_id": "EndEvent_110myff",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "EndEvent_110myff",
+              "source_type": "bpmn:endEvent",
+              "target_id": "EndEvent_110myff",
+              "target_type": "dsl:event",
+              "rule_name": "EndEvent2Event",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path_name": "Blood_analysis_auto_path_004",
+      "logical_path_file": "/root/code/ChainCollab/Experiment/new/exp3/cases/Blood_analysis/paths/Blood_analysis_auto_path_004/logical_path.json",
+      "expect": "accepted",
+      "total_steps": 12,
+      "traceable_steps": 12,
+      "untraceable_steps": [],
+      "path_traceability": 1.0,
+      "steps": [
+        {
+          "step_index": 0,
+          "step_type": "event",
+          "element_id": "StartEvent_0m7hz56",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "StartEvent_0m7hz56",
+              "source_type": "bpmn:startEvent",
+              "target_id": "StartEvent_0m7hz56",
+              "target_type": "dsl:event",
+              "rule_name": "StartEvent2Event",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 1,
+          "step_type": "gateway",
+          "element_id": "ParallelGateway_1pgjqtw",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "ParallelGateway_1pgjqtw",
+              "source_type": "bpmn:parallelGateway",
+              "target_id": "ParallelGateway_1pgjqtw",
+              "target_type": "dsl:gateway",
+              "rule_name": "ParallelGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 2,
+          "step_type": "message",
+          "element_id": "Message_0gswvmq",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0gswvmq",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0gswvmq",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_16uaf5s",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gswvmq",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_16uaf5s",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gswvmq",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_10lckh7",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0gswvmq",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 3,
+          "step_type": "message",
+          "element_id": "Message_0wq8mc6",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0wq8mc6",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0vz56a0",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0vz56a0",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_131v44n",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 4,
+          "step_type": "message",
+          "element_id": "Message_1vzqd37",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_1vzqd37",
+              "source_type": "bpmn:message",
+              "target_id": "Message_1vzqd37",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0r5mbr1",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1vzqd37",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0r5mbr1",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1vzqd37",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1732eky",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_1vzqd37",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 5,
+          "step_type": "message",
+          "element_id": "Message_13mh6mk",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_13mh6mk",
+              "source_type": "bpmn:message",
+              "target_id": "Message_13mh6mk",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0axr6ym",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_13mh6mk",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0axr6ym",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_13mh6mk",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_0rxioe7",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_13mh6mk",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 6,
+          "step_type": "gateway",
+          "element_id": "Gateway_1m6dgym",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Gateway_1m6dgym",
+              "source_type": "bpmn:parallelGateway",
+              "target_id": "Gateway_1m6dgym",
+              "target_type": "dsl:gateway",
+              "rule_name": "ParallelGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 7,
+          "step_type": "message",
+          "element_id": "Message_1rqbibd",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_1rqbibd",
+              "source_type": "bpmn:message",
+              "target_id": "Message_1rqbibd",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_09o9s93",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1rqbibd",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_09o9s93",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1rqbibd",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1bkb191",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_1rqbibd",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 8,
+          "step_type": "businessrule",
+          "element_id": "Activity_1mj4mr7",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Activity_1mj4mr7",
+              "source_type": "bpmn:businessRuleTask",
+              "target_id": "Activity_1mj4mr7",
+              "target_type": "dsl:businessrule",
+              "rule_name": "BusinessRuleTask2BusinessRule",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 9,
+          "step_type": "gateway",
+          "element_id": "Gateway_0o8snyv",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Gateway_0o8snyv",
+              "source_type": "bpmn:exclusiveGateway",
+              "target_id": "Gateway_0o8snyv",
+              "target_type": "dsl:gateway",
+              "rule_name": "ExclusiveGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 10,
+          "step_type": "message",
+          "element_id": "Message_0gd0z61",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0gd0z61",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0gd0z61",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_1ueexfr",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gd0z61",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_1ueexfr",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gd0z61",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1qmxi43",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0gd0z61",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 11,
+          "step_type": "event",
+          "element_id": "EndEvent_110myff",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "EndEvent_110myff",
+              "source_type": "bpmn:endEvent",
+              "target_id": "EndEvent_110myff",
+              "target_type": "dsl:event",
+              "rule_name": "EndEvent2Event",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path_name": "Blood_analysis_auto_path_005",
+      "logical_path_file": "/root/code/ChainCollab/Experiment/new/exp3/cases/Blood_analysis/paths/Blood_analysis_auto_path_005/logical_path.json",
+      "expect": "accepted",
+      "total_steps": 11,
+      "traceable_steps": 11,
+      "untraceable_steps": [],
+      "path_traceability": 1.0,
+      "steps": [
+        {
+          "step_index": 0,
+          "step_type": "event",
+          "element_id": "StartEvent_0m7hz56",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "StartEvent_0m7hz56",
+              "source_type": "bpmn:startEvent",
+              "target_id": "StartEvent_0m7hz56",
+              "target_type": "dsl:event",
+              "rule_name": "StartEvent2Event",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 1,
+          "step_type": "gateway",
+          "element_id": "ParallelGateway_1pgjqtw",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "ParallelGateway_1pgjqtw",
+              "source_type": "bpmn:parallelGateway",
+              "target_id": "ParallelGateway_1pgjqtw",
+              "target_type": "dsl:gateway",
+              "rule_name": "ParallelGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 2,
+          "step_type": "message",
+          "element_id": "Message_0gswvmq",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0gswvmq",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0gswvmq",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_16uaf5s",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gswvmq",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_16uaf5s",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gswvmq",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_10lckh7",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0gswvmq",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 3,
+          "step_type": "message",
+          "element_id": "Message_1vzqd37",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_1vzqd37",
+              "source_type": "bpmn:message",
+              "target_id": "Message_1vzqd37",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0r5mbr1",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1vzqd37",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0r5mbr1",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1vzqd37",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1732eky",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_1vzqd37",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 4,
+          "step_type": "message",
+          "element_id": "Message_0wq8mc6",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0wq8mc6",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0vz56a0",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0vz56a0",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_131v44n",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 5,
+          "step_type": "message",
+          "element_id": "Message_13mh6mk",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_13mh6mk",
+              "source_type": "bpmn:message",
+              "target_id": "Message_13mh6mk",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0axr6ym",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_13mh6mk",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0axr6ym",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_13mh6mk",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_0rxioe7",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_13mh6mk",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 6,
+          "step_type": "gateway",
+          "element_id": "Gateway_1m6dgym",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Gateway_1m6dgym",
+              "source_type": "bpmn:parallelGateway",
+              "target_id": "Gateway_1m6dgym",
+              "target_type": "dsl:gateway",
+              "rule_name": "ParallelGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 7,
+          "step_type": "message",
+          "element_id": "Message_1rqbibd",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_1rqbibd",
+              "source_type": "bpmn:message",
+              "target_id": "Message_1rqbibd",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_09o9s93",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1rqbibd",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_09o9s93",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1rqbibd",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1bkb191",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_1rqbibd",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 8,
+          "step_type": "businessrule",
+          "element_id": "Activity_1mj4mr7",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Activity_1mj4mr7",
+              "source_type": "bpmn:businessRuleTask",
+              "target_id": "Activity_1mj4mr7",
+              "target_type": "dsl:businessrule",
+              "rule_name": "BusinessRuleTask2BusinessRule",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 9,
+          "step_type": "gateway",
+          "element_id": "Gateway_0o8snyv",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Gateway_0o8snyv",
+              "source_type": "bpmn:exclusiveGateway",
+              "target_id": "Gateway_0o8snyv",
+              "target_type": "dsl:gateway",
+              "rule_name": "ExclusiveGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 10,
+          "step_type": "event",
+          "element_id": "EndEvent_110myff",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "EndEvent_110myff",
+              "source_type": "bpmn:endEvent",
+              "target_id": "EndEvent_110myff",
+              "target_type": "dsl:event",
+              "rule_name": "EndEvent2Event",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path_name": "Blood_analysis_auto_path_006",
+      "logical_path_file": "/root/code/ChainCollab/Experiment/new/exp3/cases/Blood_analysis/paths/Blood_analysis_auto_path_006/logical_path.json",
+      "expect": "accepted",
+      "total_steps": 12,
+      "traceable_steps": 12,
+      "untraceable_steps": [],
+      "path_traceability": 1.0,
+      "steps": [
+        {
+          "step_index": 0,
+          "step_type": "event",
+          "element_id": "StartEvent_0m7hz56",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "StartEvent_0m7hz56",
+              "source_type": "bpmn:startEvent",
+              "target_id": "StartEvent_0m7hz56",
+              "target_type": "dsl:event",
+              "rule_name": "StartEvent2Event",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 1,
+          "step_type": "gateway",
+          "element_id": "ParallelGateway_1pgjqtw",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "ParallelGateway_1pgjqtw",
+              "source_type": "bpmn:parallelGateway",
+              "target_id": "ParallelGateway_1pgjqtw",
+              "target_type": "dsl:gateway",
+              "rule_name": "ParallelGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 2,
+          "step_type": "message",
+          "element_id": "Message_0gswvmq",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0gswvmq",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0gswvmq",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_16uaf5s",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gswvmq",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_16uaf5s",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gswvmq",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_10lckh7",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0gswvmq",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 3,
+          "step_type": "message",
+          "element_id": "Message_1vzqd37",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_1vzqd37",
+              "source_type": "bpmn:message",
+              "target_id": "Message_1vzqd37",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0r5mbr1",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1vzqd37",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0r5mbr1",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1vzqd37",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1732eky",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_1vzqd37",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 4,
+          "step_type": "message",
+          "element_id": "Message_0wq8mc6",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0wq8mc6",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0vz56a0",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0vz56a0",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_131v44n",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 5,
+          "step_type": "message",
+          "element_id": "Message_13mh6mk",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_13mh6mk",
+              "source_type": "bpmn:message",
+              "target_id": "Message_13mh6mk",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0axr6ym",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_13mh6mk",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0axr6ym",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_13mh6mk",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_0rxioe7",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_13mh6mk",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 6,
+          "step_type": "gateway",
+          "element_id": "Gateway_1m6dgym",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Gateway_1m6dgym",
+              "source_type": "bpmn:parallelGateway",
+              "target_id": "Gateway_1m6dgym",
+              "target_type": "dsl:gateway",
+              "rule_name": "ParallelGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 7,
+          "step_type": "message",
+          "element_id": "Message_1rqbibd",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_1rqbibd",
+              "source_type": "bpmn:message",
+              "target_id": "Message_1rqbibd",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_09o9s93",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1rqbibd",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_09o9s93",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1rqbibd",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1bkb191",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_1rqbibd",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 8,
+          "step_type": "businessrule",
+          "element_id": "Activity_1mj4mr7",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Activity_1mj4mr7",
+              "source_type": "bpmn:businessRuleTask",
+              "target_id": "Activity_1mj4mr7",
+              "target_type": "dsl:businessrule",
+              "rule_name": "BusinessRuleTask2BusinessRule",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 9,
+          "step_type": "gateway",
+          "element_id": "Gateway_0o8snyv",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Gateway_0o8snyv",
+              "source_type": "bpmn:exclusiveGateway",
+              "target_id": "Gateway_0o8snyv",
+              "target_type": "dsl:gateway",
+              "rule_name": "ExclusiveGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 10,
+          "step_type": "message",
+          "element_id": "Message_0gd0z61",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0gd0z61",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0gd0z61",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_1ueexfr",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gd0z61",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_1ueexfr",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gd0z61",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1qmxi43",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0gd0z61",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 11,
+          "step_type": "event",
+          "element_id": "EndEvent_110myff",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "EndEvent_110myff",
+              "source_type": "bpmn:endEvent",
+              "target_id": "EndEvent_110myff",
+              "target_type": "dsl:event",
+              "rule_name": "EndEvent2Event",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path_name": "Blood_analysis_auto_path_007",
+      "logical_path_file": "/root/code/ChainCollab/Experiment/new/exp3/cases/Blood_analysis/paths/Blood_analysis_auto_path_007/logical_path.json",
+      "expect": "accepted",
+      "total_steps": 11,
+      "traceable_steps": 11,
+      "untraceable_steps": [],
+      "path_traceability": 1.0,
+      "steps": [
+        {
+          "step_index": 0,
+          "step_type": "event",
+          "element_id": "StartEvent_0m7hz56",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "StartEvent_0m7hz56",
+              "source_type": "bpmn:startEvent",
+              "target_id": "StartEvent_0m7hz56",
+              "target_type": "dsl:event",
+              "rule_name": "StartEvent2Event",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 1,
+          "step_type": "gateway",
+          "element_id": "ParallelGateway_1pgjqtw",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "ParallelGateway_1pgjqtw",
+              "source_type": "bpmn:parallelGateway",
+              "target_id": "ParallelGateway_1pgjqtw",
+              "target_type": "dsl:gateway",
+              "rule_name": "ParallelGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 2,
+          "step_type": "message",
+          "element_id": "Message_0wq8mc6",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0wq8mc6",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0vz56a0",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0vz56a0",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_131v44n",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 3,
+          "step_type": "message",
+          "element_id": "Message_0gswvmq",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0gswvmq",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0gswvmq",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_16uaf5s",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gswvmq",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_16uaf5s",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gswvmq",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_10lckh7",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0gswvmq",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 4,
+          "step_type": "message",
+          "element_id": "Message_13mh6mk",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_13mh6mk",
+              "source_type": "bpmn:message",
+              "target_id": "Message_13mh6mk",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0axr6ym",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_13mh6mk",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0axr6ym",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_13mh6mk",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_0rxioe7",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_13mh6mk",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 5,
+          "step_type": "message",
+          "element_id": "Message_1vzqd37",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_1vzqd37",
+              "source_type": "bpmn:message",
+              "target_id": "Message_1vzqd37",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0r5mbr1",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1vzqd37",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0r5mbr1",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1vzqd37",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1732eky",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_1vzqd37",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 6,
+          "step_type": "gateway",
+          "element_id": "Gateway_1m6dgym",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Gateway_1m6dgym",
+              "source_type": "bpmn:parallelGateway",
+              "target_id": "Gateway_1m6dgym",
+              "target_type": "dsl:gateway",
+              "rule_name": "ParallelGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 7,
+          "step_type": "message",
+          "element_id": "Message_1rqbibd",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_1rqbibd",
+              "source_type": "bpmn:message",
+              "target_id": "Message_1rqbibd",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_09o9s93",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1rqbibd",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_09o9s93",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1rqbibd",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1bkb191",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_1rqbibd",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 8,
+          "step_type": "businessrule",
+          "element_id": "Activity_1mj4mr7",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Activity_1mj4mr7",
+              "source_type": "bpmn:businessRuleTask",
+              "target_id": "Activity_1mj4mr7",
+              "target_type": "dsl:businessrule",
+              "rule_name": "BusinessRuleTask2BusinessRule",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 9,
+          "step_type": "gateway",
+          "element_id": "Gateway_0o8snyv",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Gateway_0o8snyv",
+              "source_type": "bpmn:exclusiveGateway",
+              "target_id": "Gateway_0o8snyv",
+              "target_type": "dsl:gateway",
+              "rule_name": "ExclusiveGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 10,
+          "step_type": "event",
+          "element_id": "EndEvent_110myff",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "EndEvent_110myff",
+              "source_type": "bpmn:endEvent",
+              "target_id": "EndEvent_110myff",
+              "target_type": "dsl:event",
+              "rule_name": "EndEvent2Event",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path_name": "Blood_analysis_auto_path_008",
+      "logical_path_file": "/root/code/ChainCollab/Experiment/new/exp3/cases/Blood_analysis/paths/Blood_analysis_auto_path_008/logical_path.json",
+      "expect": "accepted",
+      "total_steps": 12,
+      "traceable_steps": 12,
+      "untraceable_steps": [],
+      "path_traceability": 1.0,
+      "steps": [
+        {
+          "step_index": 0,
+          "step_type": "event",
+          "element_id": "StartEvent_0m7hz56",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "StartEvent_0m7hz56",
+              "source_type": "bpmn:startEvent",
+              "target_id": "StartEvent_0m7hz56",
+              "target_type": "dsl:event",
+              "rule_name": "StartEvent2Event",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 1,
+          "step_type": "gateway",
+          "element_id": "ParallelGateway_1pgjqtw",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "ParallelGateway_1pgjqtw",
+              "source_type": "bpmn:parallelGateway",
+              "target_id": "ParallelGateway_1pgjqtw",
+              "target_type": "dsl:gateway",
+              "rule_name": "ParallelGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 2,
+          "step_type": "message",
+          "element_id": "Message_0wq8mc6",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0wq8mc6",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0vz56a0",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0vz56a0",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_131v44n",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 3,
+          "step_type": "message",
+          "element_id": "Message_0gswvmq",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0gswvmq",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0gswvmq",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_16uaf5s",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gswvmq",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_16uaf5s",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gswvmq",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_10lckh7",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0gswvmq",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 4,
+          "step_type": "message",
+          "element_id": "Message_13mh6mk",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_13mh6mk",
+              "source_type": "bpmn:message",
+              "target_id": "Message_13mh6mk",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0axr6ym",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_13mh6mk",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0axr6ym",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_13mh6mk",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_0rxioe7",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_13mh6mk",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 5,
+          "step_type": "message",
+          "element_id": "Message_1vzqd37",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_1vzqd37",
+              "source_type": "bpmn:message",
+              "target_id": "Message_1vzqd37",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0r5mbr1",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1vzqd37",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0r5mbr1",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1vzqd37",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1732eky",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_1vzqd37",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 6,
+          "step_type": "gateway",
+          "element_id": "Gateway_1m6dgym",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Gateway_1m6dgym",
+              "source_type": "bpmn:parallelGateway",
+              "target_id": "Gateway_1m6dgym",
+              "target_type": "dsl:gateway",
+              "rule_name": "ParallelGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 7,
+          "step_type": "message",
+          "element_id": "Message_1rqbibd",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_1rqbibd",
+              "source_type": "bpmn:message",
+              "target_id": "Message_1rqbibd",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_09o9s93",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1rqbibd",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_09o9s93",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1rqbibd",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1bkb191",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_1rqbibd",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 8,
+          "step_type": "businessrule",
+          "element_id": "Activity_1mj4mr7",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Activity_1mj4mr7",
+              "source_type": "bpmn:businessRuleTask",
+              "target_id": "Activity_1mj4mr7",
+              "target_type": "dsl:businessrule",
+              "rule_name": "BusinessRuleTask2BusinessRule",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 9,
+          "step_type": "gateway",
+          "element_id": "Gateway_0o8snyv",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Gateway_0o8snyv",
+              "source_type": "bpmn:exclusiveGateway",
+              "target_id": "Gateway_0o8snyv",
+              "target_type": "dsl:gateway",
+              "rule_name": "ExclusiveGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 10,
+          "step_type": "message",
+          "element_id": "Message_0gd0z61",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0gd0z61",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0gd0z61",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_1ueexfr",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gd0z61",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_1ueexfr",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gd0z61",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1qmxi43",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0gd0z61",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 11,
+          "step_type": "event",
+          "element_id": "EndEvent_110myff",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "EndEvent_110myff",
+              "source_type": "bpmn:endEvent",
+              "target_id": "EndEvent_110myff",
+              "target_type": "dsl:event",
+              "rule_name": "EndEvent2Event",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path_name": "Blood_analysis_auto_path_009",
+      "logical_path_file": "/root/code/ChainCollab/Experiment/new/exp3/cases/Blood_analysis/paths/Blood_analysis_auto_path_009/logical_path.json",
+      "expect": "accepted",
+      "total_steps": 11,
+      "traceable_steps": 11,
+      "untraceable_steps": [],
+      "path_traceability": 1.0,
+      "steps": [
+        {
+          "step_index": 0,
+          "step_type": "event",
+          "element_id": "StartEvent_0m7hz56",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "StartEvent_0m7hz56",
+              "source_type": "bpmn:startEvent",
+              "target_id": "StartEvent_0m7hz56",
+              "target_type": "dsl:event",
+              "rule_name": "StartEvent2Event",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 1,
+          "step_type": "gateway",
+          "element_id": "ParallelGateway_1pgjqtw",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "ParallelGateway_1pgjqtw",
+              "source_type": "bpmn:parallelGateway",
+              "target_id": "ParallelGateway_1pgjqtw",
+              "target_type": "dsl:gateway",
+              "rule_name": "ParallelGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 2,
+          "step_type": "message",
+          "element_id": "Message_0wq8mc6",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0wq8mc6",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0vz56a0",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0vz56a0",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_131v44n",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 3,
+          "step_type": "message",
+          "element_id": "Message_0gswvmq",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0gswvmq",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0gswvmq",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_16uaf5s",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gswvmq",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_16uaf5s",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gswvmq",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_10lckh7",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0gswvmq",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 4,
+          "step_type": "message",
+          "element_id": "Message_1vzqd37",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_1vzqd37",
+              "source_type": "bpmn:message",
+              "target_id": "Message_1vzqd37",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0r5mbr1",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1vzqd37",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0r5mbr1",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1vzqd37",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1732eky",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_1vzqd37",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 5,
+          "step_type": "message",
+          "element_id": "Message_13mh6mk",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_13mh6mk",
+              "source_type": "bpmn:message",
+              "target_id": "Message_13mh6mk",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0axr6ym",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_13mh6mk",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0axr6ym",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_13mh6mk",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_0rxioe7",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_13mh6mk",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 6,
+          "step_type": "gateway",
+          "element_id": "Gateway_1m6dgym",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Gateway_1m6dgym",
+              "source_type": "bpmn:parallelGateway",
+              "target_id": "Gateway_1m6dgym",
+              "target_type": "dsl:gateway",
+              "rule_name": "ParallelGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 7,
+          "step_type": "message",
+          "element_id": "Message_1rqbibd",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_1rqbibd",
+              "source_type": "bpmn:message",
+              "target_id": "Message_1rqbibd",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_09o9s93",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1rqbibd",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_09o9s93",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1rqbibd",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1bkb191",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_1rqbibd",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 8,
+          "step_type": "businessrule",
+          "element_id": "Activity_1mj4mr7",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Activity_1mj4mr7",
+              "source_type": "bpmn:businessRuleTask",
+              "target_id": "Activity_1mj4mr7",
+              "target_type": "dsl:businessrule",
+              "rule_name": "BusinessRuleTask2BusinessRule",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 9,
+          "step_type": "gateway",
+          "element_id": "Gateway_0o8snyv",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Gateway_0o8snyv",
+              "source_type": "bpmn:exclusiveGateway",
+              "target_id": "Gateway_0o8snyv",
+              "target_type": "dsl:gateway",
+              "rule_name": "ExclusiveGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 10,
+          "step_type": "event",
+          "element_id": "EndEvent_110myff",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "EndEvent_110myff",
+              "source_type": "bpmn:endEvent",
+              "target_id": "EndEvent_110myff",
+              "target_type": "dsl:event",
+              "rule_name": "EndEvent2Event",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path_name": "Blood_analysis_auto_path_010",
+      "logical_path_file": "/root/code/ChainCollab/Experiment/new/exp3/cases/Blood_analysis/paths/Blood_analysis_auto_path_010/logical_path.json",
+      "expect": "accepted",
+      "total_steps": 12,
+      "traceable_steps": 12,
+      "untraceable_steps": [],
+      "path_traceability": 1.0,
+      "steps": [
+        {
+          "step_index": 0,
+          "step_type": "event",
+          "element_id": "StartEvent_0m7hz56",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "StartEvent_0m7hz56",
+              "source_type": "bpmn:startEvent",
+              "target_id": "StartEvent_0m7hz56",
+              "target_type": "dsl:event",
+              "rule_name": "StartEvent2Event",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 1,
+          "step_type": "gateway",
+          "element_id": "ParallelGateway_1pgjqtw",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "ParallelGateway_1pgjqtw",
+              "source_type": "bpmn:parallelGateway",
+              "target_id": "ParallelGateway_1pgjqtw",
+              "target_type": "dsl:gateway",
+              "rule_name": "ParallelGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 2,
+          "step_type": "message",
+          "element_id": "Message_0wq8mc6",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0wq8mc6",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0vz56a0",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0vz56a0",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_131v44n",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 3,
+          "step_type": "message",
+          "element_id": "Message_0gswvmq",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0gswvmq",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0gswvmq",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_16uaf5s",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gswvmq",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_16uaf5s",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gswvmq",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_10lckh7",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0gswvmq",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 4,
+          "step_type": "message",
+          "element_id": "Message_1vzqd37",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_1vzqd37",
+              "source_type": "bpmn:message",
+              "target_id": "Message_1vzqd37",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0r5mbr1",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1vzqd37",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0r5mbr1",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1vzqd37",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1732eky",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_1vzqd37",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 5,
+          "step_type": "message",
+          "element_id": "Message_13mh6mk",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_13mh6mk",
+              "source_type": "bpmn:message",
+              "target_id": "Message_13mh6mk",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0axr6ym",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_13mh6mk",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0axr6ym",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_13mh6mk",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_0rxioe7",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_13mh6mk",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 6,
+          "step_type": "gateway",
+          "element_id": "Gateway_1m6dgym",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Gateway_1m6dgym",
+              "source_type": "bpmn:parallelGateway",
+              "target_id": "Gateway_1m6dgym",
+              "target_type": "dsl:gateway",
+              "rule_name": "ParallelGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 7,
+          "step_type": "message",
+          "element_id": "Message_1rqbibd",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_1rqbibd",
+              "source_type": "bpmn:message",
+              "target_id": "Message_1rqbibd",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_09o9s93",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1rqbibd",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_09o9s93",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1rqbibd",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1bkb191",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_1rqbibd",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 8,
+          "step_type": "businessrule",
+          "element_id": "Activity_1mj4mr7",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Activity_1mj4mr7",
+              "source_type": "bpmn:businessRuleTask",
+              "target_id": "Activity_1mj4mr7",
+              "target_type": "dsl:businessrule",
+              "rule_name": "BusinessRuleTask2BusinessRule",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 9,
+          "step_type": "gateway",
+          "element_id": "Gateway_0o8snyv",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Gateway_0o8snyv",
+              "source_type": "bpmn:exclusiveGateway",
+              "target_id": "Gateway_0o8snyv",
+              "target_type": "dsl:gateway",
+              "rule_name": "ExclusiveGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 10,
+          "step_type": "message",
+          "element_id": "Message_0gd0z61",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0gd0z61",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0gd0z61",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_1ueexfr",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gd0z61",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_1ueexfr",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gd0z61",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1qmxi43",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0gd0z61",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 11,
+          "step_type": "event",
+          "element_id": "EndEvent_110myff",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "EndEvent_110myff",
+              "source_type": "bpmn:endEvent",
+              "target_id": "EndEvent_110myff",
+              "target_type": "dsl:event",
+              "rule_name": "EndEvent2Event",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path_name": "Blood_analysis_auto_path_011",
+      "logical_path_file": "/root/code/ChainCollab/Experiment/new/exp3/cases/Blood_analysis/paths/Blood_analysis_auto_path_011/logical_path.json",
+      "expect": "accepted",
+      "total_steps": 11,
+      "traceable_steps": 11,
+      "untraceable_steps": [],
+      "path_traceability": 1.0,
+      "steps": [
+        {
+          "step_index": 0,
+          "step_type": "event",
+          "element_id": "StartEvent_0m7hz56",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "StartEvent_0m7hz56",
+              "source_type": "bpmn:startEvent",
+              "target_id": "StartEvent_0m7hz56",
+              "target_type": "dsl:event",
+              "rule_name": "StartEvent2Event",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 1,
+          "step_type": "gateway",
+          "element_id": "ParallelGateway_1pgjqtw",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "ParallelGateway_1pgjqtw",
+              "source_type": "bpmn:parallelGateway",
+              "target_id": "ParallelGateway_1pgjqtw",
+              "target_type": "dsl:gateway",
+              "rule_name": "ParallelGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 2,
+          "step_type": "message",
+          "element_id": "Message_0wq8mc6",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0wq8mc6",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0vz56a0",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0vz56a0",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_131v44n",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 3,
+          "step_type": "message",
+          "element_id": "Message_13mh6mk",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_13mh6mk",
+              "source_type": "bpmn:message",
+              "target_id": "Message_13mh6mk",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0axr6ym",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_13mh6mk",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0axr6ym",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_13mh6mk",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_0rxioe7",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_13mh6mk",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 4,
+          "step_type": "message",
+          "element_id": "Message_0gswvmq",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0gswvmq",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0gswvmq",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_16uaf5s",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gswvmq",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_16uaf5s",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gswvmq",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_10lckh7",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0gswvmq",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 5,
+          "step_type": "message",
+          "element_id": "Message_1vzqd37",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_1vzqd37",
+              "source_type": "bpmn:message",
+              "target_id": "Message_1vzqd37",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0r5mbr1",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1vzqd37",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0r5mbr1",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1vzqd37",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1732eky",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_1vzqd37",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 6,
+          "step_type": "gateway",
+          "element_id": "Gateway_1m6dgym",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Gateway_1m6dgym",
+              "source_type": "bpmn:parallelGateway",
+              "target_id": "Gateway_1m6dgym",
+              "target_type": "dsl:gateway",
+              "rule_name": "ParallelGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 7,
+          "step_type": "message",
+          "element_id": "Message_1rqbibd",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_1rqbibd",
+              "source_type": "bpmn:message",
+              "target_id": "Message_1rqbibd",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_09o9s93",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1rqbibd",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_09o9s93",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1rqbibd",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1bkb191",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_1rqbibd",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 8,
+          "step_type": "businessrule",
+          "element_id": "Activity_1mj4mr7",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Activity_1mj4mr7",
+              "source_type": "bpmn:businessRuleTask",
+              "target_id": "Activity_1mj4mr7",
+              "target_type": "dsl:businessrule",
+              "rule_name": "BusinessRuleTask2BusinessRule",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 9,
+          "step_type": "gateway",
+          "element_id": "Gateway_0o8snyv",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Gateway_0o8snyv",
+              "source_type": "bpmn:exclusiveGateway",
+              "target_id": "Gateway_0o8snyv",
+              "target_type": "dsl:gateway",
+              "rule_name": "ExclusiveGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 10,
+          "step_type": "event",
+          "element_id": "EndEvent_110myff",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "EndEvent_110myff",
+              "source_type": "bpmn:endEvent",
+              "target_id": "EndEvent_110myff",
+              "target_type": "dsl:event",
+              "rule_name": "EndEvent2Event",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path_name": "Blood_analysis_auto_path_012",
+      "logical_path_file": "/root/code/ChainCollab/Experiment/new/exp3/cases/Blood_analysis/paths/Blood_analysis_auto_path_012/logical_path.json",
+      "expect": "accepted",
+      "total_steps": 12,
+      "traceable_steps": 12,
+      "untraceable_steps": [],
+      "path_traceability": 1.0,
+      "steps": [
+        {
+          "step_index": 0,
+          "step_type": "event",
+          "element_id": "StartEvent_0m7hz56",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "StartEvent_0m7hz56",
+              "source_type": "bpmn:startEvent",
+              "target_id": "StartEvent_0m7hz56",
+              "target_type": "dsl:event",
+              "rule_name": "StartEvent2Event",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 1,
+          "step_type": "gateway",
+          "element_id": "ParallelGateway_1pgjqtw",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "ParallelGateway_1pgjqtw",
+              "source_type": "bpmn:parallelGateway",
+              "target_id": "ParallelGateway_1pgjqtw",
+              "target_type": "dsl:gateway",
+              "rule_name": "ParallelGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 2,
+          "step_type": "message",
+          "element_id": "Message_0wq8mc6",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0wq8mc6",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0vz56a0",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0vz56a0",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_131v44n",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0wq8mc6",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 3,
+          "step_type": "message",
+          "element_id": "Message_13mh6mk",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_13mh6mk",
+              "source_type": "bpmn:message",
+              "target_id": "Message_13mh6mk",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0axr6ym",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_13mh6mk",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0axr6ym",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_13mh6mk",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_0rxioe7",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_13mh6mk",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 4,
+          "step_type": "message",
+          "element_id": "Message_0gswvmq",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0gswvmq",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0gswvmq",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_16uaf5s",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gswvmq",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_16uaf5s",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gswvmq",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_10lckh7",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0gswvmq",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 5,
+          "step_type": "message",
+          "element_id": "Message_1vzqd37",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_1vzqd37",
+              "source_type": "bpmn:message",
+              "target_id": "Message_1vzqd37",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_0r5mbr1",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1vzqd37",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_0r5mbr1",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1vzqd37",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1732eky",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_1vzqd37",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 6,
+          "step_type": "gateway",
+          "element_id": "Gateway_1m6dgym",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Gateway_1m6dgym",
+              "source_type": "bpmn:parallelGateway",
+              "target_id": "Gateway_1m6dgym",
+              "target_type": "dsl:gateway",
+              "rule_name": "ParallelGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 7,
+          "step_type": "message",
+          "element_id": "Message_1rqbibd",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_1rqbibd",
+              "source_type": "bpmn:message",
+              "target_id": "Message_1rqbibd",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_09o9s93",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1rqbibd",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_09o9s93",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_1rqbibd",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1bkb191",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_1rqbibd",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 8,
+          "step_type": "businessrule",
+          "element_id": "Activity_1mj4mr7",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Activity_1mj4mr7",
+              "source_type": "bpmn:businessRuleTask",
+              "target_id": "Activity_1mj4mr7",
+              "target_type": "dsl:businessrule",
+              "rule_name": "BusinessRuleTask2BusinessRule",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 9,
+          "step_type": "gateway",
+          "element_id": "Gateway_0o8snyv",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Gateway_0o8snyv",
+              "source_type": "bpmn:exclusiveGateway",
+              "target_id": "Gateway_0o8snyv",
+              "target_type": "dsl:gateway",
+              "rule_name": "ExclusiveGateway2Gateway",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        },
+        {
+          "step_index": 10,
+          "step_type": "message",
+          "element_id": "Message_0gd0z61",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "Message_0gd0z61",
+              "source_type": "bpmn:message",
+              "target_id": "Message_0gd0z61",
+              "target_type": "dsl:message",
+              "rule_name": "MessageRef2Message",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            },
+            {
+              "source_id": "MessageFlow_1ueexfr",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gd0z61",
+              "target_type": "dsl:message",
+              "rule_name": "MessageFlowEndpoints2MessageParticipants",
+              "status": "matched",
+              "match_method": "messageRef",
+              "trace_section": "relation_links"
+            },
+            {
+              "source_id": "MessageFlow_1ueexfr",
+              "source_type": "bpmn:messageFlow",
+              "target_id": "Message_0gd0z61",
+              "target_type": "represented",
+              "rule_name": "MessageFlowNoDirectNode",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            },
+            {
+              "source_id": "ChoreographyTask_1qmxi43",
+              "source_type": "bpmn:choreographyTask",
+              "target_id": "Message_0gd0z61",
+              "target_type": "represented",
+              "rule_name": "ChoreographyTaskExpansion",
+              "status": "matched",
+              "match_method": "represented_by",
+              "trace_section": "represented_sources"
+            }
+          ]
+        },
+        {
+          "step_index": 11,
+          "step_type": "event",
+          "element_id": "EndEvent_110myff",
+          "element_field": "step.element",
+          "exists_in_dsl_tag": true,
+          "traceable_to_bpmn": true,
+          "trace_links": [
+            {
+              "source_id": "EndEvent_110myff",
+              "source_type": "bpmn:endEvent",
+              "target_id": "EndEvent_110myff",
+              "target_type": "dsl:event",
+              "rule_name": "EndEvent2Event",
+              "status": "matched",
+              "match_method": "same_id",
+              "trace_section": "links"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

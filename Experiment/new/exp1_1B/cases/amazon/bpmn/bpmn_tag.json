@@ -1,0 +1,1563 @@
+{
+  "tag_version": "0.1.0",
+  "case_name": "amazon",
+  "model_type": "bpmn",
+  "source_file": "/root/code/ChainCollab/Experiment/BPMNwithDMNcase/amazon.bpmn",
+  "extractor": {
+    "name": "extract_bpmn_structure",
+    "version": "0.1.0",
+    "implementation_basis": [
+      "src/newTranslator/generator/parser/choreography_parser/parser.py",
+      "src/newTranslator/generator/parser/choreography_parser/elements.py"
+    ]
+  },
+  "nodes": [
+    {
+      "id": "Participant_1p9owwo",
+      "type": "bpmn:participant",
+      "name": "amazon support center",
+      "attrs": {
+        "is_multi": false,
+        "multi_minimum": 0,
+        "multi_maximum": 0
+      }
+    },
+    {
+      "id": "Participant_12df78t",
+      "type": "bpmn:participant",
+      "name": "customer",
+      "attrs": {
+        "is_multi": false,
+        "multi_minimum": 0,
+        "multi_maximum": 0
+      }
+    },
+    {
+      "id": "Message_1b1qlzd",
+      "type": "bpmn:message",
+      "name": "Notification of application failure",
+      "attrs": {
+        "documentation": "{\"properties\":{\"reason\":{\"type\":\"string\",\"description\":\"\"},\"result\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"reason\",\"result\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_1b1qlzd__property__reason",
+      "type": "bpmn:messageProperty",
+      "name": "reason",
+      "attrs": {
+        "name": "reason",
+        "global_name": "Reason",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_1b1qlzd",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_1b1qlzd__property__result",
+      "type": "bpmn:messageProperty",
+      "name": "result",
+      "attrs": {
+        "name": "result",
+        "global_name": "Result",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_1b1qlzd",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_01jq2zl",
+      "type": "bpmn:message",
+      "name": "send Deduction amount",
+      "attrs": {
+        "documentation": "{\"properties\":{\"amount\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"amount\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_01jq2zl__property__amount",
+      "type": "bpmn:messageProperty",
+      "name": "amount",
+      "attrs": {
+        "name": "amount",
+        "global_name": "Amount",
+        "type": "number",
+        "dsl_type": "int",
+        "description": "",
+        "owner": "Message_01jq2zl",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_12n6jjk",
+      "type": "bpmn:message",
+      "name": "submit form",
+      "attrs": {
+        "documentation": "{\"properties\":{\"requestType\":{\"type\":\"string\",\"description\":\"\"},\"duration\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"requestType\",\"duration\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_12n6jjk__property__requestType",
+      "type": "bpmn:messageProperty",
+      "name": "requestType",
+      "attrs": {
+        "name": "requestType",
+        "global_name": "RequestType",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_12n6jjk",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_12n6jjk__property__duration",
+      "type": "bpmn:messageProperty",
+      "name": "duration",
+      "attrs": {
+        "name": "duration",
+        "global_name": "Duration",
+        "type": "number",
+        "dsl_type": "int",
+        "description": "",
+        "owner": "Message_12n6jjk",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_076ulzs",
+      "type": "bpmn:message",
+      "name": "details1",
+      "attrs": {
+        "documentation": "{\"properties\":{\"time\":{\"type\":\"string\",\"description\":\"\"},\"description\":{\"type\":\"string\",\"description\":\"\"},\"EC2 resource ID\":{\"type\":\"string\",\"description\":\"\"},\"logs\":{\"type\":\"string\",\"description\":\"\"},\"other information\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"time\",\"description\",\"EC2 resource ID\",\"logs\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_076ulzs__property__time",
+      "type": "bpmn:messageProperty",
+      "name": "time",
+      "attrs": {
+        "name": "time",
+        "global_name": "Time",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_076ulzs",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_076ulzs__property__description",
+      "type": "bpmn:messageProperty",
+      "name": "description",
+      "attrs": {
+        "name": "description",
+        "global_name": "Description",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_076ulzs",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_076ulzs__property__EC2 resource ID",
+      "type": "bpmn:messageProperty",
+      "name": "EC2 resource ID",
+      "attrs": {
+        "name": "EC2 resource ID",
+        "global_name": "EC2_resource_ID",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_076ulzs",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_076ulzs__property__logs",
+      "type": "bpmn:messageProperty",
+      "name": "logs",
+      "attrs": {
+        "name": "logs",
+        "global_name": "Logs",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_076ulzs",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_076ulzs__property__other information",
+      "type": "bpmn:messageProperty",
+      "name": "other information",
+      "attrs": {
+        "name": "other information",
+        "global_name": "Other_information",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_076ulzs",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_068kmzv",
+      "type": "bpmn:message",
+      "name": "details2",
+      "attrs": {
+        "documentation": "{\"properties\":{\"time\":{\"type\":\"string\",\"description\":\"\"},\"instance ID\":{\"type\":\"string\",\"description\":\"\"},\"logs\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"time\",\"instance ID\",\"logs\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_068kmzv__property__time",
+      "type": "bpmn:messageProperty",
+      "name": "time",
+      "attrs": {
+        "name": "time",
+        "global_name": "Time",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_068kmzv",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_068kmzv__property__instance ID",
+      "type": "bpmn:messageProperty",
+      "name": "instance ID",
+      "attrs": {
+        "name": "instance ID",
+        "global_name": "Instance_ID",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_068kmzv",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_068kmzv__property__logs",
+      "type": "bpmn:messageProperty",
+      "name": "logs",
+      "attrs": {
+        "name": "logs",
+        "global_name": "Logs",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_068kmzv",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_09krt7c",
+      "type": "bpmn:message",
+      "name": "create questions",
+      "attrs": {
+        "documentation": "{\"properties\":{\"question name\":{\"type\":\"string\",\"description\":\"\"},\"description\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"question name\",\"description\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_09krt7c__property__question name",
+      "type": "bpmn:messageProperty",
+      "name": "question name",
+      "attrs": {
+        "name": "question name",
+        "global_name": "Question_name",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_09krt7c",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_09krt7c__property__description",
+      "type": "bpmn:messageProperty",
+      "name": "description",
+      "attrs": {
+        "name": "description",
+        "global_name": "Description",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_09krt7c",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_1bhhp1n",
+      "type": "bpmn:message",
+      "name": "Regional level application",
+      "attrs": {
+        "documentation": "{\"properties\":{\"serviceType\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"serviceType\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_1bhhp1n__property__serviceType",
+      "type": "bpmn:messageProperty",
+      "name": "serviceType",
+      "attrs": {
+        "name": "serviceType",
+        "global_name": "ServiceType",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_1bhhp1n",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_0ywghlt",
+      "type": "bpmn:message",
+      "name": "instance level application",
+      "attrs": {
+        "documentation": "{\"properties\":{\"serviceType\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"serviceType\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_0ywghlt__property__serviceType",
+      "type": "bpmn:messageProperty",
+      "name": "serviceType",
+      "attrs": {
+        "name": "serviceType",
+        "global_name": "ServiceType",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "",
+        "owner": "Message_0ywghlt",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Event_0ojehz6",
+      "type": "bpmn:startEvent",
+      "name": "",
+      "attrs": {
+        "incoming": [],
+        "outgoing": [
+          "Flow_0bbli9z"
+        ]
+      }
+    },
+    {
+      "id": "Event_0ci2gl8",
+      "type": "bpmn:endEvent",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "Flow_1niv4wa"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Event_0dyp0ut",
+      "type": "bpmn:endEvent",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "Flow_092fqzb"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Gateway_0auc3he",
+      "type": "bpmn:exclusiveGateway",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "Flow_0ezj4h3",
+          "Flow_1qyvyn9"
+        ],
+        "outgoing": [
+          "Flow_0rawiic"
+        ]
+      }
+    },
+    {
+      "id": "Gateway_0ivv4vg",
+      "type": "bpmn:exclusiveGateway",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "Flow_1m6mf5r"
+        ],
+        "outgoing": [
+          "Flow_06m03vj",
+          "Flow_17hhdvo"
+        ]
+      }
+    },
+    {
+      "id": "Gateway_0jgq0a6",
+      "type": "bpmn:eventBasedGateway",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "Flow_0dtlny7"
+        ],
+        "outgoing": [
+          "Flow_1kx9uv2",
+          "Flow_0td67i7"
+        ]
+      }
+    },
+    {
+      "id": "Activity_0tya4bp",
+      "type": "bpmn:businessRuleTask",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "Flow_1bh56yy"
+        ],
+        "outgoing": [
+          "Flow_1m6mf5r"
+        ],
+        "documentation": "{\"inputs\":[{\"name\":\"duration\",\"type\":\"number\",\"description\":\"\"},{\"name\":\"requestType\",\"type\":\"string\",\"description\":\"\"}],\"outputs\":[{\"name\":\"confirm\",\"type\":\"boolean\",\"description\":\"\"}]}"
+      }
+    },
+    {
+      "id": "Activity_0tya4bp__input__duration",
+      "type": "bpmn:businessRuleParameter",
+      "name": "duration",
+      "attrs": {
+        "name": "duration",
+        "global_name": "Duration",
+        "direction": "input",
+        "type": "number",
+        "dsl_type": "int",
+        "owner": "Activity_0tya4bp"
+      }
+    },
+    {
+      "id": "Activity_0tya4bp__input__requestType",
+      "type": "bpmn:businessRuleParameter",
+      "name": "requestType",
+      "attrs": {
+        "name": "requestType",
+        "global_name": "RequestType",
+        "direction": "input",
+        "type": "string",
+        "dsl_type": "string",
+        "owner": "Activity_0tya4bp"
+      }
+    },
+    {
+      "id": "Activity_0tya4bp__output__confirm",
+      "type": "bpmn:businessRuleParameter",
+      "name": "confirm",
+      "attrs": {
+        "name": "confirm",
+        "global_name": "Confirm",
+        "direction": "output",
+        "type": "boolean",
+        "dsl_type": "bool",
+        "owner": "Activity_0tya4bp"
+      }
+    },
+    {
+      "id": "ChoreographyTask_15hdy0f",
+      "type": "bpmn:choreographyTask",
+      "name": "submit question",
+      "attrs": {
+        "incoming": "Flow_0bbli9z",
+        "outgoing": "Flow_0dtlny7",
+        "participants": [
+          "Participant_12df78t",
+          "Participant_1p9owwo"
+        ],
+        "initiatingParticipantRef": "Participant_12df78t",
+        "messageFlowRefs": [
+          "MessageFlow_1lf21qb"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_0qvin75",
+      "type": "bpmn:choreographyTask",
+      "name": "instance level  application",
+      "attrs": {
+        "incoming": "Flow_1kx9uv2",
+        "outgoing": "Flow_1mhr2rd",
+        "participants": [
+          "Participant_12df78t",
+          "Participant_1p9owwo"
+        ],
+        "initiatingParticipantRef": "Participant_12df78t",
+        "messageFlowRefs": [
+          "MessageFlow_1urma6e"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_0qv0nys",
+      "type": "bpmn:choreographyTask",
+      "name": "Regional level application",
+      "attrs": {
+        "incoming": "Flow_0td67i7",
+        "outgoing": "Flow_05fmni9",
+        "participants": [
+          "Participant_12df78t",
+          "Participant_1p9owwo"
+        ],
+        "initiatingParticipantRef": "Participant_12df78t",
+        "messageFlowRefs": [
+          "MessageFlow_0khz8el"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_1xe5w82",
+      "type": "bpmn:choreographyTask",
+      "name": "level1 details",
+      "attrs": {
+        "incoming": "Flow_1mhr2rd",
+        "outgoing": "Flow_0ezj4h3",
+        "participants": [
+          "Participant_12df78t",
+          "Participant_1p9owwo"
+        ],
+        "initiatingParticipantRef": "Participant_12df78t",
+        "messageFlowRefs": [
+          "MessageFlow_1nqrrp6"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_08v8azc",
+      "type": "bpmn:choreographyTask",
+      "name": "level2 detail",
+      "attrs": {
+        "incoming": "Flow_05fmni9",
+        "outgoing": "Flow_1qyvyn9",
+        "participants": [
+          "Participant_12df78t",
+          "Participant_1p9owwo"
+        ],
+        "initiatingParticipantRef": "Participant_12df78t",
+        "messageFlowRefs": [
+          "MessageFlow_1haf3pl"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_14x309o",
+      "type": "bpmn:choreographyTask",
+      "name": "submit",
+      "attrs": {
+        "incoming": "Flow_0rawiic",
+        "outgoing": "Flow_1bh56yy",
+        "participants": [
+          "Participant_12df78t",
+          "Participant_1p9owwo"
+        ],
+        "initiatingParticipantRef": "Participant_12df78t",
+        "messageFlowRefs": [
+          "MessageFlow_05bvd7t"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_0wtdaho",
+      "type": "bpmn:choreographyTask",
+      "name": "fail",
+      "attrs": {
+        "incoming": "Flow_06m03vj",
+        "outgoing": "Flow_092fqzb",
+        "participants": [
+          "Participant_1p9owwo",
+          "Participant_12df78t"
+        ],
+        "initiatingParticipantRef": "Participant_1p9owwo",
+        "messageFlowRefs": [
+          "MessageFlow_13hle13"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_09o0tby",
+      "type": "bpmn:choreographyTask",
+      "name": "send",
+      "attrs": {
+        "incoming": "Flow_17hhdvo",
+        "outgoing": "Flow_1niv4wa",
+        "participants": [
+          "Participant_1p9owwo",
+          "Participant_12df78t"
+        ],
+        "initiatingParticipantRef": "Participant_1p9owwo",
+        "messageFlowRefs": [
+          "MessageFlow_191vfqw"
+        ]
+      }
+    },
+    {
+      "id": "Flow_06m03vj__condition__Confirm",
+      "type": "bpmn:sequenceConditionVariable",
+      "name": "confirm",
+      "attrs": {
+        "name": "confirm",
+        "relation": "==",
+        "value": "false",
+        "global_name": "Confirm",
+        "dsl_type": "string",
+        "sequenceFlow": "Flow_06m03vj"
+      }
+    },
+    {
+      "id": "Flow_17hhdvo__condition__Confirm",
+      "type": "bpmn:sequenceConditionVariable",
+      "name": "confirm",
+      "attrs": {
+        "name": "confirm",
+        "relation": "==",
+        "value": "true",
+        "global_name": "Confirm",
+        "dsl_type": "string",
+        "sequenceFlow": "Flow_17hhdvo"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "MessageFlow_13hle13",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_1p9owwo",
+      "target": "Participant_12df78t",
+      "attrs": {
+        "message": "Message_1b1qlzd",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_13hle13__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_13hle13",
+      "target": "Message_1b1qlzd",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_191vfqw",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_1p9owwo",
+      "target": "Participant_12df78t",
+      "attrs": {
+        "message": "Message_01jq2zl",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_191vfqw__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_191vfqw",
+      "target": "Message_01jq2zl",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_05bvd7t",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_12df78t",
+      "target": "Participant_1p9owwo",
+      "attrs": {
+        "message": "Message_12n6jjk",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_05bvd7t__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_05bvd7t",
+      "target": "Message_12n6jjk",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_1haf3pl",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_12df78t",
+      "target": "Participant_1p9owwo",
+      "attrs": {
+        "message": "Message_076ulzs",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_1haf3pl__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_1haf3pl",
+      "target": "Message_076ulzs",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_1nqrrp6",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_12df78t",
+      "target": "Participant_1p9owwo",
+      "attrs": {
+        "message": "Message_068kmzv",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_1nqrrp6__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_1nqrrp6",
+      "target": "Message_068kmzv",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_1lf21qb",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_12df78t",
+      "target": "Participant_1p9owwo",
+      "attrs": {
+        "message": "Message_09krt7c",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_1lf21qb__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_1lf21qb",
+      "target": "Message_09krt7c",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_0khz8el",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_12df78t",
+      "target": "Participant_1p9owwo",
+      "attrs": {
+        "message": "Message_1bhhp1n",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_0khz8el__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_0khz8el",
+      "target": "Message_1bhhp1n",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_1urma6e",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_12df78t",
+      "target": "Participant_1p9owwo",
+      "attrs": {
+        "message": "Message_0ywghlt",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_1urma6e__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_1urma6e",
+      "target": "Message_0ywghlt",
+      "attrs": {}
+    },
+    {
+      "id": "Message_1b1qlzd__documentationProperty__reason",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_1b1qlzd",
+      "target": "Message_1b1qlzd__property__reason",
+      "attrs": {}
+    },
+    {
+      "id": "Message_1b1qlzd__documentationProperty__result",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_1b1qlzd",
+      "target": "Message_1b1qlzd__property__result",
+      "attrs": {}
+    },
+    {
+      "id": "Message_01jq2zl__documentationProperty__amount",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_01jq2zl",
+      "target": "Message_01jq2zl__property__amount",
+      "attrs": {}
+    },
+    {
+      "id": "Message_12n6jjk__documentationProperty__requestType",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_12n6jjk",
+      "target": "Message_12n6jjk__property__requestType",
+      "attrs": {}
+    },
+    {
+      "id": "Message_12n6jjk__documentationProperty__duration",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_12n6jjk",
+      "target": "Message_12n6jjk__property__duration",
+      "attrs": {}
+    },
+    {
+      "id": "Message_076ulzs__documentationProperty__time",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_076ulzs",
+      "target": "Message_076ulzs__property__time",
+      "attrs": {}
+    },
+    {
+      "id": "Message_076ulzs__documentationProperty__description",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_076ulzs",
+      "target": "Message_076ulzs__property__description",
+      "attrs": {}
+    },
+    {
+      "id": "Message_076ulzs__documentationProperty__EC2 resource ID",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_076ulzs",
+      "target": "Message_076ulzs__property__EC2 resource ID",
+      "attrs": {}
+    },
+    {
+      "id": "Message_076ulzs__documentationProperty__logs",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_076ulzs",
+      "target": "Message_076ulzs__property__logs",
+      "attrs": {}
+    },
+    {
+      "id": "Message_076ulzs__documentationProperty__other information",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_076ulzs",
+      "target": "Message_076ulzs__property__other information",
+      "attrs": {}
+    },
+    {
+      "id": "Message_068kmzv__documentationProperty__time",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_068kmzv",
+      "target": "Message_068kmzv__property__time",
+      "attrs": {}
+    },
+    {
+      "id": "Message_068kmzv__documentationProperty__instance ID",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_068kmzv",
+      "target": "Message_068kmzv__property__instance ID",
+      "attrs": {}
+    },
+    {
+      "id": "Message_068kmzv__documentationProperty__logs",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_068kmzv",
+      "target": "Message_068kmzv__property__logs",
+      "attrs": {}
+    },
+    {
+      "id": "Message_09krt7c__documentationProperty__question name",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_09krt7c",
+      "target": "Message_09krt7c__property__question name",
+      "attrs": {}
+    },
+    {
+      "id": "Message_09krt7c__documentationProperty__description",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_09krt7c",
+      "target": "Message_09krt7c__property__description",
+      "attrs": {}
+    },
+    {
+      "id": "Message_1bhhp1n__documentationProperty__serviceType",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_1bhhp1n",
+      "target": "Message_1bhhp1n__property__serviceType",
+      "attrs": {}
+    },
+    {
+      "id": "Message_0ywghlt__documentationProperty__serviceType",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_0ywghlt",
+      "target": "Message_0ywghlt__property__serviceType",
+      "attrs": {}
+    },
+    {
+      "id": "Activity_0tya4bp__documentationInput__duration",
+      "type": "bpmn:documentationInput",
+      "source": "Activity_0tya4bp",
+      "target": "Activity_0tya4bp__input__duration",
+      "attrs": {}
+    },
+    {
+      "id": "Activity_0tya4bp__documentationInput__requestType",
+      "type": "bpmn:documentationInput",
+      "source": "Activity_0tya4bp",
+      "target": "Activity_0tya4bp__input__requestType",
+      "attrs": {}
+    },
+    {
+      "id": "Activity_0tya4bp__documentationOutput__confirm",
+      "type": "bpmn:documentationOutput",
+      "source": "Activity_0tya4bp",
+      "target": "Activity_0tya4bp__output__confirm",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_15hdy0f__participantRef__Participant_12df78t",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_15hdy0f",
+      "target": "Participant_12df78t",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_15hdy0f__participantRef__Participant_1p9owwo",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_15hdy0f",
+      "target": "Participant_1p9owwo",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_15hdy0f__initiatingParticipant__Participant_12df78t",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_15hdy0f",
+      "target": "Participant_12df78t",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_15hdy0f__messageFlowRef__MessageFlow_1lf21qb",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_15hdy0f",
+      "target": "MessageFlow_1lf21qb",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0qvin75__participantRef__Participant_12df78t",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_0qvin75",
+      "target": "Participant_12df78t",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0qvin75__participantRef__Participant_1p9owwo",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_0qvin75",
+      "target": "Participant_1p9owwo",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0qvin75__initiatingParticipant__Participant_12df78t",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_0qvin75",
+      "target": "Participant_12df78t",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0qvin75__messageFlowRef__MessageFlow_1urma6e",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_0qvin75",
+      "target": "MessageFlow_1urma6e",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0qv0nys__participantRef__Participant_12df78t",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_0qv0nys",
+      "target": "Participant_12df78t",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0qv0nys__participantRef__Participant_1p9owwo",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_0qv0nys",
+      "target": "Participant_1p9owwo",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0qv0nys__initiatingParticipant__Participant_12df78t",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_0qv0nys",
+      "target": "Participant_12df78t",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0qv0nys__messageFlowRef__MessageFlow_0khz8el",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_0qv0nys",
+      "target": "MessageFlow_0khz8el",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1xe5w82__participantRef__Participant_12df78t",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_1xe5w82",
+      "target": "Participant_12df78t",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1xe5w82__participantRef__Participant_1p9owwo",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_1xe5w82",
+      "target": "Participant_1p9owwo",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1xe5w82__initiatingParticipant__Participant_12df78t",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_1xe5w82",
+      "target": "Participant_12df78t",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1xe5w82__messageFlowRef__MessageFlow_1nqrrp6",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_1xe5w82",
+      "target": "MessageFlow_1nqrrp6",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_08v8azc__participantRef__Participant_12df78t",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_08v8azc",
+      "target": "Participant_12df78t",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_08v8azc__participantRef__Participant_1p9owwo",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_08v8azc",
+      "target": "Participant_1p9owwo",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_08v8azc__initiatingParticipant__Participant_12df78t",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_08v8azc",
+      "target": "Participant_12df78t",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_08v8azc__messageFlowRef__MessageFlow_1haf3pl",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_08v8azc",
+      "target": "MessageFlow_1haf3pl",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_14x309o__participantRef__Participant_12df78t",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_14x309o",
+      "target": "Participant_12df78t",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_14x309o__participantRef__Participant_1p9owwo",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_14x309o",
+      "target": "Participant_1p9owwo",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_14x309o__initiatingParticipant__Participant_12df78t",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_14x309o",
+      "target": "Participant_12df78t",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_14x309o__messageFlowRef__MessageFlow_05bvd7t",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_14x309o",
+      "target": "MessageFlow_05bvd7t",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0wtdaho__participantRef__Participant_1p9owwo",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_0wtdaho",
+      "target": "Participant_1p9owwo",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0wtdaho__participantRef__Participant_12df78t",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_0wtdaho",
+      "target": "Participant_12df78t",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0wtdaho__initiatingParticipant__Participant_1p9owwo",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_0wtdaho",
+      "target": "Participant_1p9owwo",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0wtdaho__messageFlowRef__MessageFlow_13hle13",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_0wtdaho",
+      "target": "MessageFlow_13hle13",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_09o0tby__participantRef__Participant_1p9owwo",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_09o0tby",
+      "target": "Participant_1p9owwo",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_09o0tby__participantRef__Participant_12df78t",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_09o0tby",
+      "target": "Participant_12df78t",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_09o0tby__initiatingParticipant__Participant_1p9owwo",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_09o0tby",
+      "target": "Participant_1p9owwo",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_09o0tby__messageFlowRef__MessageFlow_191vfqw",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_09o0tby",
+      "target": "MessageFlow_191vfqw",
+      "attrs": {}
+    },
+    {
+      "id": "Flow_0bbli9z",
+      "type": "bpmn:sequenceFlow",
+      "source": "Event_0ojehz6",
+      "target": "ChoreographyTask_15hdy0f",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_0dtlny7",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_15hdy0f",
+      "target": "Gateway_0jgq0a6",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_1kx9uv2",
+      "type": "bpmn:sequenceFlow",
+      "source": "Gateway_0jgq0a6",
+      "target": "ChoreographyTask_0qvin75",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_0td67i7",
+      "type": "bpmn:sequenceFlow",
+      "source": "Gateway_0jgq0a6",
+      "target": "ChoreographyTask_0qv0nys",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_1mhr2rd",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_0qvin75",
+      "target": "ChoreographyTask_1xe5w82",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_05fmni9",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_0qv0nys",
+      "target": "ChoreographyTask_08v8azc",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_0ezj4h3",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_1xe5w82",
+      "target": "Gateway_0auc3he",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_1qyvyn9",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_08v8azc",
+      "target": "Gateway_0auc3he",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_0rawiic",
+      "type": "bpmn:sequenceFlow",
+      "source": "Gateway_0auc3he",
+      "target": "ChoreographyTask_14x309o",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_1bh56yy",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_14x309o",
+      "target": "Activity_0tya4bp",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_1niv4wa",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_09o0tby",
+      "target": "Event_0ci2gl8",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_092fqzb",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_0wtdaho",
+      "target": "Event_0dyp0ut",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_1m6mf5r",
+      "type": "bpmn:sequenceFlow",
+      "source": "Activity_0tya4bp",
+      "target": "Gateway_0ivv4vg",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_06m03vj",
+      "type": "bpmn:sequenceFlow",
+      "source": "Gateway_0ivv4vg",
+      "target": "ChoreographyTask_0wtdaho",
+      "attrs": {
+        "name": "confirm==false",
+        "condition_expression": "confirm==false"
+      }
+    },
+    {
+      "id": "Flow_06m03vj__condition",
+      "type": "bpmn:condition",
+      "source": "Flow_06m03vj",
+      "target": "Flow_06m03vj__condition__Confirm",
+      "attrs": {}
+    },
+    {
+      "id": "Flow_17hhdvo",
+      "type": "bpmn:sequenceFlow",
+      "source": "Gateway_0ivv4vg",
+      "target": "ChoreographyTask_09o0tby",
+      "attrs": {
+        "name": "confirm==true",
+        "condition_expression": "confirm==true"
+      }
+    },
+    {
+      "id": "Flow_17hhdvo__condition",
+      "type": "bpmn:condition",
+      "source": "Flow_17hhdvo",
+      "target": "Flow_17hhdvo__condition__Confirm",
+      "attrs": {}
+    }
+  ],
+  "derived": [
+    {
+      "id": "Derive_Reason",
+      "type": "bpmn:message_property",
+      "target": "Reason",
+      "sources": [
+        "Message_1b1qlzd"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "reason",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_Result",
+      "type": "bpmn:message_property",
+      "target": "Result",
+      "sources": [
+        "Message_1b1qlzd"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "result",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_Amount",
+      "type": "bpmn:message_property",
+      "target": "Amount",
+      "sources": [
+        "Message_01jq2zl"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "amount",
+        "type": "number",
+        "dsl_type": "int"
+      }
+    },
+    {
+      "id": "Derive_RequestType",
+      "type": "bpmn:message_property",
+      "target": "RequestType",
+      "sources": [
+        "Message_12n6jjk"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "requestType",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_Duration",
+      "type": "bpmn:message_property",
+      "target": "Duration",
+      "sources": [
+        "Message_12n6jjk"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "duration",
+        "type": "number",
+        "dsl_type": "int"
+      }
+    },
+    {
+      "id": "Derive_Time",
+      "type": "bpmn:message_property",
+      "target": "Time",
+      "sources": [
+        "Message_076ulzs"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "time",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_Description",
+      "type": "bpmn:message_property",
+      "target": "Description",
+      "sources": [
+        "Message_076ulzs"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "description",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_EC2_resource_ID",
+      "type": "bpmn:message_property",
+      "target": "EC2_resource_ID",
+      "sources": [
+        "Message_076ulzs"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "EC2 resource ID",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_Logs",
+      "type": "bpmn:message_property",
+      "target": "Logs",
+      "sources": [
+        "Message_076ulzs"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "logs",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_Other_information",
+      "type": "bpmn:message_property",
+      "target": "Other_information",
+      "sources": [
+        "Message_076ulzs"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "other information",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_Time",
+      "type": "bpmn:message_property",
+      "target": "Time",
+      "sources": [
+        "Message_068kmzv"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "time",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_Instance_ID",
+      "type": "bpmn:message_property",
+      "target": "Instance_ID",
+      "sources": [
+        "Message_068kmzv"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "instance ID",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_Logs",
+      "type": "bpmn:message_property",
+      "target": "Logs",
+      "sources": [
+        "Message_068kmzv"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "logs",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_Question_name",
+      "type": "bpmn:message_property",
+      "target": "Question_name",
+      "sources": [
+        "Message_09krt7c"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "question name",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_Description",
+      "type": "bpmn:message_property",
+      "target": "Description",
+      "sources": [
+        "Message_09krt7c"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "description",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_ServiceType",
+      "type": "bpmn:message_property",
+      "target": "ServiceType",
+      "sources": [
+        "Message_1bhhp1n"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "serviceType",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_ServiceType",
+      "type": "bpmn:message_property",
+      "target": "ServiceType",
+      "sources": [
+        "Message_0ywghlt"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "serviceType",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_Confirm",
+      "type": "bpmn:condition_variable",
+      "target": "Confirm",
+      "sources": [
+        "Flow_06m03vj"
+      ],
+      "rule": "SequenceConditionVariable2GlobalVar",
+      "attrs": {
+        "name": "confirm",
+        "relation": "==",
+        "value": "false"
+      }
+    },
+    {
+      "id": "Derive_Confirm",
+      "type": "bpmn:condition_variable",
+      "target": "Confirm",
+      "sources": [
+        "Flow_17hhdvo"
+      ],
+      "rule": "SequenceConditionVariable2GlobalVar",
+      "attrs": {
+        "name": "confirm",
+        "relation": "==",
+        "value": "true"
+      }
+    }
+  ],
+  "warnings": []
+}

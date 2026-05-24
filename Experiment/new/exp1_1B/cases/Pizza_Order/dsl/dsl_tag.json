@@ -1,0 +1,1158 @@
+{
+  "tag_version": "0.1.0",
+  "case_name": "Pizza_Order",
+  "model_type": "dsl",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp1_1B/cases/Pizza_Order/dsl/Pizza_Order.b2c",
+  "extractor": {
+    "name": "extract_dsl_structure",
+    "version": "0.1.0",
+    "implementation_basis": [
+      "src/newTranslator/DSL/B2CDSL/b2cdsl/b2c.tx",
+      "src/newTranslator/MDAcheck/b2c.ecore"
+    ]
+  },
+  "nodes": [
+    {
+      "id": "Pizza_Order",
+      "type": "dsl:contract",
+      "name": "Pizza_Order",
+      "attrs": {}
+    },
+    {
+      "id": "Participant_1ssz56y__attr__role",
+      "type": "dsl:attribute",
+      "name": "role",
+      "attrs": {
+        "key": "role",
+        "value": "Customer"
+      }
+    },
+    {
+      "id": "Participant_1ssz56y",
+      "type": "dsl:participant",
+      "name": "Participant_1ssz56y",
+      "attrs": {
+        "msp": "CustomerMSP",
+        "x509": "",
+        "isMulti": false,
+        "multiMin": 0,
+        "multiMax": 0,
+        "attributes": {
+          "role": "Customer"
+        }
+      }
+    },
+    {
+      "id": "Participant_1f296fx__attr__role",
+      "type": "dsl:attribute",
+      "name": "role",
+      "attrs": {
+        "key": "role",
+        "value": "Pizza Place"
+      }
+    },
+    {
+      "id": "Participant_1f296fx",
+      "type": "dsl:participant",
+      "name": "Participant_1f296fx",
+      "attrs": {
+        "msp": "Pizza_PlaceMSP",
+        "x509": "",
+        "isMulti": false,
+        "multiMin": 0,
+        "multiMax": 0,
+        "attributes": {
+          "role": "Pizza Place"
+        }
+      }
+    },
+    {
+      "id": "Participant_0szm9kv__attr__role",
+      "type": "dsl:attribute",
+      "name": "role",
+      "attrs": {
+        "key": "role",
+        "value": "Delivery Driver"
+      }
+    },
+    {
+      "id": "Participant_0szm9kv",
+      "type": "dsl:participant",
+      "name": "Participant_0szm9kv",
+      "attrs": {
+        "msp": "Delivery_DriverMSP",
+        "x509": "",
+        "isMulti": false,
+        "multiMin": 0,
+        "multiMax": 0,
+        "attributes": {
+          "role": "Delivery Driver"
+        }
+      }
+    },
+    {
+      "id": "Address",
+      "type": "dsl:global",
+      "name": "Address",
+      "attrs": {
+        "type": "string"
+      }
+    },
+    {
+      "id": "DeliveryInfomation",
+      "type": "dsl:global",
+      "name": "DeliveryInfomation",
+      "attrs": {
+        "type": "string"
+      }
+    },
+    {
+      "id": "OrderContent",
+      "type": "dsl:global",
+      "name": "OrderContent",
+      "attrs": {
+        "type": "string"
+      }
+    },
+    {
+      "id": "PickUpTime",
+      "type": "dsl:global",
+      "name": "PickUpTime",
+      "attrs": {
+        "type": "string"
+      }
+    },
+    {
+      "id": "Signature",
+      "type": "dsl:global",
+      "name": "Signature",
+      "attrs": {
+        "type": "string"
+      }
+    },
+    {
+      "id": "BikePrepare",
+      "type": "dsl:global",
+      "name": "BikePrepare",
+      "attrs": {
+        "type": "bool"
+      }
+    },
+    {
+      "id": "CarPrepare",
+      "type": "dsl:global",
+      "name": "CarPrepare",
+      "attrs": {
+        "type": "bool"
+      }
+    },
+    {
+      "id": "Distance",
+      "type": "dsl:global",
+      "name": "Distance",
+      "attrs": {
+        "type": "int"
+      }
+    },
+    {
+      "id": "Message_0gm7yco",
+      "type": "dsl:message",
+      "name": "Message_0gm7yco",
+      "attrs": {
+        "sender": "Participant_1f296fx",
+        "receiver": "Participant_1ssz56y",
+        "initialState": "INACTIVE",
+        "schema": "{\"properties\":{\"PickUpTime\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"PickUpTime\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_0nc7bj9",
+      "type": "dsl:message",
+      "name": "Message_0nc7bj9",
+      "attrs": {
+        "sender": "Participant_1f296fx",
+        "receiver": "Participant_1ssz56y",
+        "initialState": "INACTIVE",
+        "schema": "{\"properties\":{\"bikePrepare\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"bikePrepare\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_0phlgzx",
+      "type": "dsl:message",
+      "name": "Message_0phlgzx",
+      "attrs": {
+        "sender": "Participant_1f296fx",
+        "receiver": "Participant_0szm9kv",
+        "initialState": "INACTIVE",
+        "schema": "{\"properties\":{\"DeliveryInfomation\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_10c1p7j",
+      "type": "dsl:message",
+      "name": "Message_10c1p7j",
+      "attrs": {
+        "sender": "Participant_1ssz56y",
+        "receiver": "Participant_1f296fx",
+        "initialState": "INACTIVE",
+        "schema": "{\"properties\":{\"Address\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"Address\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_1hi03zn",
+      "type": "dsl:message",
+      "name": "Message_1hi03zn",
+      "attrs": {
+        "sender": "Participant_1ssz56y",
+        "receiver": "Participant_0szm9kv",
+        "initialState": "INACTIVE",
+        "schema": "{\"properties\":{\"Signature\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"Signature\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_1kyybzd",
+      "type": "dsl:message",
+      "name": "Message_1kyybzd",
+      "attrs": {
+        "sender": "Participant_1f296fx",
+        "receiver": "Participant_1ssz56y",
+        "initialState": "INACTIVE",
+        "schema": "{\"properties\":{\"carPrepare\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"carPrepare\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_1l76ppu",
+      "type": "dsl:message",
+      "name": "Message_1l76ppu",
+      "attrs": {
+        "sender": "Participant_1f296fx",
+        "receiver": "Participant_1ssz56y",
+        "initialState": "INACTIVE",
+        "schema": "{\"properties\":{\"Signature\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_1wwub0e",
+      "type": "dsl:message",
+      "name": "Message_1wwub0e",
+      "attrs": {
+        "sender": "Participant_1ssz56y",
+        "receiver": "Participant_1f296fx",
+        "initialState": "INACTIVE",
+        "schema": "{\"properties\":{\"OrderContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"OrderContent\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Gateway_0ckb278",
+      "type": "dsl:gateway",
+      "name": "Gateway_0ckb278",
+      "attrs": {
+        "gatewayType": "exclusive",
+        "initialState": "INACTIVE"
+      }
+    },
+    {
+      "id": "Gateway_18xv5wc",
+      "type": "dsl:gateway",
+      "name": "Gateway_18xv5wc",
+      "attrs": {
+        "gatewayType": "exclusive",
+        "initialState": "INACTIVE"
+      }
+    },
+    {
+      "id": "Gateway_1rwnujh",
+      "type": "dsl:gateway",
+      "name": "Gateway_1rwnujh",
+      "attrs": {
+        "gatewayType": "exclusive",
+        "initialState": "INACTIVE"
+      }
+    },
+    {
+      "id": "Gateway_1k9qf30",
+      "type": "dsl:gateway",
+      "name": "Gateway_1k9qf30",
+      "attrs": {
+        "gatewayType": "event",
+        "initialState": "INACTIVE"
+      }
+    },
+    {
+      "id": "Event_17c6iyi",
+      "type": "dsl:event",
+      "name": "Event_17c6iyi",
+      "attrs": {
+        "initialState": "READY"
+      }
+    },
+    {
+      "id": "Event_1bxai2s",
+      "type": "dsl:event",
+      "name": "Event_1bxai2s",
+      "attrs": {
+        "initialState": "INACTIVE"
+      }
+    },
+    {
+      "id": "Activity_0pzravo",
+      "type": "dsl:businessrule",
+      "name": "Activity_0pzravo",
+      "attrs": {
+        "dmnResource": "Activity_0pzravo.dmn",
+        "decisionID": "Activity_0pzravo_DecisionID",
+        "initialState": "INACTIVE"
+      }
+    },
+    {
+      "id": "Activity_0pzravo__input__Address",
+      "type": "dsl:paramMapping",
+      "name": "Address",
+      "attrs": {
+        "dmnParam": "Address",
+        "globalRef": "Address",
+        "direction": "input"
+      }
+    },
+    {
+      "id": "Activity_0pzravo__output__distance",
+      "type": "dsl:paramMapping",
+      "name": "distance",
+      "attrs": {
+        "dmnParam": "distance",
+        "globalRef": "Distance",
+        "direction": "output"
+      }
+    },
+    {
+      "id": "start__Event_17c6iyi__Message_1wwub0e",
+      "type": "dsl:startFlow",
+      "name": "start__Event_17c6iyi__Message_1wwub0e",
+      "attrs": {
+        "start": "Event_17c6iyi",
+        "target": "Message_1wwub0e"
+      }
+    },
+    {
+      "id": "messageFlow__Message_1wwub0e__69",
+      "type": "dsl:messageFlow",
+      "name": "messageFlow__Message_1wwub0e__69",
+      "attrs": {
+        "message": "Message_1wwub0e",
+        "msgCond": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_10c1p7j__153",
+      "type": "dsl:messageFlow",
+      "name": "messageFlow__Message_10c1p7j__153",
+      "attrs": {
+        "message": "Message_10c1p7j",
+        "msgCond": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_0gm7yco__263",
+      "type": "dsl:messageFlow",
+      "name": "messageFlow__Message_0gm7yco__263",
+      "attrs": {
+        "message": "Message_0gm7yco",
+        "msgCond": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_0nc7bj9__372",
+      "type": "dsl:messageFlow",
+      "name": "messageFlow__Message_0nc7bj9__372",
+      "attrs": {
+        "message": "Message_0nc7bj9",
+        "msgCond": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_1kyybzd__456",
+      "type": "dsl:messageFlow",
+      "name": "messageFlow__Message_1kyybzd__456",
+      "attrs": {
+        "message": "Message_1kyybzd",
+        "msgCond": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_0phlgzx__540",
+      "type": "dsl:messageFlow",
+      "name": "messageFlow__Message_0phlgzx__540",
+      "attrs": {
+        "message": "Message_0phlgzx",
+        "msgCond": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_1hi03zn__624",
+      "type": "dsl:messageFlow",
+      "name": "messageFlow__Message_1hi03zn__624",
+      "attrs": {
+        "message": "Message_1hi03zn",
+        "msgCond": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_1l76ppu__708",
+      "type": "dsl:messageFlow",
+      "name": "messageFlow__Message_1l76ppu__708",
+      "attrs": {
+        "message": "Message_1l76ppu",
+        "msgCond": "completed"
+      }
+    },
+    {
+      "id": "ruleFlow__Activity_0pzravo__1284",
+      "type": "dsl:ruleFlow",
+      "name": "ruleFlow__Activity_0pzravo__1284",
+      "attrs": {
+        "businessrule": "Activity_0pzravo",
+        "ruleCond": "done"
+      }
+    },
+    {
+      "id": "gatewayFlow__Gateway_18xv5wc__1009",
+      "type": "dsl:gatewayFlow",
+      "name": "gatewayFlow__Gateway_18xv5wc__1009",
+      "attrs": {
+        "gateway": "Gateway_18xv5wc",
+        "condition": "completed"
+      }
+    },
+    {
+      "id": "gatewayFlow__Gateway_1rwnujh__1093",
+      "type": "dsl:gatewayFlow",
+      "name": "gatewayFlow__Gateway_1rwnujh__1093",
+      "attrs": {
+        "gateway": "Gateway_1rwnujh",
+        "condition": "completed"
+      }
+    },
+    {
+      "id": "gatewayFlow__Gateway_1k9qf30__1175",
+      "type": "dsl:gatewayFlow",
+      "name": "gatewayFlow__Gateway_1k9qf30__1175",
+      "attrs": {
+        "gateway": "Gateway_1k9qf30",
+        "condition": "completed"
+      }
+    },
+    {
+      "id": "gatewayChoose__Gateway_0ckb278__793",
+      "type": "dsl:gatewayFlow",
+      "name": "gatewayChoose__Gateway_0ckb278__793",
+      "attrs": {
+        "gateway": "Gateway_0ckb278",
+        "condition": "completed",
+        "mode": "choose"
+      }
+    },
+    {
+      "id": "gatewayChoose__Gateway_0ckb278__793__branch__0",
+      "type": "dsl:gatewayCompareBranch",
+      "name": "gatewayChoose__Gateway_0ckb278__793__branch__0",
+      "attrs": {
+        "branch_kind": "if",
+        "condition": "Distance >= 10"
+      }
+    },
+    {
+      "id": "gatewayChoose__Gateway_0ckb278__793__branch__1",
+      "type": "dsl:gatewayCompareBranch",
+      "name": "gatewayChoose__Gateway_0ckb278__793__branch__1",
+      "attrs": {
+        "branch_kind": "if",
+        "condition": "Distance < 10"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "Participant_1ssz56y__participant_attribute__role",
+      "type": "dsl:participant_attribute",
+      "source": "Participant_1ssz56y",
+      "target": "Participant_1ssz56y__attr__role",
+      "attrs": {}
+    },
+    {
+      "id": "Pizza_Order__contains__Participant_1ssz56y",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "Participant_1ssz56y",
+      "attrs": {
+        "section": "participants"
+      }
+    },
+    {
+      "id": "Participant_1f296fx__participant_attribute__role",
+      "type": "dsl:participant_attribute",
+      "source": "Participant_1f296fx",
+      "target": "Participant_1f296fx__attr__role",
+      "attrs": {}
+    },
+    {
+      "id": "Pizza_Order__contains__Participant_1f296fx",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "Participant_1f296fx",
+      "attrs": {
+        "section": "participants"
+      }
+    },
+    {
+      "id": "Participant_0szm9kv__participant_attribute__role",
+      "type": "dsl:participant_attribute",
+      "source": "Participant_0szm9kv",
+      "target": "Participant_0szm9kv__attr__role",
+      "attrs": {}
+    },
+    {
+      "id": "Pizza_Order__contains__Participant_0szm9kv",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "Participant_0szm9kv",
+      "attrs": {
+        "section": "participants"
+      }
+    },
+    {
+      "id": "Pizza_Order__contains__Address",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "Address",
+      "attrs": {
+        "section": "globals"
+      }
+    },
+    {
+      "id": "Pizza_Order__contains__DeliveryInfomation",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "DeliveryInfomation",
+      "attrs": {
+        "section": "globals"
+      }
+    },
+    {
+      "id": "Pizza_Order__contains__OrderContent",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "OrderContent",
+      "attrs": {
+        "section": "globals"
+      }
+    },
+    {
+      "id": "Pizza_Order__contains__PickUpTime",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "PickUpTime",
+      "attrs": {
+        "section": "globals"
+      }
+    },
+    {
+      "id": "Pizza_Order__contains__Signature",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "Signature",
+      "attrs": {
+        "section": "globals"
+      }
+    },
+    {
+      "id": "Pizza_Order__contains__BikePrepare",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "BikePrepare",
+      "attrs": {
+        "section": "globals"
+      }
+    },
+    {
+      "id": "Pizza_Order__contains__CarPrepare",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "CarPrepare",
+      "attrs": {
+        "section": "globals"
+      }
+    },
+    {
+      "id": "Pizza_Order__contains__Distance",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "Distance",
+      "attrs": {
+        "section": "globals"
+      }
+    },
+    {
+      "id": "Message_0gm7yco__sender",
+      "type": "dsl:message_sender",
+      "source": "Message_0gm7yco",
+      "target": "Participant_1f296fx",
+      "attrs": {}
+    },
+    {
+      "id": "Message_0gm7yco__receiver",
+      "type": "dsl:message_receiver",
+      "source": "Message_0gm7yco",
+      "target": "Participant_1ssz56y",
+      "attrs": {}
+    },
+    {
+      "id": "Pizza_Order__contains__Message_0gm7yco",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "Message_0gm7yco",
+      "attrs": {
+        "section": "messages"
+      }
+    },
+    {
+      "id": "Message_0nc7bj9__sender",
+      "type": "dsl:message_sender",
+      "source": "Message_0nc7bj9",
+      "target": "Participant_1f296fx",
+      "attrs": {}
+    },
+    {
+      "id": "Message_0nc7bj9__receiver",
+      "type": "dsl:message_receiver",
+      "source": "Message_0nc7bj9",
+      "target": "Participant_1ssz56y",
+      "attrs": {}
+    },
+    {
+      "id": "Pizza_Order__contains__Message_0nc7bj9",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "Message_0nc7bj9",
+      "attrs": {
+        "section": "messages"
+      }
+    },
+    {
+      "id": "Message_0phlgzx__sender",
+      "type": "dsl:message_sender",
+      "source": "Message_0phlgzx",
+      "target": "Participant_1f296fx",
+      "attrs": {}
+    },
+    {
+      "id": "Message_0phlgzx__receiver",
+      "type": "dsl:message_receiver",
+      "source": "Message_0phlgzx",
+      "target": "Participant_0szm9kv",
+      "attrs": {}
+    },
+    {
+      "id": "Pizza_Order__contains__Message_0phlgzx",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "Message_0phlgzx",
+      "attrs": {
+        "section": "messages"
+      }
+    },
+    {
+      "id": "Message_10c1p7j__sender",
+      "type": "dsl:message_sender",
+      "source": "Message_10c1p7j",
+      "target": "Participant_1ssz56y",
+      "attrs": {}
+    },
+    {
+      "id": "Message_10c1p7j__receiver",
+      "type": "dsl:message_receiver",
+      "source": "Message_10c1p7j",
+      "target": "Participant_1f296fx",
+      "attrs": {}
+    },
+    {
+      "id": "Pizza_Order__contains__Message_10c1p7j",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "Message_10c1p7j",
+      "attrs": {
+        "section": "messages"
+      }
+    },
+    {
+      "id": "Message_1hi03zn__sender",
+      "type": "dsl:message_sender",
+      "source": "Message_1hi03zn",
+      "target": "Participant_1ssz56y",
+      "attrs": {}
+    },
+    {
+      "id": "Message_1hi03zn__receiver",
+      "type": "dsl:message_receiver",
+      "source": "Message_1hi03zn",
+      "target": "Participant_0szm9kv",
+      "attrs": {}
+    },
+    {
+      "id": "Pizza_Order__contains__Message_1hi03zn",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "Message_1hi03zn",
+      "attrs": {
+        "section": "messages"
+      }
+    },
+    {
+      "id": "Message_1kyybzd__sender",
+      "type": "dsl:message_sender",
+      "source": "Message_1kyybzd",
+      "target": "Participant_1f296fx",
+      "attrs": {}
+    },
+    {
+      "id": "Message_1kyybzd__receiver",
+      "type": "dsl:message_receiver",
+      "source": "Message_1kyybzd",
+      "target": "Participant_1ssz56y",
+      "attrs": {}
+    },
+    {
+      "id": "Pizza_Order__contains__Message_1kyybzd",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "Message_1kyybzd",
+      "attrs": {
+        "section": "messages"
+      }
+    },
+    {
+      "id": "Message_1l76ppu__sender",
+      "type": "dsl:message_sender",
+      "source": "Message_1l76ppu",
+      "target": "Participant_1f296fx",
+      "attrs": {}
+    },
+    {
+      "id": "Message_1l76ppu__receiver",
+      "type": "dsl:message_receiver",
+      "source": "Message_1l76ppu",
+      "target": "Participant_1ssz56y",
+      "attrs": {}
+    },
+    {
+      "id": "Pizza_Order__contains__Message_1l76ppu",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "Message_1l76ppu",
+      "attrs": {
+        "section": "messages"
+      }
+    },
+    {
+      "id": "Message_1wwub0e__sender",
+      "type": "dsl:message_sender",
+      "source": "Message_1wwub0e",
+      "target": "Participant_1ssz56y",
+      "attrs": {}
+    },
+    {
+      "id": "Message_1wwub0e__receiver",
+      "type": "dsl:message_receiver",
+      "source": "Message_1wwub0e",
+      "target": "Participant_1f296fx",
+      "attrs": {}
+    },
+    {
+      "id": "Pizza_Order__contains__Message_1wwub0e",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "Message_1wwub0e",
+      "attrs": {
+        "section": "messages"
+      }
+    },
+    {
+      "id": "Pizza_Order__contains__Gateway_0ckb278",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "Gateway_0ckb278",
+      "attrs": {
+        "section": "gateways"
+      }
+    },
+    {
+      "id": "Pizza_Order__contains__Gateway_18xv5wc",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "Gateway_18xv5wc",
+      "attrs": {
+        "section": "gateways"
+      }
+    },
+    {
+      "id": "Pizza_Order__contains__Gateway_1rwnujh",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "Gateway_1rwnujh",
+      "attrs": {
+        "section": "gateways"
+      }
+    },
+    {
+      "id": "Pizza_Order__contains__Gateway_1k9qf30",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "Gateway_1k9qf30",
+      "attrs": {
+        "section": "gateways"
+      }
+    },
+    {
+      "id": "Pizza_Order__contains__Event_17c6iyi",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "Event_17c6iyi",
+      "attrs": {
+        "section": "events"
+      }
+    },
+    {
+      "id": "Pizza_Order__contains__Event_1bxai2s",
+      "type": "dsl:contains",
+      "source": "Pizza_Order",
+      "target": "Event_1bxai2s",
+      "attrs": {
+        "section": "events"
+      }
+    },
+    {
+      "id": "Activity_0pzravo__input__Address",
+      "type": "dsl:businessrule_input",
+      "source": "Activity_0pzravo",
+      "target": "Address",
+      "attrs": {
+        "dmnParam": "Address"
+      }
+    },
+    {
+      "id": "Activity_0pzravo__input__Address__globalRef",
+      "type": "dsl:param_global_ref",
+      "source": "Activity_0pzravo__input__Address",
+      "target": "Address",
+      "attrs": {}
+    },
+    {
+      "id": "Activity_0pzravo__output__distance",
+      "type": "dsl:businessrule_output",
+      "source": "Activity_0pzravo",
+      "target": "Distance",
+      "attrs": {
+        "dmnParam": "distance"
+      }
+    },
+    {
+      "id": "Activity_0pzravo__output__distance__globalRef",
+      "type": "dsl:param_global_ref",
+      "source": "Activity_0pzravo__output__distance",
+      "target": "Distance",
+      "attrs": {}
+    },
+    {
+      "id": "start__Event_17c6iyi__Message_1wwub0e",
+      "type": "dsl:start_enables",
+      "source": "Event_17c6iyi",
+      "target": "Message_1wwub0e",
+      "attrs": {
+        "flow_item": "StartFlow"
+      }
+    },
+    {
+      "id": "messageFlow__Message_1wwub0e__69__trigger",
+      "type": "dsl:flow_trigger",
+      "source": "messageFlow__Message_1wwub0e__69",
+      "target": "Message_1wwub0e",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_1wwub0e__69__enable__0__Gateway_1k9qf30",
+      "type": "dsl:enable",
+      "source": "Message_1wwub0e",
+      "target": "Gateway_1k9qf30",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed",
+        "flow_item": "MessageFlow",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "messageFlow__Message_10c1p7j__153__trigger",
+      "type": "dsl:flow_trigger",
+      "source": "messageFlow__Message_10c1p7j__153",
+      "target": "Message_10c1p7j",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_10c1p7j__153__disable__0__Message_0gm7yco",
+      "type": "dsl:disable",
+      "source": "Message_10c1p7j",
+      "target": "Message_0gm7yco",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed",
+        "flow_item": "MessageFlow",
+        "action": "disable"
+      }
+    },
+    {
+      "id": "messageFlow__Message_10c1p7j__153__enable__1__Activity_0pzravo",
+      "type": "dsl:enable",
+      "source": "Message_10c1p7j",
+      "target": "Activity_0pzravo",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed",
+        "flow_item": "MessageFlow",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "messageFlow__Message_0gm7yco__263__trigger",
+      "type": "dsl:flow_trigger",
+      "source": "messageFlow__Message_0gm7yco__263",
+      "target": "Message_0gm7yco",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_0gm7yco__263__disable__0__Message_10c1p7j",
+      "type": "dsl:disable",
+      "source": "Message_0gm7yco",
+      "target": "Message_10c1p7j",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed",
+        "flow_item": "MessageFlow",
+        "action": "disable"
+      }
+    },
+    {
+      "id": "messageFlow__Message_0gm7yco__263__enable__1__Message_1l76ppu",
+      "type": "dsl:enable",
+      "source": "Message_0gm7yco",
+      "target": "Message_1l76ppu",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed",
+        "flow_item": "MessageFlow",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "messageFlow__Message_0nc7bj9__372__trigger",
+      "type": "dsl:flow_trigger",
+      "source": "messageFlow__Message_0nc7bj9__372",
+      "target": "Message_0nc7bj9",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_0nc7bj9__372__enable__0__Gateway_18xv5wc",
+      "type": "dsl:enable",
+      "source": "Message_0nc7bj9",
+      "target": "Gateway_18xv5wc",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed",
+        "flow_item": "MessageFlow",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "messageFlow__Message_1kyybzd__456__trigger",
+      "type": "dsl:flow_trigger",
+      "source": "messageFlow__Message_1kyybzd__456",
+      "target": "Message_1kyybzd",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_1kyybzd__456__enable__0__Gateway_18xv5wc",
+      "type": "dsl:enable",
+      "source": "Message_1kyybzd",
+      "target": "Gateway_18xv5wc",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed",
+        "flow_item": "MessageFlow",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "messageFlow__Message_0phlgzx__540__trigger",
+      "type": "dsl:flow_trigger",
+      "source": "messageFlow__Message_0phlgzx__540",
+      "target": "Message_0phlgzx",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_0phlgzx__540__enable__0__Message_1hi03zn",
+      "type": "dsl:enable",
+      "source": "Message_0phlgzx",
+      "target": "Message_1hi03zn",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed",
+        "flow_item": "MessageFlow",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "messageFlow__Message_1hi03zn__624__trigger",
+      "type": "dsl:flow_trigger",
+      "source": "messageFlow__Message_1hi03zn__624",
+      "target": "Message_1hi03zn",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_1hi03zn__624__enable__0__Gateway_1rwnujh",
+      "type": "dsl:enable",
+      "source": "Message_1hi03zn",
+      "target": "Gateway_1rwnujh",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed",
+        "flow_item": "MessageFlow",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "messageFlow__Message_1l76ppu__708__trigger",
+      "type": "dsl:flow_trigger",
+      "source": "messageFlow__Message_1l76ppu__708",
+      "target": "Message_1l76ppu",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed"
+      }
+    },
+    {
+      "id": "messageFlow__Message_1l76ppu__708__enable__0__Gateway_1rwnujh",
+      "type": "dsl:enable",
+      "source": "Message_1l76ppu",
+      "target": "Gateway_1rwnujh",
+      "attrs": {
+        "trigger_type": "message",
+        "trigger_condition": "completed",
+        "flow_item": "MessageFlow",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "ruleFlow__Activity_0pzravo__1284__enable__0__Gateway_0ckb278",
+      "type": "dsl:enable",
+      "source": "Activity_0pzravo",
+      "target": "Gateway_0ckb278",
+      "attrs": {
+        "trigger_type": "businessrule",
+        "trigger_condition": "done",
+        "flow_item": "RuleFlow",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "gatewayFlow__Gateway_18xv5wc__1009__enable__0__Message_0phlgzx",
+      "type": "dsl:enable",
+      "source": "Gateway_18xv5wc",
+      "target": "Message_0phlgzx",
+      "attrs": {
+        "trigger_type": "gateway",
+        "trigger_condition": "completed",
+        "flow_item": "GatewayFlow",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "gatewayFlow__Gateway_1rwnujh__1093__enable__0__Event_1bxai2s",
+      "type": "dsl:enable",
+      "source": "Gateway_1rwnujh",
+      "target": "Event_1bxai2s",
+      "attrs": {
+        "trigger_type": "gateway",
+        "trigger_condition": "completed",
+        "flow_item": "GatewayFlow",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "gatewayFlow__Gateway_1k9qf30__1175__enable__0__Message_10c1p7j",
+      "type": "dsl:enable",
+      "source": "Gateway_1k9qf30",
+      "target": "Message_10c1p7j",
+      "attrs": {
+        "trigger_type": "gateway",
+        "trigger_condition": "completed",
+        "flow_item": "GatewayFlow",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "gatewayFlow__Gateway_1k9qf30__1175__enable__1__Message_0gm7yco",
+      "type": "dsl:enable",
+      "source": "Gateway_1k9qf30",
+      "target": "Message_0gm7yco",
+      "attrs": {
+        "trigger_type": "gateway",
+        "trigger_condition": "completed",
+        "flow_item": "GatewayFlow",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "gatewayChoose__Gateway_0ckb278__793__branch__0__gateway_branch__0__Message_0nc7bj9",
+      "type": "dsl:gateway_branch",
+      "source": "Gateway_0ckb278",
+      "target": "Message_0nc7bj9",
+      "attrs": {
+        "branch_kind": "if",
+        "condition": "Distance >= 10",
+        "action": "enable"
+      }
+    },
+    {
+      "id": "gatewayChoose__Gateway_0ckb278__793__branch__1__gateway_branch__0__Message_1kyybzd",
+      "type": "dsl:gateway_branch",
+      "source": "Gateway_0ckb278",
+      "target": "Message_1kyybzd",
+      "attrs": {
+        "branch_kind": "if",
+        "condition": "Distance < 10",
+        "action": "enable"
+      }
+    }
+  ],
+  "derived": [],
+  "warnings": []
+}
