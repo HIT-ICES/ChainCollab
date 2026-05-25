@@ -531,7 +531,7 @@ DSL 目标模型的结构图。
 }
 ```
 
-注意：`default_mapping_contract.json` 是完整映射契约；当前 1B 检查脚本只实现了其中的一个主体子集。实际 PASS/FAIL 以 `build_bpmn_dsl_trace.py` 和 `check_structure_consistency.py` 中的 `DIRECT_RULES`、`DIRECT_TYPES`、关系检查函数和 spurious target 集合为准。
+`default_mapping_contract.json` 是完整映射契约；`check_structure_consistency.py` 已实现契约中全部 13 条 element_rules 的属性检查（含 direct 元素、derived global 变量、businessrule/oracletask 的嵌套 paramMapping）和全部 9 条 relation_rules 的关系检查（含 required=true 的 4 条核心规则和 required=false 的 5 条增强规则）。PASS/FAIL 判定基于 C1-C5 五项指标全部为 1.0。
 
 ------
 
@@ -903,12 +903,19 @@ bpmn_dsl_trace.json
 ### 检查关系类型
 
 ```text
-messageFlow
-choreographyTask.messageFlowRef
-startEvent sequenceFlow
-parallelGateway join
-parallelGateway outgoing enable
+messageFlow → message sender / receiver (required=true)
+startEvent sequenceFlow → start_enables (required=true)
+choreographyTask.messageFlowRef → message enable ordering (required=true)
+parallelGateway outgoing → gateway enable (implemented)
+parallelGateway join → parallel_join_source + enable (required=false, implemented)
+eventBasedGateway branch → gateway enable + branch message disable + branch successor enable (required=false)
+exclusiveGateway condition → gateway_branch (required=false)
+businessRuleTask outgoing → ruleFlow enable (required=false)
+oracleTask outgoing → oracleTaskFlow enable (required=false)
+generic sequenceFlow → enable fallback (required=false)
 ```
+
+共 9 条关系规则，均已在 `check_relations()` 中实现；其中 4 条 required=true，5 条 required=false（含 fallback）。
 
 ### 检查逻辑
 
@@ -949,8 +956,16 @@ BPMN messageFlow(messageRef=M, sourceRef=A, targetRef=B)
 #### 5. eventBasedGateway branch → disable + enable relation
 
 ```text
-BPMN eventBasedGateway 的每个候选分支映射为 DSL 中的 event gateway 分支启用关系；
-被选中的 message 分支通过 disable relation 排除其他候选 message。
+BPMN eventBasedGateway 的每个 outgoing sequenceFlow 指向一个 choreographyTask；
+该 choreographyTask 的 init message 即为候选分支消息。
+
+对每个候选分支：
+  检查 DSL 中存在 gateway enable(gateway.id → init_message)
+  检查 DSL 中存在 disable(init_message → other_init_message)，互斥其他候选
+  如果 choreographyTask 有 return_message：
+    检查 DSL 中存在 enable(return_message → activation_target(choreographyTask.outgoing.target))
+  如果 choreographyTask 无 return_message：
+    检查 DSL 中存在 enable(init_message → activation_target(choreographyTask.outgoing.target))
 ```
 
 #### 6. exclusiveGateway condition → gateway_branch relation
@@ -970,12 +985,31 @@ BPMN parallelGateway with more than one incoming
   检查 gateway 到每个 outgoing.target 的 activation_target 存在 enable
 ```
 
-#### 8. businessRuleTask / oracleTask sequenceFlow → typed flow relation
+#### 8. businessRuleTask outgoing → ruleFlow enable relation
 
 ```text
-BPMN businessRuleTask / receiveTask / scriptTask 的 outgoing sequenceFlow
-  映射为 DSL 中对应 businessrule / oracletask 完成后的 enable relation；
-  检查后继 activation_target 是否被结构性保留。
+BPMN businessRuleTask 的 outgoing sequenceFlow
+  映射为 DSL 中 businessrule 完成后的 enable(done) relation；
+  检查 DSL 中存在 enable(businessrule.id → activation_target(outgoing.target))，
+  且 attrs 包含 trigger_type=businessrule, trigger_condition=done。
+```
+
+#### 9. oracleTask outgoing → oracleTaskFlow enable relation
+
+```text
+BPMN receiveTask / scriptTask / dataTask 的 outgoing sequenceFlow
+  映射为 DSL 中 oracletask 完成后的 enable(done) relation；
+  检查 DSL 中存在 enable(oracletask.id → activation_target(outgoing.target))，
+  且 attrs 包含 trigger_type=oracletask, trigger_condition=done。
+```
+
+#### 10. generic sequenceFlow → enable fallback relation
+
+```text
+未被以上 1-9 条专用规则覆盖的 sequenceFlow（source 不在
+startEvent / choreographyTask / parallelGateway / exclusiveGateway /
+eventBasedGateway / businessRuleTask / receiveTask / scriptTask / dataTask 中），
+按通用 enable 回退规则检查 DSL 中存在 enable(source → activation_target(target))。
 ```
 
 ### 输出
@@ -1027,7 +1061,11 @@ relation_preservation = 1.0
 ### 该步骤证明什么
 
 ```text
-BPMN 中的消息协作关系、start event 启动关系、choreography task 消息展开关系、parallel gateway join/source 关系以及 parallel gateway outgoing enable 关系，在 DSL 中被结构性保留。
+BPMN 中的消息协作关系、start event 启动关系、choreography task 消息展开关系、
+parallel gateway join/source 关系、parallel/event gateway outgoing enable 关系、
+event gateway 分支互斥与后继关系、exclusive gateway 条件分支关系、
+business rule / oracle task 完成后的类型化流关系，
+以及通用的 sequenceFlow → enable 回退关系，在 DSL 中均被结构性保留。
 ```
 
 ------
@@ -1767,12 +1805,22 @@ path_traceability_report.json
 
 ### P1：增强检查
 
-当前增强检查已并入 `check_structure_consistency.py`：
+已全部实现并并入 `check_structure_consistency.py`：
 
 ```text
-type_consistency_report.json
-attribute_preservation_report.json
-spurious_target_report.json
+C3 属性增强：
+  - businessrule inputMappings / outputMappings（dmnnParam 名和 globalRef）
+  - oracletask oracleType / dataSource / computeScript / outputMappings
+  - global 变量 public_the_name 名称和类型检查（含条件变量 boolean/integer/float/string 类型推断）
+
+C4 关系增强：
+  - EventBasedGatewayBranches2DisableEnable（branch disable 互斥 + successor enable）
+  - ExclusiveGatewayCondition2GatewayBranch（gateway_branch 条件分支）
+  - BusinessRuleSequence2RuleFlow（businessrule done 后继）
+  - OracleTaskSequence2OracleTaskFlow（oracletask done 后继）
+  - SequenceFlow2FlowEnable（通用回退）
+
+以上均已通过 11 个 BPMN case 的批量验证。
 ```
 
 ### P2：批量与可视化
@@ -1795,10 +1843,16 @@ failure_diff_viewer.py
 1. 解析 BPMN，生成 bpmn_tag.json；
 2. 解析 DSL，生成 dsl_tag.json；
 3. 根据 id 和映射契约生成 bpmn_dsl_trace.json；
-4. 检查 BPMN 元素是否都映射到 DSL；
-5. 检查 BPMN start sequence、choreography message order、message endpoint、exclusive/event branch、parallel join、business rule/oracle task 后继关系是否映射到 DSL；
-6. 输出 structure_summary.md；
-7. 如果需要衔接实验三，再执行 logical_path 附加可追踪性检查。
+4. 检查 BPMN 元素是否都映射到 DSL（C1 元素覆盖）；
+5. 检查类型映射是否正确（C2 类型一致性）；
+6. 检查关键属性是否保持（C3 属性保持，含 businessrule/oracletask 嵌套属性和 global 派生变量）；
+7. 检查 BPMN 全部 9 条关系规则是否在 DSL 中保留（C4 关系保持，
+   含 start、choreography、message sender/receiver、parallel join、
+   event branch disable/enable、exclusive branch gateway_branch、
+   businessrule/oracletask done flow 和通用 fallback）；
+8. 检查 DSL 中不存在无 BPMN 来源的关键元素（C5 目标可追踪性）；
+9. 输出 structure_summary.md；
+10. 如果需要衔接实验三，再执行 logical_path 附加可追踪性检查。
 ```
 
 最小闭环完成后，1B 主体验证已经可以支撑后续 1C；附加验证通过后，可以支撑实验三路径回放。

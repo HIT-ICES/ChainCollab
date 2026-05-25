@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -10,6 +11,7 @@ from tag_utils import (
     edges_by_type,
     find_edge,
     find_node,
+    map_bpmn_type,
     node_index,
     nodes_by_type,
     public_the_name,
@@ -162,6 +164,101 @@ def check_attributes(bpmn_tag: Dict[str, Any], dsl_tag: Dict[str, Any], trace: D
         if stype == "bpmn:businessRuleTask":
             expect(sid, tid, "dmnResource", f"{sid}.dmn", target["attrs"].get("dmnResource"))
             expect(sid, tid, "decisionID", f"{sid}_DecisionID", target["attrs"].get("decisionID"))
+            for edge_type, direction in (("bpmn:documentationInput", "input"), ("bpmn:documentationOutput", "output")):
+                for edge in bpmn_tag.get("edges", []):
+                    if edge.get("type") == edge_type and edge.get("source") == sid:
+                        bp_node = bpmn_nodes.get(edge.get("target"))
+                        if not bp_node:
+                            continue
+                        dp_node = dsl_nodes.get(bp_node["id"])
+                        if dp_node and dp_node.get("type") == "dsl:paramMapping":
+                            expect(sid, tid, f"{direction}_dmnParam__{bp_node['name']}", bp_node["name"], dp_node["attrs"].get("dmnParam"))
+                            expect(sid, tid, f"{direction}_globalRef__{bp_node['name']}", bp_node["attrs"].get("global_name", ""), dp_node["attrs"].get("globalRef"))
+                        else:
+                            checks += 1
+                            failures.append({
+                                "source_id": sid, "target_id": tid,
+                                "attribute": f"{direction}_paramMapping__{bp_node['name']}",
+                                "source_value": bp_node["attrs"],
+                                "target_value": "MISSING",
+                                "failure_type": "AttributeMismatch",
+                            })
+        if stype in ("bpmn:receiveTask", "bpmn:scriptTask", "bpmn:dataTask"):
+            doc = {}
+            try:
+                doc = json.loads(source["attrs"].get("documentation", "{}"))
+            except (json.JSONDecodeError, TypeError):
+                pass
+            if not isinstance(doc, dict):
+                doc = {}
+            default_oracle_type = "compute-task" if stype == "bpmn:scriptTask" else "external-data"
+            expect(sid, tid, "oracleType", doc.get("oracleTaskType", default_oracle_type), target["attrs"].get("oracleType"))
+            expect(sid, tid, "dataSource", doc.get("dataSource", ""), target["attrs"].get("dataSource", ""))
+            expect(sid, tid, "computeScript", doc.get("computeScript", ""), target["attrs"].get("computeScript", ""))
+            expect(sid, tid, "initialState", "INACTIVE", target["attrs"].get("initialState"))
+            for edge in bpmn_tag.get("edges", []):
+                if edge.get("type") == "bpmn:documentationOutput" and edge.get("source") == sid:
+                    bp_node = bpmn_nodes.get(edge.get("target"))
+                    if not bp_node:
+                        continue
+                    dp_node = dsl_nodes.get(bp_node["id"])
+                    if dp_node and dp_node.get("type") == "dsl:paramMapping":
+                        expect(sid, tid, f"output_dmnParam__{bp_node['name']}", bp_node["name"], dp_node["attrs"].get("dmnParam"))
+                        expect(sid, tid, f"output_globalRef__{bp_node['name']}", bp_node["attrs"].get("global_name", ""), dp_node["attrs"].get("globalRef"))
+                    else:
+                        checks += 1
+                        failures.append({
+                            "source_id": sid, "target_id": tid,
+                            "attribute": f"output_paramMapping__{bp_node['name']}",
+                            "source_value": bp_node["attrs"],
+                            "target_value": "MISSING",
+                            "failure_type": "AttributeMismatch",
+                        })
+
+    for derived in bpmn_tag.get("derived", []):
+        dsl_node = dsl_nodes.get(derived.get("target", ""))
+        if not dsl_node:
+            checks += 1
+            failures.append({
+                "source_id": derived["id"],
+                "target_id": derived.get("target", ""),
+                "attribute": "global_existence",
+                "source_value": derived,
+                "target_value": "MISSING",
+                "failure_type": "AttributeMismatch",
+            })
+            continue
+        if dsl_node.get("type") != "dsl:global":
+            checks += 1
+            failures.append({
+                "source_id": derived["id"],
+                "target_id": dsl_node["id"],
+                "attribute": "target_type",
+                "source_value": "dsl:global",
+                "target_value": dsl_node["type"],
+                "failure_type": "AttributeMismatch",
+            })
+            continue
+        derived_name = public_the_name(derived["attrs"].get("name", ""))
+        expect(derived["id"], dsl_node["id"], "global_name", derived_name, dsl_node["name"])
+        derived_type = derived.get("type", "")
+        if derived_type == "bpmn:condition_variable":
+            raw_value = derived["attrs"].get("value", "")
+            if raw_value.lower() in ("true", "false"):
+                raw_type = "boolean"
+            elif raw_value.lstrip("-").isdigit():
+                raw_type = "integer"
+            else:
+                try:
+                    float(raw_value)
+                    raw_type = "float"
+                except ValueError:
+                    raw_type = "string"
+        else:
+            raw_type = derived["attrs"].get("type", "string")
+        expected_type = derived["attrs"].get("dsl_type") or map_bpmn_type(raw_type)
+        expect(derived["id"], dsl_node["id"], "global_type", expected_type, dsl_node["attrs"].get("type"))
+
     return {
         "total_attribute_checks": checks,
         "passed_attribute_checks": checks - len(failures),
@@ -241,6 +338,105 @@ def check_relations(bpmn_tag: Dict[str, Any], dsl_tag: Dict[str, Any]) -> Dict[s
                 if seq:
                     target = activation_target(bpmn_tag, seq["target"])
                     require(find_edge(dsl_tag, "dsl:enable", gateway["id"], target) is not None, {"failure_type": "RelationMissing", "rule": "GatewayEnable", "source": gateway["id"], "target": target})
+
+    for task in nodes_by_type(bpmn_tag, "bpmn:businessRuleTask"):
+        for seq_id in task["attrs"].get("outgoing", []) or []:
+            seq = sequence_by_id(bpmn_tag, seq_id)
+            if not seq:
+                continue
+            target = activation_target(bpmn_tag, seq["target"])
+            require(
+                find_edge(dsl_tag, "dsl:enable", task["id"], target, {"trigger_type": "businessrule"}) is not None,
+                {"failure_type": "RelationMissing", "rule": "BusinessRuleSequence2RuleFlow", "source": task["id"], "target": target},
+            )
+
+    for task_type in ("bpmn:receiveTask", "bpmn:scriptTask", "bpmn:dataTask"):
+        for task in nodes_by_type(bpmn_tag, task_type):
+            for seq_id in task["attrs"].get("outgoing", []) or []:
+                seq = sequence_by_id(bpmn_tag, seq_id)
+                if not seq:
+                    continue
+                target = activation_target(bpmn_tag, seq["target"])
+                require(
+                    find_edge(dsl_tag, "dsl:enable", task["id"], target, {"trigger_type": "oracletask"}) is not None,
+                    {"failure_type": "RelationMissing", "rule": "OracleTaskSequence2OracleTaskFlow", "source": task["id"], "target": target},
+                )
+
+    for gateway in nodes_by_type(bpmn_tag, "bpmn:exclusiveGateway"):
+        for seq_id in gateway["attrs"].get("outgoing", []) or []:
+            seq = sequence_by_id(bpmn_tag, seq_id)
+            if not seq:
+                continue
+            condition = seq["attrs"].get("condition_expression", "")
+            if not condition:
+                continue
+            target = activation_target(bpmn_tag, seq["target"])
+            require(
+                find_edge(dsl_tag, "dsl:gateway_branch", gateway["id"], target) is not None,
+                {"failure_type": "RelationMissing", "rule": "ExclusiveGatewayCondition2GatewayBranch", "source": gateway["id"], "target": target, "condition": condition},
+            )
+
+    for gateway in nodes_by_type(bpmn_tag, "bpmn:eventBasedGateway"):
+        branch_messages: list[tuple[str, Dict[str, Any], str]] = []
+        message_flows = {edge["id"]: edge for edge in edges_by_type(bpmn_tag, "bpmn:messageFlow")}
+        for seq_id in gateway["attrs"].get("outgoing", []) or []:
+            seq = sequence_by_id(bpmn_tag, seq_id)
+            if not seq:
+                continue
+            target_node = find_node(bpmn_tag, seq["target"])
+            if not target_node or target_node["type"] != "bpmn:choreographyTask":
+                continue
+            initiating = target_node["attrs"].get("initiatingParticipantRef")
+            init_message = None
+            return_message = None
+            for flow_id in target_node["attrs"].get("messageFlowRefs", []) or []:
+                flow = message_flows.get(flow_id)
+                if not flow:
+                    continue
+                if flow["source"] == initiating:
+                    init_message = flow["attrs"].get("message")
+                if flow["target"] == initiating:
+                    return_message = flow["attrs"].get("message")
+            if init_message:
+                branch_messages.append((init_message, target_node, return_message or ""))
+        for msg, task_node, ret_msg in branch_messages:
+            require(
+                find_edge(dsl_tag, "dsl:enable", gateway["id"], msg) is not None,
+                {"failure_type": "RelationMissing", "rule": "EventGatewayEnableBranch", "source": gateway["id"], "target": msg},
+            )
+            for other_msg, _, _ in branch_messages:
+                if other_msg != msg:
+                    require(
+                        find_edge(dsl_tag, "dsl:disable", msg, other_msg) is not None,
+                        {"failure_type": "RelationMissing", "rule": "EventGatewayDisableBranch", "source": msg, "target": other_msg},
+                    )
+            successor = outgoing_target(bpmn_tag, task_node)
+            if successor:
+                if ret_msg:
+                    require(
+                        find_edge(dsl_tag, "dsl:enable", ret_msg, successor) is not None,
+                        {"failure_type": "RelationMissing", "rule": "EventGatewayBranchSuccessor", "source": ret_msg, "target": successor},
+                    )
+                else:
+                    require(
+                        find_edge(dsl_tag, "dsl:enable", msg, successor) is not None,
+                        {"failure_type": "RelationMissing", "rule": "EventGatewayBranchSuccessor", "source": msg, "target": successor},
+                    )
+
+    handled_source_types = {
+        "bpmn:startEvent", "bpmn:endEvent", "bpmn:choreographyTask",
+        "bpmn:parallelGateway", "bpmn:exclusiveGateway", "bpmn:eventBasedGateway",
+        "bpmn:businessRuleTask", "bpmn:receiveTask", "bpmn:scriptTask", "bpmn:dataTask",
+    }
+    for seq in edges_by_type(bpmn_tag, "bpmn:sequenceFlow"):
+        source_node = find_node(bpmn_tag, seq["source"])
+        if not source_node or source_node["type"] in handled_source_types:
+            continue
+        target = activation_target(bpmn_tag, seq["target"])
+        require(
+            find_edge(dsl_tag, "dsl:enable", seq["source"], target) is not None,
+            {"failure_type": "RelationMissing", "rule": "SequenceFlow2FlowEnable", "source": seq["source"], "target": target},
+        )
 
     return {
         "total_source_relations": checks,
