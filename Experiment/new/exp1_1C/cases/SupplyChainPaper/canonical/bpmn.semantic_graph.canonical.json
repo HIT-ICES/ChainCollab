@@ -67,70 +67,6 @@
   ],
   "nodes": [
     {
-      "id": "Message_04wmlqe",
-      "type": "message",
-      "sender": "Participant_19mgbdn",
-      "receiver": "Participant_0w6qkdf",
-      "schema": "{\"properties\":{\"productionStart\":{\"type\":\"string\",\"description\":\"Notification of the commencement of production, including the date and time\"}},\"required\":[\"productionStart\"],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_0cba4t6",
-      "type": "message",
-      "sender": "Participant_09cjol2",
-      "receiver": "Participant_0sa2v7d",
-      "schema": "{\"properties\":{\"supplyOrderId\":{\"type\":\"string\",\"description\":\" Identifier of the supply order being forwarded\"}},\"required\":[\"supplyOrderId\"],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_0d2xte5",
-      "type": "message",
-      "sender": "Participant_19j1e3o",
-      "receiver": "Participant_19mgbdn",
-      "schema": "{\"properties\":{\"deliveryConfirmation\":{\"type\":\"boolean\",\"description\":\"Confirmation of whether the supplies have been successfully delivered\"}},\"required\":[\"deliveryConfirmation\"],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_0hpha6h",
-      "type": "message",
-      "sender": "Participant_0sa2v7d",
-      "receiver": "Participant_19j1e3o",
-      "schema": "{\"properties\":{\"requestId\":{\"type\":\"number\",\"description\":\"Unique identifier of the request for additional details \"},\"supplierReputation\":{\"type\":\"number\",\"description\":\"A numerical rating representing the supplier's reputation.\"}},\"required\":[\"requestId\",\"supplierReputation\"],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_0pm90nx",
-      "type": "message",
-      "sender": "Participant_09cjol2",
-      "receiver": "Participant_19j1e3o",
-      "schema": "{\"properties\":{\"transportOrderId\":{\"type\":\"string\",\"description\":\"Identifier of the transport order being forwarded\"}},\"required\":[\"transportOrderId\"],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_0rwz1km",
-      "type": "message",
-      "sender": "Participant_19j1e3o",
-      "receiver": "Participant_0sa2v7d",
-      "schema": "{\"properties\":{\"requestId\":{\"type\":\"number\",\"description\":\" Unique identifier of the request for additional details \"},\"numberOfUnits\":{\"type\":\"number\",\"description\":\" Total number of units in the order requested\"},\"urgent\":{\"type\":\"boolean\",\"description\":\"Indicates whether the order requires urgent delivery.\"}},\"required\":[\"requestId\",\"numberOfUnits\",\"urgent\"],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_196q1fj",
-      "type": "message",
-      "sender": "Participant_19mgbdn",
-      "receiver": "Participant_0w6qkdf",
-      "schema": "{\"properties\":{},\"required\":[],\"files\":{\"deliveryNote\":{\"type\":\"file\",\"description\":\"A document confirming the delivery of goods\"}},\"file required\":[\"deliveryNote\"]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_1ajdm9l",
-      "type": "message",
-      "sender": "Participant_19mgbdn",
-      "receiver": "Participant_09cjol2",
-      "schema": "{\"properties\":{\"supplyOrderDetails\":{\"type\":\"string\",\"description\":\" Details of the supplies needed\"}},\"required\":[\"supplyOrderDetails\"],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
       "id": "Message_1dmeexg",
       "type": "message",
       "sender": "Participant_19j1e3o",
@@ -147,6 +83,38 @@
       "initial_state": "INACTIVE"
     },
     {
+      "id": "Message_1oxmq1k",
+      "type": "message",
+      "sender": "Participant_19j1e3o",
+      "receiver": "Participant_19mgbdn",
+      "schema": "{\"properties\":{\"confirm1\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_196q1fj",
+      "type": "message",
+      "sender": "Participant_19mgbdn",
+      "receiver": "Participant_0w6qkdf",
+      "schema": "{\"properties\":{},\"required\":[],\"files\":{\"deliveryNote\":{\"type\":\"file\",\"description\":\"A document confirming the delivery of goods\"}},\"file required\":[\"deliveryNote\"]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_04wmlqe",
+      "type": "message",
+      "sender": "Participant_19mgbdn",
+      "receiver": "Participant_0w6qkdf",
+      "schema": "{\"properties\":{\"productionStart\":{\"type\":\"string\",\"description\":\"Notification of the commencement of production, including the date and time\"}},\"required\":[\"productionStart\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_0d2xte5",
+      "type": "message",
+      "sender": "Participant_19j1e3o",
+      "receiver": "Participant_19mgbdn",
+      "schema": "{\"properties\":{\"deliveryConfirmation\":{\"type\":\"boolean\",\"description\":\"Confirmation of whether the supplies have been successfully delivered\"}},\"required\":[\"deliveryConfirmation\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
       "id": "Message_1io2g9u",
       "type": "message",
       "sender": "Participant_0sa2v7d",
@@ -155,11 +123,43 @@
       "initial_state": "INACTIVE"
     },
     {
-      "id": "Message_1oxmq1k",
+      "id": "Message_0hpha6h",
+      "type": "message",
+      "sender": "Participant_0sa2v7d",
+      "receiver": "Participant_19j1e3o",
+      "schema": "{\"properties\":{\"requestId\":{\"type\":\"number\",\"description\":\"Unique identifier of the request for additional details \"},\"supplierReputation\":{\"type\":\"number\",\"description\":\"A numerical rating representing the supplier's reputation.\"}},\"required\":[\"requestId\",\"supplierReputation\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_0rwz1km",
       "type": "message",
       "sender": "Participant_19j1e3o",
-      "receiver": "Participant_19mgbdn",
-      "schema": "{\"properties\":{\"confirm1\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+      "receiver": "Participant_0sa2v7d",
+      "schema": "{\"properties\":{\"requestId\":{\"type\":\"number\",\"description\":\" Unique identifier of the request for additional details \"},\"numberOfUnits\":{\"type\":\"number\",\"description\":\" Total number of units in the order requested\"},\"urgent\":{\"type\":\"boolean\",\"description\":\"Indicates whether the order requires urgent delivery.\"}},\"required\":[\"requestId\",\"numberOfUnits\",\"urgent\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_0pm90nx",
+      "type": "message",
+      "sender": "Participant_09cjol2",
+      "receiver": "Participant_19j1e3o",
+      "schema": "{\"properties\":{\"transportOrderId\":{\"type\":\"string\",\"description\":\"Identifier of the transport order being forwarded\"}},\"required\":[\"transportOrderId\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_0cba4t6",
+      "type": "message",
+      "sender": "Participant_09cjol2",
+      "receiver": "Participant_0sa2v7d",
+      "schema": "{\"properties\":{\"supplyOrderId\":{\"type\":\"string\",\"description\":\" Identifier of the supply order being forwarded\"}},\"required\":[\"supplyOrderId\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_1ajdm9l",
+      "type": "message",
+      "sender": "Participant_19mgbdn",
+      "receiver": "Participant_09cjol2",
+      "schema": "{\"properties\":{\"supplyOrderDetails\":{\"type\":\"string\",\"description\":\" Details of the supplies needed\"}},\"required\":[\"supplyOrderDetails\"],\"files\":{},\"file required\":[]}",
       "initial_state": "INACTIVE"
     },
     {
@@ -171,16 +171,9 @@
       "initial_state": "INACTIVE"
     },
     {
-      "id": "Gateway_1cr0nma",
-      "type": "gateway",
-      "gateway_type": "exclusive",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Gateway_0ep8cuh",
-      "type": "gateway",
-      "gateway_type": "exclusive",
-      "initial_state": "INACTIVE"
+      "id": "Event_06sexe6",
+      "type": "event",
+      "initial_state": "READY"
     },
     {
       "id": "Gateway_0onpe6x",
@@ -193,11 +186,6 @@
       "type": "gateway",
       "gateway_type": "parallel",
       "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Event_06sexe6",
-      "type": "event",
-      "initial_state": "READY"
     },
     {
       "id": "Event_13pbqdz",
@@ -228,23 +216,35 @@
         ]
       ],
       "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Gateway_1cr0nma",
+      "type": "gateway",
+      "gateway_type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Gateway_0ep8cuh",
+      "type": "gateway",
+      "gateway_type": "exclusive",
+      "initial_state": "INACTIVE"
     }
   ],
   "globals": {
-    "Confirm1": "bool",
-    "Confirm2": "bool",
     "Confirm3": "string",
-    "DeliveryConfirmation": "bool",
-    "FinalPriority": "string",
-    "NumberOfUnits": "int",
-    "OrderDetails": "string",
+    "Confirm2": "bool",
+    "Confirm1": "bool",
     "ProductionStart": "string",
+    "DeliveryConfirmation": "bool",
     "RequestId": "int",
     "SupplierReputation": "int",
-    "SupplyOrderDetails": "string",
-    "SupplyOrderId": "string",
+    "NumberOfUnits": "int",
+    "Urgent": "bool",
     "TransportOrderId": "string",
-    "Urgent": "bool"
+    "SupplyOrderId": "string",
+    "SupplyOrderDetails": "string",
+    "OrderDetails": "string",
+    "FinalPriority": "string"
   },
   "dmn_outputs": {
     "initialPriority": [
@@ -459,20 +459,6 @@
     {
       "id": "r_015",
       "template_kind": "gateway",
-      "trigger": "Gateway_1cr0nma",
-      "guard": null,
-      "actions": [
-        {
-          "op": "enable",
-          "target": "Message_04wmlqe"
-        }
-      ],
-      "branches": [],
-      "sources": []
-    },
-    {
-      "id": "r_016",
-      "template_kind": "gateway",
       "trigger": "Gateway_0onpe6x",
       "guard": null,
       "actions": [
@@ -489,7 +475,38 @@
       "sources": []
     },
     {
+      "id": "r_016",
+      "template_kind": "parallel_join",
+      "trigger": "Gateway_1fbifca",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_0rwz1km"
+        }
+      ],
+      "branches": [],
+      "sources": [
+        "Message_0cba4t6",
+        "Message_0pm90nx"
+      ]
+    },
+    {
       "id": "r_017",
+      "template_kind": "gateway",
+      "trigger": "Gateway_1cr0nma",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_04wmlqe"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_018",
       "template_kind": "gateway_choose",
       "trigger": "Gateway_0ep8cuh",
       "guard": null,
@@ -505,20 +522,20 @@
           ]
         },
         {
-          "guard": "FinalPriority == \"High\"",
-          "actions": [
-            {
-              "op": "enable",
-              "target": "Message_1dmeexg"
-            }
-          ]
-        },
-        {
           "guard": "FinalPriority == \"Medium\"",
           "actions": [
             {
               "op": "enable",
               "target": "Message_1dzkcn0"
+            }
+          ]
+        },
+        {
+          "guard": "FinalPriority == \"High\"",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "Message_1dmeexg"
             }
           ]
         },
@@ -533,23 +550,6 @@
         }
       ],
       "sources": []
-    },
-    {
-      "id": "r_018",
-      "template_kind": "parallel_join",
-      "trigger": "Gateway_1fbifca",
-      "guard": null,
-      "actions": [
-        {
-          "op": "enable",
-          "target": "Message_0rwz1km"
-        }
-      ],
-      "branches": [],
-      "sources": [
-        "Message_0cba4t6",
-        "Message_0pm90nx"
-      ]
     },
     {
       "id": "r_019",
@@ -588,6 +588,10 @@
     "DONE",
     "INACTIVE"
   ],
+  "construction_source": {
+    "kind": "bpmn_xml",
+    "file": "/root/code/ChainCollab/Experiment/BPMNwithDMNcase/SupplyChainPaper.bpmn"
+  },
   "canonicalization": {
     "source": "/root/code/ChainCollab/Experiment/new/exp1_1B/cases/SupplyChainPaper/trace/bpmn_dsl_trace.json",
     "mapping_count": 39

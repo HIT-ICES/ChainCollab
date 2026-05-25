@@ -4,6 +4,8 @@
 
 实验 1C 验证的是 **BPMN 源模型与 DSL 目标模型之间的行为语义是否一致**。具体做法是：分别将 BPMN 源模型和 DSL 目标模型映射到统一行为迁移系统（Unified Behavioral Transition System, UBTS）的 JSON 实现，分别生成有界 trace 集合，再通过 trace 集合双向包含、步骤级状态迁移比较和终态比较，判断 BPMN 与 DSL 的行为是否一致。
 
+当前实现已经按该原则修正：`build_bpmn_semantic_graph.py` 直接从 BPMN XML 构建 BPMN 侧 UBTS，`build_dsl_semantic_graph.py` 从 `translator/dsl.b2c` 构建 DSL 侧 UBTS。两侧不再共用由 DSL 反推的同源 UBTS，因此 1C 的比较能够暴露 BPMN→DSL 转换中的行为丢失或额外行为。
+
 有界 trace 集合一致性要求：
 
 ```text
@@ -77,18 +79,16 @@ logical_path.json 是附加格式化产物；
 
 ```text
 输入 1：BPMN 源模型
-BPMNwithDMNcase/<CaseName>.bpmn
+/root/code/ChainCollab/Experiment/BPMNwithDMNcase/<CaseName>.bpmn
 
 输入 2：newTranslator 转换配置或转换命令
-src/newTranslator/
+/root/code/ChainCollab/src/newTranslator/
 
 输入 3：newTranslator 生成的 DSL 目标模型
-Experiment/new/exp1_1C/cases/<CaseName>/translator/dsl.b2c
-或
-Experiment/new/exp1_1C/cases/<CaseName>/translator/dsl_model.json
+/root/code/ChainCollab/Experiment/new/exp1_1C/cases/<CaseName>/translator/dsl.b2c
 
 输入 4：1B 结构映射结果
-Experiment/new/exp1_1B/cases/<CaseName>/bpmn_dsl_trace.json
+/root/code/ChainCollab/Experiment/new/exp1_1B/cases/<CaseName>/trace/bpmn_dsl_trace.json
 
 输入 5：路径枚举配置
 Experiment/new/exp1_1C/cases/<CaseName>/config/path_bound_config.json
@@ -123,9 +123,10 @@ Experiment/new/exp1_1C/cases/<CaseName>/normalized/dsl.normalized_paths.json
 Experiment/new/exp1_1C/cases/<CaseName>/comparison/path_set_comparison.json
 
 输出 8：步骤级轨迹比较结果
-Experiment/new/exp1_1C/cases/<CaseName>/comparison/step_trace_comparison.json
+Experiment/new/exp1_1C/cases/<CaseName>/comparison/step_trace_comparison_summary.json
 
 输出 9：实验报告
+Experiment/new/exp1_1C/cases/<CaseName>/reports/behavior_summary.json
 Experiment/new/exp1_1C/cases/<CaseName>/reports/behavior_summary.md
 ```
 
@@ -356,17 +357,11 @@ s = (μ, ν)
 
 ```json
 {
-  "step_index": 1,
-  "trigger": {
-    "type": "message",
-    "element": "Message_1wswgqu"
-  },
+  "trigger": "Message_1wswgqu",
   "enabled_before": ["Message_1wswgqu"],
-  "accepted": true,
   "guard_result": true,
   "state_diff": {
-    "Message_1wswgqu": ["READY", "DONE"],
-    "Gateway_1fbifca": ["INIT", "READY"]
+    "Message_1wswgqu": ["READY", "DONE"]
   },
   "global_diff": {},
   "enabled_after": ["Gateway_1fbifca"]
@@ -382,12 +377,14 @@ s = (μ, ν)
   "schema_version": "exp1c.normalized_trace.v1",
   "model_type": "bpmn",
   "case_name": "SupplyChainPaper",
-  "path_id": "path_001",
+  "path_id": "bpmn_path_001",
+  "trace_signature": "9c1d9b31049d2e69",
   "steps": [],
   "final_state": {
     "status": "COMPLETED",
     "element_states": {},
-    "enabled_elements": []
+    "enabled_elements": [],
+    "globals": {}
   }
 }
 ```
@@ -442,7 +439,9 @@ BPMN 和 DSL 都可能包含循环、回退或重复执行逻辑。如果直接�
 dmn_policy = decision_table_rows
 ```
 
-即从 businessrule 关联的 DMN 决策表中读取可命中规则行，按规则行产生代表性输出估值，并将输出写回业务变量估值 `ν`。如果 businessrule 的输出变量会被后续 gateway guard 使用，则不同 DMN 输出可能诱导不同后续 trace，因此必须纳入路径生成输入空间。
+当前实现采用工程化的 `decision_table_rows` 近似策略：从已发现的 DMN 文件中读取 decision output 名称和 outputEntry 取值，形成代表性输出估值集合，并在执行 businessrule 时写回对应 global 变量。如果 businessrule 的输出变量会被后续 gateway guard 使用，则不同 DMN 输出会诱导不同后续 trace，因此必须纳入路径生成输入空间。
+
+需要注意，当前实现不是完整 DMN 引擎：它不根据输入条件精确命中某一条规则，而是枚举决策表中出现过的代表性输出值。该策略用于覆盖由 DMN 输出导致的流程分支差异，而不验证 DMN 决策表本身的业务正确性。
 
 DMN 策略可分为以下几类：
 
@@ -456,14 +455,14 @@ DMN 策略可分为以下几类：
 执行到 businessrule 节点时，路径生成器应按以下规则处理：
 
 ```text
-1. 从当前业务变量估值 ν 读取 DMN input mapping。
-2. 根据 dmn_policy 选择一组或多组 DMN 输出估值。
-3. 将 DMN output mapping 写回 ν，形成后继状态 s'=(μ',ν')。
-4. 如果输出变量影响后续 gateway guard，则继续按不同 ν' 枚举后续 traces。
-5. BPMN UBTS 和 DSL UBTS 必须使用同一组 DMN 输出估值进行比较。
+1. 根据 case 的 BPMN 文件发现同目录 DMN 文件，包含去掉空格、下划线等非字母数字字符后的同名匹配，例如 `Pizza_Order.bpmn` 对应 `PizzaOrder.dmn`。
+2. 从 DMN decision output / outputEntry 中提取代表性输出值。
+3. 执行 businessrule 时，将 output mapping 写回业务变量估值 `ν`，形成后继状态 `s'=(μ',ν')`。
+4. 如果输出变量影响后续 gateway guard，则继续按不同 `ν'` 枚举后续 traces。
+5. BPMN UBTS 和 DSL UBTS 使用同一组 DMN 输出估值进行比较。
 ```
 
-因此，DMN 策略是 trace 生成的输入空间约束，而不是额外实验边界。若时间有限，可以先采用 `fixed_sample` 完成最小闭环；正式实验建议采用 `decision_table_rows`，并用 `dmn_output_bound` 控制组合规模。
+因此，DMN 策略是 trace 生成的输入空间约束，而不是额外实验边界。当前实验已采用上述代表性 outputEntry 枚举方式，并用 `dmn_output_bound` 控制组合规模；完整 DMN 条件求值仍属于暂缓范围。
 
 ------
 
@@ -478,9 +477,9 @@ DMN 策略可分为以下几类：
 ### 输入
 
 ```text
-BPMNwithDMNcase/<CaseName>.bpmn
-src/newTranslator/
-Experiment/new/exp1_1B/cases/<CaseName>/bpmn_dsl_trace.json
+/root/code/ChainCollab/Experiment/BPMNwithDMNcase/<CaseName>.bpmn
+/root/code/ChainCollab/src/newTranslator/
+/root/code/ChainCollab/Experiment/new/exp1_1B/cases/<CaseName>/trace/bpmn_dsl_trace.json
 ```
 
 ### 输出
@@ -522,8 +521,8 @@ Experiment/new/exp1_1C/cases/<CaseName>/config/run_config.json
 ### 输入
 
 ```text
-BPMNwithDMNcase/<CaseName>.bpmn
-src/newTranslator/
+/root/code/ChainCollab/Experiment/BPMNwithDMNcase/<CaseName>.bpmn
+/root/code/ChainCollab/src/newTranslator/
 Experiment/new/exp1_1C/cases/<CaseName>/config/run_config.json
 ```
 
@@ -531,7 +530,6 @@ Experiment/new/exp1_1C/cases/<CaseName>/config/run_config.json
 
 ```text
 Experiment/new/exp1_1C/cases/<CaseName>/translator/dsl.b2c
-Experiment/new/exp1_1C/cases/<CaseName>/translator/dsl_model.json
 Experiment/new/exp1_1C/cases/<CaseName>/translator/newtranslator_report.json
 ```
 
@@ -574,7 +572,7 @@ ParticipantRef / initiatingParticipantRef
 ### 输入
 
 ```text
-BPMNwithDMNcase/<CaseName>.bpmn
+/root/code/ChainCollab/Experiment/BPMNwithDMNcase/<CaseName>.bpmn
 ```
 
 ### 输出
@@ -598,7 +596,7 @@ BPMN XML 是建模语言层面的源文件，不能直接用于 bounded trace co
 
 ### 做什么
 
-把 BPMN 原始元素映射为统一行为迁移系统（UBTS / GLSTS）的 JSON 实现，即 `bpmn.semantic_graph.json`。
+直接解析 BPMN XML，将 BPMN 原始元素和关系映射为统一行为迁移系统（UBTS / GLSTS）的 JSON 实现，即 `bpmn.semantic_graph.json`。该步骤不读取 `translator/dsl.b2c`，避免 BPMN 侧和 DSL 侧同源导致比较失效。
 
 转换规则示例：
 
@@ -622,9 +620,7 @@ BPMN XML 是建模语言层面的源文件，不能直接用于 bounded trace co
 ### 输入
 
 ```text
-bpmn.raw_elements.json
-bpmn.raw_relations.json
-bpmn_dsl_trace.json
+/root/code/ChainCollab/Experiment/BPMNwithDMNcase/<CaseName>.bpmn
 ```
 
 ### 输出
@@ -635,7 +631,7 @@ Experiment/new/exp1_1C/cases/<CaseName>/semantic/bpmn.semantic_graph.json
 
 ### 为什么必要
 
-BPMN 原始结构不等于执行语义。比如网关、消息流、业务规则、并行 join 都需要解释为带守卫的状态迁移规则。将 BPMN 映射为 UBTS 后，BPMN 才能与 DSL 进入同一个统一形式语义域。
+BPMN 原始结构不等于执行语义。比如网关、消息流、业务规则、并行 join 都需要解释为带守卫的状态迁移规则。当前实现从 BPMN XML 直接构建这套迁移系统，使 BPMN 能与 DSL 进入同一个统一形式语义域。
 
 ### 能证明什么
 
@@ -672,8 +668,6 @@ set global operation
 
 ```text
 Experiment/new/exp1_1C/cases/<CaseName>/translator/dsl.b2c
-或
-Experiment/new/exp1_1C/cases/<CaseName>/translator/dsl_model.json
 ```
 
 ### 输出
@@ -697,16 +691,14 @@ DSL 是转换后的目标模型。1C 需要检查的不是代码执行结果，�
 
 ### 做什么
 
-把 DSL 原始元素、`flows`、guard、output 和状态推进关系映射为统一行为迁移系统（UBTS / GLSTS）的 JSON 实现，即 `dsl.semantic_graph.json`。
+直接读取 `translator/dsl.b2c`，将其中的元素、`flows`、guard、output 和状态推进关系映射为统一行为迁移系统（UBTS / GLSTS）的 JSON 实现，即 `dsl.semantic_graph.json`。`raw/dsl.raw_elements.json` 和 `raw/dsl.raw_relations.json` 会作为可复查的抽取产物保留，但当前 UBTS 构建以 `dsl.b2c` 为真实输入。
 
 其中 `participants` 和 `globals` 需要作为 UBTS 的上下文一起保留：`participants` 构成参与者集合 `P`，用于解释 message 的 sender/receiver 和多实例身份属性；`globals` 构成业务变量集合 `V`，用于解释 guard、set action、businessrule output 和 oracletask output。message、event、gateway、businessrule、oracletask 则映射为可触发流程元素集合 `N`。
 
 ### 输入
 
 ```text
-dsl.raw_elements.json
-dsl.raw_relations.json
-bpmn_dsl_trace.json
+Experiment/new/exp1_1C/cases/<CaseName>/translator/dsl.b2c
 ```
 
 ### 输出
@@ -729,7 +721,9 @@ BPMN 和 DSL 的语法不同，不能直接比较。只有映射到统一形式�
 
 ### 做什么
 
-使用实验 1B 输出的 `bpmn_dsl_trace.json`，把 BPMN UBTS 和 DSL UBTS 中的元素统一到同一 ID 空间。
+使用实验 1B 输出的 `bpmn_dsl_trace.json`，记录 BPMN UBTS 和 DSL UBTS 的元素可追踪关系，并生成 canonical 版本的语义图。
+
+当前 11 个 case 中，BPMN XML 与 newTranslator 生成的 DSL 已基本保留相同的行为元素 ID，因此当前实现主要把 semantic graph 原样写入 canonical 目录，并在 `canonicalization` 字段和 `id_normalization_report.json` 中记录 1B trace 来源与映射数量。也就是说，canonicalization 当前是显式标注与可追溯确认，不是复杂 ID 重写。
 
 例如：
 
@@ -761,7 +755,7 @@ Experiment/new/exp1_1C/cases/<CaseName>/canonical/id_normalization_report.json
 
 ### 能证明什么
 
-这一步证明 BPMN 与 DSL 的行为元素具备可追踪对应关系，行为比较不是基于字符串巧合，而是基于明确映射。
+这一步证明 BPMN 与 DSL 的行为元素具备可追踪对应关系；在当前数据集中也确认了两侧行为元素 ID 已可直接比较。
 
 ------
 
@@ -845,18 +839,15 @@ Experiment/new/exp1_1C/cases/<CaseName>/paths/dsl.path_generation_report.json
 
 对 BPMN trace 和 DSL trace 进行规范化，消除语法层面的差异，只保留语义相关信息。
 
+当前实现中，主要规范化工作已经在 UBTS 构建、canonical semantic graph 和 trace 生成阶段完成，因此 Step 9 是轻量落盘步骤：将 `paths/bpmn.paths.json` 和 `paths/dsl.paths.json` 原样保存为 `normalized/bpmn.normalized_paths.json` 和 `normalized/dsl.normalized_paths.json`，并生成 `path_normalization_report.json`。该步骤保留为独立环节，是为了让比较输入和后续实验产物边界更清晰。
+
 规范化内容包括：
 
 ```text
-1. 统一元素 ID。
-2. 统一元素类型名称。
-3. 统一 guard 表达式格式。
-4. 折叠或补齐 start event bootstrap。
-5. 规范化 parallel split / join。
-6. 规范化 business rule step。
-7. 规范化 oracle task step。
-8. 规范化 message sender/receiver participant 引用。
-9. 去除非语义字段，例如图形坐标、注释、XML 顺序。
+1. 使用 canonical semantic graph 中的元素 ID 和类型。
+2. 保留 trace steps、states、final_state 等比较所需字段。
+3. 生成规范化输入文件，供 path set comparison 和 step trace comparison 使用。
+4. 非语义字段，例如图形坐标、注释、XML 顺序，已经在 BPMN/DSL UBTS 构建阶段被排除。
 ```
 
 ### 输入
@@ -878,7 +869,7 @@ Experiment/new/exp1_1C/cases/<CaseName>/normalized/path_normalization_report.jso
 
 ### 为什么必要
 
-BPMN 和 DSL 的执行表示可能存在细节差异。例如 BPMN 中显式存在网关节点，而 DSL 可能把部分网关逻辑编码为 flow guard。如果不规范化，会出现“形式不同但语义相同”的误报。
+BPMN 和 DSL 的执行表示可能存在细节差异。当前实现把这些差异前移到 UBTS 构建和 canonicalization 阶段处理，Step 9 负责固定比较输入，避免后续步骤直接读取生成路径时边界不清。
 
 ### 能证明什么
 
@@ -918,11 +909,12 @@ trace_signature =
      canonical_element_id,
      action_type,
      normalized_guard_label,
-     normalized_payload_shape)
+     normalized_payload_shape,
+     normalized_outputs)
   ])
 ```
 
-其中 `canonical_element_id` 来自 1B trace 映射，`action_type` 对应 event、message、gateway、businessrule 等动作类型，`normalized_guard_label` 是规范化后的 guard 标识，`normalized_payload_shape` 只保留影响分支和状态更新的输入字段结构或符号取值。`trace_signature` 不包含 BPMN XML 顺序、图形坐标、注释、原始 ID 差异等非语义字段。
+其中 `canonical_element_id` 来自 canonical semantic graph，`action_type` 对应 event、message、gateway、businessrule 等动作类型，`normalized_guard_label` 是规范化后的 guard 标识，`normalized_payload_shape` 只保留影响分支和状态更新的输入字段结构或符号取值，`normalized_outputs` 用于区分 businessrule / oracle task 产生的不同业务变量结果。`trace_signature` 不包含 BPMN XML 顺序、图形坐标、注释、原始 ID 差异等非语义字段。
 
 由于工程产物需要与既有路径文件命名保持兼容，部分文件名仍沿用 `paths`，但其语义是 UBTS 诱导出的 bounded traces。
 
@@ -959,28 +951,27 @@ DSL 有但 BPMN 没有：转换引入额外行为。
 
 ### 做什么
 
-对每一条匹配 trace，分别在 BPMN 语义解释器和 DSL 语义解释器中执行，生成步骤级 `NormalizedTrace`。
+对 BPMN 和 DSL 的 normalized paths 生成步骤级 `NormalizedTrace` 文件。当前实现的 `simulate_traces()` 一次性处理两侧路径，虽然脚本入口保留 `simulate_bpmn_trace.py` 和 `simulate_dsl_trace.py` 两个名称，但 pipeline 中调用一次即可同时生成 BPMN 与 DSL 两边的 trace 文件。
 
-trace 集合一致只对应 trace-level equivalence。为了进一步检查每一步迁移是否真正保持，需要把匹配 trace 重新放入 BPMN UBTS 和 DSL UBTS 中执行，记录每一步迁移前后的状态信息。
+trace 集合一致只对应 trace-level equivalence。为了进一步检查每一步迁移是否真正保持，需要保留每条路径执行过程中已经计算出的迁移前后状态信息。
 
 每一步记录：
 
 ```text
-trigger
 enabled_before
-accepted
+trigger
 guard_result
 state_diff
 global_diff
 enabled_after
+final_state
 ```
 
 ### 输入
 
 ```text
-bpmn.semantic_graph.canonical.json
-dsl.semantic_graph.canonical.json
-matched_paths.json
+bpmn.normalized_paths.json
+dsl.normalized_paths.json
 ```
 
 ### 输出
@@ -1006,27 +997,22 @@ trace 集合一致只能证明 trace-level equivalence，不能证明每一步�
 
 对每一对匹配路径，比较 BPMN trace 与 DSL trace。
 
-该步骤在 trace-level equivalence 的基础上，进一步比较每个对应迁移的 `enabled_before`、`guard_result`、`state_diff`、`enabled_after` 和 `final_state`。因此它比单纯 bounded trace equivalence 更强，用于检查有界范围内的 step-wise transition preservation 和 final-state preservation。
+当前实现不单独落盘 `matched_paths.json`。`compare_step_traces()` 直接读取 `normalized/bpmn.normalized_paths.json` 和 `normalized/dsl.normalized_paths.json`，按 `trace_signature` 找到双方匹配路径，然后比较双方的 `steps` 和 `final_state`。因为 `steps` 中已经包含触发元素、payload、guard、sender/receiver、businessrule outputs 等动作信息，`final_state` 中包含元素状态、全局变量和最终 enabled set，所以该步骤可以检查有界范围内的 step-wise transition preservation 和 final-state preservation。
 
 比较字段包括：
 
-| 字段              | 比较目的                 |
-| ----------------- | ------------------------ |
-| `trigger.element` | 当前触发元素是否一致     |
-| `trigger.type`    | 当前触发元素类型是否一致 |
-| `enabled_before`  | 执行前可触发集合是否一致 |
-| `accepted`        | 当前步骤是否都被接受     |
-| `guard_result`    | 分支条件判断是否一致     |
-| `state_diff`      | 元素状态迁移是否一致     |
-| `global_diff`     | 业务变量变化是否一致     |
-| `enabled_after`   | 执行后可触发集合是否一致 |
-| `final_state`     | 终态是否一致             |
+| 字段 | 比较目的 |
+| ---- | -------- |
+| `steps` | 动作序列、触发元素、类型、guard、payload、outputs、sender/receiver 是否一致 |
+| `final_state.element_states` | 终态元素状态是否一致 |
+| `final_state.globals` | 终态业务变量是否一致 |
+| `final_state.enabled` | 执行完成后的可触发集合是否一致 |
 
 ### 输入
 
 ```text
-bpmn.normalized.json
-dsl.normalized.json
+bpmn.normalized_paths.json
+dsl.normalized_paths.json
 ```
 
 ### 输出
@@ -1043,7 +1029,7 @@ Experiment/new/exp1_1C/cases/<CaseName>/comparison/step_trace_comparison_summary
 
 ### 能证明什么
 
-如果所有匹配 trace 的步骤级轨迹一致，可以证明 DSL 不仅保持了 BPMN 的 bounded trace equivalence，也在有界范围内保持了 enabled set、guard、effect 和 final state。
+如果所有匹配 trace 的步骤级轨迹一致，可以证明 DSL 不仅保持了 BPMN 的 bounded trace equivalence，也在当前抽象粒度下保持了动作序列、guard / payload / outputs 和 final state。
 
 ------
 
@@ -1064,21 +1050,23 @@ step_trace_comparison_summary.json
 
 ```text
 Experiment/new/exp1_1C/cases/<CaseName>/reports/behavior_summary.md
+Experiment/new/exp1_1C/cases/<CaseName>/reports/behavior_summary.json
 Experiment/new/exp1_1C/reports/all_cases_behavior_summary.csv
+Experiment/new/exp1_1C/reports/all_cases_behavior_summary.md
 ```
 
 ### 报告内容
 
 ```text
-1. BPMN 路径数量
-2. DSL 路径数量
-3. BPMN⊆DSL 是否成立
-4. DSL⊆BPMN 是否成立
-5. bounded trace 集合一致率
-6. 步骤级轨迹一致率
-7. 终态一致率
-8. 不一致类型统计
+1. BPMN bounded trace 数量
+2. DSL bounded trace 数量
+3. bounded trace equivalence 是否成立
+4. step-wise transition preservation 是否成立
+5. logical_path 格式路径导出数量
+6. case 是否通过
 ```
+
+更细的 missing / extra trace 信息保存在 `comparison/path_set_comparison.json` 中；每条匹配 trace 的步骤级比较结果保存在 `comparison/step_trace_comparison_summary.json` 和 `comparison/traces/<bpmn_path_id>/trace_comparison.json` 中。
 
 ### 为什么必要
 
@@ -1101,7 +1089,7 @@ Experiment/new/exp1_1C/reports/all_cases_behavior_summary.csv
 只有满足以下条件的路径才能生成 `logical_path.json`：
 
 ```text
-1. path_signature 在 BPMN 和 DSL 中都存在。
+1. trace_signature 在 BPMN 和 DSL 中都存在。
 2. step trace comparison 通过。
 3. final_state comparison 通过。
 ```
@@ -1109,7 +1097,7 @@ Experiment/new/exp1_1C/reports/all_cases_behavior_summary.csv
 ### 输入
 
 ```text
-matched_paths.json
+normalized/dsl.normalized_paths.json
 step_trace_comparison_summary.json
 ```
 
@@ -1127,8 +1115,8 @@ Experiment/new/exp1_1C/cases/<CaseName>/logical_paths/logical_path_generation_re
 ```json
 {
   "case_name": "Purchase",
-  "path_name": "Purchase_auto_path_001",
-  "description": "Auto materialized from BPMN/DSL consistent path.",
+  "path_name": "Purchase_dsl_path_001",
+  "description": "Auto materialized from BPMN/DSL consistent path by exp1_1C.",
   "source_model": "Experiment/new/exp1_1C/cases/Purchase/translator/dsl.b2c",
   "expect": "accepted",
   "steps": [
@@ -1157,7 +1145,7 @@ Experiment/new/exp1_1C/cases/<CaseName>/logical_paths/logical_path_generation_re
 | `expect` | 该路径的预期接受结果；1C 只导出通过验证的合法路径，因此通常为 `accepted` |
 | `steps` | 由 matched trace 转换得到的动作序列，每一步包含动作类型、规范化元素 ID 以及必要 payload |
 | `steps[].type` | 对应 UBTS 动作标签的类型，例如 event、message、gateway、businessrule |
-| `steps[].element` | 经过 1B 映射后的 canonical element id |
+| `steps[].element` | canonical semantic graph 中的元素 ID |
 | `steps[].sender` / `steps[].receiver` | 可选字段，用于保留 message step 的 participant 端点上下文 |
 | `steps[].payload` / `outputs` | 触发该步骤所需的业务输入或业务规则输出，来自 trace 枚举和步骤级回放 |
 | `generated_path.final_enabled_elements` | trace 执行完成后的 enabled set |
@@ -1203,7 +1191,7 @@ Experiment/new/exp1_1C/scripts/
 | ------------------------------- | ------------------------------ |
 | `run_newtranslator.py`          | 调用 newTranslator 生成 DSL 目标模型 |
 | `extract_bpmn_raw.py`           | 从 BPMN XML 抽取原始元素和关系 |
-| `build_bpmn_semantic_graph.py`  | 将 BPMN 映射为 UBTS / GLSTS 的 JSON 实现 |
+| `build_bpmn_semantic_graph.py`  | 直接从 BPMN XML 构建 BPMN UBTS / GLSTS JSON 实现 |
 | `extract_dsl_raw.py`            | 从 DSL 抽取原始元素和关系      |
 | `build_dsl_semantic_graph.py`   | 将 DSL 映射为 UBTS / GLSTS 的 JSON 实现 |
 | `normalize_semantic_ids.py`     | 利用 1B 映射统一 ID            |
@@ -1233,7 +1221,6 @@ Experiment/new/exp1_1C/
         path_bound_config.json
       translator/
         dsl.b2c
-        dsl_model.json
         newtranslator_report.json
       raw/
         bpmn.raw_elements.json
@@ -1257,17 +1244,18 @@ Experiment/new/exp1_1C/
         dsl.normalized_paths.json
         path_normalization_report.json
       traces/
-        bpmn/path_001/bpmn.normalized.json
-        dsl/path_001/dsl.normalized.json
+        bpmn/bpmn_path_001/bpmn.normalized.json
+        dsl/dsl_path_001/dsl.normalized.json
       comparison/
         path_set_comparison.json
         path_set_comparison.md
         step_trace_comparison_summary.json
-        traces/path_001/trace_comparison.json
+        traces/bpmn_path_001/trace_comparison.json
       reports/
+        behavior_summary.json
         behavior_summary.md
       logical_paths/
-        path_001/logical_path.json
+        <CaseName>_dsl_path_001/logical_path.json
         logical_path_generation_report.json
 ```
 
@@ -1282,7 +1270,7 @@ Experiment/new/exp1_1C/
 ```text
 1. BPMN UBTS / GLSTS JSON 实现构建成功。
 2. DSL UBTS / GLSTS JSON 实现构建成功。
-3. 所有参与比较的元素都能通过 1B trace 统一 ID。
+3. semantic graph 已写入 canonical 目录，并记录 1B trace 映射来源。
 4. BPMN bounded traces ⊆ DSL bounded traces。
 5. DSL bounded traces ⊆ BPMN bounded traces。
 6. 所有匹配 trace 的 step-wise transition preservation 检查通过。
@@ -1300,7 +1288,7 @@ Experiment/new/exp1_1C/
 | `GUARD_RESULT_MISMATCH`   | 分支条件判断不同                             |
 | `STATE_DIFF_MISMATCH`     | 状态变化不同                                 |
 | `FINAL_STATE_MISMATCH`    | 终态不同                                     |
-| `ID_TRACE_MISSING`        | 行为元素缺少 1B 映射                         |
+| `ID_TRACE_MISSING`        | 1B 映射文件缺失或映射数量异常                 |
 
 ------
 
@@ -1338,10 +1326,10 @@ logical_path.json：附加把一致路径保存成统一格式。
 1. newTranslator DSL generation
 2. BPMN UBTS / GLSTS JSON implementation
 3. DSL UBTS / GLSTS JSON implementation
-4. ID canonicalization
+4. canonical semantic graph generation with 1B trace source recorded
 5. BPMN bounded trace generation
 6. DSL bounded trace generation
-7. fixed_sample DMN policy
+7. outputEntry-based DMN output enumeration
 8. normalized trace signature
 9. bounded trace set bidirectional comparison
 10. behavior summary generation
@@ -1360,7 +1348,7 @@ logical_path.json：附加把一致路径保存成统一格式。
 2. 复杂表达式等价求解
 3. 多实例循环完整展开
 4. 高级并发交错覆盖
-5. decision_table_rows DMN policy 的完整组合覆盖
+5. 完整 DMN 条件求值和组合覆盖
 ```
 
 ### 最小结论

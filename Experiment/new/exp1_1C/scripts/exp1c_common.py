@@ -53,6 +53,18 @@ def unique_paths(paths: list[Path]) -> list[Path]:
     return out
 
 
+def comparable_stem(value: str) -> str:
+    return re.sub(r"[^a-z0-9]", "", value.lower())
+
+
+DMN_ALIASES = {
+    "managementsystem": ["management.dmn"],
+    "rentalclaim": ["rental.dmn"],
+    "supplychain": ["supply.dmn"],
+    "customer": ["customer.dmn", "customer2.dmn"],
+}
+
+
 def discover_dmn_files() -> list[Path]:
     explicit = os.environ.get("EXP1C_DMN_FILES") or os.environ.get("EXP1C_DMN_FILE")
     if explicit:
@@ -62,9 +74,13 @@ def discover_dmn_files() -> list[Path]:
         case_dir / f"{CASE_NAME}.dmn",
         case_dir / f"{CASE_NAME[:1].lower() + CASE_NAME[1:]}.dmn" if CASE_NAME else case_dir / ".dmn",
     ]
-    candidates.extend(sorted(case_dir.glob(f"{BPMN_FILE.stem}*.dmn")))
     lowered_stem = BPMN_FILE.stem[:1].lower() + BPMN_FILE.stem[1:]
-    candidates.extend(sorted(case_dir.glob(f"{lowered_stem}*.dmn")))
+    candidates.append(case_dir / f"{BPMN_FILE.stem}.dmn")
+    candidates.append(case_dir / f"{lowered_stem}.dmn")
+    normalized_stem = comparable_stem(BPMN_FILE.stem)
+    for alias in DMN_ALIASES.get(normalized_stem, []):
+        candidates.append(case_dir / alias)
+    candidates.extend(path for path in sorted(case_dir.glob("*.dmn")) if comparable_stem(path.stem) == normalized_stem)
     return unique_paths([path for path in candidates if path.exists()])
 
 
@@ -353,6 +369,380 @@ def parse_dsl(dsl_path: Path) -> DSLModel:
     return DSLModel(participants, globals_, nodes, flows)
 
 
+def public_name(name: str) -> str:
+    normalized = "".join(ch if ch.isalnum() else "_" for ch in (name or "").strip())
+    while "__" in normalized:
+        normalized = normalized.replace("__", "_")
+    normalized = normalized.strip("_")
+    return normalized[:1].upper() + normalized[1:] if normalized else normalized
+
+
+def map_bpmn_type(origin_type: str) -> str:
+    return {
+        "string": "string",
+        "number": "int",
+        "integer": "int",
+        "boolean": "bool",
+        "float": "float64",
+        "float64": "float64",
+    }.get(origin_type or "string", origin_type or "string")
+
+
+def summarize_bpmn_message_schema(documentation: str | None) -> str:
+    doc = parse_doc_json(documentation)
+    if isinstance(doc, dict) and (doc.get("properties") or doc.get("files")):
+        return json.dumps(doc, ensure_ascii=False, separators=(",", ":"))
+    return documentation or ""
+
+
+def bpmn_children_text(element: ET.Element, child_name: str) -> list[str]:
+    return [(child.text or "").strip() for child in list(element) if local_name(child.tag) == child_name and (child.text or "").strip()]
+
+
+def bpmn_documentation(element: ET.Element) -> str:
+    docs = bpmn_children_text(element, "documentation")
+    return docs[0] if docs else "{}"
+
+
+def normalize_bpmn_condition(raw: str | None) -> str:
+    raw = (raw or "").strip()
+    if not raw:
+        return ""
+    for op in ("==", "!=", ">=", "<=", ">", "<"):
+        if op in raw:
+            left, right = raw.split(op, 1)
+            right = right.strip()
+            if len(right) >= 2 and right[0] == right[-1] and right[0] in {'"', "'"}:
+                value = json.dumps(strip_quotes(right))
+            elif right.lower() in {"true", "false"}:
+                value = right.lower()
+            else:
+                value = right
+            return f"{public_name(left.strip())} {op} {value}"
+    return " ".join(raw.split())
+
+
+@dataclass
+class BpmnChoreography:
+    participants: list[dict[str, Any]]
+    nodes: dict[str, dict[str, Any]]
+    globals: dict[str, str]
+    sequence_flows: dict[str, dict[str, Any]]
+    message_flows: dict[str, dict[str, Any]]
+    tasks: dict[str, dict[str, Any]]
+    incoming: dict[str, list[str]]
+    outgoing: dict[str, list[str]]
+
+
+def parse_bpmn_choreography() -> BpmnChoreography:
+    root = ET.parse(BPMN_FILE).getroot()
+    participants: list[dict[str, Any]] = []
+    nodes: dict[str, dict[str, Any]] = {}
+    globals_: dict[str, str] = {}
+    sequence_flows: dict[str, dict[str, Any]] = {}
+    message_flows: dict[str, dict[str, Any]] = {}
+    tasks: dict[str, dict[str, Any]] = {}
+    incoming: dict[str, list[str]] = {}
+    outgoing: dict[str, list[str]] = {}
+    message_ids_from_flows: set[str] = set()
+
+    for elem in root.iter():
+        kind = local_name(elem.tag)
+        elem_id = elem.attrib.get("id", "")
+        if not elem_id:
+            continue
+        if kind == "participant":
+            multiplicity = next((child for child in list(elem) if local_name(child.tag) == "participantMultiplicity"), None)
+            name = elem.attrib.get("name", elem_id)
+            participants.append({
+                "id": elem_id,
+                "name": name,
+                "is_multi": multiplicity is not None,
+                "metadata": {
+                    "msp": f"{public_name(name or elem_id)}MSP",
+                    "x509": "",
+                    "attributes": {"role": name or elem_id},
+                },
+            })
+        elif kind == "messageFlow":
+            message_id = elem.attrib.get("messageRef", "")
+            message_ids_from_flows.add(message_id)
+            message_flows[elem_id] = {
+                "id": elem_id,
+                "source": elem.attrib.get("sourceRef", ""),
+                "target": elem.attrib.get("targetRef", ""),
+                "message": message_id,
+            }
+        elif kind == "sequenceFlow":
+            condition = ""
+            for child in list(elem):
+                if local_name(child.tag) == "conditionExpression":
+                    condition = (child.text or "").strip()
+            if not condition:
+                condition = elem.attrib.get("name", "")
+            source = elem.attrib.get("sourceRef", "")
+            target = elem.attrib.get("targetRef", "")
+            sequence_flows[elem_id] = {
+                "id": elem_id,
+                "source": source,
+                "target": target,
+                "condition": condition,
+            }
+            outgoing.setdefault(source, []).append(elem_id)
+            incoming.setdefault(target, []).append(elem_id)
+
+    for elem in root.iter():
+        kind = local_name(elem.tag)
+        elem_id = elem.attrib.get("id", "")
+        if not elem_id:
+            continue
+        if kind == "message" and elem_id in message_ids_from_flows:
+            flow = next((item for item in message_flows.values() if item["message"] == elem_id), {})
+            documentation = bpmn_documentation(elem)
+            nodes[elem_id] = {
+                "id": elem_id,
+                "type": "message",
+                "sender": flow.get("source", ""),
+                "receiver": flow.get("target", ""),
+                "schema": summarize_bpmn_message_schema(documentation),
+                "initial_state": "INACTIVE",
+            }
+            doc = parse_doc_json(documentation)
+            if isinstance(doc, dict):
+                for prop_name, spec in (doc.get("properties") or {}).items():
+                    globals_[public_name(prop_name)] = map_bpmn_type(spec.get("type", "string"))
+        elif kind == "startEvent":
+            nodes[elem_id] = {"id": elem_id, "type": "event", "initial_state": "READY"}
+        elif kind == "endEvent":
+            nodes[elem_id] = {"id": elem_id, "type": "event", "initial_state": "INACTIVE"}
+        elif kind in {"exclusiveGateway", "parallelGateway", "eventBasedGateway"}:
+            gateway_type = {"exclusiveGateway": "exclusive", "parallelGateway": "parallel", "eventBasedGateway": "event"}[kind]
+            nodes[elem_id] = {"id": elem_id, "type": "gateway", "gateway_type": gateway_type, "initial_state": "INACTIVE"}
+        elif kind == "businessRuleTask":
+            documentation = bpmn_documentation(elem)
+            doc = parse_doc_json(documentation)
+            inputs: list[tuple[str, str]] = []
+            outputs: list[tuple[str, str]] = []
+            if isinstance(doc, dict):
+                for item in doc.get("inputs", []) or []:
+                    if isinstance(item, dict) and item.get("name"):
+                        ref = public_name(item["name"])
+                        inputs.append((item["name"], ref))
+                        globals_[ref] = map_bpmn_type(item.get("type", "string"))
+                for item in doc.get("outputs", []) or []:
+                    if isinstance(item, dict) and item.get("name"):
+                        ref = public_name(item["name"])
+                        outputs.append((item["name"], ref))
+                        globals_[ref] = map_bpmn_type(item.get("type", "string"))
+            nodes[elem_id] = {"id": elem_id, "type": "businessrule", "inputs": inputs, "outputs": outputs, "initial_state": "INACTIVE"}
+        elif kind in {"receiveTask", "scriptTask", "DataTask"}:
+            documentation = bpmn_documentation(elem)
+            doc = parse_doc_json(documentation)
+            outputs = []
+            if isinstance(doc, dict):
+                for item in doc.get("outputs", []) or doc.get("outputMappings", []) or []:
+                    if isinstance(item, dict) and item.get("name"):
+                        ref = public_name(item.get("globalRef") or item["name"])
+                        outputs.append((item["name"], ref))
+                        globals_[ref] = map_bpmn_type(item.get("type", "string"))
+            oracle_type = "compute-task" if kind == "scriptTask" else "external-data"
+            nodes[elem_id] = {"id": elem_id, "type": "oracletask", "oracle_type": oracle_type, "outputs": outputs, "initial_state": "INACTIVE"}
+        elif kind == "choreographyTask":
+            tasks[elem_id] = {
+                "id": elem_id,
+                "initiating": elem.attrib.get("initiatingParticipantRef", ""),
+                "message_flow_refs": bpmn_children_text(elem, "messageFlowRef"),
+            }
+
+    return BpmnChoreography(participants, nodes, globals_, sequence_flows, message_flows, tasks, incoming, outgoing)
+
+
+def build_ubts_from_dsl(model_type: str) -> dict[str, Any]:
+    model = parse_dsl(DIRS["translator"] / "dsl.b2c")
+    transitions = []
+    for idx, flow in enumerate(model.flows, 1):
+        transitions.append({
+            "id": f"r_{idx:03d}",
+            "template_kind": flow["kind"],
+            "trigger": flow.get("trigger"),
+            "guard": flow.get("guard") or flow.get("condition") or None,
+            "actions": flow.get("actions", []),
+            "branches": flow.get("branches", []),
+            "sources": flow.get("sources", []),
+        })
+    starts = [node_id for node_id, node in model.nodes.items() if node.get("type") == "event" and node.get("initial_state") == "READY"]
+    ends = [node_id for node_id, node in model.nodes.items() if node.get("type") == "event" and node.get("initial_state") != "READY"]
+    for end in ends:
+        transitions.append({
+            "id": f"r_{len(transitions)+1:03d}",
+            "template_kind": "end_event",
+            "trigger": end,
+            "guard": None,
+            "actions": [],
+            "branches": [],
+            "sources": [],
+        })
+    ubts = make_ubts(model_type, model.participants, model.nodes, model.globals, transitions, starts, ends)
+    ubts["construction_source"] = {"kind": "dsl_b2c", "file": str(DIRS["translator"] / "dsl.b2c")}
+    return ubts
+
+
+def build_ubts_from_bpmn() -> dict[str, Any]:
+    model = parse_bpmn_choreography()
+    transitions: list[dict[str, Any]] = []
+
+    def activation_target(element_id: str) -> str:
+        task = model.tasks.get(element_id)
+        if not task:
+            return element_id
+        init_message = ""
+        return_message = ""
+        for flow_id in task.get("message_flow_refs", []):
+            flow = model.message_flows.get(flow_id)
+            if not flow:
+                continue
+            if flow["source"] == task.get("initiating"):
+                init_message = flow["message"]
+            if flow["target"] == task.get("initiating"):
+                return_message = flow["message"]
+        return init_message or return_message or element_id
+
+    def outgoing_targets(element_id: str) -> list[str]:
+        targets = []
+        for seq_id in model.outgoing.get(element_id, []):
+            seq = model.sequence_flows.get(seq_id)
+            if seq:
+                targets.append(activation_target(seq["target"]))
+        return targets
+
+    def add_transition(kind: str, trigger: str, actions: list[dict[str, Any]] | None = None, guard: str | None = None, branches: list[dict[str, Any]] | None = None, sources: list[str] | None = None) -> None:
+        transitions.append({
+            "id": f"r_{len(transitions)+1:03d}",
+            "template_kind": kind,
+            "trigger": trigger,
+            "guard": guard,
+            "actions": actions or [],
+            "branches": branches or [],
+            "sources": sources or [],
+        })
+
+    for node_id, node in model.nodes.items():
+        if node.get("type") == "event" and node.get("initial_state") == "READY":
+            for target in outgoing_targets(node_id):
+                add_transition("start", node_id, [{"op": "enable", "target": target}])
+
+    event_gateway_branch_messages: dict[str, set[str]] = {}
+    for gateway_id, node in model.nodes.items():
+        if node.get("type") == "gateway" and node.get("gateway_type") == "event":
+            branch_messages = {activation_target(model.sequence_flows[seq_id]["target"]) for seq_id in model.outgoing.get(gateway_id, []) if seq_id in model.sequence_flows}
+            event_gateway_branch_messages[gateway_id] = branch_messages
+            if branch_messages:
+                add_transition("gateway", gateway_id, [{"op": "enable", "target": target} for target in sorted(branch_messages)])
+
+    for task_id, task in model.tasks.items():
+        init_message = ""
+        return_message = ""
+        for flow_id in task.get("message_flow_refs", []):
+            flow = model.message_flows.get(flow_id)
+            if not flow:
+                continue
+            if flow["source"] == task.get("initiating"):
+                init_message = flow["message"]
+            if flow["target"] == task.get("initiating"):
+                return_message = flow["message"]
+        successor_targets = outgoing_targets(task_id)
+        predecessor_gateways = [model.sequence_flows[seq_id]["source"] for seq_id in model.incoming.get(task_id, []) if seq_id in model.sequence_flows]
+        event_gateway = next((source for source in predecessor_gateways if model.nodes.get(source, {}).get("gateway_type") == "event"), "")
+
+        if event_gateway:
+            branch_trigger = init_message or return_message
+            sibling_messages = event_gateway_branch_messages.get(event_gateway, set()) - {branch_trigger}
+            branch_actions = [{"op": "disable", "target": target} for target in sorted(sibling_messages)]
+            if init_message and return_message:
+                branch_actions.append({"op": "enable", "target": return_message})
+                add_transition("message", init_message, branch_actions, guard="completed")
+                successor_actions = [{"op": "enable", "target": target} for target in successor_targets]
+                if successor_actions:
+                    add_transition("message", return_message, successor_actions, guard="completed")
+            elif branch_trigger:
+                branch_actions.extend({"op": "enable", "target": target} for target in successor_targets)
+                if branch_actions:
+                    add_transition("message", branch_trigger, branch_actions, guard="completed")
+            continue
+
+        if init_message and return_message:
+            add_transition("message", init_message, [{"op": "enable", "target": return_message}], guard="completed")
+            trigger_for_successor = return_message
+        else:
+            trigger_for_successor = init_message or return_message
+        if trigger_for_successor:
+            actions = [{"op": "enable", "target": target} for target in successor_targets]
+            if actions:
+                add_transition("message", trigger_for_successor, actions, guard="completed")
+
+    for gateway_id, node in model.nodes.items():
+        if node.get("type") != "gateway" or node.get("gateway_type") == "event":
+            continue
+        outgoing_seq_ids = [seq_id for seq_id in model.outgoing.get(gateway_id, []) if seq_id in model.sequence_flows]
+        incoming_seq_ids = [seq_id for seq_id in model.incoming.get(gateway_id, []) if seq_id in model.sequence_flows]
+        if node.get("gateway_type") == "parallel" and len(incoming_seq_ids) > 1:
+            sources = [activation_target(model.sequence_flows[seq_id]["source"]) for seq_id in incoming_seq_ids]
+            actions = [{"op": "enable", "target": activation_target(model.sequence_flows[seq_id]["target"])} for seq_id in outgoing_seq_ids]
+            add_transition("parallel_join", gateway_id, actions, sources=sources)
+            continue
+        conditioned = [model.sequence_flows[seq_id] for seq_id in outgoing_seq_ids if model.sequence_flows[seq_id].get("condition")]
+        if conditioned:
+            branches = []
+            for seq_id in outgoing_seq_ids:
+                seq = model.sequence_flows[seq_id]
+                guard = normalize_bpmn_condition(seq.get("condition")) or "else"
+                branches.append({"guard": guard, "actions": [{"op": "enable", "target": activation_target(seq["target"])}]})
+            add_transition("gateway_choose", gateway_id, branches=branches)
+        elif outgoing_seq_ids:
+            actions = [{"op": "enable", "target": activation_target(model.sequence_flows[seq_id]["target"])} for seq_id in outgoing_seq_ids]
+            add_transition("gateway", gateway_id, actions)
+
+    for node_id, node in model.nodes.items():
+        if node.get("type") not in {"businessrule", "oracletask"}:
+            continue
+        actions = [{"op": "enable", "target": target} for target in outgoing_targets(node_id)]
+        if actions:
+            add_transition(node["type"], node_id, actions)
+
+    starts = [node_id for node_id, node in model.nodes.items() if node.get("type") == "event" and node.get("initial_state") == "READY"]
+    ends = [node_id for node_id, node in model.nodes.items() if node.get("type") == "event" and node.get("initial_state") != "READY"]
+    for end in ends:
+        add_transition("end_event", end)
+    ubts = make_ubts("bpmn", model.participants, model.nodes, model.globals, transitions, starts, ends)
+    ubts["construction_source"] = {"kind": "bpmn_xml", "file": str(BPMN_FILE)}
+    return ubts
+
+
+def make_ubts(
+    model_type: str,
+    participants: list[dict[str, Any]],
+    nodes: dict[str, dict[str, Any]],
+    globals_: dict[str, str],
+    transitions: list[dict[str, Any]],
+    starts: list[str],
+    ends: list[str],
+) -> dict[str, Any]:
+    return {
+        "schema_version": "exp1c.ubts.v1",
+        "case_name": CASE_NAME,
+        "model_type": model_type,
+        "formalism": "UBTS/GLSTS JSON implementation",
+        "participants": participants,
+        "nodes": list(nodes.values()),
+        "globals": globals_,
+        "dmn_outputs": parse_dmn_outputs(),
+        "transitions": transitions,
+        "start_nodes": starts,
+        "end_nodes": ends,
+        "state_model": ["INIT", "READY", "PENDING_CONFIRMATION", "DONE", "INACTIVE"],
+    }
+
+
 def extract_dsl_raw() -> None:
     model = parse_dsl(DIRS["translator"] / "dsl.b2c")
     elements = model.participants + list(model.nodes.values()) + [{"id": k, "type": "global", "dsl_type": v} for k, v in model.globals.items()]
@@ -391,53 +781,12 @@ def parse_dmn_outputs() -> dict[str, list[str]]:
     return {k: sorted(v) for k, v in outputs.items()}
 
 
-def build_ubts(model_type: str) -> dict[str, Any]:
-    model = parse_dsl(DIRS["translator"] / "dsl.b2c")
-    transitions = []
-    for idx, flow in enumerate(model.flows, 1):
-        transitions.append({
-            "id": f"r_{idx:03d}",
-            "template_kind": flow["kind"],
-            "trigger": flow.get("trigger"),
-            "guard": flow.get("guard") or flow.get("condition") or None,
-            "actions": flow.get("actions", []),
-            "branches": flow.get("branches", []),
-            "sources": flow.get("sources", []),
-        })
-    starts = [node_id for node_id, node in model.nodes.items() if node.get("type") == "event" and node.get("initial_state") == "READY"]
-    ends = [node_id for node_id, node in model.nodes.items() if node.get("type") == "event" and node.get("initial_state") != "READY"]
-    for end in ends:
-        transitions.append({
-            "id": f"r_{len(transitions)+1:03d}",
-            "template_kind": "end_event",
-            "trigger": end,
-            "guard": None,
-            "actions": [],
-            "branches": [],
-            "sources": [],
-        })
-    return {
-        "schema_version": "exp1c.ubts.v1",
-        "case_name": CASE_NAME,
-        "model_type": model_type,
-        "formalism": "UBTS/GLSTS JSON implementation",
-        "participants": model.participants,
-        "nodes": list(model.nodes.values()),
-        "globals": model.globals,
-        "dmn_outputs": parse_dmn_outputs(),
-        "transitions": transitions,
-        "start_nodes": starts,
-        "end_nodes": ends,
-        "state_model": ["INIT", "READY", "PENDING_CONFIRMATION", "DONE", "INACTIVE"],
-    }
-
-
 def build_bpmn_semantic_graph() -> None:
-    write_json(DIRS["semantic"] / "bpmn.semantic_graph.json", build_ubts("bpmn"))
+    write_json(DIRS["semantic"] / "bpmn.semantic_graph.json", build_ubts_from_bpmn())
 
 
 def build_dsl_semantic_graph() -> None:
-    write_json(DIRS["semantic"] / "dsl.semantic_graph.json", build_ubts("dsl"))
+    write_json(DIRS["semantic"] / "dsl.semantic_graph.json", build_ubts_from_dsl("dsl"))
 
 
 def canonicalize() -> None:

@@ -43,19 +43,11 @@
   ],
   "nodes": [
     {
-      "id": "Message_02echpq",
-      "type": "message",
-      "sender": "Participant_0ykkst0",
-      "receiver": "Participant_1be5jmm",
-      "schema": "{\"properties\":{\"content2\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_02ng01e",
+      "id": "Message_1h1vc49",
       "type": "message",
       "sender": "Participant_1be5jmm",
       "receiver": "Participant_0ykkst0",
-      "schema": "{\"properties\":{\"complete\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"complete\"],\"files\":{},\"file required\":[]}",
+      "schema": "{\"properties\":{\"id\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"id\"],\"files\":{},\"file required\":[]}",
       "initial_state": "INACTIVE"
     },
     {
@@ -67,19 +59,11 @@
       "initial_state": "INACTIVE"
     },
     {
-      "id": "Message_1ejkslm",
-      "type": "message",
-      "sender": "Participant_0a0qr98",
-      "receiver": "Participant_1be5jmm",
-      "schema": "{\"properties\":{\"Content\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_1h1vc49",
+      "id": "Message_02ng01e",
       "type": "message",
       "sender": "Participant_1be5jmm",
       "receiver": "Participant_0ykkst0",
-      "schema": "{\"properties\":{\"id\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"id\"],\"files\":{},\"file required\":[]}",
+      "schema": "{\"properties\":{\"complete\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"complete\"],\"files\":{},\"file required\":[]}",
       "initial_state": "INACTIVE"
     },
     {
@@ -91,21 +75,19 @@
       "initial_state": "INACTIVE"
     },
     {
-      "id": "Gateway_067p6u8",
-      "type": "gateway",
-      "gateway_type": "exclusive",
+      "id": "Message_02echpq",
+      "type": "message",
+      "sender": "Participant_0ykkst0",
+      "receiver": "Participant_1be5jmm",
+      "schema": "{\"properties\":{\"content2\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
       "initial_state": "INACTIVE"
     },
     {
-      "id": "Gateway_1fl1t0k",
-      "type": "gateway",
-      "gateway_type": "exclusive",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Gateway_0e7k79c",
-      "type": "gateway",
-      "gateway_type": "event",
+      "id": "Message_1ejkslm",
+      "type": "message",
+      "sender": "Participant_0a0qr98",
+      "receiver": "Participant_1be5jmm",
+      "schema": "{\"properties\":{\"Content\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
       "initial_state": "INACTIVE"
     },
     {
@@ -114,13 +96,15 @@
       "initial_state": "READY"
     },
     {
-      "id": "Event_1u0cugu",
-      "type": "event",
+      "id": "Gateway_0e7k79c",
+      "type": "gateway",
+      "gateway_type": "event",
       "initial_state": "INACTIVE"
     },
     {
-      "id": "Event_1pm2yw6",
-      "type": "event",
+      "id": "Gateway_067p6u8",
+      "type": "gateway",
+      "gateway_type": "exclusive",
       "initial_state": "INACTIVE"
     },
     {
@@ -139,16 +123,32 @@
         ]
       ],
       "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Gateway_1fl1t0k",
+      "type": "gateway",
+      "gateway_type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Event_1u0cugu",
+      "type": "event",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Event_1pm2yw6",
+      "type": "event",
+      "initial_state": "INACTIVE"
     }
   ],
   "globals": {
-    "Content": "string",
-    "Complete": "bool",
-    "Content2": "string",
-    "Content3": "string",
     "Id": "string",
-    "Qualified": "bool",
-    "Quality": "string"
+    "Quality": "string",
+    "Complete": "bool",
+    "Content3": "string",
+    "Content2": "string",
+    "Content": "string",
+    "Qualified": "bool"
   },
   "dmn_outputs": {
     "qualified": [
@@ -173,6 +173,24 @@
     },
     {
       "id": "r_002",
+      "template_kind": "gateway",
+      "trigger": "Gateway_0e7k79c",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_02echpq"
+        },
+        {
+          "op": "enable",
+          "target": "Message_1tiyc35"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_003",
       "template_kind": "message",
       "trigger": "Message_1ejkslm",
       "guard": "completed",
@@ -186,7 +204,7 @@
       "sources": []
     },
     {
-      "id": "r_003",
+      "id": "r_004",
       "template_kind": "message",
       "trigger": "Message_02echpq",
       "guard": "completed",
@@ -204,7 +222,7 @@
       "sources": []
     },
     {
-      "id": "r_004",
+      "id": "r_005",
       "template_kind": "message",
       "trigger": "Message_1tiyc35",
       "guard": "completed",
@@ -222,7 +240,7 @@
       "sources": []
     },
     {
-      "id": "r_005",
+      "id": "r_006",
       "template_kind": "message",
       "trigger": "Message_02ng01e",
       "guard": "completed",
@@ -236,7 +254,7 @@
       "sources": []
     },
     {
-      "id": "r_006",
+      "id": "r_007",
       "template_kind": "message",
       "trigger": "Message_094ld7m",
       "guard": "completed",
@@ -250,7 +268,7 @@
       "sources": []
     },
     {
-      "id": "r_007",
+      "id": "r_008",
       "template_kind": "message",
       "trigger": "Message_1h1vc49",
       "guard": "completed",
@@ -264,7 +282,7 @@
       "sources": []
     },
     {
-      "id": "r_008",
+      "id": "r_009",
       "template_kind": "gateway",
       "trigger": "Gateway_067p6u8",
       "guard": null,
@@ -272,24 +290,6 @@
         {
           "op": "enable",
           "target": "Message_02ng01e"
-        }
-      ],
-      "branches": [],
-      "sources": []
-    },
-    {
-      "id": "r_009",
-      "template_kind": "gateway",
-      "trigger": "Gateway_0e7k79c",
-      "guard": null,
-      "actions": [
-        {
-          "op": "enable",
-          "target": "Message_02echpq"
-        },
-        {
-          "op": "enable",
-          "target": "Message_1tiyc35"
         }
       ],
       "branches": [],
@@ -370,6 +370,10 @@
     "DONE",
     "INACTIVE"
   ],
+  "construction_source": {
+    "kind": "bpmn_xml",
+    "file": "/root/code/ChainCollab/Experiment/BPMNwithDMNcase/ManagementSystem.bpmn"
+  },
   "canonicalization": {
     "source": "/root/code/ChainCollab/Experiment/new/exp1_1B/cases/ManagementSystem/trace/bpmn_dsl_trace.json",
     "mapping_count": 23

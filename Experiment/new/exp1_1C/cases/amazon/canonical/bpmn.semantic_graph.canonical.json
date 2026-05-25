@@ -31,43 +31,19 @@
   ],
   "nodes": [
     {
+      "id": "Message_1b1qlzd",
+      "type": "message",
+      "sender": "Participant_1p9owwo",
+      "receiver": "Participant_12df78t",
+      "schema": "{\"properties\":{\"reason\":{\"type\":\"string\",\"description\":\"\"},\"result\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"reason\",\"result\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
       "id": "Message_01jq2zl",
       "type": "message",
       "sender": "Participant_1p9owwo",
       "receiver": "Participant_12df78t",
       "schema": "{\"properties\":{\"amount\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"amount\"],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_068kmzv",
-      "type": "message",
-      "sender": "Participant_12df78t",
-      "receiver": "Participant_1p9owwo",
-      "schema": "{\"properties\":{\"time\":{\"type\":\"string\",\"description\":\"\"},\"instance ID\":{\"type\":\"string\",\"description\":\"\"},\"logs\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"time\",\"instance ID\",\"logs\"],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_076ulzs",
-      "type": "message",
-      "sender": "Participant_12df78t",
-      "receiver": "Participant_1p9owwo",
-      "schema": "{\"properties\":{\"time\":{\"type\":\"string\",\"description\":\"\"},\"description\":{\"type\":\"string\",\"description\":\"\"},\"EC2 resource ID\":{\"type\":\"string\",\"description\":\"\"},\"logs\":{\"type\":\"string\",\"description\":\"\"},\"other information\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"time\",\"description\",\"EC2 resource ID\",\"logs\"],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_09krt7c",
-      "type": "message",
-      "sender": "Participant_12df78t",
-      "receiver": "Participant_1p9owwo",
-      "schema": "{\"properties\":{\"question name\":{\"type\":\"string\",\"description\":\"\"},\"description\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"question name\",\"description\"],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_0ywghlt",
-      "type": "message",
-      "sender": "Participant_12df78t",
-      "receiver": "Participant_1p9owwo",
-      "schema": "{\"properties\":{\"serviceType\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"serviceType\"],\"files\":{},\"file required\":[]}",
       "initial_state": "INACTIVE"
     },
     {
@@ -79,11 +55,27 @@
       "initial_state": "INACTIVE"
     },
     {
-      "id": "Message_1b1qlzd",
+      "id": "Message_076ulzs",
       "type": "message",
-      "sender": "Participant_1p9owwo",
-      "receiver": "Participant_12df78t",
-      "schema": "{\"properties\":{\"reason\":{\"type\":\"string\",\"description\":\"\"},\"result\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"reason\",\"result\"],\"files\":{},\"file required\":[]}",
+      "sender": "Participant_12df78t",
+      "receiver": "Participant_1p9owwo",
+      "schema": "{\"properties\":{\"time\":{\"type\":\"string\",\"description\":\"\"},\"description\":{\"type\":\"string\",\"description\":\"\"},\"EC2 resource ID\":{\"type\":\"string\",\"description\":\"\"},\"logs\":{\"type\":\"string\",\"description\":\"\"},\"other information\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"time\",\"description\",\"EC2 resource ID\",\"logs\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_068kmzv",
+      "type": "message",
+      "sender": "Participant_12df78t",
+      "receiver": "Participant_1p9owwo",
+      "schema": "{\"properties\":{\"time\":{\"type\":\"string\",\"description\":\"\"},\"instance ID\":{\"type\":\"string\",\"description\":\"\"},\"logs\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"time\",\"instance ID\",\"logs\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_09krt7c",
+      "type": "message",
+      "sender": "Participant_12df78t",
+      "receiver": "Participant_1p9owwo",
+      "schema": "{\"properties\":{\"question name\":{\"type\":\"string\",\"description\":\"\"},\"description\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"question name\",\"description\"],\"files\":{},\"file required\":[]}",
       "initial_state": "INACTIVE"
     },
     {
@@ -95,21 +87,11 @@
       "initial_state": "INACTIVE"
     },
     {
-      "id": "Gateway_0auc3he",
-      "type": "gateway",
-      "gateway_type": "exclusive",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Gateway_0ivv4vg",
-      "type": "gateway",
-      "gateway_type": "exclusive",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Gateway_0jgq0a6",
-      "type": "gateway",
-      "gateway_type": "event",
+      "id": "Message_0ywghlt",
+      "type": "message",
+      "sender": "Participant_12df78t",
+      "receiver": "Participant_1p9owwo",
+      "schema": "{\"properties\":{\"serviceType\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"serviceType\"],\"files\":{},\"file required\":[]}",
       "initial_state": "INACTIVE"
     },
     {
@@ -118,13 +100,15 @@
       "initial_state": "READY"
     },
     {
-      "id": "Event_0ci2gl8",
-      "type": "event",
+      "id": "Gateway_0jgq0a6",
+      "type": "gateway",
+      "gateway_type": "event",
       "initial_state": "INACTIVE"
     },
     {
-      "id": "Event_0dyp0ut",
-      "type": "event",
+      "id": "Gateway_0auc3he",
+      "type": "gateway",
+      "gateway_type": "exclusive",
       "initial_state": "INACTIVE"
     },
     {
@@ -147,23 +131,39 @@
         ]
       ],
       "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Event_0ci2gl8",
+      "type": "event",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Event_0dyp0ut",
+      "type": "event",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Gateway_0ivv4vg",
+      "type": "gateway",
+      "gateway_type": "exclusive",
+      "initial_state": "INACTIVE"
     }
   ],
   "globals": {
-    "EC2_resource_ID": "string",
+    "Reason": "string",
+    "Result": "string",
     "Amount": "int",
-    "Confirm": "bool",
-    "Description": "string",
+    "RequestType": "string",
     "Duration": "int",
-    "Instance_ID": "string",
+    "Time": "string",
+    "Description": "string",
+    "EC2_resource_ID": "string",
     "Logs": "string",
     "Other_information": "string",
+    "Instance_ID": "string",
     "Question_name": "string",
-    "Reason": "string",
-    "RequestType": "string",
-    "Result": "string",
     "ServiceType": "string",
-    "Time": "string"
+    "Confirm": "bool"
   },
   "dmn_outputs": {
     "confirm": [
@@ -188,6 +188,24 @@
     },
     {
       "id": "r_002",
+      "template_kind": "gateway",
+      "trigger": "Gateway_0jgq0a6",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_0ywghlt"
+        },
+        {
+          "op": "enable",
+          "target": "Message_1bhhp1n"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_003",
       "template_kind": "message",
       "trigger": "Message_09krt7c",
       "guard": "completed",
@@ -201,7 +219,7 @@
       "sources": []
     },
     {
-      "id": "r_003",
+      "id": "r_004",
       "template_kind": "message",
       "trigger": "Message_0ywghlt",
       "guard": "completed",
@@ -219,7 +237,7 @@
       "sources": []
     },
     {
-      "id": "r_004",
+      "id": "r_005",
       "template_kind": "message",
       "trigger": "Message_1bhhp1n",
       "guard": "completed",
@@ -237,7 +255,7 @@
       "sources": []
     },
     {
-      "id": "r_005",
+      "id": "r_006",
       "template_kind": "message",
       "trigger": "Message_068kmzv",
       "guard": "completed",
@@ -251,7 +269,7 @@
       "sources": []
     },
     {
-      "id": "r_006",
+      "id": "r_007",
       "template_kind": "message",
       "trigger": "Message_076ulzs",
       "guard": "completed",
@@ -265,7 +283,7 @@
       "sources": []
     },
     {
-      "id": "r_007",
+      "id": "r_008",
       "template_kind": "message",
       "trigger": "Message_12n6jjk",
       "guard": "completed",
@@ -279,7 +297,7 @@
       "sources": []
     },
     {
-      "id": "r_008",
+      "id": "r_009",
       "template_kind": "message",
       "trigger": "Message_1b1qlzd",
       "guard": "completed",
@@ -293,7 +311,7 @@
       "sources": []
     },
     {
-      "id": "r_009",
+      "id": "r_010",
       "template_kind": "message",
       "trigger": "Message_01jq2zl",
       "guard": "completed",
@@ -307,7 +325,7 @@
       "sources": []
     },
     {
-      "id": "r_010",
+      "id": "r_011",
       "template_kind": "gateway",
       "trigger": "Gateway_0auc3he",
       "guard": null,
@@ -315,24 +333,6 @@
         {
           "op": "enable",
           "target": "Message_12n6jjk"
-        }
-      ],
-      "branches": [],
-      "sources": []
-    },
-    {
-      "id": "r_011",
-      "template_kind": "gateway",
-      "trigger": "Gateway_0jgq0a6",
-      "guard": null,
-      "actions": [
-        {
-          "op": "enable",
-          "target": "Message_0ywghlt"
-        },
-        {
-          "op": "enable",
-          "target": "Message_1bhhp1n"
         }
       ],
       "branches": [],
@@ -413,6 +413,10 @@
     "DONE",
     "INACTIVE"
   ],
+  "construction_source": {
+    "kind": "bpmn_xml",
+    "file": "/root/code/ChainCollab/Experiment/BPMNwithDMNcase/amazon.bpmn"
+  },
   "canonicalization": {
     "source": "/root/code/ChainCollab/Experiment/new/exp1_1B/cases/amazon/trace/bpmn_dsl_trace.json",
     "mapping_count": 31

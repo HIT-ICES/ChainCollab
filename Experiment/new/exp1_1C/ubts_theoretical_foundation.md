@@ -2,7 +2,9 @@
 
 本文档用于支撑实验 1C，解释为什么在 BPMN->DSL 源目标行为一致性验证中采用 UBTS，即 Unified Behavioral Transition System，统一行为迁移系统。
 
-本文中的 UBTS 不是临时自造的流程建模语言，而是对标号迁移系统（Labeled Transition System, LTS）、带守卫状态迁移系统（Guarded State Transition System, GSTS）、带守卫标号状态迁移系统（Guarded Labeled State Transition System, GLSTS）以及 BPMN token-based execution semantics 的工程化采用。实验 1C 将 BPMN 源模型和 DSL 目标模型都映射到 UBTS，是为了在统一的行为语义域上执行有界 trace 枚举、路径集合双向包含、步骤级迁移保持和终态保持检查。
+本文中的 UBTS 不是临时自造的流程建模语言，而是对标号迁移系统（Labeled Transition System, LTS）、带守卫状态迁移系统（Guarded State Transition System, GSTS）、带守卫标号状态迁移系统（Guarded Labeled State Transition System, GLSTS）以及 BPMN token-based execution semantics 的工程化采用。实验 1C 将 BPMN 源模型和 DSL 目标模型分别映射到 UBTS，是为了在统一的行为语义域上执行有界 trace 枚举、路径集合双向包含、步骤级迁移保持和终态保持检查。
+
+当前实现中，BPMN-UBTS 直接从 BPMN XML 解析构建，DSL-UBTS 直接从 `translator/dsl.b2c` 解析构建。两侧使用同一套 UBTS JSON schema 和路径生成器，但源数据不同，避免把 BPMN 侧也从 DSL 反推而造成同源自证。
 
 ## 1. UBTS 的基本含义
 
@@ -271,11 +273,13 @@ dmn_output_bound = 20
 dmn_fallback_policy = fixed_sample
 ```
 
+这里的 `decision_table_rows` 是工程化近似策略：实现从已发现的 DMN 文件中读取 decision output 名称和 outputEntry 取值，形成代表性输出估值集合；它不作为完整 DMN 引擎，不根据输入条件精确命中某一条规则。
+
 当 trace 执行到 businessrule 节点时：
 
 ```text
 读取 businessrule 的 output mapping；
-读取对应 DMN 决策表的 outputEntry；
+读取已发现 DMN 决策表中的 outputEntry；
 枚举有限个可能输出；
 将输出写回业务变量估值 ν；
 再继续执行后继 gateway guard。
@@ -290,7 +294,7 @@ invoiceAvailable -> InvoiceAvailable
 finalPriority -> FinalPriority
 ```
 
-这使得 DSL 中由 DMN 输出驱动的分支可以被 UBTS trace 枚举覆盖。
+这使得 BPMN 与 DSL 中由 DMN 输出驱动的分支可以在同一 outputEntry 估值空间下被 UBTS trace 枚举覆盖。DMN 条件命中和完整组合求值不属于当前 1C 的证明目标。
 
 ## 9. 为什么不直接比较 BPMN XML 和 DSL 文本
 
@@ -394,14 +398,14 @@ businessrule / oracletask outputs。
 具有可比较的路径结构。
 ```
 
-后续仍需要步骤级迁移比较确认 enabled set、state diff、enabled_after 和 final_state 是否保持。
+后续仍需要步骤级迁移比较确认双方 `steps` 与 `final_state` 是否保持一致。当前实现中，`steps` 已包含动作类型、触发元素、guard、payload、outputs 和 sender/receiver 等可观察行为信息。
 
 ## 13. UBTS 与实验 1C 三类证明目标的对应关系
 
 | 实验目标 | 依赖的 UBTS 信息 | 说明 |
 |---|---|---|
 | bounded trace equivalence | `S, A, T, s0, F` | 比较 BPMN 与 DSL 在有界范围内生成的 trace 集合是否双向包含 |
-| step-wise transition preservation | `enabled_before, guard, effect, state_diff, enabled_after` | 检查每个对应迁移是否保持 |
+| step-wise transition preservation | `steps, guard, payload, outputs, final_state` | 检查匹配 trace 的动作序列、分支标签、输入输出和终态是否保持 |
 | final-state preservation | `F, μ, ν` | 检查路径结束时元素状态和业务变量估值是否一致 |
 
 可以看到，如果没有 UBTS：
@@ -444,6 +448,7 @@ JSON 中的字段与 UBTS 的关系如下：
 | `start_nodes` | 用于构造初始状态 `s0` |
 | `end_nodes` | 用于判断终止状态集合 `F` |
 | `state_model` | 元素标记 `μ` 的取值空间 |
+| `construction_source` | 该 UBTS 的真实构建来源，BPMN 侧为 BPMN XML，DSL 侧为 `dsl.b2c` |
 
 运行时迁移关系 `T` 不直接静态存储在 JSON 中，而是在路径生成时由以下信息动态诱导：
 
@@ -493,6 +498,8 @@ UBTS 证明对齐结构诱导出的行为可对齐。
 
 因此，UBTS 不是替代 TAG，而是在结构一致性基础上进一步验证行为一致性。
 
+当前实现会读取 1B 的 `bpmn_dsl_trace.json`，并在 canonical semantic graph 中记录 trace 来源和映射数量。由于当前 11 个 case 的 BPMN XML 与 DSL 已基本保留相同的行为元素 ID，canonicalization 主要是显式标注与可追溯确认，而不是复杂 ID 重写。
+
 ## 16. 与本文实验实现的对应
 
 本文实验实现中，UBTS 相关产物包括：
@@ -504,6 +511,10 @@ canonical/bpmn.semantic_graph.canonical.json
 canonical/dsl.semantic_graph.canonical.json
 paths/bpmn.paths.json
 paths/dsl.paths.json
+normalized/bpmn.normalized_paths.json
+normalized/dsl.normalized_paths.json
+traces/bpmn/bpmn_path_001/bpmn.normalized.json
+traces/dsl/dsl_path_001/dsl.normalized.json
 comparison/path_set_comparison.json
 comparison/step_trace_comparison_summary.json
 ```
@@ -511,9 +522,11 @@ comparison/step_trace_comparison_summary.json
 其中：
 
 ```text
-semantic/*.json 负责表示 UBTS 静态结构；
-canonical/*.json 负责保存 ID 归一化后的 UBTS；
+semantic/*.json 负责表示 UBTS 静态结构，并记录 construction_source；
+canonical/*.json 负责保存 canonical UBTS 和 1B trace 映射来源；
 paths/*.json 负责保存由 UBTS 诱导出的 bounded traces；
+normalized/*.json 负责固定后续比较输入，当前主要是轻量落盘；
+traces/*/*.json 负责保存路径级迁移轨迹；
 path_set_comparison.json 负责保存 trace 集合双向包含结果；
 step_trace_comparison_summary.json 负责保存步骤级迁移保持结果。
 ```
@@ -525,7 +538,7 @@ step_trace_comparison_summary.json 负责保存步骤级迁移保持结果。
 可以这样描述 UBTS：
 
 ```text
-为避免直接比较 BPMN XML 与 DSL 文本造成的语法差异干扰，本文将 BPMN 源模型与 DSL 目标模型分别映射到统一行为迁移系统（Unified Behavioral Transition System, UBTS）。UBTS 借鉴标号迁移系统、带守卫状态迁移系统和 BPMN token-based execution semantics，以状态、动作标签、守卫、效果和终止状态刻画模型的可执行行为，使 BPMN 与 DSL 能够在统一行为语义域中进行比较。
+为避免直接比较 BPMN XML 与 DSL 文本造成的语法差异干扰，本文将 BPMN 源模型与 DSL 目标模型分别映射到统一行为迁移系统（Unified Behavioral Transition System, UBTS）。其中 BPMN-UBTS 直接由 BPMN XML 构建，DSL-UBTS 直接由 `newTranslator` 生成的 `dsl.b2c` 构建。UBTS 借鉴标号迁移系统、带守卫状态迁移系统和 BPMN token-based execution semantics，以状态、动作标签、守卫、效果和终止状态刻画模型的可执行行为，使 BPMN 与 DSL 能够在统一行为语义域中进行比较。
 ```
 
 可以这样描述路径集合比较：
@@ -537,7 +550,7 @@ step_trace_comparison_summary.json 负责保存步骤级迁移保持结果。
 可以这样描述步骤级比较：
 
 ```text
-路径集合一致只能说明两侧在观测动作序列层面一致。为进一步验证迁移语义保持性，本文对匹配 trace 的每一步迁移比较 enabled_before、guard_result、state_diff、enabled_after 和 final_state，从而检查有界范围内的 step-wise transition preservation 与 final-state preservation。
+路径集合一致只能说明两侧在观测动作序列层面一致。为进一步验证迁移语义保持性，本文按 `trace_signature` 匹配 BPMN 与 DSL 路径，并比较双方的 `steps` 与 `final_state`；其中 `steps` 保留动作类型、触发元素、guard、payload、outputs 和 sender/receiver 等信息，`final_state` 保留终态元素状态、业务变量与 enabled set，从而检查有界范围内的 step-wise transition preservation 与 final-state preservation。
 ```
 
 ## 18. 与现有理论的关系边界
@@ -548,7 +561,7 @@ step_trace_comparison_summary.json 负责保存步骤级迁移保持结果。
 
 ```text
 本文借鉴 LTS、GSTS、GLSTS 和 BPMN token-flow 语义；
-本文将 BPMN 与 DSL 工程化映射为 UBTS；
+本文将 BPMN XML 与 DSL b2c 分别工程化映射为 UBTS；
 本文基于 UBTS 执行有界 trace equivalence 和 step-wise transition preservation 检查。
 ```
 

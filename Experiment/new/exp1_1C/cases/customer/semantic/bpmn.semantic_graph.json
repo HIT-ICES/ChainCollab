@@ -43,11 +43,27 @@
   ],
   "nodes": [
     {
-      "id": "Message_045i10y",
+      "id": "Message_1qbk325",
       "type": "message",
-      "sender": "Participant_1080bkg",
+      "sender": "Participant_1gcdqza",
       "receiver": "Participant_0sktaei",
-      "schema": "{\"properties\":{\"VIPpoints\":{\"type\":\"number\",\"description\":\"points\"}},\"required\":[\"VIPpoints\"],\"files\":{},\"file required\":[]}",
+      "schema": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_1q05nnw",
+      "type": "message",
+      "sender": "Participant_0sktaei",
+      "receiver": "Participant_1gcdqza",
+      "schema": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_1i8rlqn",
+      "type": "message",
+      "sender": "Participant_0sktaei",
+      "receiver": "Participant_1gcdqza",
+      "schema": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}",
       "initial_state": "INACTIVE"
     },
     {
@@ -59,42 +75,10 @@
       "initial_state": "INACTIVE"
     },
     {
-      "id": "Message_0o8eyir",
-      "type": "message",
-      "sender": "Participant_1080bkg",
-      "receiver": "Participant_0sktaei",
-      "schema": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_0r9lypd",
-      "type": "message",
-      "sender": "Participant_0sktaei",
-      "receiver": "Participant_1080bkg",
-      "schema": "{\"properties\":{\"is_available\":{\"type\":\"boolean\",\"description\":\"Is the service available?\"}},\"required\":[\"is_available\"],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_1em0ee4",
-      "type": "message",
-      "sender": "Participant_0sktaei",
-      "receiver": "Participant_1080bkg",
-      "schema": "{\"properties\":{\"need_external_provider\":{\"type\":\"boolean\",\"description\":\"Whether external service providers are required\"}},\"required\":[\"need_external_provider\"],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
       "id": "Message_1etcmvl",
       "type": "message",
       "sender": "Participant_0sktaei",
       "receiver": "Participant_1080bkg",
-      "schema": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_1i8rlqn",
-      "type": "message",
-      "sender": "Participant_0sktaei",
-      "receiver": "Participant_1gcdqza",
       "schema": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}",
       "initial_state": "INACTIVE"
     },
@@ -115,6 +99,22 @@
       "initial_state": "INACTIVE"
     },
     {
+      "id": "Message_1xm9dxy",
+      "type": "message",
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei",
+      "schema": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_0o8eyir",
+      "type": "message",
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei",
+      "schema": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
       "id": "Message_1nlagx2",
       "type": "message",
       "sender": "Participant_1080bkg",
@@ -123,28 +123,33 @@
       "initial_state": "INACTIVE"
     },
     {
-      "id": "Message_1q05nnw",
+      "id": "Message_1em0ee4",
       "type": "message",
       "sender": "Participant_0sktaei",
-      "receiver": "Participant_1gcdqza",
-      "schema": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}",
+      "receiver": "Participant_1080bkg",
+      "schema": "{\"properties\":{\"need_external_provider\":{\"type\":\"boolean\",\"description\":\"Whether external service providers are required\"}},\"required\":[\"need_external_provider\"],\"files\":{},\"file required\":[]}",
       "initial_state": "INACTIVE"
     },
     {
-      "id": "Message_1qbk325",
+      "id": "Message_0r9lypd",
       "type": "message",
-      "sender": "Participant_1gcdqza",
-      "receiver": "Participant_0sktaei",
-      "schema": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}",
+      "sender": "Participant_0sktaei",
+      "receiver": "Participant_1080bkg",
+      "schema": "{\"properties\":{\"is_available\":{\"type\":\"boolean\",\"description\":\"Is the service available?\"}},\"required\":[\"is_available\"],\"files\":{},\"file required\":[]}",
       "initial_state": "INACTIVE"
     },
     {
-      "id": "Message_1xm9dxy",
+      "id": "Message_045i10y",
       "type": "message",
       "sender": "Participant_1080bkg",
       "receiver": "Participant_0sktaei",
-      "schema": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}",
+      "schema": "{\"properties\":{\"VIPpoints\":{\"type\":\"number\",\"description\":\"points\"}},\"required\":[\"VIPpoints\"],\"files\":{},\"file required\":[]}",
       "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Event_1jtgn3j",
+      "type": "event",
+      "initial_state": "READY"
     },
     {
       "id": "ExclusiveGateway_106je4z",
@@ -159,9 +164,25 @@
       "initial_state": "INACTIVE"
     },
     {
+      "id": "EventBasedGateway_1fxpmyn",
+      "type": "gateway",
+      "gateway_type": "event",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Event_0366pfz",
+      "type": "event",
+      "initial_state": "INACTIVE"
+    },
+    {
       "id": "ExclusiveGateway_0nzwv7v",
       "type": "gateway",
       "gateway_type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Event_146eii4",
+      "type": "event",
       "initial_state": "INACTIVE"
     },
     {
@@ -174,32 +195,6 @@
       "id": "Gateway_04h9e6e",
       "type": "gateway",
       "gateway_type": "exclusive",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "EventBasedGateway_1fxpmyn",
-      "type": "gateway",
-      "gateway_type": "event",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Event_1jtgn3j",
-      "type": "event",
-      "initial_state": "READY"
-    },
-    {
-      "id": "Event_0366pfz",
-      "type": "event",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Event_146eii4",
-      "type": "event",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Event_143ykco",
-      "type": "event",
       "initial_state": "INACTIVE"
     },
     {
@@ -243,17 +238,22 @@
         ]
       ],
       "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Event_143ykco",
+      "type": "event",
+      "initial_state": "INACTIVE"
     }
   ],
   "globals": {
-    "VIPpoints": "int",
-    "Confirmation": "bool",
-    "ExternalAvailable": "bool",
     "Invoice": "bool",
-    "InvoiceAvailable": "bool",
     "InvoiceType": "string",
+    "Confirmation": "bool",
+    "Need_external_provider": "bool",
     "Is_available": "bool",
-    "Need_external_provider": "bool"
+    "VIPpoints": "int",
+    "ExternalAvailable": "bool",
+    "InvoiceAvailable": "bool"
   },
   "dmn_outputs": {
     "externalAvailable": [
@@ -282,224 +282,6 @@
     },
     {
       "id": "r_002",
-      "template_kind": "message",
-      "trigger": "Message_045i10y",
-      "guard": "completed",
-      "actions": [
-        {
-          "op": "enable",
-          "target": "Message_0r9lypd"
-        }
-      ],
-      "branches": [],
-      "sources": []
-    },
-    {
-      "id": "r_003",
-      "template_kind": "message",
-      "trigger": "Message_0r9lypd",
-      "guard": "completed",
-      "actions": [
-        {
-          "op": "enable",
-          "target": "ExclusiveGateway_106je4z"
-        }
-      ],
-      "branches": [],
-      "sources": []
-    },
-    {
-      "id": "r_004",
-      "template_kind": "message",
-      "trigger": "Message_1em0ee4",
-      "guard": "completed",
-      "actions": [
-        {
-          "op": "enable",
-          "target": "Message_1nlagx2"
-        }
-      ],
-      "branches": [],
-      "sources": []
-    },
-    {
-      "id": "r_005",
-      "template_kind": "message",
-      "trigger": "Message_1nlagx2",
-      "guard": "completed",
-      "actions": [
-        {
-          "op": "enable",
-          "target": "EventBasedGateway_1fxpmyn"
-        }
-      ],
-      "branches": [],
-      "sources": []
-    },
-    {
-      "id": "r_006",
-      "template_kind": "message",
-      "trigger": "Message_0o8eyir",
-      "guard": "completed",
-      "actions": [
-        {
-          "op": "disable",
-          "target": "Message_1xm9dxy"
-        },
-        {
-          "op": "enable",
-          "target": "Activity_1yl9tfp"
-        }
-      ],
-      "branches": [],
-      "sources": []
-    },
-    {
-      "id": "r_007",
-      "template_kind": "message",
-      "trigger": "Message_1xm9dxy",
-      "guard": "completed",
-      "actions": [
-        {
-          "op": "disable",
-          "target": "Message_0o8eyir"
-        },
-        {
-          "op": "enable",
-          "target": "Event_0366pfz"
-        }
-      ],
-      "branches": [],
-      "sources": []
-    },
-    {
-      "id": "r_008",
-      "template_kind": "message",
-      "trigger": "Message_1ljlm4g",
-      "guard": "completed",
-      "actions": [
-        {
-          "op": "enable",
-          "target": "Message_0m9p3da"
-        }
-      ],
-      "branches": [],
-      "sources": []
-    },
-    {
-      "id": "r_009",
-      "template_kind": "message",
-      "trigger": "Message_0m9p3da",
-      "guard": "completed",
-      "actions": [
-        {
-          "op": "enable",
-          "target": "Activity_0ibsbry"
-        }
-      ],
-      "branches": [],
-      "sources": []
-    },
-    {
-      "id": "r_010",
-      "template_kind": "message",
-      "trigger": "Message_1joj7ca",
-      "guard": "completed",
-      "actions": [
-        {
-          "op": "enable",
-          "target": "Message_1etcmvl"
-        }
-      ],
-      "branches": [],
-      "sources": []
-    },
-    {
-      "id": "r_011",
-      "template_kind": "message",
-      "trigger": "Message_1etcmvl",
-      "guard": "completed",
-      "actions": [
-        {
-          "op": "enable",
-          "target": "Event_146eii4"
-        }
-      ],
-      "branches": [],
-      "sources": []
-    },
-    {
-      "id": "r_012",
-      "template_kind": "message",
-      "trigger": "Message_1i8rlqn",
-      "guard": "completed",
-      "actions": [
-        {
-          "op": "enable",
-          "target": "Message_1q05nnw"
-        }
-      ],
-      "branches": [],
-      "sources": []
-    },
-    {
-      "id": "r_013",
-      "template_kind": "message",
-      "trigger": "Message_1q05nnw",
-      "guard": "completed",
-      "actions": [
-        {
-          "op": "enable",
-          "target": "Message_1qbk325"
-        }
-      ],
-      "branches": [],
-      "sources": []
-    },
-    {
-      "id": "r_014",
-      "template_kind": "message",
-      "trigger": "Message_1qbk325",
-      "guard": "completed",
-      "actions": [
-        {
-          "op": "enable",
-          "target": "Gateway_04h9e6e"
-        }
-      ],
-      "branches": [],
-      "sources": []
-    },
-    {
-      "id": "r_015",
-      "template_kind": "gateway",
-      "trigger": "ExclusiveGateway_0hs3ztq",
-      "guard": null,
-      "actions": [
-        {
-          "op": "enable",
-          "target": "Message_045i10y"
-        }
-      ],
-      "branches": [],
-      "sources": []
-    },
-    {
-      "id": "r_016",
-      "template_kind": "gateway",
-      "trigger": "Gateway_04h9e6e",
-      "guard": null,
-      "actions": [
-        {
-          "op": "enable",
-          "target": "Message_1ljlm4g"
-        }
-      ],
-      "branches": [],
-      "sources": []
-    },
-    {
-      "id": "r_017",
       "template_kind": "gateway",
       "trigger": "EventBasedGateway_1fxpmyn",
       "guard": null,
@@ -517,7 +299,197 @@
       "sources": []
     },
     {
-      "id": "r_018",
+      "id": "r_003",
+      "template_kind": "message",
+      "trigger": "Message_045i10y",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_0r9lypd"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_004",
+      "template_kind": "message",
+      "trigger": "Message_0r9lypd",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "ExclusiveGateway_106je4z"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_005",
+      "template_kind": "message",
+      "trigger": "Message_1em0ee4",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_1nlagx2"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_006",
+      "template_kind": "message",
+      "trigger": "Message_1nlagx2",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EventBasedGateway_1fxpmyn"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_007",
+      "template_kind": "message",
+      "trigger": "Message_0o8eyir",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "disable",
+          "target": "Message_1xm9dxy"
+        },
+        {
+          "op": "enable",
+          "target": "Activity_1yl9tfp"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_008",
+      "template_kind": "message",
+      "trigger": "Message_1xm9dxy",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "disable",
+          "target": "Message_0o8eyir"
+        },
+        {
+          "op": "enable",
+          "target": "Event_0366pfz"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_009",
+      "template_kind": "message",
+      "trigger": "Message_1ljlm4g",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_0m9p3da"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_010",
+      "template_kind": "message",
+      "trigger": "Message_0m9p3da",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Activity_0ibsbry"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_011",
+      "template_kind": "message",
+      "trigger": "Message_1joj7ca",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_1etcmvl"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_012",
+      "template_kind": "message",
+      "trigger": "Message_1etcmvl",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Event_146eii4"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_013",
+      "template_kind": "message",
+      "trigger": "Message_1i8rlqn",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_1q05nnw"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_014",
+      "template_kind": "message",
+      "trigger": "Message_1q05nnw",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_1qbk325"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_015",
+      "template_kind": "message",
+      "trigger": "Message_1qbk325",
+      "guard": "completed",
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Gateway_04h9e6e"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_016",
       "template_kind": "gateway_choose",
       "trigger": "ExclusiveGateway_106je4z",
       "guard": null,
@@ -545,7 +517,21 @@
       "sources": []
     },
     {
-      "id": "r_019",
+      "id": "r_017",
+      "template_kind": "gateway",
+      "trigger": "ExclusiveGateway_0hs3ztq",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_045i10y"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_018",
       "template_kind": "gateway_choose",
       "trigger": "ExclusiveGateway_0nzwv7v",
       "guard": null,
@@ -573,7 +559,7 @@
       "sources": []
     },
     {
-      "id": "r_020",
+      "id": "r_019",
       "template_kind": "gateway_choose",
       "trigger": "Gateway_1bhtapl",
       "guard": null,
@@ -598,6 +584,20 @@
           ]
         }
       ],
+      "sources": []
+    },
+    {
+      "id": "r_020",
+      "template_kind": "gateway",
+      "trigger": "Gateway_04h9e6e",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_1ljlm4g"
+        }
+      ],
+      "branches": [],
       "sources": []
     },
     {
@@ -670,5 +670,9 @@
     "PENDING_CONFIRMATION",
     "DONE",
     "INACTIVE"
-  ]
+  ],
+  "construction_source": {
+    "kind": "bpmn_xml",
+    "file": "/root/code/ChainCollab/Experiment/BPMNwithDMNcase/customer.bpmn"
+  }
 }

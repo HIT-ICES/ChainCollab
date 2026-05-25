@@ -43,51 +43,11 @@
   ],
   "nodes": [
     {
-      "id": "Message_0gm7yco",
-      "type": "message",
-      "sender": "Participant_1f296fx",
-      "receiver": "Participant_1ssz56y",
-      "schema": "{\"properties\":{\"PickUpTime\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"PickUpTime\"],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_0nc7bj9",
-      "type": "message",
-      "sender": "Participant_1f296fx",
-      "receiver": "Participant_1ssz56y",
-      "schema": "{\"properties\":{\"bikePrepare\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"bikePrepare\"],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_0phlgzx",
-      "type": "message",
-      "sender": "Participant_1f296fx",
-      "receiver": "Participant_0szm9kv",
-      "schema": "{\"properties\":{\"DeliveryInfomation\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_10c1p7j",
-      "type": "message",
-      "sender": "Participant_1ssz56y",
-      "receiver": "Participant_1f296fx",
-      "schema": "{\"properties\":{\"Address\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"Address\"],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
       "id": "Message_1hi03zn",
       "type": "message",
       "sender": "Participant_1ssz56y",
       "receiver": "Participant_0szm9kv",
       "schema": "{\"properties\":{\"Signature\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"Signature\"],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_1kyybzd",
-      "type": "message",
-      "sender": "Participant_1f296fx",
-      "receiver": "Participant_1ssz56y",
-      "schema": "{\"properties\":{\"carPrepare\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"carPrepare\"],\"files\":{},\"file required\":[]}",
       "initial_state": "INACTIVE"
     },
     {
@@ -99,11 +59,79 @@
       "initial_state": "INACTIVE"
     },
     {
+      "id": "Message_0phlgzx",
+      "type": "message",
+      "sender": "Participant_1f296fx",
+      "receiver": "Participant_0szm9kv",
+      "schema": "{\"properties\":{\"DeliveryInfomation\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_0nc7bj9",
+      "type": "message",
+      "sender": "Participant_1f296fx",
+      "receiver": "Participant_1ssz56y",
+      "schema": "{\"properties\":{\"bikePrepare\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"bikePrepare\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_1kyybzd",
+      "type": "message",
+      "sender": "Participant_1f296fx",
+      "receiver": "Participant_1ssz56y",
+      "schema": "{\"properties\":{\"carPrepare\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"carPrepare\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_10c1p7j",
+      "type": "message",
+      "sender": "Participant_1ssz56y",
+      "receiver": "Participant_1f296fx",
+      "schema": "{\"properties\":{\"Address\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"Address\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_0gm7yco",
+      "type": "message",
+      "sender": "Participant_1f296fx",
+      "receiver": "Participant_1ssz56y",
+      "schema": "{\"properties\":{\"PickUpTime\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"PickUpTime\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
       "id": "Message_1wwub0e",
       "type": "message",
       "sender": "Participant_1ssz56y",
       "receiver": "Participant_1f296fx",
       "schema": "{\"properties\":{\"OrderContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"OrderContent\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Event_17c6iyi",
+      "type": "event",
+      "initial_state": "READY"
+    },
+    {
+      "id": "Gateway_1k9qf30",
+      "type": "gateway",
+      "gateway_type": "event",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Activity_0pzravo",
+      "type": "businessrule",
+      "inputs": [
+        [
+          "Address",
+          "Address"
+        ]
+      ],
+      "outputs": [
+        [
+          "distance",
+          "Distance"
+        ]
+      ],
       "initial_state": "INACTIVE"
     },
     {
@@ -125,47 +153,19 @@
       "initial_state": "INACTIVE"
     },
     {
-      "id": "Gateway_1k9qf30",
-      "type": "gateway",
-      "gateway_type": "event",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Event_17c6iyi",
-      "type": "event",
-      "initial_state": "READY"
-    },
-    {
       "id": "Event_1bxai2s",
       "type": "event",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Activity_0pzravo",
-      "type": "businessrule",
-      "inputs": [
-        [
-          "Address",
-          "Address"
-        ]
-      ],
-      "outputs": [
-        [
-          "distance",
-          "Distance"
-        ]
-      ],
       "initial_state": "INACTIVE"
     }
   ],
   "globals": {
-    "Address": "string",
-    "DeliveryInfomation": "string",
-    "OrderContent": "string",
-    "PickUpTime": "string",
     "Signature": "string",
+    "DeliveryInfomation": "string",
     "BikePrepare": "bool",
     "CarPrepare": "bool",
+    "Address": "string",
+    "PickUpTime": "string",
+    "OrderContent": "string",
     "Distance": "int"
   },
   "dmn_outputs": {
@@ -192,6 +192,24 @@
     },
     {
       "id": "r_002",
+      "template_kind": "gateway",
+      "trigger": "Gateway_1k9qf30",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_0gm7yco"
+        },
+        {
+          "op": "enable",
+          "target": "Message_10c1p7j"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_003",
       "template_kind": "message",
       "trigger": "Message_1wwub0e",
       "guard": "completed",
@@ -205,7 +223,7 @@
       "sources": []
     },
     {
-      "id": "r_003",
+      "id": "r_004",
       "template_kind": "message",
       "trigger": "Message_10c1p7j",
       "guard": "completed",
@@ -223,7 +241,7 @@
       "sources": []
     },
     {
-      "id": "r_004",
+      "id": "r_005",
       "template_kind": "message",
       "trigger": "Message_0gm7yco",
       "guard": "completed",
@@ -241,7 +259,7 @@
       "sources": []
     },
     {
-      "id": "r_005",
+      "id": "r_006",
       "template_kind": "message",
       "trigger": "Message_0nc7bj9",
       "guard": "completed",
@@ -255,7 +273,7 @@
       "sources": []
     },
     {
-      "id": "r_006",
+      "id": "r_007",
       "template_kind": "message",
       "trigger": "Message_1kyybzd",
       "guard": "completed",
@@ -269,7 +287,7 @@
       "sources": []
     },
     {
-      "id": "r_007",
+      "id": "r_008",
       "template_kind": "message",
       "trigger": "Message_0phlgzx",
       "guard": "completed",
@@ -283,7 +301,7 @@
       "sources": []
     },
     {
-      "id": "r_008",
+      "id": "r_009",
       "template_kind": "message",
       "trigger": "Message_1hi03zn",
       "guard": "completed",
@@ -297,7 +315,7 @@
       "sources": []
     },
     {
-      "id": "r_009",
+      "id": "r_010",
       "template_kind": "message",
       "trigger": "Message_1l76ppu",
       "guard": "completed",
@@ -311,53 +329,7 @@
       "sources": []
     },
     {
-      "id": "r_010",
-      "template_kind": "gateway",
-      "trigger": "Gateway_18xv5wc",
-      "guard": null,
-      "actions": [
-        {
-          "op": "enable",
-          "target": "Message_0phlgzx"
-        }
-      ],
-      "branches": [],
-      "sources": []
-    },
-    {
       "id": "r_011",
-      "template_kind": "gateway",
-      "trigger": "Gateway_1rwnujh",
-      "guard": null,
-      "actions": [
-        {
-          "op": "enable",
-          "target": "Event_1bxai2s"
-        }
-      ],
-      "branches": [],
-      "sources": []
-    },
-    {
-      "id": "r_012",
-      "template_kind": "gateway",
-      "trigger": "Gateway_1k9qf30",
-      "guard": null,
-      "actions": [
-        {
-          "op": "enable",
-          "target": "Message_10c1p7j"
-        },
-        {
-          "op": "enable",
-          "target": "Message_0gm7yco"
-        }
-      ],
-      "branches": [],
-      "sources": []
-    },
-    {
-      "id": "r_013",
       "template_kind": "gateway_choose",
       "trigger": "Gateway_0ckb278",
       "guard": null,
@@ -382,6 +354,34 @@
           ]
         }
       ],
+      "sources": []
+    },
+    {
+      "id": "r_012",
+      "template_kind": "gateway",
+      "trigger": "Gateway_18xv5wc",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_0phlgzx"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_013",
+      "template_kind": "gateway",
+      "trigger": "Gateway_1rwnujh",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Event_1bxai2s"
+        }
+      ],
+      "branches": [],
       "sources": []
     },
     {
@@ -420,5 +420,9 @@
     "PENDING_CONFIRMATION",
     "DONE",
     "INACTIVE"
-  ]
+  ],
+  "construction_source": {
+    "kind": "bpmn_xml",
+    "file": "/root/code/ChainCollab/Experiment/BPMNwithDMNcase/Pizza_Order.bpmn"
+  }
 }

@@ -31,43 +31,11 @@
   ],
   "nodes": [
     {
-      "id": "Message_045i10y",
-      "type": "message",
-      "sender": "Participant_1080bkg",
-      "receiver": "Participant_0sktaei",
-      "schema": "{\"properties\":{\"date\":{\"type\":\"string\",\"description\":\"\"},\"bedrooms\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"date\"],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
       "id": "Message_04ikf2n",
       "type": "message",
       "sender": "Participant_0sktaei",
       "receiver": "Participant_1080bkg",
       "schema": "{\"properties\":{\"discount2\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_0m9p3da",
-      "type": "message",
-      "sender": "Participant_1080bkg",
-      "receiver": "Participant_0sktaei",
-      "schema": "{\"properties\":{\"cancel\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"cancel\"],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_0o8eyir",
-      "type": "message",
-      "sender": "Participant_1080bkg",
-      "receiver": "Participant_0sktaei",
-      "schema": "{\"properties\":{\"payableto\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"payableto\"],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_0r9lypd",
-      "type": "message",
-      "sender": "Participant_0sktaei",
-      "receiver": "Participant_1080bkg",
-      "schema": "{\"properties\":{\"confirm\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"confirm\"],\"files\":{},\"file required\":[]}",
       "initial_state": "INACTIVE"
     },
     {
@@ -87,11 +55,11 @@
       "initial_state": "INACTIVE"
     },
     {
-      "id": "Message_1em0ee4",
+      "id": "Message_0m9p3da",
       "type": "message",
-      "sender": "Participant_0sktaei",
-      "receiver": "Participant_1080bkg",
-      "schema": "{\"properties\":{\"quotation\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"quotation\"],\"files\":{},\"file required\":[]}",
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei",
+      "schema": "{\"properties\":{\"cancel\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"cancel\"],\"files\":{},\"file required\":[]}",
       "initial_state": "INACTIVE"
     },
     {
@@ -119,6 +87,22 @@
       "initial_state": "INACTIVE"
     },
     {
+      "id": "Message_1xm9dxy",
+      "type": "message",
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei",
+      "schema": "{\"properties\":{\"motivation\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"motivation\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_0o8eyir",
+      "type": "message",
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei",
+      "schema": "{\"properties\":{\"payableto\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"payableto\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
       "id": "Message_1nlagx2",
       "type": "message",
       "sender": "Participant_1080bkg",
@@ -127,12 +111,33 @@
       "initial_state": "INACTIVE"
     },
     {
-      "id": "Message_1xm9dxy",
+      "id": "Message_1em0ee4",
+      "type": "message",
+      "sender": "Participant_0sktaei",
+      "receiver": "Participant_1080bkg",
+      "schema": "{\"properties\":{\"quotation\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"quotation\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_0r9lypd",
+      "type": "message",
+      "sender": "Participant_0sktaei",
+      "receiver": "Participant_1080bkg",
+      "schema": "{\"properties\":{\"confirm\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"confirm\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_045i10y",
       "type": "message",
       "sender": "Participant_1080bkg",
       "receiver": "Participant_0sktaei",
-      "schema": "{\"properties\":{\"motivation\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"motivation\"],\"files\":{},\"file required\":[]}",
+      "schema": "{\"properties\":{\"date\":{\"type\":\"string\",\"description\":\"\"},\"bedrooms\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"date\"],\"files\":{},\"file required\":[]}",
       "initial_state": "INACTIVE"
+    },
+    {
+      "id": "StartEvent_1jtgn3j",
+      "type": "event",
+      "initial_state": "READY"
     },
     {
       "id": "ExclusiveGateway_106je4z",
@@ -147,37 +152,20 @@
       "initial_state": "INACTIVE"
     },
     {
-      "id": "ExclusiveGateway_0nzwv7v",
-      "type": "gateway",
-      "gateway_type": "exclusive",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Gateway_1jhfnrm",
-      "type": "gateway",
-      "gateway_type": "exclusive",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Gateway_1atxr3y",
-      "type": "gateway",
-      "gateway_type": "exclusive",
-      "initial_state": "INACTIVE"
-    },
-    {
       "id": "EventBasedGateway_1fxpmyn",
       "type": "gateway",
       "gateway_type": "event",
       "initial_state": "INACTIVE"
     },
     {
-      "id": "StartEvent_1jtgn3j",
-      "type": "event",
-      "initial_state": "READY"
-    },
-    {
       "id": "EndEvent_0366pfz",
       "type": "event",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "ExclusiveGateway_0nzwv7v",
+      "type": "gateway",
+      "gateway_type": "exclusive",
       "initial_state": "INACTIVE"
     },
     {
@@ -206,24 +194,36 @@
         ]
       ],
       "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Gateway_1jhfnrm",
+      "type": "gateway",
+      "gateway_type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Gateway_1atxr3y",
+      "type": "gateway",
+      "gateway_type": "exclusive",
+      "initial_state": "INACTIVE"
     }
   ],
   "globals": {
-    "ID": "string",
-    "VIPLevel": "int",
-    "VIPcardId": "string",
-    "VIPpoints": "int",
-    "Bedrooms": "int",
-    "Booking_id": "string",
-    "Cancel": "bool",
-    "Confirm": "bool",
-    "Confirmation": "bool",
-    "Date": "string",
-    "Discount1": "int",
     "Discount2": "int",
-    "Motivation": "string",
+    "Discount1": "int",
+    "VIPpoints": "int",
+    "VIPcardId": "string",
+    "Cancel": "bool",
     "Payableto": "string",
-    "Quotation": "int"
+    "ID": "string",
+    "Booking_id": "string",
+    "Motivation": "string",
+    "Confirmation": "bool",
+    "Quotation": "int",
+    "Confirm": "bool",
+    "Date": "string",
+    "Bedrooms": "int",
+    "VIPLevel": "int"
   },
   "dmn_outputs": {
     "VIPLevel": [
@@ -249,6 +249,28 @@
     },
     {
       "id": "r_002",
+      "template_kind": "gateway",
+      "trigger": "EventBasedGateway_1fxpmyn",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_0o8eyir"
+        },
+        {
+          "op": "enable",
+          "target": "Message_104h2tt"
+        },
+        {
+          "op": "enable",
+          "target": "Message_1xm9dxy"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_003",
       "template_kind": "message",
       "trigger": "Message_045i10y",
       "guard": "completed",
@@ -262,7 +284,7 @@
       "sources": []
     },
     {
-      "id": "r_003",
+      "id": "r_004",
       "template_kind": "message",
       "trigger": "Message_0r9lypd",
       "guard": "completed",
@@ -276,7 +298,7 @@
       "sources": []
     },
     {
-      "id": "r_004",
+      "id": "r_005",
       "template_kind": "message",
       "trigger": "Message_1em0ee4",
       "guard": "completed",
@@ -290,7 +312,7 @@
       "sources": []
     },
     {
-      "id": "r_005",
+      "id": "r_006",
       "template_kind": "message",
       "trigger": "Message_1nlagx2",
       "guard": "completed",
@@ -304,18 +326,18 @@
       "sources": []
     },
     {
-      "id": "r_006",
+      "id": "r_007",
       "template_kind": "message",
       "trigger": "Message_0o8eyir",
       "guard": "completed",
       "actions": [
         {
           "op": "disable",
-          "target": "Message_1xm9dxy"
+          "target": "Message_104h2tt"
         },
         {
           "op": "disable",
-          "target": "Message_104h2tt"
+          "target": "Message_1xm9dxy"
         },
         {
           "op": "enable",
@@ -326,7 +348,7 @@
       "sources": []
     },
     {
-      "id": "r_007",
+      "id": "r_008",
       "template_kind": "message",
       "trigger": "Message_1xm9dxy",
       "guard": "completed",
@@ -348,7 +370,7 @@
       "sources": []
     },
     {
-      "id": "r_008",
+      "id": "r_009",
       "template_kind": "message",
       "trigger": "Message_1ljlm4g",
       "guard": "completed",
@@ -362,7 +384,7 @@
       "sources": []
     },
     {
-      "id": "r_009",
+      "id": "r_010",
       "template_kind": "message",
       "trigger": "Message_0m9p3da",
       "guard": "completed",
@@ -376,7 +398,7 @@
       "sources": []
     },
     {
-      "id": "r_010",
+      "id": "r_011",
       "template_kind": "message",
       "trigger": "Message_1joj7ca",
       "guard": "completed",
@@ -390,7 +412,7 @@
       "sources": []
     },
     {
-      "id": "r_011",
+      "id": "r_012",
       "template_kind": "message",
       "trigger": "Message_1etcmvl",
       "guard": "completed",
@@ -404,7 +426,7 @@
       "sources": []
     },
     {
-      "id": "r_012",
+      "id": "r_013",
       "template_kind": "message",
       "trigger": "Message_104h2tt",
       "guard": "completed",
@@ -426,7 +448,7 @@
       "sources": []
     },
     {
-      "id": "r_013",
+      "id": "r_014",
       "template_kind": "message",
       "trigger": "Message_0vlxzcv",
       "guard": "completed",
@@ -440,7 +462,7 @@
       "sources": []
     },
     {
-      "id": "r_014",
+      "id": "r_015",
       "template_kind": "message",
       "trigger": "Message_04ikf2n",
       "guard": "completed",
@@ -454,57 +476,7 @@
       "sources": []
     },
     {
-      "id": "r_015",
-      "template_kind": "gateway",
-      "trigger": "ExclusiveGateway_0hs3ztq",
-      "guard": null,
-      "actions": [
-        {
-          "op": "enable",
-          "target": "Message_045i10y"
-        }
-      ],
-      "branches": [],
-      "sources": []
-    },
-    {
       "id": "r_016",
-      "template_kind": "gateway",
-      "trigger": "Gateway_1atxr3y",
-      "guard": null,
-      "actions": [
-        {
-          "op": "enable",
-          "target": "Message_0o8eyir"
-        }
-      ],
-      "branches": [],
-      "sources": []
-    },
-    {
-      "id": "r_017",
-      "template_kind": "gateway",
-      "trigger": "EventBasedGateway_1fxpmyn",
-      "guard": null,
-      "actions": [
-        {
-          "op": "enable",
-          "target": "Message_0o8eyir"
-        },
-        {
-          "op": "enable",
-          "target": "Message_1xm9dxy"
-        },
-        {
-          "op": "enable",
-          "target": "Message_104h2tt"
-        }
-      ],
-      "branches": [],
-      "sources": []
-    },
-    {
-      "id": "r_018",
       "template_kind": "gateway_choose",
       "trigger": "ExclusiveGateway_106je4z",
       "guard": null,
@@ -532,7 +504,21 @@
       "sources": []
     },
     {
-      "id": "r_019",
+      "id": "r_017",
+      "template_kind": "gateway",
+      "trigger": "ExclusiveGateway_0hs3ztq",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_045i10y"
+        }
+      ],
+      "branches": [],
+      "sources": []
+    },
+    {
+      "id": "r_018",
       "template_kind": "gateway_choose",
       "trigger": "ExclusiveGateway_0nzwv7v",
       "guard": null,
@@ -560,7 +546,7 @@
       "sources": []
     },
     {
-      "id": "r_020",
+      "id": "r_019",
       "template_kind": "gateway_choose",
       "trigger": "Gateway_1jhfnrm",
       "guard": null,
@@ -585,6 +571,20 @@
           ]
         }
       ],
+      "sources": []
+    },
+    {
+      "id": "r_020",
+      "template_kind": "gateway",
+      "trigger": "Gateway_1atxr3y",
+      "guard": null,
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Message_0o8eyir"
+        }
+      ],
+      "branches": [],
       "sources": []
     },
     {
@@ -643,5 +643,9 @@
     "PENDING_CONFIRMATION",
     "DONE",
     "INACTIVE"
-  ]
+  ],
+  "construction_source": {
+    "kind": "bpmn_xml",
+    "file": "/root/code/ChainCollab/Experiment/BPMNwithDMNcase/Hotel Booking.bpmn"
+  }
 }

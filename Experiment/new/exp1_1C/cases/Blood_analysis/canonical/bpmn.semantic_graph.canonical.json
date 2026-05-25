@@ -43,35 +43,19 @@
   ],
   "nodes": [
     {
-      "id": "Message_0gd0z61",
-      "type": "message",
-      "sender": "Participant_0tkhpj2",
-      "receiver": "Participant_0ggs0ck",
-      "schema": "{\"properties\":{\"furtherCheckPlace\":{\"type\":\"string\",\"description\":\"\"},\"furtherCheckDate\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"furtherCheckPlace\",\"furtherCheckDate\"],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_0gswvmq",
-      "type": "message",
-      "sender": "Participant_0ggs0ck",
-      "receiver": "Participant_1v6wnpq",
-      "schema": "{\"properties\":{\"sample\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"sample\"],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Message_0wq8mc6",
-      "type": "message",
-      "sender": "Participant_0ggs0ck",
-      "receiver": "Participant_0tkhpj2",
-      "schema": "{\"properties\":{\"patientData\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"patientData\"],\"files\":{},\"file required\":[]}",
-      "initial_state": "INACTIVE"
-    },
-    {
       "id": "Message_13mh6mk",
       "type": "message",
       "sender": "Participant_0tkhpj2",
       "receiver": "Participant_0ggs0ck",
       "schema": "{\"properties\":{\"reportContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"reportContent\"],\"files\":{},\"file required\":[]}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Message_0gd0z61",
+      "type": "message",
+      "sender": "Participant_0tkhpj2",
+      "receiver": "Participant_0ggs0ck",
+      "schema": "{\"properties\":{\"furtherCheckPlace\":{\"type\":\"string\",\"description\":\"\"},\"furtherCheckDate\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"furtherCheckPlace\",\"furtherCheckDate\"],\"files\":{},\"file required\":[]}",
       "initial_state": "INACTIVE"
     },
     {
@@ -91,27 +75,31 @@
       "initial_state": "INACTIVE"
     },
     {
-      "id": "Gateway_0o8snyv",
-      "type": "gateway",
-      "gateway_type": "exclusive",
+      "id": "Message_0wq8mc6",
+      "type": "message",
+      "sender": "Participant_0ggs0ck",
+      "receiver": "Participant_0tkhpj2",
+      "schema": "{\"properties\":{\"patientData\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"patientData\"],\"files\":{},\"file required\":[]}",
       "initial_state": "INACTIVE"
     },
     {
-      "id": "ParallelGateway_1pgjqtw",
-      "type": "gateway",
-      "gateway_type": "parallel",
-      "initial_state": "INACTIVE"
-    },
-    {
-      "id": "Gateway_1m6dgym",
-      "type": "gateway",
-      "gateway_type": "parallel",
+      "id": "Message_0gswvmq",
+      "type": "message",
+      "sender": "Participant_0ggs0ck",
+      "receiver": "Participant_1v6wnpq",
+      "schema": "{\"properties\":{\"sample\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"sample\"],\"files\":{},\"file required\":[]}",
       "initial_state": "INACTIVE"
     },
     {
       "id": "StartEvent_0m7hz56",
       "type": "event",
       "initial_state": "READY"
+    },
+    {
+      "id": "ParallelGateway_1pgjqtw",
+      "type": "gateway",
+      "gateway_type": "parallel",
+      "initial_state": "INACTIVE"
     },
     {
       "id": "EndEvent_110myff",
@@ -134,16 +122,28 @@
         ]
       ],
       "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Gateway_0o8snyv",
+      "type": "gateway",
+      "gateway_type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "id": "Gateway_1m6dgym",
+      "type": "gateway",
+      "gateway_type": "parallel",
+      "initial_state": "INACTIVE"
     }
   ],
   "globals": {
-    "FurtherCheck": "bool",
-    "FurtherCheckDate": "string",
-    "FurtherCheckPlace": "string",
-    "PatientData": "string",
     "ReportContent": "string",
+    "FurtherCheckPlace": "string",
+    "FurtherCheckDate": "string",
     "Result": "string",
-    "Sample": "string"
+    "PatientData": "string",
+    "Sample": "string",
+    "FurtherCheck": "bool"
   },
   "dmn_outputs": {
     "FurtherCheck": [
@@ -350,6 +350,10 @@
     "DONE",
     "INACTIVE"
   ],
+  "construction_source": {
+    "kind": "bpmn_xml",
+    "file": "/root/code/ChainCollab/Experiment/BPMNwithDMNcase/Blood_analysis.bpmn"
+  },
   "canonicalization": {
     "source": "/root/code/ChainCollab/Experiment/new/exp1_1B/cases/Blood_analysis/trace/bpmn_dsl_trace.json",
     "mapping_count": 22
