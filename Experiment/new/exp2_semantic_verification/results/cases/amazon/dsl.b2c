@@ -1,4 +1,4 @@
-contract GeneratedContract {
+contract amazon {
 
     participants {
         participant Participant_1p9owwo {
@@ -39,10 +39,10 @@ contract GeneratedContract {
         Other_information: string
         Question_name: string
         Reason: string
+        RequestType: string
         Result: string
         ServiceType: string
         Time: string
-        Type: string
 
     }
 
@@ -71,7 +71,7 @@ contract GeneratedContract {
         }
         message Message_12n6jjk from Participant_12df78t to Participant_1p9owwo {
             initial state INACTIVE
-            schema "{\"properties\":{\"type\":{\"type\":\"string\",\"description\":\"\"},\"duration\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"type\",\"duration\"],\"files\":{},\"file required\":[]}"
+            schema "{\"properties\":{\"requestType\":{\"type\":\"string\",\"description\":\"\"},\"duration\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"requestType\",\"duration\"],\"files\":{},\"file required\":[]}"
         }
         message Message_1b1qlzd from Participant_1p9owwo to Participant_12df78t {
             initial state INACTIVE
@@ -124,8 +124,8 @@ contract GeneratedContract {
             dmn "Activity_0tya4bp.dmn"
             decision "Activity_0tya4bp_DecisionID"
             input mapping {
-                type -> Type
                 duration -> Duration
+                requestType -> RequestType
 
             }
             output mapping {

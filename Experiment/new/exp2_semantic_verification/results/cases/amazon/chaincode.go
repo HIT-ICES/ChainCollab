@@ -96,10 +96,10 @@ type StateMemory struct {
 	Other_information string `json:"Other_information"`
 	Question_name string `json:"Question_name"`
 	Reason string `json:"Reason"`
+	RequestType string `json:"RequestType"`
 	Result string `json:"Result"`
 	ServiceType string `json:"ServiceType"`
 	Time string `json:"Time"`
-	Type string `json:"Type"`
 }
 
 type InitParameters struct {
@@ -895,7 +895,7 @@ func (cc *SmartContract) CreateInstance(ctx contractapi.TransactionContextInterf
 	cc.CreateMessage(ctx, &instance, "Message_076ulzs", "Participant_12df78t", "Participant_1p9owwo", "", DISABLED, `{"schema": "{\"properties\":{\"time\":{\"type\":\"string\",\"description\":\"\"},\"description\":{\"type\":\"string\",\"description\":\"\"},\"EC2 resource ID\":{\"type\":\"string\",\"description\":\"\"},\"logs\":{\"type\":\"string\",\"description\":\"\"},\"other information\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"time\",\"description\",\"EC2 resource ID\",\"logs\"],\"files\":{},\"file required\":[]}"}`)
 	cc.CreateMessage(ctx, &instance, "Message_09krt7c", "Participant_12df78t", "Participant_1p9owwo", "", DISABLED, `{"schema": "{\"properties\":{\"question name\":{\"type\":\"string\",\"description\":\"\"},\"description\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"question name\",\"description\"],\"files\":{},\"file required\":[]}"}`)
 	cc.CreateMessage(ctx, &instance, "Message_0ywghlt", "Participant_12df78t", "Participant_1p9owwo", "", DISABLED, `{"schema": "{\"properties\":{\"serviceType\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"serviceType\"],\"files\":{},\"file required\":[]}"}`)
-	cc.CreateMessage(ctx, &instance, "Message_12n6jjk", "Participant_12df78t", "Participant_1p9owwo", "", DISABLED, `{"schema": "{\"properties\":{\"type\":{\"type\":\"string\",\"description\":\"\"},\"duration\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"type\",\"duration\"],\"files\":{},\"file required\":[]}"}`)
+	cc.CreateMessage(ctx, &instance, "Message_12n6jjk", "Participant_12df78t", "Participant_1p9owwo", "", DISABLED, `{"schema": "{\"properties\":{\"requestType\":{\"type\":\"string\",\"description\":\"\"},\"duration\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"requestType\",\"duration\"],\"files\":{},\"file required\":[]}"}`)
 	cc.CreateMessage(ctx, &instance, "Message_1b1qlzd", "Participant_1p9owwo", "Participant_12df78t", "", DISABLED, `{"schema": "{\"properties\":{\"reason\":{\"type\":\"string\",\"description\":\"\"},\"result\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"reason\",\"result\"],\"files\":{},\"file required\":[]}"}`)
 	cc.CreateMessage(ctx, &instance, "Message_1bhhp1n", "Participant_12df78t", "Participant_1p9owwo", "", DISABLED, `{"schema": "{\"properties\":{\"serviceType\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"serviceType\"],\"files\":{},\"file required\":[]}"}`)
 	cc.CreateGateway(ctx, &instance, "Gateway_0auc3he", DISABLED)
@@ -1162,7 +1162,7 @@ func (cc *SmartContract) Event_0ojehz6(ctx contractapi.TransactionContextInterfa
 	return nil
 }
 
-func (cc *SmartContract) Message_01jq2zl_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
+func (cc *SmartContract) Message_01jq2zl_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, amount int) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_01jq2zl")
@@ -1185,6 +1185,18 @@ func (cc *SmartContract) Message_01jq2zl_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instance, "Message_01jq2zl", COMPLETED)
+
+globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
+	if readGloabolError != nil {
+		fmt.Println(readGloabolError.Error())
+		return readGloabolError
+	}
+	globalMemory.Amount = amount
+	setGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)
+	if setGloabolErrror != nil {
+		fmt.Println(setGloabolErrror.Error())
+		return setGloabolErrror
+	}
 
 	stub.SetEvent("Message_01jq2zl", []byte("Message is waiting for confirmation"))
 	cc.SetInstance(ctx, instance)
@@ -1221,7 +1233,7 @@ func (cc *SmartContract) Message_01jq2zl_Complete(ctx contractapi.TransactionCon
 	return nil
 }
 
-func (cc *SmartContract) Message_068kmzv_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
+func (cc *SmartContract) Message_068kmzv_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, logs string, time string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_068kmzv")
@@ -1244,6 +1256,19 @@ func (cc *SmartContract) Message_068kmzv_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instance, "Message_068kmzv", COMPLETED)
+
+globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
+	if readGloabolError != nil {
+		fmt.Println(readGloabolError.Error())
+		return readGloabolError
+	}
+	globalMemory.Logs = logs
+	globalMemory.Time = time
+	setGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)
+	if setGloabolErrror != nil {
+		fmt.Println(setGloabolErrror.Error())
+		return setGloabolErrror
+	}
 
 	stub.SetEvent("Message_068kmzv", []byte("Message is waiting for confirmation"))
 	cc.SetInstance(ctx, instance)
@@ -1280,7 +1305,7 @@ func (cc *SmartContract) Message_068kmzv_Complete(ctx contractapi.TransactionCon
 	return nil
 }
 
-func (cc *SmartContract) Message_076ulzs_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
+func (cc *SmartContract) Message_076ulzs_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, description string, logs string, time string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_076ulzs")
@@ -1303,6 +1328,20 @@ func (cc *SmartContract) Message_076ulzs_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instance, "Message_076ulzs", COMPLETED)
+
+globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
+	if readGloabolError != nil {
+		fmt.Println(readGloabolError.Error())
+		return readGloabolError
+	}
+	globalMemory.Description = description
+	globalMemory.Logs = logs
+	globalMemory.Time = time
+	setGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)
+	if setGloabolErrror != nil {
+		fmt.Println(setGloabolErrror.Error())
+		return setGloabolErrror
+	}
 
 	stub.SetEvent("Message_076ulzs", []byte("Message is waiting for confirmation"))
 	cc.SetInstance(ctx, instance)
@@ -1339,7 +1378,7 @@ func (cc *SmartContract) Message_076ulzs_Complete(ctx contractapi.TransactionCon
 	return nil
 }
 
-func (cc *SmartContract) Message_09krt7c_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
+func (cc *SmartContract) Message_09krt7c_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, description string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_09krt7c")
@@ -1362,6 +1401,18 @@ func (cc *SmartContract) Message_09krt7c_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instance, "Message_09krt7c", COMPLETED)
+
+globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
+	if readGloabolError != nil {
+		fmt.Println(readGloabolError.Error())
+		return readGloabolError
+	}
+	globalMemory.Description = description
+	setGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)
+	if setGloabolErrror != nil {
+		fmt.Println(setGloabolErrror.Error())
+		return setGloabolErrror
+	}
 
 	stub.SetEvent("Message_09krt7c", []byte("Message is waiting for confirmation"))
 	cc.SetInstance(ctx, instance)
@@ -1398,7 +1449,7 @@ func (cc *SmartContract) Message_09krt7c_Complete(ctx contractapi.TransactionCon
 	return nil
 }
 
-func (cc *SmartContract) Message_0ywghlt_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
+func (cc *SmartContract) Message_0ywghlt_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, serviceType string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_0ywghlt")
@@ -1421,6 +1472,18 @@ func (cc *SmartContract) Message_0ywghlt_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instance, "Message_0ywghlt", COMPLETED)
+
+globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
+	if readGloabolError != nil {
+		fmt.Println(readGloabolError.Error())
+		return readGloabolError
+	}
+	globalMemory.ServiceType = serviceType
+	setGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)
+	if setGloabolErrror != nil {
+		fmt.Println(setGloabolErrror.Error())
+		return setGloabolErrror
+	}
 
 	stub.SetEvent("Message_0ywghlt", []byte("Message is waiting for confirmation"))
 	cc.SetInstance(ctx, instance)
@@ -1458,7 +1521,7 @@ func (cc *SmartContract) Message_0ywghlt_Complete(ctx contractapi.TransactionCon
 	return nil
 }
 
-func (cc *SmartContract) Message_12n6jjk_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
+func (cc *SmartContract) Message_12n6jjk_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, duration int, requestType string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_12n6jjk")
@@ -1481,6 +1544,19 @@ func (cc *SmartContract) Message_12n6jjk_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instance, "Message_12n6jjk", COMPLETED)
+
+globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
+	if readGloabolError != nil {
+		fmt.Println(readGloabolError.Error())
+		return readGloabolError
+	}
+	globalMemory.Duration = duration
+	globalMemory.RequestType = requestType
+	setGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)
+	if setGloabolErrror != nil {
+		fmt.Println(setGloabolErrror.Error())
+		return setGloabolErrror
+	}
 
 	stub.SetEvent("Message_12n6jjk", []byte("Message is waiting for confirmation"))
 	cc.SetInstance(ctx, instance)
@@ -1517,7 +1593,7 @@ func (cc *SmartContract) Message_12n6jjk_Complete(ctx contractapi.TransactionCon
 	return nil
 }
 
-func (cc *SmartContract) Message_1b1qlzd_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
+func (cc *SmartContract) Message_1b1qlzd_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, reason string, result string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_1b1qlzd")
@@ -1540,6 +1616,19 @@ func (cc *SmartContract) Message_1b1qlzd_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instance, "Message_1b1qlzd", COMPLETED)
+
+globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
+	if readGloabolError != nil {
+		fmt.Println(readGloabolError.Error())
+		return readGloabolError
+	}
+	globalMemory.Reason = reason
+	globalMemory.Result = result
+	setGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)
+	if setGloabolErrror != nil {
+		fmt.Println(setGloabolErrror.Error())
+		return setGloabolErrror
+	}
 
 	stub.SetEvent("Message_1b1qlzd", []byte("Message is waiting for confirmation"))
 	cc.SetInstance(ctx, instance)
@@ -1576,7 +1665,7 @@ func (cc *SmartContract) Message_1b1qlzd_Complete(ctx contractapi.TransactionCon
 	return nil
 }
 
-func (cc *SmartContract) Message_1bhhp1n_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
+func (cc *SmartContract) Message_1bhhp1n_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, serviceType string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_1bhhp1n")
@@ -1599,6 +1688,18 @@ func (cc *SmartContract) Message_1bhhp1n_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instance, "Message_1bhhp1n", COMPLETED)
+
+globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
+	if readGloabolError != nil {
+		fmt.Println(readGloabolError.Error())
+		return readGloabolError
+	}
+	globalMemory.ServiceType = serviceType
+	setGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)
+	if setGloabolErrror != nil {
+		fmt.Println(setGloabolErrror.Error())
+		return setGloabolErrror
+	}
 
 	stub.SetEvent("Message_1bhhp1n", []byte("Message is waiting for confirmation"))
 	cc.SetInstance(ctx, instance)

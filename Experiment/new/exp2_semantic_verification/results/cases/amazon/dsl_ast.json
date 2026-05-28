@@ -1,5 +1,5 @@
 {
-  "contract_name": "GeneratedContract",
+  "contract_name": "amazon",
   "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/amazon/dsl.b2c",
   "participants": [
     {
@@ -69,6 +69,10 @@
       "type": "string"
     },
     {
+      "name": "RequestType",
+      "type": "string"
+    },
+    {
       "name": "Result",
       "type": "string"
     },
@@ -78,10 +82,6 @@
     },
     {
       "name": "Time",
-      "type": "string"
-    },
-    {
-      "name": "Type",
       "type": "string"
     }
   ],
@@ -126,7 +126,7 @@
       "from": "Participant_12df78t",
       "to": "Participant_1p9owwo",
       "initial_state": "INACTIVE",
-      "schema": "{\"properties\":{\"type\":{\"type\":\"string\",\"description\":\"\"},\"duration\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"type\",\"duration\"],\"files\":{},\"file required\":[]}"
+      "schema": "{\"properties\":{\"requestType\":{\"type\":\"string\",\"description\":\"\"},\"duration\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"requestType\",\"duration\"],\"files\":{},\"file required\":[]}"
     },
     {
       "name": "Message_1b1qlzd",
@@ -181,12 +181,12 @@
       "decision": "Activity_0tya4bp_DecisionID",
       "input_mapping": [
         {
-          "dmn_param": "type",
-          "global": "Type"
-        },
-        {
           "dmn_param": "duration",
           "global": "Duration"
+        },
+        {
+          "dmn_param": "requestType",
+          "global": "RequestType"
         }
       ],
       "output_mapping": [

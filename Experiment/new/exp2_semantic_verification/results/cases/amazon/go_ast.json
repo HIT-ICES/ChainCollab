@@ -203,6 +203,10 @@
           "type": "string"
         },
         {
+          "name": "RequestType",
+          "type": "string"
+        },
+        {
           "name": "Result",
           "type": "string"
         },
@@ -212,10 +216,6 @@
         },
         {
           "name": "Time",
-          "type": "string"
-        },
-        {
-          "name": "Type",
           "type": "string"
         }
       ]
@@ -288,6 +288,10 @@
       "type": "string"
     },
     {
+      "name": "RequestType",
+      "type": "string"
+    },
+    {
       "name": "Result",
       "type": "string"
     },
@@ -297,10 +301,6 @@
     },
     {
       "name": "Time",
-      "type": "string"
-    },
-    {
-      "name": "Type",
       "type": "string"
     }
   ],
@@ -770,7 +770,8 @@
       "params": [
         "contractapi.TransactionContextInterface",
         "string",
-        "string"
+        "string",
+        "int"
       ],
       "results": [
         "error"
@@ -792,6 +793,8 @@
       "receiver": "*SmartContract",
       "params": [
         "contractapi.TransactionContextInterface",
+        "string",
+        "string",
         "string",
         "string"
       ],
@@ -816,6 +819,9 @@
       "params": [
         "contractapi.TransactionContextInterface",
         "string",
+        "string",
+        "string",
+        "string",
         "string"
       ],
       "results": [
@@ -838,6 +844,7 @@
       "receiver": "*SmartContract",
       "params": [
         "contractapi.TransactionContextInterface",
+        "string",
         "string",
         "string"
       ],
@@ -862,6 +869,7 @@
       "params": [
         "contractapi.TransactionContextInterface",
         "string",
+        "string",
         "string"
       ],
       "results": [
@@ -885,6 +893,8 @@
       "params": [
         "contractapi.TransactionContextInterface",
         "string",
+        "string",
+        "int",
         "string"
       ],
       "results": [
@@ -908,6 +918,8 @@
       "params": [
         "contractapi.TransactionContextInterface",
         "string",
+        "string",
+        "string",
         "string"
       ],
       "results": [
@@ -930,6 +942,7 @@
       "receiver": "*SmartContract",
       "params": [
         "contractapi.TransactionContextInterface",
+        "string",
         "string",
         "string"
       ],
@@ -1504,6 +1517,14 @@
       "condition": "msg.MsgState != ENABLED"
     },
     {
+      "function": "Message_01jq2zl_Send",
+      "condition": "readGloabolError != nil"
+    },
+    {
+      "function": "Message_01jq2zl_Send",
+      "condition": "setGloabolErrror != nil"
+    },
+    {
       "function": "Message_01jq2zl_Complete",
       "condition": "err != nil"
     },
@@ -1526,6 +1547,14 @@
     {
       "function": "Message_068kmzv_Send",
       "condition": "msg.MsgState != ENABLED"
+    },
+    {
+      "function": "Message_068kmzv_Send",
+      "condition": "readGloabolError != nil"
+    },
+    {
+      "function": "Message_068kmzv_Send",
+      "condition": "setGloabolErrror != nil"
     },
     {
       "function": "Message_068kmzv_Complete",
@@ -1552,6 +1581,14 @@
       "condition": "msg.MsgState != ENABLED"
     },
     {
+      "function": "Message_076ulzs_Send",
+      "condition": "readGloabolError != nil"
+    },
+    {
+      "function": "Message_076ulzs_Send",
+      "condition": "setGloabolErrror != nil"
+    },
+    {
       "function": "Message_076ulzs_Complete",
       "condition": "err != nil"
     },
@@ -1574,6 +1611,14 @@
     {
       "function": "Message_09krt7c_Send",
       "condition": "msg.MsgState != ENABLED"
+    },
+    {
+      "function": "Message_09krt7c_Send",
+      "condition": "readGloabolError != nil"
+    },
+    {
+      "function": "Message_09krt7c_Send",
+      "condition": "setGloabolErrror != nil"
     },
     {
       "function": "Message_09krt7c_Complete",
@@ -1600,6 +1645,14 @@
       "condition": "msg.MsgState != ENABLED"
     },
     {
+      "function": "Message_0ywghlt_Send",
+      "condition": "readGloabolError != nil"
+    },
+    {
+      "function": "Message_0ywghlt_Send",
+      "condition": "setGloabolErrror != nil"
+    },
+    {
       "function": "Message_0ywghlt_Complete",
       "condition": "err != nil"
     },
@@ -1622,6 +1675,14 @@
     {
       "function": "Message_12n6jjk_Send",
       "condition": "msg.MsgState != ENABLED"
+    },
+    {
+      "function": "Message_12n6jjk_Send",
+      "condition": "readGloabolError != nil"
+    },
+    {
+      "function": "Message_12n6jjk_Send",
+      "condition": "setGloabolErrror != nil"
     },
     {
       "function": "Message_12n6jjk_Complete",
@@ -1648,6 +1709,14 @@
       "condition": "msg.MsgState != ENABLED"
     },
     {
+      "function": "Message_1b1qlzd_Send",
+      "condition": "readGloabolError != nil"
+    },
+    {
+      "function": "Message_1b1qlzd_Send",
+      "condition": "setGloabolErrror != nil"
+    },
+    {
       "function": "Message_1b1qlzd_Complete",
       "condition": "err != nil"
     },
@@ -1670,6 +1739,14 @@
     {
       "function": "Message_1bhhp1n_Send",
       "condition": "msg.MsgState != ENABLED"
+    },
+    {
+      "function": "Message_1bhhp1n_Send",
+      "condition": "readGloabolError != nil"
+    },
+    {
+      "function": "Message_1bhhp1n_Send",
+      "condition": "setGloabolErrror != nil"
     },
     {
       "function": "Message_1bhhp1n_Complete",
@@ -3355,6 +3432,34 @@
       ]
     },
     {
+      "function": "Message_01jq2zl_Send",
+      "lhs": [
+        "globalMemory",
+        "readGloabolError"
+      ],
+      "rhs": [
+        "cc.ReadGlobalVariable(ctx, instanceID)"
+      ]
+    },
+    {
+      "function": "Message_01jq2zl_Send",
+      "lhs": [
+        "globalMemory.Amount"
+      ],
+      "rhs": [
+        "amount"
+      ]
+    },
+    {
+      "function": "Message_01jq2zl_Send",
+      "lhs": [
+        "setGloabolErrror"
+      ],
+      "rhs": [
+        "cc.SetGlobalVariable(ctx, instance, globalMemory)"
+      ]
+    },
+    {
       "function": "Message_01jq2zl_Complete",
       "lhs": [
         "stub"
@@ -3449,6 +3554,43 @@
       ]
     },
     {
+      "function": "Message_068kmzv_Send",
+      "lhs": [
+        "globalMemory",
+        "readGloabolError"
+      ],
+      "rhs": [
+        "cc.ReadGlobalVariable(ctx, instanceID)"
+      ]
+    },
+    {
+      "function": "Message_068kmzv_Send",
+      "lhs": [
+        "globalMemory.Logs"
+      ],
+      "rhs": [
+        "logs"
+      ]
+    },
+    {
+      "function": "Message_068kmzv_Send",
+      "lhs": [
+        "globalMemory.Time"
+      ],
+      "rhs": [
+        "time"
+      ]
+    },
+    {
+      "function": "Message_068kmzv_Send",
+      "lhs": [
+        "setGloabolErrror"
+      ],
+      "rhs": [
+        "cc.SetGlobalVariable(ctx, instance, globalMemory)"
+      ]
+    },
+    {
       "function": "Message_068kmzv_Complete",
       "lhs": [
         "stub"
@@ -3543,6 +3685,52 @@
       ]
     },
     {
+      "function": "Message_076ulzs_Send",
+      "lhs": [
+        "globalMemory",
+        "readGloabolError"
+      ],
+      "rhs": [
+        "cc.ReadGlobalVariable(ctx, instanceID)"
+      ]
+    },
+    {
+      "function": "Message_076ulzs_Send",
+      "lhs": [
+        "globalMemory.Description"
+      ],
+      "rhs": [
+        "description"
+      ]
+    },
+    {
+      "function": "Message_076ulzs_Send",
+      "lhs": [
+        "globalMemory.Logs"
+      ],
+      "rhs": [
+        "logs"
+      ]
+    },
+    {
+      "function": "Message_076ulzs_Send",
+      "lhs": [
+        "globalMemory.Time"
+      ],
+      "rhs": [
+        "time"
+      ]
+    },
+    {
+      "function": "Message_076ulzs_Send",
+      "lhs": [
+        "setGloabolErrror"
+      ],
+      "rhs": [
+        "cc.SetGlobalVariable(ctx, instance, globalMemory)"
+      ]
+    },
+    {
       "function": "Message_076ulzs_Complete",
       "lhs": [
         "stub"
@@ -3637,6 +3825,34 @@
       ]
     },
     {
+      "function": "Message_09krt7c_Send",
+      "lhs": [
+        "globalMemory",
+        "readGloabolError"
+      ],
+      "rhs": [
+        "cc.ReadGlobalVariable(ctx, instanceID)"
+      ]
+    },
+    {
+      "function": "Message_09krt7c_Send",
+      "lhs": [
+        "globalMemory.Description"
+      ],
+      "rhs": [
+        "description"
+      ]
+    },
+    {
+      "function": "Message_09krt7c_Send",
+      "lhs": [
+        "setGloabolErrror"
+      ],
+      "rhs": [
+        "cc.SetGlobalVariable(ctx, instance, globalMemory)"
+      ]
+    },
+    {
       "function": "Message_09krt7c_Complete",
       "lhs": [
         "stub"
@@ -3731,6 +3947,34 @@
       ]
     },
     {
+      "function": "Message_0ywghlt_Send",
+      "lhs": [
+        "globalMemory",
+        "readGloabolError"
+      ],
+      "rhs": [
+        "cc.ReadGlobalVariable(ctx, instanceID)"
+      ]
+    },
+    {
+      "function": "Message_0ywghlt_Send",
+      "lhs": [
+        "globalMemory.ServiceType"
+      ],
+      "rhs": [
+        "serviceType"
+      ]
+    },
+    {
+      "function": "Message_0ywghlt_Send",
+      "lhs": [
+        "setGloabolErrror"
+      ],
+      "rhs": [
+        "cc.SetGlobalVariable(ctx, instance, globalMemory)"
+      ]
+    },
+    {
       "function": "Message_0ywghlt_Complete",
       "lhs": [
         "stub"
@@ -3825,6 +4069,43 @@
       ]
     },
     {
+      "function": "Message_12n6jjk_Send",
+      "lhs": [
+        "globalMemory",
+        "readGloabolError"
+      ],
+      "rhs": [
+        "cc.ReadGlobalVariable(ctx, instanceID)"
+      ]
+    },
+    {
+      "function": "Message_12n6jjk_Send",
+      "lhs": [
+        "globalMemory.Duration"
+      ],
+      "rhs": [
+        "duration"
+      ]
+    },
+    {
+      "function": "Message_12n6jjk_Send",
+      "lhs": [
+        "globalMemory.RequestType"
+      ],
+      "rhs": [
+        "requestType"
+      ]
+    },
+    {
+      "function": "Message_12n6jjk_Send",
+      "lhs": [
+        "setGloabolErrror"
+      ],
+      "rhs": [
+        "cc.SetGlobalVariable(ctx, instance, globalMemory)"
+      ]
+    },
+    {
       "function": "Message_12n6jjk_Complete",
       "lhs": [
         "stub"
@@ -3919,6 +4200,43 @@
       ]
     },
     {
+      "function": "Message_1b1qlzd_Send",
+      "lhs": [
+        "globalMemory",
+        "readGloabolError"
+      ],
+      "rhs": [
+        "cc.ReadGlobalVariable(ctx, instanceID)"
+      ]
+    },
+    {
+      "function": "Message_1b1qlzd_Send",
+      "lhs": [
+        "globalMemory.Reason"
+      ],
+      "rhs": [
+        "reason"
+      ]
+    },
+    {
+      "function": "Message_1b1qlzd_Send",
+      "lhs": [
+        "globalMemory.Result"
+      ],
+      "rhs": [
+        "result"
+      ]
+    },
+    {
+      "function": "Message_1b1qlzd_Send",
+      "lhs": [
+        "setGloabolErrror"
+      ],
+      "rhs": [
+        "cc.SetGlobalVariable(ctx, instance, globalMemory)"
+      ]
+    },
+    {
       "function": "Message_1b1qlzd_Complete",
       "lhs": [
         "stub"
@@ -4010,6 +4328,34 @@
       ],
       "rhs": [
         "fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)"
+      ]
+    },
+    {
+      "function": "Message_1bhhp1n_Send",
+      "lhs": [
+        "globalMemory",
+        "readGloabolError"
+      ],
+      "rhs": [
+        "cc.ReadGlobalVariable(ctx, instanceID)"
+      ]
+    },
+    {
+      "function": "Message_1bhhp1n_Send",
+      "lhs": [
+        "globalMemory.ServiceType"
+      ],
+      "rhs": [
+        "serviceType"
+      ]
+    },
+    {
+      "function": "Message_1bhhp1n_Send",
+      "lhs": [
+        "setGloabolErrror"
+      ],
+      "rhs": [
+        "cc.SetGlobalVariable(ctx, instance, globalMemory)"
       ]
     },
     {
@@ -5592,6 +5938,20 @@
       ]
     },
     {
+      "function": "Message_01jq2zl_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "readGloabolError.Error()"
+      ]
+    },
+    {
+      "function": "Message_01jq2zl_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "setGloabolErrror.Error()"
+      ]
+    },
+    {
       "function": "Message_01jq2zl_Complete",
       "callee": "ctx.GetStub",
       "args": []
@@ -5687,6 +6047,20 @@
       "callee": "fmt.Errorf",
       "args": [
         "errorMessage"
+      ]
+    },
+    {
+      "function": "Message_068kmzv_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "readGloabolError.Error()"
+      ]
+    },
+    {
+      "function": "Message_068kmzv_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "setGloabolErrror.Error()"
       ]
     },
     {
@@ -5788,6 +6162,20 @@
       ]
     },
     {
+      "function": "Message_076ulzs_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "readGloabolError.Error()"
+      ]
+    },
+    {
+      "function": "Message_076ulzs_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "setGloabolErrror.Error()"
+      ]
+    },
+    {
       "function": "Message_076ulzs_Complete",
       "callee": "ctx.GetStub",
       "args": []
@@ -5886,6 +6274,20 @@
       ]
     },
     {
+      "function": "Message_09krt7c_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "readGloabolError.Error()"
+      ]
+    },
+    {
+      "function": "Message_09krt7c_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "setGloabolErrror.Error()"
+      ]
+    },
+    {
       "function": "Message_09krt7c_Complete",
       "callee": "ctx.GetStub",
       "args": []
@@ -5984,6 +6386,20 @@
       ]
     },
     {
+      "function": "Message_0ywghlt_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "readGloabolError.Error()"
+      ]
+    },
+    {
+      "function": "Message_0ywghlt_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "setGloabolErrror.Error()"
+      ]
+    },
+    {
       "function": "Message_0ywghlt_Complete",
       "callee": "ctx.GetStub",
       "args": []
@@ -6082,6 +6498,20 @@
       ]
     },
     {
+      "function": "Message_12n6jjk_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "readGloabolError.Error()"
+      ]
+    },
+    {
+      "function": "Message_12n6jjk_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "setGloabolErrror.Error()"
+      ]
+    },
+    {
       "function": "Message_12n6jjk_Complete",
       "callee": "ctx.GetStub",
       "args": []
@@ -6180,6 +6610,20 @@
       ]
     },
     {
+      "function": "Message_1b1qlzd_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "readGloabolError.Error()"
+      ]
+    },
+    {
+      "function": "Message_1b1qlzd_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "setGloabolErrror.Error()"
+      ]
+    },
+    {
       "function": "Message_1b1qlzd_Complete",
       "callee": "ctx.GetStub",
       "args": []
@@ -6275,6 +6719,20 @@
       "callee": "fmt.Errorf",
       "args": [
         "errorMessage"
+      ]
+    },
+    {
+      "function": "Message_1bhhp1n_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "readGloabolError.Error()"
+      ]
+    },
+    {
+      "function": "Message_1bhhp1n_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "setGloabolErrror.Error()"
       ]
     },
     {
@@ -8322,7 +8780,7 @@
         "\"Participant_1p9owwo\"",
         "\"\"",
         "DISABLED",
-        "`{\"schema\": \"{\\\"properties\\\":{\\\"type\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"},\\\"duration\\\":{\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"type\\\",\\\"duration\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}`"
+        "`{\"schema\": \"{\\\"properties\\\":{\\\"requestType\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"},\\\"duration\\\":{\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"requestType\\\",\\\"duration\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}`"
       ]
     },
     {
@@ -9187,6 +9645,47 @@
     },
     {
       "function": "Message_01jq2zl_Send",
+      "callee": "cc.ReadGlobalVariable",
+      "args": [
+        "ctx",
+        "instanceID"
+      ]
+    },
+    {
+      "function": "Message_01jq2zl_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "readGloabolError.Error()"
+      ]
+    },
+    {
+      "function": "Message_01jq2zl_Send",
+      "callee": "readGloabolError.Error",
+      "args": []
+    },
+    {
+      "function": "Message_01jq2zl_Send",
+      "callee": "cc.SetGlobalVariable",
+      "args": [
+        "ctx",
+        "instance",
+        "globalMemory"
+      ]
+    },
+    {
+      "function": "Message_01jq2zl_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "setGloabolErrror.Error()"
+      ]
+    },
+    {
+      "function": "Message_01jq2zl_Send",
+      "callee": "setGloabolErrror.Error",
+      "args": []
+    },
+    {
+      "function": "Message_01jq2zl_Send",
       "callee": "stub.SetEvent",
       "args": [
         "\"Message_01jq2zl\"",
@@ -9439,6 +9938,47 @@
     },
     {
       "function": "Message_068kmzv_Send",
+      "callee": "cc.ReadGlobalVariable",
+      "args": [
+        "ctx",
+        "instanceID"
+      ]
+    },
+    {
+      "function": "Message_068kmzv_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "readGloabolError.Error()"
+      ]
+    },
+    {
+      "function": "Message_068kmzv_Send",
+      "callee": "readGloabolError.Error",
+      "args": []
+    },
+    {
+      "function": "Message_068kmzv_Send",
+      "callee": "cc.SetGlobalVariable",
+      "args": [
+        "ctx",
+        "instance",
+        "globalMemory"
+      ]
+    },
+    {
+      "function": "Message_068kmzv_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "setGloabolErrror.Error()"
+      ]
+    },
+    {
+      "function": "Message_068kmzv_Send",
+      "callee": "setGloabolErrror.Error",
+      "args": []
+    },
+    {
+      "function": "Message_068kmzv_Send",
       "callee": "stub.SetEvent",
       "args": [
         "\"Message_068kmzv\"",
@@ -9691,6 +10231,47 @@
     },
     {
       "function": "Message_076ulzs_Send",
+      "callee": "cc.ReadGlobalVariable",
+      "args": [
+        "ctx",
+        "instanceID"
+      ]
+    },
+    {
+      "function": "Message_076ulzs_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "readGloabolError.Error()"
+      ]
+    },
+    {
+      "function": "Message_076ulzs_Send",
+      "callee": "readGloabolError.Error",
+      "args": []
+    },
+    {
+      "function": "Message_076ulzs_Send",
+      "callee": "cc.SetGlobalVariable",
+      "args": [
+        "ctx",
+        "instance",
+        "globalMemory"
+      ]
+    },
+    {
+      "function": "Message_076ulzs_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "setGloabolErrror.Error()"
+      ]
+    },
+    {
+      "function": "Message_076ulzs_Send",
+      "callee": "setGloabolErrror.Error",
+      "args": []
+    },
+    {
+      "function": "Message_076ulzs_Send",
       "callee": "stub.SetEvent",
       "args": [
         "\"Message_076ulzs\"",
@@ -9943,6 +10524,47 @@
     },
     {
       "function": "Message_09krt7c_Send",
+      "callee": "cc.ReadGlobalVariable",
+      "args": [
+        "ctx",
+        "instanceID"
+      ]
+    },
+    {
+      "function": "Message_09krt7c_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "readGloabolError.Error()"
+      ]
+    },
+    {
+      "function": "Message_09krt7c_Send",
+      "callee": "readGloabolError.Error",
+      "args": []
+    },
+    {
+      "function": "Message_09krt7c_Send",
+      "callee": "cc.SetGlobalVariable",
+      "args": [
+        "ctx",
+        "instance",
+        "globalMemory"
+      ]
+    },
+    {
+      "function": "Message_09krt7c_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "setGloabolErrror.Error()"
+      ]
+    },
+    {
+      "function": "Message_09krt7c_Send",
+      "callee": "setGloabolErrror.Error",
+      "args": []
+    },
+    {
+      "function": "Message_09krt7c_Send",
       "callee": "stub.SetEvent",
       "args": [
         "\"Message_09krt7c\"",
@@ -10192,6 +10814,47 @@
         "\"Message_0ywghlt\"",
         "COMPLETED"
       ]
+    },
+    {
+      "function": "Message_0ywghlt_Send",
+      "callee": "cc.ReadGlobalVariable",
+      "args": [
+        "ctx",
+        "instanceID"
+      ]
+    },
+    {
+      "function": "Message_0ywghlt_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "readGloabolError.Error()"
+      ]
+    },
+    {
+      "function": "Message_0ywghlt_Send",
+      "callee": "readGloabolError.Error",
+      "args": []
+    },
+    {
+      "function": "Message_0ywghlt_Send",
+      "callee": "cc.SetGlobalVariable",
+      "args": [
+        "ctx",
+        "instance",
+        "globalMemory"
+      ]
+    },
+    {
+      "function": "Message_0ywghlt_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "setGloabolErrror.Error()"
+      ]
+    },
+    {
+      "function": "Message_0ywghlt_Send",
+      "callee": "setGloabolErrror.Error",
+      "args": []
     },
     {
       "function": "Message_0ywghlt_Send",
@@ -10457,6 +11120,47 @@
     },
     {
       "function": "Message_12n6jjk_Send",
+      "callee": "cc.ReadGlobalVariable",
+      "args": [
+        "ctx",
+        "instanceID"
+      ]
+    },
+    {
+      "function": "Message_12n6jjk_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "readGloabolError.Error()"
+      ]
+    },
+    {
+      "function": "Message_12n6jjk_Send",
+      "callee": "readGloabolError.Error",
+      "args": []
+    },
+    {
+      "function": "Message_12n6jjk_Send",
+      "callee": "cc.SetGlobalVariable",
+      "args": [
+        "ctx",
+        "instance",
+        "globalMemory"
+      ]
+    },
+    {
+      "function": "Message_12n6jjk_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "setGloabolErrror.Error()"
+      ]
+    },
+    {
+      "function": "Message_12n6jjk_Send",
+      "callee": "setGloabolErrror.Error",
+      "args": []
+    },
+    {
+      "function": "Message_12n6jjk_Send",
       "callee": "stub.SetEvent",
       "args": [
         "\"Message_12n6jjk\"",
@@ -10709,6 +11413,47 @@
     },
     {
       "function": "Message_1b1qlzd_Send",
+      "callee": "cc.ReadGlobalVariable",
+      "args": [
+        "ctx",
+        "instanceID"
+      ]
+    },
+    {
+      "function": "Message_1b1qlzd_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "readGloabolError.Error()"
+      ]
+    },
+    {
+      "function": "Message_1b1qlzd_Send",
+      "callee": "readGloabolError.Error",
+      "args": []
+    },
+    {
+      "function": "Message_1b1qlzd_Send",
+      "callee": "cc.SetGlobalVariable",
+      "args": [
+        "ctx",
+        "instance",
+        "globalMemory"
+      ]
+    },
+    {
+      "function": "Message_1b1qlzd_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "setGloabolErrror.Error()"
+      ]
+    },
+    {
+      "function": "Message_1b1qlzd_Send",
+      "callee": "setGloabolErrror.Error",
+      "args": []
+    },
+    {
+      "function": "Message_1b1qlzd_Send",
       "callee": "stub.SetEvent",
       "args": [
         "\"Message_1b1qlzd\"",
@@ -10958,6 +11703,47 @@
         "\"Message_1bhhp1n\"",
         "COMPLETED"
       ]
+    },
+    {
+      "function": "Message_1bhhp1n_Send",
+      "callee": "cc.ReadGlobalVariable",
+      "args": [
+        "ctx",
+        "instanceID"
+      ]
+    },
+    {
+      "function": "Message_1bhhp1n_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "readGloabolError.Error()"
+      ]
+    },
+    {
+      "function": "Message_1bhhp1n_Send",
+      "callee": "readGloabolError.Error",
+      "args": []
+    },
+    {
+      "function": "Message_1bhhp1n_Send",
+      "callee": "cc.SetGlobalVariable",
+      "args": [
+        "ctx",
+        "instance",
+        "globalMemory"
+      ]
+    },
+    {
+      "function": "Message_1bhhp1n_Send",
+      "callee": "fmt.Println",
+      "args": [
+        "setGloabolErrror.Error()"
+      ]
+    },
+    {
+      "function": "Message_1bhhp1n_Send",
+      "callee": "setGloabolErrror.Error",
+      "args": []
     },
     {
       "function": "Message_1bhhp1n_Send",
@@ -11742,10 +12528,10 @@
     "{\"schema\": \"{\\\"properties\\\":{\\\"amount\\\":{\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"amount\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
     "{\"schema\": \"{\\\"properties\\\":{\\\"question name\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"},\\\"description\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"question name\\\",\\\"description\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
     "{\"schema\": \"{\\\"properties\\\":{\\\"reason\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"},\\\"result\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"reason\\\",\\\"result\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
+    "{\"schema\": \"{\\\"properties\\\":{\\\"requestType\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"},\\\"duration\\\":{\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"requestType\\\",\\\"duration\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
     "{\"schema\": \"{\\\"properties\\\":{\\\"serviceType\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"serviceType\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
     "{\"schema\": \"{\\\"properties\\\":{\\\"time\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"},\\\"description\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"},\\\"EC2 resource ID\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"},\\\"logs\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"},\\\"other information\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"time\\\",\\\"description\\\",\\\"EC2 resource ID\\\",\\\"logs\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
     "{\"schema\": \"{\\\"properties\\\":{\\\"time\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"},\\\"instance ID\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"},\\\"logs\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"time\\\",\\\"instance ID\\\",\\\"logs\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
-    "{\"schema\": \"{\\\"properties\\\":{\\\"type\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"},\\\"duration\\\":{\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[\\\"type\\\",\\\"duration\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}",
     "无法将实例元素转换为ActionEvent",
     "无法将实例元素转换为BusinessRule",
     "无法将实例元素转换为Gateway",

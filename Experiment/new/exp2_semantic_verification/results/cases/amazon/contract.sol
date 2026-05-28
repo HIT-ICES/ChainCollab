@@ -43,7 +43,7 @@ interface IIdentityRegistry {
     function getIdentityOrg(address identityAddress) external view returns (string memory);
 }
 
-contract GeneratedContract {
+contract amazon {
     enum ElementState {
         DISABLED,
         ENABLED,
@@ -91,10 +91,10 @@ contract GeneratedContract {
         string Other_information;
         string Question_name;
         string Reason;
+        string RequestType;
         string Result;
         string ServiceType;
         string Time;
-        string Type;
     }
 
     struct Participant {
@@ -803,15 +803,15 @@ contract GeneratedContract {
         inputBody = _jsonAppendField(
             inputBody,
             _jsonField(
-                "type",
-            _jsonString(inst.stateMemory.Type)
+                "duration",
+            _jsonInt(inst.stateMemory.Duration)
             )
         );
         inputBody = _jsonAppendField(
             inputBody,
             _jsonField(
-                "duration",
-            _jsonInt(inst.stateMemory.Duration)
+                "requestType",
+            _jsonString(inst.stateMemory.RequestType)
             )
         );
         string memory inputData = _jsonObject(inputBody);
@@ -959,7 +959,7 @@ function Message_0ywghlt_Send(uint256 instanceId, string calldata fireflyTranId,
 
     }
 
-function Message_12n6jjk_Send(uint256 instanceId, string calldata fireflyTranId, string calldata type, int256 duration) external onlyInitialized {
+function Message_12n6jjk_Send(uint256 instanceId, string calldata fireflyTranId, string calldata requestType, int256 duration) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);
         Message storage m = inst.messages[MessageKey.Message_12n6jjk];
         require(m.exists, "message not set");
@@ -967,7 +967,7 @@ function Message_12n6jjk_Send(uint256 instanceId, string calldata fireflyTranId,
         require(m.state == ElementState.ENABLED, "message state not allowed");
 
         m.fireflyTranId = fireflyTranId;
-        inst.stateMemory.Type = type;
+        inst.stateMemory.RequestType = requestType;
         inst.stateMemory.Duration = duration;
         m.state = ElementState.COMPLETED;
         emit MessageSent(instanceId, MessageKey.Message_12n6jjk, fireflyTranId);

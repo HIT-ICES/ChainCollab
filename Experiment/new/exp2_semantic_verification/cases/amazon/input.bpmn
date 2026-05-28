@@ -7,7 +7,7 @@
     <bpmn2:documentation>{"properties":{"amount":{"type":"number","description":""}},"required":["amount"],"files":{},"file required":[]}</bpmn2:documentation>
   </bpmn2:message>
   <bpmn2:message id="Message_12n6jjk" name="submit form">
-    <bpmn2:documentation>{"properties":{"type":{"type":"string","description":""},"duration":{"type":"number","description":""}},"required":["type","duration"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:documentation>{"properties":{"requestType":{"type":"string","description":""},"duration":{"type":"number","description":""}},"required":["requestType","duration"],"files":{},"file required":[]}</bpmn2:documentation>
   </bpmn2:message>
   <bpmn2:message id="Message_076ulzs" name="details1">
     <bpmn2:documentation>{"properties":{"time":{"type":"string","description":""},"description":{"type":"string","description":""},"EC2 resource ID":{"type":"string","description":""},"logs":{"type":"string","description":""},"other information":{"type":"string","description":""}},"required":["time","description","EC2 resource ID","logs"],"files":{},"file required":[]}</bpmn2:documentation>
@@ -100,7 +100,7 @@
     </bpmn2:choreographyTask>
     <bpmn2:sequenceFlow id="Flow_0rawiic" sourceRef="Gateway_0auc3he" targetRef="ChoreographyTask_14x309o" />
     <bpmn2:businessRuleTask id="Activity_0tya4bp" name="">
-      <bpmn2:documentation>{"inputs":[{"name":"type","type":"string","description":""},{"name":"duration","type":"number","description":""}],"outputs":[{"name":"confirm","type":"boolean","description":""}]}</bpmn2:documentation>
+      <bpmn2:documentation>{"inputs":[{"name":"duration","type":"number","description":""},{"name":"requestType","type":"string","description":""}],"outputs":[{"name":"confirm","type":"boolean","description":""}]}</bpmn2:documentation>
       <bpmn2:incoming>Flow_1bh56yy</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1m6mf5r</bpmn2:outgoing>
     </bpmn2:businessRuleTask>

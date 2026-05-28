@@ -1,0 +1,5270 @@
+{
+  "contracts": [
+    {
+      "name": "IOracle",
+      "kind": "interface"
+    },
+    {
+      "name": "IDmnLite",
+      "kind": "interface"
+    },
+    {
+      "name": "IIdentityRegistry",
+      "kind": "interface"
+    },
+    {
+      "name": "amazon",
+      "kind": "contract"
+    }
+  ],
+  "state_variables": [
+    {
+      "contract": "amazon",
+      "name": "EC2_resource_ID",
+      "type": "string",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "amazon",
+      "name": "Amount",
+      "type": "int256",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "amazon",
+      "name": "Confirm",
+      "type": "bool",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "amazon",
+      "name": "Description",
+      "type": "string",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "amazon",
+      "name": "Duration",
+      "type": "int256",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "amazon",
+      "name": "Instance_ID",
+      "type": "string",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "amazon",
+      "name": "Logs",
+      "type": "string",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "amazon",
+      "name": "Other_information",
+      "type": "string",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "amazon",
+      "name": "Question_name",
+      "type": "string",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "amazon",
+      "name": "Reason",
+      "type": "string",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "amazon",
+      "name": "RequestType",
+      "type": "string",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "amazon",
+      "name": "Result",
+      "type": "string",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "amazon",
+      "name": "ServiceType",
+      "type": "string",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "amazon",
+      "name": "Time",
+      "type": "string",
+      "container": "StateMemory"
+    },
+    {
+      "contract": "amazon",
+      "name": "owner",
+      "type": "address",
+      "visibility": "public"
+    },
+    {
+      "contract": "amazon",
+      "name": "isInited",
+      "type": "bool",
+      "visibility": "public"
+    },
+    {
+      "contract": "amazon",
+      "name": "currentInstanceId",
+      "type": "uint256",
+      "visibility": "public"
+    },
+    {
+      "contract": "amazon",
+      "name": "oracle",
+      "type": "UserDefinedTypeName",
+      "visibility": "public"
+    },
+    {
+      "contract": "amazon",
+      "name": "instances",
+      "type": "Mapping",
+      "visibility": "private"
+    },
+    {
+      "contract": "amazon",
+      "name": "DMN_REQUEST_FULFILLED",
+      "type": "uint8",
+      "visibility": "private"
+    }
+  ],
+  "enums": [
+    {
+      "contract": "amazon",
+      "name": "ElementState",
+      "values": [
+        "DISABLED",
+        "ENABLED",
+        "WAITING_FOR_CONFIRMATION",
+        "COMPLETED"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "ParticipantKey",
+      "values": [
+        "Participant_1p9owwo",
+        "Participant_12df78t"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "MessageKey",
+      "values": [
+        "Message_01jq2zl",
+        "Message_068kmzv",
+        "Message_076ulzs",
+        "Message_09krt7c",
+        "Message_0ywghlt",
+        "Message_12n6jjk",
+        "Message_1b1qlzd",
+        "Message_1bhhp1n"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "GatewayKey",
+      "values": [
+        "Gateway_0auc3he",
+        "Gateway_0ivv4vg",
+        "Gateway_0jgq0a6"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "EventKey",
+      "values": [
+        "Event_0ojehz6",
+        "Event_0ci2gl8",
+        "Event_0dyp0ut"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "BusinessRuleKey",
+      "values": [
+        "Activity_0tya4bp"
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "contract": "IOracle",
+      "name": "getExternalData",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "activityId",
+          "type": "string"
+        },
+        {
+          "name": "dataSource",
+          "type": "string"
+        },
+        {
+          "name": "outputKey",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "value",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "IOracle",
+      "name": "runComputeTask",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "activityId",
+          "type": "string"
+        },
+        {
+          "name": "computeScript",
+          "type": "string"
+        },
+        {
+          "name": "outputKey",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "value",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "IDmnLite",
+      "name": "requestDMNDecision",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "url",
+          "type": "string"
+        },
+        {
+          "name": "dmnCid",
+          "type": "string"
+        },
+        {
+          "name": "decisionId",
+          "type": "string"
+        },
+        {
+          "name": "inputData",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "requestId",
+          "type": "bytes32"
+        }
+      ]
+    },
+    {
+      "contract": "IDmnLite",
+      "name": "getRequestStatus",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "requestId",
+          "type": "bytes32"
+        }
+      ],
+      "returns": [
+        {
+          "name": "state",
+          "type": "uint8"
+        },
+        {
+          "name": "requester",
+          "type": "address"
+        },
+        {
+          "name": "createdAt",
+          "type": "uint256"
+        },
+        {
+          "name": "fulfilledAt",
+          "type": "uint256"
+        },
+        {
+          "name": "exists",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "contract": "IDmnLite",
+      "name": "getRawByRequestId",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "requestId",
+          "type": "bytes32"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "IIdentityRegistry",
+      "name": "getIdentityOrg",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "identityAddress",
+          "type": "address"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "constructor",
+      "kind": "constructor",
+      "visibility": "public",
+      "state_mutability": "nonpayable",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "oracleAddress",
+          "type": "address"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "setOracle",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyOwner"
+      ],
+      "parameters": [
+        {
+          "name": "oracleAddress",
+          "type": "address"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "initLedger",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyOwner"
+      ],
+      "parameters": [],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "_getInstance",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": [
+        {
+          "name": "inst",
+          "type": "UserDefinedTypeName"
+        }
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "_checkParticipant",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "inst",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "key",
+          "type": "UserDefinedTypeName"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "_checkBusinessRuleCaller",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "inst",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "br",
+          "type": "UserDefinedTypeName"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "_createParticipant",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "nonpayable",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "inst",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "key",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "name": "org",
+          "type": "string"
+        },
+        {
+          "name": "isMulti",
+          "type": "bool"
+        },
+        {
+          "name": "maxMulti",
+          "type": "uint8"
+        },
+        {
+          "name": "minMulti",
+          "type": "uint8"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "_createMessage",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "nonpayable",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "inst",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "key",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "sendKey",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "recvKey",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "state",
+          "type": "UserDefinedTypeName"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "_createGateway",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "nonpayable",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "inst",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "key",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "state",
+          "type": "UserDefinedTypeName"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "_createActionEvent",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "nonpayable",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "inst",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "key",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "state",
+          "type": "UserDefinedTypeName"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "_createBusinessRule",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "nonpayable",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "inst",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "key",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "config",
+          "type": "UserDefinedTypeName"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "_stringToInt",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "value",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "int256"
+        }
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "_stringToBool",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "value",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "_jsonString",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "value",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "_jsonBool",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "value",
+          "type": "bool"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "_jsonInt",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "value",
+          "type": "int256"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "_jsonField",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "key",
+          "type": "string"
+        },
+        {
+          "name": "encodedValue",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "_jsonAppendField",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "body",
+          "type": "string"
+        },
+        {
+          "name": "field",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "_jsonObject",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "body",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "_skipWhitespace",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "data",
+          "type": "bytes"
+        },
+        {
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "_sliceBytes",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "data",
+          "type": "bytes"
+        },
+        {
+          "name": "start",
+          "type": "uint256"
+        },
+        {
+          "name": "end",
+          "type": "uint256"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "_findJsonValue",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "raw",
+          "type": "string"
+        },
+        {
+          "name": "key",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "start",
+          "type": "uint256"
+        },
+        {
+          "name": "end",
+          "type": "uint256"
+        },
+        {
+          "name": "kind",
+          "type": "uint8"
+        },
+        {
+          "name": "found",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "_extractJsonString",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "raw",
+          "type": "string"
+        },
+        {
+          "name": "key",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "_extractJsonBool",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "raw",
+          "type": "string"
+        },
+        {
+          "name": "key",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "_extractJsonInt",
+      "kind": "function",
+      "visibility": "internal",
+      "state_mutability": "pure",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "raw",
+          "type": "string"
+        },
+        {
+          "name": "key",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "name": "",
+          "type": "int256"
+        }
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "createInstance",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyOwner",
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "params",
+          "type": "UserDefinedTypeName"
+        }
+      ],
+      "returns": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "getExecutionSnapshot",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "view",
+      "modifiers": [],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": [
+        {
+          "name": "messageStates",
+          "type": "ArrayTypeName"
+        },
+        {
+          "name": "messageFireflyTranIds",
+          "type": "ArrayTypeName"
+        },
+        {
+          "name": "gatewayStates",
+          "type": "ArrayTypeName"
+        },
+        {
+          "name": "eventStates",
+          "type": "ArrayTypeName"
+        },
+        {
+          "name": "businessRuleStates",
+          "type": "ArrayTypeName"
+        },
+        {
+          "name": "businessRuleRequestIds",
+          "type": "ArrayTypeName"
+        }
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "Activity_0tya4bp",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "Activity_0tya4bp_Continue",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "Event_0ojehz6",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "Message_01jq2zl_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "amount",
+          "type": "int256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "Message_068kmzv_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "time",
+          "type": "string"
+        },
+        {
+          "name": "instance_ID",
+          "type": "string"
+        },
+        {
+          "name": "logs",
+          "type": "string"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "Message_076ulzs_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "time",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "name": "EC2_resource_ID",
+          "type": "string"
+        },
+        {
+          "name": "logs",
+          "type": "string"
+        },
+        {
+          "name": "other_information",
+          "type": "string"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "Message_09krt7c_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "question_name",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "Message_0ywghlt_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "serviceType",
+          "type": "string"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "Message_12n6jjk_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "requestType",
+          "type": "string"
+        },
+        {
+          "name": "duration",
+          "type": "int256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "Message_1b1qlzd_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "reason",
+          "type": "string"
+        },
+        {
+          "name": "result",
+          "type": "string"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "Message_1bhhp1n_Send",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        },
+        {
+          "name": "serviceType",
+          "type": "string"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "Gateway_0auc3he",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "Gateway_0ivv4vg",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "Gateway_0jgq0a6",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "Event_0ci2gl8",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "contract": "amazon",
+      "name": "Event_0dyp0ut",
+      "kind": "function",
+      "visibility": "external",
+      "state_mutability": "nonpayable",
+      "modifiers": [
+        "onlyInitialized"
+      ],
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        }
+      ],
+      "returns": []
+    }
+  ],
+  "requires": [
+    {
+      "contract": "amazon",
+      "function": "",
+      "callee": "require",
+      "arguments": [
+        "msg.sender == owner",
+        "not owner"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "",
+      "callee": "require",
+      "arguments": [
+        "isInited",
+        "contract not initialized"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "initLedger",
+      "callee": "require",
+      "arguments": [
+        "!isInited",
+        "already initialized"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_getInstance",
+      "callee": "require",
+      "arguments": [
+        "inst.exists",
+        "instance not found"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_checkParticipant",
+      "callee": "require",
+      "arguments": [
+        "participant.exists",
+        "participant not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_checkParticipant",
+      "callee": "require",
+      "arguments": [
+        "msg.sender == participant.account",
+        "participant not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_checkParticipant",
+      "callee": "require",
+      "arguments": [
+        "inst.identityContractAddress != address",
+        "identity contract not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_checkParticipant",
+      "callee": "require",
+      "arguments": [
+        "keccak256 == keccak256",
+        "participant org not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_checkBusinessRuleCaller",
+      "callee": "require",
+      "arguments": [
+        "br.allowedCaller != address",
+        "business rule caller not configured"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_checkBusinessRuleCaller",
+      "callee": "require",
+      "arguments": [
+        "msg.sender == br.allowedCaller",
+        "business rule caller not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_stringToInt",
+      "callee": "require",
+      "arguments": [
+        "c >= 48 && c <= 57",
+        "invalid int string"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_sliceBytes",
+      "callee": "require",
+      "arguments": [
+        "end >= start",
+        "invalid slice"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonString",
+      "callee": "require",
+      "arguments": [
+        "found && kind == 1",
+        "json string not found"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonBool",
+      "callee": "require",
+      "arguments": [
+        "found && kind == 2",
+        "json bool not found"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonInt",
+      "callee": "require",
+      "arguments": [
+        "found && kind == 3",
+        "json number not found"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "require",
+      "arguments": [
+        "!inst.exists",
+        "instance already exists"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "require",
+      "arguments": [
+        "inst.dmnLiteAddress != address",
+        "dmn lite not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "require",
+      "arguments": [
+        "bytes.length != 0",
+        "dmn eval url not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "callee": "require",
+      "arguments": [
+        "br.exists",
+        "business rule not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "callee": "require",
+      "arguments": [
+        "br.state == ElementState.ENABLED",
+        "business rule not enabled"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "callee": "require",
+      "arguments": [
+        "bytes.length != 0",
+        "dmn cid not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "callee": "require",
+      "arguments": [
+        "requestId != bytes32",
+        "dmn request failed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "callee": "require",
+      "arguments": [
+        "br.exists",
+        "business rule not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "callee": "require",
+      "arguments": [
+        "br.state == ElementState.WAITING_FOR_CONFIRMATION",
+        "business rule not waiting"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "callee": "require",
+      "arguments": [
+        "br.requestId != bytes32",
+        "business rule not requested"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "callee": "require",
+      "arguments": [
+        "exists",
+        "dmn request missing"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "callee": "require",
+      "arguments": [
+        "requester == address",
+        "unexpected dmn requester"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "callee": "require",
+      "arguments": [
+        "requestState == DMN_REQUEST_FULFILLED",
+        "dmn result not ready"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Event_0ojehz6",
+      "callee": "require",
+      "arguments": [
+        "ev.exists",
+        "event not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Event_0ojehz6",
+      "callee": "require",
+      "arguments": [
+        "ev.state == ElementState.ENABLED",
+        "event state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_01jq2zl_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_01jq2zl_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_068kmzv_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_068kmzv_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_076ulzs_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_076ulzs_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_09krt7c_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_09krt7c_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_0ywghlt_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_0ywghlt_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_12n6jjk_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_12n6jjk_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_1b1qlzd_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_1b1qlzd_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_1bhhp1n_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_1bhhp1n_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0auc3he",
+      "callee": "require",
+      "arguments": [
+        "g.exists",
+        "gateway not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0auc3he",
+      "callee": "require",
+      "arguments": [
+        "g.state == ElementState.ENABLED",
+        "gateway state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0ivv4vg",
+      "callee": "require",
+      "arguments": [
+        "g.exists",
+        "gateway not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0ivv4vg",
+      "callee": "require",
+      "arguments": [
+        "g.state == ElementState.ENABLED",
+        "gateway state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0jgq0a6",
+      "callee": "require",
+      "arguments": [
+        "g.exists",
+        "gateway not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0jgq0a6",
+      "callee": "require",
+      "arguments": [
+        "g.state == ElementState.ENABLED",
+        "gateway state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Event_0ci2gl8",
+      "callee": "require",
+      "arguments": [
+        "ev.exists",
+        "event not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Event_0ci2gl8",
+      "callee": "require",
+      "arguments": [
+        "ev.state == ElementState.ENABLED",
+        "event state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Event_0dyp0ut",
+      "callee": "require",
+      "arguments": [
+        "ev.exists",
+        "event not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Event_0dyp0ut",
+      "callee": "require",
+      "arguments": [
+        "ev.state == ElementState.ENABLED",
+        "event state not allowed"
+      ]
+    }
+  ],
+  "assignments": [
+    {
+      "contract": "amazon",
+      "function": "constructor",
+      "lhs": "owner",
+      "rhs": "msg.sender",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "constructor",
+      "lhs": "oracle",
+      "rhs": "IOracle",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "setOracle",
+      "lhs": "oracle",
+      "rhs": "IOracle",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "initLedger",
+      "lhs": "isInited",
+      "rhs": "true",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "initLedger",
+      "lhs": "currentInstanceId",
+      "rhs": "0",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "_getInstance",
+      "lhs": "inst",
+      "rhs": "instances[instanceId]",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "_createParticipant",
+      "lhs": "inst.participants[key]",
+      "rhs": "Participant",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "_createMessage",
+      "lhs": "inst.messages[key]",
+      "rhs": "Message",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "_createGateway",
+      "lhs": "inst.gateways[key]",
+      "rhs": "Gateway",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "_createActionEvent",
+      "lhs": "inst.events[key]",
+      "rhs": "ActionEvent",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "_createBusinessRule",
+      "lhs": "inst.businessRules[key]",
+      "rhs": "BusinessRule",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "_stringToInt",
+      "lhs": "negative",
+      "rhs": "true",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "_stringToInt",
+      "lhs": "index",
+      "rhs": "1",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "_stringToInt",
+      "lhs": "result",
+      "rhs": "result * 10 + int256",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "_jsonInt",
+      "lhs": "cursor",
+      "rhs": "10",
+      "operator": "/="
+    },
+    {
+      "contract": "amazon",
+      "function": "_jsonInt",
+      "lhs": "buffer[index]",
+      "rhs": "bytes1",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "_jsonInt",
+      "lhs": "temp",
+      "rhs": "10",
+      "operator": "/="
+    },
+    {
+      "contract": "amazon",
+      "function": "_jsonInt",
+      "lhs": "buffer[0]",
+      "rhs": "bytes1",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "_sliceBytes",
+      "lhs": "out[i - start]",
+      "rhs": "data[i]",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "lhs": "matches",
+      "rhs": "false",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "lhs": "cursor",
+      "rhs": "_skipWhitespace",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "lhs": "instanceId",
+      "rhs": "currentInstanceId",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "lhs": "inst.exists",
+      "rhs": "true",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "lhs": "inst.instanceId",
+      "rhs": "instanceId",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "lhs": "inst.identityContractAddress",
+      "rhs": "params.identityContractAddress",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "lhs": "inst.dmnLiteAddress",
+      "rhs": "params.dmnLiteAddress",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "lhs": "inst.dmnEvalUrl",
+      "rhs": "params.dmnEvalUrl",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "lhs": "inst.enforceBusinessRuleCaller",
+      "rhs": "params.enforceBusinessRuleCaller",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "lhs": "currentInstanceId",
+      "rhs": "1",
+      "operator": "+="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates",
+      "rhs": "NewExpression",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds",
+      "rhs": "NewExpression",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[0]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[0]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[1]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[1]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[2]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[2]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[3]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[3]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[4]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[4]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[5]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[5]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[6]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[6]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageStates[7]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "messageFireflyTranIds[7]",
+      "rhs": "m.fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "gatewayStates",
+      "rhs": "NewExpression",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "gatewayStates[0]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "gatewayStates[1]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "gatewayStates[2]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "eventStates",
+      "rhs": "NewExpression",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "eventStates[0]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "eventStates[1]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "eventStates[2]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "businessRuleStates",
+      "rhs": "NewExpression",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "businessRuleRequestIds",
+      "rhs": "NewExpression",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "businessRuleStates[0]",
+      "rhs": "uint8",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "lhs": "businessRuleRequestIds[0]",
+      "rhs": "br.requestId",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "lhs": "inputBody",
+      "rhs": "_jsonAppendField",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "lhs": "inputBody",
+      "rhs": "_jsonAppendField",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "lhs": "br.requestId",
+      "rhs": "requestId",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "lhs": "br.requestedAt",
+      "rhs": "block.timestamp",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "lhs": "br.fulfilledAt",
+      "rhs": "0",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "lhs": "br.lastRawResult",
+      "rhs": "",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "lhs": "br.state",
+      "rhs": "ElementState.WAITING_FOR_CONFIRMATION",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "lhs": "br.lastRawResult",
+      "rhs": "raw",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "lhs": "br.fulfilledAt",
+      "rhs": "fulfilledAt",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "lhs": "inst.stateMemory.Confirm",
+      "rhs": "_extractJsonBool",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "lhs": "br.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "lhs": "inst.gateways[GatewayKey.Gateway_0ivv4vg].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Event_0ojehz6",
+      "lhs": "ev.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Event_0ojehz6",
+      "lhs": "inst.messages[MessageKey.Message_09krt7c].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_01jq2zl_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_01jq2zl_Send",
+      "lhs": "inst.stateMemory.Amount",
+      "rhs": "amount",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_01jq2zl_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_01jq2zl_Send",
+      "lhs": "inst.events[EventKey.Event_0ci2gl8].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_068kmzv_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_068kmzv_Send",
+      "lhs": "inst.stateMemory.Time",
+      "rhs": "time",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_068kmzv_Send",
+      "lhs": "inst.stateMemory.Instance_ID",
+      "rhs": "instance_ID",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_068kmzv_Send",
+      "lhs": "inst.stateMemory.Logs",
+      "rhs": "logs",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_068kmzv_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_068kmzv_Send",
+      "lhs": "inst.gateways[GatewayKey.Gateway_0auc3he].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_076ulzs_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_076ulzs_Send",
+      "lhs": "inst.stateMemory.Time",
+      "rhs": "time",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_076ulzs_Send",
+      "lhs": "inst.stateMemory.Description",
+      "rhs": "description",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_076ulzs_Send",
+      "lhs": "inst.stateMemory.EC2_resource_ID",
+      "rhs": "EC2_resource_ID",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_076ulzs_Send",
+      "lhs": "inst.stateMemory.Logs",
+      "rhs": "logs",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_076ulzs_Send",
+      "lhs": "inst.stateMemory.Other_information",
+      "rhs": "other_information",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_076ulzs_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_076ulzs_Send",
+      "lhs": "inst.gateways[GatewayKey.Gateway_0auc3he].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_09krt7c_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_09krt7c_Send",
+      "lhs": "inst.stateMemory.Question_name",
+      "rhs": "question_name",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_09krt7c_Send",
+      "lhs": "inst.stateMemory.Description",
+      "rhs": "description",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_09krt7c_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_09krt7c_Send",
+      "lhs": "inst.gateways[GatewayKey.Gateway_0jgq0a6].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_0ywghlt_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_0ywghlt_Send",
+      "lhs": "inst.stateMemory.ServiceType",
+      "rhs": "serviceType",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_0ywghlt_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_0ywghlt_Send",
+      "lhs": "inst.messages[MessageKey.Message_1bhhp1n].state",
+      "rhs": "ElementState.DISABLED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_0ywghlt_Send",
+      "lhs": "inst.messages[MessageKey.Message_068kmzv].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_12n6jjk_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_12n6jjk_Send",
+      "lhs": "inst.stateMemory.RequestType",
+      "rhs": "requestType",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_12n6jjk_Send",
+      "lhs": "inst.stateMemory.Duration",
+      "rhs": "duration",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_12n6jjk_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_12n6jjk_Send",
+      "lhs": "inst.businessRules[BusinessRuleKey.Activity_0tya4bp].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_1b1qlzd_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_1b1qlzd_Send",
+      "lhs": "inst.stateMemory.Reason",
+      "rhs": "reason",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_1b1qlzd_Send",
+      "lhs": "inst.stateMemory.Result",
+      "rhs": "result",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_1b1qlzd_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_1b1qlzd_Send",
+      "lhs": "inst.events[EventKey.Event_0dyp0ut].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_1bhhp1n_Send",
+      "lhs": "m.fireflyTranId",
+      "rhs": "fireflyTranId",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_1bhhp1n_Send",
+      "lhs": "inst.stateMemory.ServiceType",
+      "rhs": "serviceType",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_1bhhp1n_Send",
+      "lhs": "m.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_1bhhp1n_Send",
+      "lhs": "inst.messages[MessageKey.Message_0ywghlt].state",
+      "rhs": "ElementState.DISABLED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_1bhhp1n_Send",
+      "lhs": "inst.messages[MessageKey.Message_076ulzs].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0auc3he",
+      "lhs": "g.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0auc3he",
+      "lhs": "inst.messages[MessageKey.Message_12n6jjk].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0ivv4vg",
+      "lhs": "g.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0ivv4vg",
+      "lhs": "inst.messages[MessageKey.Message_01jq2zl].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0ivv4vg",
+      "lhs": "inst.messages[MessageKey.Message_1b1qlzd].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0jgq0a6",
+      "lhs": "g.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0jgq0a6",
+      "lhs": "inst.messages[MessageKey.Message_0ywghlt].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0jgq0a6",
+      "lhs": "inst.messages[MessageKey.Message_1bhhp1n].state",
+      "rhs": "ElementState.ENABLED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Event_0ci2gl8",
+      "lhs": "ev.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    },
+    {
+      "contract": "amazon",
+      "function": "Event_0dyp0ut",
+      "lhs": "ev.state",
+      "rhs": "ElementState.COMPLETED",
+      "operator": "="
+    }
+  ],
+  "events": [
+    {
+      "contract": "amazon",
+      "name": "MessageSent",
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "messageKey",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "fireflyTranId",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "GatewayDone",
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "gatewayKey",
+          "type": "UserDefinedTypeName"
+        }
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "ActionEventDone",
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "eventKey",
+          "type": "UserDefinedTypeName"
+        }
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "BusinessRuleRequested",
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "ruleKey",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "requestId",
+          "type": "bytes32"
+        }
+      ]
+    },
+    {
+      "contract": "amazon",
+      "name": "BusinessRuleCompleted",
+      "parameters": [
+        {
+          "name": "instanceId",
+          "type": "uint256"
+        },
+        {
+          "name": "ruleKey",
+          "type": "UserDefinedTypeName"
+        },
+        {
+          "name": "requestId",
+          "type": "bytes32"
+        }
+      ]
+    }
+  ],
+  "external_calls": [
+    {
+      "contract": "amazon",
+      "function": "constructor",
+      "callee": "IOracle",
+      "arguments": [
+        "oracleAddress"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "setOracle",
+      "callee": "IOracle",
+      "arguments": [
+        "oracleAddress"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_checkParticipant",
+      "callee": "IIdentityRegistry.getIdentityOrg",
+      "arguments": [
+        "msg.sender"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_checkParticipant",
+      "callee": "IIdentityRegistry",
+      "arguments": [
+        "inst.identityContractAddress"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_jsonString",
+      "callee": "string.concat",
+      "arguments": [
+        "\"",
+        "value",
+        "\""
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_jsonField",
+      "callee": "string.concat",
+      "arguments": [
+        "_jsonString",
+        ":",
+        "encodedValue"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_jsonAppendField",
+      "callee": "string.concat",
+      "arguments": [
+        "body",
+        ",",
+        "field"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_jsonObject",
+      "callee": "string.concat",
+      "arguments": [
+        "{",
+        "body",
+        "}"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "callee": "dmnLite.requestDMNDecision",
+      "arguments": [
+        "inst.dmnEvalUrl",
+        "br.dmnCid",
+        "br.decisionId",
+        "inputData"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "callee": "dmnLite.getRequestStatus",
+      "arguments": [
+        "br.requestId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "callee": "dmnLite.getRawByRequestId",
+      "arguments": [
+        "br.requestId"
+      ]
+    }
+  ],
+  "calls": [
+    {
+      "contract": "amazon",
+      "function": "",
+      "callee": "require",
+      "arguments": [
+        "msg.sender == owner",
+        "not owner"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "",
+      "callee": "require",
+      "arguments": [
+        "isInited",
+        "contract not initialized"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "constructor",
+      "callee": "IOracle",
+      "arguments": [
+        "oracleAddress"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "setOracle",
+      "callee": "IOracle",
+      "arguments": [
+        "oracleAddress"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "initLedger",
+      "callee": "require",
+      "arguments": [
+        "!isInited",
+        "already initialized"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_getInstance",
+      "callee": "require",
+      "arguments": [
+        "inst.exists",
+        "instance not found"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_checkParticipant",
+      "callee": "require",
+      "arguments": [
+        "participant.exists",
+        "participant not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_checkParticipant",
+      "callee": "require",
+      "arguments": [
+        "msg.sender == participant.account",
+        "participant not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_checkParticipant",
+      "callee": "require",
+      "arguments": [
+        "inst.identityContractAddress != address",
+        "identity contract not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_checkParticipant",
+      "callee": "address",
+      "arguments": [
+        "0"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_checkParticipant",
+      "callee": "IIdentityRegistry.getIdentityOrg",
+      "arguments": [
+        "msg.sender"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_checkParticipant",
+      "callee": "IIdentityRegistry",
+      "arguments": [
+        "inst.identityContractAddress"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_checkParticipant",
+      "callee": "require",
+      "arguments": [
+        "keccak256 == keccak256",
+        "participant org not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_checkParticipant",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_checkParticipant",
+      "callee": "bytes",
+      "arguments": [
+        "callerOrg"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_checkParticipant",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_checkParticipant",
+      "callee": "bytes",
+      "arguments": [
+        "participant.org"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_checkBusinessRuleCaller",
+      "callee": "require",
+      "arguments": [
+        "br.allowedCaller != address",
+        "business rule caller not configured"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_checkBusinessRuleCaller",
+      "callee": "address",
+      "arguments": [
+        "0"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_checkBusinessRuleCaller",
+      "callee": "require",
+      "arguments": [
+        "msg.sender == br.allowedCaller",
+        "business rule caller not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_createParticipant",
+      "callee": "Participant",
+      "arguments": [
+        "true",
+        "account",
+        "org",
+        "isMulti",
+        "maxMulti",
+        "minMulti"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_createMessage",
+      "callee": "Message",
+      "arguments": [
+        "true",
+        "sendKey",
+        "recvKey",
+        "",
+        "state"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_createGateway",
+      "callee": "Gateway",
+      "arguments": [
+        "true",
+        "state"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_createActionEvent",
+      "callee": "ActionEvent",
+      "arguments": [
+        "true",
+        "state"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_createBusinessRule",
+      "callee": "BusinessRule",
+      "arguments": [
+        "true",
+        "config.dmnCid",
+        "config.dmnHash",
+        "config.decisionId",
+        "config.callerRestricted",
+        "config.allowedCaller",
+        "ElementState.DISABLED",
+        "bytes32",
+        "0",
+        "0",
+        ""
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_createBusinessRule",
+      "callee": "bytes32",
+      "arguments": [
+        "0"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_stringToInt",
+      "callee": "bytes",
+      "arguments": [
+        "value"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_stringToInt",
+      "callee": "bytes1",
+      "arguments": [
+        "-"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_stringToInt",
+      "callee": "uint8",
+      "arguments": [
+        "data[index]"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_stringToInt",
+      "callee": "require",
+      "arguments": [
+        "c >= 48 && c <= 57",
+        "invalid int string"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_stringToInt",
+      "callee": "int256",
+      "arguments": [
+        "uint256"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_stringToInt",
+      "callee": "uint256",
+      "arguments": [
+        "c - 48"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_stringToBool",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_stringToBool",
+      "callee": "bytes",
+      "arguments": [
+        "value"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_stringToBool",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_stringToBool",
+      "callee": "bytes",
+      "arguments": [
+        "true"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_stringToBool",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_stringToBool",
+      "callee": "bytes",
+      "arguments": [
+        "TRUE"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_stringToBool",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_stringToBool",
+      "callee": "bytes",
+      "arguments": [
+        "1"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_jsonString",
+      "callee": "string.concat",
+      "arguments": [
+        "\"",
+        "value",
+        "\""
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_jsonInt",
+      "callee": "uint256",
+      "arguments": [
+        "Conditional"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_jsonInt",
+      "callee": "NewExpression",
+      "arguments": [
+        "totalLength"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_jsonInt",
+      "callee": "bytes1",
+      "arguments": [
+        "uint8"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_jsonInt",
+      "callee": "uint8",
+      "arguments": [
+        "48 + temp % 10"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_jsonInt",
+      "callee": "bytes1",
+      "arguments": [
+        "-"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_jsonInt",
+      "callee": "string",
+      "arguments": [
+        "buffer"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_jsonField",
+      "callee": "string.concat",
+      "arguments": [
+        "_jsonString",
+        ":",
+        "encodedValue"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_jsonField",
+      "callee": "_jsonString",
+      "arguments": [
+        "key"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_jsonAppendField",
+      "callee": "bytes",
+      "arguments": [
+        "body"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_jsonAppendField",
+      "callee": "string.concat",
+      "arguments": [
+        "body",
+        ",",
+        "field"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_jsonObject",
+      "callee": "string.concat",
+      "arguments": [
+        "{",
+        "body",
+        "}"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_sliceBytes",
+      "callee": "require",
+      "arguments": [
+        "end >= start",
+        "invalid slice"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_sliceBytes",
+      "callee": "NewExpression",
+      "arguments": [
+        "end - start"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_sliceBytes",
+      "callee": "string",
+      "arguments": [
+        "out"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "callee": "bytes",
+      "arguments": [
+        "raw"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "callee": "bytes",
+      "arguments": [
+        "key"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "\""
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "\""
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "callee": "_skipWhitespace",
+      "arguments": [
+        "data",
+        "i + keyBytes.length + 2"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        ":"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "callee": "_skipWhitespace",
+      "arguments": [
+        "data",
+        "cursor + 1"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "\""
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "\""
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "\\"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "callee": "revert",
+      "arguments": [
+        "unterminated json string"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "t"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "f"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "a"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "z"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "A"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "Z"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "-"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "0"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "9"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "-"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "."
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "0"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "callee": "bytes1",
+      "arguments": [
+        "9"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonString",
+      "callee": "_findJsonValue",
+      "arguments": [
+        "raw",
+        "key"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonString",
+      "callee": "require",
+      "arguments": [
+        "found && kind == 1",
+        "json string not found"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonString",
+      "callee": "_sliceBytes",
+      "arguments": [
+        "bytes",
+        "start",
+        "end"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonString",
+      "callee": "bytes",
+      "arguments": [
+        "raw"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonBool",
+      "callee": "_findJsonValue",
+      "arguments": [
+        "raw",
+        "key"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonBool",
+      "callee": "require",
+      "arguments": [
+        "found && kind == 2",
+        "json bool not found"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonBool",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonBool",
+      "callee": "bytes",
+      "arguments": [
+        "_sliceBytes"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonBool",
+      "callee": "_sliceBytes",
+      "arguments": [
+        "bytes",
+        "start",
+        "end"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonBool",
+      "callee": "bytes",
+      "arguments": [
+        "raw"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonBool",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonBool",
+      "callee": "bytes",
+      "arguments": [
+        "true"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonBool",
+      "callee": "keccak256",
+      "arguments": [
+        "bytes"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonBool",
+      "callee": "bytes",
+      "arguments": [
+        "false"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonBool",
+      "callee": "revert",
+      "arguments": [
+        "invalid json bool"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonInt",
+      "callee": "_findJsonValue",
+      "arguments": [
+        "raw",
+        "key"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonInt",
+      "callee": "require",
+      "arguments": [
+        "found && kind == 3",
+        "json number not found"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonInt",
+      "callee": "_stringToInt",
+      "arguments": [
+        "_sliceBytes"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonInt",
+      "callee": "_sliceBytes",
+      "arguments": [
+        "bytes",
+        "start",
+        "end"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonInt",
+      "callee": "bytes",
+      "arguments": [
+        "raw"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "require",
+      "arguments": [
+        "!inst.exists",
+        "instance already exists"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "require",
+      "arguments": [
+        "inst.dmnLiteAddress != address",
+        "dmn lite not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "address",
+      "arguments": [
+        "0"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "require",
+      "arguments": [
+        "bytes.length != 0",
+        "dmn eval url not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "bytes",
+      "arguments": [
+        "inst.dmnEvalUrl"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "_createParticipant",
+      "arguments": [
+        "inst",
+        "ParticipantKey.Participant_1p9owwo",
+        "params.Participant_1p9owwo_account",
+        "params.Participant_1p9owwo_org",
+        "false",
+        "0",
+        "0"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "_createParticipant",
+      "arguments": [
+        "inst",
+        "ParticipantKey.Participant_12df78t",
+        "params.Participant_12df78t_account",
+        "params.Participant_12df78t_org",
+        "false",
+        "0",
+        "0"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "_createActionEvent",
+      "arguments": [
+        "inst",
+        "EventKey.Event_0ojehz6",
+        "ElementState.ENABLED"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "_createActionEvent",
+      "arguments": [
+        "inst",
+        "EventKey.Event_0ci2gl8",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "_createActionEvent",
+      "arguments": [
+        "inst",
+        "EventKey.Event_0dyp0ut",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_01jq2zl",
+        "ParticipantKey.Participant_1p9owwo",
+        "ParticipantKey.Participant_12df78t",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_068kmzv",
+        "ParticipantKey.Participant_12df78t",
+        "ParticipantKey.Participant_1p9owwo",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_076ulzs",
+        "ParticipantKey.Participant_12df78t",
+        "ParticipantKey.Participant_1p9owwo",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_09krt7c",
+        "ParticipantKey.Participant_12df78t",
+        "ParticipantKey.Participant_1p9owwo",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_0ywghlt",
+        "ParticipantKey.Participant_12df78t",
+        "ParticipantKey.Participant_1p9owwo",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_12n6jjk",
+        "ParticipantKey.Participant_12df78t",
+        "ParticipantKey.Participant_1p9owwo",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_1b1qlzd",
+        "ParticipantKey.Participant_1p9owwo",
+        "ParticipantKey.Participant_12df78t",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "_createMessage",
+      "arguments": [
+        "inst",
+        "MessageKey.Message_1bhhp1n",
+        "ParticipantKey.Participant_12df78t",
+        "ParticipantKey.Participant_1p9owwo",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "_createGateway",
+      "arguments": [
+        "inst",
+        "GatewayKey.Gateway_0auc3he",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "_createGateway",
+      "arguments": [
+        "inst",
+        "GatewayKey.Gateway_0ivv4vg",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "_createGateway",
+      "arguments": [
+        "inst",
+        "GatewayKey.Gateway_0jgq0a6",
+        "ElementState.DISABLED"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "createInstance",
+      "callee": "_createBusinessRule",
+      "arguments": [
+        "inst",
+        "BusinessRuleKey.Activity_0tya4bp",
+        "params.Activity_0tya4bp"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "callee": "NewExpression",
+      "arguments": [
+        "8"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "callee": "NewExpression",
+      "arguments": [
+        "8"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "m.state"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "callee": "NewExpression",
+      "arguments": [
+        "3"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "g.state"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "g.state"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "g.state"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "callee": "NewExpression",
+      "arguments": [
+        "3"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "ev.state"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "ev.state"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "ev.state"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "callee": "NewExpression",
+      "arguments": [
+        "1"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "callee": "NewExpression",
+      "arguments": [
+        "1"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "getExecutionSnapshot",
+      "callee": "uint8",
+      "arguments": [
+        "br.state"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "callee": "require",
+      "arguments": [
+        "br.exists",
+        "business rule not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "callee": "require",
+      "arguments": [
+        "br.state == ElementState.ENABLED",
+        "business rule not enabled"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "callee": "_checkBusinessRuleCaller",
+      "arguments": [
+        "inst",
+        "br"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "callee": "_jsonAppendField",
+      "arguments": [
+        "inputBody",
+        "_jsonField"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "callee": "_jsonField",
+      "arguments": [
+        "duration",
+        "_jsonInt"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "callee": "_jsonInt",
+      "arguments": [
+        "inst.stateMemory.Duration"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "callee": "_jsonAppendField",
+      "arguments": [
+        "inputBody",
+        "_jsonField"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "callee": "_jsonField",
+      "arguments": [
+        "requestType",
+        "_jsonString"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "callee": "_jsonString",
+      "arguments": [
+        "inst.stateMemory.RequestType"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "callee": "_jsonObject",
+      "arguments": [
+        "inputBody"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "callee": "IDmnLite",
+      "arguments": [
+        "inst.dmnLiteAddress"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "callee": "require",
+      "arguments": [
+        "bytes.length != 0",
+        "dmn cid not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "callee": "bytes",
+      "arguments": [
+        "br.dmnCid"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "callee": "dmnLite.requestDMNDecision",
+      "arguments": [
+        "inst.dmnEvalUrl",
+        "br.dmnCid",
+        "br.decisionId",
+        "inputData"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "callee": "require",
+      "arguments": [
+        "requestId != bytes32",
+        "dmn request failed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "callee": "bytes32",
+      "arguments": [
+        "0"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp",
+      "callee": "BusinessRuleRequested",
+      "arguments": [
+        "instanceId",
+        "BusinessRuleKey.Activity_0tya4bp",
+        "requestId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "callee": "require",
+      "arguments": [
+        "br.exists",
+        "business rule not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "callee": "require",
+      "arguments": [
+        "br.state == ElementState.WAITING_FOR_CONFIRMATION",
+        "business rule not waiting"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "callee": "require",
+      "arguments": [
+        "br.requestId != bytes32",
+        "business rule not requested"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "callee": "bytes32",
+      "arguments": [
+        "0"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "callee": "_checkBusinessRuleCaller",
+      "arguments": [
+        "inst",
+        "br"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "callee": "IDmnLite",
+      "arguments": [
+        "inst.dmnLiteAddress"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "callee": "dmnLite.getRequestStatus",
+      "arguments": [
+        "br.requestId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "callee": "require",
+      "arguments": [
+        "exists",
+        "dmn request missing"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "callee": "require",
+      "arguments": [
+        "requester == address",
+        "unexpected dmn requester"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "callee": "address",
+      "arguments": [
+        "this"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "callee": "require",
+      "arguments": [
+        "requestState == DMN_REQUEST_FULFILLED",
+        "dmn result not ready"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "callee": "dmnLite.getRawByRequestId",
+      "arguments": [
+        "br.requestId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "callee": "_extractJsonBool",
+      "arguments": [
+        "raw",
+        "confirm"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Activity_0tya4bp_Continue",
+      "callee": "BusinessRuleCompleted",
+      "arguments": [
+        "instanceId",
+        "BusinessRuleKey.Activity_0tya4bp",
+        "br.requestId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Event_0ojehz6",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Event_0ojehz6",
+      "callee": "require",
+      "arguments": [
+        "ev.exists",
+        "event not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Event_0ojehz6",
+      "callee": "require",
+      "arguments": [
+        "ev.state == ElementState.ENABLED",
+        "event state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Event_0ojehz6",
+      "callee": "ActionEventDone",
+      "arguments": [
+        "instanceId",
+        "EventKey.Event_0ojehz6"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_01jq2zl_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_01jq2zl_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_01jq2zl_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_01jq2zl_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_01jq2zl_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_01jq2zl",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_068kmzv_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_068kmzv_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_068kmzv_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_068kmzv_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_068kmzv_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_068kmzv",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_076ulzs_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_076ulzs_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_076ulzs_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_076ulzs_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_076ulzs_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_076ulzs",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_09krt7c_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_09krt7c_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_09krt7c_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_09krt7c_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_09krt7c_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_09krt7c",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_0ywghlt_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_0ywghlt_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_0ywghlt_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_0ywghlt_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_0ywghlt_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_0ywghlt",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_12n6jjk_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_12n6jjk_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_12n6jjk_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_12n6jjk_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_12n6jjk_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_12n6jjk",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_1b1qlzd_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_1b1qlzd_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_1b1qlzd_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_1b1qlzd_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_1b1qlzd_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_1b1qlzd",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_1bhhp1n_Send",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_1bhhp1n_Send",
+      "callee": "require",
+      "arguments": [
+        "m.exists",
+        "message not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_1bhhp1n_Send",
+      "callee": "_checkParticipant",
+      "arguments": [
+        "inst",
+        "m.sendParticipant"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_1bhhp1n_Send",
+      "callee": "require",
+      "arguments": [
+        "m.state == ElementState.ENABLED",
+        "message state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Message_1bhhp1n_Send",
+      "callee": "MessageSent",
+      "arguments": [
+        "instanceId",
+        "MessageKey.Message_1bhhp1n",
+        "fireflyTranId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0auc3he",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0auc3he",
+      "callee": "require",
+      "arguments": [
+        "g.exists",
+        "gateway not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0auc3he",
+      "callee": "require",
+      "arguments": [
+        "g.state == ElementState.ENABLED",
+        "gateway state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0auc3he",
+      "callee": "GatewayDone",
+      "arguments": [
+        "instanceId",
+        "GatewayKey.Gateway_0auc3he"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0ivv4vg",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0ivv4vg",
+      "callee": "require",
+      "arguments": [
+        "g.exists",
+        "gateway not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0ivv4vg",
+      "callee": "require",
+      "arguments": [
+        "g.state == ElementState.ENABLED",
+        "gateway state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0ivv4vg",
+      "callee": "GatewayDone",
+      "arguments": [
+        "instanceId",
+        "GatewayKey.Gateway_0ivv4vg"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0jgq0a6",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0jgq0a6",
+      "callee": "require",
+      "arguments": [
+        "g.exists",
+        "gateway not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0jgq0a6",
+      "callee": "require",
+      "arguments": [
+        "g.state == ElementState.ENABLED",
+        "gateway state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0jgq0a6",
+      "callee": "GatewayDone",
+      "arguments": [
+        "instanceId",
+        "GatewayKey.Gateway_0jgq0a6"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Event_0ci2gl8",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Event_0ci2gl8",
+      "callee": "require",
+      "arguments": [
+        "ev.exists",
+        "event not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Event_0ci2gl8",
+      "callee": "require",
+      "arguments": [
+        "ev.state == ElementState.ENABLED",
+        "event state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Event_0ci2gl8",
+      "callee": "ActionEventDone",
+      "arguments": [
+        "instanceId",
+        "EventKey.Event_0ci2gl8"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Event_0dyp0ut",
+      "callee": "_getInstance",
+      "arguments": [
+        "instanceId"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Event_0dyp0ut",
+      "callee": "require",
+      "arguments": [
+        "ev.exists",
+        "event not set"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Event_0dyp0ut",
+      "callee": "require",
+      "arguments": [
+        "ev.state == ElementState.ENABLED",
+        "event state not allowed"
+      ]
+    },
+    {
+      "contract": "amazon",
+      "function": "Event_0dyp0ut",
+      "callee": "ActionEventDone",
+      "arguments": [
+        "instanceId",
+        "EventKey.Event_0dyp0ut"
+      ]
+    }
+  ],
+  "if_conditions": [
+    {
+      "contract": "amazon",
+      "function": "_checkParticipant",
+      "condition": "!participant.isMulti"
+    },
+    {
+      "contract": "amazon",
+      "function": "_checkBusinessRuleCaller",
+      "condition": "!inst.enforceBusinessRuleCaller || br.callerRestricted"
+    },
+    {
+      "contract": "amazon",
+      "function": "_stringToInt",
+      "condition": "data.length == 0"
+    },
+    {
+      "contract": "amazon",
+      "function": "_stringToInt",
+      "condition": "data[0] == bytes1"
+    },
+    {
+      "contract": "amazon",
+      "function": "_jsonInt",
+      "condition": "value == 0"
+    },
+    {
+      "contract": "amazon",
+      "function": "_jsonInt",
+      "condition": "negative"
+    },
+    {
+      "contract": "amazon",
+      "function": "_jsonAppendField",
+      "condition": "bytes.length == 0"
+    },
+    {
+      "contract": "amazon",
+      "function": "_skipWhitespace",
+      "condition": "ch != 0x20 && ch != 0x09 && ch != 0x0A && ch != 0x0D"
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "condition": "data.length == 0 || keyBytes.length == 0"
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "condition": "data[i] != bytes1"
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "condition": "data[i + 1 + j] != keyBytes[j]"
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "condition": "!matches || data[i + 1 + keyBytes.length] != bytes1"
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "condition": "cursor >= data.length || data[cursor] != bytes1"
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "condition": "cursor >= data.length"
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "condition": "ch == bytes1"
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "condition": "data[valueEnd] == bytes1 && valueEnd == valueStart || data[valueEnd - 1] != bytes1"
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "condition": "ch == bytes1 || ch == bytes1"
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "condition": "c < bytes1 || c > bytes1 && c < bytes1 || c > bytes1"
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "condition": "ch == bytes1 || ch >= bytes1 && ch <= bytes1"
+    },
+    {
+      "contract": "amazon",
+      "function": "_findJsonValue",
+      "condition": "c != bytes1 && c != bytes1 && c < bytes1 || c > bytes1"
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonBool",
+      "condition": "hashed == keccak256"
+    },
+    {
+      "contract": "amazon",
+      "function": "_extractJsonBool",
+      "condition": "hashed == keccak256"
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0ivv4vg",
+      "condition": "inst.stateMemory.Confirm == false"
+    },
+    {
+      "contract": "amazon",
+      "function": "Gateway_0ivv4vg",
+      "condition": "inst.stateMemory.Confirm == true"
+    }
+  ],
+  "string_literals": [
+    "\"",
+    ",",
+    "-",
+    ".",
+    "0",
+    "0x09",
+    "0x0A",
+    "0x0D",
+    "0x20",
+    "1",
+    "10",
+    "2",
+    "3",
+    "4",
+    "48",
+    "5",
+    "57",
+    "6",
+    "7",
+    "8",
+    "9",
+    ":",
+    "A",
+    "TRUE",
+    "Z",
+    "\\",
+    "a",
+    "already initialized",
+    "business rule caller not allowed",
+    "business rule caller not configured",
+    "business rule not enabled",
+    "business rule not requested",
+    "business rule not set",
+    "business rule not waiting",
+    "confirm",
+    "contract not initialized",
+    "dmn cid not set",
+    "dmn eval url not set",
+    "dmn lite not set",
+    "dmn request failed",
+    "dmn request missing",
+    "dmn result not ready",
+    "duration",
+    "event not set",
+    "event state not allowed",
+    "f",
+    "false",
+    "gateway not set",
+    "gateway state not allowed",
+    "identity contract not set",
+    "instance already exists",
+    "instance not found",
+    "invalid int string",
+    "invalid json bool",
+    "invalid slice",
+    "json bool not found",
+    "json number not found",
+    "json string not found",
+    "message not set",
+    "message state not allowed",
+    "not owner",
+    "participant not allowed",
+    "participant not set",
+    "participant org not allowed",
+    "requestType",
+    "t",
+    "true",
+    "unexpected dmn requester",
+    "unterminated json string",
+    "z",
+    "{",
+    "}"
+  ]
+}
