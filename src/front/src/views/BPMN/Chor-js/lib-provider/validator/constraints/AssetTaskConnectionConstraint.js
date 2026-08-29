@@ -1,4 +1,5 @@
 import { is } from 'bpmn-js/lib/util/ModelUtil';
+import { getAssetOperationData, isChoreographyTask } from '../../../utils/assetExtension';
 
 /**
  * Validates that AssetTask elements have correct DataObject connections based on operation type.
@@ -16,6 +17,19 @@ import { is } from 'bpmn-js/lib/util/ModelUtil';
  * @param reporter {Reporter}
  */
 export default function assetTaskConnectionConstraint(shape, reporter) {
+  if (isChoreographyTask(shape)) {
+    const config = getAssetOperationData(shape);
+    if (!config.operation) return;
+    validateConnectionsByOperation(
+      shape,
+      config.operation,
+      config.inputAssetRefs.length,
+      config.outputAssetRefs.length,
+      reporter
+    );
+    return;
+  }
+
   // Only check Task elements
   if (!is(shape, 'bpmn:Task')) {
     return;

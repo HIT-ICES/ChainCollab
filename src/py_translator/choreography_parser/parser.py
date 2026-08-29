@@ -25,6 +25,7 @@ from .elements import (
 
 from typing import List, Optional, Tuple, Any, Protocol
 from .protocals import ElementProtocol, GraphProtocol
+from .asset_extension import create_asset_task_projections
 
 
 class Choreography:
@@ -293,6 +294,10 @@ class Choreography:
         self.message_to_add = []
         self._parse_element(target_element)
         self._parse_messages(root)
+        asset_task_projections = create_asset_task_projections(self, root)
+        self.nodes.extend(asset_task_projections)
+        for projection in asset_task_projections:
+            self._id2nodes[projection.id] = projection
         self._init_element_properties()
 
 

@@ -1,6 +1,7 @@
 import { assign, isArray } from 'min-dash';
 import { is } from 'bpmn-js/lib/util/ModelUtil';
 import { isAny } from 'bpmn-js/lib/features/modeling/util/ModelingUtil';
+import { getAssetOperation, isAssetElement, isChoreographyTask } from '../../utils/assetExtension';
 
 /**
  * 数据元素上下文菜单提供者
@@ -28,7 +29,7 @@ export default class DataContextPadProvider {
     const actions = {};
 
     // For DataObject: add connect and delete
-    if (isAny(element.businessObject, [
+    if (isAssetElement(element) || isAny(element.businessObject, [
       'bpmn:DataObjectReference',
       'bpmn:DataStoreReference',
     ])) {
@@ -41,7 +42,7 @@ export default class DataContextPadProvider {
         'connect': {
           group: 'connect',
           className: 'bpmn-icon-connection-multi',
-          title: translate('Connect using DataAssociation'),
+          title: translate('Connect using Asset Reference'),
           action: {
             click: startConnect,
             dragstart: startConnect,
@@ -73,7 +74,7 @@ export default class DataContextPadProvider {
     }
 
     // For Task: add data connection option
-    if (is(element, 'bpmn:Task')) {
+    if (isChoreographyTask(element) && getAssetOperation(element)) {
       function startConnect(event, element) {
         connect.start(event, element);
       }
@@ -82,7 +83,7 @@ export default class DataContextPadProvider {
         'connect.data': {
           group: 'connect',
           className: 'bpmn-icon-data-object',
-          title: translate('Connect to DataObject'),
+          title: translate('Connect to Asset'),
           action: {
             click: startConnect,
             dragstart: startConnect,

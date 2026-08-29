@@ -99,6 +99,40 @@ export default function ChoreoRenderer(config, eventBus, textRenderer, pathMap) 
     return p;
   };
 
+  this.drawAsset = function(p, element) {
+    const body = svgCreate('path');
+    svgAttr(body, {
+      d: componentsToPath([
+        ['M', 0, 0],
+        ['l', element.width - 10, 0],
+        ['l', 10, 10],
+        ['l', 0, element.height - 10],
+        ['l', -element.width, 0],
+        ['z'],
+        ['M', element.width - 10, 0],
+        ['l', 0, 10],
+        ['l', 10, 0]
+      ]),
+      fill: '#fff',
+      fillOpacity: DEFAULT_FILL_OPACITY,
+      stroke: '#111',
+      strokeWidth: 2
+    });
+    svgAppend(p, body);
+
+    if (element.businessObject.name) {
+      const label = getBoxedLabel(element.businessObject.name, {
+        x: -32,
+        y: element.height + 4,
+        width: element.width + 64,
+        height: 24
+      }, 'center-middle');
+      svgAppend(p, label);
+    }
+
+    return p;
+  };
+
   // Participant band drawing function
   this.drawParticipantBand = function (p, element) {
     const bandKind = element.diBand.participantBandKind || 'top-initiating';
@@ -309,7 +343,7 @@ export default function ChoreoRenderer(config, eventBus, textRenderer, pathMap) 
 inherits(ChoreoRenderer, BaseRenderer);
 ChoreoRenderer.$inject = ['config', 'eventBus', 'textRenderer', 'pathMap'];
 ChoreoRenderer.prototype.canRender = function (element) {
-  return is(element, 'bpmn:ChoreographyActivity') || is(element, 'bpmn:Participant') || is(element, 'bpmn:Message');
+  return is(element, 'bpmn:ChoreographyActivity') || is(element, 'bpmn:Participant') || is(element, 'bpmn:Message') || is(element, 'abc:Asset');
 };
 ChoreoRenderer.prototype.drawShape = function (p, element) {
   if (is(element, 'bpmn:ChoreographyActivity')) {
@@ -318,6 +352,8 @@ ChoreoRenderer.prototype.drawShape = function (p, element) {
     return this.drawParticipantBand(p, element);
   } else if (is(element, 'bpmn:Message')) {
     return this.drawMessage(p, element);
+  } else if (is(element, 'abc:Asset')) {
+    return this.drawAsset(p, element);
   }
 };
 ChoreoRenderer.prototype.getShapePath = function (shape) {
@@ -327,6 +363,8 @@ ChoreoRenderer.prototype.getShapePath = function (shape) {
     return getParticipantBandOutline(shape.x, shape.y, shape.width, shape.height, shape.diBand.participantBandKind);
   } else if (is(shape, 'bpmn:Message')) {
     return getMessageOutline(shape);
+  } else if (is(shape, 'abc:Asset')) {
+    return getMessageOutline(shape.x, shape.y, shape.width, shape.height);
   }
 };
 

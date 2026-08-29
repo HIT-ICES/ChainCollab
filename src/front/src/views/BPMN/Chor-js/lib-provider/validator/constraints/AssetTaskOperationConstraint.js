@@ -1,4 +1,9 @@
 import { is } from 'bpmn-js/lib/util/ModelUtil';
+import {
+  getAssetData,
+  getAssetOperationData,
+  isChoreographyTask,
+} from '../../../utils/assetExtension';
 
 // 全局缓存，用于存储已计算的状态结果
 // 缓存键格式: `${tokenId}:${tokenHasExistInERC}`
@@ -30,7 +35,49 @@ export default function assetTaskOperationConstraint(shape, reporter) {
     lastValidationRun = now;
   }
 
-  // Only check Task elements
+  if (isChoreographyTask(shape)) {
+    const taskConfig = getAssetOperationData(shape);
+    const { operation } = taskConfig;
+    if (!operation) return;
+
+    const linkedAsset = getLinkedAssetFromRefs(taskConfig, reporter.elementRegistry);
+    if (!linkedAsset) {
+      reporter.error(
+        shape,
+        `AssetOperation with operation <b>${operation}</b> must reference an Asset. ` +
+        `Please connect an Asset input or output according to the operation type.`
+      );
+      return;
+    }
+
+    const { assetType, tokenType, tokenId, tokenHasExistInERC } = linkedAsset;
+    if (!validateOperationAssetTypeMatch(shape, operation, assetType, tokenType, reporter)) {
+      return;
+    }
+
+    if (['grant usage rights', 'revoke usage rights'].includes(operation) && taskConfig.recipientRefs.length === 0) {
+      reporter.error(
+        shape,
+        `<b>${operation}</b> requires at least one recipient.`
+      );
+      return;
+    }
+
+    if (['mint', 'burn', 'query', 'branch', 'merge', 'Transfer', 'transfer'].includes(operation) && taskConfig.recipientRefs.length > 0) {
+      reporter.error(
+        shape,
+        `<b>${operation}</b> must not use recipientRefs. Recipients are derived by parser or unused for this operation.`
+      );
+      return;
+    }
+
+    if (assetType === 'transferable' && tokenType === 'FT') return;
+    if (!tokenId) return;
+    validateOperationWithStateTracking(shape, tokenId, operation, tokenHasExistInERC, assetType, reporter);
+    return;
+  }
+
+  // Only check legacy Task elements
   if (!is(shape, 'bpmn:Task')) {
     return;
   }
@@ -94,6 +141,15 @@ export default function assetTaskOperationConstraint(shape, reporter) {
 
   // Validate operation based on token state tracking
   validateOperationWithStateTracking(shape, tokenId, operation, tokenHasExistInERC, assetType, reporter);
+}
+
+function getLinkedAssetFromRefs(taskConfig, elementRegistry) {
+  const createOps = ['mint', 'branch', 'merge'];
+  const refs = createOps.includes(taskConfig.operation)
+    ? taskConfig.outputAssetRefs
+    : taskConfig.inputAssetRefs;
+  const assetElement = refs.length ? elementRegistry.get(refs[0]) : null;
+  return assetElement ? getAssetData(assetElement) : null;
 }
 
 /**
@@ -298,7 +354,19 @@ function getPossibleStatesAtTask(targetTask, tokenId, tokenHasExistInERC, elemen
 
     // Update state based on current element's operation
     let newState = currentState;
-    if (is(element, 'bpmn:Task')) {
+    if (isChoreographyTask(element)) {
+      const taskConfig = getAssetOperationData(element);
+      const linkedAsset = getLinkedAssetFromRefs(taskConfig, elementRegistry);
+
+      if (linkedAsset && linkedAsset.tokenId === tokenId && taskConfig.operation) {
+        const op = taskConfig.operation.toLowerCase();
+        if (op === 'mint' || op === 'branch' || op === 'merge') {
+          newState = 'EXISTS';
+        } else if (op === 'burn') {
+          newState = 'NOT_EXISTS';
+        }
+      }
+    } else if (is(element, 'bpmn:Task')) {
       const docs = element.businessObject.documentation;
       if (Array.isArray(docs) && docs.length > 0) {
         try {
@@ -357,8 +425,20 @@ function getPossibleStatesAtTask(targetTask, tokenId, tokenHasExistInERC, elemen
  * Validate value-added operations (branch/merge)
  */
 function validateValueAddedOperation(currentShape, tokenId, currentOperation, tokenHasExistInERC, reporter) {
-  const linkedAsset = getLinkedDataObjectAsset(currentShape, reporter.elementRegistry);
-  const refTokenIds = linkedAsset?.refTokenIds || [];
+  let refTokenIds = [];
+
+  if (isChoreographyTask(currentShape)) {
+    const taskConfig = getAssetOperationData(currentShape);
+    refTokenIds = (taskConfig.inputAssetRefs || [])
+      .map(assetId => {
+        const assetElement = reporter.elementRegistry.get(assetId);
+        return assetElement ? getAssetData(assetElement).tokenId : '';
+      })
+      .filter(Boolean);
+  } else {
+    const linkedAsset = getLinkedDataObjectAsset(currentShape, reporter.elementRegistry);
+    refTokenIds = linkedAsset?.refTokenIds || [];
+  }
 
   if (refTokenIds.length > 0) {
     refTokenIds.forEach(refTokenId => {
@@ -368,7 +448,12 @@ function validateValueAddedOperation(currentShape, tokenId, currentOperation, to
       // Check if referenced token has tokenHasExistInERC
       let refHasExistInERC = false;
       reporter.elementRegistry.forEach(element => {
-        if (element.type === 'bpmn:DataObjectReference') {
+        if (element.type === 'abc:Asset') {
+          const parsed = getAssetData(element);
+          if (parsed.tokenId === refTokenId && parsed.tokenHasExistInERC) {
+            refHasExistInERC = true;
+          }
+        } else if (element.type === 'bpmn:DataObjectReference') {
           const docs = element.businessObject.documentation;
           if (Array.isArray(docs) && docs.length) {
             try {

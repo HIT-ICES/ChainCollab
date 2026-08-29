@@ -85,16 +85,16 @@ export const bindTokensToERCs = async (
             if (erc.installed === true && (!erc.token || erc.token === "")) {
                 console.log(`更新 ERC ${ercId} 绑定 Token: ${token}`);
                 if (erc.token_type == "ERC721") {
-                    invokeTokenInitialize(chaincodeUrl, token, erc.name);
+                    await invokeTokenInitialize(chaincodeUrl, token, erc.name);
                 }
                 else if (erc.token_type == "ERC20") {
-                    invokeFTTokenInitialize(chaincodeUrl, token, erc.name);
+                    await invokeFTTokenInitialize(chaincodeUrl, token, erc.name);
                 }
                 else if(erc.token_type == "ERC1155"){
-                    invokeTokenInitialize(chaincodeUrl, token, erc.name);
+                    await invokeTokenInitialize(chaincodeUrl, token, erc.name);
                 }
                 else if (erc.token_type=="ERC5521"){
-                    invokeTokenInitialize(chaincodeUrl, token, erc.name,"true")
+                    await invokeTokenInitialize(chaincodeUrl, token, erc.name,"true")
                 }
                 await updateERCChaincodebindToken(ercId, token, consortiumId);
             } else {
@@ -121,7 +121,7 @@ export const ERCAddMintAuthority = async (
                 console.log(` 无法获取 ERC 对象: ${ercId}`);
                 continue;
             }
-            invokeAddAuthority(chaincodeUrl, instanceId, msps, erc.name)
+            await invokeAddAuthority(chaincodeUrl, instanceId, msps, erc.name)
 
         } catch (err) {
             console.error(` ERC ${ercId} 出错:`, err);

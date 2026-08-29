@@ -1,11 +1,11 @@
-import icon from '../../../../../assets/token.svg'
+import { ensureAssetOperation } from '../../utils/assetExtension';
 
 export default class AssetTaskPaletteProvider{
-  // 自定义邮件收发组件
-  constructor(palette, create, elementFactory) {
+  constructor(palette, create, elementFactory, moddle) {
 
     this.create = create
     this.elementFactory = elementFactory
+    this.moddle = moddle
     palette.registerProvider(this)
   }
 
@@ -13,20 +13,22 @@ export default class AssetTaskPaletteProvider{
   getPaletteEntries(element) {
     const elementFactory = this.elementFactory
     const create = this.create
+    const moddle = this.moddle
 
     function startCreate(event) {
-      const serviceTaskShape = elementFactory.create(
-        'shape', { type: 'bpmn:Task' },
-      )
+      const assetTaskShape = elementFactory.createShape({
+        type: 'bpmn:ChoreographyTask'
+      });
 
-      create.start(event, serviceTaskShape)
+      ensureAssetOperation(assetTaskShape, moddle);
+      create.start(event, assetTaskShape);
     }
 
     return {
-      'create-test-data': {
-        group: 'activity',
-        title: '创建 NFT资产',
-        imageUrl: icon,
+      'create.asset-task': {
+        group: 'choreography',
+        className: 'choreo-icon-choreography-task',
+        title: 'Create AssetTask',
         action: {
           dragstart: startCreate,
           click: startCreate,
@@ -40,4 +42,5 @@ AssetTaskPaletteProvider.$inject = [
   'palette',
   'create',
   'elementFactory',
+  'moddle',
 ]

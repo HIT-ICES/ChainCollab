@@ -1,6 +1,6 @@
 /**
  * 数据元素调色板提供者
- * 在左侧调色板添加 DataObjectReference 元素
+ * 在左侧调色板添加 abc:Asset 元素
  */
 export default class DataPaletteProvider {
   constructor(palette, create, elementFactory, translate) {
@@ -20,7 +20,7 @@ export default class DataPaletteProvider {
 
     function createDataObject(event) {
       const shape = elementFactory.createShape({
-        type: 'bpmn:DataObjectReference'
+        type: 'abc:Asset'
       });
       create.start(event, shape);
     }
@@ -29,7 +29,7 @@ export default class DataPaletteProvider {
       'create.data-object': {
         group: 'data-object',
         className: 'bpmn-icon-data-object',
-        title: translate('Create DataObjectReference'),
+        title: translate('Create Asset'),
         action: {
           dragstart: createDataObject,
           click: createDataObject,

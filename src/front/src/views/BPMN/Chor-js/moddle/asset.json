@@ -1,0 +1,109 @@
+{
+  "name": "AssetBlockCollab",
+  "uri": "http://chaincollab.assetblockcollab/schema/abc",
+  "prefix": "abc",
+  "xml": {
+    "tagAlias": "lowerCase"
+  },
+  "types": [
+    {
+      "name": "Asset",
+      "superClass": [
+        "bpmn:FlowNode"
+      ],
+      "properties": [
+        {
+          "name": "assetType",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "tokenType",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "tokenName",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "tokenId",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "tokenURL",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "tokenHasExistInERC",
+          "type": "Boolean",
+          "isAttr": true
+        }
+      ]
+    },
+    {
+      "name": "AssetOperation",
+      "superClass": [
+        "Element"
+      ],
+      "properties": [
+        {
+          "name": "operation",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "inputAssetRefs",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "outputAssetRefs",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "recipientRefs",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "tokenNumber",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "outputs",
+          "type": "Output",
+          "isMany": true
+        }
+      ]
+    },
+    {
+      "name": "Output",
+      "superClass": [
+        "Element"
+      ],
+      "properties": [
+        {
+          "name": "name",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "type",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "dataType",
+          "type": "String",
+          "isAttr": true
+        }
+      ]
+    }
+  ]
+}

@@ -11,6 +11,7 @@ import UploadDmnModal from './pop-up/UploadDmnModal';
 import TestPaletteProvider from './lib-provider/external-elements'
 import AssetTaskProvider from './lib-provider/assettask-elements'
 import DataElementsModule from './lib-provider/data-elements'
+import assetModdleDescriptor from './moddle/asset.json'
 import { getParticipantsByContent } from '@/api/translator.ts'
 import { addBPMN } from '@/api/externalResource.js'
 import { useAppSelector } from "@/redux/hooks.ts";
@@ -95,11 +96,11 @@ const ChorJs = () => {
 
   const js_open_file_listener = (e: MouseEvent): void => {
     console.log('[ChorJs] open file click');
-    document.getElementById('file-input').click();
+    document.getElementById('file-input')?.click();
   };
 
   const js_file_input_listener = (e: Event): void => {
-    const loadDiagram = document.getElementById('file-input');
+    const loadDiagram = document.getElementById('file-input') as HTMLInputElement;
     console.log('[ChorJs] file input change', loadDiagram?.files?.length);
     const file = loadDiagram.files[0];
     if (file) {
@@ -311,6 +312,9 @@ const ChorJs = () => {
           AssetTaskProvider,
           DataElementsModule,
         ],
+        moddleExtensions: {
+          abc: assetModdleDescriptor,
+        },
         keyboard: {
           bindTo: document
         }

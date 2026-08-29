@@ -3,6 +3,7 @@ import BpmnRules from 'bpmn-js/lib/features/rules/BpmnRules';
 import { is } from 'bpmn-js/lib/util/ModelUtil';
 import { getMessageShape } from '../../util/MessageUtil';
 import { isAny } from 'bpmn-js/lib/features/modeling/util/ModelingUtil';
+import { getAssetOperation, getAssetOperationData, isAssetElement, isChoreographyTask } from '../../../utils/assetExtension';
 
 /**
  * Specific rules for choreographies. We have to override and replace BpmnRules and can not add
@@ -225,6 +226,73 @@ ChoreoRules.prototype.canCreate = function (shape, target, source, position) {
   return BpmnRules.prototype.canCreate.call(this, shape, target, source, position);
 };
 ChoreoRules.prototype.canConnect = function (source, target, connection) {
+  const getOperation = function(taskElement) {
+    return getAssetOperationData(taskElement).operation || null;
+  };
+
+  const countAssetReferences = function(taskElement) {
+    const incoming = taskElement.incoming || [];
+    const outgoing = taskElement.outgoing || [];
+    return {
+      inputCount: incoming.filter(connection =>
+        is(connection, 'bpmn:Association') && isAssetElement(connection.source)
+      ).length,
+      outputCount: outgoing.filter(connection =>
+        is(connection, 'bpmn:Association') && isAssetElement(connection.target)
+      ).length,
+    };
+  };
+
+  const hasExistingAssetReference = function(sourceElement, targetElement) {
+    return (sourceElement.outgoing || []).some(connection =>
+      is(connection, 'bpmn:Association') &&
+      connection.source === sourceElement &&
+      connection.target === targetElement
+    );
+  };
+
+  if (isAssetElement(source) && isChoreographyTask(target)) {
+    if (!getAssetOperation(target)) {
+      return false;
+    }
+    if (hasExistingAssetReference(source, target)) {
+      return false;
+    }
+    const operation = getOperation(target);
+    const { inputCount } = countAssetReferences(target);
+
+    if (operation === 'mint') {
+      return false;
+    }
+    if (!['branch', 'merge'].includes(operation || '') && inputCount > 0) {
+      return false;
+    }
+    return { type: 'bpmn:Association', associationDirection: 'One' };
+  }
+
+  if (isChoreographyTask(source) && isAssetElement(target)) {
+    if (!getAssetOperation(source)) {
+      return false;
+    }
+    if (hasExistingAssetReference(source, target)) {
+      return false;
+    }
+    const operation = getOperation(source);
+    const { outputCount } = countAssetReferences(source);
+
+    if (outputCount > 0) {
+      return false;
+    }
+    if (operation && !['mint', 'branch', 'merge'].includes(operation)) {
+      return false;
+    }
+    return { type: 'bpmn:Association', associationDirection: 'One' };
+  }
+
+  if (isAssetElement(source) || isAssetElement(target)) {
+    return false;
+  }
+
   // Helper function to get operation from Task documentation
   const getTaskOperation = function(taskElement) {
     if (!taskElement || !is(taskElement, 'bpmn:Task')) return null;

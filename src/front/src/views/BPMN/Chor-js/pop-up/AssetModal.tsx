@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Modal, Input, Select, message, Checkbox } from 'antd';
-import { debounce } from 'lodash';
+import { getAssetData, getDerivedRefTokenIds, isAssetElement } from '../utils/assetExtension';
 
 interface AssetModalProps {
   dataElementId: string;
@@ -15,348 +15,134 @@ export default function AssetModal({
 }: AssetModalProps) {
   const modeler = window.bpmnjs;
   const elementRegistry = modeler.get('elementRegistry');
-  const commandStack = modeler.get('commandStack');
+  const modeling = modeler.get('modeling');
   const eventBus = modeler.get('eventBus');
   const shape = elementRegistry.get(dataElementId);
 
-  // state
   const [elementName, setElementName] = React.useState('');
   const [assetType, setAssetType] = React.useState('');
   const [tokenType, setTokenType] = React.useState('');
   const [tokenName, setTokenName] = React.useState('');
   const [tokenId, setTokenId] = React.useState('');
-  const [originalTokenId, setOriginalTokenId] = React.useState('');
-  const [refTokenIds, setRefTokenIds] = React.useState<string[]>([]);
+  const [tokenURL, setTokenURL] = React.useState('');
   const [tokenHasExistInERC, setTokenHasExistInERC] = React.useState(false);
+  const [derivedRefTokenIds, setDerivedRefTokenIds] = React.useState<string[]>([]);
 
-  // tokenId 和 FT tokenName 可选列表
-  const [tokenIdOptions, setTokenIdOptions] = React.useState<string[]>([]);
-  const [tokenNameOptions, setTokenNameOptions] = React.useState<string[]>([]);
-
-  // 从 BPMN 文档加载已有值
   const loadDataFromBPMN = () => {
     if (!shape) return;
+
+    const data = getAssetData(shape);
     setElementName(shape.businessObject.name || '');
-    const doc = shape.businessObject.documentation;
-    if (Array.isArray(doc) && doc.length) {
-      try {
-        const parsed = JSON.parse(doc[0].text);
-        setAssetType(parsed.assetType || '');
-        setTokenType(parsed.tokenType || '');
-        setTokenName(parsed.tokenName || '');
-        const loadedTokenId = parsed.tokenId || '';
-        setTokenId(loadedTokenId);
-        setOriginalTokenId(loadedTokenId);
-        setTokenHasExistInERC(parsed.tokenHasExistInERC || false);
-        if (parsed.assetType === 'value-added' && Array.isArray(parsed.refTokenIds)) {
-          setRefTokenIds(parsed.refTokenIds);
-        } else {
-          setRefTokenIds([]);
-        }
-      } catch {
-        // ignore parse error
-      }
-    }
+    setAssetType(data.assetType || '');
+    setTokenType(data.tokenType || '');
+    setTokenName(data.tokenName || '');
+    setTokenId(data.tokenId || '');
+    setTokenURL(data.tokenURL || '');
+    setTokenHasExistInERC(Boolean(data.tokenHasExistInERC));
+    setDerivedRefTokenIds(getDerivedRefTokenIds(shape, elementRegistry));
   };
 
   React.useEffect(() => {
     if (isModalOpen) {
-      // 打开时重置并加载
       setElementName('');
       setAssetType('');
       setTokenType('');
       setTokenName('');
       setTokenId('');
-      setOriginalTokenId('');
-      setRefTokenIds([]);
+      setTokenURL('');
       setTokenHasExistInERC(false);
+      setDerivedRefTokenIds([]);
       loadDataFromBPMN();
     }
   }, [shape, isModalOpen]);
 
-  // ===== 扫描所有 FT tokenName =====
-  const scanFTTokenNames = React.useCallback(() => {
-    const allElements = elementRegistry.getAll();
-    const names = new Set<string>();
-    allElements.forEach((el: any) => {
-      const docs = el.businessObject.documentation;
-      if (Array.isArray(docs) && docs.length) {
-        try {
-          const p = JSON.parse(docs[0].text);
-          // 从 DataObjectReference 扫描 FT tokenName
-          if (el.type === 'bpmn:DataObjectReference' &&
-              p.assetType === 'transferable' &&
-              p.tokenType === 'FT' &&
-              p.tokenName) {
-            names.add(p.tokenName);
-          }
-        } catch {
-          // ignore
-        }
-      }
-    });
-    setTokenNameOptions(Array.from(names));
-  }, [elementRegistry]);
-
-  // ===== 扫描 tokenId（只读扫描，不执行清理操作）=====
-  const scanTokenIds = React.useCallback(() => {
-    const allElements = elementRegistry.getAll();
-    const newTokenIdsSet = new Set<string>();
-
-    // 收集所有 DataObjectReference 的 tokenId
-    allElements.forEach((el: any) => {
-      const docs = el.businessObject.documentation;
-      if (Array.isArray(docs) && docs.length) {
-        try {
-          const parsed = JSON.parse(docs[0].text);
-          // 从 DataObjectReference 扫描 tokenId
-          if (el.type === 'bpmn:DataObjectReference' && parsed.tokenId) {
-            newTokenIdsSet.add(parsed.tokenId);
-          }
-        } catch {
-          // ignore
-        }
-      }
-    });
-
-    // 更新 tokenIdOptions
-    const newTokenIds = Array.from(newTokenIdsSet);
-    setTokenIdOptions(prev => {
-      const prevSet = new Set(prev);
-      const same =
-        prevSet.size === newTokenIdsSet.size &&
-        newTokenIds.every(id => prevSet.has(id));
-      return same ? prev : newTokenIds;
-    });
-  }, [elementRegistry]);
-
-  // 合并扫描逻辑
-  const scanAll = React.useCallback(() => {
-    scanTokenIds();
-    scanFTTokenNames();
-  }, [scanTokenIds, scanFTTokenNames]);
-
-  // 防抖版本的扫描函数
-  const debouncedScanAll = React.useMemo(
-    () => debounce(scanAll, 150),
-    [scanAll]
-  );
-
-  // 清理防抖函数
   React.useEffect(() => {
-    return () => {
-      debouncedScanAll.cancel();
-    };
-  }, [debouncedScanAll]);
+    if (!isModalOpen || !shape) return;
 
-  React.useEffect(() => {
-    // 初次扫描（立即执行）
-    scanAll();
-    // 监听模型变化，使用防抖重新扫描
-    const handler = () => debouncedScanAll();
-    eventBus.on('commandStack.changed', handler);
-    return () => {
-      eventBus.off('commandStack.changed', handler);
+    const refreshDerivedRefs = () => {
+      setDerivedRefTokenIds(getDerivedRefTokenIds(shape, elementRegistry));
     };
-  }, [eventBus, scanAll, debouncedScanAll]);
 
-  // 更新到 BPMN
+    eventBus.on('commandStack.changed', refreshDerivedRefs);
+    return () => {
+      eventBus.off('commandStack.changed', refreshDerivedRefs);
+    };
+  }, [eventBus, elementRegistry, shape, isModalOpen]);
+
   const updateDataToBPMN = () => {
     if (!shape) return;
 
-    commandStack.execute('element.updateLabel', {
-      element: shape,
-      newLabel: elementName || shape.businessObject.name,
-    });
+    modeling.updateLabel(shape, elementName || shape.businessObject.name);
 
-    const payload: any = {
+    const properties: any = {
       assetType,
-      tokenName
+      tokenType: assetType === 'transferable' ? tokenType : undefined,
+      tokenName,
+      tokenId: assetType === 'transferable' && tokenType === 'FT' ? undefined : tokenId,
+      tokenURL: assetType === 'distributive' ? tokenURL : undefined,
+      tokenHasExistInERC: assetType === 'transferable' && tokenType === 'FT'
+        ? undefined
+        : tokenHasExistInERC,
+      documentation: undefined,
     };
 
-    if (assetType === 'transferable') {
-      if (tokenType) payload.tokenType = tokenType;
-      if (tokenName) payload.tokenName = tokenName;
-    }
-
-    // FT 不需要 tokenId
-    if (!(assetType === 'transferable' && tokenType === 'FT') && tokenId) {
-      payload.tokenId = tokenId;
-      // 添加 tokenHasExistInERC 字段
-      payload.tokenHasExistInERC = tokenHasExistInERC;
-    }
-
-    // value-added 的 refTokenIds 由 DataAssociationBehavior 自动管理
-    // 但我们必须保存当前状态到 BPMN 文档，以便文件重新加载后保持数据
-    // 即使是空数组也要保存，这样可以清除旧的引用
-    if (assetType === 'value-added') {
-      payload.refTokenIds = refTokenIds;
-    }
-
-    commandStack.execute('element.updateProperties', {
-      element: shape,
-      properties: {
-        documentation: [
-          modeler._moddle.create('bpmn:Documentation', {
-            text: JSON.stringify(payload, null, 2),
-          }),
-        ],
-      },
-    });
-
-    // 如果 tokenId 发生了变化，触发全局同步
-    if (tokenId && tokenId !== originalTokenId) {
-      syncRefTokenIdsGlobally(originalTokenId, tokenId);
-    }
-  };
-
-  // 全局同步 refTokenIds：将所有引用 oldTokenId 的 DataObject 更新为 newTokenId
-  const syncRefTokenIdsGlobally = (oldTokenId: string, newTokenId: string) => {
-    if (!oldTokenId || !newTokenId || oldTokenId === newTokenId) return;
-
-    const allElements = elementRegistry.getAll();
-
-    allElements.forEach((el: any) => {
-      // 只处理 DataObjectReference
-      if (el.type !== 'bpmn:DataObjectReference') return;
-
-      const docs = el.businessObject.documentation;
-      if (Array.isArray(docs) && docs.length) {
-        try {
-          const parsed = JSON.parse(docs[0].text);
-
-          // 检查是否有 refTokenIds 并且包含 oldTokenId
-          if (parsed.assetType === 'value-added' && Array.isArray(parsed.refTokenIds)) {
-            const index = parsed.refTokenIds.indexOf(oldTokenId);
-            if (index !== -1) {
-              // 替换 oldTokenId 为 newTokenId
-              parsed.refTokenIds[index] = newTokenId;
-
-              // 更新 DataObject
-              commandStack.execute('element.updateProperties', {
-                element: el,
-                properties: {
-                  documentation: [
-                    modeler._moddle.create('bpmn:Documentation', {
-                      text: JSON.stringify(parsed, null, 2),
-                    }),
-                  ],
-                },
-              });
-            }
-          }
-        } catch {
-          // ignore parse error
-        }
-      }
-    });
+    modeling.updateProperties(shape, properties);
   };
 
   const handleOk = () => {
-    // ===== FT tokenName 唯一性校验（DataObject 为 transferable + FT 时）=====
-if (assetType === 'transferable' && tokenType === 'FT') {
-  const name = (tokenName || '').trim();
-  if (name) {
-    const allElements = elementRegistry.getAll();
-    let duplicated = false;
-
-    allElements.forEach((el: any) => {
-      // 跳过当前编辑的元素
-      if (el.id === dataElementId) return;
-      if (el.type !== 'bpmn:DataObjectReference') return;
-
-      const docs = el.businessObject.documentation;
-      if (Array.isArray(docs) && docs.length) {
-        try {
-          const parsed = JSON.parse(docs[0].text);
-          const otherName = (parsed.tokenName || '').trim();
-          if (
-            parsed.assetType === 'transferable' &&
-            parsed.tokenType === 'FT' &&
-            otherName &&
-            otherName === name
-          ) {
-            duplicated = true;
-          }
-        } catch {
-          // ignore
-        }
-      }
-    });
-
-    if (duplicated) {
-      message.warning('FT tokenName already exists. Please choose a different tokenName');
+    if (!assetType) {
+      message.warning('Please select asset type');
       return;
     }
-  }
-}
 
-    // 验证 tokenId 是否重复 - 实时扫描所有 DataObject
-    if (tokenId) {
-      const allElements = elementRegistry.getAll();
-      const existingTokenIds = new Set<string>();
+    if (assetType === 'transferable' && !tokenType) {
+      message.warning('Please select token type');
+      return;
+    }
 
-      allElements.forEach((el: any) => {
-        // 跳过当前编辑的元素
-        if (el.id === dataElementId) return;
+    const name = (tokenName || '').trim();
+    if (!name) {
+      message.warning('tokenName is required');
+      return;
+    }
 
-        const docs = el.businessObject.documentation;
-        if (Array.isArray(docs) && docs.length) {
-          try {
-            const parsed = JSON.parse(docs[0].text);
-            if (el.type === 'bpmn:DataObjectReference' && parsed.tokenId) {
-              existingTokenIds.add(parsed.tokenId);
-            }
-          } catch {
-            // ignore
-          }
-        }
+    if (!(assetType === 'transferable' && tokenType === 'FT') && !(tokenId || '').trim()) {
+      message.warning('tokenId is required');
+      return;
+    }
+
+    if (assetType === 'transferable' && tokenType === 'FT') {
+      const duplicated = elementRegistry.getAll().some((el: any) => {
+        if (el.id === dataElementId || !isAssetElement(el)) return false;
+        const data = getAssetData(el);
+        return data.assetType === 'transferable' &&
+          data.tokenType === 'FT' &&
+          (data.tokenName || '').trim() === name;
       });
 
-      if (existingTokenIds.has(tokenId)) {
+      if (duplicated) {
+        message.warning('FT tokenName already exists. Please choose a different tokenName');
+        return;
+      }
+    }
+
+    if (tokenId) {
+      const duplicated = elementRegistry.getAll().some((el: any) => {
+        if (el.id === dataElementId || !isAssetElement(el)) return false;
+        return getAssetData(el).tokenId === tokenId;
+      });
+
+      if (duplicated) {
         message.warning('The tokenId already exists. Please choose a different one');
         return;
       }
     }
+
     updateDataToBPMN();
     onClose(true);
   };
 
-  // 检查 DataObject 是否被 branch/merge Task 使用（输出连接）
-  const isUsedByBranchMergeTask = React.useMemo(() => {
-    if (!shape || assetType !== 'value-added') return false;
-
-    const incoming = shape.incoming || [];
-
-    // 查找 DataOutputAssociation 连线（Task -> DataObject）
-    for (const connection of incoming) {
-      const connBo = connection.businessObject;
-      if (connBo.$type === 'bpmn:DataOutputAssociation') {
-        const taskElement = connection.source;
-
-        // 检查 Task 的 operation
-        if (taskElement && taskElement.type === 'bpmn:Task') {
-          const docs = taskElement.businessObject.documentation;
-          if (Array.isArray(docs) && docs.length) {
-            try {
-              const parsed = JSON.parse(docs[0].text);
-              if (parsed.operation && ['branch', 'merge'].includes(parsed.operation)) {
-                return true;
-              }
-            } catch {
-              // ignore
-            }
-          }
-        }
-      }
-    }
-    return false;
-  }, [shape, assetType]);
-
-  // 显示条件
-  const shouldShowTokenId = React.useMemo(() => {
-    return !(assetType === 'transferable' && tokenType === 'FT');
-  }, [assetType, tokenType]);
+  const shouldShowTokenId = !(assetType === 'transferable' && tokenType === 'FT');
 
   return (
     <Modal
@@ -366,13 +152,11 @@ if (assetType === 'transferable' && tokenType === 'FT') {
       onCancel={() => onClose(false)}
       width={600}
     >
-      {/* 1. elementName */}
       <div style={{ marginBottom: 16 }}>
         <label style={{ display: 'block', marginBottom: 4 }}>Element Name:</label>
         <Input value={elementName} onChange={e => setElementName(e.target.value)} />
       </div>
 
-      {/* 2. assetType */}
       <div style={{ marginBottom: 16 }}>
         <label style={{ display: 'block', marginBottom: 4 }}>Asset Type:</label>
         <Select
@@ -382,6 +166,8 @@ if (assetType === 'transferable' && tokenType === 'FT') {
             setTokenType('');
             setTokenName('');
             setTokenId('');
+            setTokenURL('');
+            setTokenHasExistInERC(false);
           }}
           allowClear
           style={{ width: '100%' }}
@@ -392,7 +178,6 @@ if (assetType === 'transferable' && tokenType === 'FT') {
         </Select>
       </div>
 
-      {/* 3. tokenType (仅 transferable) */}
       {assetType === 'transferable' && (
         <div style={{ marginBottom: 16 }}>
           <label style={{ display: 'block', marginBottom: 4 }}>Token Type:</label>
@@ -400,8 +185,8 @@ if (assetType === 'transferable' && tokenType === 'FT') {
             value={tokenType}
             onChange={value => {
               setTokenType(value);
-              setTokenName('');
               setTokenId('');
+              setTokenHasExistInERC(false);
             }}
             allowClear
             style={{ width: '100%' }}
@@ -412,7 +197,6 @@ if (assetType === 'transferable' && tokenType === 'FT') {
         </div>
       )}
 
-      {/* 4. tokenId (非 FT 类型) */}
       {shouldShowTokenId && (
         <div style={{ marginBottom: 16 }}>
           <label style={{ display: 'block', marginBottom: 4 }}>Token ID:</label>
@@ -426,18 +210,12 @@ if (assetType === 'transferable' && tokenType === 'FT') {
               checked={tokenHasExistInERC}
               onChange={e => setTokenHasExistInERC(e.target.checked)}
             >
-              Token already exists in ERC contract (skip mint operation)
+              Token already exists in ERC contract
             </Checkbox>
           </div>
-          {tokenHasExistInERC && (
-            <div style={{ fontSize: 12, color: '#1890ff', marginTop: 4, paddingLeft: 24 }}>
-              ℹ️ This token will be treated as already minted. A default mint owner will be assigned based on participant bindings.
-            </div>
-          )}
         </div>
       )}
 
-      {/* 5. tokenName */}
       <div style={{ marginBottom: 16 }}>
         <label style={{ display: 'block', marginBottom: 4 }}>Token Name:</label>
         <Input
@@ -447,24 +225,27 @@ if (assetType === 'transferable' && tokenType === 'FT') {
         />
       </div>
 
-      {/* 6. refTokenIds (仅 value-added) */}
+      {assetType === 'distributive' && (
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 4 }}>Token URL:</label>
+          <Input
+            value={tokenURL}
+            onChange={e => setTokenURL(e.target.value)}
+            placeholder="Enter token URL"
+          />
+        </div>
+      )}
+
       {assetType === 'value-added' && (
         <div style={{ marginBottom: 16 }}>
           <label style={{ display: 'block', marginBottom: 4 }}>Reference Token IDs:</label>
           <Select
             mode="multiple"
-            value={refTokenIds}
+            value={derivedRefTokenIds}
             disabled
             style={{ width: '100%' }}
-            placeholder="Auto-filled from Task connections"
+            placeholder="Derived from branch/merge AssetTask inputs"
           />
-          <div style={{ fontSize: 12, color: '#1890ff', marginTop: 4, padding: '4px 8px', background: '#e6f7ff', border: '1px solid #91d5ff', borderRadius: 4 }}>
-            {isUsedByBranchMergeTask ? (
-              <>ℹ️ This DataObject is created by a branch/merge Task. Reference Token IDs are automatically collected from DataObjects connected to that Task.</>
-            ) : (
-              <>ℹ️ For value-added assets, Reference Token IDs are automatically managed through Task connections. Connect this DataObject as output of a branch/merge Task to populate refTokenIds.</>
-            )}
-          </div>
         </div>
       )}
     </Modal>

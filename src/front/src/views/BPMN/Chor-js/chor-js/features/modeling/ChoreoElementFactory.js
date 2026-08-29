@@ -28,6 +28,11 @@ ChoreoElementFactory.prototype._getDefaultSize = function (element) {
       width: 100,
       height: 80
     };
+  } else if (is(businessObject, 'abc:Asset')) {
+    return {
+      width: 36,
+      height: 50
+    };
   } else if (is(businessObject, 'bpmn:SubChoreography') || is(businessObject, 'bpmn:CallChoreography')) {
     if (businessObject.di.isExpanded) {
       return {

@@ -7,6 +7,7 @@ import MessageModal from './MessageModal';
 import DmnModal from './DmnModal'
 import TaskModal from './TaskModal';
 import ParticipantModal from './ParticipantModal';
+import { getAssetOperation } from '../utils/assetExtension';
 
 export default function MainPage({ xmlDataMap, onSave }) {
   const [dataElementId, setDataElementId] = React.useState(null);
@@ -21,14 +22,18 @@ export default function MainPage({ xmlDataMap, onSave }) {
       const modeler = window.bpmnjs;
       const elementRegistry = modeler.get('elementRegistry');
       const shape = elementRegistry.get(data_element_id);
+      if (!shape) return;
       // console.log('data_element_id-shape', data_element_id, shape);
       const type = shape.type;
+      const popupType = type === 'bpmn:ChoreographyTask' && getAssetOperation(shape)
+        ? 'abc:AssetTask'
+        : type;
       console.log('data_element_id-type', data_element_id, type);
       // const ids = data_element_id.split('_');
       // const type = ids[0];
       setDataElementId(data_element_id);
-      setDataElementType(type);
-      if (type === 'bpmn:BusinessRuleTask' || type === 'bpmn:Message' || type === 'bpmn:Task' || type === 'bpmn:DataObjectReference') {
+      setDataElementType(popupType);
+      if (popupType === 'bpmn:BusinessRuleTask' || popupType === 'bpmn:Message' || popupType === 'abc:AssetTask' || popupType === 'abc:Asset') {
         setModalOpen(true);
       }
     }
@@ -57,17 +62,17 @@ export default function MainPage({ xmlDataMap, onSave }) {
           onClose={() => setModalOpen(false)}
           onSave={onSave}
         />) : null}
-      {dataElementType === 'bpmn:Task' && dataElementId ? (
+      {dataElementType === 'abc:AssetTask' && dataElementId ? (
         <AssetTaskModal
           dataElementId={dataElementId}
-          open={modalOpen && 'bpmn:Task' === dataElementType}
+          open={modalOpen && 'abc:AssetTask' === dataElementType}
           onClose={() => setModalOpen(false)}
         />
       ) : null}
-      {dataElementType === 'bpmn:DataObjectReference' && dataElementId ? (
+      {dataElementType === 'abc:Asset' && dataElementId ? (
         <AssetModal
           dataElementId={dataElementId}
-          open={modalOpen && 'bpmn:DataObjectReference' === dataElementType}
+          open={modalOpen && 'abc:Asset' === dataElementType}
           onClose={() => setModalOpen(false)}
         />
       ) : null}

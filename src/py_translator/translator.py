@@ -20,6 +20,7 @@ from choreography_parser.parser import Choreography
 from chaincode_snippet import snippet
 import json
 import xml.etree.ElementTree as ET
+import re
 
 
 def type_change_from_bpmn_to_go(type: str) -> str:
@@ -43,6 +44,16 @@ def public_the_name(name: str) -> str:
 
 def bool_handle(origin: bool) -> str:
     return "true" if origin else "false"
+
+
+def _lookup_case_insensitive(data: dict, key: str):
+    if key in data:
+        return key, data[key]
+    key_lower = key.lower()
+    for candidate_key, value in data.items():
+        if candidate_key.lower() == key_lower:
+            return candidate_key, value
+    return key, None
 
 
 default_config = {
@@ -176,6 +187,7 @@ class GoChaincodeTranslator:
             **task_outputs,
         }
 
+        condition_pattern = re.compile(r"^\s*(?P<prop>[^=!<>]+?)\s*(?P<relation>==|!=|>=|<=|>|<)\s*(?P<value>.+?)\s*$")
         for sequence_flow in choreography.query_element_with_type(EdgeType.SEQUENCE_FLOW):
             name = sequence_flow.name
             if name == "":
@@ -191,97 +203,28 @@ class GoChaincodeTranslator:
                 #   [A] means the property of the message
                 #   [B] means the value of the property
             }
-            match name:
-                case x if "==" in x:
-                    prop, value = x.split("==")
-                    prop_defination = message_properties_plus_business_rule_outputs.get(prop)
-                    if prop_defination is None:
-                        # Parse Error!
-                        continue
-                    global_parameters[prop] = {
-                        "definition": prop_defination,
-                    }
-                    judge_parameters[sequence_flow.id] = {
-                        "name": prop,
-                        "value": value,
-                        "type": prop_defination["type"],
-                        "relation": "==",
-                    }
-                case x if "!=" in x:
-                    prop, value = x.split("!=")
-                    prop_defination = message_properties_plus_business_rule_outputs.get(prop)
-                    if prop_defination is None:
-                        # Parse Error!
-                        continue
-                    global_parameters[prop] = {
-                        "definition": prop_defination,
-                    }
-                    judge_parameters[sequence_flow.id] = {
-                        "name": prop,
-                        "value": value,
-                        "type": prop_defination["type"],
-                        "relation": "!=",
-                    }
-                case x if ">" in x:
-                    prop, value = x.split(">")
-                    prop_defination = message_properties_plus_business_rule_outputs.get(prop)
-                    if prop_defination is None:
-                        # Parse Error!
-                        continue
-                    global_parameters[prop] = {
-                        "definition": prop_defination,
-                    }
-                    judge_parameters[sequence_flow.id] = {
-                        "name": prop,
-                        "value": value,
-                        "type": prop_defination["type"],
-                        "relation": ">",
-                    }
-                case x if "<" in x:
-                    prop, value = x.split("<")
-                    prop_defination = message_properties_plus_business_rule_outputs.get(prop)
-                    if prop_defination is None:
-                        # Parse Error!
-                        continue
-                    global_parameters[prop] = {
-                        "definition": prop_defination,
-                    }
-                    judge_parameters[sequence_flow.id] = {
-                        "name": prop,
-                        "value": value,
-                        "type": prop_defination["type"],
-                        "relation": "<",
-                    }
-                case x if ">=" in x:
-                    prop, value = x.split(">=")
-                    prop_defination = message_properties_plus_business_rule_outputs.get(prop)
-                    if prop_defination is None:
-                        # Parse Error!
-                        continue
-                    global_parameters[prop] = {
-                        "definition": prop_defination,
-                    }
-                    judge_parameters[sequence_flow.id] = {
-                        "name": prop,
-                        "value": value,
-                        "type": prop_defination["type"],
-                        "relation": ">=",
-                    }
-                case x if "<=" in x:
-                    prop, value = x.split("<=")
-                    prop_defination = message_properties_plus_business_rule_outputs.get(prop)
-                    if prop_defination is None:
-                        # Parse Error!
-                        continue
-                    global_parameters[prop] = {
-                        "definition": prop_defination,
-                    }
-                    judge_parameters[sequence_flow.id] = {
-                        "name": prop,
-                        "value": value,
-                        "type": prop_defination["type"],
-                        "relation": "<=",
-                    }
+            condition_match = condition_pattern.match(name)
+            if condition_match is None:
+                continue
+
+            prop = condition_match.group("prop").strip()
+            relation = condition_match.group("relation")
+            value = condition_match.group("value").strip()
+            canonical_prop, prop_defination = _lookup_case_insensitive(
+                message_properties_plus_business_rule_outputs, prop
+            )
+            if prop_defination is None:
+                # Parse Error!
+                continue
+            global_parameters[canonical_prop] = {
+                "definition": prop_defination,
+            }
+            judge_parameters[sequence_flow.id] = {
+                "name": canonical_prop,
+                "value": value,
+                "type": prop_defination["type"],
+                "relation": relation,
+            }
 
         return global_parameters, judge_parameters
 
@@ -470,6 +413,12 @@ class GoChaincodeTranslator:
         合并 Task 的 documentation 和关联的 DataObject 的 documentation
         返回合并后的完整字段，只包含实际存在的非空字段
         """
+        if getattr(task, "is_asset_projection", False):
+            try:
+                return json.loads(task.documentation or "{}")
+            except json.JSONDecodeError:
+                return {}
+
         # 获取 Task 自己的字段
         task_doc = {}
         if task.documentation and task.documentation != "{}":
@@ -495,6 +444,8 @@ class GoChaincodeTranslator:
                 merged_doc['tokenName'] = dataobject_doc['tokenName']
             if 'tokenId' in dataobject_doc and dataobject_doc['tokenId']:
                 merged_doc['tokenId'] = dataobject_doc['tokenId']
+            if 'tokenURL' in dataobject_doc and dataobject_doc['tokenURL']:
+                merged_doc['tokenURL'] = dataobject_doc['tokenURL']
             # 增值型资产的 refTokenIds 也从 DataObject 读取
             if 'refTokenIds' in dataobject_doc and dataobject_doc['refTokenIds']:
                 merged_doc['refTokenIds'] = dataobject_doc['refTokenIds']
@@ -511,6 +462,8 @@ class GoChaincodeTranslator:
                 merged_doc['tokenName'] = task_doc['tokenName']
             if 'tokenId' in task_doc and task_doc['tokenId']:
                 merged_doc['tokenId'] = task_doc['tokenId']
+            if 'tokenURL' in task_doc and task_doc['tokenURL']:
+                merged_doc['tokenURL'] = task_doc['tokenURL']
             # 向后兼容：从 Task 读取 refTokenIds
             if 'refTokenIds' in task_doc and task_doc['refTokenIds']:
                 merged_doc['refTokenIds'] = task_doc['refTokenIds']
@@ -531,6 +484,22 @@ class GoChaincodeTranslator:
             merged_doc['outputs'] = task_doc['outputs']
 
         return merged_doc
+
+    def _is_asset_choreography_task(self, element: Element) -> bool:
+        return element.type == NodeType.CHOREOGRAPHY_TASK and getattr(element, "is_asset_task", False)
+
+    def _asset_message_ids(self) -> set[str]:
+        message_ids = set()
+        for element in self._choreography.nodes:
+            if not self._is_asset_choreography_task(element):
+                continue
+            for message_flow in element.message_flows:
+                if message_flow.message:
+                    message_ids.add(message_flow.message.id)
+        return message_ids
+
+    def _is_asset_message_flow(self, message_flow: MessageFlow) -> bool:
+        return message_flow.message and message_flow.message.id in self._asset_message_ids()
 
     def _generate_instance_initparameters_code(self) -> str:
         instance_initparameters = self._instance_initparameters
@@ -559,7 +528,11 @@ class GoChaincodeTranslator:
         temp_list = []
         start_event: StartEvent = choreography.query_element_with_type(NodeType.START_EVENT)[0]
         end_events: EndEvent = choreography.query_element_with_type(NodeType.END_EVENT)
-        message_flows: List[MessageFlow] = choreography.query_element_with_type(EdgeType.MESSAGE_FLOW)
+        message_flows: List[MessageFlow] = [
+            message_flow
+            for message_flow in choreography.query_element_with_type(EdgeType.MESSAGE_FLOW)
+            if not self._is_asset_message_flow(message_flow)
+        ]
         gateways: List[Union[ExclusiveGateway, ParallelGateway, EventBasedGateway]] = (
             choreography.query_element_with_type(NodeType.EXCLUSIVE_GATEWAY)
             + choreography.query_element_with_type(NodeType.PARALLEL_GATEWAY)
@@ -614,6 +587,11 @@ class GoChaincodeTranslator:
     def _generate_change_state_code(self, element: Element, state: str = "ENABLED") -> str:
         match element.type:
             case NodeType.CHOREOGRAPHY_TASK:
+                if self._is_asset_choreography_task(element):
+                    projected_task = self._choreography.get_element_with_id(element.id)
+                    if projected_task is not element and projected_task.type == NodeType.TASK:
+                        return snippet.changeTokenElementState_code(projected_task.id, state)
+                    return ""
                 return snippet.ChangeMsgState_code(element.init_message_flow.message.id, state)
             case NodeType.EXCLUSIVE_GATEWAY | NodeType.PARALLEL_GATEWAY | NodeType.EVENT_BASED_GATEWAY:
                 return snippet.ChangeGtwState_code(element.id, state)
@@ -629,6 +607,11 @@ class GoChaincodeTranslator:
     def _generate_check_state_code(self, element: Element, state: str = "ENABLED"):
         match element.type:
             case NodeType.CHOREOGRAPHY_TASK:
+                if self._is_asset_choreography_task(element):
+                    projected_task = self._choreography.get_element_with_id(element.id)
+                    if projected_task is not element and projected_task.type == NodeType.TASK:
+                        return snippet.CheckTokenElement_code(projected_task.id, state)
+                    return "true"
                 return snippet.CheckMessageState_code(element.init_message_flow.message.id, state)
             case NodeType.EXCLUSIVE_GATEWAY | NodeType.PARALLEL_GATEWAY | NodeType.EVENT_BASED_GATEWAY:
                 return snippet.CheckGatewayState_code(element.id, state)
@@ -824,13 +807,33 @@ class GoChaincodeTranslator:
         if sequence_flow.id in judge_parameters:
             parameter = judge_parameters[sequence_flow.id]
             return (
-                # snippet.ReadState_code(public_the_name(parameter["name"]))
-                # + "\n"
-                public_the_name(parameter["name"])
+                "currentMemory."
+                + public_the_name(parameter["name"])
                 + parameter["relation"]
                 + parameter["value"]
             )
         return "true"
+
+    def _generate_exclusive_gateway_branch_code(self, outgoings: List[SequenceFlow]) -> str:
+        branches = []
+        default_branch = None
+        for outgoing in outgoings:
+            todo = self._generate_change_state_code(outgoing.target)
+            if outgoing.id not in self._judge_parameters:
+                if default_branch is None:
+                    default_branch = todo
+                continue
+
+            keyword = "if" if not branches else "} else if"
+            branches.append(
+                f"{keyword} {self._generate_fullfill_condition_code(outgoing)} {{\n\t{todo}"
+            )
+
+        if default_branch is not None:
+            keyword = "} else" if branches else "if true"
+            branches.append(f"{keyword} {{\n\t{default_branch}")
+
+        return "\n".join(branches) + ("\n}" if branches else "")
 
     def _generate_chaincode_for_exclusive_gateway(
         self,
@@ -850,22 +853,7 @@ class GoChaincodeTranslator:
                 gateway=exclusive_gateway.id,
                 change_next_state_code="\n".join(
                     [snippet.ReadGlobalMemory_code()]
-                    + list(
-                        set(
-                            [
-                                snippet.ReadState_code(public_the_name(judge_parameters[outgoing.id]["name"]))
-                                for outgoing in exclusive_gateway.outgoings
-                                if outgoing.id in judge_parameters
-                            ]
-                        )
-                    )
-                    + [
-                        snippet.ConditionToDo_code(
-                            self._generate_fullfill_condition_code(outgoing),
-                            self._generate_change_state_code(outgoing.target),
-                        )
-                        for outgoing in exclusive_gateway.outgoings
-                    ]
+                    + [self._generate_exclusive_gateway_branch_code(exclusive_gateway.outgoings)]
                 ),
                 pre_activate_next_hook="\n\t".join(pre_activate_next_hook),
                 after_all_hook="\n\t".join(when_triggered_code),
@@ -1265,6 +1253,8 @@ class GoChaincodeTranslator:
 
         for element in self._choreography.nodes:
             if element.type == NodeType.CHOREOGRAPHY_TASK:
+                if self._is_asset_choreography_task(element):
+                    continue
                 chaincode_list.extend(self._generate_chaincode_for_choreography_task(element))
             if element.type == NodeType.EXCLUSIVE_GATEWAY:
                 chaincode_list.extend(self._generate_chaincode_for_exclusive_gateway(element))
@@ -1490,7 +1480,11 @@ class GoChaincodeTranslator:
             )
         return items
     def _generate_ffi_events(self) -> list:
-        return [{"name": "DMNContentRequired"}, {"name": "InstanceCreated"}]
+        return [
+            {"name": "DMNContentRequired"},
+            {"name": "InstanceCreated"},
+            {"name": "AssetUploadRequired"},
+        ]
 
     def generate_ffi(self, is_output: bool = False, output_path: str = "resource/ffi.json") -> str:
         ffi_items = []
@@ -1649,6 +1643,8 @@ class GoChaincodeTranslator:
         for element in self._choreography.nodes:
             match element.type:
                 case NodeType.CHOREOGRAPHY_TASK:
+                    if self._is_asset_choreography_task(element):
+                        continue
                     ffi_items.extend(self.generate_ffi_items_for_choreography_task(element))
                 case NodeType.BUSINESS_RULE_TASK:
                     ffi_items.extend(self._generate_ffi_items_for_business_rule_task(element))
@@ -1690,12 +1686,14 @@ class GoChaincodeTranslator:
         }
 
     def get_messages(self):
+        asset_message_ids = self._asset_message_ids()
         return {
             message.id: {
                 "name": message.name,
                 "documentation": message.documentation,
             }
             for message in self._choreography.query_element_with_type(NodeType.MESSAGE)
+            if message.id not in asset_message_ids
         }
 
     def get_businessrules(self):
