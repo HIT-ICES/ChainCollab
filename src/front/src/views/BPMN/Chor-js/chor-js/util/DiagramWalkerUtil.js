@@ -1,6 +1,7 @@
 import { is } from 'bpmn-js/lib/util/ModelUtil';
 import { flatten } from 'min-dash';
 import { isLabel } from 'bpmn-js/lib/util/LabelUtil';
+import { isContractParticipant } from '../../utils/assetExtension';
 
 /**
  * Get connected elements
@@ -50,7 +51,9 @@ export function getParticipants(shape) {
     return [shape.businessObject];
   }
   if (is(shape, 'bpmn:ChoreographyActivity')) {
-    return shape.bandShapes.map(bandShape => bandShape.businessObject);
+    return shape.bandShapes
+      .map(bandShape => bandShape.businessObject)
+      .filter(participant => !isContractParticipant(participant));
   }
   return [];
 }

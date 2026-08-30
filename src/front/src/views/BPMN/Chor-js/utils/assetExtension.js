@@ -1,10 +1,17 @@
 export const ASSET_TYPE = 'abc:Asset';
 export const ASSET_OPERATION_TYPE = 'abc:AssetOperation';
+export const CONTRACT_PARTICIPANT_ID = 'Participant_Contract';
+export const CONTRACT_PARTICIPANT_NAME = 'Contract';
 
 const REF_SEPARATOR = ' ';
 
 export function isAssetElement(element) {
   return element?.type === ASSET_TYPE || element?.businessObject?.$type === ASSET_TYPE;
+}
+
+export function isContractParticipant(participant) {
+  const bo = participant?.businessObject || participant || {};
+  return bo.id === CONTRACT_PARTICIPANT_ID || participant === CONTRACT_PARTICIPANT_ID;
 }
 
 export function isChoreographyTask(element) {
@@ -181,6 +188,7 @@ export function getParticipantOptions(elementRegistry) {
   const toPureParticipantId = id => (id || '').split('_ChoreographyTask_')[0];
   const rawOptions = elementRegistry
     .filter(el => el.businessObject?.$type === 'bpmn:Participant')
+    .filter(el => !isContractParticipant(el.businessObject))
     .map(el => {
       const pureId = toPureParticipantId(el.id);
       return {
@@ -195,8 +203,10 @@ export function getParticipantOptions(elementRegistry) {
 export function getReceivingParticipantIds(taskElement) {
   const bo = taskElement?.businessObject;
   const caller = bo?.initiatingParticipantRef?.id || bo?.initiatingParticipantRef || '';
-  return (bo?.participantRef || [])
+  const receivingIds = (bo?.participantRef || [])
+    .filter(participant => !isContractParticipant(participant))
     .map(participant => participant.id || participant)
     .filter(id => id && id !== caller)
     .map(id => id.split('_ChoreographyTask_')[0]);
+  return Array.from(new Set(receivingIds));
 }

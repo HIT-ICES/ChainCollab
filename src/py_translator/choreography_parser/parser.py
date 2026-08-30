@@ -225,8 +225,11 @@ class Choreography:
         if split_tag in [member.value for member in TerminalType.__members__.values()]:
             return
         if split_tag in [member.value for member in NodeType.__members__.values()]:
-            self.nodes.append(self._parse_node(element))
-            self._id2nodes[self.nodes[-1].id] = self.nodes[-1]
+            node = self._parse_node(element)
+            if node is None:
+                return
+            self.nodes.append(node)
+            self._id2nodes[node.id] = node
             return
         if split_tag in [member.value for member in EdgeType.__members__.values()]:
             self.edges.append(self._parse_edge(element))

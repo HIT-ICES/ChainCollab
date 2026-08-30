@@ -2,6 +2,7 @@ import { is } from 'bpmn-js/lib/util/ModelUtil';
 import {
   getAssetData,
   getAssetOperationData,
+  getReceivingParticipantIds,
   isChoreographyTask,
 } from '../../../utils/assetExtension';
 
@@ -55,18 +56,39 @@ export default function assetTaskOperationConstraint(shape, reporter) {
       return;
     }
 
-    if (['grant usage rights', 'revoke usage rights'].includes(operation) && taskConfig.recipientRefs.length === 0) {
+    const receivingParticipantIds = getReceivingParticipantIds(shape);
+    const multiCalleeOperations = ['grant usage rights', 'revoke usage rights'];
+    const singleCalleeOperations = ['Transfer', 'transfer'];
+    const calleeFreeOperations = ['mint', 'burn', 'query', 'branch', 'merge'];
+
+    if (multiCalleeOperations.includes(operation) && receivingParticipantIds.length === 0) {
       reporter.error(
         shape,
-        `<b>${operation}</b> requires at least one recipient.`
+        `<b>${operation}</b> requires at least one non-initiating participant.`
       );
       return;
     }
 
-    if (['mint', 'burn', 'query', 'branch', 'merge', 'Transfer', 'transfer'].includes(operation) && taskConfig.recipientRefs.length > 0) {
+    if (singleCalleeOperations.includes(operation) && receivingParticipantIds.length !== 1) {
       reporter.error(
         shape,
-        `<b>${operation}</b> must not use recipientRefs. Recipients are derived by parser or unused for this operation.`
+        `<b>${operation}</b> requires exactly one non-initiating participant.`
+      );
+      return;
+    }
+
+    if (calleeFreeOperations.includes(operation) && receivingParticipantIds.length > 0) {
+      reporter.error(
+        shape,
+        `<b>${operation}</b> must not have non-initiating business participants. Keep only the Contract placeholder.`
+      );
+      return;
+    }
+
+    if (!['grant usage rights', 'revoke usage rights'].includes(operation) && taskConfig.recipientRefs.length > 0) {
+      reporter.error(
+        shape,
+        `<b>${operation}</b> must not use recipientRefs. Recipients are derived from non-initiating participant bands.`
       );
       return;
     }

@@ -1,4 +1,5 @@
 import { is } from 'bpmn-js/lib/util/ModelUtil';
+import { isContractParticipant } from '../../../utils/assetExtension';
 
 /**
  * Get connected elements
@@ -50,11 +51,13 @@ export function getConnectedElements(shape, direction, hasRequiredType) {
 
 export function getParticipants(shape) {
   if (is(shape, 'bpmn:Participant')) {
-    return [shape.businessObject];
+    return isContractParticipant(shape.businessObject) ? [] : [shape.businessObject];
   }
 
   if (is(shape, 'bpmn:ChoreographyActivity')) {
-    return shape.bandShapes.map(bandShape => bandShape.businessObject);
+    return shape.bandShapes
+      .map(bandShape => bandShape.businessObject)
+      .filter(participant => !isContractParticipant(participant));
   }
 
   return [];

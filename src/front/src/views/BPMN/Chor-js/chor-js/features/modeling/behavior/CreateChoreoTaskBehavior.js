@@ -3,6 +3,7 @@ import CommandInterceptor from 'diagram-js/lib/command/CommandInterceptor';
 import { is } from 'bpmn-js/lib/util/ModelUtil';
 import { flatten } from 'min-dash';
 import { getConnectedElements, isChoreoActivity, isInitiating } from '../../../util/DiagramWalkerUtil';
+import { CONTRACT_PARTICIPANT_ID, CONTRACT_PARTICIPANT_NAME, getAssetOperation, isContractParticipant } from '../../../../utils/assetExtension';
 
 /**
  *
@@ -12,7 +13,7 @@ import { getConnectedElements, isChoreoActivity, isInitiating } from '../../../u
  */
 function chooseParticipants(hints, choreo) {
   // In the default case no source shape was given, e.g. because the the activity was dragged from the side pallet.
-  const allParticipants = choreo.businessObject.get('participants');
+  const allParticipants = getBusinessParticipants(choreo);
   if (allParticipants.length < 2) {
     return {};
   }
@@ -25,12 +26,16 @@ function chooseParticipants(hints, choreo) {
     const precedingActivities = getConnectedElements(hints.sourceShape, 'incoming', isChoreoActivity);
     if (isChoreoActivity(source) || precedingActivities.length === 1) {
       // We reverse the participants roles compared to the previous activity.
-      const participants = isChoreoActivity(source) ? source.bandShapes : precedingActivities[0].bandShapes;
-      recommended.receiver = participants.find(p => isInitiating(p)).businessObject;
-      recommended.initiator = participants.find(p => !isInitiating(p)).businessObject;
+      const participants = (isChoreoActivity(source) ? source.bandShapes : precedingActivities[0].bandShapes)
+        .filter(p => !isContractParticipant(p.businessObject));
+      const initiating = participants.find(p => isInitiating(p));
+      const nonInitiating = participants.find(p => !isInitiating(p));
+      recommended.receiver = initiating ? initiating.businessObject : recommended.receiver;
+      recommended.initiator = nonInitiating ? nonInitiating.businessObject : recommended.initiator;
     } else if (precedingActivities.length > 1) {
       // If there are more than two preceding activities, e.g., due to a join we select the most used participants.
-      const participants = flatten(precedingActivities.map(p => p.bandShapes.map(bs => bs.businessObject)));
+      const participants = flatten(precedingActivities.map(p => p.bandShapes.map(bs => bs.businessObject)))
+        .filter(participant => !isContractParticipant(participant));
       const count = {};
       participants.forEach(bo => {
         count[bo.id] = (count[bo.id] || 0) + 1;
@@ -42,6 +47,30 @@ function chooseParticipants(hints, choreo) {
     }
   }
   return recommended;
+}
+
+function getBusinessParticipants(choreo) {
+  return (choreo.businessObject.get('participants') || [])
+    .filter(participant => !isContractParticipant(participant));
+}
+
+function getOrCreateContractParticipant(choreo, bpmnFactory) {
+  let participants = choreo.businessObject.get('participants') || [];
+  let contractParticipant = participants.find(participant =>
+    participant.id === CONTRACT_PARTICIPANT_ID
+  );
+
+  if (!contractParticipant) {
+    contractParticipant = bpmnFactory.create('bpmn:Participant', {
+      id: CONTRACT_PARTICIPANT_ID,
+      name: CONTRACT_PARTICIPANT_NAME
+    });
+    contractParticipant.$parent = choreo.businessObject;
+    participants.push(contractParticipant);
+    choreo.businessObject.participants = participants;
+  }
+
+  return contractParticipant;
 }
 
 /**
@@ -89,9 +118,13 @@ export default function CreateChoreoTaskBehavior(injector, bpmnFactory, canvas, 
       } else {
         const choreo = canvas.getRootElement();
         const recommended = chooseParticipants(context.hints, choreo);
-        participants[0] = recommended.initiator;
-        participants[1] = recommended.receiver;
-        businessObject.initiatingParticipantRef = recommended.initiator;
+        const isAssetTask = getAssetOperation(shape);
+        const initiator = recommended.initiator || getBusinessParticipants(choreo)[0];
+        participants[0] = initiator;
+        participants[1] = isAssetTask
+          ? getOrCreateContractParticipant(choreo, bpmnFactory)
+          : recommended.receiver;
+        businessObject.initiatingParticipantRef = initiator;
         if (!businessObject.participantRef) {
           businessObject.participantRef = [];
         }

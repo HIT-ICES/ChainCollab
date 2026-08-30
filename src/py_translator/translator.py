@@ -17,6 +17,7 @@ from choreography_parser.elements import (
     Task,
 )
 from choreography_parser.parser import Choreography
+from choreography_parser.asset_extension import is_contract_participant
 from chaincode_snippet import snippet
 import json
 import xml.etree.ElementTree as ET
@@ -251,6 +252,8 @@ class GoChaincodeTranslator:
         participants = self._choreography.query_element_with_type(NodeType.PARTICIPANT)
         instance_initparameters["Participant"] = {}
         for participant in participants:
+            if is_contract_participant(participant.id, participant.name):
+                continue
             instance_initparameters["Participant"][participant.id] = {
                 "is_multi": participant.is_multi,
                 "multi_minimum": participant.multi_minimum,
@@ -539,7 +542,11 @@ class GoChaincodeTranslator:
             + choreography.query_element_with_type(NodeType.EVENT_BASED_GATEWAY)
         )
 
-        participants_exist = [element.id for element in choreography.query_element_with_type(NodeType.PARTICIPANT)]
+        participants_exist = [
+            element.id
+            for element in choreography.query_element_with_type(NodeType.PARTICIPANT)
+            if not is_contract_participant(element.id, element.name)
+        ]
 
         participant_to_be_added = [
             {
@@ -1683,6 +1690,7 @@ class GoChaincodeTranslator:
         return {
             participant.id: participant.name
             for participant in self._choreography.query_element_with_type(NodeType.PARTICIPANT)
+            if not is_contract_participant(participant.id, participant.name)
         }
 
     def get_messages(self):

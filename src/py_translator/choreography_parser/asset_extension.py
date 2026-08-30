@@ -6,10 +6,16 @@ from .elements import Task
 
 BPMN_NS = "http://www.omg.org/spec/BPMN/20100524/MODEL"
 ABC_NS = "http://chaincollab.assetblockcollab/schema/abc"
+CONTRACT_PARTICIPANT_ID = "Participant_Contract"
+CONTRACT_PARTICIPANT_NAME = "Contract"
 
 
 def _split_refs(value):
     return [item for item in (value or "").split() if item]
+
+
+def is_contract_participant(participant_id="", participant_name=""):
+    return participant_id == CONTRACT_PARTICIPANT_ID
 
 
 def _bool_attr(value):
@@ -201,18 +207,55 @@ def derive_caller_and_callee(choreo_task_element, asset_operation):
     if operation in ["mint", "burn", "query", "branch", "merge"]:
         return caller, []
 
-    if operation in ["grant usage rights", "revoke usage rights"]:
-        return caller, asset_operation.get("recipientRefs", [])
-
-    if operation in ["Transfer", "transfer"]:
-        participants = [
-            participant_ref.text
-            for participant_ref in choreo_task_element.findall(f"./{{{BPMN_NS}}}participantRef")
-            if participant_ref.text
-        ]
-        return caller, [participant for participant in participants if participant != caller]
+    if operation in ["grant usage rights", "revoke usage rights", "Transfer", "transfer"]:
+        participants = get_business_callee_refs(choreo_task_element, caller)
+        if participants:
+            return caller, participants
+        return caller, normalize_callee_refs(asset_operation.get("recipientRefs", []), caller)
 
     return caller, []
+
+
+def normalize_callee_refs(refs, caller=""):
+    normalized = []
+    seen = set()
+    for ref in refs or []:
+        if not ref or ref == caller or is_contract_participant(ref) or ref in seen:
+            continue
+        normalized.append(ref)
+        seen.add(ref)
+    return normalized
+
+
+def get_business_callee_refs(choreo_task_element, caller):
+    return normalize_callee_refs([
+        participant_ref.text
+        for participant_ref in choreo_task_element.findall(f"./{{{BPMN_NS}}}participantRef")
+        if participant_ref.text
+    ], caller)
+
+
+def validate_asset_operation_participants(choreo_task_element, asset_operation):
+    operation = asset_operation.get("operation", "")
+    _, callees = derive_caller_and_callee(choreo_task_element, asset_operation)
+
+    if operation in ["grant usage rights", "revoke usage rights"] and not callees:
+        raise ValueError(
+            f"AssetTask {choreo_task_element.attrib.get('id', '')} with operation {operation} "
+            "requires at least one non-initiating participant."
+        )
+
+    if operation in ["Transfer", "transfer"] and len(callees) != 1:
+        raise ValueError(
+            f"AssetTask {choreo_task_element.attrib.get('id', '')} with operation {operation} "
+            "requires exactly one non-initiating participant."
+        )
+
+    if operation in ["mint", "burn", "query", "branch", "merge"] and callees:
+        raise ValueError(
+            f"AssetTask {choreo_task_element.attrib.get('id', '')} with operation {operation} "
+            "must not have non-initiating business participants."
+        )
 
 
 def build_legacy_asset_doc(choreo_task_element, asset_operation, assets_by_id):
@@ -277,6 +320,7 @@ def create_asset_task_projections(graph, root):
             asset_operation,
             asset_refs_by_task.get(choreo_task_element.attrib["id"]),
         )
+        validate_asset_operation_participants(choreo_task_element, asset_operation)
 
         legacy_doc = build_legacy_asset_doc(choreo_task_element, asset_operation, assets_by_id)
         if legacy_doc is None:

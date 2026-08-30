@@ -33,6 +33,8 @@ const splitXmlRefs = (value?: string | null): string[] =>
     .map((ref) => ref.trim())
     .filter(Boolean);
 
+const CONTRACT_PARTICIPANT_ID = "Participant_Contract";
+
 const parseXmlBoolean = (value?: string | null) =>
   value === "true" || value === "1";
 
@@ -101,25 +103,46 @@ const readAssetOperation = (taskElement: Element) => {
 };
 
 const getTaskParticipantRefs = (taskElement: Element) =>
-  Array.from(taskElement.children)
-    .filter((child) => getXmlLocalName(child) === "participantref")
-    .map((child) => child.textContent?.trim() || "")
-    .filter(Boolean);
+  Array.from(
+    new Set(
+      Array.from(taskElement.children)
+        .filter((child) => getXmlLocalName(child) === "participantref")
+        .map((child) => child.textContent?.trim() || "")
+        .filter((participantRef) => participantRef !== CONTRACT_PARTICIPANT_ID)
+        .filter(Boolean),
+    ),
+  );
+
+const normalizeCalleeRefs = (refs: string[], caller = "") =>
+  Array.from(
+    new Set(
+      refs
+        .map((ref) => ref.trim())
+        .filter(Boolean)
+        .filter((ref) => ref !== CONTRACT_PARTICIPANT_ID && ref !== caller),
+    ),
+  );
 
 const deriveCalleeRefs = (
   taskElement: Element,
   operation: string,
   recipientRefs: string[],
 ) => {
-  if (["grant usage rights", "revoke usage rights"].includes(operation)) {
-    return recipientRefs;
-  }
-
-  if (operation === "Transfer" || operation === "transfer") {
+  if (
+    [
+      "grant usage rights",
+      "revoke usage rights",
+      "Transfer",
+      "transfer",
+    ].includes(operation)
+  ) {
     const caller = taskElement.getAttribute("initiatingParticipantRef") || "";
-    return getTaskParticipantRefs(taskElement).filter(
+    const callees = getTaskParticipantRefs(taskElement).filter(
       (participantRef) => participantRef !== caller,
     );
+    return callees.length > 0
+      ? normalizeCalleeRefs(callees, caller)
+      : normalizeCalleeRefs(recipientRefs, caller);
   }
 
   return [];

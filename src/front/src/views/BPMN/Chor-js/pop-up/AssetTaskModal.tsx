@@ -37,7 +37,6 @@ export default function AssetTaskModal({
   const [elementName, setElementName] = React.useState('');
   const [operation, setOperation] = React.useState('');
   const [tokenNumber, setTokenNumber] = React.useState('');
-  const [recipientRefs, setRecipientRefs] = React.useState<string[]>([]);
   const [outputList, setOutputList] = React.useState<OutputRow[]>([]);
   const [participantOptions, setParticipantOptions] = React.useState<{ value: string; label: string }[]>([]);
   const [participantOptionsKey, setParticipantOptionsKey] = React.useState(0);
@@ -65,7 +64,6 @@ export default function AssetTaskModal({
     setElementName(shape.businessObject.name || '');
     setOperation(data.operation || '');
     setTokenNumber(data.tokenNumber || '');
-    setRecipientRefs(data.recipientRefs || []);
     setOutputList(
       Object.keys(data.outputs || {}).map((key, index) => ({
         key: index,
@@ -83,7 +81,6 @@ export default function AssetTaskModal({
     setElementName('');
     setOperation('');
     setTokenNumber('');
-    setRecipientRefs([]);
     setOutputList([]);
     loadDataFromBPMN();
 
@@ -150,9 +147,7 @@ export default function AssetTaskModal({
       tokenNumber: assetType === 'transferable' && tokenType === 'FT' && operation !== 'query'
         ? tokenNumber
         : '',
-      recipientRefs: ['grant usage rights', 'revoke usage rights'].includes(operation)
-        ? recipientRefs
-        : [],
+      recipientRefs: [],
       outputs,
     });
   };
@@ -181,13 +176,22 @@ export default function AssetTaskModal({
       }
     }
 
-    if (['grant usage rights', 'revoke usage rights'].includes(operation) && recipientRefs.length === 0) {
-      message.warning('Please select at least one recipient');
+    const multiCalleeOperations = ['grant usage rights', 'revoke usage rights'];
+    const singleCalleeOperations = ['Transfer', 'transfer'];
+    const calleeFreeOperations = ['mint', 'burn', 'query', 'branch', 'merge'];
+
+    if (multiCalleeOperations.includes(operation) && receivingParticipants.length === 0) {
+      message.warning(`${operation} requires at least one non-initiating participant on the AssetTask`);
       return;
     }
 
-    if ((operation === 'Transfer' || operation === 'transfer') && receivingParticipants.length === 0) {
-      message.warning('Transfer requires a receiving participant on the ChoreographyTask');
+    if (singleCalleeOperations.includes(operation) && receivingParticipants.length !== 1) {
+      message.warning(`${operation} requires exactly one non-initiating participant on the AssetTask`);
+      return;
+    }
+
+    if (calleeFreeOperations.includes(operation) && receivingParticipants.length > 0) {
+      message.warning(`${operation} must keep only the Contract placeholder as non-initiating participant`);
       return;
     }
 
@@ -307,9 +311,9 @@ export default function AssetTaskModal({
           <Select
             key={participantOptionsKey}
             mode="multiple"
-            value={recipientRefs}
+            value={receivingParticipants}
             options={participantOptions}
-            onChange={setRecipientRefs}
+            disabled
             style={{ width: '100%' }}
           />
         </div>

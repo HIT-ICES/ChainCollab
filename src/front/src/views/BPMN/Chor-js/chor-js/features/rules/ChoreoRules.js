@@ -3,7 +3,7 @@ import BpmnRules from 'bpmn-js/lib/features/rules/BpmnRules';
 import { is } from 'bpmn-js/lib/util/ModelUtil';
 import { getMessageShape } from '../../util/MessageUtil';
 import { isAny } from 'bpmn-js/lib/features/modeling/util/ModelingUtil';
-import { getAssetOperation, getAssetOperationData, isAssetElement, isChoreographyTask } from '../../../utils/assetExtension';
+import { getAssetOperation, getAssetOperationData, isAssetElement, isChoreographyTask, isContractParticipant } from '../../../utils/assetExtension';
 
 /**
  * Specific rules for choreographies. We have to override and replace BpmnRules and can not add
@@ -123,15 +123,18 @@ ChoreoRules.prototype.init = function () {
   this.addRule('band.create', function (context) {
     let activityShape = context.activityShape;
 
-    // bands can only be created on sub- and call choreographies
-    return is(activityShape, 'bpmn:SubChoreography') || is(activityShape, 'bpmn:CallChoreography');
+    // AssetTasks use ChoreographyTask visuals but may need more than two participants.
+    return is(activityShape, 'bpmn:SubChoreography') || is(activityShape, 'bpmn:CallChoreography') || getAssetOperation(activityShape);
   });
   this.addRule('band.delete', function (context) {
     let activityShape = context.activityShape;
+    let bandShape = context.bandShape;
 
-    // bands can only be deleted from sub and call choreographies when there are
-    // at least two left afterwards
-    if (is(activityShape, 'bpmn:SubChoreography') || is(activityShape, 'bpmn:CallChoreography')) {
+    // Participant bands may be deleted only when at least two are left afterwards.
+    if (is(activityShape, 'bpmn:SubChoreography') || is(activityShape, 'bpmn:CallChoreography') || getAssetOperation(activityShape)) {
+      if (getAssetOperation(activityShape) && bandShape && isContractParticipant(bandShape.businessObject)) {
+        return false;
+      }
       return activityShape.bandShapes.length > 2;
     }
     return false;

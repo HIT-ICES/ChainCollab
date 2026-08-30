@@ -57,7 +57,8 @@ ChoreoKeyboardBindings.prototype.registerBindings = function (keyboard, selectio
       let element = getSelectedBand();
       if (element) {
         if (rules.allowed('band.delete', {
-          activityShape: element.activityShape
+          activityShape: element.activityShape,
+          bandShape: element
         })) {
           modeling.deleteParticipantBand(element.activityShape, element.businessObject);
           return true;

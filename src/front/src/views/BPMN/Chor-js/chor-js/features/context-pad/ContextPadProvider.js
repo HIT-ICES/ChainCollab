@@ -2,6 +2,7 @@ import inherits from 'inherits';
 import BaseContextPadProvider from 'bpmn-js/lib/features/context-pad/ContextPadProvider';
 import { is } from 'bpmn-js/lib/util/ModelUtil';
 import { assign, isArray } from 'min-dash';
+import { getAssetOperation } from '../../../utils/assetExtension';
 
 /**
  * Provider responsible for populating the context pad menu of all elements.
@@ -261,7 +262,7 @@ ContextPadProvider.prototype.getContextPadEntries = function (element) {
 
   // --------------------------------------------------------------------------------------------
   // add new participant band
-  if (is(element, 'bpmn:SubChoreography') || is(element, 'bpmn:CallChoreography')) {
+  if (is(element, 'bpmn:SubChoreography') || is(element, 'bpmn:CallChoreography') || getAssetOperation(element)) {
     if (this._rules.allowed('band.create', {
       activityShape: element
     })) {
@@ -291,7 +292,8 @@ ContextPadProvider.prototype.getContextPadEntries = function (element) {
   if (is(element, 'bpmn:Participant')) {
     // delete
     if (this._rules.allowed('band.delete', {
-      activityShape: element.activityShape
+      activityShape: element.activityShape,
+      bandShape: element
     })) {
       assign(actions, {
         'band.delete': {

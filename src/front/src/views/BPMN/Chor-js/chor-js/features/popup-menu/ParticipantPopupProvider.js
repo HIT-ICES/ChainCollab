@@ -2,6 +2,7 @@ import inherits from 'inherits';
 import PopupMenuProvider from 'diagram-js/lib/features/popup-menu/PopupMenuProvider';
 import { hasBandMarker } from '../../util/BandUtil';
 import { is } from 'bpmn-js/lib/util/ModelUtil';
+import { isContractParticipant } from '../../../utils/assetExtension';
 
 /**
  * Popup on participant bands that provides functionality to change the participant
@@ -57,7 +58,7 @@ ParticipantPopupProvider.prototype.getEntries = function (element) {
   }
 
   // one button for each participant that is not already part of the element
-  participants.filter(canSelectParticipant).forEach(participant => {
+  participants.filter(participant => !isContractParticipant(participant)).filter(canSelectParticipant).forEach(participant => {
     entries.push({
       label: participant.name,
       id: participant.id,
