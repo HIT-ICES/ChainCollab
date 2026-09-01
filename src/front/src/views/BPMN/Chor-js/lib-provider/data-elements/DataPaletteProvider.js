@@ -27,8 +27,8 @@ export default class DataPaletteProvider {
 
     return {
       'create.data-object': {
-        group: 'data-object',
-        className: 'bpmn-icon-data-object',
+        group: 'asset',
+        className: 'bpmn-icon-data-object asset-palette-entry asset-palette-object',
         title: translate('Create Asset'),
         action: {
           dragstart: createDataObject,

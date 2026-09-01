@@ -8,6 +8,14 @@ import {
   isIntermediateTimerCatchEvent,
   getTimerDefinitionType
 } from '../util/ValidatorUtil';
+import {
+  getAssetOperationData,
+  isChoreographyTask
+} from '../../../utils/assetExtension';
+
+function isAssetTask(shape) {
+  return isChoreographyTask(shape) && !!getAssetOperationData(shape).operation;
+}
 
 /**
  * Checks the basic sequence flow constraint.
@@ -30,6 +38,10 @@ export default function simpleFlowConstraint(shape, reporter) {
           getTimerDefinitionType(e) === 'timeDate'
         );
       }).filter(isChoreoActivity);
+
+      if (isAssetTask(shape.parent) || predecessors.some(isAssetTask)) {
+        return;
+      }
 
       // For the remaining choreography tasks, check whether they include this participant.
       let simpleConstraint = true;

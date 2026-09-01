@@ -25,9 +25,13 @@ export default class AssetTaskPaletteProvider{
     }
 
     return {
+      'asset-separator': {
+        group: 'asset',
+        separator: true
+      },
       'create.asset-task': {
-        group: 'choreography',
-        className: 'choreo-icon-choreography-task',
+        group: 'asset',
+        className: 'choreo-icon-choreography-task asset-palette-entry asset-palette-task',
         title: 'Create AssetTask',
         action: {
           dragstart: startCreate,
