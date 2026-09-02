@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { Modal, Input, Select, message, Button, Table } from 'antd';
 import {
+  ASSET_OPERATION_OPTIONS,
+  ASSET_OPERATION_OPTIONS_BY_ASSET_TYPE,
   getAssetData,
   getAssetOperationData,
   getParticipantOptions,
@@ -41,14 +43,6 @@ export default function AssetTaskModal({
   const [participantOptions, setParticipantOptions] = React.useState<{ value: string; label: string }[]>([]);
   const [participantOptionsKey, setParticipantOptionsKey] = React.useState(0);
   const [primaryAsset, setPrimaryAsset] = React.useState<any>(null);
-
-  const operationOptions: Record<string, string[]> = {
-    distributive: ['mint', 'burn', 'grant usage rights', 'revoke usage rights', 'transfer', 'query'],
-    transferable: ['mint', 'burn', 'Transfer', 'query'],
-    'value-added': ['branch', 'merge', 'Transfer', 'burn', 'query'],
-  };
-
-  const allOperationOptions = Array.from(new Set(Object.values(operationOptions).flat()));
 
   const refreshDerivedData = React.useCallback(() => {
     setParticipantOptions(getParticipantOptions(elementRegistry));
@@ -92,7 +86,7 @@ export default function AssetTaskModal({
 
   const assetType = primaryAsset?.assetType || '';
   const tokenType = primaryAsset?.tokenType || '';
-  const activeOperationOptions = assetType ? operationOptions[assetType] || [] : allOperationOptions;
+  const activeOperationOptions = assetType ? ASSET_OPERATION_OPTIONS_BY_ASSET_TYPE[assetType] || [] : ASSET_OPERATION_OPTIONS;
   const receivingParticipants = shape ? getReceivingParticipantIds(shape) : [];
 
   const getOutputTypes = () => {
@@ -282,8 +276,7 @@ export default function AssetTaskModal({
         <label style={{ display: 'block', marginBottom: 4 }}>Operation:</label>
         <Select
           value={operation}
-          onChange={value => setOperation(value)}
-          allowClear
+          disabled
           style={{ width: '100%' }}
         >
           {activeOperationOptions.map(item => (

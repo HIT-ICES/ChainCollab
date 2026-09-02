@@ -216,7 +216,12 @@ ul.corner-links {
 }
 
 .djs-palette .entry.asset-palette-entry {
+  color: #5aaee8;
   position: relative;
+}
+
+.djs-palette .entry.asset-palette-entry::before {
+  color: #5aaee8;
 }
 
 .djs-palette .entry.asset-palette-entry::after {
@@ -234,6 +239,277 @@ ul.corner-links {
 
 .djs-palette .group[data-group="asset"] {
   margin-top: 8px;
+}
+
+.asset-type-provider .djs-popup-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  width: 112px;
+}
+
+.asset-type-provider .entry.asset-kind-icon,
+.asset-kind-symbol {
+  position: relative;
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+}
+
+.asset-kind-symbol::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 5px;
+  width: 14px;
+  height: 14px;
+}
+
+.asset-type-provider .entry.asset-kind-icon::before {
+  content: none;
+}
+
+.asset-type-provider .entry.asset-kind-icon::after {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  color: #276f9f;
+  font-family: Arial, sans-serif;
+  font-weight: 700;
+  line-height: 24px;
+  text-align: center;
+}
+
+.asset-category-transferable::after {
+  content: "T";
+  font-size: 12px;
+}
+
+.asset-kind-transferable-nft::before,
+.asset-kind-transferable-ft::before {
+  border: 2px solid #276f9f;
+  transform: rotate(45deg) scale(0.76);
+}
+
+.asset-kind-transferable-nft::after,
+.asset-kind-transferable-ft::after {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  color: #276f9f;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 24px;
+  text-align: center;
+}
+
+.asset-kind-transferable-nft::after {
+  content: "N";
+}
+
+.asset-kind-transferable-ft::after {
+  content: "F";
+}
+
+.asset-type-provider .entry.asset-token-type-icon {
+  display: none;
+  width: 48px;
+}
+
+.asset-type-provider .djs-popup-header:has(.asset-category-transferable:hover) .entry.asset-token-type-icon,
+.asset-type-provider .djs-popup-header:has(.asset-token-type-icon:hover) .entry.asset-token-type-icon,
+.asset-type-provider .entry.asset-category-transferable.active ~ .entry.asset-token-type-icon {
+  display: inline-block;
+}
+
+.asset-type-provider .entry.asset-token-type-icon::after {
+  width: 48px;
+  font-size: 11px;
+}
+
+.asset-type-provider .entry.asset-token-type-nft {
+  margin-left: 6px;
+}
+
+.asset-token-type-nft::after {
+  content: "NFT";
+}
+
+.asset-token-type-ft::after {
+  content: "FT";
+}
+
+.asset-kind-distributive::before {
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 20%, #276f9f 0 2px, transparent 2.5px),
+    radial-gradient(circle at 20% 80%, #276f9f 0 2px, transparent 2.5px),
+    radial-gradient(circle at 80% 80%, #276f9f 0 2px, transparent 2.5px),
+    linear-gradient(135deg, transparent 42%, #276f9f 43% 48%, transparent 49%) 2px 5px / 8px 8px no-repeat,
+    linear-gradient(45deg, transparent 42%, #276f9f 43% 48%, transparent 49%) 8px 5px / 8px 8px no-repeat;
+}
+
+.asset-type-provider .entry.asset-kind-distributive::after,
+.asset-type-provider .entry.asset-category-distributive::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 5px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 20%, #276f9f 0 2px, transparent 2.5px),
+    radial-gradient(circle at 20% 80%, #276f9f 0 2px, transparent 2.5px),
+    radial-gradient(circle at 80% 80%, #276f9f 0 2px, transparent 2.5px),
+    linear-gradient(135deg, transparent 42%, #276f9f 43% 48%, transparent 49%) 2px 5px / 8px 8px no-repeat,
+    linear-gradient(45deg, transparent 42%, #276f9f 43% 48%, transparent 49%) 8px 5px / 8px 8px no-repeat;
+}
+
+.asset-type-provider .entry.asset-category-value-added::after {
+  content: "+";
+  font-size: 17px;
+}
+
+.asset-kind-value-added::before {
+  border: 2px solid #276f9f;
+  transform: rotate(45deg) scale(0.76);
+}
+
+.asset-kind-value-added::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  width: 8px;
+  height: 8px;
+  background:
+    linear-gradient(#276f9f, #276f9f) center / 8px 2px no-repeat,
+    linear-gradient(#276f9f, #276f9f) center / 2px 8px no-repeat;
+}
+
+.asset-kind-selector {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.asset-kind-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 48px;
+  padding: 6px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  background: #fff;
+  color: #333;
+  font-size: 12px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.asset-kind-choice .asset-kind-symbol {
+  flex: 0 0 24px;
+}
+
+.asset-kind-choice > span:last-child {
+  display: block;
+  width: 100%;
+  min-height: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.asset-kind-choice.active {
+  border-color: #5aaee8;
+  background: #eaf6ff;
+}
+
+.asset-kind-choice-readonly {
+  cursor: default;
+}
+
+.asset-kind-choice-readonly:not(.active) {
+  background: #fafafa;
+  color: #666;
+}
+
+.asset-kind-choice-readonly:disabled {
+  opacity: 1;
+}
+
+.asset-operation-provider .djs-popup-header {
+  display: flex;
+  gap: 4px;
+}
+
+.asset-operation-provider .entry.asset-operation-icon {
+  position: relative;
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+}
+
+.asset-operation-provider .entry.asset-operation-icon::before {
+  content: none;
+}
+
+.asset-operation-provider .entry.asset-operation-icon::after {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  color: #276f9f;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 24px;
+  text-align: center;
+}
+
+.asset-operation-mint::after {
+  content: "M";
+}
+
+.asset-operation-burn::after {
+  content: "B";
+}
+
+.asset-operation-grant::after {
+  content: "G";
+}
+
+.asset-operation-revoke::after {
+  content: "R";
+}
+
+.asset-operation-transfer::after {
+  content: "T";
+}
+
+.asset-operation-query::after {
+  content: "Q";
+}
+
+.asset-operation-branch::after {
+  content: "Br";
+  font-size: 8px;
+}
+
+.asset-operation-merge::after {
+  content: "Mg";
+  font-size: 8px;
 }
 
 .validation-annotation {

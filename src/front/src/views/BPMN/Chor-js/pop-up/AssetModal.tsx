@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Modal, Input, Select, message, Checkbox } from 'antd';
-import { getAssetData, getDerivedRefTokenIds, isAssetElement } from '../utils/assetExtension';
+import { ASSET_KIND_OPTIONS, getAssetData, getDerivedRefTokenIds, isAssetElement } from '../utils/assetExtension';
 
 interface AssetModalProps {
   dataElementId: string;
@@ -27,6 +27,13 @@ export default function AssetModal({
   const [tokenURL, setTokenURL] = React.useState('');
   const [tokenHasExistInERC, setTokenHasExistInERC] = React.useState(false);
   const [derivedRefTokenIds, setDerivedRefTokenIds] = React.useState<string[]>([]);
+
+  const selectedAssetKind = React.useMemo(() => {
+    if (assetType === 'transferable') {
+      return tokenType === 'FT' ? 'transferable-ft' : 'transferable-nft';
+    }
+    return assetType || '';
+  }, [assetType, tokenType]);
 
   const loadDataFromBPMN = () => {
     if (!shape) return;
@@ -157,19 +164,25 @@ export default function AssetModal({
         <Input value={elementName} onChange={e => setElementName(e.target.value)} />
       </div>
 
+      <div className="asset-kind-selector">
+        {ASSET_KIND_OPTIONS.map(option => (
+          <button
+            key={option.key}
+            type="button"
+            className={`asset-kind-choice asset-kind-choice-readonly ${selectedAssetKind === option.key ? 'active' : ''}`}
+            disabled
+            title={option.label}
+          >
+            <span>{option.label}</span>
+          </button>
+        ))}
+      </div>
+
       <div style={{ marginBottom: 16 }}>
         <label style={{ display: 'block', marginBottom: 4 }}>Asset Type:</label>
         <Select
           value={assetType}
-          onChange={value => {
-            setAssetType(value);
-            setTokenType('');
-            setTokenName('');
-            setTokenId('');
-            setTokenURL('');
-            setTokenHasExistInERC(false);
-          }}
-          allowClear
+          disabled
           style={{ width: '100%' }}
         >
           <Select.Option value="distributive">Distributive</Select.Option>
@@ -183,12 +196,7 @@ export default function AssetModal({
           <label style={{ display: 'block', marginBottom: 4 }}>Token Type:</label>
           <Select
             value={tokenType}
-            onChange={value => {
-              setTokenType(value);
-              setTokenId('');
-              setTokenHasExistInERC(false);
-            }}
-            allowClear
+            disabled
             style={{ width: '100%' }}
           >
             <Select.Option value="NFT">NFT</Select.Option>

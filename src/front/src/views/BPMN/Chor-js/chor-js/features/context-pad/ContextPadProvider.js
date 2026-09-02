@@ -194,11 +194,12 @@ ContextPadProvider.prototype.getContextPadEntries = function (element) {
   // --------------------------------------------------------------------------------------------
   // Change properties of choreography activities.
   if (is(businessObject, 'bpmn:ChoreographyActivity')) {
+    const isAssetTask = !!getAssetOperation(element);
     assign(actions, {
       'loopPopup': {
         group: 'edit',
         className: 'bpmn-icon-screw-wrench',
-        title: this._translate('Edit properties'),
+        title: this._translate(isAssetTask ? 'Change asset operation' : 'Edit properties'),
         action: {
           click: (event, element) => {
             const position = assign(popupMenuPosition(element), {
@@ -207,7 +208,7 @@ ContextPadProvider.prototype.getContextPadEntries = function (element) {
                 y: event.y
               }
             });
-            self._popupMenu.open(element, 'loop-provider', position);
+            self._popupMenu.open(element, isAssetTask ? 'asset-operation-provider' : 'loop-provider', position);
           }
         }
       }

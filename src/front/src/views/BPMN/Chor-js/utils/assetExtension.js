@@ -5,6 +5,81 @@ export const CONTRACT_PARTICIPANT_NAME = 'Contract';
 
 const REF_SEPARATOR = ' ';
 
+export const ASSET_KIND_OPTIONS = [
+  {
+    key: 'transferable-nft',
+    label: 'Transferable NFT',
+    assetType: 'transferable',
+    tokenType: 'NFT'
+  },
+  {
+    key: 'transferable-ft',
+    label: 'Transferable FT',
+    assetType: 'transferable',
+    tokenType: 'FT'
+  },
+  {
+    key: 'distributive',
+    label: 'Distributive',
+    assetType: 'distributive',
+    tokenType: ''
+  },
+  {
+    key: 'value-added',
+    label: 'Value-added',
+    assetType: 'value-added',
+    tokenType: ''
+  }
+];
+
+export const ASSET_CATEGORY_OPTIONS = [
+  {
+    key: 'transferable',
+    label: 'Transferable',
+    assetType: 'transferable'
+  },
+  {
+    key: 'distributive',
+    label: 'Distributive',
+    assetType: 'distributive'
+  },
+  {
+    key: 'value-added',
+    label: 'Value-added',
+    assetType: 'value-added'
+  }
+];
+
+export const TRANSFERABLE_TOKEN_TYPE_OPTIONS = [
+  {
+    key: 'nft',
+    label: 'NFT',
+    tokenType: 'NFT'
+  },
+  {
+    key: 'ft',
+    label: 'FT',
+    tokenType: 'FT'
+  }
+];
+
+export const ASSET_OPERATION_OPTIONS_BY_ASSET_TYPE = {
+  distributive: ['mint', 'burn', 'grant usage rights', 'revoke usage rights', 'transfer', 'query'],
+  transferable: ['mint', 'burn', 'Transfer', 'query'],
+  'value-added': ['branch', 'merge', 'Transfer', 'burn', 'query']
+};
+
+export const ASSET_OPERATION_OPTIONS = Array.from(new Set(
+  Object.values(ASSET_OPERATION_OPTIONS_BY_ASSET_TYPE).flat()
+));
+
+export function getAssetOperationOptions(assetData) {
+  const assetType = assetData?.assetType || '';
+  return assetType
+    ? ASSET_OPERATION_OPTIONS_BY_ASSET_TYPE[assetType] || []
+    : ASSET_OPERATION_OPTIONS;
+}
+
 export function isAssetElement(element) {
   return element?.type === ASSET_TYPE || element?.businessObject?.$type === ASSET_TYPE;
 }
@@ -139,6 +214,19 @@ export function removeAssetRef(taskElement, moddle, modeling, kind, assetId) {
   updateAssetOperation(taskElement, moddle, modeling, data);
 }
 
+export function applyAssetOperation(taskElement, moddle, modeling, operation, assetData) {
+  const existing = getAssetOperationData(taskElement);
+  updateAssetOperation(taskElement, moddle, modeling, {
+    ...existing,
+    operation,
+    tokenNumber: assetData?.assetType === 'transferable' && assetData?.tokenType === 'FT' && operation !== 'query'
+      ? existing.tokenNumber
+      : '',
+    recipientRefs: [],
+    outputs: operation === 'query' ? existing.outputs : {}
+  });
+}
+
 export function getAssetData(assetElement) {
   const bo = assetElement?.businessObject || {};
   return {
@@ -150,6 +238,54 @@ export function getAssetData(assetElement) {
     tokenURL: bo.tokenURL || '',
     tokenHasExistInERC: Boolean(bo.tokenHasExistInERC)
   };
+}
+
+export function getAssetKind(assetElement) {
+  const { assetType, tokenType } = getAssetData(assetElement);
+  if (assetType === 'transferable') {
+    return tokenType === 'FT' ? 'transferable-ft' : 'transferable-nft';
+  }
+  return assetType || '';
+}
+
+export function applyAssetKind(element, modeling, kind) {
+  const option = ASSET_KIND_OPTIONS.find(item => item.key === kind);
+  if (!option) return;
+
+  modeling.updateProperties(element, {
+    assetType: option.assetType,
+    tokenType: option.assetType === 'transferable' ? option.tokenType : undefined,
+    tokenId: option.key === 'transferable-ft' ? undefined : element.businessObject.tokenId,
+    tokenURL: option.assetType === 'distributive' ? element.businessObject.tokenURL : undefined,
+    tokenHasExistInERC: option.key === 'transferable-ft' ? undefined : element.businessObject.tokenHasExistInERC,
+    documentation: undefined
+  });
+}
+
+export function applyAssetCategory(element, modeling, assetType) {
+  const nextTokenType = assetType === 'transferable'
+    ? element.businessObject.tokenType || 'NFT'
+    : undefined;
+
+  modeling.updateProperties(element, {
+    assetType,
+    tokenType: nextTokenType,
+    tokenId: assetType === 'transferable' && nextTokenType === 'FT' ? undefined : element.businessObject.tokenId,
+    tokenURL: assetType === 'distributive' ? element.businessObject.tokenURL : undefined,
+    tokenHasExistInERC: assetType === 'transferable' && nextTokenType === 'FT' ? undefined : element.businessObject.tokenHasExistInERC,
+    documentation: undefined
+  });
+}
+
+export function applyTransferableTokenType(element, modeling, tokenType) {
+  modeling.updateProperties(element, {
+    assetType: 'transferable',
+    tokenType,
+    tokenId: tokenType === 'FT' ? undefined : element.businessObject.tokenId,
+    tokenURL: undefined,
+    tokenHasExistInERC: tokenType === 'FT' ? undefined : element.businessObject.tokenHasExistInERC,
+    documentation: undefined
+  });
 }
 
 export function getDerivedRefTokenIds(assetElement, elementRegistry) {

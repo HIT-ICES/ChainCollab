@@ -7,6 +7,7 @@ import { is } from 'bpmn-js/lib/util/ModelUtil';
 import { append as svgAppend, attr as svgAttr, create as svgCreate, classes as svgClasses } from 'tiny-svg';
 import { heightOfBottomBands, heightOfTopBands, hasBandMarker } from '../util/BandUtil';
 import { MESSAGE_DISTANCE } from '../util/MessageUtil';
+import { getAssetKind, getAssetOperation, getAssetOperationData } from '../../utils/assetExtension';
 
 // Renderer configuration parameters
 const CHOREO_TASK_ROUNDING = 10;
@@ -14,6 +15,21 @@ const MARKER_HEIGHT = 15;
 const DEFAULT_FILL_OPACITY = 0.95;
 const NON_INITIATING_OPACITY = 0.1725;
 const DEFAULT_NON_INITIATING_FILL = 'rgb(211,211,211)';
+const ASSET_FILL = '#eaf6ff';
+const ASSET_STROKE = '#5aaee8';
+const ASSET_BADGE_SIZE = 16;
+const ASSET_BADGE_URL = new URL('../../../../../assets/token.svg', import.meta.url).href;
+const ASSET_OPERATION_MARKERS = {
+  mint: 'M',
+  burn: 'B',
+  'grant usage rights': 'G',
+  'revoke usage rights': 'R',
+  transfer: 'T',
+  Transfer: 'T',
+  query: 'Q',
+  branch: 'Br',
+  merge: 'Mg'
+};
 
 /**
  * A renderer for BPMN 2.0 choreography diagrams.
@@ -31,6 +47,116 @@ export default function ChoreoRenderer(config, eventBus, textRenderer, pathMap) 
   }
   function getStrokeColor(di, override) {
     return di.get('bioc:stroke') || config && config.defaultStrokeColor || override || 'black';
+  }
+  function isAssetTask(element) {
+    return !!getAssetOperation(element);
+  }
+  function drawAssetBadge(parentGfx, x, y, size = ASSET_BADGE_SIZE) {
+    const badge = svgCreate('image');
+    svgAttr(badge, {
+      x,
+      y,
+      width: size,
+      height: size,
+      href: ASSET_BADGE_URL,
+      opacity: 0.9,
+      'pointer-events': 'none'
+    });
+    svgAppend(parentGfx, badge);
+    return badge;
+  }
+  function drawAssetKindIcon(parentGfx, element) {
+    const kind = getAssetKind(element);
+    if (!kind) return;
+
+    const icon = svgCreate('g');
+    svgAttr(icon, {
+      transform: 'translate(' + (element.width / 2 - 10) + ', ' + (element.height / 2 - 10) + ')',
+      'pointer-events': 'none'
+    });
+    svgAppend(parentGfx, icon);
+
+    const stroke = '#276f9f';
+    const fill = 'none';
+
+    if (kind === 'transferable-nft' || kind === 'transferable-ft') {
+      const text = svgCreate('text');
+      svgAttr(text, {
+        x: 10,
+        y: 13,
+        fill: stroke,
+        fontSize: 8,
+        fontFamily: 'Arial, sans-serif',
+        fontWeight: 700,
+        textAnchor: 'middle'
+      });
+      text.textContent = kind === 'transferable-nft' ? 'NFT' : 'FT';
+      svgAppend(icon, text);
+    } else if (kind === 'distributive') {
+      [[10, 10], [4, 16], [16, 16]].forEach(([cx, cy]) => {
+        const circle = svgCreate('circle');
+        svgAttr(circle, {
+          cx,
+          cy,
+          r: 2.2,
+          fill: stroke
+        });
+        svgAppend(icon, circle);
+      });
+      [[10, 10, 4, 16], [10, 10, 16, 16]].forEach(([x1, y1, x2, y2]) => {
+        const line = svgCreate('path');
+        svgAttr(line, {
+          d: componentsToPath([['M', x1, y1], ['l', x2 - x1, y2 - y1]]),
+          stroke,
+          strokeWidth: 1.4
+        });
+        svgAppend(icon, line);
+      });
+    } else if (kind === 'value-added') {
+      const diamond = svgCreate('path');
+      svgAttr(diamond, {
+        d: componentsToPath([['M', 10, 2], ['l', 8, 8], ['l', -8, 8], ['l', -8, -8], ['z']]),
+        fill,
+        stroke,
+        strokeWidth: 1.6
+      });
+      svgAppend(icon, diamond);
+      const plus = svgCreate('path');
+      svgAttr(plus, {
+        d: componentsToPath([['M', 10, 6], ['l', 0, 8], ['M', 6, 10], ['l', 8, 0]]),
+        stroke,
+        strokeWidth: 1.8,
+        strokeLinecap: 'round'
+      });
+      svgAppend(icon, plus);
+    }
+  }
+  function drawAssetOperationIcon(parentGfx, element, centerY) {
+    const operation = getAssetOperationData(element).operation;
+    const marker = ASSET_OPERATION_MARKERS[operation];
+    if (!marker) return;
+
+    const icon = svgCreate('g');
+    svgAttr(icon, {
+      transform: 'translate(' + (element.width / 2) + ', ' + centerY + ')',
+      'pointer-events': 'none'
+    });
+    svgAppend(parentGfx, icon);
+
+    const stroke = '#276f9f';
+    const text = svgCreate('text');
+    svgAttr(text, {
+      x: 0,
+      y: 4,
+      fill: stroke,
+      fontSize: marker.length > 1 ? 8 : 11,
+      fontFamily: 'Arial, sans-serif',
+      fontWeight: 700,
+      textAnchor: 'middle',
+      dominantBaseline: 'middle'
+    });
+    text.textContent = marker;
+    svgAppend(icon, text);
   }
 
   // Label convenience functions
@@ -113,12 +239,14 @@ export default function ChoreoRenderer(config, eventBus, textRenderer, pathMap) 
         ['l', 0, 10],
         ['l', 10, 0]
       ]),
-      fill: '#fff',
+      fill: ASSET_FILL,
       fillOpacity: DEFAULT_FILL_OPACITY,
-      stroke: '#111',
+      stroke: ASSET_STROKE,
       strokeWidth: 2
     });
     svgAppend(p, body);
+    drawAssetBadge(p, -8, -8);
+    drawAssetKindIcon(p, element);
 
     if (element.businessObject.name) {
       const label = getBoxedLabel(element.businessObject.name, {
@@ -144,6 +272,7 @@ export default function ChoreoRenderer(config, eventBus, textRenderer, pathMap) 
     const bandStroke = element.diBand.get('bioc:stroke');
     const activityFill = element.parent.businessObject.di.get('bioc:fill');
     const activityStroke = element.parent.businessObject.di.get('bioc:stroke');
+    const parentIsAssetTask = isAssetTask(element.parent);
     const needsSolidFill = bandFill || activityFill;
     const needsAdditionalOutline = bandStroke || activityStroke;
 
@@ -167,7 +296,7 @@ export default function ChoreoRenderer(config, eventBus, textRenderer, pathMap) 
       svgAttr(bandOutline, {
         d: getParticipantBandOutline(0, 0, element.width, element.height, bandKind),
         fill: 'none',
-        stroke: getStrokeColor(element.diBand, getStrokeColor(element.parent.businessObject.di)),
+        stroke: getStrokeColor(element.diBand, getStrokeColor(element.parent.businessObject.di, parentIsAssetTask ? ASSET_STROKE : undefined)),
         strokeWidth: 2
       });
       svgAppend(p, bandOutline);
@@ -177,7 +306,7 @@ export default function ChoreoRenderer(config, eventBus, textRenderer, pathMap) 
         let line = svgCreate('path');
         svgAttr(line, {
           d: componentsToPath([['M', 0, element.height], ['l', element.width, 0]]),
-          stroke: getStrokeColor(element.parent.businessObject.di),
+          stroke: getStrokeColor(element.parent.businessObject.di, parentIsAssetTask ? ASSET_STROKE : undefined),
           strokeWidth: 2
         });
         svgAppend(p, line);
@@ -186,7 +315,7 @@ export default function ChoreoRenderer(config, eventBus, textRenderer, pathMap) 
         let line = svgCreate('path');
         svgAttr(line, {
           d: componentsToPath([['M', 0, 0], ['l', element.width, 0]]),
-          stroke: getStrokeColor(element.parent.businessObject.di),
+          stroke: getStrokeColor(element.parent.businessObject.di, parentIsAssetTask ? ASSET_STROKE : undefined),
           strokeWidth: 2
         });
         svgAppend(p, line);
@@ -206,13 +335,14 @@ export default function ChoreoRenderer(config, eventBus, textRenderer, pathMap) 
 
   // Choreography activity drawing function
   this.drawChoreographyActivity = function (p, element) {
+    const assetTask = isAssetTask(element);
     // Draw the outer stroke and background
     let shape = svgCreate('path');
     svgAttr(shape, {
       d: getTaskOutline(0, 0, element.width, element.height, is(element, 'bpmn:CallChoreography') ? 2 : 0),
-      fill: getFillColor(element.businessObject.di),
+      fill: getFillColor(element.businessObject.di, assetTask ? ASSET_FILL : undefined),
       fillOpacity: DEFAULT_FILL_OPACITY,
-      stroke: getStrokeColor(element.businessObject.di),
+      stroke: getStrokeColor(element.businessObject.di, assetTask ? ASSET_STROKE : undefined),
       strokeWidth: is(element, 'bpmn:CallChoreography') ? 6 : 2
     });
     svgAppend(p, shape);
@@ -227,13 +357,18 @@ export default function ChoreoRenderer(config, eventBus, textRenderer, pathMap) 
     if ((is(element, 'bpmn:SubChoreography') || is(element, 'bpmn:CallChoreography')) && !element.collapsed) {
       align = 'left';
     }
+    const labelBoxHeight = assetTask ? Math.max(12, bottom - top - 8) : bottom - top;
     let label = getBoxedLabel(element.businessObject.name, {
       x: 0,
       y: top,
       width: element.width,
-      height: bottom - top
+      height: labelBoxHeight
     }, align);
     svgAppend(p, label);
+    if (assetTask) {
+      drawAssetOperationIcon(p, element, top + labelBoxHeight / 2 + 12);
+      drawAssetBadge(p, -8, -8);
+    }
     return p;
   };
 
