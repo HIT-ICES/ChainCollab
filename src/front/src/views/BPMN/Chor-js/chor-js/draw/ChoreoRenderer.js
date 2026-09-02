@@ -20,15 +20,15 @@ const ASSET_STROKE = '#5aaee8';
 const ASSET_BADGE_SIZE = 16;
 const ASSET_BADGE_URL = new URL('../../../../../assets/token.svg', import.meta.url).href;
 const ASSET_OPERATION_MARKERS = {
-  mint: 'M',
-  burn: 'B',
-  'grant usage rights': 'G',
-  'revoke usage rights': 'R',
-  transfer: 'T',
-  Transfer: 'T',
-  query: 'Q',
-  branch: 'Br',
-  merge: 'Mg'
+  mint: 'MNT',
+  burn: 'BRN',
+  'grant usage rights': 'GR',
+  'revoke usage rights': 'RVK',
+  transfer: 'XFR',
+  Transfer: 'XFR',
+  query: 'QRY',
+  branch: 'BR',
+  merge: 'MRG'
 };
 
 /**
@@ -149,7 +149,7 @@ export default function ChoreoRenderer(config, eventBus, textRenderer, pathMap) 
       x: 0,
       y: 4,
       fill: stroke,
-      fontSize: marker.length > 1 ? 8 : 11,
+      fontSize: marker.length > 2 ? 7 : 8,
       fontFamily: 'Arial, sans-serif',
       fontWeight: 700,
       textAnchor: 'middle',
