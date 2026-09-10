@@ -404,6 +404,7 @@ const InputComponentForMessage = ({
 	instanceId,
 	the_identity,
 	onActionRecord,
+	onActionSuccess,
 }) => {
 	const format = parseElementFormat(currentElement?.Format);
 	const propertyEntries = Object.entries(format.properties || {});
@@ -483,6 +484,7 @@ const InputComponentForMessage = ({
 				payload: res,
 			});
 			message.success("Message confirmed");
+			onActionSuccess?.();
 		} catch (error: any) {
 			onActionRecord?.({
 				traceId,
@@ -746,6 +748,7 @@ const InputComponentForMessage = ({
 				},
 			});
 			message.success("Message sent and contract invoked");
+			onActionSuccess?.();
 		} catch (error: any) {
 			onActionRecord?.({
 				traceId,
@@ -895,19 +898,23 @@ const InputComponentForMessage = ({
 						return (
 							<Form.Item
 								label={key}
-								name={key}
 								key={key}
-							rules={[
-								{
-									required: format.required.includes(key),
-									message: `${key} is required!`,
-									},
-								]}
 							>
-								<div>
+								<Space>
 									<Tag>{String(fieldDef?.type || "string")}</Tag>
-									<Input placeholder={getSchemaFieldDescription(fieldDef, key)} />
-								</div>
+									<Form.Item
+										name={key}
+										noStyle
+										rules={[
+											{
+												required: format.required.includes(key),
+												message: `${key} is required!`,
+											},
+										]}
+									>
+										<Input placeholder={getSchemaFieldDescription(fieldDef, key)} />
+									</Form.Item>
+								</Space>
 							</Form.Item>
 						);
 					})}
@@ -1005,6 +1012,7 @@ const ControlPanel = ({
 	executionMode,
 	onMockAction,
 	mockProcessingElementId,
+	onActionSuccess,
 }) => {
 	const type = currentElement?.type;
 	const elementId = getElementId(currentElement);
@@ -1186,6 +1194,7 @@ const ControlPanel = ({
 				payload: res,
 			});
 			message.success("Event invoked");
+			onActionSuccess?.();
 		} catch (error: any) {
 			onActionRecord?.({
 				traceId,
@@ -1243,6 +1252,7 @@ const ControlPanel = ({
 				payload: res,
 			});
 			message.success("Gateway invoked");
+			onActionSuccess?.();
 		} catch (error: any) {
 			onActionRecord?.({
 				traceId,
@@ -1299,6 +1309,7 @@ const ControlPanel = ({
 				txId: res?.tx,
 				payload: res,
 			});
+			onActionSuccess?.();
 			return res;
 		} catch (error: any) {
 			onActionRecord?.({
@@ -1421,6 +1432,7 @@ const ControlPanel = ({
 					instanceId={instanceId}
 					the_identity={identity}
 					onActionRecord={onActionRecord}
+					onActionSuccess={onActionSuccess}
 				/>
 			</div>,
 			showTransactionId ? "Confirm message" : "Send message",
@@ -1667,6 +1679,60 @@ const getBpmnDocumentationText = (element: Element) => {
 	return docNode?.textContent?.trim() || "";
 };
 
+const readMessageSchemaExtension = (element: Element) => {
+	const extensionElements = Array.from(element.children).find(
+		(child) => child.localName === "extensionElements",
+	);
+	if (!extensionElements) return null;
+
+	const schemaElement = Array.from(extensionElements.children).find(
+		(child) => child.localName === "MessageSchema",
+	);
+	if (!schemaElement) return null;
+
+	const schema = {
+		properties: {} as Record<string, any>,
+		required: [] as string[],
+		files: {} as Record<string, any>,
+		"file required": [] as string[],
+	};
+
+	Array.from(schemaElement.children).forEach((child) => {
+		const name = child.getAttribute("name") || "";
+		if (!name) return;
+		let definition: Record<string, any> = {};
+		const rawDefinition = child.getAttribute("definition") || "";
+		if (rawDefinition) {
+			try {
+				const parsed = JSON.parse(rawDefinition);
+				if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+					definition = parsed;
+				}
+			} catch {
+				definition = {};
+			}
+		}
+		definition.type = definition.type || child.getAttribute("type") || "string";
+		if (!definition.description && child.hasAttribute("description")) {
+			definition.description = child.getAttribute("description") || "";
+		}
+		const isRequired = ["1", "true", "yes"].includes(
+			(child.getAttribute("required") || "").toLowerCase(),
+		);
+
+		if (child.localName === "Property") {
+			schema.properties[name] = definition;
+			if (isRequired) schema.required.push(name);
+		}
+		if (child.localName === "File") {
+			schema.files[name] = definition;
+			if (isRequired) schema["file required"].push(name);
+		}
+	});
+
+	return schema;
+};
+
 const parseBpmnExecutionMeta = (bpmnContent?: string) => {
 	const meta = {
 		messages: {} as Record<string, any>,
@@ -1685,11 +1751,15 @@ const parseBpmnExecutionMeta = (bpmnContent?: string) => {
 			if (!id) return;
 			const name = node.getAttribute("name") || id;
 			const documentation = getBpmnDocumentationText(node);
-			const parsedDoc = safeParseJsonText(documentation);
+			const messageSchema = id.startsWith("Message_")
+				? readMessageSchemaExtension(node)
+				: null;
+			const parsedDoc = messageSchema || safeParseJsonText(documentation);
 			const entry = {
 				id,
 				name,
-				documentation,
+				documentation:
+					documentation || (messageSchema ? JSON.stringify(messageSchema) : ""),
 				parsedDoc,
 				type: node.localName,
 			};
@@ -3056,6 +3126,15 @@ const ExecutionPage = (props) => {
 		setMockProcessingElementId("");
 	};
 
+	const refreshAfterRealAction = () => {
+		if (executionMode !== "real") return;
+		setIsRefreshing(true);
+		setLastManualRefreshAt(new Date().toISOString());
+		syncFireflyData();
+		window.setTimeout(syncFireflyData, 1500);
+		window.setTimeout(syncFireflyData, 4000);
+	};
+
 	const getNextMockActionable = (): {
 		element: any;
 		op: "execute" | "confirm";
@@ -3700,22 +3779,23 @@ const ExecutionPage = (props) => {
 			>
 				{currentElements.map((currentElement) => {
 					return (
-						<ControlPanel
-							key={`${currentElement.type}-${currentElement.EventID || currentElement.GatewayID || currentElement.MessageID || currentElement.BusinessRuleID}`}
-							currentElement={currentElement}
-							contractName={contractName}
-							coreURL={full_core_url}
-							bpmnName={bpmnData.name}
-							contractMethodDes={contractMethodDes}
-							bpmn={bpmnData}
-							bpmnInstance={bpmnInstance}
-							instanceId={bpmnInstance.instance_chaincode_id}
-							identity={identity}
-							onActionRecord={onActionRecord}
-							executionMode={executionMode}
-							onMockAction={runMockAction}
-							mockProcessingElementId={mockProcessingElementId}
-						/>
+							<ControlPanel
+								key={`${currentElement.type}-${currentElement.EventID || currentElement.GatewayID || currentElement.MessageID || currentElement.BusinessRuleID}`}
+								currentElement={currentElement}
+								contractName={contractName}
+								coreURL={full_core_url}
+								bpmnName={bpmnData.name}
+								contractMethodDes={contractMethodDes}
+								bpmn={bpmnData}
+								bpmnInstance={bpmnInstance}
+								instanceId={bpmnInstance.instance_chaincode_id}
+								identity={identity}
+								onActionRecord={onActionRecord}
+								executionMode={executionMode}
+								onMockAction={runMockAction}
+								mockProcessingElementId={mockProcessingElementId}
+								onActionSuccess={refreshAfterRealAction}
+							/>
 					);
 				})}
 			</div>

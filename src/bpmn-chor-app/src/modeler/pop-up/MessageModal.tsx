@@ -26,6 +26,174 @@ const paramTypes = [
 
 ];
 
+const defaultMessageSchema = {
+  properties: {},
+  required: [],
+  files: {},
+  'file required': []
+};
+
+const localName = (item) => {
+  return item?.$type?.split(':').pop() || item?.localName || item?.tagName?.split(':').pop();
+};
+
+const requiredValue = (value) => {
+  return value === true || value === 'true' || value === '1';
+};
+
+const parseDefinition = (item) => {
+  if (!item?.definition) {
+    return {};
+  }
+  try {
+    return JSON.parse(item.definition);
+  } catch (error) {
+    return {};
+  }
+};
+
+const readMessageSchemaFromExtension = (businessObject) => {
+  const values = businessObject?.extensionElements?.values || [];
+  const schema = values.find((value) => localName(value) === 'MessageSchema');
+  if (!schema) {
+    return null;
+  }
+
+  const data = {
+    properties: {},
+    required: [],
+    files: {},
+    'file required': []
+  };
+
+  (schema.properties || []).forEach((property) => {
+    const definition = parseDefinition(property);
+    const name = property.name || definition.name;
+    if (!name) {
+      return;
+    }
+    data.properties[name] = {
+      type: definition.type || property.type || 'string',
+      description: definition.description || property.description || ''
+    };
+    if (requiredValue(definition.required ?? property.required)) {
+      data.required.push(name);
+    }
+  });
+
+  (schema.files || []).forEach((file) => {
+    const definition = parseDefinition(file);
+    const name = file.name || definition.name;
+    if (!name) {
+      return;
+    }
+    data.files[name] = {
+      type: definition.type || file.type || 'file',
+      description: definition.description || file.description || ''
+    };
+    if (requiredValue(definition.required ?? file.required)) {
+      data['file required'].push(name);
+    }
+  });
+
+  return data;
+};
+
+const readMessageSchemaFromDocumentation = (businessObject) => {
+  const documentation = businessObject?.documentation;
+  if (!documentation?.length || !documentation[0]?.text) {
+    return null;
+  }
+  try {
+    return JSON.parse(documentation[0].text);
+  } catch (error) {
+    return null;
+  }
+};
+
+const buildMessageSchemaPayload = (dataSource) => {
+  const properties = {};
+  const files = {};
+  const required = [];
+  const fileRequired = [];
+
+  dataSource.forEach((item) => {
+    if (!item.name) {
+      return;
+    }
+    if (item.type != 'file') {
+      properties[item.name] = {
+        type: item.type,
+        description: item.description
+      };
+      if (item.required) {
+        required.push(item.name);
+      }
+    } else {
+      files[item.name] = {
+        type: item.type,
+        description: item.description
+      };
+      if (item.required) {
+        fileRequired.push(item.name);
+      }
+    }
+  });
+
+  return {
+    properties,
+    required,
+    files,
+    'file required': fileRequired
+  };
+};
+
+const buildMessageSchemaExtension = (modeler, shape, payload) => {
+  const extensionElements = shape.businessObject.extensionElements
+    || modeler._moddle.create('bpmn:ExtensionElements', { values: [] });
+
+  const messageSchema = modeler._moddle.create('abc:MessageSchema', {
+    properties: [],
+    files: []
+  });
+
+  Object.keys(payload.properties).forEach((name) => {
+    const definition = payload.properties[name];
+    const required = payload.required.includes(name);
+    const property = modeler._moddle.create('abc:Property', {
+      name,
+      type: definition.type,
+      description: definition.description,
+      required,
+      definition: JSON.stringify(definition)
+    });
+    property.$parent = messageSchema;
+    messageSchema.properties.push(property);
+  });
+
+  Object.keys(payload.files).forEach((name) => {
+    const definition = payload.files[name];
+    const required = payload['file required'].includes(name);
+    const file = modeler._moddle.create('abc:File', {
+      name,
+      type: definition.type,
+      description: definition.description,
+      required,
+      definition: JSON.stringify(definition)
+    });
+    file.$parent = messageSchema;
+    messageSchema.files.push(file);
+  });
+
+  messageSchema.$parent = extensionElements;
+  extensionElements.values = (extensionElements.values || [])
+    .filter((value) => localName(value) !== 'MessageSchema')
+    .concat(messageSchema);
+  extensionElements.$parent = shape.businessObject;
+
+  return extensionElements;
+};
+
 export default function MessageModal({ dataElementId, open: isModalOpen, onClose }) {
   const [title, setTitle] = React.useState(`message id: ${dataElementId}`);
 
@@ -46,40 +214,14 @@ export default function MessageModal({ dataElementId, open: isModalOpen, onClose
   console.log(dataElementId, shape)
 
 
-  // React.useEffect(() => {
-  //   if (shape != null) {
-  //     commandStack.execute('element.updateProperties', {
-  //       element: shape,
-  //       properties: {
-  //         // 修改的内容是 shape.businessObject
-  //         // 可以修改ID， 但感觉不必要
-  //         // 'id': newId,
-  //         // 也可以用这个修改title
-  //         // 'name': newTitle, // 即element.updateLabel的功能
-  //         // 修改 documentation, 数组，每行1个
-  //         'documentation': [
-  //           modeler._moddle.create("bpmn:Documentation", {
-  //             text: JSON.stringify(paramListOptions)
-  //           })
-  //         ]
-  //       }
-  //     });
-  //   }
-  // }, [paramListOptions]);
-
-
-
   const [name, setName] = React.useState(shape !== null ? shape.businessObject.name : "");
   const [dataSource, setDataSource] = React.useState([]);
 
   const loadDataFromBPMN = () => {
     if (shape != null) {
-      const data = shape.businessObject.documentation.length > 0 ? JSON.parse(shape.businessObject.documentation[0].text) : {
-        properties: {},
-        required: [],
-        files: {},
-        'file required': []
-      }
+      const data = readMessageSchemaFromExtension(shape.businessObject)
+        || readMessageSchemaFromDocumentation(shape.businessObject)
+        || defaultMessageSchema;
       const propertiesData = Object.keys(data.properties).map((key, index) => {
         return {
           key: index,
@@ -122,51 +264,14 @@ export default function MessageModal({ dataElementId, open: isModalOpen, onClose
         newLabel: name,
       });
     }
-    // 构造参数 from dataSource
-    let properties = {};
-    let files = {};
-    let required = [];
-    let fileRequired = [];
-
-    dataSource.forEach((item) => {
-      if (item.type != 'file') {
-        properties[item.name] = {
-          type: item.type,
-          description: item.description
-        };
-        if (item.required) {
-          required.push(item.name);
-        }
-      } else {
-        files[item.name] = {
-          type: item.type,
-          description: item.description
-        };
-        if (item.required) {
-          fileRequired.push(item.name);
-        }
-      }
-    })
-
-    const uploadData = {
-      properties: properties,
-      required: required,
-      files: files,
-      'file required': fileRequired
-    }
-
-
-
     // update参数
     if (shape != null) {
+      const uploadData = buildMessageSchemaPayload(dataSource);
       commandStack.execute('element.updateProperties', {
         element: shape,
         properties: {
-          'documentation': [
-            modeler._moddle.create("bpmn:Documentation", {
-              text: JSON.stringify(uploadData)
-            })
-          ]
+          'extensionElements': buildMessageSchemaExtension(modeler, shape, uploadData),
+          'documentation': []
         }
       });
     }

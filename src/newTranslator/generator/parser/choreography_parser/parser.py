@@ -31,6 +31,80 @@ from generator.parser.choreography_parser.protocals import (
 )
 
 
+ABC_NS = "https://chaincollab.io/schema/abc"
+BPMN_NS = "http://www.omg.org/spec/BPMN/20100524/MODEL"
+
+
+def _local_name(tag: str) -> str:
+    return tag.split("}", 1)[-1] if "}" in tag else tag
+
+
+def _bool_attr(value: str) -> bool:
+    return str(value or "").strip().lower() in {"1", "true", "yes"}
+
+
+def _read_message_schema_extension(element: ET.Element) -> str | None:
+    """Read abc:MessageSchema and return the legacy message documentation JSON."""
+    extension_elements = next(
+        (child for child in list(element) if _local_name(child.tag) == "extensionElements"),
+        None,
+    )
+    if extension_elements is None:
+        return None
+
+    schema_element = next(
+        (
+            child
+            for child in list(extension_elements)
+            if _local_name(child.tag) == "MessageSchema"
+        ),
+        None,
+    )
+    if schema_element is None:
+        return None
+
+    properties = {}
+    required = []
+    files = {}
+    file_required = []
+
+    for child in list(schema_element):
+        child_name = _local_name(child.tag)
+        field_name = child.attrib.get("name", "")
+        if not field_name:
+            continue
+        raw_definition = child.attrib.get("definition", "")
+        try:
+            field_def = json.loads(raw_definition) if raw_definition else {}
+        except json.JSONDecodeError:
+            field_def = {}
+        if not isinstance(field_def, dict):
+            field_def = {}
+        field_def.pop("required", None)
+        field_def.setdefault("type", child.attrib.get("type", "string"))
+        if "description" in child.attrib:
+            field_def.setdefault("description", child.attrib.get("description", ""))
+        if child_name == "Property":
+            properties[field_name] = field_def
+            if _bool_attr(child.attrib.get("required", "")):
+                required.append(field_name)
+        elif child_name == "File":
+            files[field_name] = field_def
+            if _bool_attr(child.attrib.get("required", "")):
+                file_required.append(field_name)
+
+    return json.dumps(
+        {
+            "properties": properties,
+            "required": required,
+            "files": files,
+            "file required": file_required,
+        },
+        ensure_ascii=False,
+        separators=(",", ":"),
+    )
+
+
 class Choreography:
     def __init__(self):
         self.graph = nx.DiGraph()
@@ -97,11 +171,14 @@ class Choreography:
                 documentation = (
                     documentation_list[0].text if documentation_list else None
                 )
+                extension_documentation = _read_message_schema_extension(element)
                 return Message(
                     self,
                     element.attrib["id"],
                     element.attrib.get("name", ""),
-                    documentation=documentation if documentation is not None else "{}",
+                    documentation=extension_documentation
+                    if extension_documentation is not None
+                    else (documentation if documentation is not None else "{}"),
                 )
             case NodeType.BUSINESS_RULE_TASK.value:
                 # Parser Input & Output
