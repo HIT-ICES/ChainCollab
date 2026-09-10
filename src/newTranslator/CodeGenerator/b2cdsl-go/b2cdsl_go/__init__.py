@@ -220,7 +220,7 @@ class FlowRenderer:
                     MESSAGE_SEND_TEMPLATE,
                     message_name=msg_name,
                     after_hooks=send_actions,
-                    state_change_block=self._change_state_code(message, "COMPLETED"),
+                    state_change_block=self._change_state_code(message, "WAITINGFORCONFIRMATION"),
                     more_parameters=self._render_message_parameters(parameters),
                     parameter_assignments=self._render_message_parameter_assignments(assignments),
                 )

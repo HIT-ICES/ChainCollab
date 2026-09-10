@@ -15,6 +15,62 @@ import DmnDrawer from "./DmnDrawer"
 import Draggable from 'react-draggable';
 import type { DraggableEvent, DraggableData } from 'react-draggable';
 
+const localName = (item) => {
+    return item?.$type?.split(':').pop() || item?.localName || item?.tagName?.split(':').pop();
+};
+
+const requiredValue = (value) => {
+    return value === true || value === 'true' || value === '1';
+};
+
+const parseDefinition = (item) => {
+    if (!item?.definition) {
+        return {};
+    }
+    try {
+        return JSON.parse(item.definition);
+    } catch (error) {
+        return {};
+    }
+};
+
+const readMessageFieldsFromExtension = (businessObject) => {
+    const values = businessObject?.extensionElements?.values || [];
+    const schema = values.find((value) => localName(value) === 'MessageSchema');
+    if (!schema) {
+        return null;
+    }
+
+    return (schema.properties || []).map((property) => {
+        const definition = parseDefinition(property);
+        return {
+            name: property.name || definition.name,
+            type: definition.type || property.type || 'string',
+            description: definition.description || property.description || '',
+            required: requiredValue(definition.required ?? property.required)
+        };
+    }).filter((field) => field.name);
+};
+
+const readMessageFieldsFromDocumentation = (businessObject) => {
+    const documentation = businessObject?.documentation;
+    if (!documentation?.length || !documentation[0]?.text) {
+        return [];
+    }
+    try {
+        const content = JSON.parse(documentation[0].text).properties || {};
+        return Object.keys(content).map((key) => {
+            return {
+                name: key,
+                type: content[key].type,
+                description: content[key].description
+            }
+        });
+    } catch (error) {
+        return [];
+    }
+};
+
 
 const IOBlock = ({
     index, type, item, handleChange, handleRemove
@@ -176,20 +232,9 @@ const DmnModal = ({ dataElementId, xmlData, open: isModalOpen, onClose, onSave }
     const messageList = Object.keys(elementRegistry._elements).map(
         (key) => elementRegistry._elements[key]
     ).filter((element) => element.element.type === 'bpmn:Message').map((element) => {
-        const documentation = element.element.businessObject.documentation;
-        let fields = []
-        if (documentation) {
-            const doc = element.element.businessObject.documentation[0]
-            const content = JSON.parse(doc.text).properties
-            // {\"input1\":{\"type\":\"string\",\"description\":\"123\"}
-            fields = Object.keys(content).map((key) => {
-                return {
-                    name: key,
-                    type: content[key].type,
-                    description: content[key].description
-                }
-            })
-        }
+        const businessObject = element.element.businessObject;
+        const fields = readMessageFieldsFromExtension(businessObject)
+            || readMessageFieldsFromDocumentation(businessObject);
         return {
             name: element.element.businessObject.id,
             fields: fields

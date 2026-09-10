@@ -1,0 +1,91 @@
+{
+  "name": "ABC",
+  "uri": "https://chaincollab.io/schema/abc",
+  "prefix": "abc",
+  "types": [
+    {
+      "name": "MessageSchema",
+      "superClass": [
+        "Element"
+      ],
+      "properties": [
+        {
+          "name": "properties",
+          "type": "Property",
+          "isMany": true
+        },
+        {
+          "name": "files",
+          "type": "File",
+          "isMany": true
+        }
+      ]
+    },
+    {
+      "name": "Property",
+      "superClass": [
+        "Element"
+      ],
+      "properties": [
+        {
+          "name": "name",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "type",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "description",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "required",
+          "type": "Boolean",
+          "isAttr": true
+        },
+        {
+          "name": "definition",
+          "type": "String",
+          "isAttr": true
+        }
+      ]
+    },
+    {
+      "name": "File",
+      "superClass": [
+        "Element"
+      ],
+      "properties": [
+        {
+          "name": "name",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "type",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "description",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "required",
+          "type": "Boolean",
+          "isAttr": true
+        },
+        {
+          "name": "definition",
+          "type": "String",
+          "isAttr": true
+        }
+      ]
+    }
+  ]
+}
