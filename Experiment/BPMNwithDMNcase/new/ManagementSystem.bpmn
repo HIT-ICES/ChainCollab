@@ -1,4 +1,3 @@
-<?xml version='1.0' encoding='utf-8'?>
 <bpmn2:definitions xmlns:abc="https://chaincollab.io/schema/abc" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://bpmn.io/schema/bpmn">
   <bpmn2:message id="Message_1h1vc49" name="discard">
     <bpmn2:extensionElements>
@@ -198,7 +197,12 @@
     </bpmn2:choreographyTask>
     <bpmn2:sequenceFlow id="Flow_0yqybnx" sourceRef="ChoreographyTask_00l67sg" targetRef="ChoreographyTask_08a3r5d" />
     <bpmn2:businessRuleTask id="Activity_18dcm0h">
-      <bpmn2:documentation>{"inputs":[{"name":"quality","type":"string","description":""}],"outputs":[{"name":"qualified","type":"boolean","description":""}]}</bpmn2:documentation>
+      <bpmn2:extensionElements>
+        <abc:BusinessRule>
+          <abc:Input name="quality" type="string" description="" definition="{&quot;name&quot;:&quot;quality&quot;,&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+          <abc:Output name="qualified" type="boolean" description="" definition="{&quot;name&quot;:&quot;qualified&quot;,&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;&quot;}" />
+        </abc:BusinessRule>
+      </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_00nou89</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1ba87mj</bpmn2:outgoing>
     </bpmn2:businessRuleTask>

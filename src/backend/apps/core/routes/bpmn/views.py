@@ -135,7 +135,68 @@ def _message_schema_documentation_to_extension(element: ET.Element) -> bool:
     return True
 
 
-def _normalize_message_schema_extensions(bpmn_content: str | None) -> str | None:
+def _business_rule_documentation_to_extension(element: ET.Element) -> bool:
+    documentation_node = next(
+        (child for child in list(element) if _local_name(child.tag) == "documentation"),
+        None,
+    )
+    if documentation_node is None or not (documentation_node.text or "").strip():
+        return False
+
+    try:
+        documentation = json.loads(documentation_node.text or "{}")
+    except Exception:
+        return False
+    if not isinstance(documentation, dict):
+        return False
+    if not (documentation.get("inputs") or documentation.get("outputs")):
+        return False
+
+    element_ns = element.tag[1:].split("}", 1)[0] if element.tag.startswith("{") else ""
+    extension_tag = f"{{{element_ns}}}extensionElements" if element_ns else "extensionElements"
+    extension_elements = next(
+        (child for child in list(element) if _local_name(child.tag) == "extensionElements"),
+        None,
+    )
+    if extension_elements is None:
+        extension_elements = ET.Element(extension_tag)
+        element.insert(0, extension_elements)
+
+    for child in list(extension_elements):
+        if _local_name(child.tag) == "BusinessRule":
+            extension_elements.remove(child)
+
+    business_rule = ET.SubElement(extension_elements, f"{{{ABC_NS}}}BusinessRule")
+
+    for item in documentation.get("inputs") or []:
+        if not isinstance(item, dict):
+            continue
+        attrs = {
+            "name": str(item.get("name", "")),
+            "type": str(item.get("type", "string")),
+            "description": str(item.get("description", "")),
+            "definition": json.dumps(item, ensure_ascii=False, separators=(",", ":")),
+        }
+        if attrs["name"]:
+            ET.SubElement(business_rule, f"{{{ABC_NS}}}Input", attrs)
+
+    for item in documentation.get("outputs") or []:
+        if not isinstance(item, dict):
+            continue
+        attrs = {
+            "name": str(item.get("name", "")),
+            "type": str(item.get("type", "string")),
+            "description": str(item.get("description", "")),
+            "definition": json.dumps(item, ensure_ascii=False, separators=(",", ":")),
+        }
+        if attrs["name"]:
+            ET.SubElement(business_rule, f"{{{ABC_NS}}}Output", attrs)
+
+    element.remove(documentation_node)
+    return True
+
+
+def _normalize_abc_extensions(bpmn_content: str | None) -> str | None:
     if not bpmn_content:
         return bpmn_content
     try:
@@ -148,6 +209,8 @@ def _normalize_message_schema_extensions(bpmn_content: str | None) -> str | None
     for element in root.iter():
         if _local_name(element.tag) == "message":
             changed = _message_schema_documentation_to_extension(element) or changed
+        if _local_name(element.tag) == "businessRuleTask":
+            changed = _business_rule_documentation_to_extension(element) or changed
     if not changed:
         return bpmn_content
 
@@ -307,7 +370,7 @@ def _autoload_initial_bpmns(consortium_id: str, request_user):
             logger.exception("Failed to read initial BPMN file: %s", bpmn_path)
             failed += 1
             continue
-        bpmn_content = _normalize_message_schema_extensions(bpmn_content)
+        bpmn_content = _normalize_abc_extensions(bpmn_content)
         svg_path = bpmn_path.with_suffix(".svg")
         if svg_path.exists():
             try:
@@ -349,7 +412,7 @@ class BPMNViewsSet(viewsets.ModelViewSet):
             consortiumid = request.data.get("consortiumid")
             orgid = request.data.get("orgid")
             name = request.data.get("name")
-            bpmnContent = _normalize_message_schema_extensions(
+            bpmnContent = _normalize_abc_extensions(
                 request.data.get("bpmnContent")
             )
             svgContent = request.data.get("svgContent")
@@ -423,7 +486,7 @@ class BPMNViewsSet(viewsets.ModelViewSet):
             if "name" in request.data:
                 bpmn.name = request.data.get("name")
             if "bpmnContent" in request.data:
-                bpmn.bpmnContent = _normalize_message_schema_extensions(
+                bpmn.bpmnContent = _normalize_abc_extensions(
                     request.data.get("bpmnContent")
                 )
                 if "participants" not in request.data:

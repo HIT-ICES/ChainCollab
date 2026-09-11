@@ -25,6 +25,22 @@ import { useAppSelector } from "@/redux/hooks"
 import { useDecisions } from "./hooks"
 
 
+const parseBusinessRuleDocumentation = (documentation?: string) => {
+    if (!documentation) {
+        return { inputs: [], outputs: [] }
+    }
+
+    try {
+        const parsed = JSON.parse(documentation)
+        return {
+            inputs: Array.isArray(parsed?.inputs) ? parsed.inputs : [],
+            outputs: Array.isArray(parsed?.outputs) ? parsed.outputs : []
+        }
+    } catch (error) {
+        return { inputs: [], outputs: [] }
+    }
+}
+
 
 const DmnBindingBlock = (
     {
@@ -65,9 +81,7 @@ const DmnBindingBlock = (
         }
 
         // init currentParamMapping based on businessRuleToFullfill'input and outputs, but not always empty
-        const content = businessRuleToFullfill ? JSON.parse(businessRuleToFullfill.documentation) : {
-            inputs: [], outputs: []
-        }
+        const content = parseBusinessRuleDocumentation(businessRuleToFullfill?.documentation)
 
         if (getActivity(businessRuleToFullfill.businessRuleId)) {
             const activity = getActivity(businessRuleToFullfill.businessRuleId)
@@ -84,9 +98,7 @@ const DmnBindingBlock = (
     }, [businessRuleToFullfill])
 
     const checkParamMappingFullfill = () => {
-        const content = businessRuleToFullfill ? JSON.parse(businessRuleToFullfill.documentation) : {
-            inputs: [], outputs: []
-        }
+        const content = parseBusinessRuleDocumentation(businessRuleToFullfill?.documentation)
         const inputs = content.inputs
         const outputs = content.outputs
         const inputsFullfill = inputs.every((input) => {
@@ -123,9 +135,7 @@ const DmnBindingBlock = (
         unSetActivity(businessRuleToFullfill.businessRuleId)
     }
 
-    const content = businessRuleToFullfill ? JSON.parse(businessRuleToFullfill.documentation) : {
-        inputs: [], outputs: []
-    }
+    const content = parseBusinessRuleDocumentation(businessRuleToFullfill?.documentation)
 
     const inputDataSource = content.inputs.map((item) => {
         return {

@@ -1,4 +1,3 @@
-<?xml version='1.0' encoding='utf-8'?>
 <bpmn2:definitions xmlns:abc="https://chaincollab.io/schema/abc" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://www.signavio.com">
   <bpmn2:message id="Message_1qbk325" name="delivered product information">
     <bpmn2:extensionElements>
@@ -212,13 +211,25 @@
     <bpmn2:sequenceFlow id="Flow_1naa7u0" sourceRef="ChoreographyTask_1khafgk" targetRef="ChoreographyTask_1c9swul" />
     <bpmn2:sequenceFlow id="Flow_0bl3c43" sourceRef="ChoreographyTask_1c9swul" targetRef="Gateway_04h9e6e" />
     <bpmn2:businessRuleTask id="Activity_1yl9tfp" name="external">
-      <bpmn2:documentation>{"inputs":[{"name":"VIPpoints","type":"number","description":"points"},{"name":"need_external_provider","type":"boolean","description":"Whether external service providers are required"}],"outputs":[{"name":"externalAvailable","type":"boolean","description":""}]}</bpmn2:documentation>
+      <bpmn2:extensionElements>
+        <abc:BusinessRule>
+          <abc:Input name="VIPpoints" type="number" description="points" definition="{&quot;name&quot;:&quot;VIPpoints&quot;,&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;points&quot;}" />
+          <abc:Input name="need_external_provider" type="boolean" description="Whether external service providers are required" definition="{&quot;name&quot;:&quot;need_external_provider&quot;,&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;Whether external service providers are required&quot;}" />
+          <abc:Output name="externalAvailable" type="boolean" description="" definition="{&quot;name&quot;:&quot;externalAvailable&quot;,&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;&quot;}" />
+        </abc:BusinessRule>
+      </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1858yke</bpmn2:incoming>
       <bpmn2:outgoing>Flow_02sms1i</bpmn2:outgoing>
     </bpmn2:businessRuleTask>
     <bpmn2:sequenceFlow id="Flow_02sms1i" sourceRef="Activity_1yl9tfp" targetRef="Gateway_1bhtapl" />
     <bpmn2:businessRuleTask id="Activity_0ibsbry" name="invoiceAvailable">
-      <bpmn2:documentation>{"inputs":[{"name":"invoiceType","type":"string","description":"type"},{"name":"invoice","type":"boolean","description":"Do you need an invoice?"}],"outputs":[{"name":"invoiceAvailable","type":"boolean","description":""}]}</bpmn2:documentation>
+      <bpmn2:extensionElements>
+        <abc:BusinessRule>
+          <abc:Input name="invoiceType" type="string" description="type" definition="{&quot;name&quot;:&quot;invoiceType&quot;,&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;type&quot;}" />
+          <abc:Input name="invoice" type="boolean" description="Do you need an invoice?" definition="{&quot;name&quot;:&quot;invoice&quot;,&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;Do you need an invoice?&quot;}" />
+          <abc:Output name="invoiceAvailable" type="boolean" description="" definition="{&quot;name&quot;:&quot;invoiceAvailable&quot;,&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;&quot;}" />
+        </abc:BusinessRule>
+      </bpmn2:extensionElements>
       <bpmn2:incoming>SequenceFlow_0nxtqz1</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1i177uo</bpmn2:outgoing>
     </bpmn2:businessRuleTask>

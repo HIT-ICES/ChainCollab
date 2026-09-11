@@ -105,6 +105,54 @@ def _read_message_schema_extension(element: ET.Element) -> str | None:
     )
 
 
+def _read_business_rule_extension(element: ET.Element) -> str | None:
+    """Read abc:BusinessRule and return the legacy business-rule documentation JSON."""
+    extension_elements = next(
+        (child for child in list(element) if _local_name(child.tag) == "extensionElements"),
+        None,
+    )
+    if extension_elements is None:
+        return None
+
+    business_rule = next(
+        (
+            child
+            for child in list(extension_elements)
+            if _local_name(child.tag) == "BusinessRule"
+        ),
+        None,
+    )
+    if business_rule is None:
+        return None
+
+    payload = {
+        "inputs": [],
+        "outputs": [],
+    }
+
+    for child in list(business_rule):
+        child_name = _local_name(child.tag)
+        raw_definition = child.attrib.get("definition", "")
+        try:
+            item = json.loads(raw_definition) if raw_definition else {}
+        except json.JSONDecodeError:
+            item = {}
+        if not isinstance(item, dict):
+            item = {}
+        item.setdefault("name", child.attrib.get("name", ""))
+        item.setdefault("type", child.attrib.get("type", "string"))
+        if "description" in child.attrib:
+            item.setdefault("description", child.attrib.get("description", ""))
+        if not item.get("name"):
+            continue
+        if child_name == "Input":
+            payload["inputs"].append(item)
+        elif child_name == "Output":
+            payload["outputs"].append(item)
+
+    return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+
+
 class Choreography:
     def __init__(self):
         self.graph = nx.DiGraph()
@@ -186,13 +234,16 @@ class Choreography:
                 documentation = (
                     documentation_list[0].text if documentation_list else None
                 )
+                extension_documentation = _read_business_rule_extension(element)
                 return BusinessRuleTask(
                     self,
                     element.attrib["id"],
                     element.attrib.get("name", ""),
                     incoming=_first_text(f"./{bpmn2prefix}incoming"),
                     outgoing=_first_text(f"./{bpmn2prefix}outgoing"),
-                    documentation=documentation if documentation is not None else "{}",
+                    documentation=extension_documentation
+                    if extension_documentation is not None
+                    else (documentation if documentation is not None else "{}"),
                 )
             case NodeType.RECEIVE_TASK.value:
                 documentation_list = element.findall(f"./{bpmn2prefix}documentation")

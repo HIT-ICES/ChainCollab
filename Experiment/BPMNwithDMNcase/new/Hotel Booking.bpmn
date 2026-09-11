@@ -1,4 +1,3 @@
-<?xml version='1.0' encoding='utf-8'?>
 <bpmn2:definitions xmlns:abc="https://chaincollab.io/schema/abc" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://www.signavio.com">
   <bpmn2:message id="Message_04ikf2n" name="discountInfo">
     <bpmn2:extensionElements>
@@ -212,7 +211,12 @@
     </bpmn2:choreographyTask>
     <bpmn2:sequenceFlow id="Flow_00urpax" sourceRef="EventBasedGateway_1fxpmyn" targetRef="ChoreographyTask_0yime3t" />
     <bpmn2:businessRuleTask id="Activity_0b1f7uv" name="vipSale">
-      <bpmn2:documentation>{"inputs":[{"name":"VIPpoints","type":"number","description":""}],"outputs":[{"name":"VIPLevel","type":"number","description":""}]}</bpmn2:documentation>
+      <bpmn2:extensionElements>
+        <abc:BusinessRule>
+          <abc:Input name="VIPpoints" type="number" description="" definition="{&quot;name&quot;:&quot;VIPpoints&quot;,&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;&quot;}" />
+          <abc:Output name="VIPLevel" type="number" description="" definition="{&quot;name&quot;:&quot;VIPLevel&quot;,&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;&quot;}" />
+        </abc:BusinessRule>
+      </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1byvr2b</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0webz0z</bpmn2:outgoing>
     </bpmn2:businessRuleTask>

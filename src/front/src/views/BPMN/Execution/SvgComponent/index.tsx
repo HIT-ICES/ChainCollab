@@ -1733,6 +1733,49 @@ const readMessageSchemaExtension = (element: Element) => {
 	return schema;
 };
 
+const readBusinessRuleExtension = (element: Element) => {
+	const extensionElements = Array.from(element.children).find(
+		(child) => child.localName === "extensionElements",
+	);
+	if (!extensionElements) return null;
+
+	const businessRuleElement = Array.from(extensionElements.children).find(
+		(child) => child.localName === "BusinessRule",
+	);
+	if (!businessRuleElement) return null;
+
+	const readItem = (child: Element) => {
+		let definition: Record<string, any> = {};
+		const rawDefinition = child.getAttribute("definition") || "";
+		if (rawDefinition) {
+			try {
+				const parsed = JSON.parse(rawDefinition);
+				if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+					definition = parsed;
+				}
+			} catch {
+				definition = {};
+			}
+		}
+		return {
+			name: definition.name || child.getAttribute("name") || "",
+			type: definition.type || child.getAttribute("type") || "string",
+			description: definition.description || child.getAttribute("description") || "",
+		};
+	};
+
+	return {
+		inputs: Array.from(businessRuleElement.children)
+			.filter((child) => child.localName === "Input")
+			.map(readItem)
+			.filter((item) => item.name),
+		outputs: Array.from(businessRuleElement.children)
+			.filter((child) => child.localName === "Output")
+			.map(readItem)
+			.filter((item) => item.name),
+	};
+};
+
 const parseBpmnExecutionMeta = (bpmnContent?: string) => {
 	const meta = {
 		messages: {} as Record<string, any>,
@@ -1754,7 +1797,10 @@ const parseBpmnExecutionMeta = (bpmnContent?: string) => {
 			const messageSchema = id.startsWith("Message_")
 				? readMessageSchemaExtension(node)
 				: null;
-			const parsedDoc = messageSchema || safeParseJsonText(documentation);
+			const businessRuleConfig = id.startsWith("Activity_") && node.localName === "businessRuleTask"
+				? readBusinessRuleExtension(node)
+				: null;
+			const parsedDoc = messageSchema || businessRuleConfig || safeParseJsonText(documentation);
 			const entry = {
 				id,
 				name,

@@ -1,4 +1,3 @@
-<?xml version='1.0' encoding='utf-8'?>
 <bpmn2:definitions xmlns:abc="https://chaincollab.io/schema/abc" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://www.signavio.com">
   <bpmn2:message id="Message_13mh6mk" name="report">
     <bpmn2:extensionElements>
@@ -99,7 +98,12 @@
     </bpmn2:endEvent>
     <bpmn2:sequenceFlow id="SequenceFlow_1muj86l" sourceRef="ChoreographyTask_1bkb191" targetRef="Activity_1mj4mr7" />
     <bpmn2:businessRuleTask id="Activity_1mj4mr7" name="blood">
-      <bpmn2:documentation>{"inputs":[{"name":"result","type":"string","description":""}],"outputs":[{"name":"FurtherCheck","type":"boolean","description":""}]}</bpmn2:documentation>
+      <bpmn2:extensionElements>
+        <abc:BusinessRule>
+          <abc:Input name="result" type="string" description="" definition="{&quot;name&quot;:&quot;result&quot;,&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+          <abc:Output name="FurtherCheck" type="boolean" description="" definition="{&quot;name&quot;:&quot;FurtherCheck&quot;,&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;&quot;}" />
+        </abc:BusinessRule>
+      </bpmn2:extensionElements>
       <bpmn2:incoming>SequenceFlow_1muj86l</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0xlfi9k</bpmn2:outgoing>
     </bpmn2:businessRuleTask>

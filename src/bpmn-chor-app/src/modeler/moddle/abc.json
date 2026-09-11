@@ -22,6 +22,24 @@
       ]
     },
     {
+      "name": "BusinessRule",
+      "superClass": [
+        "Element"
+      ],
+      "properties": [
+        {
+          "name": "inputs",
+          "type": "Input",
+          "isMany": true
+        },
+        {
+          "name": "outputs",
+          "type": "Output",
+          "isMany": true
+        }
+      ]
+    },
+    {
       "name": "Property",
       "superClass": [
         "Element"
@@ -78,6 +96,62 @@
         {
           "name": "required",
           "type": "Boolean",
+          "isAttr": true
+        },
+        {
+          "name": "definition",
+          "type": "String",
+          "isAttr": true
+        }
+      ]
+    },
+    {
+      "name": "Input",
+      "superClass": [
+        "Element"
+      ],
+      "properties": [
+        {
+          "name": "name",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "type",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "description",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "definition",
+          "type": "String",
+          "isAttr": true
+        }
+      ]
+    },
+    {
+      "name": "Output",
+      "superClass": [
+        "Element"
+      ],
+      "properties": [
+        {
+          "name": "name",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "type",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "description",
+          "type": "String",
           "isAttr": true
         },
         {
