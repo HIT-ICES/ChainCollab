@@ -1,4 +1,3 @@
-<?xml version='1.0' encoding='utf-8'?>
 <bpmn2:definitions xmlns:abc="https://chaincollab.io/schema/abc" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://bpmn.io/schema/bpmn">
   <bpmn2:message id="Message_0ps2yzo" name="Self_pickup">
     <bpmn2:extensionElements>
@@ -203,7 +202,13 @@
     </bpmn2:choreographyTask>
     <bpmn2:sequenceFlow id="Flow_1r9e0fl" sourceRef="ChoreographyTask_0s4ig1m" targetRef="ChoreographyTask_1ynktv4" />
     <bpmn2:businessRuleTask id="Activity_0fbi09z" name="">
-      <bpmn2:documentation>{"inputs":[{"name":"amount","type":"number","description":""},{"name":"Self_pickup","type":"boolean","description":""}],"outputs":[{"name":"deliver","type":"boolean","description":""}]}</bpmn2:documentation>
+      <bpmn2:extensionElements>
+        <abc:BusinessRule>
+          <abc:Input name="amount" type="number" description="" definition="{&quot;name&quot;:&quot;amount&quot;,&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;&quot;}" />
+          <abc:Input name="Self_pickup" type="boolean" description="" definition="{&quot;name&quot;:&quot;Self_pickup&quot;,&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;&quot;}" />
+          <abc:Output name="deliver" type="boolean" description="" definition="{&quot;name&quot;:&quot;deliver&quot;,&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;&quot;}" />
+        </abc:BusinessRule>
+      </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1hbgb5i</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0i9c5yv</bpmn2:outgoing>
     </bpmn2:businessRuleTask>

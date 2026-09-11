@@ -1,4 +1,3 @@
-<?xml version='1.0' encoding='utf-8'?>
 <bpmn2:definitions xmlns:abc="https://chaincollab.io/schema/abc" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://bpmn.io/schema/bpmn">
   <bpmn2:message id="Message_1dmeexg" name="Supplies Delivery Confirmation4">
     <bpmn2:extensionElements>
@@ -211,7 +210,14 @@
     <bpmn2:sequenceFlow id="Flow_1tf8ufi" sourceRef="ChoreographyTask_0s4ig1m" targetRef="ChoreographyTask_1q3p8t2" />
     <bpmn2:sequenceFlow id="Flow_0imjwmb" sourceRef="ChoreographyTask_1cceq4q" targetRef="ChoreographyTask_1tkm8jm" />
     <bpmn2:businessRuleTask id="Activity_0rm8bkp" name="Priority Decision">
-      <bpmn2:documentation>{"inputs":[{"name":"numberOfUnits","type":"number","description":" Total number of units in the order requested"},{"name":"urgent","type":"boolean","description":"Indicates whether the order requires urgent delivery."},{"name":"supplierReputation","type":"number","description":"A numerical rating representing the supplier's reputation."}],"outputs":[{"name":"finalPriority","type":"string","description":""}]}</bpmn2:documentation>
+      <bpmn2:extensionElements>
+        <abc:BusinessRule>
+          <abc:Input name="numberOfUnits" type="number" description=" Total number of units in the order requested" definition="{&quot;name&quot;:&quot;numberOfUnits&quot;,&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot; Total number of units in the order requested&quot;}" />
+          <abc:Input name="urgent" type="boolean" description="Indicates whether the order requires urgent delivery." definition="{&quot;name&quot;:&quot;urgent&quot;,&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;Indicates whether the order requires urgent delivery.&quot;}" />
+          <abc:Input name="supplierReputation" type="number" description="A numerical rating representing the supplier's reputation." definition="{&quot;name&quot;:&quot;supplierReputation&quot;,&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;A numerical rating representing the supplier's reputation.&quot;}" />
+          <abc:Output name="finalPriority" type="string" description="" definition="{&quot;name&quot;:&quot;finalPriority&quot;,&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+        </abc:BusinessRule>
+      </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_19s99wl</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1jxt9fr</bpmn2:outgoing>
     </bpmn2:businessRuleTask>

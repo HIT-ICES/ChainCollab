@@ -1,4 +1,3 @@
-<?xml version='1.0' encoding='utf-8'?>
 <bpmn2:definitions xmlns:abc="https://chaincollab.io/schema/abc" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://bpmn.io/schema/bpmn">
   <bpmn2:message id="Message_05uqcn2" name="pay">
     <bpmn2:extensionElements>
@@ -128,7 +127,12 @@
     </bpmn2:choreographyTask>
     <bpmn2:sequenceFlow id="Flow_0t6gewr" sourceRef="Gateway_085e7pr" targetRef="ChoreographyTask_041ugdo" />
     <bpmn2:businessRuleTask id="Activity_1uktp5z" name="Cancel">
-      <bpmn2:documentation>{"inputs":[{"name":"OrderAmount","type":"number","description":""}],"outputs":[{"name":"CancelFee","type":"boolean","description":""}]}</bpmn2:documentation>
+      <bpmn2:extensionElements>
+        <abc:BusinessRule>
+          <abc:Input name="OrderAmount" type="number" description="" definition="{&quot;name&quot;:&quot;OrderAmount&quot;,&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;&quot;}" />
+          <abc:Output name="CancelFee" type="boolean" description="" definition="{&quot;name&quot;:&quot;CancelFee&quot;,&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;&quot;}" />
+        </abc:BusinessRule>
+      </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_00qh424</bpmn2:incoming>
       <bpmn2:outgoing>Flow_08kp8xk</bpmn2:outgoing>
     </bpmn2:businessRuleTask>

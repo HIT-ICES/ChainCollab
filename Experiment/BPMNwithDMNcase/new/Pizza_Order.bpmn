@@ -1,4 +1,3 @@
-<?xml version='1.0' encoding='utf-8'?>
 <bpmn2:definitions xmlns:abc="https://chaincollab.io/schema/abc" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://bpmn.io/schema/bpmn">
   <bpmn2:message id="Message_1hi03zn" name="Receipt">
     <bpmn2:extensionElements>
@@ -102,7 +101,12 @@
     </bpmn2:choreographyTask>
     <bpmn2:sequenceFlow id="Flow_01jdkr7" sourceRef="Gateway_1k9qf30" targetRef="ChoreographyTask_1bje0eq" />
     <bpmn2:businessRuleTask id="Activity_0pzravo" name="delivery">
-      <bpmn2:documentation>{"inputs":[{"name":"Address","type":"string","description":""}],"outputs":[{"name":"distance","type":"number","description":""}]}</bpmn2:documentation>
+      <bpmn2:extensionElements>
+        <abc:BusinessRule>
+          <abc:Input name="Address" type="string" description="" definition="{&quot;name&quot;:&quot;Address&quot;,&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+          <abc:Output name="distance" type="number" description="" definition="{&quot;name&quot;:&quot;distance&quot;,&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;&quot;}" />
+        </abc:BusinessRule>
+      </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0l16nm2</bpmn2:incoming>
       <bpmn2:outgoing>Flow_11h09u6</bpmn2:outgoing>
     </bpmn2:businessRuleTask>

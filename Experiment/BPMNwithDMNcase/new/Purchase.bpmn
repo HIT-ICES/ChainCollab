@@ -1,4 +1,3 @@
-<?xml version='1.0' encoding='utf-8'?>
 <bpmn2:definitions xmlns:abc="https://chaincollab.io/schema/abc" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://bpmn.io/schema/bpmn">
   <bpmn2:message id="Message_15b83n1" />
   <bpmn2:message id="Message_08ms1jj" name="sale">
@@ -289,7 +288,12 @@
     </bpmn2:endEvent>
     <bpmn2:sequenceFlow id="Flow_1w7smbz" sourceRef="ChoreographyTask_0huz12d" targetRef="Event_194zr5n" />
     <bpmn2:businessRuleTask id="Activity_12arovy">
-      <bpmn2:documentation>{"inputs":[{"name":"Price","type":"number","description":""}],"outputs":[{"name":"discount","type":"boolean","description":""}]}</bpmn2:documentation>
+      <bpmn2:extensionElements>
+        <abc:BusinessRule>
+          <abc:Input name="Price" type="number" description="" definition="{&quot;name&quot;:&quot;Price&quot;,&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;&quot;}" />
+          <abc:Output name="discount" type="boolean" description="" definition="{&quot;name&quot;:&quot;discount&quot;,&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;&quot;}" />
+        </abc:BusinessRule>
+      </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0lnnht6</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1ocsrxv</bpmn2:outgoing>
     </bpmn2:businessRuleTask>
