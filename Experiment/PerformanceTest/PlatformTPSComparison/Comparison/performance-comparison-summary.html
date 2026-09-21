@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fabric and Geth Performance Comparison</title>
+  <style>
+    body { margin: 0; background: #f7f8fa; color: #111827; font-family: Arial, Helvetica, sans-serif; }
+    main { max-width: 1180px; margin: 36px auto; padding: 0 18px; }
+    h1 { margin: 0 0 6px; font-size: 26px; font-weight: 600; }
+    h2 { margin: 24px 0 10px; font-size: 17px; font-weight: 600; }
+    .meta { margin: 0 0 22px; color: #5b6472; font-size: 13px; }
+    .chart-wrap { background: #fff; border: 1px solid #555; overflow-x: auto; }
+    .chart { width: 100%; min-width: 820px; height: auto; display: block; }
+    .axis { stroke: #555; stroke-width: 1; }
+    .grid { stroke: #d7dce2; stroke-width: 1; }
+    .fabric-line { fill: none; stroke: #1264d8; stroke-width: 2.5; }
+    .geth-line { fill: none; stroke: #d63838; stroke-width: 2.5; }
+    .fabric-point { fill: #1264d8; }
+    .geth-point { fill: #d63838; }
+    text { fill: #111827; font-size: 11px; text-anchor: middle; }
+    .label { text-anchor: start; font-weight: 600; font-size: 12px; }
+    .tick { fill: #5b6472; }
+    .fabric-label { fill: #1264d8; }
+    .geth-label { fill: #d63838; }
+    .legend text { font-size: 12px; text-anchor: start; }
+    table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #555; font-size: 12px; }
+    th, td { border: 1px solid #555; padding: 8px 10px; white-space: nowrap; }
+    th { background: #eee; font-weight: 600; text-align: center; }
+    td { text-align: right; }
+    td:first-child { text-align: left; }
+    a { color: #1264d8; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Fabric and Geth Performance Comparison</h1>
+    <p class="meta">Combined throughput curve from the selected Fabric and Geth summary results.</p>
+
+    <div class="chart-wrap">
+      <svg class="chart" viewBox="0 0 860 420" role="img" aria-label="Fabric and Geth throughput comparison">
+        <line class="axis" x1="70" y1="350" x2="800" y2="350" />
+        <line class="axis" x1="70" y1="40" x2="70" y2="350" />
+        <line class="grid" x1="70" y1="268.4" x2="800" y2="268.4" />
+        <line class="grid" x1="70" y1="186.8" x2="800" y2="186.8" />
+        <line class="grid" x1="70" y1="105.3" x2="800" y2="105.3" />
+        <text class="label" x="70" y="24">Throughput (TPS)</text>
+        <text class="tick" x="43" y="354">0</text>
+        <text class="tick" x="43" y="272">50</text>
+        <text class="tick" x="39" y="191">100</text>
+        <text class="tick" x="39" y="109">150</text>
+        <text class="tick" x="39" y="45">190</text>
+
+        <text class="tick" x="70.0" y="378">0</text>
+        <text class="tick" x="190.8" y="378">50</text>
+        <text class="tick" x="311.7" y="378">100</text>
+        <text class="tick" x="432.5" y="378">150</text>
+        <text class="tick" x="553.3" y="378">200</text>
+        <text class="tick" x="674.2" y="378">250</text>
+        <text class="tick" x="795.0" y="378">300</text>
+        <text class="label" x="665" y="402">Requested TPS</text>
+
+        <g class="legend">
+          <line class="fabric-line" x1="610" y1="48" x2="650" y2="48" />
+          <circle class="fabric-point" cx="630" cy="48" r="4" />
+          <text x="660" y="52">Fabric</text>
+          <line class="geth-line" x1="610" y1="70" x2="650" y2="70" />
+          <circle class="geth-point" cx="630" cy="70" r="4" />
+          <text x="660" y="74">Geth</text>
+        </g>
+
+        <polyline class="fabric-line" points="94.2,334.0 190.8,270.7 311.7,195.9 432.5,153.0 505.0,88.3 553.3,86.8 674.2,88.6 795.0,44.0" />
+        <polyline class="geth-line" points="94.2,336.1 190.8,322.8 311.7,322.3 432.5,297.6 505.0,318.5 553.3,304.2 674.2,313.1 795.0,316.1" />
+
+        <circle class="fabric-point" cx="94.2" cy="334.0" r="5"><title>Fabric 10 TPS: 9.8 TPS</title></circle>
+        <circle class="fabric-point" cx="190.8" cy="270.7" r="5"><title>Fabric 50 TPS: 48.6 TPS</title></circle>
+        <circle class="fabric-point" cx="311.7" cy="195.9" r="5"><title>Fabric 100 TPS: 94.5 TPS</title></circle>
+        <circle class="fabric-point" cx="432.5" cy="153.0" r="5"><title>Fabric 150 TPS: 120.7 TPS</title></circle>
+        <circle class="fabric-point" cx="505.0" cy="88.3" r="5"><title>Fabric 180 TPS: 160.5 TPS</title></circle>
+        <circle class="fabric-point" cx="553.3" cy="86.8" r="5"><title>Fabric 200 TPS: 161.4 TPS</title></circle>
+        <circle class="fabric-point" cx="674.2" cy="88.6" r="5"><title>Fabric 250 TPS: 160.3 TPS</title></circle>
+        <circle class="fabric-point" cx="795.0" cy="44.0" r="5"><title>Fabric 300 TPS: 187.6 TPS</title></circle>
+
+        <circle class="geth-point" cx="94.2" cy="336.1" r="5"><title>Geth 10 TPS: 8.5 TPS</title></circle>
+        <circle class="geth-point" cx="190.8" cy="322.8" r="5"><title>Geth 50 TPS: 16.7 TPS</title></circle>
+        <circle class="geth-point" cx="311.7" cy="322.3" r="5"><title>Geth 100 TPS: 17.0 TPS</title></circle>
+        <circle class="geth-point" cx="432.5" cy="297.6" r="5"><title>Geth 150 TPS: 32.1 TPS</title></circle>
+        <circle class="geth-point" cx="505.0" cy="318.5" r="5"><title>Geth 180 TPS: 19.3 TPS</title></circle>
+        <circle class="geth-point" cx="553.3" cy="304.2" r="5"><title>Geth 200 TPS: 28.1 TPS</title></circle>
+        <circle class="geth-point" cx="674.2" cy="313.1" r="5"><title>Geth 250 TPS: 22.6 TPS</title></circle>
+        <circle class="geth-point" cx="795.0" cy="316.1" r="5"><title>Geth 300 TPS: 20.8 TPS</title></circle>
+
+        <text class="fabric-label" x="94.2" y="326.0">9.8</text>
+        <text class="fabric-label" x="190.8" y="262.7">48.6</text>
+        <text class="fabric-label" x="311.7" y="187.9">94.5</text>
+        <text class="fabric-label" x="432.5" y="145.0">120.7</text>
+        <text class="fabric-label" x="505.0" y="80.3">160.5</text>
+        <text class="fabric-label" x="553.3" y="78.8">161.4</text>
+        <text class="fabric-label" x="674.2" y="80.6">160.3</text>
+        <text class="fabric-label" x="795.0" y="36.0">187.6</text>
+
+        <text class="geth-label" x="94.2" y="348.1">8.5</text>
+        <text class="geth-label" x="190.8" y="314.8">16.7</text>
+        <text class="geth-label" x="311.7" y="314.3">17.0</text>
+        <text class="geth-label" x="432.5" y="289.6">32.1</text>
+        <text class="geth-label" x="505.0" y="310.5">19.3</text>
+        <text class="geth-label" x="553.3" y="296.2">28.1</text>
+        <text class="geth-label" x="674.2" y="305.1">22.6</text>
+        <text class="geth-label" x="795.0" y="308.1">20.8</text>
+      </svg>
+    </div>
+
+    <h2>Selected Results</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Requested TPS</th>
+          <th>Fabric Throughput (TPS)</th>
+          <th>Geth Throughput (TPS)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>10</td><td>9.8</td><td>8.5</td></tr>
+        <tr><td>50</td><td>48.6</td><td>16.7</td></tr>
+        <tr><td>100</td><td>94.5</td><td>17.0</td></tr>
+        <tr><td>150</td><td>120.7</td><td>32.1</td></tr>
+        <tr><td>180</td><td>160.5</td><td>19.3</td></tr>
+        <tr><td>200</td><td>161.4</td><td>28.1</td></tr>
+        <tr><td>250</td><td>160.3</td><td>22.6</td></tr>
+        <tr><td>300</td><td>187.6</td><td>20.8</td></tr>
+      </tbody>
+    </table>
+
+    <p class="meta">
+      Source summaries:
+      <a href="../Fabric/performance-test-summary.html">Fabric summary</a>
+      and
+      <a href="../Geth/geth-performance-test-summary.html">Geth summary</a>.
+    </p>
+  </main>
+</body>
+</html>
