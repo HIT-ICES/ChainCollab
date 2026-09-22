@@ -1,0 +1,625 @@
+{
+  "contract_name": "GeneratedContract",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/SupplyChainPaper/dsl.b2c",
+  "participants": [
+    {
+      "name": "Participant_0w6qkdf",
+      "msp": "Bulk_buyerMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "role": "Bulk buyer",
+      "attributes": {
+        "role": "Bulk buyer"
+      }
+    },
+    {
+      "name": "Participant_19mgbdn",
+      "msp": "ManufacturerMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "role": "Manufacturer",
+      "attributes": {
+        "role": "Manufacturer"
+      }
+    },
+    {
+      "name": "Participant_09cjol2",
+      "msp": "MiddlemanMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "role": "Middleman",
+      "attributes": {
+        "role": "Middleman"
+      }
+    },
+    {
+      "name": "Participant_0sa2v7d",
+      "msp": "SupplierMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "role": "Supplier",
+      "attributes": {
+        "role": "Supplier"
+      }
+    },
+    {
+      "name": "Participant_19j1e3o",
+      "msp": "Special_carrierMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "role": "Special carrier",
+      "attributes": {
+        "role": "Special carrier"
+      }
+    }
+  ],
+  "globals": [
+    {
+      "name": "Confirm1",
+      "type": "bool"
+    },
+    {
+      "name": "Confirm2",
+      "type": "bool"
+    },
+    {
+      "name": "Confirm3",
+      "type": "string"
+    },
+    {
+      "name": "DeliveryConfirmation",
+      "type": "bool"
+    },
+    {
+      "name": "FinalPriority",
+      "type": "string"
+    },
+    {
+      "name": "NumberOfUnits",
+      "type": "int"
+    },
+    {
+      "name": "OrderDetails",
+      "type": "string"
+    },
+    {
+      "name": "ProductionStart",
+      "type": "string"
+    },
+    {
+      "name": "RequestId",
+      "type": "int"
+    },
+    {
+      "name": "SupplierReputation",
+      "type": "int"
+    },
+    {
+      "name": "SupplyOrderDetails",
+      "type": "string"
+    },
+    {
+      "name": "SupplyOrderId",
+      "type": "string"
+    },
+    {
+      "name": "TransportOrderId",
+      "type": "string"
+    },
+    {
+      "name": "Urgent",
+      "type": "bool"
+    }
+  ],
+  "messages": [
+    {
+      "name": "Message_04wmlqe",
+      "from": "Participant_19mgbdn",
+      "to": "Participant_0w6qkdf",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"productionStart\":{\"type\":\"string\",\"description\":\"Notification of the commencement of production, including the date and time\"}},\"required\":[\"productionStart\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_0cba4t6",
+      "from": "Participant_09cjol2",
+      "to": "Participant_0sa2v7d",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"supplyOrderId\":{\"type\":\"string\",\"description\":\" Identifier of the supply order being forwarded\"}},\"required\":[\"supplyOrderId\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_0d2xte5",
+      "from": "Participant_19j1e3o",
+      "to": "Participant_19mgbdn",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"deliveryConfirmation\":{\"type\":\"boolean\",\"description\":\"Confirmation of whether the supplies have been successfully delivered\"}},\"required\":[\"deliveryConfirmation\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_0hpha6h",
+      "from": "Participant_0sa2v7d",
+      "to": "Participant_19j1e3o",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"requestId\":{\"type\":\"number\",\"description\":\"Unique identifier of the request for additional details \"},\"supplierReputation\":{\"type\":\"number\",\"description\":\"A numerical rating representing the supplier's reputation.\"}},\"required\":[\"requestId\",\"supplierReputation\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_0pm90nx",
+      "from": "Participant_09cjol2",
+      "to": "Participant_19j1e3o",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"transportOrderId\":{\"type\":\"string\",\"description\":\"Identifier of the transport order being forwarded\"}},\"required\":[\"transportOrderId\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_0rwz1km",
+      "from": "Participant_19j1e3o",
+      "to": "Participant_0sa2v7d",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"requestId\":{\"type\":\"number\",\"description\":\" Unique identifier of the request for additional details \"},\"numberOfUnits\":{\"type\":\"number\",\"description\":\" Total number of units in the order requested\"},\"urgent\":{\"type\":\"boolean\",\"description\":\"Indicates whether the order requires urgent delivery.\"}},\"required\":[\"requestId\",\"numberOfUnits\",\"urgent\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_196q1fj",
+      "from": "Participant_19mgbdn",
+      "to": "Participant_0w6qkdf",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{},\"required\":[],\"files\":{\"deliveryNote\":{\"type\":\"file\",\"description\":\"A document confirming the delivery of goods\"}},\"file required\":[\"deliveryNote\"]}"
+    },
+    {
+      "name": "Message_1ajdm9l",
+      "from": "Participant_19mgbdn",
+      "to": "Participant_09cjol2",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"supplyOrderDetails\":{\"type\":\"string\",\"description\":\" Details of the supplies needed\"}},\"required\":[\"supplyOrderDetails\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_1dmeexg",
+      "from": "Participant_19j1e3o",
+      "to": "Participant_19mgbdn",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"confirm3\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_1dzkcn0",
+      "from": "Participant_19j1e3o",
+      "to": "Participant_19mgbdn",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"confirm2\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_1io2g9u",
+      "from": "Participant_0sa2v7d",
+      "to": "Participant_19j1e3o",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{},\"required\":[],\"files\":{\"waybill\":{\"type\":\"file\",\"description\":\"Digital or physical waybill document\\uff0cdetailing the shipment contents and destination.\"}},\"file required\":[\"waybill\"]}"
+    },
+    {
+      "name": "Message_1oxmq1k",
+      "from": "Participant_19j1e3o",
+      "to": "Participant_19mgbdn",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"confirm1\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_1wswgqu",
+      "from": "Participant_0w6qkdf",
+      "to": "Participant_19mgbdn",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"orderDetails\":{\"type\":\"string\",\"description\":\"Detailed list of goods ordered\"}},\"required\":[\"orderDetails\"],\"files\":{},\"file required\":[]}"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "Gateway_1cr0nma",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Gateway_0ep8cuh",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Gateway_0onpe6x",
+      "type": "parallel",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Gateway_1fbifca",
+      "type": "parallel",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "Event_06sexe6",
+      "initial_state": "READY"
+    },
+    {
+      "name": "Event_13pbqdz",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [
+    {
+      "name": "Activity_0rm8bkp",
+      "dmn": "Activity_0rm8bkp.dmn",
+      "decision": "Activity_0rm8bkp_DecisionID",
+      "input_mapping": [
+        {
+          "dmn_param": "numberOfUnits",
+          "global": "NumberOfUnits"
+        },
+        {
+          "dmn_param": "urgent",
+          "global": "Urgent"
+        },
+        {
+          "dmn_param": "supplierReputation",
+          "global": "SupplierReputation"
+        }
+      ],
+      "output_mapping": [
+        {
+          "dmn_param": "finalPriority",
+          "global": "FinalPriority"
+        }
+      ],
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "oracletasks": [],
+  "flows": [
+    {
+      "kind": "start_flow",
+      "trigger": {
+        "type": "start",
+        "name": "Event_06sexe6",
+        "state": "ready"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1wswgqu"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_1wswgqu",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1ajdm9l"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_1ajdm9l",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_0onpe6x"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0cba4t6",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1fbifca"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0pm90nx",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1fbifca"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0rwz1km",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0hpha6h"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0hpha6h",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1io2g9u"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_1io2g9u",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Activity_0rm8bkp"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0d2xte5",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1cr0nma"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_04wmlqe",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_196q1fj"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_196q1fj",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Event_13pbqdz"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_1oxmq1k",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1cr0nma"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_1dzkcn0",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1cr0nma"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_1dmeexg",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1cr0nma"
+        }
+      ]
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "Gateway_1cr0nma",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_04wmlqe"
+        }
+      ]
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "Gateway_0ep8cuh",
+        "state": "completed"
+      },
+      "conditions": [
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_1oxmq1k"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "FinalPriority",
+          "relation": "==",
+          "value": "\"Low\""
+        },
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_1dmeexg"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "FinalPriority",
+          "relation": "==",
+          "value": "\"High\""
+        },
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_1dzkcn0"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "FinalPriority",
+          "relation": "==",
+          "value": "\"Medium\""
+        },
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_0d2xte5"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "FinalPriority",
+          "relation": "==",
+          "value": "\"VeryLow\""
+        }
+      ],
+      "actions": []
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "Gateway_0onpe6x",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0cba4t6"
+        },
+        {
+          "kind": "enable",
+          "target": "Message_0pm90nx"
+        }
+      ]
+    },
+    {
+      "kind": "parallel_join",
+      "trigger": {
+        "type": "parallel",
+        "name": "Gateway_1fbifca",
+        "state": "await"
+      },
+      "conditions": [
+        {
+          "condition_kind": "await_all",
+          "sources": [
+            "Message_0cba4t6",
+            "Message_0pm90nx"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0rwz1km"
+        }
+      ]
+    },
+    {
+      "kind": "rule_flow",
+      "trigger": {
+        "type": "businessrule",
+        "name": "Activity_0rm8bkp",
+        "state": "done"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_0ep8cuh"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,259 @@
+contract GeneratedContract {
+
+    participants {
+        participant Participant_0w6qkdf {
+            msp "Bulk_buyerMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Bulk buyer"
+
+            }
+        }
+        participant Participant_19mgbdn {
+            msp "ManufacturerMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Manufacturer"
+
+            }
+        }
+        participant Participant_09cjol2 {
+            msp "MiddlemanMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Middleman"
+
+            }
+        }
+        participant Participant_0sa2v7d {
+            msp "SupplierMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Supplier"
+
+            }
+        }
+        participant Participant_19j1e3o {
+            msp "Special_carrierMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Special carrier"
+
+            }
+        }
+
+    }
+
+
+
+    globals {
+        Confirm1: bool
+        Confirm2: bool
+        Confirm3: string
+        DeliveryConfirmation: bool
+        FinalPriority: string
+        NumberOfUnits: int
+        OrderDetails: string
+        ProductionStart: string
+        RequestId: int
+        SupplierReputation: int
+        SupplyOrderDetails: string
+        SupplyOrderId: string
+        TransportOrderId: string
+        Urgent: bool
+
+    }
+
+
+
+    messages {
+        message Message_04wmlqe from Participant_19mgbdn to Participant_0w6qkdf {
+            initial state INACTIVE
+            schema "{\"properties\":{\"productionStart\":{\"type\":\"string\",\"description\":\"Notification of the commencement of production, including the date and time\"}},\"required\":[\"productionStart\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_0cba4t6 from Participant_09cjol2 to Participant_0sa2v7d {
+            initial state INACTIVE
+            schema "{\"properties\":{\"supplyOrderId\":{\"type\":\"string\",\"description\":\" Identifier of the supply order being forwarded\"}},\"required\":[\"supplyOrderId\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_0d2xte5 from Participant_19j1e3o to Participant_19mgbdn {
+            initial state INACTIVE
+            schema "{\"properties\":{\"deliveryConfirmation\":{\"type\":\"boolean\",\"description\":\"Confirmation of whether the supplies have been successfully delivered\"}},\"required\":[\"deliveryConfirmation\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_0hpha6h from Participant_0sa2v7d to Participant_19j1e3o {
+            initial state INACTIVE
+            schema "{\"properties\":{\"requestId\":{\"type\":\"number\",\"description\":\"Unique identifier of the request for additional details \"},\"supplierReputation\":{\"type\":\"number\",\"description\":\"A numerical rating representing the supplier's reputation.\"}},\"required\":[\"requestId\",\"supplierReputation\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_0pm90nx from Participant_09cjol2 to Participant_19j1e3o {
+            initial state INACTIVE
+            schema "{\"properties\":{\"transportOrderId\":{\"type\":\"string\",\"description\":\"Identifier of the transport order being forwarded\"}},\"required\":[\"transportOrderId\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_0rwz1km from Participant_19j1e3o to Participant_0sa2v7d {
+            initial state INACTIVE
+            schema "{\"properties\":{\"requestId\":{\"type\":\"number\",\"description\":\" Unique identifier of the request for additional details \"},\"numberOfUnits\":{\"type\":\"number\",\"description\":\" Total number of units in the order requested\"},\"urgent\":{\"type\":\"boolean\",\"description\":\"Indicates whether the order requires urgent delivery.\"}},\"required\":[\"requestId\",\"numberOfUnits\",\"urgent\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_196q1fj from Participant_19mgbdn to Participant_0w6qkdf {
+            initial state INACTIVE
+            schema "{\"properties\":{},\"required\":[],\"files\":{\"deliveryNote\":{\"type\":\"file\",\"description\":\"A document confirming the delivery of goods\"}},\"file required\":[\"deliveryNote\"]}"
+        }
+        message Message_1ajdm9l from Participant_19mgbdn to Participant_09cjol2 {
+            initial state INACTIVE
+            schema "{\"properties\":{\"supplyOrderDetails\":{\"type\":\"string\",\"description\":\" Details of the supplies needed\"}},\"required\":[\"supplyOrderDetails\"],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1dmeexg from Participant_19j1e3o to Participant_19mgbdn {
+            initial state INACTIVE
+            schema "{\"properties\":{\"confirm3\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1dzkcn0 from Participant_19j1e3o to Participant_19mgbdn {
+            initial state INACTIVE
+            schema "{\"properties\":{\"confirm2\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1io2g9u from Participant_0sa2v7d to Participant_19j1e3o {
+            initial state INACTIVE
+            schema "{\"properties\":{},\"required\":[],\"files\":{\"waybill\":{\"type\":\"file\",\"description\":\"Digital or physical waybill document\uff0cdetailing the shipment contents and destination.\"}},\"file required\":[\"waybill\"]}"
+        }
+        message Message_1oxmq1k from Participant_19j1e3o to Participant_19mgbdn {
+            initial state INACTIVE
+            schema "{\"properties\":{\"confirm1\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1wswgqu from Participant_0w6qkdf to Participant_19mgbdn {
+            initial state INACTIVE
+            schema "{\"properties\":{\"orderDetails\":{\"type\":\"string\",\"description\":\"Detailed list of goods ordered\"}},\"required\":[\"orderDetails\"],\"files\":{},\"file required\":[]}"
+        }
+
+    }
+
+
+
+    gateways {
+        gateway Gateway_1cr0nma {
+            type exclusive
+            initial state INACTIVE
+        }
+        gateway Gateway_0ep8cuh {
+            type exclusive
+            initial state INACTIVE
+        }
+        gateway Gateway_0onpe6x {
+            type parallel
+            initial state INACTIVE
+        }
+        gateway Gateway_1fbifca {
+            type parallel
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    events {
+        event Event_06sexe6 {
+            initial state READY
+        }
+        event Event_13pbqdz {
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    businessrules {
+        businessrule Activity_0rm8bkp {
+            dmn "Activity_0rm8bkp.dmn"
+            decision "Activity_0rm8bkp_DecisionID"
+            input mapping {
+                numberOfUnits -> NumberOfUnits
+                urgent -> Urgent
+                supplierReputation -> SupplierReputation
+
+            }
+            output mapping {
+                finalPriority -> FinalPriority
+
+            }
+
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    oracletasks {
+
+    }
+
+
+
+    flows {
+        start event Event_06sexe6 enables Message_1wswgqu;
+
+        when message Message_1wswgqu completed
+        then enable Message_1ajdm9l;
+        when message Message_1ajdm9l completed
+        then enable Gateway_0onpe6x;
+        when message Message_0cba4t6 completed
+        then enable Gateway_1fbifca;
+        when message Message_0pm90nx completed
+        then enable Gateway_1fbifca;
+        when message Message_0rwz1km completed
+        then enable Message_0hpha6h;
+        when message Message_0hpha6h completed
+        then enable Message_1io2g9u;
+        when message Message_1io2g9u completed
+        then enable Activity_0rm8bkp;
+        when message Message_0d2xte5 completed
+        then enable Gateway_1cr0nma;
+        when message Message_04wmlqe completed
+        then enable Message_196q1fj;
+        when message Message_196q1fj completed
+        then enable Event_13pbqdz;
+        when message Message_1oxmq1k completed
+        then enable Gateway_1cr0nma;
+        when message Message_1dzkcn0 completed
+        then enable Gateway_1cr0nma;
+        when message Message_1dmeexg completed
+        then enable Gateway_1cr0nma;
+
+        when gateway Gateway_1cr0nma completed
+        then enable Message_04wmlqe;
+        when gateway Gateway_0ep8cuh completed
+        choose {
+            if FinalPriority == "\"Low\""
+            then enable Message_1oxmq1k;
+            if FinalPriority == "\"High\""
+            then enable Message_1dmeexg;
+            if FinalPriority == "\"Medium\""
+            then enable Message_1dzkcn0;
+            if FinalPriority == "\"VeryLow\""
+            then enable Message_0d2xte5;
+
+        }
+        when gateway Gateway_0onpe6x completed
+        then enable Message_0cba4t6, enable Message_0pm90nx;
+
+        parallel gateway Gateway_1fbifca await Message_0cba4t6, Message_0pm90nx
+        then enable Message_0rwz1km;
+
+        when businessrule Activity_0rm8bkp done
+        then enable Gateway_0ep8cuh;
+
+    }
+
+}

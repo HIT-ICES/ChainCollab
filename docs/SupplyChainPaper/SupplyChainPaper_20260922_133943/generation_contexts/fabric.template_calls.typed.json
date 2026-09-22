@@ -1,0 +1,3968 @@
+[
+  {
+    "template": "flows/start_event.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "event_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Event_06sexe6"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "next_state_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeMsgState(ctx, instance, \"Message_1wswgqu\", ENABLED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "pre_activate_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "actions/set_global_variable.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "assignments"
+          },
+          "value": {
+            "type": "builtins.list",
+            "items": [
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "ProductionStart"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "value"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "productionStart"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_send.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_04wmlqe"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "state_change_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeMsgState(ctx, instance, \"Message_04wmlqe\", COMPLETED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "more_parameters"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ", productionStart string"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "parameter_assignments"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)\n\tif readGloabolError != nil {\n\t\tfmt.Println(readGloabolError.Error())\n\t\treturn readGloabolError\n\t}\n\tglobalMemory.ProductionStart = productionStart\n\tsetGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)\n\tif setGloabolErrror != nil {\n\t\tfmt.Println(setGloabolErrror.Error())\n\t\treturn setGloabolErrror\n\t}\n"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_complete.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_04wmlqe"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "next_state_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeMsgState(ctx, instance, \"Message_196q1fj\", ENABLED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "pre_activate_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "actions/set_global_variable.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "assignments"
+          },
+          "value": {
+            "type": "builtins.list",
+            "items": [
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "SupplyOrderId"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "value"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "supplyOrderId"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_send.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_0cba4t6"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "state_change_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeMsgState(ctx, instance, \"Message_0cba4t6\", COMPLETED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "more_parameters"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ", supplyOrderId string"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "parameter_assignments"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)\n\tif readGloabolError != nil {\n\t\tfmt.Println(readGloabolError.Error())\n\t\treturn readGloabolError\n\t}\n\tglobalMemory.SupplyOrderId = supplyOrderId\n\tsetGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)\n\tif setGloabolErrror != nil {\n\t\tfmt.Println(setGloabolErrror.Error())\n\t\treturn setGloabolErrror\n\t}\n"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_complete.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_0cba4t6"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "next_state_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeGtwState(ctx, instance, \"Gateway_1fbifca\", ENABLED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "pre_activate_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "actions/set_global_variable.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "assignments"
+          },
+          "value": {
+            "type": "builtins.list",
+            "items": [
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "DeliveryConfirmation"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "value"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "deliveryConfirmation"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_send.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_0d2xte5"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "state_change_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeMsgState(ctx, instance, \"Message_0d2xte5\", COMPLETED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "more_parameters"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ", deliveryConfirmation bool"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "parameter_assignments"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)\n\tif readGloabolError != nil {\n\t\tfmt.Println(readGloabolError.Error())\n\t\treturn readGloabolError\n\t}\n\tglobalMemory.DeliveryConfirmation = deliveryConfirmation\n\tsetGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)\n\tif setGloabolErrror != nil {\n\t\tfmt.Println(setGloabolErrror.Error())\n\t\treturn setGloabolErrror\n\t}\n"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_complete.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_0d2xte5"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "next_state_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeGtwState(ctx, instance, \"Gateway_1cr0nma\", ENABLED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "pre_activate_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "actions/set_global_variable.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "assignments"
+          },
+          "value": {
+            "type": "builtins.list",
+            "items": [
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "RequestId"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "value"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "requestId"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "SupplierReputation"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "value"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "supplierReputation"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_send.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_0hpha6h"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "state_change_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeMsgState(ctx, instance, \"Message_0hpha6h\", COMPLETED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "more_parameters"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ", requestId int, supplierReputation int"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "parameter_assignments"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)\n\tif readGloabolError != nil {\n\t\tfmt.Println(readGloabolError.Error())\n\t\treturn readGloabolError\n\t}\n\tglobalMemory.RequestId = requestId\n\tglobalMemory.SupplierReputation = supplierReputation\n\tsetGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)\n\tif setGloabolErrror != nil {\n\t\tfmt.Println(setGloabolErrror.Error())\n\t\treturn setGloabolErrror\n\t}\n"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_complete.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_0hpha6h"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "next_state_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeMsgState(ctx, instance, \"Message_1io2g9u\", ENABLED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "pre_activate_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "actions/set_global_variable.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "assignments"
+          },
+          "value": {
+            "type": "builtins.list",
+            "items": [
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "TransportOrderId"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "value"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "transportOrderId"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_send.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_0pm90nx"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "state_change_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeMsgState(ctx, instance, \"Message_0pm90nx\", COMPLETED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "more_parameters"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ", transportOrderId string"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "parameter_assignments"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)\n\tif readGloabolError != nil {\n\t\tfmt.Println(readGloabolError.Error())\n\t\treturn readGloabolError\n\t}\n\tglobalMemory.TransportOrderId = transportOrderId\n\tsetGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)\n\tif setGloabolErrror != nil {\n\t\tfmt.Println(setGloabolErrror.Error())\n\t\treturn setGloabolErrror\n\t}\n"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_complete.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_0pm90nx"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "next_state_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeGtwState(ctx, instance, \"Gateway_1fbifca\", ENABLED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "pre_activate_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "actions/set_global_variable.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "assignments"
+          },
+          "value": {
+            "type": "builtins.list",
+            "items": [
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "NumberOfUnits"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "value"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "numberOfUnits"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "RequestId"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "value"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "requestId"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "Urgent"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "value"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "urgent"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_send.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_0rwz1km"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "state_change_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeMsgState(ctx, instance, \"Message_0rwz1km\", COMPLETED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "more_parameters"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ", numberOfUnits int, requestId int, urgent bool"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "parameter_assignments"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)\n\tif readGloabolError != nil {\n\t\tfmt.Println(readGloabolError.Error())\n\t\treturn readGloabolError\n\t}\n\tglobalMemory.NumberOfUnits = numberOfUnits\n\tglobalMemory.RequestId = requestId\n\tglobalMemory.Urgent = urgent\n\tsetGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)\n\tif setGloabolErrror != nil {\n\t\tfmt.Println(setGloabolErrror.Error())\n\t\treturn setGloabolErrror\n\t}\n"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_complete.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_0rwz1km"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "next_state_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeMsgState(ctx, instance, \"Message_0hpha6h\", ENABLED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "pre_activate_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_send.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_196q1fj"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "state_change_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeMsgState(ctx, instance, \"Message_196q1fj\", COMPLETED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "more_parameters"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "parameter_assignments"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_complete.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_196q1fj"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "next_state_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeEventState(ctx, instance, \"Event_13pbqdz\", ENABLED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "pre_activate_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "actions/set_global_variable.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "assignments"
+          },
+          "value": {
+            "type": "builtins.list",
+            "items": [
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "SupplyOrderDetails"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "value"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "supplyOrderDetails"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_send.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_1ajdm9l"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "state_change_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeMsgState(ctx, instance, \"Message_1ajdm9l\", COMPLETED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "more_parameters"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ", supplyOrderDetails string"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "parameter_assignments"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)\n\tif readGloabolError != nil {\n\t\tfmt.Println(readGloabolError.Error())\n\t\treturn readGloabolError\n\t}\n\tglobalMemory.SupplyOrderDetails = supplyOrderDetails\n\tsetGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)\n\tif setGloabolErrror != nil {\n\t\tfmt.Println(setGloabolErrror.Error())\n\t\treturn setGloabolErrror\n\t}\n"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_complete.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_1ajdm9l"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "next_state_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeGtwState(ctx, instance, \"Gateway_0onpe6x\", ENABLED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "pre_activate_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "actions/set_global_variable.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "assignments"
+          },
+          "value": {
+            "type": "builtins.list",
+            "items": [
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "Confirm3"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "value"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "confirm3"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_send.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_1dmeexg"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "state_change_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeMsgState(ctx, instance, \"Message_1dmeexg\", COMPLETED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "more_parameters"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ", confirm3 string"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "parameter_assignments"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)\n\tif readGloabolError != nil {\n\t\tfmt.Println(readGloabolError.Error())\n\t\treturn readGloabolError\n\t}\n\tglobalMemory.Confirm3 = confirm3\n\tsetGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)\n\tif setGloabolErrror != nil {\n\t\tfmt.Println(setGloabolErrror.Error())\n\t\treturn setGloabolErrror\n\t}\n"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_complete.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_1dmeexg"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "next_state_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeGtwState(ctx, instance, \"Gateway_1cr0nma\", ENABLED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "pre_activate_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "actions/set_global_variable.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "assignments"
+          },
+          "value": {
+            "type": "builtins.list",
+            "items": [
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "Confirm2"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "value"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "confirm2"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_send.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_1dzkcn0"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "state_change_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeMsgState(ctx, instance, \"Message_1dzkcn0\", COMPLETED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "more_parameters"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ", confirm2 bool"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "parameter_assignments"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)\n\tif readGloabolError != nil {\n\t\tfmt.Println(readGloabolError.Error())\n\t\treturn readGloabolError\n\t}\n\tglobalMemory.Confirm2 = confirm2\n\tsetGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)\n\tif setGloabolErrror != nil {\n\t\tfmt.Println(setGloabolErrror.Error())\n\t\treturn setGloabolErrror\n\t}\n"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_complete.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_1dzkcn0"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "next_state_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeGtwState(ctx, instance, \"Gateway_1cr0nma\", ENABLED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "pre_activate_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_send.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_1io2g9u"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "state_change_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeMsgState(ctx, instance, \"Message_1io2g9u\", COMPLETED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "more_parameters"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "parameter_assignments"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_complete.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_1io2g9u"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "next_state_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeBusinessRuleState(ctx, instance, \"Activity_0rm8bkp\", ENABLED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "pre_activate_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "actions/set_global_variable.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "assignments"
+          },
+          "value": {
+            "type": "builtins.list",
+            "items": [
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "Confirm1"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "value"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "confirm1"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_send.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_1oxmq1k"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "state_change_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeMsgState(ctx, instance, \"Message_1oxmq1k\", COMPLETED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "more_parameters"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ", confirm1 bool"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "parameter_assignments"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)\n\tif readGloabolError != nil {\n\t\tfmt.Println(readGloabolError.Error())\n\t\treturn readGloabolError\n\t}\n\tglobalMemory.Confirm1 = confirm1\n\tsetGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)\n\tif setGloabolErrror != nil {\n\t\tfmt.Println(setGloabolErrror.Error())\n\t\treturn setGloabolErrror\n\t}\n"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_complete.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_1oxmq1k"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "next_state_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeGtwState(ctx, instance, \"Gateway_1cr0nma\", ENABLED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "pre_activate_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "actions/set_global_variable.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "assignments"
+          },
+          "value": {
+            "type": "builtins.list",
+            "items": [
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "OrderDetails"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "value"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "orderDetails"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_send.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_1wswgqu"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "state_change_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeMsgState(ctx, instance, \"Message_1wswgqu\", COMPLETED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "more_parameters"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ", orderDetails string"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "parameter_assignments"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)\n\tif readGloabolError != nil {\n\t\tfmt.Println(readGloabolError.Error())\n\t\treturn readGloabolError\n\t}\n\tglobalMemory.OrderDetails = orderDetails\n\tsetGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)\n\tif setGloabolErrror != nil {\n\t\tfmt.Println(setGloabolErrror.Error())\n\t\treturn setGloabolErrror\n\t}\n"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/message_complete.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "message_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Message_1wswgqu"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "next_state_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeMsgState(ctx, instance, \"Message_1ajdm9l\", ENABLED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "pre_activate_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "after_hooks"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/gateway.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "gateway_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Gateway_1cr0nma"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "action_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeMsgState(ctx, instance, \"Message_04wmlqe\", ENABLED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "conditional_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "parallel_guard"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/gateway.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "gateway_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Gateway_0ep8cuh"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "action_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tif instance.InstanceStateMemory.FinalPriority == \"Low\" {\n\t\tcc.ChangeMsgState(ctx, instance, \"Message_1oxmq1k\", ENABLED)\n\t} else if instance.InstanceStateMemory.FinalPriority == \"High\" {\n\t\tcc.ChangeMsgState(ctx, instance, \"Message_1dmeexg\", ENABLED)\n\t} else if instance.InstanceStateMemory.FinalPriority == \"Medium\" {\n\t\tcc.ChangeMsgState(ctx, instance, \"Message_1dzkcn0\", ENABLED)\n\t} else if instance.InstanceStateMemory.FinalPriority == \"VeryLow\" {\n\t\tcc.ChangeMsgState(ctx, instance, \"Message_0d2xte5\", ENABLED)\n\t}\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "conditional_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tif instance.InstanceStateMemory.FinalPriority == \"Low\" {\n\t\tcc.ChangeMsgState(ctx, instance, \"Message_1oxmq1k\", ENABLED)\n\t} else if instance.InstanceStateMemory.FinalPriority == \"High\" {\n\t\tcc.ChangeMsgState(ctx, instance, \"Message_1dmeexg\", ENABLED)\n\t} else if instance.InstanceStateMemory.FinalPriority == \"Medium\" {\n\t\tcc.ChangeMsgState(ctx, instance, \"Message_1dzkcn0\", ENABLED)\n\t} else if instance.InstanceStateMemory.FinalPriority == \"VeryLow\" {\n\t\tcc.ChangeMsgState(ctx, instance, \"Message_0d2xte5\", ENABLED)\n\t}\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "parallel_guard"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/gateway.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "gateway_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Gateway_0onpe6x"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "action_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeMsgState(ctx, instance, \"Message_0cba4t6\", ENABLED)\n\tcc.ChangeMsgState(ctx, instance, \"Message_0pm90nx\", ENABLED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "conditional_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "parallel_guard"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/gateway.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "gateway_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Gateway_1fbifca"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "action_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tcc.ChangeMsgState(ctx, instance, \"Message_0rwz1km\", ENABLED)\n"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "conditional_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "parallel_guard"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "\tif !(instance.InstanceMessages[\"Message_0cba4t6\"].MsgState == COMPLETED && instance.InstanceMessages[\"Message_0pm90nx\"].MsgState == COMPLETED) {\n\t\treturn fmt.Errorf(\"Parallel gateway prerequisite not met\")\n\t}\n"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "flows/event.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "event_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "Event_13pbqdz"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "action_block"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": ""
+          }
+        }
+      ]
+    }
+  },
+  {
+    "template": "contract.go.jinja",
+    "context": {
+      "type": "builtins.dict",
+      "entries": [
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "package_name"
+          },
+          "value": {
+            "type": "builtins.str",
+            "value": "chaincode"
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "imports"
+          },
+          "value": {
+            "type": "builtins.list",
+            "items": [
+              {
+                "type": "builtins.str",
+                "value": "encoding/json"
+              },
+              {
+                "type": "builtins.str",
+                "value": "errors"
+              },
+              {
+                "type": "builtins.str",
+                "value": "fmt"
+              },
+              {
+                "type": "builtins.str",
+                "value": "strconv"
+              },
+              {
+                "type": "builtins.str",
+                "value": "reflect"
+              },
+              {
+                "type": "builtins.str",
+                "value": "crypto/sha256"
+              },
+              {
+                "type": "builtins.str",
+                "value": "encoding/hex"
+              },
+              {
+                "type": "builtins.str",
+                "value": "github.com/hyperledger/fabric-chaincode-go/shim"
+              },
+              {
+                "type": "builtins.str",
+                "value": "github.com/hyperledger/fabric-contract-api-go/contractapi"
+              },
+              {
+                "type": "builtins.str",
+                "value": "strings"
+              },
+              {
+                "type": "builtins.str",
+                "value": "IBC/Oracle/oracle"
+              }
+            ]
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "globals"
+          },
+          "value": {
+            "type": "builtins.list",
+            "items": [
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "Confirm1"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "type"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "bool"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "Confirm2"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "type"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "bool"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "Confirm3"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "type"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "string"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "DeliveryConfirmation"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "type"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "bool"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "FinalPriority"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "type"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "string"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "NumberOfUnits"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "type"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "int"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "OrderDetails"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "type"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "string"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "ProductionStart"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "type"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "string"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "RequestId"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "type"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "int"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "SupplierReputation"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "type"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "int"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "SupplyOrderDetails"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "type"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "string"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "SupplyOrderId"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "type"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "string"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "TransportOrderId"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "type"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "string"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "Urgent"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "type"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "bool"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "init_params"
+          },
+          "value": {
+            "type": "builtins.list",
+            "items": [
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "Participant_0w6qkdf"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "type"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "Participant"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "Participant_19mgbdn"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "type"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "Participant"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "Participant_09cjol2"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "type"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "Participant"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "Participant_0sa2v7d"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "type"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "Participant"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "Participant_19j1e3o"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "type"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "Participant"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "Activity_0rm8bkp_DecisionID"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "type"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "string"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "Activity_0rm8bkp_ParamMapping"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "type"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "map[string]string"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "Activity_0rm8bkp_Content"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "type"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "string"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "create_instance"
+          },
+          "value": {
+            "type": "builtins.dict",
+            "entries": [
+              {
+                "key": {
+                  "type": "builtins.str",
+                  "value": "start_event"
+                },
+                "value": {
+                  "type": "builtins.str",
+                  "value": "Event_06sexe6"
+                }
+              },
+              {
+                "key": {
+                  "type": "builtins.str",
+                  "value": "end_events"
+                },
+                "value": {
+                  "type": "builtins.list",
+                  "items": [
+                    {
+                      "type": "builtins.str",
+                      "value": "Event_13pbqdz"
+                    }
+                  ]
+                }
+              },
+              {
+                "key": {
+                  "type": "builtins.str",
+                  "value": "oracle_tasks"
+                },
+                "value": {
+                  "type": "builtins.list",
+                  "items": []
+                }
+              },
+              {
+                "key": {
+                  "type": "builtins.str",
+                  "value": "messages"
+                },
+                "value": {
+                  "type": "builtins.list",
+                  "items": [
+                    {
+                      "type": "builtins.dict",
+                      "entries": [
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "name"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Message_04wmlqe"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "sender"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_19mgbdn"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "receiver"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_0w6qkdf"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "properties"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "{\"schema\": \"{\\\"properties\\\":{\\\"productionStart\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"Notification of the commencement of production, including the date and time\\\"}},\\\"required\\\":[\\\"productionStart\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "builtins.dict",
+                      "entries": [
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "name"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Message_0cba4t6"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "sender"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_09cjol2"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "receiver"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_0sa2v7d"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "properties"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "{\"schema\": \"{\\\"properties\\\":{\\\"supplyOrderId\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\" Identifier of the supply order being forwarded\\\"}},\\\"required\\\":[\\\"supplyOrderId\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "builtins.dict",
+                      "entries": [
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "name"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Message_0d2xte5"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "sender"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_19j1e3o"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "receiver"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_19mgbdn"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "properties"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "{\"schema\": \"{\\\"properties\\\":{\\\"deliveryConfirmation\\\":{\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"Confirmation of whether the supplies have been successfully delivered\\\"}},\\\"required\\\":[\\\"deliveryConfirmation\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "builtins.dict",
+                      "entries": [
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "name"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Message_0hpha6h"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "sender"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_0sa2v7d"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "receiver"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_19j1e3o"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "properties"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "{\"schema\": \"{\\\"properties\\\":{\\\"requestId\\\":{\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\"Unique identifier of the request for additional details \\\"},\\\"supplierReputation\\\":{\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\"A numerical rating representing the supplier's reputation.\\\"}},\\\"required\\\":[\\\"requestId\\\",\\\"supplierReputation\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "builtins.dict",
+                      "entries": [
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "name"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Message_0pm90nx"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "sender"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_09cjol2"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "receiver"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_19j1e3o"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "properties"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "{\"schema\": \"{\\\"properties\\\":{\\\"transportOrderId\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"Identifier of the transport order being forwarded\\\"}},\\\"required\\\":[\\\"transportOrderId\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "builtins.dict",
+                      "entries": [
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "name"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Message_0rwz1km"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "sender"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_19j1e3o"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "receiver"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_0sa2v7d"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "properties"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "{\"schema\": \"{\\\"properties\\\":{\\\"requestId\\\":{\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\" Unique identifier of the request for additional details \\\"},\\\"numberOfUnits\\\":{\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\" Total number of units in the order requested\\\"},\\\"urgent\\\":{\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"Indicates whether the order requires urgent delivery.\\\"}},\\\"required\\\":[\\\"requestId\\\",\\\"numberOfUnits\\\",\\\"urgent\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "builtins.dict",
+                      "entries": [
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "name"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Message_196q1fj"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "sender"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_19mgbdn"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "receiver"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_0w6qkdf"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "properties"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "{\"schema\": \"{\\\"properties\\\":{},\\\"required\\\":[],\\\"files\\\":{\\\"deliveryNote\\\":{\\\"type\\\":\\\"file\\\",\\\"description\\\":\\\"A document confirming the delivery of goods\\\"}},\\\"file required\\\":[\\\"deliveryNote\\\"]}\"}"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "builtins.dict",
+                      "entries": [
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "name"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Message_1ajdm9l"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "sender"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_19mgbdn"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "receiver"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_09cjol2"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "properties"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "{\"schema\": \"{\\\"properties\\\":{\\\"supplyOrderDetails\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\" Details of the supplies needed\\\"}},\\\"required\\\":[\\\"supplyOrderDetails\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "builtins.dict",
+                      "entries": [
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "name"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Message_1dmeexg"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "sender"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_19j1e3o"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "receiver"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_19mgbdn"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "properties"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "{\"schema\": \"{\\\"properties\\\":{\\\"confirm3\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "builtins.dict",
+                      "entries": [
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "name"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Message_1dzkcn0"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "sender"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_19j1e3o"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "receiver"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_19mgbdn"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "properties"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "{\"schema\": \"{\\\"properties\\\":{\\\"confirm2\\\":{\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "builtins.dict",
+                      "entries": [
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "name"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Message_1io2g9u"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "sender"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_0sa2v7d"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "receiver"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_19j1e3o"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "properties"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "{\"schema\": \"{\\\"properties\\\":{},\\\"required\\\":[],\\\"files\\\":{\\\"waybill\\\":{\\\"type\\\":\\\"file\\\",\\\"description\\\":\\\"Digital or physical waybill document\\\\uff0cdetailing the shipment contents and destination.\\\"}},\\\"file required\\\":[\\\"waybill\\\"]}\"}"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "builtins.dict",
+                      "entries": [
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "name"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Message_1oxmq1k"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "sender"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_19j1e3o"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "receiver"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_19mgbdn"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "properties"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "{\"schema\": \"{\\\"properties\\\":{\\\"confirm1\\\":{\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\"}"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "builtins.dict",
+                      "entries": [
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "name"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Message_1wswgqu"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "sender"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_0w6qkdf"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "receiver"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_19mgbdn"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "properties"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "{\"schema\": \"{\\\"properties\\\":{\\\"orderDetails\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"Detailed list of goods ordered\\\"}},\\\"required\\\":[\\\"orderDetails\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\"}"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "key": {
+                  "type": "builtins.str",
+                  "value": "gateways"
+                },
+                "value": {
+                  "type": "builtins.list",
+                  "items": [
+                    {
+                      "type": "builtins.str",
+                      "value": "Gateway_1cr0nma"
+                    },
+                    {
+                      "type": "builtins.str",
+                      "value": "Gateway_0ep8cuh"
+                    },
+                    {
+                      "type": "builtins.str",
+                      "value": "Gateway_0onpe6x"
+                    },
+                    {
+                      "type": "builtins.str",
+                      "value": "Gateway_1fbifca"
+                    }
+                  ]
+                }
+              },
+              {
+                "key": {
+                  "type": "builtins.str",
+                  "value": "participants"
+                },
+                "value": {
+                  "type": "builtins.list",
+                  "items": [
+                    {
+                      "type": "builtins.dict",
+                      "entries": [
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "id"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_0w6qkdf"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "field_name"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_0w6qkdf"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "multi_maximum"
+                          },
+                          "value": {
+                            "type": "builtins.int",
+                            "value": 0
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "multi_minimum"
+                          },
+                          "value": {
+                            "type": "builtins.int",
+                            "value": 0
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "builtins.dict",
+                      "entries": [
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "id"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_19mgbdn"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "field_name"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_19mgbdn"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "multi_maximum"
+                          },
+                          "value": {
+                            "type": "builtins.int",
+                            "value": 0
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "multi_minimum"
+                          },
+                          "value": {
+                            "type": "builtins.int",
+                            "value": 0
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "builtins.dict",
+                      "entries": [
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "id"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_09cjol2"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "field_name"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_09cjol2"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "multi_maximum"
+                          },
+                          "value": {
+                            "type": "builtins.int",
+                            "value": 0
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "multi_minimum"
+                          },
+                          "value": {
+                            "type": "builtins.int",
+                            "value": 0
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "builtins.dict",
+                      "entries": [
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "id"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_0sa2v7d"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "field_name"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_0sa2v7d"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "multi_maximum"
+                          },
+                          "value": {
+                            "type": "builtins.int",
+                            "value": 0
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "multi_minimum"
+                          },
+                          "value": {
+                            "type": "builtins.int",
+                            "value": 0
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "builtins.dict",
+                      "entries": [
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "id"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_19j1e3o"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "field_name"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Participant_19j1e3o"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "multi_maximum"
+                          },
+                          "value": {
+                            "type": "builtins.int",
+                            "value": 0
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "multi_minimum"
+                          },
+                          "value": {
+                            "type": "builtins.int",
+                            "value": 0
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "key": {
+                  "type": "builtins.str",
+                  "value": "business_rules"
+                },
+                "value": {
+                  "type": "builtins.list",
+                  "items": [
+                    {
+                      "type": "builtins.dict",
+                      "entries": [
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "name"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Activity_0rm8bkp"
+                          }
+                        },
+                        {
+                          "key": {
+                            "type": "builtins.str",
+                            "value": "field_name"
+                          },
+                          "value": {
+                            "type": "builtins.str",
+                            "value": "Activity_0rm8bkp"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "business_rules"
+          },
+          "value": {
+            "type": "builtins.list",
+            "items": [
+              {
+                "type": "builtins.dict",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "name"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "Activity_0rm8bkp"
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "builtins.str",
+                      "value": "done_actions"
+                    },
+                    "value": {
+                      "type": "builtins.str",
+                      "value": "\tcc.ChangeGtwState(ctx, instance, \"Gateway_0ep8cuh\", ENABLED)\n"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "key": {
+            "type": "builtins.str",
+            "value": "flow_functions"
+          },
+          "value": {
+            "type": "builtins.list",
+            "items": [
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Event_06sexe6(ctx contractapi.TransactionContextInterface, instanceID string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\n\tactionEvent, err := cc.ReadEvent(ctx, instanceID, \"Event_06sexe6\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif actionEvent.EventState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", actionEvent.EventID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeEventState(ctx, instance, \"Event_06sexe6\", COMPLETED)\n\tstub.SetEvent(\"Event_06sexe6\", []byte(\"Contract has been started successfully\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeMsgState(ctx, instance, \"Message_1wswgqu\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_04wmlqe_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, productionStart string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_04wmlqe\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\t//\n\tif cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)\n\tcc.ChangeMsgState(ctx, instance, \"Message_04wmlqe\", COMPLETED)\n\nglobalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)\n\tif readGloabolError != nil {\n\t\tfmt.Println(readGloabolError.Error())\n\t\treturn readGloabolError\n\t}\n\tglobalMemory.ProductionStart = productionStart\n\tsetGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)\n\tif setGloabolErrror != nil {\n\t\tfmt.Println(setGloabolErrror.Error())\n\t\treturn setGloabolErrror\n\t}\n\n\tstub.SetEvent(\"Message_04wmlqe\", []byte(\"Message is waiting for confirmation\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_04wmlqe_Complete(ctx contractapi.TransactionContextInterface, instanceID string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_04wmlqe\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != WAITINGFORCONFIRMATION {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgState(ctx, instance, msg.MessageID, COMPLETED)\n\tstub.SetEvent(\"Message_04wmlqe\", []byte(\"Message has been done\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeMsgState(ctx, instance, \"Message_196q1fj\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_0cba4t6_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, supplyOrderId string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_0cba4t6\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\t//\n\tif cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)\n\tcc.ChangeMsgState(ctx, instance, \"Message_0cba4t6\", COMPLETED)\n\nglobalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)\n\tif readGloabolError != nil {\n\t\tfmt.Println(readGloabolError.Error())\n\t\treturn readGloabolError\n\t}\n\tglobalMemory.SupplyOrderId = supplyOrderId\n\tsetGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)\n\tif setGloabolErrror != nil {\n\t\tfmt.Println(setGloabolErrror.Error())\n\t\treturn setGloabolErrror\n\t}\n\n\tstub.SetEvent(\"Message_0cba4t6\", []byte(\"Message is waiting for confirmation\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_0cba4t6_Complete(ctx contractapi.TransactionContextInterface, instanceID string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_0cba4t6\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != WAITINGFORCONFIRMATION {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgState(ctx, instance, msg.MessageID, COMPLETED)\n\tstub.SetEvent(\"Message_0cba4t6\", []byte(\"Message has been done\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeGtwState(ctx, instance, \"Gateway_1fbifca\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_0d2xte5_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, deliveryConfirmation bool) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_0d2xte5\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\t//\n\tif cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)\n\tcc.ChangeMsgState(ctx, instance, \"Message_0d2xte5\", COMPLETED)\n\nglobalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)\n\tif readGloabolError != nil {\n\t\tfmt.Println(readGloabolError.Error())\n\t\treturn readGloabolError\n\t}\n\tglobalMemory.DeliveryConfirmation = deliveryConfirmation\n\tsetGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)\n\tif setGloabolErrror != nil {\n\t\tfmt.Println(setGloabolErrror.Error())\n\t\treturn setGloabolErrror\n\t}\n\n\tstub.SetEvent(\"Message_0d2xte5\", []byte(\"Message is waiting for confirmation\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_0d2xte5_Complete(ctx contractapi.TransactionContextInterface, instanceID string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_0d2xte5\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != WAITINGFORCONFIRMATION {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgState(ctx, instance, msg.MessageID, COMPLETED)\n\tstub.SetEvent(\"Message_0d2xte5\", []byte(\"Message has been done\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeGtwState(ctx, instance, \"Gateway_1cr0nma\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_0hpha6h_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, requestId int, supplierReputation int) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_0hpha6h\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\t//\n\tif cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)\n\tcc.ChangeMsgState(ctx, instance, \"Message_0hpha6h\", COMPLETED)\n\nglobalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)\n\tif readGloabolError != nil {\n\t\tfmt.Println(readGloabolError.Error())\n\t\treturn readGloabolError\n\t}\n\tglobalMemory.RequestId = requestId\n\tglobalMemory.SupplierReputation = supplierReputation\n\tsetGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)\n\tif setGloabolErrror != nil {\n\t\tfmt.Println(setGloabolErrror.Error())\n\t\treturn setGloabolErrror\n\t}\n\n\tstub.SetEvent(\"Message_0hpha6h\", []byte(\"Message is waiting for confirmation\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_0hpha6h_Complete(ctx contractapi.TransactionContextInterface, instanceID string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_0hpha6h\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != WAITINGFORCONFIRMATION {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgState(ctx, instance, msg.MessageID, COMPLETED)\n\tstub.SetEvent(\"Message_0hpha6h\", []byte(\"Message has been done\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeMsgState(ctx, instance, \"Message_1io2g9u\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_0pm90nx_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, transportOrderId string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_0pm90nx\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\t//\n\tif cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)\n\tcc.ChangeMsgState(ctx, instance, \"Message_0pm90nx\", COMPLETED)\n\nglobalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)\n\tif readGloabolError != nil {\n\t\tfmt.Println(readGloabolError.Error())\n\t\treturn readGloabolError\n\t}\n\tglobalMemory.TransportOrderId = transportOrderId\n\tsetGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)\n\tif setGloabolErrror != nil {\n\t\tfmt.Println(setGloabolErrror.Error())\n\t\treturn setGloabolErrror\n\t}\n\n\tstub.SetEvent(\"Message_0pm90nx\", []byte(\"Message is waiting for confirmation\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_0pm90nx_Complete(ctx contractapi.TransactionContextInterface, instanceID string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_0pm90nx\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != WAITINGFORCONFIRMATION {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgState(ctx, instance, msg.MessageID, COMPLETED)\n\tstub.SetEvent(\"Message_0pm90nx\", []byte(\"Message has been done\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeGtwState(ctx, instance, \"Gateway_1fbifca\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_0rwz1km_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, numberOfUnits int, requestId int, urgent bool) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_0rwz1km\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\t//\n\tif cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)\n\tcc.ChangeMsgState(ctx, instance, \"Message_0rwz1km\", COMPLETED)\n\nglobalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)\n\tif readGloabolError != nil {\n\t\tfmt.Println(readGloabolError.Error())\n\t\treturn readGloabolError\n\t}\n\tglobalMemory.NumberOfUnits = numberOfUnits\n\tglobalMemory.RequestId = requestId\n\tglobalMemory.Urgent = urgent\n\tsetGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)\n\tif setGloabolErrror != nil {\n\t\tfmt.Println(setGloabolErrror.Error())\n\t\treturn setGloabolErrror\n\t}\n\n\tstub.SetEvent(\"Message_0rwz1km\", []byte(\"Message is waiting for confirmation\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_0rwz1km_Complete(ctx contractapi.TransactionContextInterface, instanceID string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_0rwz1km\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != WAITINGFORCONFIRMATION {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgState(ctx, instance, msg.MessageID, COMPLETED)\n\tstub.SetEvent(\"Message_0rwz1km\", []byte(\"Message has been done\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeMsgState(ctx, instance, \"Message_0hpha6h\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_196q1fj_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_196q1fj\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\t//\n\tif cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)\n\tcc.ChangeMsgState(ctx, instance, \"Message_196q1fj\", COMPLETED)\n\n\tstub.SetEvent(\"Message_196q1fj\", []byte(\"Message is waiting for confirmation\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_196q1fj_Complete(ctx contractapi.TransactionContextInterface, instanceID string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_196q1fj\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != WAITINGFORCONFIRMATION {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgState(ctx, instance, msg.MessageID, COMPLETED)\n\tstub.SetEvent(\"Message_196q1fj\", []byte(\"Message has been done\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeEventState(ctx, instance, \"Event_13pbqdz\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_1ajdm9l_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, supplyOrderDetails string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_1ajdm9l\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\t//\n\tif cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)\n\tcc.ChangeMsgState(ctx, instance, \"Message_1ajdm9l\", COMPLETED)\n\nglobalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)\n\tif readGloabolError != nil {\n\t\tfmt.Println(readGloabolError.Error())\n\t\treturn readGloabolError\n\t}\n\tglobalMemory.SupplyOrderDetails = supplyOrderDetails\n\tsetGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)\n\tif setGloabolErrror != nil {\n\t\tfmt.Println(setGloabolErrror.Error())\n\t\treturn setGloabolErrror\n\t}\n\n\tstub.SetEvent(\"Message_1ajdm9l\", []byte(\"Message is waiting for confirmation\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_1ajdm9l_Complete(ctx contractapi.TransactionContextInterface, instanceID string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_1ajdm9l\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != WAITINGFORCONFIRMATION {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgState(ctx, instance, msg.MessageID, COMPLETED)\n\tstub.SetEvent(\"Message_1ajdm9l\", []byte(\"Message has been done\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeGtwState(ctx, instance, \"Gateway_0onpe6x\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_1dmeexg_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, confirm3 string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_1dmeexg\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\t//\n\tif cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)\n\tcc.ChangeMsgState(ctx, instance, \"Message_1dmeexg\", COMPLETED)\n\nglobalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)\n\tif readGloabolError != nil {\n\t\tfmt.Println(readGloabolError.Error())\n\t\treturn readGloabolError\n\t}\n\tglobalMemory.Confirm3 = confirm3\n\tsetGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)\n\tif setGloabolErrror != nil {\n\t\tfmt.Println(setGloabolErrror.Error())\n\t\treturn setGloabolErrror\n\t}\n\n\tstub.SetEvent(\"Message_1dmeexg\", []byte(\"Message is waiting for confirmation\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_1dmeexg_Complete(ctx contractapi.TransactionContextInterface, instanceID string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_1dmeexg\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != WAITINGFORCONFIRMATION {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgState(ctx, instance, msg.MessageID, COMPLETED)\n\tstub.SetEvent(\"Message_1dmeexg\", []byte(\"Message has been done\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeGtwState(ctx, instance, \"Gateway_1cr0nma\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_1dzkcn0_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, confirm2 bool) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_1dzkcn0\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\t//\n\tif cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)\n\tcc.ChangeMsgState(ctx, instance, \"Message_1dzkcn0\", COMPLETED)\n\nglobalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)\n\tif readGloabolError != nil {\n\t\tfmt.Println(readGloabolError.Error())\n\t\treturn readGloabolError\n\t}\n\tglobalMemory.Confirm2 = confirm2\n\tsetGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)\n\tif setGloabolErrror != nil {\n\t\tfmt.Println(setGloabolErrror.Error())\n\t\treturn setGloabolErrror\n\t}\n\n\tstub.SetEvent(\"Message_1dzkcn0\", []byte(\"Message is waiting for confirmation\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_1dzkcn0_Complete(ctx contractapi.TransactionContextInterface, instanceID string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_1dzkcn0\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != WAITINGFORCONFIRMATION {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgState(ctx, instance, msg.MessageID, COMPLETED)\n\tstub.SetEvent(\"Message_1dzkcn0\", []byte(\"Message has been done\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeGtwState(ctx, instance, \"Gateway_1cr0nma\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_1io2g9u_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_1io2g9u\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\t//\n\tif cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)\n\tcc.ChangeMsgState(ctx, instance, \"Message_1io2g9u\", COMPLETED)\n\n\tstub.SetEvent(\"Message_1io2g9u\", []byte(\"Message is waiting for confirmation\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_1io2g9u_Complete(ctx contractapi.TransactionContextInterface, instanceID string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_1io2g9u\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != WAITINGFORCONFIRMATION {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgState(ctx, instance, msg.MessageID, COMPLETED)\n\tstub.SetEvent(\"Message_1io2g9u\", []byte(\"Message has been done\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeBusinessRuleState(ctx, instance, \"Activity_0rm8bkp\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_1oxmq1k_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, confirm1 bool) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_1oxmq1k\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\t//\n\tif cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)\n\tcc.ChangeMsgState(ctx, instance, \"Message_1oxmq1k\", COMPLETED)\n\nglobalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)\n\tif readGloabolError != nil {\n\t\tfmt.Println(readGloabolError.Error())\n\t\treturn readGloabolError\n\t}\n\tglobalMemory.Confirm1 = confirm1\n\tsetGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)\n\tif setGloabolErrror != nil {\n\t\tfmt.Println(setGloabolErrror.Error())\n\t\treturn setGloabolErrror\n\t}\n\n\tstub.SetEvent(\"Message_1oxmq1k\", []byte(\"Message is waiting for confirmation\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_1oxmq1k_Complete(ctx contractapi.TransactionContextInterface, instanceID string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_1oxmq1k\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != WAITINGFORCONFIRMATION {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgState(ctx, instance, msg.MessageID, COMPLETED)\n\tstub.SetEvent(\"Message_1oxmq1k\", []byte(\"Message has been done\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeGtwState(ctx, instance, \"Gateway_1cr0nma\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_1wswgqu_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, orderDetails string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_1wswgqu\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\t//\n\tif cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)\n\tcc.ChangeMsgState(ctx, instance, \"Message_1wswgqu\", COMPLETED)\n\nglobalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)\n\tif readGloabolError != nil {\n\t\tfmt.Println(readGloabolError.Error())\n\t\treturn readGloabolError\n\t}\n\tglobalMemory.OrderDetails = orderDetails\n\tsetGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)\n\tif setGloabolErrror != nil {\n\t\tfmt.Println(setGloabolErrror.Error())\n\t\treturn setGloabolErrror\n\t}\n\n\tstub.SetEvent(\"Message_1wswgqu\", []byte(\"Message is waiting for confirmation\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Message_1wswgqu_Complete(ctx contractapi.TransactionContextInterface, instanceID string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"Message_1wswgqu\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != WAITINGFORCONFIRMATION {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgState(ctx, instance, msg.MessageID, COMPLETED)\n\tstub.SetEvent(\"Message_1wswgqu\", []byte(\"Message has been done\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeMsgState(ctx, instance, \"Message_1ajdm9l\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Gateway_1cr0nma(ctx contractapi.TransactionContextInterface, instanceID string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tgtw, err := cc.ReadGtw(ctx, instanceID, \"Gateway_1cr0nma\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif gtw.GatewayState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Gateway state %s is not allowed\", gtw.GatewayID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\n\tcc.ChangeGtwState(ctx, instance, gtw.GatewayID, COMPLETED)\n\tstub.SetEvent(\"Gateway_1cr0nma\", []byte(\"Gateway has been completed\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeMsgState(ctx, instance, \"Message_04wmlqe\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Gateway_0ep8cuh(ctx contractapi.TransactionContextInterface, instanceID string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tgtw, err := cc.ReadGtw(ctx, instanceID, \"Gateway_0ep8cuh\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif gtw.GatewayState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Gateway state %s is not allowed\", gtw.GatewayID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\n\tcc.ChangeGtwState(ctx, instance, gtw.GatewayID, COMPLETED)\n\tstub.SetEvent(\"Gateway_0ep8cuh\", []byte(\"Gateway has been completed\"))\n\tcc.SetInstance(ctx, instance)\n\tif instance.InstanceStateMemory.FinalPriority == \"Low\" {\n\t\tcc.ChangeMsgState(ctx, instance, \"Message_1oxmq1k\", ENABLED)\n\t} else if instance.InstanceStateMemory.FinalPriority == \"High\" {\n\t\tcc.ChangeMsgState(ctx, instance, \"Message_1dmeexg\", ENABLED)\n\t} else if instance.InstanceStateMemory.FinalPriority == \"Medium\" {\n\t\tcc.ChangeMsgState(ctx, instance, \"Message_1dzkcn0\", ENABLED)\n\t} else if instance.InstanceStateMemory.FinalPriority == \"VeryLow\" {\n\t\tcc.ChangeMsgState(ctx, instance, \"Message_0d2xte5\", ENABLED)\n\t}\n\n\tcc.SetInstance(ctx, instance)\n\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Gateway_0onpe6x(ctx contractapi.TransactionContextInterface, instanceID string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tgtw, err := cc.ReadGtw(ctx, instanceID, \"Gateway_0onpe6x\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif gtw.GatewayState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Gateway state %s is not allowed\", gtw.GatewayID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\n\tcc.ChangeGtwState(ctx, instance, gtw.GatewayID, COMPLETED)\n\tstub.SetEvent(\"Gateway_0onpe6x\", []byte(\"Gateway has been completed\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeMsgState(ctx, instance, \"Message_0cba4t6\", ENABLED)\n\tcc.ChangeMsgState(ctx, instance, \"Message_0pm90nx\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Gateway_1fbifca(ctx contractapi.TransactionContextInterface, instanceID string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tgtw, err := cc.ReadGtw(ctx, instanceID, \"Gateway_1fbifca\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif gtw.GatewayState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Gateway state %s is not allowed\", gtw.GatewayID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif !(instance.InstanceMessages[\"Message_0cba4t6\"].MsgState == COMPLETED && instance.InstanceMessages[\"Message_0pm90nx\"].MsgState == COMPLETED) {\n\t\treturn fmt.Errorf(\"Parallel gateway prerequisite not met\")\n\t}\n\n\n\tcc.ChangeGtwState(ctx, instance, gtw.GatewayID, COMPLETED)\n\tstub.SetEvent(\"Gateway_1fbifca\", []byte(\"Gateway has been completed\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeMsgState(ctx, instance, \"Message_0rwz1km\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\n\treturn nil\n}"
+              },
+              {
+                "type": "builtins.str",
+                "value": "func (cc *SmartContract) Event_13pbqdz(ctx contractapi.TransactionContextInterface, instanceID string) error {\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tactionEvent, err := cc.ReadEvent(ctx, instanceID, \"Event_13pbqdz\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif actionEvent.EventState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", actionEvent.EventID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeEventState(ctx, instance, \"Event_13pbqdz\", COMPLETED)\n\tstub.SetEvent(\"Event_13pbqdz\", []byte(\"Event has been completed\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+]

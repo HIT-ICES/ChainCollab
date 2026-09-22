@@ -1,0 +1,773 @@
+[
+  {
+    "id": "Participant_0w6qkdf",
+    "type": "bpmn:participant",
+    "name": "Bulk buyer",
+    "attrs": {
+      "is_multi": false,
+      "multi_minimum": 0,
+      "multi_maximum": 0
+    }
+  },
+  {
+    "id": "Participant_19mgbdn",
+    "type": "bpmn:participant",
+    "name": "Manufacturer",
+    "attrs": {
+      "is_multi": false,
+      "multi_minimum": 0,
+      "multi_maximum": 0
+    }
+  },
+  {
+    "id": "Participant_09cjol2",
+    "type": "bpmn:participant",
+    "name": "Middleman",
+    "attrs": {
+      "is_multi": false,
+      "multi_minimum": 0,
+      "multi_maximum": 0
+    }
+  },
+  {
+    "id": "Participant_0sa2v7d",
+    "type": "bpmn:participant",
+    "name": "Supplier",
+    "attrs": {
+      "is_multi": false,
+      "multi_minimum": 0,
+      "multi_maximum": 0
+    }
+  },
+  {
+    "id": "Participant_19j1e3o",
+    "type": "bpmn:participant",
+    "name": "Special carrier",
+    "attrs": {
+      "is_multi": false,
+      "multi_minimum": 0,
+      "multi_maximum": 0
+    }
+  },
+  {
+    "id": "Message_1dmeexg",
+    "type": "bpmn:message",
+    "name": "Supplies Delivery Confirmation4",
+    "attrs": {
+      "documentation": "{\"properties\":{\"confirm3\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1dmeexg__property__confirm3",
+    "type": "bpmn:messageProperty",
+    "name": "confirm3",
+    "attrs": {
+      "name": "confirm3",
+      "global_name": "Confirm3",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_1dmeexg",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_1dzkcn0",
+    "type": "bpmn:message",
+    "name": "Supplies Delivery Confirmation3",
+    "attrs": {
+      "documentation": "{\"properties\":{\"confirm2\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1dzkcn0__property__confirm2",
+    "type": "bpmn:messageProperty",
+    "name": "confirm2",
+    "attrs": {
+      "name": "confirm2",
+      "global_name": "Confirm2",
+      "type": "boolean",
+      "dsl_type": "bool",
+      "description": "",
+      "owner": "Message_1dzkcn0",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_1oxmq1k",
+    "type": "bpmn:message",
+    "name": "Supplies Delivery Confirmation2",
+    "attrs": {
+      "documentation": "{\"properties\":{\"confirm1\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1oxmq1k__property__confirm1",
+    "type": "bpmn:messageProperty",
+    "name": "confirm1",
+    "attrs": {
+      "name": "confirm1",
+      "global_name": "Confirm1",
+      "type": "boolean",
+      "dsl_type": "bool",
+      "description": "",
+      "owner": "Message_1oxmq1k",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_196q1fj",
+    "type": "bpmn:message",
+    "name": "Goods Delivery Confirmation",
+    "attrs": {
+      "documentation": "{\"properties\":{},\"required\":[],\"files\":{\"deliveryNote\":{\"type\":\"file\",\"description\":\"A document confirming the delivery of goods\"}},\"file required\":[\"deliveryNote\"]}"
+    }
+  },
+  {
+    "id": "Message_04wmlqe",
+    "type": "bpmn:message",
+    "name": "Supplies Delivery Information",
+    "attrs": {
+      "documentation": "{\"properties\":{\"productionStart\":{\"type\":\"string\",\"description\":\"Notification of the commencement of production, including the date and time\"}},\"required\":[\"productionStart\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_04wmlqe__property__productionStart",
+    "type": "bpmn:messageProperty",
+    "name": "productionStart",
+    "attrs": {
+      "name": "productionStart",
+      "global_name": "ProductionStart",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "Notification of the commencement of production, including the date and time",
+      "owner": "Message_04wmlqe",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0d2xte5",
+    "type": "bpmn:message",
+    "name": "Supplies Delivery Confirmation1",
+    "attrs": {
+      "documentation": "{\"properties\":{\"deliveryConfirmation\":{\"type\":\"boolean\",\"description\":\"Confirmation of whether the supplies have been successfully delivered\"}},\"required\":[\"deliveryConfirmation\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0d2xte5__property__deliveryConfirmation",
+    "type": "bpmn:messageProperty",
+    "name": "deliveryConfirmation",
+    "attrs": {
+      "name": "deliveryConfirmation",
+      "global_name": "DeliveryConfirmation",
+      "type": "boolean",
+      "dsl_type": "bool",
+      "description": "Confirmation of whether the supplies have been successfully delivered",
+      "owner": "Message_0d2xte5",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_1io2g9u",
+    "type": "bpmn:message",
+    "name": "Waybill Transmission",
+    "attrs": {
+      "documentation": "{\"properties\":{},\"required\":[],\"files\":{\"waybill\":{\"type\":\"file\",\"description\":\"Digital or physical waybill document，detailing the shipment contents and destination.\"}},\"file required\":[\"waybill\"]}"
+    }
+  },
+  {
+    "id": "Message_0hpha6h",
+    "type": "bpmn:message",
+    "name": "Details Provision",
+    "attrs": {
+      "documentation": "{\"properties\":{\"requestId\":{\"type\":\"number\",\"description\":\"Unique identifier of the request for additional details \"},\"supplierReputation\":{\"type\":\"number\",\"description\":\"A numerical rating representing the supplier's reputation.\"}},\"required\":[\"requestId\",\"supplierReputation\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0hpha6h__property__requestId",
+    "type": "bpmn:messageProperty",
+    "name": "requestId",
+    "attrs": {
+      "name": "requestId",
+      "global_name": "RequestId",
+      "type": "number",
+      "dsl_type": "int",
+      "description": "Unique identifier of the request for additional details ",
+      "owner": "Message_0hpha6h",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0hpha6h__property__supplierReputation",
+    "type": "bpmn:messageProperty",
+    "name": "supplierReputation",
+    "attrs": {
+      "name": "supplierReputation",
+      "global_name": "SupplierReputation",
+      "type": "number",
+      "dsl_type": "int",
+      "description": "A numerical rating representing the supplier's reputation.",
+      "owner": "Message_0hpha6h",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0rwz1km",
+    "type": "bpmn:message",
+    "name": "Request Details",
+    "attrs": {
+      "documentation": "{\"properties\":{\"requestId\":{\"type\":\"number\",\"description\":\" Unique identifier of the request for additional details \"},\"numberOfUnits\":{\"type\":\"number\",\"description\":\" Total number of units in the order requested\"},\"urgent\":{\"type\":\"boolean\",\"description\":\"Indicates whether the order requires urgent delivery.\"}},\"required\":[\"requestId\",\"numberOfUnits\",\"urgent\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0rwz1km__property__requestId",
+    "type": "bpmn:messageProperty",
+    "name": "requestId",
+    "attrs": {
+      "name": "requestId",
+      "global_name": "RequestId",
+      "type": "number",
+      "dsl_type": "int",
+      "description": " Unique identifier of the request for additional details ",
+      "owner": "Message_0rwz1km",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0rwz1km__property__numberOfUnits",
+    "type": "bpmn:messageProperty",
+    "name": "numberOfUnits",
+    "attrs": {
+      "name": "numberOfUnits",
+      "global_name": "NumberOfUnits",
+      "type": "number",
+      "dsl_type": "int",
+      "description": " Total number of units in the order requested",
+      "owner": "Message_0rwz1km",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0rwz1km__property__urgent",
+    "type": "bpmn:messageProperty",
+    "name": "urgent",
+    "attrs": {
+      "name": "urgent",
+      "global_name": "Urgent",
+      "type": "boolean",
+      "dsl_type": "bool",
+      "description": "Indicates whether the order requires urgent delivery.",
+      "owner": "Message_0rwz1km",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0pm90nx",
+    "type": "bpmn:message",
+    "name": "Transport Order Forwarding",
+    "attrs": {
+      "documentation": "{\"properties\":{\"transportOrderId\":{\"type\":\"string\",\"description\":\"Identifier of the transport order being forwarded\"}},\"required\":[\"transportOrderId\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0pm90nx__property__transportOrderId",
+    "type": "bpmn:messageProperty",
+    "name": "transportOrderId",
+    "attrs": {
+      "name": "transportOrderId",
+      "global_name": "TransportOrderId",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "Identifier of the transport order being forwarded",
+      "owner": "Message_0pm90nx",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0cba4t6",
+    "type": "bpmn:message",
+    "name": "Supply Order Forwarding",
+    "attrs": {
+      "documentation": "{\"properties\":{\"supplyOrderId\":{\"type\":\"string\",\"description\":\" Identifier of the supply order being forwarded\"}},\"required\":[\"supplyOrderId\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0cba4t6__property__supplyOrderId",
+    "type": "bpmn:messageProperty",
+    "name": "supplyOrderId",
+    "attrs": {
+      "name": "supplyOrderId",
+      "global_name": "SupplyOrderId",
+      "type": "string",
+      "dsl_type": "string",
+      "description": " Identifier of the supply order being forwarded",
+      "owner": "Message_0cba4t6",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_1ajdm9l",
+    "type": "bpmn:message",
+    "name": "Supply Order Request",
+    "attrs": {
+      "documentation": "{\"properties\":{\"supplyOrderDetails\":{\"type\":\"string\",\"description\":\" Details of the supplies needed\"}},\"required\":[\"supplyOrderDetails\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1ajdm9l__property__supplyOrderDetails",
+    "type": "bpmn:messageProperty",
+    "name": "supplyOrderDetails",
+    "attrs": {
+      "name": "supplyOrderDetails",
+      "global_name": "SupplyOrderDetails",
+      "type": "string",
+      "dsl_type": "string",
+      "description": " Details of the supplies needed",
+      "owner": "Message_1ajdm9l",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_1wswgqu",
+    "type": "bpmn:message",
+    "name": "Goods Order Request",
+    "attrs": {
+      "documentation": "{\"properties\":{\"orderDetails\":{\"type\":\"string\",\"description\":\"Detailed list of goods ordered\"}},\"required\":[\"orderDetails\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1wswgqu__property__orderDetails",
+    "type": "bpmn:messageProperty",
+    "name": "orderDetails",
+    "attrs": {
+      "name": "orderDetails",
+      "global_name": "OrderDetails",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "Detailed list of goods ordered",
+      "owner": "Message_1wswgqu",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Event_06sexe6",
+    "type": "bpmn:startEvent",
+    "name": "",
+    "attrs": {
+      "incoming": [],
+      "outgoing": [
+        "Flow_1btgvf6"
+      ]
+    }
+  },
+  {
+    "id": "Event_13pbqdz",
+    "type": "bpmn:endEvent",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_17gtrvu"
+      ],
+      "outgoing": []
+    }
+  },
+  {
+    "id": "Gateway_1cr0nma",
+    "type": "bpmn:exclusiveGateway",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_1rdmhkh",
+        "Flow_12cq02s",
+        "Flow_0ieovgu",
+        "Flow_1sdqx53"
+      ],
+      "outgoing": [
+        "Flow_0kh4ywx"
+      ]
+    }
+  },
+  {
+    "id": "Gateway_0ep8cuh",
+    "type": "bpmn:exclusiveGateway",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_1jxt9fr"
+      ],
+      "outgoing": [
+        "Flow_0bna2ku",
+        "Flow_0r6rayf",
+        "Flow_1ihncup",
+        "Flow_0005j8y"
+      ]
+    }
+  },
+  {
+    "id": "Gateway_0onpe6x",
+    "type": "bpmn:parallelGateway",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_0by1ery"
+      ],
+      "outgoing": [
+        "Flow_0fs2i4x",
+        "Flow_1wyrozo"
+      ]
+    }
+  },
+  {
+    "id": "Gateway_1fbifca",
+    "type": "bpmn:parallelGateway",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_1azhglw",
+        "Flow_1tvz6lc"
+      ],
+      "outgoing": [
+        "Flow_0gtd6v3"
+      ]
+    }
+  },
+  {
+    "id": "Activity_0rm8bkp",
+    "type": "bpmn:businessRuleTask",
+    "name": "Priority Decision",
+    "attrs": {
+      "incoming": [
+        "Flow_19s99wl"
+      ],
+      "outgoing": [
+        "Flow_1jxt9fr"
+      ],
+      "documentation": "{\"inputs\":[{\"name\":\"numberOfUnits\",\"type\":\"number\",\"description\":\" Total number of units in the order requested\"},{\"name\":\"urgent\",\"type\":\"boolean\",\"description\":\"Indicates whether the order requires urgent delivery.\"},{\"name\":\"supplierReputation\",\"type\":\"number\",\"description\":\"A numerical rating representing the supplier's reputation.\"}],\"outputs\":[{\"name\":\"finalPriority\",\"type\":\"string\",\"description\":\"\"}]}"
+    }
+  },
+  {
+    "id": "Activity_0rm8bkp__input__numberOfUnits",
+    "type": "bpmn:businessRuleParameter",
+    "name": "numberOfUnits",
+    "attrs": {
+      "name": "numberOfUnits",
+      "global_name": "NumberOfUnits",
+      "direction": "input",
+      "type": "number",
+      "dsl_type": "int",
+      "owner": "Activity_0rm8bkp"
+    }
+  },
+  {
+    "id": "Activity_0rm8bkp__input__urgent",
+    "type": "bpmn:businessRuleParameter",
+    "name": "urgent",
+    "attrs": {
+      "name": "urgent",
+      "global_name": "Urgent",
+      "direction": "input",
+      "type": "boolean",
+      "dsl_type": "bool",
+      "owner": "Activity_0rm8bkp"
+    }
+  },
+  {
+    "id": "Activity_0rm8bkp__input__supplierReputation",
+    "type": "bpmn:businessRuleParameter",
+    "name": "supplierReputation",
+    "attrs": {
+      "name": "supplierReputation",
+      "global_name": "SupplierReputation",
+      "direction": "input",
+      "type": "number",
+      "dsl_type": "int",
+      "owner": "Activity_0rm8bkp"
+    }
+  },
+  {
+    "id": "Activity_0rm8bkp__output__finalPriority",
+    "type": "bpmn:businessRuleParameter",
+    "name": "finalPriority",
+    "attrs": {
+      "name": "finalPriority",
+      "global_name": "FinalPriority",
+      "direction": "output",
+      "type": "string",
+      "dsl_type": "string",
+      "owner": "Activity_0rm8bkp"
+    }
+  },
+  {
+    "id": "ChoreographyTask_0tyax7p",
+    "type": "bpmn:choreographyTask",
+    "name": "Order goods",
+    "attrs": {
+      "incoming": "Flow_1btgvf6",
+      "outgoing": "Flow_06esz8k",
+      "participants": [
+        "Participant_0w6qkdf",
+        "Participant_19mgbdn"
+      ],
+      "initiatingParticipantRef": "Participant_0w6qkdf",
+      "messageFlowRefs": [
+        "MessageFlow_06374xt"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_0m4d50p",
+    "type": "bpmn:choreographyTask",
+    "name": "Place order for supplies",
+    "attrs": {
+      "incoming": "Flow_06esz8k",
+      "outgoing": "Flow_0by1ery",
+      "participants": [
+        "Participant_19mgbdn",
+        "Participant_09cjol2"
+      ],
+      "initiatingParticipantRef": "Participant_19mgbdn",
+      "messageFlowRefs": [
+        "MessageFlow_1vbejzn"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_0i0ht39",
+    "type": "bpmn:choreographyTask",
+    "name": "Forward order for supplies",
+    "attrs": {
+      "incoming": "Flow_0fs2i4x",
+      "outgoing": "Flow_1azhglw",
+      "participants": [
+        "Participant_09cjol2",
+        "Participant_0sa2v7d"
+      ],
+      "initiatingParticipantRef": "Participant_09cjol2",
+      "messageFlowRefs": [
+        "MessageFlow_1m81z4l"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_145bktk",
+    "type": "bpmn:choreographyTask",
+    "name": "Forward order for transport",
+    "attrs": {
+      "incoming": "Flow_1wyrozo",
+      "outgoing": "Flow_1tvz6lc",
+      "participants": [
+        "Participant_09cjol2",
+        "Participant_19j1e3o"
+      ],
+      "initiatingParticipantRef": "Participant_09cjol2",
+      "messageFlowRefs": [
+        "MessageFlow_1541zid"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_1cceq4q",
+    "type": "bpmn:choreographyTask",
+    "name": "Request details",
+    "attrs": {
+      "incoming": "Flow_0gtd6v3",
+      "outgoing": "Flow_0imjwmb",
+      "participants": [
+        "Participant_19j1e3o",
+        "Participant_0sa2v7d"
+      ],
+      "initiatingParticipantRef": "Participant_19j1e3o",
+      "messageFlowRefs": [
+        "MessageFlow_087ue4t"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_1tkm8jm",
+    "type": "bpmn:choreographyTask",
+    "name": "Provide details",
+    "attrs": {
+      "incoming": "Flow_0imjwmb",
+      "outgoing": "Flow_08iq6o5",
+      "participants": [
+        "Participant_0sa2v7d",
+        "Participant_19j1e3o"
+      ],
+      "initiatingParticipantRef": "Participant_0sa2v7d",
+      "messageFlowRefs": [
+        "MessageFlow_0tx6stl"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_0q1fvry",
+    "type": "bpmn:choreographyTask",
+    "name": "Send waybill",
+    "attrs": {
+      "incoming": "Flow_08iq6o5",
+      "outgoing": "Flow_19s99wl",
+      "participants": [
+        "Participant_0sa2v7d",
+        "Participant_19j1e3o"
+      ],
+      "initiatingParticipantRef": "Participant_0sa2v7d",
+      "messageFlowRefs": [
+        "MessageFlow_12csdsd"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_0p8dcch",
+    "type": "bpmn:choreographyTask",
+    "name": "Deliver supplies slowly",
+    "attrs": {
+      "incoming": "Flow_0005j8y",
+      "outgoing": "Flow_1rdmhkh",
+      "participants": [
+        "Participant_19j1e3o",
+        "Participant_19mgbdn"
+      ],
+      "initiatingParticipantRef": "Participant_19j1e3o",
+      "messageFlowRefs": [
+        "MessageFlow_1wk4rp7"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_0s4ig1m",
+    "type": "bpmn:choreographyTask",
+    "name": "Report start of production",
+    "attrs": {
+      "incoming": "Flow_0kh4ywx",
+      "outgoing": "Flow_1tf8ufi",
+      "participants": [
+        "Participant_19mgbdn",
+        "Participant_0w6qkdf"
+      ],
+      "initiatingParticipantRef": "Participant_19mgbdn",
+      "messageFlowRefs": [
+        "MessageFlow_0g6c3ic"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_1q3p8t2",
+    "type": "bpmn:choreographyTask",
+    "name": "Deliver goods",
+    "attrs": {
+      "incoming": "Flow_1tf8ufi",
+      "outgoing": "Flow_17gtrvu",
+      "participants": [
+        "Participant_19mgbdn",
+        "Participant_0w6qkdf"
+      ],
+      "initiatingParticipantRef": "Participant_19mgbdn",
+      "messageFlowRefs": [
+        "MessageFlow_1wmjt89"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_1573x71",
+    "type": "bpmn:choreographyTask",
+    "name": "Deliver supplies",
+    "attrs": {
+      "incoming": "Flow_0bna2ku",
+      "outgoing": "Flow_12cq02s",
+      "participants": [
+        "Participant_19j1e3o",
+        "Participant_19mgbdn"
+      ],
+      "initiatingParticipantRef": "Participant_19j1e3o",
+      "messageFlowRefs": [
+        "MessageFlow_1wcvu98"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_1qfvx9k",
+    "type": "bpmn:choreographyTask",
+    "name": "Expedited deliver supplies",
+    "attrs": {
+      "incoming": "Flow_1ihncup",
+      "outgoing": "Flow_0ieovgu",
+      "participants": [
+        "Participant_19j1e3o",
+        "Participant_19mgbdn"
+      ],
+      "initiatingParticipantRef": "Participant_19j1e3o",
+      "messageFlowRefs": [
+        "MessageFlow_0j9vpbt"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_01sje89",
+    "type": "bpmn:choreographyTask",
+    "name": "Airlift",
+    "attrs": {
+      "incoming": "Flow_0r6rayf",
+      "outgoing": "Flow_1sdqx53",
+      "participants": [
+        "Participant_19j1e3o",
+        "Participant_19mgbdn"
+      ],
+      "initiatingParticipantRef": "Participant_19j1e3o",
+      "messageFlowRefs": [
+        "MessageFlow_16tyv4a"
+      ]
+    }
+  },
+  {
+    "id": "Flow_0bna2ku__condition__FinalPriority",
+    "type": "bpmn:sequenceConditionVariable",
+    "name": "finalPriority",
+    "attrs": {
+      "name": "finalPriority",
+      "relation": "==",
+      "value": "Low",
+      "global_name": "FinalPriority",
+      "dsl_type": "string",
+      "sequenceFlow": "Flow_0bna2ku"
+    }
+  },
+  {
+    "id": "Flow_1ihncup__condition__FinalPriority",
+    "type": "bpmn:sequenceConditionVariable",
+    "name": "finalPriority",
+    "attrs": {
+      "name": "finalPriority",
+      "relation": "==",
+      "value": "Medium",
+      "global_name": "FinalPriority",
+      "dsl_type": "string",
+      "sequenceFlow": "Flow_1ihncup"
+    }
+  },
+  {
+    "id": "Flow_0r6rayf__condition__FinalPriority",
+    "type": "bpmn:sequenceConditionVariable",
+    "name": "finalPriority",
+    "attrs": {
+      "name": "finalPriority",
+      "relation": "==",
+      "value": "High",
+      "global_name": "FinalPriority",
+      "dsl_type": "string",
+      "sequenceFlow": "Flow_0r6rayf"
+    }
+  },
+  {
+    "id": "Flow_0005j8y__condition__FinalPriority",
+    "type": "bpmn:sequenceConditionVariable",
+    "name": "finalPriority",
+    "attrs": {
+      "name": "finalPriority",
+      "relation": "==",
+      "value": "VeryLow",
+      "global_name": "FinalPriority",
+      "dsl_type": "string",
+      "sequenceFlow": "Flow_0005j8y"
+    }
+  }
+]
