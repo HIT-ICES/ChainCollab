@@ -1,0 +1,292 @@
+{
+  "contract_name": "GeneratedContract",
+  "participants": [
+    {
+      "name": "Participant_0w6qkdf",
+      "enum_name": "Participant_0w6qkdf",
+      "param_name": "Participant_0w6qkdf_account",
+      "org_param": "Participant_0w6qkdf_org",
+      "is_multi": "false",
+      "multi_maximum": 0,
+      "multi_minimum": 0
+    },
+    {
+      "name": "Participant_19mgbdn",
+      "enum_name": "Participant_19mgbdn",
+      "param_name": "Participant_19mgbdn_account",
+      "org_param": "Participant_19mgbdn_org",
+      "is_multi": "false",
+      "multi_maximum": 0,
+      "multi_minimum": 0
+    },
+    {
+      "name": "Participant_09cjol2",
+      "enum_name": "Participant_09cjol2",
+      "param_name": "Participant_09cjol2_account",
+      "org_param": "Participant_09cjol2_org",
+      "is_multi": "false",
+      "multi_maximum": 0,
+      "multi_minimum": 0
+    },
+    {
+      "name": "Participant_0sa2v7d",
+      "enum_name": "Participant_0sa2v7d",
+      "param_name": "Participant_0sa2v7d_account",
+      "org_param": "Participant_0sa2v7d_org",
+      "is_multi": "false",
+      "multi_maximum": 0,
+      "multi_minimum": 0
+    },
+    {
+      "name": "Participant_19j1e3o",
+      "enum_name": "Participant_19j1e3o",
+      "param_name": "Participant_19j1e3o_account",
+      "org_param": "Participant_19j1e3o_org",
+      "is_multi": "false",
+      "multi_maximum": 0,
+      "multi_minimum": 0
+    }
+  ],
+  "messages": [
+    {
+      "enum_name": "Message_04wmlqe",
+      "sender": "Participant_19mgbdn",
+      "receiver": "Participant_0w6qkdf",
+      "initial_state": "DISABLED",
+      "schema": "\"{\\\"properties\\\":{\\\"productionStart\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"Notification of the commencement of production, including the date and time\\\"}},\\\"required\\\":[\\\"productionStart\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\""
+    },
+    {
+      "enum_name": "Message_0cba4t6",
+      "sender": "Participant_09cjol2",
+      "receiver": "Participant_0sa2v7d",
+      "initial_state": "DISABLED",
+      "schema": "\"{\\\"properties\\\":{\\\"supplyOrderId\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\" Identifier of the supply order being forwarded\\\"}},\\\"required\\\":[\\\"supplyOrderId\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\""
+    },
+    {
+      "enum_name": "Message_0d2xte5",
+      "sender": "Participant_19j1e3o",
+      "receiver": "Participant_19mgbdn",
+      "initial_state": "DISABLED",
+      "schema": "\"{\\\"properties\\\":{\\\"deliveryConfirmation\\\":{\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"Confirmation of whether the supplies have been successfully delivered\\\"}},\\\"required\\\":[\\\"deliveryConfirmation\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\""
+    },
+    {
+      "enum_name": "Message_0hpha6h",
+      "sender": "Participant_0sa2v7d",
+      "receiver": "Participant_19j1e3o",
+      "initial_state": "DISABLED",
+      "schema": "\"{\\\"properties\\\":{\\\"requestId\\\":{\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\"Unique identifier of the request for additional details \\\"},\\\"supplierReputation\\\":{\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\"A numerical rating representing the supplier's reputation.\\\"}},\\\"required\\\":[\\\"requestId\\\",\\\"supplierReputation\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\""
+    },
+    {
+      "enum_name": "Message_0pm90nx",
+      "sender": "Participant_09cjol2",
+      "receiver": "Participant_19j1e3o",
+      "initial_state": "DISABLED",
+      "schema": "\"{\\\"properties\\\":{\\\"transportOrderId\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"Identifier of the transport order being forwarded\\\"}},\\\"required\\\":[\\\"transportOrderId\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\""
+    },
+    {
+      "enum_name": "Message_0rwz1km",
+      "sender": "Participant_19j1e3o",
+      "receiver": "Participant_0sa2v7d",
+      "initial_state": "DISABLED",
+      "schema": "\"{\\\"properties\\\":{\\\"requestId\\\":{\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\" Unique identifier of the request for additional details \\\"},\\\"numberOfUnits\\\":{\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\" Total number of units in the order requested\\\"},\\\"urgent\\\":{\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"Indicates whether the order requires urgent delivery.\\\"}},\\\"required\\\":[\\\"requestId\\\",\\\"numberOfUnits\\\",\\\"urgent\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\""
+    },
+    {
+      "enum_name": "Message_196q1fj",
+      "sender": "Participant_19mgbdn",
+      "receiver": "Participant_0w6qkdf",
+      "initial_state": "DISABLED",
+      "schema": "\"{\\\"properties\\\":{},\\\"required\\\":[],\\\"files\\\":{\\\"deliveryNote\\\":{\\\"type\\\":\\\"file\\\",\\\"description\\\":\\\"A document confirming the delivery of goods\\\"}},\\\"file required\\\":[\\\"deliveryNote\\\"]}\""
+    },
+    {
+      "enum_name": "Message_1ajdm9l",
+      "sender": "Participant_19mgbdn",
+      "receiver": "Participant_09cjol2",
+      "initial_state": "DISABLED",
+      "schema": "\"{\\\"properties\\\":{\\\"supplyOrderDetails\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\" Details of the supplies needed\\\"}},\\\"required\\\":[\\\"supplyOrderDetails\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\""
+    },
+    {
+      "enum_name": "Message_1dmeexg",
+      "sender": "Participant_19j1e3o",
+      "receiver": "Participant_19mgbdn",
+      "initial_state": "DISABLED",
+      "schema": "\"{\\\"properties\\\":{\\\"confirm3\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\""
+    },
+    {
+      "enum_name": "Message_1dzkcn0",
+      "sender": "Participant_19j1e3o",
+      "receiver": "Participant_19mgbdn",
+      "initial_state": "DISABLED",
+      "schema": "\"{\\\"properties\\\":{\\\"confirm2\\\":{\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\""
+    },
+    {
+      "enum_name": "Message_1io2g9u",
+      "sender": "Participant_0sa2v7d",
+      "receiver": "Participant_19j1e3o",
+      "initial_state": "DISABLED",
+      "schema": "\"{\\\"properties\\\":{},\\\"required\\\":[],\\\"files\\\":{\\\"waybill\\\":{\\\"type\\\":\\\"file\\\",\\\"description\\\":\\\"Digital or physical waybill document\\\\uff0cdetailing the shipment contents and destination.\\\"}},\\\"file required\\\":[\\\"waybill\\\"]}\""
+    },
+    {
+      "enum_name": "Message_1oxmq1k",
+      "sender": "Participant_19j1e3o",
+      "receiver": "Participant_19mgbdn",
+      "initial_state": "DISABLED",
+      "schema": "\"{\\\"properties\\\":{\\\"confirm1\\\":{\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"\\\"}},\\\"required\\\":[],\\\"files\\\":{},\\\"file required\\\":[]}\""
+    },
+    {
+      "enum_name": "Message_1wswgqu",
+      "sender": "Participant_0w6qkdf",
+      "receiver": "Participant_19mgbdn",
+      "initial_state": "DISABLED",
+      "schema": "\"{\\\"properties\\\":{\\\"orderDetails\\\":{\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"Detailed list of goods ordered\\\"}},\\\"required\\\":[\\\"orderDetails\\\"],\\\"files\\\":{},\\\"file required\\\":[]}\""
+    }
+  ],
+  "gateways": [
+    {
+      "enum_name": "Gateway_1cr0nma",
+      "initial_state": "DISABLED"
+    },
+    {
+      "enum_name": "Gateway_0ep8cuh",
+      "initial_state": "DISABLED"
+    },
+    {
+      "enum_name": "Gateway_0onpe6x",
+      "initial_state": "DISABLED"
+    },
+    {
+      "enum_name": "Gateway_1fbifca",
+      "initial_state": "DISABLED"
+    }
+  ],
+  "events": [
+    {
+      "enum_name": "Event_06sexe6",
+      "initial_state": "ENABLED"
+    },
+    {
+      "enum_name": "Event_13pbqdz",
+      "initial_state": "DISABLED"
+    }
+  ],
+  "oracle_tasks": [],
+  "globals": [
+    {
+      "name": "Confirm1",
+      "type": "bool"
+    },
+    {
+      "name": "Confirm2",
+      "type": "bool"
+    },
+    {
+      "name": "Confirm3",
+      "type": "string"
+    },
+    {
+      "name": "DeliveryConfirmation",
+      "type": "bool"
+    },
+    {
+      "name": "FinalPriority",
+      "type": "string"
+    },
+    {
+      "name": "NumberOfUnits",
+      "type": "int256"
+    },
+    {
+      "name": "OrderDetails",
+      "type": "string"
+    },
+    {
+      "name": "ProductionStart",
+      "type": "string"
+    },
+    {
+      "name": "RequestId",
+      "type": "int256"
+    },
+    {
+      "name": "SupplierReputation",
+      "type": "int256"
+    },
+    {
+      "name": "SupplyOrderDetails",
+      "type": "string"
+    },
+    {
+      "name": "SupplyOrderId",
+      "type": "string"
+    },
+    {
+      "name": "TransportOrderId",
+      "type": "string"
+    },
+    {
+      "name": "Urgent",
+      "type": "bool"
+    }
+  ],
+  "business_rules": [
+    {
+      "name": "Activity_0rm8bkp",
+      "enum_name": "Activity_0rm8bkp",
+      "config_param": "Activity_0rm8bkp",
+      "content_param": "dmnCid",
+      "hash_param": "dmnHash",
+      "decision_param": "decisionId",
+      "caller_restricted_param": "callerRestricted",
+      "allowed_caller_param": "allowedCaller",
+      "input_mappings": [
+        {
+          "param_name": "numberOfUnits",
+          "param_literal": "\"numberOfUnits\"",
+          "slot_name": "NumberOfUnits",
+          "sol_type": "int256"
+        },
+        {
+          "param_name": "urgent",
+          "param_literal": "\"urgent\"",
+          "slot_name": "Urgent",
+          "sol_type": "bool"
+        },
+        {
+          "param_name": "supplierReputation",
+          "param_literal": "\"supplierReputation\"",
+          "slot_name": "SupplierReputation",
+          "sol_type": "int256"
+        }
+      ],
+      "output_mappings": [
+        {
+          "param_name": "finalPriority",
+          "param_literal": "\"finalPriority\"",
+          "slot_name": "FinalPriority",
+          "sol_type": "string"
+        }
+      ],
+      "done_actions": "        inst.gateways[GatewayKey.Gateway_0ep8cuh].state = ElementState.ENABLED;\n"
+    }
+  ],
+  "flow_functions": [
+    "function Event_06sexe6(uint256 instanceId) external onlyInitialized {\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.Event_06sexe6];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.Event_06sexe6);\n        inst.messages[MessageKey.Message_1wswgqu].state = ElementState.ENABLED;\n\n    }",
+    "function Message_04wmlqe_Send(uint256 instanceId, string calldata fireflyTranId, string calldata productionStart) external onlyInitialized {\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.Message_04wmlqe];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        inst.stateMemory.ProductionStart = productionStart;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.Message_04wmlqe, fireflyTranId);\n        inst.messages[MessageKey.Message_196q1fj].state = ElementState.ENABLED;\n\n    }",
+    "function Message_0cba4t6_Send(uint256 instanceId, string calldata fireflyTranId, string calldata supplyOrderId) external onlyInitialized {\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.Message_0cba4t6];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        inst.stateMemory.SupplyOrderId = supplyOrderId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.Message_0cba4t6, fireflyTranId);\n        inst.gateways[GatewayKey.Gateway_1fbifca].state = ElementState.ENABLED;\n\n    }",
+    "function Message_0d2xte5_Send(uint256 instanceId, string calldata fireflyTranId, bool deliveryConfirmation) external onlyInitialized {\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.Message_0d2xte5];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        inst.stateMemory.DeliveryConfirmation = deliveryConfirmation;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.Message_0d2xte5, fireflyTranId);\n        inst.gateways[GatewayKey.Gateway_1cr0nma].state = ElementState.ENABLED;\n\n    }",
+    "function Message_0hpha6h_Send(uint256 instanceId, string calldata fireflyTranId, int256 requestId, int256 supplierReputation) external onlyInitialized {\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.Message_0hpha6h];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        inst.stateMemory.RequestId = requestId;\n        inst.stateMemory.SupplierReputation = supplierReputation;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.Message_0hpha6h, fireflyTranId);\n        inst.messages[MessageKey.Message_1io2g9u].state = ElementState.ENABLED;\n\n    }",
+    "function Message_0pm90nx_Send(uint256 instanceId, string calldata fireflyTranId, string calldata transportOrderId) external onlyInitialized {\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.Message_0pm90nx];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        inst.stateMemory.TransportOrderId = transportOrderId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.Message_0pm90nx, fireflyTranId);\n        inst.gateways[GatewayKey.Gateway_1fbifca].state = ElementState.ENABLED;\n\n    }",
+    "function Message_0rwz1km_Send(uint256 instanceId, string calldata fireflyTranId, int256 requestId, int256 numberOfUnits, bool urgent) external onlyInitialized {\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.Message_0rwz1km];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        inst.stateMemory.RequestId = requestId;\n        inst.stateMemory.NumberOfUnits = numberOfUnits;\n        inst.stateMemory.Urgent = urgent;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.Message_0rwz1km, fireflyTranId);\n        inst.messages[MessageKey.Message_0hpha6h].state = ElementState.ENABLED;\n\n    }",
+    "function Message_196q1fj_Send(uint256 instanceId, string calldata fireflyTranId, string calldata deliveryNote) external onlyInitialized {\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.Message_196q1fj];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.Message_196q1fj, fireflyTranId);\n        inst.events[EventKey.Event_13pbqdz].state = ElementState.ENABLED;\n\n    }",
+    "function Message_1ajdm9l_Send(uint256 instanceId, string calldata fireflyTranId, string calldata supplyOrderDetails) external onlyInitialized {\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.Message_1ajdm9l];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        inst.stateMemory.SupplyOrderDetails = supplyOrderDetails;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.Message_1ajdm9l, fireflyTranId);\n        inst.gateways[GatewayKey.Gateway_0onpe6x].state = ElementState.ENABLED;\n\n    }",
+    "function Message_1dmeexg_Send(uint256 instanceId, string calldata fireflyTranId, string calldata confirm3) external onlyInitialized {\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.Message_1dmeexg];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        inst.stateMemory.Confirm3 = confirm3;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.Message_1dmeexg, fireflyTranId);\n        inst.gateways[GatewayKey.Gateway_1cr0nma].state = ElementState.ENABLED;\n\n    }",
+    "function Message_1dzkcn0_Send(uint256 instanceId, string calldata fireflyTranId, bool confirm2) external onlyInitialized {\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.Message_1dzkcn0];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        inst.stateMemory.Confirm2 = confirm2;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.Message_1dzkcn0, fireflyTranId);\n        inst.gateways[GatewayKey.Gateway_1cr0nma].state = ElementState.ENABLED;\n\n    }",
+    "function Message_1io2g9u_Send(uint256 instanceId, string calldata fireflyTranId, string calldata waybill) external onlyInitialized {\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.Message_1io2g9u];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.Message_1io2g9u, fireflyTranId);\n        inst.businessRules[BusinessRuleKey.Activity_0rm8bkp].state = ElementState.ENABLED;\n\n    }",
+    "function Message_1oxmq1k_Send(uint256 instanceId, string calldata fireflyTranId, bool confirm1) external onlyInitialized {\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.Message_1oxmq1k];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        inst.stateMemory.Confirm1 = confirm1;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.Message_1oxmq1k, fireflyTranId);\n        inst.gateways[GatewayKey.Gateway_1cr0nma].state = ElementState.ENABLED;\n\n    }",
+    "function Message_1wswgqu_Send(uint256 instanceId, string calldata fireflyTranId, string calldata orderDetails) external onlyInitialized {\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.Message_1wswgqu];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        inst.stateMemory.OrderDetails = orderDetails;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.Message_1wswgqu, fireflyTranId);\n        inst.messages[MessageKey.Message_1ajdm9l].state = ElementState.ENABLED;\n\n    }",
+    "function Gateway_1cr0nma(uint256 instanceId) external onlyInitialized {\n        Instance storage inst = _getInstance(instanceId);\n        Gateway storage g = inst.gateways[GatewayKey.Gateway_1cr0nma];\n        require(g.exists, \"gateway not set\");\n        require(g.state == ElementState.ENABLED, \"gateway state not allowed\");\n\n        g.state = ElementState.COMPLETED;\n        emit GatewayDone(instanceId, GatewayKey.Gateway_1cr0nma);\n        inst.messages[MessageKey.Message_04wmlqe].state = ElementState.ENABLED;\n\n    }",
+    "function Gateway_0ep8cuh(uint256 instanceId) external onlyInitialized {\n        Instance storage inst = _getInstance(instanceId);\n        Gateway storage g = inst.gateways[GatewayKey.Gateway_0ep8cuh];\n        require(g.exists, \"gateway not set\");\n        require(g.state == ElementState.ENABLED, \"gateway state not allowed\");\n\n        g.state = ElementState.COMPLETED;\n        emit GatewayDone(instanceId, GatewayKey.Gateway_0ep8cuh);\n        if (keccak256(bytes(inst.stateMemory.FinalPriority)) == keccak256(bytes(\"Low\"))) {\n            inst.messages[MessageKey.Message_1oxmq1k].state = ElementState.ENABLED;\n        }\n        else if (keccak256(bytes(inst.stateMemory.FinalPriority)) == keccak256(bytes(\"High\"))) {\n            inst.messages[MessageKey.Message_1dmeexg].state = ElementState.ENABLED;\n        }\n        else if (keccak256(bytes(inst.stateMemory.FinalPriority)) == keccak256(bytes(\"Medium\"))) {\n            inst.messages[MessageKey.Message_1dzkcn0].state = ElementState.ENABLED;\n        }\n        else if (keccak256(bytes(inst.stateMemory.FinalPriority)) == keccak256(bytes(\"VeryLow\"))) {\n            inst.messages[MessageKey.Message_0d2xte5].state = ElementState.ENABLED;\n        }\n\n    }",
+    "function Gateway_0onpe6x(uint256 instanceId) external onlyInitialized {\n        Instance storage inst = _getInstance(instanceId);\n        Gateway storage g = inst.gateways[GatewayKey.Gateway_0onpe6x];\n        require(g.exists, \"gateway not set\");\n        require(g.state == ElementState.ENABLED, \"gateway state not allowed\");\n\n        g.state = ElementState.COMPLETED;\n        emit GatewayDone(instanceId, GatewayKey.Gateway_0onpe6x);\n        inst.messages[MessageKey.Message_0cba4t6].state = ElementState.ENABLED;\n        inst.messages[MessageKey.Message_0pm90nx].state = ElementState.ENABLED;\n\n    }",
+    "function Gateway_1fbifca(uint256 instanceId) external onlyInitialized {\n        Instance storage inst = _getInstance(instanceId);\n        Gateway storage g = inst.gateways[GatewayKey.Gateway_1fbifca];\n        require(g.exists, \"gateway not set\");\n        require(g.state == ElementState.ENABLED, \"gateway state not allowed\");\n\n        g.state = ElementState.COMPLETED;\n        emit GatewayDone(instanceId, GatewayKey.Gateway_1fbifca);\n        if (!(inst.messages[MessageKey.Message_0cba4t6].state == ElementState.COMPLETED && inst.messages[MessageKey.Message_0pm90nx].state == ElementState.COMPLETED)) {\n                    revert(\"Parallel gateway prerequisites not met\");\n                }\n        inst.messages[MessageKey.Message_0rwz1km].state = ElementState.ENABLED;\n\n    }",
+    "function Event_13pbqdz(uint256 instanceId) external onlyInitialized {\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.Event_13pbqdz];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.Event_13pbqdz);\n\n    }"
+  ]
+}

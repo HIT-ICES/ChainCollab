@@ -1,0 +1,1 @@
+stage_status.json 是最终状态。diagnostic_error.txt 保留第一次诊断脚本调用 LanguageDesc 的失败；随后改为直接加载当前 grammar，已成功重跑。该失败不是原生转换器失败。原生 CLI 的 command.json/stdout/stderr 独立记录。collect_seciv.py/document_seciv.py 为旁路复现脚本，不是产品代码。平台编译与部署均 NOT_RUN。
