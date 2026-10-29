@@ -1,0 +1,25 @@
+contract MessageConfirmation {
+ participants {
+  participant Sender {}
+  participant Receiver {}
+  participant MultiReceiver { isMulti true }
+ }
+ globals { Count: int }
+ messages {
+  message M from Sender to Receiver { initial state READY schema '{"properties":{"count":{"type":"number"}}}' }
+  message M2 from Sender to Receiver { initial state READY }
+  message OnSend from Sender to Receiver {}
+  message OnComplete from Sender to Receiver {}
+  message DataGood from Sender to Receiver {}
+  message DataBad from Sender to Receiver {}
+  message Multi from Sender to MultiReceiver { initial state READY }
+ }
+ gateways { gateway Data { type exclusive } gateway Join { type parallel initial state READY } }
+ events { event End {} }
+ flows {
+  when message M sent then enable OnSend, enable Data;
+  when message M completed then enable OnComplete;
+  when gateway Data completed choose { if Count == 42 then enable DataGood; else then enable DataBad; }
+  parallel gateway Join await M, M2 then enable End;
+ }
+}

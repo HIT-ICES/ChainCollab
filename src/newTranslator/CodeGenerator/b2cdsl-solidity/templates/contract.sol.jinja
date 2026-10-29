@@ -198,6 +198,7 @@ contract {{ contract_name }} {
     uint8 private constant DMN_REQUEST_FULFILLED = 2;
 
     event MessageSent(uint256 instanceId, MessageKey messageKey, string fireflyTranId);
+    event MessageCompleted(uint256 instanceId, MessageKey messageKey, string fireflyTranId);
     event GatewayDone(uint256 instanceId, GatewayKey gatewayKey);
     event ActionEventDone(uint256 instanceId, EventKey eventKey);
     event BusinessRuleRequested(

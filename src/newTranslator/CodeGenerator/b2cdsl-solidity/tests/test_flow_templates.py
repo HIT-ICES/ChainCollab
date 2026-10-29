@@ -1,4 +1,4 @@
-"""Golden generation regressions captured before the Jinja-only skeleton refactor.
+"""Golden regressions for unchanged output, plus two-stage message lifecycle checks.
 
 The DSL fixture is synthetic test data. Hashes cover exact output bytes,
 including whitespace, as well as individual flow blocks for useful diagnostics.
@@ -54,21 +54,50 @@ class FlowTemplateGoldenTests(unittest.TestCase):
     def test_go_full_contract_matches_pre_refactor_bytes(self):
         self.assert_generated_bytes(b2cdsl_go, "go", ".go")
 
-    def test_solidity_full_contract_matches_pre_refactor_bytes(self):
-        self.assert_generated_bytes(b2cdsl_solidity, "solidity", ".sol")
-
-    def test_each_solidity_flow_matches_pre_refactor_bytes(self):
+    def solidity_renderer(self):
         adapter = b2cdsl_solidity.DSLContractAdapter(self.model().contracts[0])
-        blocks = b2cdsl_solidity.SolidityRenderer(adapter).build_context()["flow_functions"]
-        expected = self.expected["solidity_flow_blocks"]
-        self.assertEqual(len(blocks), len(expected))
-        for block, original in zip(blocks, expected):
+        return b2cdsl_solidity.SolidityRenderer(adapter)
+
+    def test_non_message_solidity_flows_match_pre_refactor_bytes(self):
+        blocks = {
+            block.splitlines()[0]: block
+            for block in self.solidity_renderer().build_context()["flow_functions"]
+            if not block.startswith("function Message")
+        }
+        expected = [
+            block for block in self.expected["solidity_flow_blocks"]
+            if not block["signature"].startswith("function Message")
+        ]
+        self.assertEqual(set(blocks), {block["signature"] for block in expected})
+        for original in expected:
             with self.subTest(function=original["signature"]):
-                self.assertEqual(block.splitlines()[0], original["signature"])
                 self.assertEqual(
-                    hashlib.sha256(block.encode("utf-8")).hexdigest(),
+                    hashlib.sha256(blocks[original["signature"]].encode()).hexdigest(),
                     original["sha256"],
                 )
+
+    def test_message_actions_are_split_between_send_and_complete(self):
+        blocks = self.solidity_renderer().build_context()["flow_functions"]
+        send = next(b for b in blocks if b.startswith("function MessageFields_Send("))
+        complete = next(b for b in blocks if b.startswith("function MessageFields_Complete("))
+        self.assertIn("m.state = ElementState.WAITING_FOR_CONFIRMATION;", send)
+        self.assertNotIn("m.state = ElementState.COMPLETED;", send)
+        self.assertIn("inst.stateMemory.Count = count;", send)
+        self.assertNotIn("inst.stateMemory.Count = count;", complete)
+        self.assertNotIn("MessageKey.MessageEmpty].state = ElementState.DISABLED", send)
+        self.assertIn("MessageKey.MessageEmpty].state = ElementState.DISABLED", complete)
+        self.assertIn("_checkParticipant(inst, m.receiveParticipant)", complete)
+        self.assertIn("m.state == ElementState.WAITING_FOR_CONFIRMATION", complete)
+        self.assertIn("m.state = ElementState.COMPLETED;", complete)
+        self.assertIn("emit MessageCompleted", complete)
+
+    def test_execution_layout_exposes_both_message_methods(self):
+        layout = self.solidity_renderer().build_execution_layout()
+        message = next(m for m in layout["messages"] if m["id"] == "MessageFields")
+        self.assertEqual(message["sendMethod"], "MessageFields_Send")
+        self.assertEqual(message["completeMethod"], "MessageFields_Complete")
+        self.assertEqual(layout["methodMap"]["MessageFields"], "MessageFields_Send")
+        self.assertEqual(layout["methodMap"]["MessageFields#complete"], "MessageFields_Complete")
 
 
 if __name__ == "__main__":
