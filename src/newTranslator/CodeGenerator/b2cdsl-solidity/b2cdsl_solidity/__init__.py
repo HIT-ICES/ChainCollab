@@ -378,6 +378,9 @@ class SolidityFlowRenderer:
         self.oracle_actions: dict[tuple[str, str], List[str]] = {}
         self._collect_flow_actions()
 
+    def _render_template(self, template_name: str, **context: Any) -> str:
+        return TEMPLATE_ENV.get_template(template_name).render(**context)
+
     def render_blocks(self) -> List[str]:
         blocks: List[str] = []
         blocks.extend(self._render_start_events())
@@ -438,16 +441,11 @@ class SolidityFlowRenderer:
         functions: List[str] = []
         for event_name, actions in self.start_event_actions.items():
             enum_name = self.enum_maps["event"].get(event_name, sanitize_identifier(event_name))
-            body = f"""function {enum_name}(uint256 instanceId) external onlyInitialized {{
-        Instance storage inst = _getInstance(instanceId);
-        ActionEvent storage ev = inst.events[EventKey.{enum_name}];
-        require(ev.exists, "event not set");
-        require(ev.state == ElementState.ENABLED, "event state not allowed");
-
-        ev.state = ElementState.COMPLETED;
-        emit ActionEventDone(instanceId, EventKey.{enum_name});
-{self._indent("".join(actions), 2)}
-    }}"""
+            body = self._render_template(
+                "flows/start_event.sol.jinja",
+                event_name=enum_name,
+                after_hooks=self._indent("".join(actions), 2),
+            )
             functions.append(body)
         return functions
 
@@ -461,19 +459,13 @@ class SolidityFlowRenderer:
             # message follow-up flow is not dropped when the DSL uses `completed`.
             send_actions = self._indent("".join(self._message_transition_actions(message.name)), 2)
             signature = ", ".join(["uint256 instanceId", "string calldata fireflyTranId", *method_params])
-            body = f"""function {enum_name}_Send({signature}) external onlyInitialized {{
-        Instance storage inst = _getInstance(instanceId);
-        Message storage m = inst.messages[MessageKey.{enum_name}];
-        require(m.exists, "message not set");
-        _checkParticipant(inst, m.sendParticipant);
-        require(m.state == ElementState.ENABLED, "message state not allowed");
-
-        m.fireflyTranId = fireflyTranId;
-{assignment_block}\
-        m.state = ElementState.COMPLETED;
-        emit MessageSent(instanceId, MessageKey.{enum_name}, fireflyTranId);
-{send_actions}
-    }}"""
+            body = self._render_template(
+                "actions/message_send.sol.jinja",
+                message_name=enum_name,
+                signature=signature,
+                parameter_assignments=assignment_block,
+                after_hooks=send_actions,
+            )
             functions.append(body)
         return functions
 
@@ -561,16 +553,11 @@ class SolidityFlowRenderer:
             conditional_raw = self.gateway_branch_blocks.get(gateway.name, "")
             conditional_block = self._indent(conditional_raw, 2) if conditional_raw else ""
             action_block = guard_block + (conditional_block or normal_actions)
-            body = f"""function {enum_name}(uint256 instanceId) external onlyInitialized {{
-        Instance storage inst = _getInstance(instanceId);
-        Gateway storage g = inst.gateways[GatewayKey.{enum_name}];
-        require(g.exists, "gateway not set");
-        require(g.state == ElementState.ENABLED, "gateway state not allowed");
-
-        g.state = ElementState.COMPLETED;
-        emit GatewayDone(instanceId, GatewayKey.{enum_name});
-{action_block}
-    }}"""
+            body = self._render_template(
+                "flows/gateway.sol.jinja",
+                gateway_name=enum_name,
+                action_block=action_block,
+            )
             functions.append(body)
         return functions
 
@@ -604,47 +591,21 @@ class SolidityFlowRenderer:
                     }
                 )
 
-            assign_lines: List[str] = []
-            for idx, mapping in enumerate(output_mappings):
-                value_var = f"oracleValue{idx}"
-                param_literal = mapping["param_literal"]
-                if oracle_type == "compute-task":
-                    source_call = (
-                        f'oracle.runComputeTask(instanceId, {task_name_literal}, '
-                        f'{compute_script_literal}, {param_literal})'
-                    )
-                else:
-                    source_call = (
-                        f'oracle.getExternalData(instanceId, {task_name_literal}, '
-                        f'{data_source_literal}, {param_literal})'
-                    )
-                assign_lines.append(f"        string memory {value_var} = {source_call};")
-                if mapping["sol_type"] == "int256":
-                    assign_lines.append(
-                        f"        inst.stateMemory.{mapping['slot_name']} = _stringToInt({value_var});"
-                    )
-                elif mapping["sol_type"] == "bool":
-                    assign_lines.append(
-                        f"        inst.stateMemory.{mapping['slot_name']} = _stringToBool({value_var});"
-                    )
-                else:
-                    assign_lines.append(
-                        f"        inst.stateMemory.{mapping['slot_name']} = {value_var};"
-                    )
-            assign_block = "\n".join(assign_lines)
-            if assign_block:
-                assign_block += "\n"
+            assign_block = self._render_template(
+                "actions/oracle_outputs.sol.jinja",
+                output_mappings=output_mappings,
+                oracle_type=oracle_type,
+                task_name_literal=task_name_literal,
+                data_source_literal=data_source_literal,
+                compute_script_literal=compute_script_literal,
+            )
             done_actions = self._indent("".join(self.oracle_actions.get((task.name, "done"), [])), 2)
-            body = f"""function {enum_name}(uint256 instanceId) external onlyInitialized {{
-        Instance storage inst = _getInstance(instanceId);
-        ActionEvent storage ev = inst.events[EventKey.{enum_name}];
-        require(ev.exists, "oracle task not set");
-        require(ev.state == ElementState.ENABLED, "oracle task state not allowed");
-
-{assign_block}        ev.state = ElementState.COMPLETED;
-        emit ActionEventDone(instanceId, EventKey.{enum_name});
-{done_actions}
-    }}"""
+            body = self._render_template(
+                "actions/oracle_task.sol.jinja",
+                task_name=enum_name,
+                output_assignments=assign_block,
+                after_hooks=done_actions,
+            )
             functions.append(body)
         return functions
 
@@ -656,16 +617,11 @@ class SolidityFlowRenderer:
                 continue
             enum_name = self.enum_maps["event"].get(event.name, sanitize_identifier(event.name))
             actions = self._indent("".join(self.event_actions.get(event.name, [])), 2)
-            body = f"""function {enum_name}(uint256 instanceId) external onlyInitialized {{
-        Instance storage inst = _getInstance(instanceId);
-        ActionEvent storage ev = inst.events[EventKey.{enum_name}];
-        require(ev.exists, "event not set");
-        require(ev.state == ElementState.ENABLED, "event state not allowed");
-
-        ev.state = ElementState.COMPLETED;
-        emit ActionEventDone(instanceId, EventKey.{enum_name});
-{actions}
-    }}"""
+            body = self._render_template(
+                "flows/event.sol.jinja",
+                event_name=enum_name,
+                after_hooks=actions,
+            )
             functions.append(body)
         return functions
 
@@ -793,9 +749,12 @@ class SolidityFlowRenderer:
             clause = ""
             if condition and prefix != "else":
                 clause = f" ({condition})"
-            block = f"{prefix}{clause} {{\n"
-            block += self._indent(actions, 1)
-            block += "}\n"
+            block = self._render_template(
+                "flows/gateway_branch.sol.jinja",
+                prefix=prefix,
+                clause=clause,
+                actions=self._indent(actions, 1),
+            )
             blocks.append(block)
             branch_index += 1
         return "".join(blocks)
@@ -825,7 +784,7 @@ class SolidityFlowRenderer:
         if not checks:
             return ""
         condition = " && ".join(checks)
-        return f"if (!({condition})) {{\n            revert(\"Parallel gateway prerequisites not met\");\n        }}\n"
+        return self._render_template("flows/parallel_guard.sol.jinja", condition=condition)
 
     def _element_ready_check(self, element: Any) -> Optional[str]:
         cls_name = element.__class__.__name__

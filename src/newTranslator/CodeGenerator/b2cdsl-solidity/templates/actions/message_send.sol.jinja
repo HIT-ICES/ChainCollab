@@ -1,0 +1,12 @@
+function {{ message_name }}_Send({{ signature }}) external onlyInitialized {
+        Instance storage inst = _getInstance(instanceId);
+        Message storage m = inst.messages[MessageKey.{{ message_name }}];
+        require(m.exists, "message not set");
+        _checkParticipant(inst, m.sendParticipant);
+        require(m.state == ElementState.ENABLED, "message state not allowed");
+
+        m.fireflyTranId = fireflyTranId;
+{{ parameter_assignments }}        m.state = ElementState.COMPLETED;
+        emit MessageSent(instanceId, MessageKey.{{ message_name }}, fireflyTranId);
+{{ after_hooks }}
+    }

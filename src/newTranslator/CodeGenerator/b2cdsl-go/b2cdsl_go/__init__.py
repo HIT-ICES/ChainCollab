@@ -336,34 +336,13 @@ class FlowRenderer:
                 )
 
             done_actions = "".join(self.oracle_actions.get((task.name, "done"), []))
-            body = f"""func (cc *SmartContract) {task.name}(ctx contractapi.TransactionContextInterface, instanceID string{param_sig}) error {{
-    stub := ctx.GetStub()
-
-    instance, err := cc.GetInstance(ctx, instanceID)
-    if err != nil {{
-        return err
-    }}
-
-    oracleTask, err := cc.ReadEvent(ctx, instanceID, "{task.name}")
-    if err != nil {{
-        return err
-    }}
-
-    if oracleTask.EventState != ENABLED {{
-        errorMessage := fmt.Sprintf("Oracle task state %s is not allowed", oracleTask.EventID)
-        fmt.Println(errorMessage)
-        return fmt.Errorf(errorMessage)
-    }}
-
-    cc.ChangeEventState(ctx, instance, "{task.name}", COMPLETED)
-{self._indent(set_globals, 1)}{self._indent(done_actions, 1)}    stub.SetEvent("{task.name}", []byte("Oracle task has been completed"))
-    err = cc.SetInstance(ctx, instance)
-    if err != nil {{
-        return err
-    }}
-
-    return nil
-}}"""
+            body = self._render_template(
+                "flows/oracle_task.go.jinja",
+                task_name=task.name,
+                more_parameters=param_sig,
+                parameter_assignments=self._indent(set_globals, 1),
+                after_hooks=self._indent(done_actions, 1),
+            )
             blocks.append(body)
         return blocks
 
