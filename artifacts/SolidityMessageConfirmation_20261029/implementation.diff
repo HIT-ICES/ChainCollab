@@ -1,0 +1,188 @@
+diff --git a/src/front/src/views/BPMN/Execution/SvgComponent/index.tsx b/src/front/src/views/BPMN/Execution/SvgComponent/index.tsx
+index 0f2ff773..c0aa5f07 100644
+--- a/src/front/src/views/BPMN/Execution/SvgComponent/index.tsx
++++ b/src/front/src/views/BPMN/Execution/SvgComponent/index.tsx
+@@ -2069,6 +2069,18 @@ const getEthereumActionConfig = (
+ 			payload: { ...payload, ...overrides },
+ 		};
+ 	}
++	if (element?.type === "message" && element?.state === 2) {
++		const methodName = `${element.MessageID}_Complete`;
++		const method = methodsByName[methodName];
++		if (!method) return null;
++		return {
++			type: "message" as const,
++			label: "Confirm receipt",
++			method: methodName,
++			methodDef: method,
++			payload: buildEthereumMethodPayload(method, instanceId),
++		};
++	}
+ 	if (element?.type === "gateway" && element?.state === 1) {
+ 		const method = methodsByName[element.GatewayID];
+ 		return {
+diff --git a/src/newTranslator/CodeGenerator/b2cdsl-solidity/b2cdsl_solidity/__init__.py b/src/newTranslator/CodeGenerator/b2cdsl-solidity/b2cdsl_solidity/__init__.py
+index 4aef228f..0cc5b3a3 100644
+--- a/src/newTranslator/CodeGenerator/b2cdsl-solidity/b2cdsl_solidity/__init__.py
++++ b/src/newTranslator/CodeGenerator/b2cdsl-solidity/b2cdsl_solidity/__init__.py
+@@ -125,6 +125,8 @@ class SolidityRenderer:
+                     "id": item["enum_name"],
+                     "sender": item["sender"],
+                     "receiver": item["receiver"],
++                    "sendMethod": f"{item['enum_name']}_Send",
++                    "completeMethod": f"{item['enum_name']}_Complete",
+                 }
+                 for item in self._message_payload()
+             ],
+@@ -165,6 +167,10 @@ class SolidityRenderer:
+                     item["enum_name"]: f"{item['enum_name']}_Send"
+                     for item in self._message_payload()
+                 },
++                **{
++                    f"{item['enum_name']}#complete": f"{item['enum_name']}_Complete"
++                    for item in self._message_payload()
++                },
+                 **{
+                     item["enum_name"]: item["enum_name"]
+                     for item in self._simple_payload(self.adapter.gateways)
+@@ -454,10 +460,12 @@ class SolidityFlowRenderer:
+         for message in self.adapter.messages:
+             enum_name = self.enum_maps["message"].get(message.name, sanitize_identifier(message.name))
+             method_params, assignment_block = self._message_method_signature(message)
+-            # The Solidity runtime has a single message send transition that also
+-            # marks the message as completed. Support both DSL conditions here so
+-            # message follow-up flow is not dropped when the DSL uses `completed`.
+-            send_actions = self._indent("".join(self._message_transition_actions(message.name)), 2)
++            send_actions = self._indent(
++                "".join(self.message_actions.get((message.name, "sent"), [])), 2
++            )
++            complete_actions = self._indent(
++                "".join(self.message_actions.get((message.name, "completed"), [])), 2
++            )
+             signature = ", ".join(["uint256 instanceId", "string calldata fireflyTranId", *method_params])
+             body = self._render_template(
+                 "actions/message_send.sol.jinja",
+@@ -467,19 +475,15 @@ class SolidityFlowRenderer:
+                 after_hooks=send_actions,
+             )
+             functions.append(body)
++            functions.append(
++                self._render_template(
++                    "actions/message_complete.sol.jinja",
++                    message_name=enum_name,
++                    after_hooks=complete_actions,
++                )
++            )
+         return functions
+ 
+-    def _message_transition_actions(self, message_name: str) -> List[str]:
+-        combined: List[str] = []
+-        seen: set[str] = set()
+-        for condition in ("sent", "completed"):
+-            for action in self.message_actions.get((message_name, condition), []):
+-                if action in seen:
+-                    continue
+-                seen.add(action)
+-                combined.append(action)
+-        return combined
+-
+     def _message_method_signature(self, message: Any) -> tuple[List[str], str]:
+         schema_doc = self._parse_message_schema(getattr(message, "schema", "") or "")
+         params: List[str] = []
+diff --git a/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/actions/message_send.sol.jinja b/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/actions/message_send.sol.jinja
+index 024b17ad..8a6e2c74 100644
+--- a/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/actions/message_send.sol.jinja
++++ b/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/actions/message_send.sol.jinja
+@@ -6,7 +6,7 @@ function {{ message_name }}_Send({{ signature }}) external onlyInitialized {
+         require(m.state == ElementState.ENABLED, "message state not allowed");
+ 
+         m.fireflyTranId = fireflyTranId;
+-{{ parameter_assignments }}        m.state = ElementState.COMPLETED;
++{{ parameter_assignments }}        m.state = ElementState.WAITING_FOR_CONFIRMATION;
+         emit MessageSent(instanceId, MessageKey.{{ message_name }}, fireflyTranId);
+ {{ after_hooks }}
+     }
+diff --git a/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/contract.sol.jinja b/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/contract.sol.jinja
+index d580edd1..a9e2515f 100644
+--- a/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/contract.sol.jinja
++++ b/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/contract.sol.jinja
+@@ -198,6 +198,7 @@ contract {{ contract_name }} {
+     uint8 private constant DMN_REQUEST_FULFILLED = 2;
+ 
+     event MessageSent(uint256 instanceId, MessageKey messageKey, string fireflyTranId);
++    event MessageCompleted(uint256 instanceId, MessageKey messageKey, string fireflyTranId);
+     event GatewayDone(uint256 instanceId, GatewayKey gatewayKey);
+     event ActionEventDone(uint256 instanceId, EventKey eventKey);
+     event BusinessRuleRequested(
+diff --git a/src/newTranslator/CodeGenerator/b2cdsl-solidity/tests/test_flow_templates.py b/src/newTranslator/CodeGenerator/b2cdsl-solidity/tests/test_flow_templates.py
+index df1609bc..46fa30c4 100644
+--- a/src/newTranslator/CodeGenerator/b2cdsl-solidity/tests/test_flow_templates.py
++++ b/src/newTranslator/CodeGenerator/b2cdsl-solidity/tests/test_flow_templates.py
+@@ -1,4 +1,4 @@
+-"""Golden generation regressions captured before the Jinja-only skeleton refactor.
++"""Golden regressions for unchanged output, plus two-stage message lifecycle checks.
+ 
+ The DSL fixture is synthetic test data. Hashes cover exact output bytes,
+ including whitespace, as well as individual flow blocks for useful diagnostics.
+@@ -54,22 +54,51 @@ class FlowTemplateGoldenTests(unittest.TestCase):
+     def test_go_full_contract_matches_pre_refactor_bytes(self):
+         self.assert_generated_bytes(b2cdsl_go, "go", ".go")
+ 
+-    def test_solidity_full_contract_matches_pre_refactor_bytes(self):
+-        self.assert_generated_bytes(b2cdsl_solidity, "solidity", ".sol")
+-
+-    def test_each_solidity_flow_matches_pre_refactor_bytes(self):
++    def solidity_renderer(self):
+         adapter = b2cdsl_solidity.DSLContractAdapter(self.model().contracts[0])
+-        blocks = b2cdsl_solidity.SolidityRenderer(adapter).build_context()["flow_functions"]
+-        expected = self.expected["solidity_flow_blocks"]
+-        self.assertEqual(len(blocks), len(expected))
+-        for block, original in zip(blocks, expected):
++        return b2cdsl_solidity.SolidityRenderer(adapter)
++
++    def test_non_message_solidity_flows_match_pre_refactor_bytes(self):
++        blocks = {
++            block.splitlines()[0]: block
++            for block in self.solidity_renderer().build_context()["flow_functions"]
++            if not block.startswith("function Message")
++        }
++        expected = [
++            block for block in self.expected["solidity_flow_blocks"]
++            if not block["signature"].startswith("function Message")
++        ]
++        self.assertEqual(set(blocks), {block["signature"] for block in expected})
++        for original in expected:
+             with self.subTest(function=original["signature"]):
+-                self.assertEqual(block.splitlines()[0], original["signature"])
+                 self.assertEqual(
+-                    hashlib.sha256(block.encode("utf-8")).hexdigest(),
++                    hashlib.sha256(blocks[original["signature"]].encode()).hexdigest(),
+                     original["sha256"],
+                 )
+ 
++    def test_message_actions_are_split_between_send_and_complete(self):
++        blocks = self.solidity_renderer().build_context()["flow_functions"]
++        send = next(b for b in blocks if b.startswith("function MessageFields_Send("))
++        complete = next(b for b in blocks if b.startswith("function MessageFields_Complete("))
++        self.assertIn("m.state = ElementState.WAITING_FOR_CONFIRMATION;", send)
++        self.assertNotIn("m.state = ElementState.COMPLETED;", send)
++        self.assertIn("inst.stateMemory.Count = count;", send)
++        self.assertNotIn("inst.stateMemory.Count = count;", complete)
++        self.assertNotIn("MessageKey.MessageEmpty].state = ElementState.DISABLED", send)
++        self.assertIn("MessageKey.MessageEmpty].state = ElementState.DISABLED", complete)
++        self.assertIn("_checkParticipant(inst, m.receiveParticipant)", complete)
++        self.assertIn("m.state == ElementState.WAITING_FOR_CONFIRMATION", complete)
++        self.assertIn("m.state = ElementState.COMPLETED;", complete)
++        self.assertIn("emit MessageCompleted", complete)
++
++    def test_execution_layout_exposes_both_message_methods(self):
++        layout = self.solidity_renderer().build_execution_layout()
++        message = next(m for m in layout["messages"] if m["id"] == "MessageFields")
++        self.assertEqual(message["sendMethod"], "MessageFields_Send")
++        self.assertEqual(message["completeMethod"], "MessageFields_Complete")
++        self.assertEqual(layout["methodMap"]["MessageFields"], "MessageFields_Send")
++        self.assertEqual(layout["methodMap"]["MessageFields#complete"], "MessageFields_Complete")
++
+ 
+ if __name__ == "__main__":
+     unittest.main()

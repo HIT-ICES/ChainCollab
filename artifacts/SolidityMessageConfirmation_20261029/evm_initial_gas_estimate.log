@@ -1,0 +1,50 @@
+This version of µWS is not compatible with your Node.js build:
+
+Error: Cannot find module '../binaries/uws_linux_x64_127.node'
+Require stack:
+- /tmp/chaincollab-message-confirmation-20261029/node_modules/ganache/node_modules/@trufflesuite/uws-js-unofficial/src/uws.js
+- /tmp/chaincollab-message-confirmation-20261029/node_modules/ganache/dist/node/core.js
+- /home/shenxz-lab/code/ChainCollab/src/newTranslator/CodeGenerator/b2cdsl-solidity/tests/message_confirmation.evm.cjs
+Falling back to a NodeJS implementation; performance may be degraded.
+
+
+Error: transaction execution reverted (action="sendTransaction", data=null, reason=null, invocation=null, revert=null, transaction={ "data": "", "from": "0x0279091F56BF123C36E0d407015205E8f5D202C7", "to": "0x454744929B2F9F863C67C503f2cBD487dC0B1723" }, receipt={ "_type": "TransactionReceipt", "blobGasPrice": null, "blobGasUsed": null, "blockHash": "0x5f3313036885f10e8e7932509cbeae34579aeabc9bbd51ccde1211efa8e0308c", "blockNumber": 7, "contractAddress": null, "cumulativeGasUsed": "550244", "from": "0x0279091F56BF123C36E0d407015205E8f5D202C7", "gasPrice": "514957736", "gasUsed": "550244", "hash": "0xfe77d0d343b2dc5b258e948778d68f10d7f0d8be664281e682527310d31b731c", "index": 0, "logs": [  ], "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", "root": null, "status": 0, "to": "0x454744929B2F9F863C67C503f2cBD487dC0B1723" }, code=CALL_EXCEPTION, version=6.17.0)
+    at makeError (/tmp/chaincollab-message-confirmation-20261029/node_modules/ethers/lib.commonjs/utils/errors.js:137:21)
+    at assert (/tmp/chaincollab-message-confirmation-20261029/node_modules/ethers/lib.commonjs/utils/errors.js:157:15)
+    at checkReceipt (/tmp/chaincollab-message-confirmation-20261029/node_modules/ethers/lib.commonjs/providers/provider.js:1143:35)
+    at ContractTransactionResponse.wait (/tmp/chaincollab-message-confirmation-20261029/node_modules/ethers/lib.commonjs/providers/provider.js:1159:24)
+    at async ContractTransactionResponse.wait (/tmp/chaincollab-message-confirmation-20261029/node_modules/ethers/lib.commonjs/contract/wrappers.js:115:25)
+    at async tx (/home/shenxz-lab/code/ChainCollab/src/newTranslator/CodeGenerator/b2cdsl-solidity/tests/message_confirmation.evm.cjs:38:36)
+    at async main (/home/shenxz-lab/code/ChainCollab/src/newTranslator/CodeGenerator/b2cdsl-solidity/tests/message_confirmation.evm.cjs:56:5) {
+  code: 'CALL_EXCEPTION',
+  action: 'sendTransaction',
+  data: null,
+  reason: null,
+  invocation: null,
+  revert: null,
+  transaction: {
+    to: '0x454744929B2F9F863C67C503f2cBD487dC0B1723',
+    from: '0x0279091F56BF123C36E0d407015205E8f5D202C7',
+    data: ''
+  },
+  receipt: TransactionReceipt {
+    provider: BrowserProvider {},
+    to: '0x454744929B2F9F863C67C503f2cBD487dC0B1723',
+    from: '0x0279091F56BF123C36E0d407015205E8f5D202C7',
+    contractAddress: null,
+    hash: '0xfe77d0d343b2dc5b258e948778d68f10d7f0d8be664281e682527310d31b731c',
+    index: 0,
+    blockHash: '0x5f3313036885f10e8e7932509cbeae34579aeabc9bbd51ccde1211efa8e0308c',
+    blockNumber: 7,
+    logsBloom: '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+    gasUsed: 550244n,
+    blobGasUsed: null,
+    cumulativeGasUsed: 550244n,
+    gasPrice: 514957736n,
+    blobGasPrice: null,
+    type: 2,
+    status: 0,
+    root: undefined
+  },
+  shortMessage: 'transaction execution reverted'
+}

@@ -125,6 +125,8 @@ class SolidityRenderer:
                     "id": item["enum_name"],
                     "sender": item["sender"],
                     "receiver": item["receiver"],
+                    "sendMethod": f"{item['enum_name']}_Send",
+                    "completeMethod": f"{item['enum_name']}_Complete",
                 }
                 for item in self._message_payload()
             ],
@@ -163,6 +165,10 @@ class SolidityRenderer:
             "methodMap": {
                 **{
                     item["enum_name"]: f"{item['enum_name']}_Send"
+                    for item in self._message_payload()
+                },
+                **{
+                    f"{item['enum_name']}#complete": f"{item['enum_name']}_Complete"
                     for item in self._message_payload()
                 },
                 **{
@@ -454,10 +460,12 @@ class SolidityFlowRenderer:
         for message in self.adapter.messages:
             enum_name = self.enum_maps["message"].get(message.name, sanitize_identifier(message.name))
             method_params, assignment_block = self._message_method_signature(message)
-            # The Solidity runtime has a single message send transition that also
-            # marks the message as completed. Support both DSL conditions here so
-            # message follow-up flow is not dropped when the DSL uses `completed`.
-            send_actions = self._indent("".join(self._message_transition_actions(message.name)), 2)
+            send_actions = self._indent(
+                "".join(self.message_actions.get((message.name, "sent"), [])), 2
+            )
+            complete_actions = self._indent(
+                "".join(self.message_actions.get((message.name, "completed"), [])), 2
+            )
             signature = ", ".join(["uint256 instanceId", "string calldata fireflyTranId", *method_params])
             body = self._render_template(
                 "actions/message_send.sol.jinja",
@@ -467,18 +475,14 @@ class SolidityFlowRenderer:
                 after_hooks=send_actions,
             )
             functions.append(body)
+            functions.append(
+                self._render_template(
+                    "actions/message_complete.sol.jinja",
+                    message_name=enum_name,
+                    after_hooks=complete_actions,
+                )
+            )
         return functions
-
-    def _message_transition_actions(self, message_name: str) -> List[str]:
-        combined: List[str] = []
-        seen: set[str] = set()
-        for condition in ("sent", "completed"):
-            for action in self.message_actions.get((message_name, condition), []):
-                if action in seen:
-                    continue
-                seen.add(action)
-                combined.append(action)
-        return combined
 
     def _message_method_signature(self, message: Any) -> tuple[List[str], str]:
         schema_doc = self._parse_message_schema(getattr(message, "schema", "") or "")

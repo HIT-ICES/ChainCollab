@@ -2069,6 +2069,18 @@ const getEthereumActionConfig = (
 			payload: { ...payload, ...overrides },
 		};
 	}
+	if (element?.type === "message" && element?.state === 2) {
+		const methodName = `${element.MessageID}_Complete`;
+		const method = methodsByName[methodName];
+		if (!method) return null;
+		return {
+			type: "message" as const,
+			label: "Confirm receipt",
+			method: methodName,
+			methodDef: method,
+			payload: buildEthereumMethodPayload(method, instanceId),
+		};
+	}
 	if (element?.type === "gateway" && element?.state === 1) {
 		const method = methodsByName[element.GatewayID];
 		return {
