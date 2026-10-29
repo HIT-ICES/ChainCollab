@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
   postgres:
-    image: postgres:14
+    image: ${POSTGRES_IMAGE:-postgres:11.1}
     container_name: cello-postgres
     restart: unless-stopped
     env_file:
@@ -19,7 +17,7 @@ services:
       - cello-network
 
   redis:
-    image: redis:7
+    image: ${REDIS_IMAGE:-redis:7}
     container_name: cello-redis
     restart: unless-stopped
     ports:

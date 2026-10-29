@@ -1,12 +1,9 @@
 import axios from "axios";
 import { localStorageGetItem } from "@/utils/localStorage";
 
-const defaultBackendUrl =
-  import.meta.env.MODE === "local_mode" ? "http://127.0.0.1:8000" : "http://192.168.1.177:8000";
-const defaultTranslatorUrl =
-  import.meta.env.MODE === "local_mode" ? "http://127.0.0.1:9999" : "http://192.168.1.177:9999";
-const defaultHostBase =
-  import.meta.env.MODE === "local_mode" ? "http://127.0.0.1" : "http://192.168.1.177";
+const defaultBackendUrl = "http://127.0.0.1:8000";
+const defaultTranslatorUrl = "http://127.0.0.1:9999";
+const defaultHostBase = "http://127.0.0.1";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || defaultBackendUrl;
 const translatorUrl = import.meta.env.VITE_TRANSLATOR_URL || defaultTranslatorUrl;

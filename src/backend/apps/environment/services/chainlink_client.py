@@ -16,6 +16,9 @@ DEFAULT_CHAINLINK_NODES = [
 
 
 def resolve_chainlink_root(anchor_file: Path) -> Path:
+    configured = os.environ.get("CHAINLINK_ROOT")
+    if configured:
+        return Path(configured).expanduser().resolve()
     here = anchor_file.resolve()
     for parent in here.parents:
         if parent.name != "src":
@@ -27,7 +30,7 @@ def resolve_chainlink_root(anchor_file: Path) -> Path:
         candidate = parent / "oracle" / "CHAINLINK"
         if candidate.exists():
             return candidate
-    return Path(os.environ.get("CHAINLINK_ROOT", "/home/logres/system/src/oracle/CHAINLINK"))
+    raise FileNotFoundError("Oracle runtime not found; configure CHAINLINK_ROOT or retain src/oracle/CHAINLINK")
 
 
 def resolve_chainlink_credentials(chainlink_root: Path) -> tuple[str, str]:

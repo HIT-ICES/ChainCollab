@@ -278,3 +278,29 @@ src/chor_js/nohup.out
 src/hosts.bak
 
 /src/runtime/*
+
+# Release: local runtimes and retired development-only trees
+/src/py_translator/
+/src/java-env-custom-image/
+/src/backend/api/
+/src/bpmn-chor-app/
+/src/oracle-node/
+/src/newTranslator/MDAcheck/
+/src/newTranslator/build/
+/src/newTranslator/dashboard/
+/src/agent/agent-dashboard/
+/src/oracle/**/.api
+/src/oracle/**/.password
+/src/oracle/**/secrets.toml
+/src/oracle/**/keystore/
+/.runtime/
+/.release-verification/
+
+/src/backend/media/
+/src/backend/staticfiles/
+
+# Release reproducibility inputs must be versioned.
+!/src/front/package-lock.json
+!/src/backend/apps/api/migrations/*_auto_*.py
+
+/src/front/.env.local

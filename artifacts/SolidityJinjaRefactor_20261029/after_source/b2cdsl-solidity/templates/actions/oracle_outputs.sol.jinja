@@ -1,7 +1,0 @@
-{% for mapping in output_mappings %}
-        string memory oracleValue{{ loop.index0 }} = oracle.{% if oracle_type == 'compute-task' %}runComputeTask(instanceId, {{ task_name_literal }}, {{ compute_script_literal }}, {{ mapping.param_literal }});{{ '\n' }}{% else %}getExternalData(instanceId, {{ task_name_literal }}, {{ data_source_literal }}, {{ mapping.param_literal }});{{ '\n' }}{% endif %}
-{% if mapping.sol_type == 'int256' %}
-        inst.stateMemory.{{ mapping.slot_name }} = _stringToInt(oracleValue{{ loop.index0 }});{{ '\n' }}{% elif mapping.sol_type == 'bool' %}
-        inst.stateMemory.{{ mapping.slot_name }} = _stringToBool(oracleValue{{ loop.index0 }});{{ '\n' }}{% else %}
-        inst.stateMemory.{{ mapping.slot_name }} = oracleValue{{ loop.index0 }};{{ '\n' }}{% endif %}
-{% endfor %}

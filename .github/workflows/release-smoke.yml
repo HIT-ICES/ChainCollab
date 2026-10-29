@@ -1,0 +1,26 @@
+name: Release source smoke checks
+on: [push, pull_request]
+jobs:
+  source:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: src/front/package-lock.json
+      - name: Install generator dependencies
+        run: |
+          python -m pip install -r src/newTranslator/requirements.release.txt
+          python -m pip install -e src/newTranslator/DSL/B2CDSL -e src/newTranslator/CodeGenerator/b2cdsl-go -e src/newTranslator/CodeGenerator/b2cdsl-solidity
+      - name: Generator regression tests
+        run: python -m unittest discover -s src/newTranslator/CodeGenerator/b2cdsl-solidity/tests -v
+      - name: Frontend clean install and build
+        working-directory: src/front
+        run: |
+          npm ci
+          npm run build
