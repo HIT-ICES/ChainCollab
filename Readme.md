@@ -1,36 +1,36 @@
 # ChainCollab
 
-ChainCollab 是一个 BPMN choreography + DMN 协作系统：建模、组织与联盟管理、Fabric/Geth 环境管理、模型到 Go/Solidity 的代码生成，以及消息、决策和跨链调用的执行。
+ChainCollab supports collaborative business processes modeled with BPMN choreography and DMN. It provides modeling, organization and consortium management, Fabric/Geth environment management, Go/Solidity code generation, and execution of messages, decisions, and cross-chain calls.
 
-本分支 `release-MultiBlockchain` 保留运行系统所需的源码、模板、部署资源、示例，以及原 release 的实验目录。**所有命令均从仓库根目录执行**，除非代码块中明确写了 `cd`。旧版五终端 alias、旧翻译器和历史教程不再作为启动入口。
+The `release-MultiBlockchain` branch contains application source, generation templates, deployment resources, examples, and the original release experiment directory. **Run all commands from the repository root**, unless a command explicitly changes directories. Use the startup entry point below; earlier terminal aliases and legacy translator tutorials are no longer the startup guide.
 
-## 1. 分支和已有环境
+## 1. Branches and existing installations
 
-清理前的完整版本已经保存到 `dev-MultiBlockchain` 和 `dev-MultiBlockChain-fork`。二者以清理前 release 的 `eaea6028` 为基础，并补入旧忽略规则漏掉的前端锁文件和既有数据库迁移，保存了相同的完整运行基线；历史提交没有被强制覆盖。论文证据归档、编辑器开发工程等保留在这两个 dev 分支；`Experiment/` 则在 release 中按清理前的布局和内容完整保留。
+The complete pre-cleanup implementation is preserved on `dev-MultiBlockchain` and `dev-MultiBlockChain-fork`. Both preserve the same runnable baseline based on release commit `eaea6028`, including the existing frontend lockfile and database migration previously excluded by ignore rules. Their earlier histories are retained. These development branches also retain manuscript evidence archives and the editor development project. Release retains `Experiment/` with its original layout and contents.
 
-切换到 dev 前，先在当前 release 执行 `python3 scripts/chaincollab.py down`，再切分支并使用该分支原有的启动方式；数据库与原有依赖环境继续保留。
+Before switching from release to a development branch, run `python3 scripts/chaincollab.py down`, switch branches, and follow that branch's startup instructions. Existing databases and dependency environments remain on the machine.
 
 ```bash
 git switch release-MultiBlockchain
-# 需要继续使用清理前的开发工程时：
+# To use the preserved development implementation:
 # git switch dev-MultiBlockchain
-# 或 git switch dev-MultiBlockChain-fork
+# or git switch dev-MultiBlockChain-fork
 ```
 
-这里的“保存环境”指保留代码版本，并且不删除本机现有 venv、node_modules、数据库、链数据或本地配置。Git 分支本身不包含运行中的容器、数据库内容或密码。此次本机配置和数据库备份保存在 `.git/release-preservation-20261029/`，不会被发布。
+Preserving an installation means retaining its code and leaving local virtual environments, `node_modules`, databases, blockchain data, and configuration in place. Git branches do not contain running containers, database contents, or passwords. Private configuration and database backups made during cleanup are stored locally under `.git/release-preservation-20261029/` and are not distributed.
 
-## 2. 软件条件
+## 2. Prerequisites
 
-推荐 Ubuntu 22.04 / WSL2，Python **3.10**、Node.js **22**（至少 20.19）、Docker Engine 与 `docker compose`。本次本机验证使用 Node 22.21.0、Go 1.22.0 和 FireFly CLI 1.4.0。
+The recommended environment is Ubuntu 22.04 or WSL2, Python **3.10**, Node.js **22** (minimum 20.19), Docker Engine, and `docker compose`. Local verification used Node 22.21.0, Go 1.22.0, and FireFly CLI 1.4.0. See the [verification report](docs/RELEASE_VERIFICATION.md) for completed checks and their limits.
 
-WSL 用户先启动 Windows Docker Desktop，在 Settings → Resources → WSL Integration 中启用当前 Ubuntu。以下两个命令都必须成功：
+For WSL2, start Docker Desktop on Windows and enable Ubuntu under Settings → Resources → WSL Integration. Both commands must succeed:
 
 ```bash
 docker info
 docker compose version
 ```
 
-如果系统默认 Node 仍是 12/16，先切换版本；已经安装 nvm 时：
+If Node.js 12 or 16 is still selected, switch versions first. With nvm installed:
 
 ```bash
 source "$HOME/.nvm/nvm.sh"
@@ -38,14 +38,14 @@ nvm install 22
 nvm use 22
 ```
 
-首次安装 Python 依赖时需要编译工具和 Graphviz 开发文件：
+Install the build tools and Graphviz development libraries required by the Python dependencies:
 
 ```bash
 sudo apt-get update
 sudo apt-get install -y python3.10-venv python3.10-dev build-essential pkg-config libgraphviz-dev graphviz libpq-dev
 ```
 
-运行 Web 系统不要求重新构建建模器。创建区块链/FireFly 环境还需要 Go、FireFly CLI 和对应镜像，并确保工具在 PATH 中，例如已安装到默认位置时：
+The web application uses a packaged modeler and does not require rebuilding its development project. Provisioning blockchain/FireFly environments additionally requires Go, the FireFly CLI, and corresponding container images. Ensure the tools are available on `PATH`; for their usual installation locations:
 
 ```bash
 export PATH="/usr/local/go/bin:$HOME/go/bin:$PATH"
@@ -53,7 +53,7 @@ go version
 ff version
 ```
 
-## 3. 初始化：新机器和已有环境使用同一入口
+## 3. Installation and configuration
 
 ```bash
 git clone --branch release-MultiBlockchain https://github.com/HIT-ICES/ChainCollab.git
@@ -62,89 +62,89 @@ python3 scripts/chaincollab.py setup
 python3 scripts/chaincollab.py doctor
 ```
 
-已有工作目录直接执行后两条，不需要重新克隆。`setup` 会：
+For an existing checkout, run only the final two commands. The `setup` command:
 
-- 保留已经存在的 `.venv` / `venv` 和本地 `.env`，不覆盖或重装当前正常环境。
-- 仅在缺少 Python 环境时创建 Python 3.10 venv，使用对应组件的 `requirements.release.txt` 安装已捕获的依赖版本。安装因网络中断时可重跑 setup，脚本会补齐不完整依赖，健康环境不重装。
-- 注册 B2CDSL、Go、Solidity 三个 editable 包；已有注册可以继续使用。
-- 首次安装前端时执行 `npm ci`。建模器通过 `src/front/vendor/bpmn-chor-app-0.1.2.tgz` 安装，不需要编辑器源码服务器。
+- Preserves existing `.venv` / `venv` directories and local configuration. Healthy environments are reused.
+- Creates missing Python 3.10 environments and installs captured dependency versions from each component's `requirements.release.txt`. After an interrupted download, rerun `setup` to complete missing dependencies.
+- Registers the B2CDSL, Go, and Solidity packages as editable installations when needed.
+- Runs `npm ci` when frontend dependencies need installation. The modeler is installed from `src/front/vendor/bpmn-chor-app-0.1.2.tgz`; a separate editor source server is not required.
 
-配置文件：
+Configuration files:
 
-| 文件 | 用途 |
+| File | Purpose |
 | --- | --- |
-| `src/backend/.env` | Django、PostgreSQL、Redis、媒体路径；从 `.env.example` 创建 |
-| `src/front/.env.local` | 后端/翻译器地址；从 `.env.example` 创建 |
-| `src/backend/docker-compose.yml` | PostgreSQL 与 Redis |
+| `src/backend/.env` | Django, PostgreSQL, Redis, and media paths; initialized from `.env.example` |
+| `src/front/.env.local` | Backend and translator URLs; initialized from `.env.example` |
+| `src/backend/docker-compose.yml` | PostgreSQL and Redis services |
 
-后端配置实际读取 `src/backend/.env`，API 前缀为 `WEBROOT=/api/v1`。如果旧配置仍为 `/api`，改为 `/api/v1`，使其与主前端一致。数据库连接的库名、用户名和密码必须与 compose 的 `POSTGRES_*` 配置一致。前端使用 `VITE_BACKEND_URL`、`VITE_TRANSLATOR_URL` 和 `VITE_HOST_BASE_URL`；这些值会进入浏览器，不能填写容器内部主机名。
+The backend reads `src/backend/.env`. Set `WEBROOT=/api/v1`; an older `/api` setting must be updated to match the frontend. Database names, usernames, and passwords must match the Compose `POSTGRES_*` settings. The frontend reads `VITE_BACKEND_URL`, `VITE_TRANSLATOR_URL`, and `VITE_HOST_BASE_URL`. These URLs are accessed by the browser, so use addresses reachable from the browser rather than container-internal hostnames.
 
-**已有数据库不要换主版本直接启动。** 本次确认本机 `pgdata/PG_VERSION` 为 11，因此发布默认镜像锁定为 `postgres:11.1`，本机 `.env` 也使用相同的 `POSTGRES_IMAGE`。这次整理没有夹带数据库主版本升级，没有重建数据目录。其他已有环境应使用匹配原数据目录的镜像；升级数据库应另行迁移与验证。
+**Use a PostgreSQL image compatible with an existing data directory.** The preserved local installation has `pgdata/PG_VERSION` equal to 11, so release defaults to `postgres:11.1`. Cleanup did not upgrade PostgreSQL or recreate its data directory. Other existing installations should select an image matching their own data format; a major-version upgrade requires a separate migration.
 
-`POSTGRES_IMAGE` / `REDIS_IMAGE` 支持镜像源覆盖。本次本机 Redis 已从 `public.ecr.aws/docker/library/redis:7` 拉取，并在本机 `.env` 中设置了该 `REDIS_IMAGE`；这项机器网络配置不写入发布默认值。若 `docker pull` 返回网络 EOF，先恢复 registry 网络或配置可用镜像源，再启动；不要删除数据库或重装 Python 来处理镜像下载问题。
+Use `POSTGRES_IMAGE` and `REDIS_IMAGE` to override image sources when necessary. Local verification used `public.ecr.aws/docker/library/redis:7` through a private `.env` override; the release default remains unchanged. If an image download returns EOF or times out, restore registry access or select an accessible image source before starting services.
 
-## 4. 启动、停止和日志
+## 4. Starting, stopping, and inspecting services
 
 ```bash
 python3 scripts/chaincollab.py up
 python3 scripts/chaincollab.py status
 ```
 
-`up` 顺序：启动 PostgreSQL/Redis → 等待数据库 → 执行**已提交**的迁移 → 翻译器 → Docker agent → Celery worker → Django → 前端。正常启动不会运行 `makemigrations`，也不会清空数据库。
+The startup sequence is PostgreSQL/Redis → readiness checks → **committed** database migrations → translator → Docker agent → Celery worker → Django → frontend. Normal startup does not run `makemigrations` or clear the database.
 
-| 服务 | 默认地址 | 日志 |
+| Service | Default address | Log |
 | --- | --- | --- |
-| 主前端 | http://127.0.0.1:3000 | `.runtime/front.log` |
+| Frontend | http://127.0.0.1:3000 | `.runtime/front.log` |
 | Django API | http://127.0.0.1:8000 | `.runtime/backend.log` |
-| 翻译器与 API 文档 | http://127.0.0.1:9999/docs | `.runtime/translator.log` |
+| Translator and API documentation | http://127.0.0.1:9999/docs | `.runtime/translator.log` |
 | Docker agent | http://127.0.0.1:7001 | `.runtime/agent.log` |
-| Celery worker | 后台队列，使用 Redis | `.runtime/worker.log` |
+| Celery worker | Background queue using Redis | `.runtime/worker.log` |
 
 ```bash
-# 查看日志
+# Follow the backend log.
 tail -f .runtime/backend.log
-# 停止由本脚本启动的应用；数据库继续保留和运行
+# Stop managed application processes; databases remain running.
 python3 scripts/chaincollab.py down
-# 如需停止数据库容器（不删除数据卷）
+# Stop database containers without deleting their volumes.
 python3 scripts/chaincollab.py db-stop
 ```
 
-脚本只管理自己记录的 PID，并检查进程身份，不接管/终止占用相同端口的其他进程。端口已被占用时会报错；先确认对应服务，再选择复用外部部署或停止原服务。
+The script manages recorded processes and checks their identities. It does not take over or terminate unrelated processes using the same ports. Resolve reported port conflicts before restarting.
 
-可以在前台单独启动组件以诊断，例如：
+To run individual components in the foreground for diagnosis:
 
 ```bash
 python3 scripts/chaincollab.py run translator
 python3 scripts/chaincollab.py run backend
 ```
 
-外部数据库已经配置、服务也已就绪时，可以 `up --no-db`。`--no-migrate` 仅用于确认数据库已迁移的情况。只测试独立前端/翻译器而不启动数据库时：
+Use `up --no-db` when external database services are already configured and ready. Use `--no-migrate` only when the database schema has already been migrated. To start selected frontend/translation components without database startup or migration:
 
 ```bash
 python3 scripts/chaincollab.py up --services translator agent front --no-db --no-migrate
 ```
 
-这一命令只验证所选组件，不能据此声称已经复现了完整区块链工作流。
+This starts only the selected components. It does not provision or reproduce a complete blockchain workflow.
 
-## 5. 使用系统
+## 5. Running a collaborative workflow
 
-首次部署可以创建管理员账户；已有数据库不要重复初始化测试数据：
+For a new installation, create an administrator account if needed. Avoid reinitializing test data in an existing database.
 
 ```bash
 python3 scripts/chaincollab.py manage createsuperuser
 ```
 
-打开前端，注册/登录用户，创建组织与联盟、邀请参与组织/成员，选择 Fabric 或 Geth 创建环境，再按界面完成节点/网络/FireFly 初始化。部署前确认相应镜像可以拉取、Docker 网络存在、Go/ff 可执行文件可用。
+Open the frontend, register or sign in, create an organization and consortium, and invite participating organizations or members. Select Fabric or Geth to create an environment, then follow the interface to initialize nodes, networks, and FireFly. Before deployment, verify that required images are accessible, Docker networking is configured, and Go and `ff` are available.
 
-随后导入 `examples/bpmn-dmn/SupplyChainPaper.bpmn` 和对应 `supplyChainPaper.dmn`，分配参与方，生成并部署代码，创建实例，然后执行消息、网关与决策节点。
+Import `examples/bpmn-dmn/SupplyChainPaper.bpmn` and its companion `supplyChainPaper.dmn`, assign participants, generate and deploy code, create an instance, and execute its message, gateway, and decision nodes.
 
-生成代码不等于完成 DMN 服务绑定：请根据实际 DMN 文件的 decision ID 配置运行时绑定。消息采用 Send → 等待接收确认 → Complete → 完成；BusinessRule 使用 Request → 等待结果 → Continue → 写回与完成。说明见 [消息确认协议](docs/Solidity_Message_Confirmation.md)。
+Code generation does not establish a runtime DMN service binding. Configure bindings using the decision IDs in the actual DMN file. Messages follow Send → wait for receipt confirmation → Complete → completion. BusinessRule tasks follow Request → wait for a result → Continue → output writeback and completion. See the [message confirmation protocol](docs/Solidity_Message_Confirmation.md).
 
-Oracle、DMN/OCR 和 Relayer 是执行决策/跨链时需要的独立组件，启动命令、外部条件及实际路径见 [Oracle / Relayer 操作指南](docs/ORACLE_RELAYER_SETUP.md)。它们不能在没有区块链环境时由一个 Web 启动命令凭空建立。
+Oracle, DMN/OCR, and Relayer services are separate components required for decision execution or cross-chain calls. Their commands, external prerequisites, and active paths are documented in the [Oracle and Relayer setup guide](docs/ORACLE_RELAYER_SETUP.md). Provision the required blockchain environment before using them.
 
-## 6. 独立复现 BPMN → PIM → Go / Solidity
+## 6. Standalone BPMN → PIM → Go / Solidity generation
 
-不需要运行数据库、前端或链节点：
+The following workflow does not require a database, frontend, or blockchain node:
 
 ```bash
 mkdir -p .runtime/generated/go .runtime/generated/solidity
@@ -157,40 +157,42 @@ src/newTranslator/.venv/bin/textx generate .runtime/generated/SupplyChainPaper.b
   --target solidity --output-path .runtime/generated/solidity --overwrite
 ```
 
-这是实际解析器、textX grammar 和 Jinja 模板的生成结果。没有独立导出的 PSM 文件；DMN companion 文件在此步骤不被求值。
+These commands use the implemented parser, textX grammar, and Jinja templates. They generate the B2CDSL representation and target code; no separate PSM file is exported. The companion DMN file is not evaluated during this generation step.
+
+Run source checks and build the frontend with:
 
 ```bash
 python3 scripts/chaincollab.py check
-# 前端生产构建
+# Build the frontend for production.
 (cd src/front && npm run build)
 ```
 
-## 7. 发布目录
+## 7. Repository layout and experiment materials
 
 ```text
-Experiment/                     原 release 的实验模型、脚本和结果，保持原有布局
-examples/bpmn-dmn/               可复现的结构化 BPMN / DMN 示例
-scripts/chaincollab.py           唯一 setup / doctor / up / down / check 入口
-src/backend/                    Django、数据库迁移、区块链部署资源
-src/agent/docker-rest-agent/     Docker 资源连接器
-src/front/                      主前端及 vendor 建模器分发包
-src/newTranslator/              解析器、DSL、Jinja 生成器、API 与测试
-src/oracle/                     被后台实际调用的 Oracle / OCR / DMN 栈
-src/relayer-node/                跨链监听转发服务及其可选 UI
-src/geth_identity_contract/      Geth 多实例参与方身份合约
-docs/                           发布边界、操作说明和验证记录
+Experiment/                     Original release experiment models, scripts, and results
+examples/bpmn-dmn/               Structured BPMN/DMN inputs for the generation example
+scripts/chaincollab.py           Shared setup / doctor / up / down / check entry point
+src/backend/                    Django, migrations, and blockchain deployment resources
+src/agent/docker-rest-agent/     Docker resource connector
+src/front/                      Main frontend and packaged modeler
+src/newTranslator/              Parser, DSL, Jinja generators, API, and tests
+src/oracle/                     Oracle / OCR / DMN components used by the backend
+src/relayer-node/                Cross-chain relaying service and optional interface
+src/geth_identity_contract/      Participant identity contract for Geth instances
+docs/                           Release scope, operating guides, and verification records
 ```
 
-`Experiment/` 包含 `BPMNwithDMNcase/`、`NoiseExperiment/`、`PerformanceTest/` 和 `new/`，完整保留清理前 release 的 3,631 个文件。结构化 SupplyChainPaper 模型位于 `Experiment/BPMNwithDMNcase/new/SupplyChainPaper.bpmn`。`examples/bpmn-dmn/` 用于上面的快速生成示例；原始实验布局和既有数据仍以 `Experiment/` 为准。本次整理没有重跑实验或改写实验结果。
+`Experiment/` retains all 3,631 files from the pre-cleanup release under `BPMNwithDMNcase/`, `NoiseExperiment/`, `PerformanceTest/`, and `new/`. The structured SupplyChainPaper model is at `Experiment/BPMNwithDMNcase/new/SupplyChainPaper.bpmn`. Use `examples/bpmn-dmn/` for the standalone generation walkthrough; the original experiment layout and recorded data remain under `Experiment/`. Repository cleanup did not rerun experiments or rewrite their results.
 
-[目录保留/删除依据](docs/RELEASE_LAYOUT.md) 说明哪些开发资料转留 dev 分支。`.gitignore` 隐藏本机保留的旧开发目录、venv、node_modules、配置和数据；它们可能仍在原工作目录中，但不会进入新克隆的发布源码。
+The [release scope record](docs/RELEASE_LAYOUT.md) explains which development materials remain on development branches. `.gitignore` excludes retained local development directories, virtual environments, `node_modules`, configuration, and runtime data from new release checkouts.
 
-## 8. 排错
+## 8. Troubleshooting
 
-- `doctor` 的 Node 版本错误：切换 nvm 版本后重新运行，不必重建 Python 环境。
-- Docker API 不可用：先启动 Docker Desktop/Engine，检查当前 WSL 集成与 `docker context show`。
-- 镜像拉取 EOF/超时：镜像仓库网络问题；可设置 `POSTGRES_IMAGE` / `REDIS_IMAGE` 为可用来源。
-- PostgreSQL 提示 data directory version incompatible：使用与 `PG_VERSION` 匹配的主版本；不要用删除 pgdata 的方式解决。
-- 翻译器缺少 b2cdsl 包：用翻译器自己的 Python 执行三个本地包的 `pip install -e`，不要安装进后端 venv。
-- 创建链环境失败：检查 `.runtime/backend.log`、agent 日志、镜像/Go/ff，以及目标环境的 hosts/Docker 网络配置；主前端能打开不代表链网络已经部署。
-- Oracle/Relayer 离线：按可选组件指南启动，校对节点 URL、运行时身份与 job/contract 配置。
+- **Unsupported Node version:** select the required version with nvm and rerun `doctor`.
+- **Docker API unavailable:** start Docker Desktop/Engine and check WSL integration and `docker context show`.
+- **Image download EOF or timeout:** check registry connectivity or configure accessible `POSTGRES_IMAGE` / `REDIS_IMAGE` sources.
+- **PostgreSQL data directory version mismatch:** select the image major version matching `PG_VERSION`; retain the existing data directory.
+- **Missing B2CDSL packages:** use the translator's Python environment to install its three local packages with `pip install -e`.
+- **Blockchain provisioning fails:** inspect `.runtime/backend.log`, agent logs, image availability, Go/FireFly executables, and the target environment's hosts and Docker network configuration. An accessible frontend alone does not establish that blockchain provisioning succeeded.
+- **Oracle or Relayer offline:** follow the optional-component guide and check node URLs, runtime identities, and job/contract configuration.
