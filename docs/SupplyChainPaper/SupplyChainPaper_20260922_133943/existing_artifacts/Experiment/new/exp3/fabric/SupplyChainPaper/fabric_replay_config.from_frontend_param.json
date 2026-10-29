@@ -1,0 +1,81 @@
+{
+  "firefly_core_url": "http://127.0.0.1:5001",
+  "event_core_urls": [
+    "http://127.0.0.1:5000",
+    "http://127.0.0.1:5001"
+  ],
+  "namespace": "default",
+  "api_name": "SupplyChainPaper-751b61",
+  "chaincode": "SupplyChainPaper",
+  "default_signer": "Atlas-nc1-aegis-nc1.org.comMSP::x509::CN=user2,OU=client::CN=ca.Atlas-NC1-Aegis-NC1.org.com,OU=Fabric,O=Atlas-NC1-Aegis-NC1.org.com,ST=North Carolina,C=US",
+  "create_instance_signer": "",
+  "create_instance_params": {
+      "Participant_19mgbdn": {
+    "msp": "Atlas-nc1-aegis-nc1.org.comMSP",
+    "attributes": {},
+    "isMulti": false,
+    "multiMaximum": 0,
+    "multiMinimum": 0,
+    "x509": "eDUwOTo6Q049dXNlcjIsT1U9Y2xpZW50OjpDTj1jYS5BdGxhcy1OQzEtQWVnaXMtTkMxLm9yZy5jb20sT1U9RmFicmljLE89QXRsYXMtTkMxLUFlZ2lzLU5DMS5vcmcuY29tLFNUPU5vcnRoIENhcm9saW5hLEM9VVM=@Atlas-nc1-aegis-nc1.org.comMSP"
+  },
+  "Participant_0w6qkdf": {
+    "msp": "Atlas-nc1-aegis-nc1.org.comMSP",
+    "attributes": {},
+    "isMulti": false,
+    "multiMaximum": 0,
+    "multiMinimum": 0,
+    "x509": "eDUwOTo6Q049dXNlcjIsT1U9Y2xpZW50OjpDTj1jYS5BdGxhcy1OQzEtQWVnaXMtTkMxLm9yZy5jb20sT1U9RmFicmljLE89QXRsYXMtTkMxLUFlZ2lzLU5DMS5vcmcuY29tLFNUPU5vcnRoIENhcm9saW5hLEM9VVM=@Atlas-nc1-aegis-nc1.org.comMSP"
+  },
+  "Participant_19j1e3o": {
+    "msp": "Atlas-nc1-aegis-nc1.org.comMSP",
+    "attributes": {},
+    "isMulti": false,
+    "multiMaximum": 0,
+    "multiMinimum": 0,
+    "x509": "eDUwOTo6Q049dXNlcjIsT1U9Y2xpZW50OjpDTj1jYS5BdGxhcy1OQzEtQWVnaXMtTkMxLm9yZy5jb20sT1U9RmFicmljLE89QXRsYXMtTkMxLUFlZ2lzLU5DMS5vcmcuY29tLFNUPU5vcnRoIENhcm9saW5hLEM9VVM=@Atlas-nc1-aegis-nc1.org.comMSP"
+  },
+  "Participant_09cjol2": {
+    "msp": "Atlas-nc1-aegis-nc1.org.comMSP",
+    "attributes": {},
+    "isMulti": false,
+    "multiMaximum": 0,
+    "multiMinimum": 0,
+    "x509": "eDUwOTo6Q049dXNlcjIsT1U9Y2xpZW50OjpDTj1jYS5BdGxhcy1OQzEtQWVnaXMtTkMxLm9yZy5jb20sT1U9RmFicmljLE89QXRsYXMtTkMxLUFlZ2lzLU5DMS5vcmcuY29tLFNUPU5vcnRoIENhcm9saW5hLEM9VVM=@Atlas-nc1-aegis-nc1.org.comMSP"
+  },
+  "Participant_0sa2v7d": {
+    "msp": "Atlas-nc1-aegis-nc1.org.comMSP",
+    "attributes": {},
+    "isMulti": false,
+    "multiMaximum": 0,
+    "multiMinimum": 0,
+    "x509": "eDUwOTo6Q049dXNlcjIsT1U9Y2xpZW50OjpDTj1jYS5BdGxhcy1OQzEtQWVnaXMtTkMxLm9yZy5jb20sT1U9RmFicmljLE89QXRsYXMtTkMxLUFlZ2lzLU5DMS5vcmcuY29tLFNUPU5vcnRoIENhcm9saW5hLEM9VVM=@Atlas-nc1-aegis-nc1.org.comMSP"
+  },
+  "Activity_0rm8bkp_DecisionID": "Decision_0zwjfyy",
+  "Activity_0rm8bkp_ParamMapping": {
+    "numberOfUnits": "numberOfUnits",
+    "urgent": "urgent",
+    "supplierReputation": "supplierReputation",
+    "finalPriority": "finalPriority"
+  },
+  "Activity_0rm8bkp_Content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<definitions xmlns=\"https://www.omg.org/spec/DMN/20191111/MODEL/\" xmlns:dmndi=\"https://www.omg.org/spec/DMN/20191111/DMNDI/\" xmlns:dc=\"http://www.omg.org/spec/DMN/20180521/DC/\" xmlns:di=\"http://www.omg.org/spec/DMN/20180521/DI/\" id=\"definitions_1olsuce\" name=\"definitions\" namespace=\"http://camunda.org/schema/1.0/dmn\" exporter=\"dmn-js (https://demo.bpmn.io/dmn)\" exporterVersion=\"16.4.0\">\n  <decision id=\"decision_0tybghz\" name=\"Initial Priority Decision\">\n    <informationRequirement id=\"InformationRequirement_1yax2nr\">\n      <requiredInput href=\"#InputData_0x10kua\" />\n    </informationRequirement>\n    <informationRequirement id=\"InformationRequirement_0968tcf\">\n      <requiredInput href=\"#InputData_19y9i1v\" />\n    </informationRequirement>\n    <decisionTable id=\"decisionTable_1v3tii8\">\n      <input id=\"input1\" label=\"numberOfUnits\">\n        <inputExpression id=\"inputExpression1\" typeRef=\"number\">\n          <text>numberOfUnits</text>\n        </inputExpression>\n      </input>\n      <input id=\"InputClause_0pvns0w\" label=\"urgent\">\n        <inputExpression id=\"LiteralExpression_08nncbj\" typeRef=\"boolean\">\n          <text>urgent</text>\n        </inputExpression>\n      </input>\n      <output id=\"output1\" label=\"initialPriority\" name=\"initialPriority\" typeRef=\"string\" />\n      <rule id=\"DecisionRule_0u3ic44\">\n        <inputEntry id=\"UnaryTests_0ju5tlr\">\n          <text>&lt;100</text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_05vb8be\">\n          <text></text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_17p1hon\">\n          <text>\"Low\"</text>\n        </outputEntry>\n      </rule>\n      <rule id=\"DecisionRule_0nwm2gu\">\n        <inputEntry id=\"UnaryTests_01oe1uf\">\n          <text>[100..500)</text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_0gr116d\">\n          <text>false</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_07fd2cz\">\n          <text>\"Medium\"</text>\n        </outputEntry>\n      </rule>\n      <rule id=\"DecisionRule_0uz5tzx\">\n        <inputEntry id=\"UnaryTests_0se9tkd\">\n          <text>[100..500)</text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_0hmxfz8\">\n          <text>true</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_0p3cwai\">\n          <text>\"High\"</text>\n        </outputEntry>\n      </rule>\n      <rule id=\"DecisionRule_09xhvy9\">\n        <inputEntry id=\"UnaryTests_1oq4wlh\">\n          <text>&gt;=500</text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_0ujggp2\">\n          <text></text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_10me9jn\">\n          <text>\"High\"</text>\n        </outputEntry>\n      </rule>\n    </decisionTable>\n  </decision>\n  <inputData id=\"InputData_0x10kua\" name=\"numberOfUnits\" />\n  <inputData id=\"InputData_19y9i1v\" name=\"urgent\" />\n  <decision id=\"Decision_0zwjfyy\" name=\"Final Priority Adjustment Decision\">\n    <informationRequirement id=\"InformationRequirement_0hefcti\">\n      <requiredDecision href=\"#decision_0tybghz\" />\n    </informationRequirement>\n    <informationRequirement id=\"InformationRequirement_1o26uw3\">\n      <requiredInput href=\"#InputData_01mbjhm\" />\n    </informationRequirement>\n    <decisionTable id=\"DecisionTable_1c43yo6\">\n      <input id=\"InputClause_14snh1s\" label=\"initialPriority\">\n        <inputExpression id=\"LiteralExpression_0zgz0u7\" typeRef=\"string\">\n          <text>initialPriority</text>\n        </inputExpression>\n      </input>\n      <input id=\"InputClause_0r7er56\" label=\"supplierReputation\">\n        <inputExpression id=\"LiteralExpression_14je7bl\" typeRef=\"number\">\n          <text>supplierReputation</text>\n        </inputExpression>\n      </input>\n      <output id=\"OutputClause_0ugy0r3\" label=\"finalPriority\" name=\"finalPriority\" typeRef=\"string\" />\n      <rule id=\"DecisionRule_1ji9p5q\">\n        <inputEntry id=\"UnaryTests_0gywq2x\">\n          <text>\"Low\"</text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_1ly0kl0\">\n          <text>&lt;3</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_17ybt1a\">\n          <text>\"VeryLow\"</text>\n        </outputEntry>\n      </rule>\n      <rule id=\"DecisionRule_0een4yz\">\n        <inputEntry id=\"UnaryTests_1jnrzhz\">\n          <text>\"Low\"</text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_1cp09o7\">\n          <text>&gt;=3</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_0g6h3ee\">\n          <text>\"Low\"</text>\n        </outputEntry>\n      </rule>\n      <rule id=\"DecisionRule_11u4ema\">\n        <inputEntry id=\"UnaryTests_0dgckdn\">\n          <text>\"Medium\"</text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_06ekcvf\">\n          <text>&lt;3</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_0jpckpc\">\n          <text>\"Low\"</text>\n        </outputEntry>\n      </rule>\n      <rule id=\"DecisionRule_0qtj8y9\">\n        <inputEntry id=\"UnaryTests_0pzq72r\">\n          <text>\"Medium\"</text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_1xk645h\">\n          <text>&gt;=3</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_039dz01\">\n          <text>\"Medium\"</text>\n        </outputEntry>\n      </rule>\n      <rule id=\"DecisionRule_0atuqz7\">\n        <inputEntry id=\"UnaryTests_0v84h5u\">\n          <text>\"High\"</text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_07e4eq2\">\n          <text>&lt;3</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_1qg56xq\">\n          <text>\"Medium\"</text>\n        </outputEntry>\n      </rule>\n      <rule id=\"DecisionRule_1df3y7p\">\n        <inputEntry id=\"UnaryTests_0rpua0h\">\n          <text>\"High\"</text>\n        </inputEntry>\n        <inputEntry id=\"UnaryTests_0b3aoo8\">\n          <text>&gt;=3</text>\n        </inputEntry>\n        <outputEntry id=\"LiteralExpression_1y9o94k\">\n          <text>\"High\"</text>\n        </outputEntry>\n      </rule>\n    </decisionTable>\n  </decision>\n  <inputData id=\"InputData_01mbjhm\" name=\"supplierReputation\" />\n  <dmndi:DMNDI>\n    <dmndi:DMNDiagram id=\"DMNDiagram_14swko0\">\n      <dmndi:DMNShape id=\"DMNShape_1ujfuig\" dmnElementRef=\"decision_0tybghz\">\n        <dc:Bounds height=\"80\" width=\"180\" x=\"150\" y=\"150\" />\n      </dmndi:DMNShape>\n      <dmndi:DMNShape id=\"DMNShape_0ih0fma\" dmnElementRef=\"InputData_0x10kua\">\n        <dc:Bounds height=\"45\" width=\"125\" x=\"17\" y=\"307\" />\n      </dmndi:DMNShape>\n      <dmndi:DMNEdge id=\"DMNEdge_1ki7x9b\" dmnElementRef=\"InformationRequirement_1yax2nr\">\n        <di:waypoint x=\"80\" y=\"307\" />\n        <di:waypoint x=\"210\" y=\"250\" />\n        <di:waypoint x=\"210\" y=\"230\" />\n      </dmndi:DMNEdge>\n      <dmndi:DMNShape id=\"DMNShape_1hcq2mc\" dmnElementRef=\"InputData_19y9i1v\">\n        <dc:Bounds height=\"45\" width=\"125\" x=\"257\" y=\"307\" />\n      </dmndi:DMNShape>\n      <dmndi:DMNEdge id=\"DMNEdge_1o1ier2\" dmnElementRef=\"InformationRequirement_0968tcf\">\n        <di:waypoint x=\"320\" y=\"307\" />\n        <di:waypoint x=\"270\" y=\"250\" />\n        <di:waypoint x=\"270\" y=\"230\" />\n      </dmndi:DMNEdge>\n      <dmndi:DMNShape id=\"DMNShape_0zormdd\" dmnElementRef=\"Decision_0zwjfyy\">\n        <dc:Bounds height=\"80\" width=\"180\" x=\"280\" y=\"-20\" />\n      </dmndi:DMNShape>\n      <dmndi:DMNEdge id=\"DMNEdge_0k1jr3i\" dmnElementRef=\"InformationRequirement_0hefcti\">\n        <di:waypoint x=\"240\" y=\"150\" />\n        <di:waypoint x=\"340\" y=\"80\" />\n        <di:waypoint x=\"340\" y=\"60\" />\n      </dmndi:DMNEdge>\n      <dmndi:DMNShape id=\"DMNShape_1txv6gd\" dmnElementRef=\"InputData_01mbjhm\">\n        <dc:Bounds height=\"45\" width=\"125\" x=\"417\" y=\"167\" />\n      </dmndi:DMNShape>\n      <dmndi:DMNEdge id=\"DMNEdge_1geh2p0\" dmnElementRef=\"InformationRequirement_1o26uw3\">\n        <di:waypoint x=\"480\" y=\"167\" />\n        <di:waypoint x=\"400\" y=\"80\" />\n        <di:waypoint x=\"400\" y=\"60\" />\n      </dmndi:DMNEdge>\n    </dmndi:DMNDiagram>\n  </dmndi:DMNDI>\n</definitions>\n"
+
+    },
+  "participant_signers": {
+    "Participant_09cjol2": "",
+    "Participant_0sa2v7d": "",
+    "Participant_0w6qkdf": "",
+    "Participant_19j1e3o": "",
+    "Participant_19mgbdn": ""
+  },
+  "signer_overrides": {},
+  "action_overrides": {},
+  "target_wait_retries": 80,
+  "target_wait_seconds": 1.5,
+  "instance_wait_retries": 60,
+  "instance_wait_seconds": 1.5,
+  "operation_wait_retries": 80,
+  "operation_wait_seconds": 1.0,
+  "business_rule_auto_continue_wait_retries": 10,
+  "business_rule_auto_continue_wait_seconds": 1.5,
+  "execution_sequence_file": "/root/code/ChainCollab/Experiment/new/exp3/solidity/SupplyChainPaper/paths/SupplyChainPaper_auto_path_004/execution_sequence.json"
+}

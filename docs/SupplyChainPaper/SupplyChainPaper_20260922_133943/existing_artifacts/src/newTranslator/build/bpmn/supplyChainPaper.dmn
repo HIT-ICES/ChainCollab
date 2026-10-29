@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/" id="definitions_1olsuce" name="definitions" namespace="http://camunda.org/schema/1.0/dmn" exporter="dmn-js (https://demo.bpmn.io/dmn)" exporterVersion="16.4.0">
+  <decision id="decision_0tybghz" name="Initial Priority Decision">
+    <informationRequirement id="InformationRequirement_1yax2nr">
+      <requiredInput href="#InputData_0x10kua" />
+    </informationRequirement>
+    <informationRequirement id="InformationRequirement_0968tcf">
+      <requiredInput href="#InputData_19y9i1v" />
+    </informationRequirement>
+    <decisionTable id="decisionTable_1v3tii8">
+      <input id="input1" label="numberOfUnits">
+        <inputExpression id="inputExpression1" typeRef="number">
+          <text>numberOfUnits</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0pvns0w" label="urgent">
+        <inputExpression id="LiteralExpression_08nncbj" typeRef="boolean">
+          <text>urgent</text>
+        </inputExpression>
+      </input>
+      <output id="output1" label="initialPriority" name="initialPriority" typeRef="string" />
+      <rule id="DecisionRule_0u3ic44">
+        <inputEntry id="UnaryTests_0ju5tlr">
+          <text>&lt;100</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_05vb8be">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_17p1hon">
+          <text>"Low"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0nwm2gu">
+        <inputEntry id="UnaryTests_01oe1uf">
+          <text>[100..500)</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0gr116d">
+          <text>false</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_07fd2cz">
+          <text>"Medium"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0uz5tzx">
+        <inputEntry id="UnaryTests_0se9tkd">
+          <text>[100..500)</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0hmxfz8">
+          <text>true</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0p3cwai">
+          <text>"High"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_09xhvy9">
+        <inputEntry id="UnaryTests_1oq4wlh">
+          <text>&gt;=500</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ujggp2">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_10me9jn">
+          <text>"High"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <inputData id="InputData_0x10kua" name="numberOfUnits" />
+  <inputData id="InputData_19y9i1v" name="urgent" />
+  <decision id="Decision_0zwjfyy" name="Final Priority Adjustment Decision">
+    <informationRequirement id="InformationRequirement_0hefcti">
+      <requiredDecision href="#decision_0tybghz" />
+    </informationRequirement>
+    <informationRequirement id="InformationRequirement_1o26uw3">
+      <requiredInput href="#InputData_01mbjhm" />
+    </informationRequirement>
+    <decisionTable id="DecisionTable_1c43yo6">
+      <input id="InputClause_14snh1s" label="initialPriority">
+        <inputExpression id="LiteralExpression_0zgz0u7" typeRef="string">
+          <text>initialPriority</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0r7er56" label="supplierReputation">
+        <inputExpression id="LiteralExpression_14je7bl" typeRef="number">
+          <text>supplierReputation</text>
+        </inputExpression>
+      </input>
+      <output id="OutputClause_0ugy0r3" label="finalPriority" name="finalPriority" typeRef="string" />
+      <rule id="DecisionRule_1ji9p5q">
+        <inputEntry id="UnaryTests_0gywq2x">
+          <text>"Low"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ly0kl0">
+          <text>&lt;3</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_17ybt1a">
+          <text>"Very Low"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0een4yz">
+        <inputEntry id="UnaryTests_1jnrzhz">
+          <text>"Low"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1cp09o7">
+          <text>&gt;=3</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0g6h3ee">
+          <text>"Low"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_11u4ema">
+        <inputEntry id="UnaryTests_0dgckdn">
+          <text>"Medium"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_06ekcvf">
+          <text>&lt;3</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0jpckpc">
+          <text>"Low"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0qtj8y9">
+        <inputEntry id="UnaryTests_0pzq72r">
+          <text>"Medium"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1xk645h">
+          <text>&gt;=3</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_039dz01">
+          <text>"Medium"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0atuqz7">
+        <inputEntry id="UnaryTests_0v84h5u">
+          <text>"High"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_07e4eq2">
+          <text>&lt;3</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1qg56xq">
+          <text>"Medium"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1df3y7p">
+        <inputEntry id="UnaryTests_0rpua0h">
+          <text>"High"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0b3aoo8">
+          <text>&gt;=3</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1y9o94k">
+          <text>"High"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <inputData id="InputData_01mbjhm" name="supplierReputation" />
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram id="DMNDiagram_14swko0">
+      <dmndi:DMNShape id="DMNShape_1ujfuig" dmnElementRef="decision_0tybghz">
+        <dc:Bounds height="80" width="180" x="150" y="150" />
+      </dmndi:DMNShape>
+      <dmndi:DMNShape id="DMNShape_0ih0fma" dmnElementRef="InputData_0x10kua">
+        <dc:Bounds height="45" width="125" x="17" y="307" />
+      </dmndi:DMNShape>
+      <dmndi:DMNEdge id="DMNEdge_1ki7x9b" dmnElementRef="InformationRequirement_1yax2nr">
+        <di:waypoint x="80" y="307" />
+        <di:waypoint x="210" y="250" />
+        <di:waypoint x="210" y="230" />
+      </dmndi:DMNEdge>
+      <dmndi:DMNShape id="DMNShape_1hcq2mc" dmnElementRef="InputData_19y9i1v">
+        <dc:Bounds height="45" width="125" x="257" y="307" />
+      </dmndi:DMNShape>
+      <dmndi:DMNEdge id="DMNEdge_1o1ier2" dmnElementRef="InformationRequirement_0968tcf">
+        <di:waypoint x="320" y="307" />
+        <di:waypoint x="270" y="250" />
+        <di:waypoint x="270" y="230" />
+      </dmndi:DMNEdge>
+      <dmndi:DMNShape id="DMNShape_0zormdd" dmnElementRef="Decision_0zwjfyy">
+        <dc:Bounds height="80" width="180" x="280" y="-20" />
+      </dmndi:DMNShape>
+      <dmndi:DMNEdge id="DMNEdge_0k1jr3i" dmnElementRef="InformationRequirement_0hefcti">
+        <di:waypoint x="240" y="150" />
+        <di:waypoint x="340" y="80" />
+        <di:waypoint x="340" y="60" />
+      </dmndi:DMNEdge>
+      <dmndi:DMNShape id="DMNShape_1txv6gd" dmnElementRef="InputData_01mbjhm">
+        <dc:Bounds height="45" width="125" x="417" y="167" />
+      </dmndi:DMNShape>
+      <dmndi:DMNEdge id="DMNEdge_1geh2p0" dmnElementRef="InformationRequirement_1o26uw3">
+        <di:waypoint x="480" y="167" />
+        <di:waypoint x="400" y="80" />
+        <di:waypoint x="400" y="60" />
+      </dmndi:DMNEdge>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>

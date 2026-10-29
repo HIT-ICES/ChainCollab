@@ -1173,7 +1173,7 @@ func (cc *SmartContract) Event_06sexe6(ctx contractapi.TransactionContextInterfa
 	return nil
 }
 
-func (cc *SmartContract) Message_04wmlqe_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, productionStart string) error {
+func (cc *SmartContract) Message_04wmlqe_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_04wmlqe")
@@ -1196,18 +1196,6 @@ func (cc *SmartContract) Message_04wmlqe_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instance, "Message_04wmlqe", COMPLETED)
-
-globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
-	if readGloabolError != nil {
-		fmt.Println(readGloabolError.Error())
-		return readGloabolError
-	}
-	globalMemory.ProductionStart = productionStart
-	setGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)
-	if setGloabolErrror != nil {
-		fmt.Println(setGloabolErrror.Error())
-		return setGloabolErrror
-	}
 
 	stub.SetEvent("Message_04wmlqe", []byte("Message has been done"))
 	cc.SetInstance(ctx, instance)
@@ -1245,7 +1233,7 @@ func (cc *SmartContract) Message_04wmlqe_Complete(ctx contractapi.TransactionCon
 	return nil
 }
 
-func (cc *SmartContract) Message_0cba4t6_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, supplyOrderId string) error {
+func (cc *SmartContract) Message_0cba4t6_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_0cba4t6")
@@ -1268,18 +1256,6 @@ func (cc *SmartContract) Message_0cba4t6_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instance, "Message_0cba4t6", COMPLETED)
-
-globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
-	if readGloabolError != nil {
-		fmt.Println(readGloabolError.Error())
-		return readGloabolError
-	}
-	globalMemory.SupplyOrderId = supplyOrderId
-	setGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)
-	if setGloabolErrror != nil {
-		fmt.Println(setGloabolErrror.Error())
-		return setGloabolErrror
-	}
 
 	stub.SetEvent("Message_0cba4t6", []byte("Message has been done"))
 	cc.SetInstance(ctx, instance)
@@ -1317,7 +1293,7 @@ func (cc *SmartContract) Message_0cba4t6_Complete(ctx contractapi.TransactionCon
 	return nil
 }
 
-func (cc *SmartContract) Message_0d2xte5_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, deliveryConfirmation bool) error {
+func (cc *SmartContract) Message_0d2xte5_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_0d2xte5")
@@ -1340,18 +1316,6 @@ func (cc *SmartContract) Message_0d2xte5_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instance, "Message_0d2xte5", COMPLETED)
-
-globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
-	if readGloabolError != nil {
-		fmt.Println(readGloabolError.Error())
-		return readGloabolError
-	}
-	globalMemory.DeliveryConfirmation = deliveryConfirmation
-	setGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)
-	if setGloabolErrror != nil {
-		fmt.Println(setGloabolErrror.Error())
-		return setGloabolErrror
-	}
 
 	stub.SetEvent("Message_0d2xte5", []byte("Message has been done"))
 	cc.SetInstance(ctx, instance)
@@ -1389,7 +1353,7 @@ func (cc *SmartContract) Message_0d2xte5_Complete(ctx contractapi.TransactionCon
 	return nil
 }
 
-func (cc *SmartContract) Message_0hpha6h_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, requestId int, supplierReputation int) error {
+func (cc *SmartContract) Message_0hpha6h_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_0hpha6h")
@@ -1412,19 +1376,6 @@ func (cc *SmartContract) Message_0hpha6h_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instance, "Message_0hpha6h", COMPLETED)
-
-globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
-	if readGloabolError != nil {
-		fmt.Println(readGloabolError.Error())
-		return readGloabolError
-	}
-	globalMemory.RequestId = requestId
-	globalMemory.SupplierReputation = supplierReputation
-	setGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)
-	if setGloabolErrror != nil {
-		fmt.Println(setGloabolErrror.Error())
-		return setGloabolErrror
-	}
 
 	stub.SetEvent("Message_0hpha6h", []byte("Message has been done"))
 	cc.SetInstance(ctx, instance)
@@ -1462,7 +1413,7 @@ func (cc *SmartContract) Message_0hpha6h_Complete(ctx contractapi.TransactionCon
 	return nil
 }
 
-func (cc *SmartContract) Message_0pm90nx_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, transportOrderId string) error {
+func (cc *SmartContract) Message_0pm90nx_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_0pm90nx")
@@ -1485,18 +1436,6 @@ func (cc *SmartContract) Message_0pm90nx_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instance, "Message_0pm90nx", COMPLETED)
-
-globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
-	if readGloabolError != nil {
-		fmt.Println(readGloabolError.Error())
-		return readGloabolError
-	}
-	globalMemory.TransportOrderId = transportOrderId
-	setGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)
-	if setGloabolErrror != nil {
-		fmt.Println(setGloabolErrror.Error())
-		return setGloabolErrror
-	}
 
 	stub.SetEvent("Message_0pm90nx", []byte("Message has been done"))
 	cc.SetInstance(ctx, instance)
@@ -1534,7 +1473,7 @@ func (cc *SmartContract) Message_0pm90nx_Complete(ctx contractapi.TransactionCon
 	return nil
 }
 
-func (cc *SmartContract) Message_0rwz1km_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, numberOfUnits int, requestId int, urgent bool) error {
+func (cc *SmartContract) Message_0rwz1km_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_0rwz1km")
@@ -1557,20 +1496,6 @@ func (cc *SmartContract) Message_0rwz1km_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instance, "Message_0rwz1km", COMPLETED)
-
-globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
-	if readGloabolError != nil {
-		fmt.Println(readGloabolError.Error())
-		return readGloabolError
-	}
-	globalMemory.NumberOfUnits = numberOfUnits
-	globalMemory.RequestId = requestId
-	globalMemory.Urgent = urgent
-	setGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)
-	if setGloabolErrror != nil {
-		fmt.Println(setGloabolErrror.Error())
-		return setGloabolErrror
-	}
 
 	stub.SetEvent("Message_0rwz1km", []byte("Message has been done"))
 	cc.SetInstance(ctx, instance)
@@ -1668,7 +1593,7 @@ func (cc *SmartContract) Message_196q1fj_Complete(ctx contractapi.TransactionCon
 	return nil
 }
 
-func (cc *SmartContract) Message_1ajdm9l_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, supplyOrderDetails string) error {
+func (cc *SmartContract) Message_1ajdm9l_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_1ajdm9l")
@@ -1691,18 +1616,6 @@ func (cc *SmartContract) Message_1ajdm9l_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instance, "Message_1ajdm9l", COMPLETED)
-
-globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
-	if readGloabolError != nil {
-		fmt.Println(readGloabolError.Error())
-		return readGloabolError
-	}
-	globalMemory.SupplyOrderDetails = supplyOrderDetails
-	setGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)
-	if setGloabolErrror != nil {
-		fmt.Println(setGloabolErrror.Error())
-		return setGloabolErrror
-	}
 
 	stub.SetEvent("Message_1ajdm9l", []byte("Message has been done"))
 	cc.SetInstance(ctx, instance)
@@ -1740,7 +1653,7 @@ func (cc *SmartContract) Message_1ajdm9l_Complete(ctx contractapi.TransactionCon
 	return nil
 }
 
-func (cc *SmartContract) Message_1dmeexg_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, confirm3 string) error {
+func (cc *SmartContract) Message_1dmeexg_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_1dmeexg")
@@ -1763,18 +1676,6 @@ func (cc *SmartContract) Message_1dmeexg_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instance, "Message_1dmeexg", COMPLETED)
-
-globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
-	if readGloabolError != nil {
-		fmt.Println(readGloabolError.Error())
-		return readGloabolError
-	}
-	globalMemory.Confirm3 = confirm3
-	setGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)
-	if setGloabolErrror != nil {
-		fmt.Println(setGloabolErrror.Error())
-		return setGloabolErrror
-	}
 
 	stub.SetEvent("Message_1dmeexg", []byte("Message has been done"))
 	cc.SetInstance(ctx, instance)
@@ -1812,7 +1713,7 @@ func (cc *SmartContract) Message_1dmeexg_Complete(ctx contractapi.TransactionCon
 	return nil
 }
 
-func (cc *SmartContract) Message_1dzkcn0_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, confirm2 bool) error {
+func (cc *SmartContract) Message_1dzkcn0_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_1dzkcn0")
@@ -1835,18 +1736,6 @@ func (cc *SmartContract) Message_1dzkcn0_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instance, "Message_1dzkcn0", COMPLETED)
-
-globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
-	if readGloabolError != nil {
-		fmt.Println(readGloabolError.Error())
-		return readGloabolError
-	}
-	globalMemory.Confirm2 = confirm2
-	setGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)
-	if setGloabolErrror != nil {
-		fmt.Println(setGloabolErrror.Error())
-		return setGloabolErrror
-	}
 
 	stub.SetEvent("Message_1dzkcn0", []byte("Message has been done"))
 	cc.SetInstance(ctx, instance)
@@ -1944,7 +1833,7 @@ func (cc *SmartContract) Message_1io2g9u_Complete(ctx contractapi.TransactionCon
 	return nil
 }
 
-func (cc *SmartContract) Message_1oxmq1k_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, confirm1 bool) error {
+func (cc *SmartContract) Message_1oxmq1k_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_1oxmq1k")
@@ -1967,18 +1856,6 @@ func (cc *SmartContract) Message_1oxmq1k_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instance, "Message_1oxmq1k", COMPLETED)
-
-globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
-	if readGloabolError != nil {
-		fmt.Println(readGloabolError.Error())
-		return readGloabolError
-	}
-	globalMemory.Confirm1 = confirm1
-	setGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)
-	if setGloabolErrror != nil {
-		fmt.Println(setGloabolErrror.Error())
-		return setGloabolErrror
-	}
 
 	stub.SetEvent("Message_1oxmq1k", []byte("Message has been done"))
 	cc.SetInstance(ctx, instance)
@@ -2016,7 +1893,7 @@ func (cc *SmartContract) Message_1oxmq1k_Complete(ctx contractapi.TransactionCon
 	return nil
 }
 
-func (cc *SmartContract) Message_1wswgqu_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string, orderDetails string) error {
+func (cc *SmartContract) Message_1wswgqu_Send(ctx contractapi.TransactionContextInterface, instanceID string, fireflyTranID string) error {
 	stub := ctx.GetStub()
 	instance, err := cc.GetInstance(ctx, instanceID)
 	msg, err := cc.ReadMsg(ctx, instanceID, "Message_1wswgqu")
@@ -2039,18 +1916,6 @@ func (cc *SmartContract) Message_1wswgqu_Send(ctx contractapi.TransactionContext
 
 	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
 	cc.ChangeMsgState(ctx, instance, "Message_1wswgqu", COMPLETED)
-
-globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
-	if readGloabolError != nil {
-		fmt.Println(readGloabolError.Error())
-		return readGloabolError
-	}
-	globalMemory.OrderDetails = orderDetails
-	setGloabolErrror := cc.SetGlobalVariable(ctx, instance, globalMemory)
-	if setGloabolErrror != nil {
-		fmt.Println(setGloabolErrror.Error())
-		return setGloabolErrror
-	}
 
 	stub.SetEvent("Message_1wswgqu", []byte("Message has been done"))
 	cc.SetInstance(ctx, instance)
