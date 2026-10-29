@@ -1,0 +1,574 @@
+[
+  {
+    "id": "Participant_0oa2za9",
+    "type": "bpmn:participant",
+    "name": "Client",
+    "attrs": {
+      "is_multi": false,
+      "multi_minimum": 0,
+      "multi_maximum": 0
+    }
+  },
+  {
+    "id": "Participant_0jwk4tk",
+    "type": "bpmn:participant",
+    "name": "Company",
+    "attrs": {
+      "is_multi": false,
+      "multi_minimum": 0,
+      "multi_maximum": 0
+    }
+  },
+  {
+    "id": "Participant_0cb2p7d",
+    "type": "bpmn:participant",
+    "name": "New Participant 1",
+    "attrs": {
+      "is_multi": false,
+      "multi_minimum": 0,
+      "multi_maximum": 0
+    }
+  },
+  {
+    "id": "Message_15b83n1",
+    "type": "bpmn:message",
+    "name": "",
+    "attrs": {
+      "documentation": "{}"
+    }
+  },
+  {
+    "id": "Message_08ms1jj",
+    "type": "bpmn:message",
+    "name": "sale",
+    "attrs": {
+      "documentation": "{\"properties\":{\"sale\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"sale\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_08ms1jj__property__sale",
+    "type": "bpmn:messageProperty",
+    "name": "sale",
+    "attrs": {
+      "name": "sale",
+      "global_name": "Sale",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_08ms1jj",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0mcktm6",
+    "type": "bpmn:message",
+    "name": "PaymentContent",
+    "attrs": {
+      "documentation": "{\"properties\":{\"Price\":{\"type\":\"number\",\"description\":\"\"},\"Time\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"Price\",\"Time\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0mcktm6__property__Price",
+    "type": "bpmn:messageProperty",
+    "name": "Price",
+    "attrs": {
+      "name": "Price",
+      "global_name": "Price",
+      "type": "number",
+      "dsl_type": "int",
+      "description": "",
+      "owner": "Message_0mcktm6",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0mcktm6__property__Time",
+    "type": "bpmn:messageProperty",
+    "name": "Time",
+    "attrs": {
+      "name": "Time",
+      "global_name": "Time",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_0mcktm6",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0q9hvem",
+    "type": "bpmn:message",
+    "name": "OrderContent",
+    "attrs": {
+      "documentation": "{\"properties\":{\"orderContent\":{\"type\":\"string\",\"description\":\"\"},\"productAvalibale\":{\"type\":\"boolean\",\"description\":\"is product avaliable\"}},\"required\":[\"orderContent\",\"productAvalibale\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0q9hvem__property__orderContent",
+    "type": "bpmn:messageProperty",
+    "name": "orderContent",
+    "attrs": {
+      "name": "orderContent",
+      "global_name": "OrderContent",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_0q9hvem",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0q9hvem__property__productAvalibale",
+    "type": "bpmn:messageProperty",
+    "name": "productAvalibale",
+    "attrs": {
+      "name": "productAvalibale",
+      "global_name": "ProductAvalibale",
+      "type": "boolean",
+      "dsl_type": "bool",
+      "description": "is product avaliable",
+      "owner": "Message_0q9hvem",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_05gz8u0",
+    "type": "bpmn:message",
+    "name": "NotifyMessage3",
+    "attrs": {
+      "documentation": "{\"properties\":{\"MessageContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_05gz8u0__property__MessageContent",
+    "type": "bpmn:messageProperty",
+    "name": "MessageContent",
+    "attrs": {
+      "name": "MessageContent",
+      "global_name": "MessageContent",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_05gz8u0",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0g7m9tf",
+    "type": "bpmn:message",
+    "name": "ProductMessage",
+    "attrs": {
+      "documentation": "{\"properties\":{\"num\":{\"type\":\"string\",\"description\":\"\"},\"time2\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0g7m9tf__property__num",
+    "type": "bpmn:messageProperty",
+    "name": "num",
+    "attrs": {
+      "name": "num",
+      "global_name": "Num",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_0g7m9tf",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0g7m9tf__property__time2",
+    "type": "bpmn:messageProperty",
+    "name": "time2",
+    "attrs": {
+      "name": "time2",
+      "global_name": "Time2",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_0g7m9tf",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_14wu8ts",
+    "type": "bpmn:message",
+    "name": "NotifyMessage2",
+    "attrs": {
+      "documentation": "{\"properties\":{\"MessageContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_14wu8ts__property__MessageContent",
+    "type": "bpmn:messageProperty",
+    "name": "MessageContent",
+    "attrs": {
+      "name": "MessageContent",
+      "global_name": "MessageContent",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_14wu8ts",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_1f0gefc",
+    "type": "bpmn:message",
+    "name": "NotifyMessage1",
+    "attrs": {
+      "documentation": "{\"properties\":{\"MessageContent\":{\"type\":\"string\",\"description\":\"\"},\"priceOK\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"MessageContent\",\"priceOK\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1f0gefc__property__MessageContent",
+    "type": "bpmn:messageProperty",
+    "name": "MessageContent",
+    "attrs": {
+      "name": "MessageContent",
+      "global_name": "MessageContent",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_1f0gefc",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_1f0gefc__property__priceOK",
+    "type": "bpmn:messageProperty",
+    "name": "priceOK",
+    "attrs": {
+      "name": "priceOK",
+      "global_name": "PriceOK",
+      "type": "boolean",
+      "dsl_type": "bool",
+      "description": "",
+      "owner": "Message_1f0gefc",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Event_0ehnwwz",
+    "type": "bpmn:startEvent",
+    "name": "",
+    "attrs": {
+      "incoming": [],
+      "outgoing": [
+        "Flow_0ylolin"
+      ]
+    }
+  },
+  {
+    "id": "Event_0e3j88g",
+    "type": "bpmn:endEvent",
+    "name": "No product purchased/sold",
+    "attrs": {
+      "incoming": [
+        "Flow_0zetv07"
+      ],
+      "outgoing": []
+    }
+  },
+  {
+    "id": "Event_1o9guxu",
+    "type": "bpmn:endEvent",
+    "name": "Product purchased/sold",
+    "attrs": {
+      "incoming": [
+        "Flow_0qasdjj"
+      ],
+      "outgoing": []
+    }
+  },
+  {
+    "id": "Event_194zr5n",
+    "type": "bpmn:endEvent",
+    "name": "No product purchased/sold",
+    "attrs": {
+      "incoming": [
+        "Flow_1w7smbz"
+      ],
+      "outgoing": []
+    }
+  },
+  {
+    "id": "Gateway_1ltys0e",
+    "type": "bpmn:exclusiveGateway",
+    "name": "Is product available?",
+    "attrs": {
+      "incoming": [
+        "Flow_1a8wuhd"
+      ],
+      "outgoing": [
+        "Flow_07aezih",
+        "Flow_0qarc3k"
+      ]
+    }
+  },
+  {
+    "id": "Gateway_025uwvp",
+    "type": "bpmn:exclusiveGateway",
+    "name": "Is price ok?",
+    "attrs": {
+      "incoming": [
+        "Flow_0r96jzq"
+      ],
+      "outgoing": [
+        "Flow_1alyrr0",
+        "Flow_1eug3xo"
+      ]
+    }
+  },
+  {
+    "id": "Gateway_13i0b7w",
+    "type": "bpmn:exclusiveGateway",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_1ocsrxv"
+      ],
+      "outgoing": [
+        "Flow_0jqgl6j",
+        "Flow_1j4bvpd"
+      ]
+    }
+  },
+  {
+    "id": "Activity_12arovy",
+    "type": "bpmn:businessRuleTask",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_0lnnht6"
+      ],
+      "outgoing": [
+        "Flow_1ocsrxv"
+      ],
+      "documentation": "{\"inputs\":[{\"name\":\"Price\",\"type\":\"number\",\"description\":\"\"}],\"outputs\":[{\"name\":\"discount\",\"type\":\"boolean\",\"description\":\"\"}]}"
+    }
+  },
+  {
+    "id": "Activity_12arovy__input__Price",
+    "type": "bpmn:businessRuleParameter",
+    "name": "Price",
+    "attrs": {
+      "name": "Price",
+      "global_name": "Price",
+      "direction": "input",
+      "type": "number",
+      "dsl_type": "int",
+      "owner": "Activity_12arovy"
+    }
+  },
+  {
+    "id": "Activity_12arovy__output__discount",
+    "type": "bpmn:businessRuleParameter",
+    "name": "discount",
+    "attrs": {
+      "name": "discount",
+      "global_name": "Discount",
+      "direction": "output",
+      "type": "boolean",
+      "dsl_type": "bool",
+      "owner": "Activity_12arovy"
+    }
+  },
+  {
+    "id": "ChoreographyTask_1d8axmm",
+    "type": "bpmn:choreographyTask",
+    "name": "Send order",
+    "attrs": {
+      "incoming": "Flow_0ylolin",
+      "outgoing": "Flow_1a8wuhd",
+      "participants": [
+        "Participant_0oa2za9",
+        "Participant_0jwk4tk"
+      ],
+      "initiatingParticipantRef": "Participant_0jwk4tk",
+      "messageFlowRefs": [
+        "MessageFlow_18hgpre"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_01rdy6m",
+    "type": "bpmn:choreographyTask",
+    "name": "Notify product available",
+    "attrs": {
+      "incoming": "Flow_07aezih",
+      "outgoing": "Flow_0r96jzq",
+      "participants": [
+        "Participant_0oa2za9",
+        "Participant_0jwk4tk"
+      ],
+      "initiatingParticipantRef": "Participant_0oa2za9",
+      "messageFlowRefs": [
+        "MessageFlow_0xexblk"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_0huz12d",
+    "type": "bpmn:choreographyTask",
+    "name": "Notify product not available",
+    "attrs": {
+      "incoming": "Flow_0qarc3k",
+      "outgoing": "Flow_1w7smbz",
+      "participants": [
+        "Participant_0oa2za9",
+        "Participant_0jwk4tk"
+      ],
+      "initiatingParticipantRef": "Participant_0oa2za9",
+      "messageFlowRefs": [
+        "MessageFlow_0m4bfnr"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_13g05bg",
+    "type": "bpmn:choreographyTask",
+    "name": "Send payment",
+    "attrs": {
+      "incoming": "Flow_1alyrr0",
+      "outgoing": "Flow_0lnnht6",
+      "participants": [
+        "Participant_0oa2za9",
+        "Participant_0jwk4tk"
+      ],
+      "initiatingParticipantRef": "Participant_0jwk4tk",
+      "messageFlowRefs": [
+        "MessageFlow_0nq8x22"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_1k9vb6k",
+    "type": "bpmn:choreographyTask",
+    "name": "Notify payment refused",
+    "attrs": {
+      "incoming": "Flow_1eug3xo",
+      "outgoing": "Flow_0zetv07",
+      "participants": [
+        "Participant_0oa2za9",
+        "Participant_0jwk4tk"
+      ],
+      "initiatingParticipantRef": "Participant_0jwk4tk",
+      "messageFlowRefs": [
+        "MessageFlow_0s1vo46"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_1yl8kdd",
+    "type": "bpmn:choreographyTask",
+    "name": "Send Product",
+    "attrs": {
+      "incoming": "Flow_0jqgl6j",
+      "outgoing": "Flow_0qasdjj",
+      "participants": [
+        "Participant_0oa2za9",
+        "Participant_0jwk4tk"
+      ],
+      "initiatingParticipantRef": "Participant_0oa2za9",
+      "messageFlowRefs": [
+        "MessageFlow_0tb3its"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_06fwl21",
+    "type": "bpmn:choreographyTask",
+    "name": "sale",
+    "attrs": {
+      "incoming": "Flow_1j4bvpd",
+      "outgoing": "Flow_0lon5nm",
+      "participants": [
+        "Participant_0oa2za9",
+        "Participant_0jwk4tk"
+      ],
+      "initiatingParticipantRef": "Participant_0oa2za9",
+      "messageFlowRefs": [
+        "MessageFlow_0bp7p12",
+        "MessageFlow_1qi88x8"
+      ]
+    }
+  },
+  {
+    "id": "Flow_07aezih__condition__ProductAvalibale",
+    "type": "bpmn:sequenceConditionVariable",
+    "name": "productAvalibale",
+    "attrs": {
+      "name": "productAvalibale",
+      "relation": "==",
+      "value": "true",
+      "global_name": "ProductAvalibale",
+      "dsl_type": "string",
+      "sequenceFlow": "Flow_07aezih"
+    }
+  },
+  {
+    "id": "Flow_0qarc3k__condition__ProductAvalibale",
+    "type": "bpmn:sequenceConditionVariable",
+    "name": "productAvalibale",
+    "attrs": {
+      "name": "productAvalibale",
+      "relation": "==",
+      "value": "false",
+      "global_name": "ProductAvalibale",
+      "dsl_type": "string",
+      "sequenceFlow": "Flow_0qarc3k"
+    }
+  },
+  {
+    "id": "Flow_1alyrr0__condition__PriceOK",
+    "type": "bpmn:sequenceConditionVariable",
+    "name": "priceOK",
+    "attrs": {
+      "name": "priceOK",
+      "relation": "==",
+      "value": "true",
+      "global_name": "PriceOK",
+      "dsl_type": "string",
+      "sequenceFlow": "Flow_1alyrr0"
+    }
+  },
+  {
+    "id": "Flow_1eug3xo__condition__PriceOK",
+    "type": "bpmn:sequenceConditionVariable",
+    "name": "priceOK",
+    "attrs": {
+      "name": "priceOK",
+      "relation": "==",
+      "value": "false",
+      "global_name": "PriceOK",
+      "dsl_type": "string",
+      "sequenceFlow": "Flow_1eug3xo"
+    }
+  },
+  {
+    "id": "Flow_0jqgl6j__condition__Discount",
+    "type": "bpmn:sequenceConditionVariable",
+    "name": "discount",
+    "attrs": {
+      "name": "discount",
+      "relation": "==",
+      "value": "false",
+      "global_name": "Discount",
+      "dsl_type": "string",
+      "sequenceFlow": "Flow_0jqgl6j"
+    }
+  },
+  {
+    "id": "Flow_1j4bvpd__condition__Discount",
+    "type": "bpmn:sequenceConditionVariable",
+    "name": "discount",
+    "attrs": {
+      "name": "discount",
+      "relation": "==",
+      "value": "true",
+      "global_name": "Discount",
+      "dsl_type": "string",
+      "sequenceFlow": "Flow_1j4bvpd"
+    }
+  }
+]

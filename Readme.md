@@ -2,11 +2,11 @@
 
 ChainCollab 是一个 BPMN choreography + DMN 协作系统：建模、组织与联盟管理、Fabric/Geth 环境管理、模型到 Go/Solidity 的代码生成，以及消息、决策和跨链调用的执行。
 
-本分支 `release-MultiBlockchain` 只保留运行系统所需的源码、模板、部署资源和示例。**所有命令均从仓库根目录执行**，除非代码块中明确写了 `cd`。旧版五终端 alias、旧翻译器和历史教程不再作为启动入口。
+本分支 `release-MultiBlockchain` 保留运行系统所需的源码、模板、部署资源、示例，以及原 release 的实验目录。**所有命令均从仓库根目录执行**，除非代码块中明确写了 `cd`。旧版五终端 alias、旧翻译器和历史教程不再作为启动入口。
 
 ## 1. 分支和已有环境
 
-清理前的完整版本已经保存到 `dev-MultiBlockchain` 和 `dev-MultiBlockChain-fork`。二者以清理前 release 的 `eaea6028` 为基础，并补入旧忽略规则漏掉的前端锁文件和既有数据库迁移，保存了相同的完整运行基线；历史提交没有被强制覆盖。实验数据、论文证据、编辑器开发工程等保留在这两个 dev 分支。
+清理前的完整版本已经保存到 `dev-MultiBlockchain` 和 `dev-MultiBlockChain-fork`。二者以清理前 release 的 `eaea6028` 为基础，并补入旧忽略规则漏掉的前端锁文件和既有数据库迁移，保存了相同的完整运行基线；历史提交没有被强制覆盖。论文证据归档、编辑器开发工程等保留在这两个 dev 分支；`Experiment/` 则在 release 中按清理前的布局和内容完整保留。
 
 切换到 dev 前，先在当前 release 执行 `python3 scripts/chaincollab.py down`，再切分支并使用该分支原有的启动方式；数据库与原有依赖环境继续保留。
 
@@ -168,6 +168,7 @@ python3 scripts/chaincollab.py check
 ## 7. 发布目录
 
 ```text
+Experiment/                     原 release 的实验模型、脚本和结果，保持原有布局
 examples/bpmn-dmn/               可复现的结构化 BPMN / DMN 示例
 scripts/chaincollab.py           唯一 setup / doctor / up / down / check 入口
 src/backend/                    Django、数据库迁移、区块链部署资源
@@ -179,6 +180,8 @@ src/relayer-node/                跨链监听转发服务及其可选 UI
 src/geth_identity_contract/      Geth 多实例参与方身份合约
 docs/                           发布边界、操作说明和验证记录
 ```
+
+`Experiment/` 包含 `BPMNwithDMNcase/`、`NoiseExperiment/`、`PerformanceTest/` 和 `new/`，完整保留清理前 release 的 3,631 个文件。结构化 SupplyChainPaper 模型位于 `Experiment/BPMNwithDMNcase/new/SupplyChainPaper.bpmn`。`examples/bpmn-dmn/` 用于上面的快速生成示例；原始实验布局和既有数据仍以 `Experiment/` 为准。本次整理没有重跑实验或改写实验结果。
 
 [目录保留/删除依据](docs/RELEASE_LAYOUT.md) 说明哪些开发资料转留 dev 分支。`.gitignore` 隐藏本机保留的旧开发目录、venv、node_modules、配置和数据；它们可能仍在原工作目录中，但不会进入新克隆的发布源码。
 

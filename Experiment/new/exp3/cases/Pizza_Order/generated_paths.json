@@ -1,0 +1,362 @@
+{
+  "case_name": "Pizza_Order",
+  "source_model": "/root/code/ChainCollab/src/runtime/newTranslator/20260505-092527-898708/Pizza_Order.b2c",
+  "path_count": 4,
+  "paths": [
+    {
+      "path_name": "Pizza_Order_auto_path_001",
+      "expect": "accepted",
+      "steps": [
+        {
+          "type": "message",
+          "element": "Message_1wwub0e",
+          "payload": {
+            "OrderContent": "sample-OrderContent"
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_1k9qf30"
+        },
+        {
+          "type": "message",
+          "element": "Message_0gm7yco",
+          "payload": {
+            "PickUpTime": "sample-PickUpTime"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_1l76ppu",
+          "payload": {
+            "Signature": "sample-Signature"
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_1rwnujh"
+        },
+        {
+          "type": "event",
+          "element": "Event_1bxai2s"
+        }
+      ],
+      "final_enabled_elements": [],
+      "final_element_states": {
+        "Message_0gm7yco": "DONE",
+        "Message_0nc7bj9": "INACTIVE",
+        "Message_0phlgzx": "INACTIVE",
+        "Message_10c1p7j": "INACTIVE",
+        "Message_1hi03zn": "INACTIVE",
+        "Message_1kyybzd": "INACTIVE",
+        "Message_1l76ppu": "DONE",
+        "Message_1wwub0e": "DONE",
+        "Gateway_0ckb278": "INACTIVE",
+        "Gateway_18xv5wc": "INACTIVE",
+        "Gateway_1rwnujh": "DONE",
+        "Gateway_1k9qf30": "DONE",
+        "Event_17c6iyi": "DONE",
+        "Event_1bxai2s": "DONE",
+        "Activity_0pzravo": "INACTIVE"
+      },
+      "final_globals": {
+        "Address": null,
+        "DeliveryInfomation": null,
+        "OrderContent": "sample-OrderContent",
+        "PickUpTime": "sample-PickUpTime",
+        "Signature": "sample-Signature",
+        "BikePrepare": null,
+        "CarPrepare": null,
+        "Distance": null
+      }
+    },
+    {
+      "path_name": "Pizza_Order_auto_path_002",
+      "expect": "accepted",
+      "steps": [
+        {
+          "type": "message",
+          "element": "Message_1wwub0e",
+          "payload": {
+            "OrderContent": "sample-OrderContent"
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_1k9qf30"
+        },
+        {
+          "type": "message",
+          "element": "Message_10c1p7j",
+          "payload": {
+            "Address": "sample-Address"
+          }
+        },
+        {
+          "type": "businessrule",
+          "element": "Activity_0pzravo",
+          "outputs": {
+            "distance": 5
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_0ckb278"
+        },
+        {
+          "type": "message",
+          "element": "Message_1kyybzd",
+          "payload": {
+            "carPrepare": true
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_18xv5wc"
+        },
+        {
+          "type": "message",
+          "element": "Message_0phlgzx",
+          "payload": {
+            "DeliveryInfomation": "sample-DeliveryInfomation"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_1hi03zn",
+          "payload": {
+            "Signature": "sample-Signature"
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_1rwnujh"
+        },
+        {
+          "type": "event",
+          "element": "Event_1bxai2s"
+        }
+      ],
+      "final_enabled_elements": [],
+      "final_element_states": {
+        "Message_0gm7yco": "INACTIVE",
+        "Message_0nc7bj9": "INACTIVE",
+        "Message_0phlgzx": "DONE",
+        "Message_10c1p7j": "DONE",
+        "Message_1hi03zn": "DONE",
+        "Message_1kyybzd": "DONE",
+        "Message_1l76ppu": "INACTIVE",
+        "Message_1wwub0e": "DONE",
+        "Gateway_0ckb278": "DONE",
+        "Gateway_18xv5wc": "DONE",
+        "Gateway_1rwnujh": "DONE",
+        "Gateway_1k9qf30": "DONE",
+        "Event_17c6iyi": "DONE",
+        "Event_1bxai2s": "DONE",
+        "Activity_0pzravo": "DONE"
+      },
+      "final_globals": {
+        "Address": "sample-Address",
+        "DeliveryInfomation": "sample-DeliveryInfomation",
+        "OrderContent": "sample-OrderContent",
+        "PickUpTime": null,
+        "Signature": "sample-Signature",
+        "BikePrepare": null,
+        "CarPrepare": true,
+        "Distance": 5
+      }
+    },
+    {
+      "path_name": "Pizza_Order_auto_path_003",
+      "expect": "accepted",
+      "steps": [
+        {
+          "type": "message",
+          "element": "Message_1wwub0e",
+          "payload": {
+            "OrderContent": "sample-OrderContent"
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_1k9qf30"
+        },
+        {
+          "type": "message",
+          "element": "Message_10c1p7j",
+          "payload": {
+            "Address": "sample-Address"
+          }
+        },
+        {
+          "type": "businessrule",
+          "element": "Activity_0pzravo",
+          "outputs": {
+            "distance": 10
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_0ckb278"
+        },
+        {
+          "type": "message",
+          "element": "Message_0nc7bj9",
+          "payload": {
+            "bikePrepare": true
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_18xv5wc"
+        },
+        {
+          "type": "message",
+          "element": "Message_0phlgzx",
+          "payload": {
+            "DeliveryInfomation": "sample-DeliveryInfomation"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_1hi03zn",
+          "payload": {
+            "Signature": "sample-Signature"
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_1rwnujh"
+        },
+        {
+          "type": "event",
+          "element": "Event_1bxai2s"
+        }
+      ],
+      "final_enabled_elements": [],
+      "final_element_states": {
+        "Message_0gm7yco": "INACTIVE",
+        "Message_0nc7bj9": "DONE",
+        "Message_0phlgzx": "DONE",
+        "Message_10c1p7j": "DONE",
+        "Message_1hi03zn": "DONE",
+        "Message_1kyybzd": "INACTIVE",
+        "Message_1l76ppu": "INACTIVE",
+        "Message_1wwub0e": "DONE",
+        "Gateway_0ckb278": "DONE",
+        "Gateway_18xv5wc": "DONE",
+        "Gateway_1rwnujh": "DONE",
+        "Gateway_1k9qf30": "DONE",
+        "Event_17c6iyi": "DONE",
+        "Event_1bxai2s": "DONE",
+        "Activity_0pzravo": "DONE"
+      },
+      "final_globals": {
+        "Address": "sample-Address",
+        "DeliveryInfomation": "sample-DeliveryInfomation",
+        "OrderContent": "sample-OrderContent",
+        "PickUpTime": null,
+        "Signature": "sample-Signature",
+        "BikePrepare": true,
+        "CarPrepare": null,
+        "Distance": 10
+      }
+    },
+    {
+      "path_name": "Pizza_Order_auto_path_004",
+      "expect": "accepted",
+      "steps": [
+        {
+          "type": "message",
+          "element": "Message_1wwub0e",
+          "payload": {
+            "OrderContent": "sample-OrderContent"
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_1k9qf30"
+        },
+        {
+          "type": "message",
+          "element": "Message_10c1p7j",
+          "payload": {
+            "Address": "sample-Address"
+          }
+        },
+        {
+          "type": "businessrule",
+          "element": "Activity_0pzravo",
+          "outputs": {
+            "distance": 20
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_0ckb278"
+        },
+        {
+          "type": "message",
+          "element": "Message_0nc7bj9",
+          "payload": {
+            "bikePrepare": true
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_18xv5wc"
+        },
+        {
+          "type": "message",
+          "element": "Message_0phlgzx",
+          "payload": {
+            "DeliveryInfomation": "sample-DeliveryInfomation"
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_1hi03zn",
+          "payload": {
+            "Signature": "sample-Signature"
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "Gateway_1rwnujh"
+        },
+        {
+          "type": "event",
+          "element": "Event_1bxai2s"
+        }
+      ],
+      "final_enabled_elements": [],
+      "final_element_states": {
+        "Message_0gm7yco": "INACTIVE",
+        "Message_0nc7bj9": "DONE",
+        "Message_0phlgzx": "DONE",
+        "Message_10c1p7j": "DONE",
+        "Message_1hi03zn": "DONE",
+        "Message_1kyybzd": "INACTIVE",
+        "Message_1l76ppu": "INACTIVE",
+        "Message_1wwub0e": "DONE",
+        "Gateway_0ckb278": "DONE",
+        "Gateway_18xv5wc": "DONE",
+        "Gateway_1rwnujh": "DONE",
+        "Gateway_1k9qf30": "DONE",
+        "Event_17c6iyi": "DONE",
+        "Event_1bxai2s": "DONE",
+        "Activity_0pzravo": "DONE"
+      },
+      "final_globals": {
+        "Address": "sample-Address",
+        "DeliveryInfomation": "sample-DeliveryInfomation",
+        "OrderContent": "sample-OrderContent",
+        "PickUpTime": null,
+        "Signature": "sample-Signature",
+        "BikePrepare": true,
+        "CarPrepare": null,
+        "Distance": 20
+      }
+    }
+  ]
+}

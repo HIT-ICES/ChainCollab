@@ -1,0 +1,315 @@
+{
+  "contract": "chaincode",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/positive/linear_contract_a/linear_contract_a.go",
+  "globals": [
+    {
+      "name": "ApprovedA",
+      "type": "bool"
+    }
+  ],
+  "handlers": [
+    {
+      "name": "StartEvent_A",
+      "language": "go",
+      "element_kind": "event",
+      "element_name": "StartEvent_A",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_A"
+      },
+      "guards": [
+        "err != nil",
+        "actionEvent.EventState != ENABLED"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "RequestA"
+        },
+        {
+          "op": "complete",
+          "target": "StartEvent_A"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "err != nil",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "actionEvent.EventState != ENABLED",
+          "actions": [],
+          "else_actions": []
+        }
+      ],
+      "body": "{\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\n\tactionEvent, err := cc.ReadEvent(ctx, instanceID, \"StartEvent_A\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif actionEvent.EventState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", actionEvent.EventID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeEventState(ctx, instance, \"StartEvent_A\", COMPLETED)\n\tstub.SetEvent(\"StartEvent_A\", []byte(\"Contract has been started successfully\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeMsgState(ctx, instance, \"RequestA\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+    },
+    {
+      "name": "RequestA_Send",
+      "language": "go",
+      "element_kind": "message",
+      "element_name": "RequestA",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "RequestA"
+      },
+      "guards": [
+        "err != nil",
+        "cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false",
+        "msg.MsgState != ENABLED"
+      ],
+      "actions": [
+        {
+          "op": "complete",
+          "target": "RequestA"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "err != nil",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "msg.MsgState != ENABLED",
+          "actions": [],
+          "else_actions": []
+        }
+      ],
+      "body": "{\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"RequestA\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)\n\tcc.ChangeMsgState(ctx, instance, \"RequestA\", COMPLETED)\n\n\tstub.SetEvent(\"RequestA\", []byte(\"Message is waiting for confirmation\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+    },
+    {
+      "name": "RequestA_Complete",
+      "language": "go",
+      "element_kind": "message",
+      "element_name": "RequestA",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "RequestA"
+      },
+      "guards": [
+        "err != nil",
+        "cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false",
+        "msg.MsgState != WAITINGFORCONFIRMATION"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "DecisionA"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "err != nil",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "msg.MsgState != WAITINGFORCONFIRMATION",
+          "actions": [],
+          "else_actions": []
+        }
+      ],
+      "body": "{\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"RequestA\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != WAITINGFORCONFIRMATION {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgState(ctx, instance, msg.MessageID, COMPLETED)\n\tstub.SetEvent(\"RequestA\", []byte(\"Message has been done\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeGtwState(ctx, instance, \"DecisionA\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+    },
+    {
+      "name": "ConfirmA_Send",
+      "language": "go",
+      "element_kind": "message",
+      "element_name": "ConfirmA",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "ConfirmA"
+      },
+      "guards": [
+        "err != nil",
+        "cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false",
+        "msg.MsgState != ENABLED"
+      ],
+      "actions": [
+        {
+          "op": "complete",
+          "target": "ConfirmA"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "err != nil",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "msg.MsgState != ENABLED",
+          "actions": [],
+          "else_actions": []
+        }
+      ],
+      "body": "{\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"ConfirmA\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)\n\tcc.ChangeMsgState(ctx, instance, \"ConfirmA\", COMPLETED)\n\n\tstub.SetEvent(\"ConfirmA\", []byte(\"Message is waiting for confirmation\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+    },
+    {
+      "name": "ConfirmA_Complete",
+      "language": "go",
+      "element_kind": "message",
+      "element_name": "ConfirmA",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "ConfirmA"
+      },
+      "guards": [
+        "err != nil",
+        "cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false",
+        "msg.MsgState != WAITINGFORCONFIRMATION"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_A"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "err != nil",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "msg.MsgState != WAITINGFORCONFIRMATION",
+          "actions": [],
+          "else_actions": []
+        }
+      ],
+      "body": "{\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"ConfirmA\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != WAITINGFORCONFIRMATION {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgState(ctx, instance, msg.MessageID, COMPLETED)\n\tstub.SetEvent(\"ConfirmA\", []byte(\"Message has been done\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeEventState(ctx, instance, \"EndEvent_A\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+    },
+    {
+      "name": "DecisionA",
+      "language": "go",
+      "element_kind": "gateway",
+      "element_name": "DecisionA",
+      "trigger": {
+        "kind": "gateway_completed",
+        "name": "DecisionA"
+      },
+      "guards": [
+        "err != nil",
+        "gtw.GatewayState != ENABLED",
+        "instance.InstanceStateMemory.ApprovedA == true"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "ConfirmA"
+        },
+        {
+          "op": "enable",
+          "target": "EndEvent_A"
+        },
+        {
+          "op": "set",
+          "var": "ApprovedA",
+          "value": "= true {"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "err != nil",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "gtw.GatewayState != ENABLED",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "instance.InstanceStateMemory.ApprovedA == true",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "ConfirmA"
+            }
+          ],
+          "else_actions": [
+            {
+              "op": "enable",
+              "target": "EndEvent_A"
+            }
+          ]
+        }
+      ],
+      "body": "{\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tgtw, err := cc.ReadGtw(ctx, instanceID, \"DecisionA\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif gtw.GatewayState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Gateway state %s is not allowed\", gtw.GatewayID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeGtwState(ctx, instance, gtw.GatewayID, COMPLETED)\n\tstub.SetEvent(\"DecisionA\", []byte(\"Gateway has been completed\"))\n\tcc.SetInstance(ctx, instance)\n\tif instance.InstanceStateMemory.ApprovedA == true {\n\t\tcc.ChangeMsgState(ctx, instance, \"ConfirmA\", ENABLED)\n\t} else {\n\t\tcc.ChangeEventState(ctx, instance, \"EndEvent_A\", ENABLED)\n\t}\n\n\tcc.SetInstance(ctx, instance)\n\n\treturn nil\n}"
+    },
+    {
+      "name": "EndEvent_A",
+      "language": "go",
+      "element_kind": "event",
+      "element_name": "EndEvent_A",
+      "trigger": {
+        "kind": "event_completed",
+        "name": "EndEvent_A"
+      },
+      "guards": [
+        "err != nil",
+        "actionEvent.EventState != ENABLED"
+      ],
+      "actions": [
+        {
+          "op": "complete",
+          "target": "EndEvent_A"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "err != nil",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "actionEvent.EventState != ENABLED",
+          "actions": [],
+          "else_actions": []
+        }
+      ],
+      "body": "{\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tactionEvent, err := cc.ReadEvent(ctx, instanceID, \"EndEvent_A\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif actionEvent.EventState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", actionEvent.EventID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeEventState(ctx, instance, \"EndEvent_A\", COMPLETED)\n\tstub.SetEvent(\"EndEvent_A\", []byte(\"Event has been completed\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+    }
+  ],
+  "elements": {
+    "messages": [
+      "ConfirmA",
+      "RequestA"
+    ],
+    "gateways": [
+      "DecisionA"
+    ],
+    "events": [
+      "EndEvent_A",
+      "StartEvent_A"
+    ],
+    "businessrules": []
+  },
+  "unsupported": [],
+  "raw_summary": {
+    "function_count": 41,
+    "struct_count": 11
+  }
+}

@@ -1,0 +1,57 @@
+assertions:
+  - id: missing_flow_target
+    title: flow target 引用不存在元素
+    category: 引用完整性
+    expected_stage: dsl_parse_or_reference_resolution
+    expected_result: EXPECTED_REJECT
+    description: start flow 或其他 flow 的 target 必须引用已定义的 FlowElement。
+
+  - id: missing_set_variable
+    title: set 语句引用不存在全局变量
+    category: 引用完整性
+    expected_stage: dsl_parse_or_reference_resolution
+    expected_result: EXPECTED_REJECT
+    description: set 的 var 必须引用已声明的 GlobalVar。
+
+  - id: invalid_gateway_type
+    title: gateway 类型非法
+    category: 语法合法性
+    expected_stage: dsl_parse
+    expected_result: EXPECTED_REJECT
+    description: gateway type 只能是 exclusive、event、parallel。
+
+  - id: missing_message_trigger
+    title: message flow 触发消息不存在
+    category: 引用完整性
+    expected_stage: dsl_parse_or_reference_resolution
+    expected_result: EXPECTED_REJECT
+    description: when message <msg> ... 中的 msg 必须已定义。
+
+  - id: missing_message_sender
+    title: message 的发送方参与者不存在
+    category: 引用完整性
+    expected_stage: dsl_parse_or_reference_resolution
+    expected_result: EXPECTED_REJECT
+    description: message from / to 必须引用已定义的 participant。
+
+  - id: missing_rule_mapping_global
+    title: businessrule 的输入映射引用不存在全局变量
+    category: 引用完整性
+    expected_stage: dsl_parse_or_reference_resolution
+    expected_result: EXPECTED_REJECT
+    description: businessrule input mapping / output mapping 中的 globalRef 必须存在。
+
+  - id: missing_parallel_source
+    title: parallel await 源元素不存在
+    category: 引用完整性
+    expected_stage: dsl_parse_or_reference_resolution
+    expected_result: EXPECTED_REJECT
+    description: parallel gateway await 后列出的 source 元素必须已定义。
+
+  - id: missing_start_event
+    title: start flow 引用不存在事件
+    category: 引用完整性
+    expected_stage: dsl_parse_or_reference_resolution
+    expected_result: EXPECTED_REJECT
+    description: start event 必须引用已声明的 event。
+

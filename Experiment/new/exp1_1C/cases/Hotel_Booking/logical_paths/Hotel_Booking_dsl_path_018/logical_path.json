@@ -1,0 +1,248 @@
+{
+  "case_name": "Hotel_Booking",
+  "path_name": "Hotel_Booking_dsl_path_018",
+  "description": "Auto materialized from BPMN/DSL consistent path by exp1_1C.",
+  "source_model": "/root/code/ChainCollab/Experiment/new/exp1_1C/cases/Hotel_Booking/translator/dsl.b2c",
+  "expect": "accepted",
+  "steps": [
+    {
+      "type": "event",
+      "element": "StartEvent_1jtgn3j",
+      "payload": {}
+    },
+    {
+      "type": "gateway",
+      "element": "ExclusiveGateway_0hs3ztq",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_045i10y",
+      "payload": {
+        "date": "sample-date",
+        "bedrooms": 1
+      },
+      "guard": "completed",
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei"
+    },
+    {
+      "type": "message",
+      "element": "Message_0r9lypd",
+      "payload": {
+        "confirm": "false"
+      },
+      "guard": "completed",
+      "outputs": {
+        "Confirm": "false"
+      },
+      "sender": "Participant_0sktaei",
+      "receiver": "Participant_1080bkg"
+    },
+    {
+      "type": "gateway",
+      "element": "ExclusiveGateway_106je4z",
+      "payload": {},
+      "guard": "Confirm == false"
+    },
+    {
+      "type": "gateway",
+      "element": "ExclusiveGateway_0hs3ztq",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_045i10y",
+      "payload": {
+        "date": "sample-date",
+        "bedrooms": 1
+      },
+      "guard": "completed",
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei"
+    },
+    {
+      "type": "message",
+      "element": "Message_0r9lypd",
+      "payload": {
+        "confirm": "true"
+      },
+      "guard": "completed",
+      "outputs": {
+        "Confirm": "true"
+      },
+      "sender": "Participant_0sktaei",
+      "receiver": "Participant_1080bkg"
+    },
+    {
+      "type": "gateway",
+      "element": "ExclusiveGateway_106je4z",
+      "payload": {},
+      "guard": "Confirm == true"
+    },
+    {
+      "type": "message",
+      "element": "Message_1em0ee4",
+      "payload": {
+        "quotation": 1
+      },
+      "guard": "completed",
+      "sender": "Participant_0sktaei",
+      "receiver": "Participant_1080bkg"
+    },
+    {
+      "type": "message",
+      "element": "Message_1nlagx2",
+      "payload": {
+        "confirmation": true
+      },
+      "guard": "completed",
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei"
+    },
+    {
+      "type": "gateway",
+      "element": "EventBasedGateway_1fxpmyn",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_104h2tt",
+      "payload": {
+        "VIPpoints": 1,
+        "VIPcardId": "sample-VIPcardId"
+      },
+      "guard": "completed",
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei"
+    },
+    {
+      "type": "businessrule",
+      "element": "Activity_0b1f7uv",
+      "payload": {},
+      "guard": "dmn:decision_table_rows",
+      "outputs": {
+        "VIPLevel": "3"
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_1jhfnrm",
+      "payload": {},
+      "guard": "VIPLevel == 3"
+    },
+    {
+      "type": "message",
+      "element": "Message_04ikf2n",
+      "payload": {
+        "discount2": 1
+      },
+      "guard": "completed",
+      "sender": "Participant_0sktaei",
+      "receiver": "Participant_1080bkg"
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_1atxr3y",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_0o8eyir",
+      "payload": {
+        "payableto": "sample-payableto"
+      },
+      "guard": "completed",
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei"
+    },
+    {
+      "type": "message",
+      "element": "Message_1ljlm4g",
+      "payload": {
+        "booking_id": "sample-booking_id"
+      },
+      "guard": "completed",
+      "sender": "Participant_0sktaei",
+      "receiver": "Participant_1080bkg"
+    },
+    {
+      "type": "message",
+      "element": "Message_0m9p3da",
+      "payload": {
+        "cancel": "true"
+      },
+      "guard": "completed",
+      "outputs": {
+        "Cancel": "true"
+      },
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei"
+    },
+    {
+      "type": "gateway",
+      "element": "ExclusiveGateway_0nzwv7v",
+      "payload": {},
+      "guard": "Cancel == true"
+    },
+    {
+      "type": "message",
+      "element": "Message_1joj7ca",
+      "payload": {
+        "ID": "sample-ID"
+      },
+      "guard": "completed",
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei"
+    },
+    {
+      "type": "message",
+      "element": "Message_1etcmvl",
+      "payload": {
+        "payableto": "sample-payableto"
+      },
+      "guard": "completed",
+      "sender": "Participant_0sktaei",
+      "receiver": "Participant_1080bkg"
+    },
+    {
+      "type": "event",
+      "element": "EndEvent_146eii4",
+      "payload": {}
+    }
+  ],
+  "generated_path": {
+    "final_enabled_elements": [],
+    "final_element_states": {
+      "Message_045i10y": "DONE",
+      "Message_04ikf2n": "DONE",
+      "Message_0m9p3da": "DONE",
+      "Message_0o8eyir": "DONE",
+      "Message_0r9lypd": "DONE",
+      "Message_0vlxzcv": "INACTIVE",
+      "Message_104h2tt": "INACTIVE",
+      "Message_1em0ee4": "DONE",
+      "Message_1etcmvl": "DONE",
+      "Message_1joj7ca": "DONE",
+      "Message_1ljlm4g": "DONE",
+      "Message_1nlagx2": "DONE",
+      "Message_1xm9dxy": "INACTIVE",
+      "ExclusiveGateway_106je4z": "DONE",
+      "ExclusiveGateway_0hs3ztq": "DONE",
+      "ExclusiveGateway_0nzwv7v": "DONE",
+      "Gateway_1jhfnrm": "DONE",
+      "Gateway_1atxr3y": "DONE",
+      "EventBasedGateway_1fxpmyn": "DONE",
+      "StartEvent_1jtgn3j": "DONE",
+      "EndEvent_0366pfz": "INACTIVE",
+      "EndEvent_08edp7f": "INACTIVE",
+      "EndEvent_146eii4": "DONE",
+      "Activity_0b1f7uv": "DONE"
+    },
+    "final_globals": {
+      "Confirm": "true",
+      "VIPLevel": "3",
+      "Cancel": "true"
+    }
+  }
+}

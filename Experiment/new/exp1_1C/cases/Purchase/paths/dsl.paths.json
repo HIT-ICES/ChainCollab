@@ -1,0 +1,1015 @@
+[
+  {
+    "path_id": "dsl_path_001",
+    "trace_signature": "0f0b74853e58a9fd",
+    "steps": [
+      {
+        "type": "event",
+        "element": "Event_0ehnwwz",
+        "payload": {}
+      },
+      {
+        "type": "message",
+        "element": "Message_0q9hvem",
+        "payload": {
+          "orderContent": "sample-orderContent",
+          "productAvalibale": "false"
+        },
+        "guard": "completed",
+        "outputs": {
+          "ProductAvalibale": "false"
+        },
+        "sender": "Participant_0jwk4tk",
+        "receiver": "Participant_0oa2za9"
+      },
+      {
+        "type": "gateway",
+        "element": "Gateway_1ltys0e",
+        "payload": {},
+        "guard": "ProductAvalibale == false"
+      },
+      {
+        "type": "message",
+        "element": "Message_14wu8ts",
+        "payload": {
+          "MessageContent": "sample-MessageContent"
+        },
+        "guard": "completed",
+        "sender": "Participant_0oa2za9",
+        "receiver": "Participant_0jwk4tk"
+      },
+      {
+        "type": "event",
+        "element": "Event_194zr5n",
+        "payload": {}
+      }
+    ],
+    "states": [
+      {
+        "enabled_before": [
+          "Event_0ehnwwz"
+        ],
+        "trigger": "Event_0ehnwwz",
+        "guard_result": true,
+        "state_diff": {
+          "Event_0ehnwwz": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": [
+          "Message_0q9hvem"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Message_0q9hvem"
+        ],
+        "trigger": "Message_0q9hvem",
+        "guard_result": true,
+        "state_diff": {
+          "Message_0q9hvem": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {
+          "ProductAvalibale": "false"
+        },
+        "enabled_after": [
+          "Gateway_1ltys0e"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Gateway_1ltys0e"
+        ],
+        "trigger": "Gateway_1ltys0e",
+        "guard_result": true,
+        "state_diff": {
+          "Gateway_1ltys0e": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": [
+          "Message_14wu8ts"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Message_14wu8ts"
+        ],
+        "trigger": "Message_14wu8ts",
+        "guard_result": true,
+        "state_diff": {
+          "Message_14wu8ts": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": [
+          "Event_194zr5n"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Event_194zr5n"
+        ],
+        "trigger": "Event_194zr5n",
+        "guard_result": true,
+        "state_diff": {
+          "Event_194zr5n": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": []
+      }
+    ],
+    "final_state": {
+      "element_states": {
+        "Message_05gz8u0": "INACTIVE",
+        "Message_08ms1jj": "INACTIVE",
+        "Message_0g7m9tf": "INACTIVE",
+        "Message_0mcktm6": "INACTIVE",
+        "Message_0q9hvem": "DONE",
+        "Message_14wu8ts": "DONE",
+        "Message_15b83n1": "INACTIVE",
+        "Message_1f0gefc": "INACTIVE",
+        "Gateway_1ltys0e": "DONE",
+        "Gateway_025uwvp": "INACTIVE",
+        "Gateway_13i0b7w": "INACTIVE",
+        "Event_0ehnwwz": "DONE",
+        "Event_0e3j88g": "INACTIVE",
+        "Event_1o9guxu": "INACTIVE",
+        "Event_194zr5n": "DONE",
+        "Activity_12arovy": "INACTIVE"
+      },
+      "globals": {
+        "ProductAvalibale": "false"
+      },
+      "enabled": []
+    }
+  },
+  {
+    "path_id": "dsl_path_002",
+    "trace_signature": "c9ef6222a3447342",
+    "steps": [
+      {
+        "type": "event",
+        "element": "Event_0ehnwwz",
+        "payload": {}
+      },
+      {
+        "type": "message",
+        "element": "Message_0q9hvem",
+        "payload": {
+          "orderContent": "sample-orderContent",
+          "productAvalibale": "true"
+        },
+        "guard": "completed",
+        "outputs": {
+          "ProductAvalibale": "true"
+        },
+        "sender": "Participant_0jwk4tk",
+        "receiver": "Participant_0oa2za9"
+      },
+      {
+        "type": "gateway",
+        "element": "Gateway_1ltys0e",
+        "payload": {},
+        "guard": "ProductAvalibale == true"
+      },
+      {
+        "type": "message",
+        "element": "Message_1f0gefc",
+        "payload": {
+          "MessageContent": "sample-MessageContent",
+          "priceOK": "false"
+        },
+        "guard": "completed",
+        "outputs": {
+          "PriceOK": "false"
+        },
+        "sender": "Participant_0oa2za9",
+        "receiver": "Participant_0jwk4tk"
+      },
+      {
+        "type": "gateway",
+        "element": "Gateway_025uwvp",
+        "payload": {},
+        "guard": "PriceOK == false"
+      },
+      {
+        "type": "message",
+        "element": "Message_05gz8u0",
+        "payload": {
+          "MessageContent": "sample-MessageContent"
+        },
+        "guard": "completed",
+        "sender": "Participant_0jwk4tk",
+        "receiver": "Participant_0oa2za9"
+      },
+      {
+        "type": "event",
+        "element": "Event_0e3j88g",
+        "payload": {}
+      }
+    ],
+    "states": [
+      {
+        "enabled_before": [
+          "Event_0ehnwwz"
+        ],
+        "trigger": "Event_0ehnwwz",
+        "guard_result": true,
+        "state_diff": {
+          "Event_0ehnwwz": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": [
+          "Message_0q9hvem"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Message_0q9hvem"
+        ],
+        "trigger": "Message_0q9hvem",
+        "guard_result": true,
+        "state_diff": {
+          "Message_0q9hvem": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {
+          "ProductAvalibale": "true"
+        },
+        "enabled_after": [
+          "Gateway_1ltys0e"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Gateway_1ltys0e"
+        ],
+        "trigger": "Gateway_1ltys0e",
+        "guard_result": true,
+        "state_diff": {
+          "Gateway_1ltys0e": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": [
+          "Message_1f0gefc"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Message_1f0gefc"
+        ],
+        "trigger": "Message_1f0gefc",
+        "guard_result": true,
+        "state_diff": {
+          "Message_1f0gefc": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {
+          "PriceOK": "false"
+        },
+        "enabled_after": [
+          "Gateway_025uwvp"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Gateway_025uwvp"
+        ],
+        "trigger": "Gateway_025uwvp",
+        "guard_result": true,
+        "state_diff": {
+          "Gateway_025uwvp": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": [
+          "Message_05gz8u0"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Message_05gz8u0"
+        ],
+        "trigger": "Message_05gz8u0",
+        "guard_result": true,
+        "state_diff": {
+          "Message_05gz8u0": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": [
+          "Event_0e3j88g"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Event_0e3j88g"
+        ],
+        "trigger": "Event_0e3j88g",
+        "guard_result": true,
+        "state_diff": {
+          "Event_0e3j88g": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": []
+      }
+    ],
+    "final_state": {
+      "element_states": {
+        "Message_05gz8u0": "DONE",
+        "Message_08ms1jj": "INACTIVE",
+        "Message_0g7m9tf": "INACTIVE",
+        "Message_0mcktm6": "INACTIVE",
+        "Message_0q9hvem": "DONE",
+        "Message_14wu8ts": "INACTIVE",
+        "Message_15b83n1": "INACTIVE",
+        "Message_1f0gefc": "DONE",
+        "Gateway_1ltys0e": "DONE",
+        "Gateway_025uwvp": "DONE",
+        "Gateway_13i0b7w": "INACTIVE",
+        "Event_0ehnwwz": "DONE",
+        "Event_0e3j88g": "DONE",
+        "Event_1o9guxu": "INACTIVE",
+        "Event_194zr5n": "INACTIVE",
+        "Activity_12arovy": "INACTIVE"
+      },
+      "globals": {
+        "ProductAvalibale": "true",
+        "PriceOK": "false"
+      },
+      "enabled": []
+    }
+  },
+  {
+    "path_id": "dsl_path_003",
+    "trace_signature": "e06e46276b401535",
+    "steps": [
+      {
+        "type": "event",
+        "element": "Event_0ehnwwz",
+        "payload": {}
+      },
+      {
+        "type": "message",
+        "element": "Message_0q9hvem",
+        "payload": {
+          "orderContent": "sample-orderContent",
+          "productAvalibale": "true"
+        },
+        "guard": "completed",
+        "outputs": {
+          "ProductAvalibale": "true"
+        },
+        "sender": "Participant_0jwk4tk",
+        "receiver": "Participant_0oa2za9"
+      },
+      {
+        "type": "gateway",
+        "element": "Gateway_1ltys0e",
+        "payload": {},
+        "guard": "ProductAvalibale == true"
+      },
+      {
+        "type": "message",
+        "element": "Message_1f0gefc",
+        "payload": {
+          "MessageContent": "sample-MessageContent",
+          "priceOK": "true"
+        },
+        "guard": "completed",
+        "outputs": {
+          "PriceOK": "true"
+        },
+        "sender": "Participant_0oa2za9",
+        "receiver": "Participant_0jwk4tk"
+      },
+      {
+        "type": "gateway",
+        "element": "Gateway_025uwvp",
+        "payload": {},
+        "guard": "PriceOK == true"
+      },
+      {
+        "type": "message",
+        "element": "Message_0mcktm6",
+        "payload": {
+          "Price": 1,
+          "Time": "sample-Time"
+        },
+        "guard": "completed",
+        "sender": "Participant_0jwk4tk",
+        "receiver": "Participant_0oa2za9"
+      },
+      {
+        "type": "businessrule",
+        "element": "Activity_12arovy",
+        "payload": {},
+        "guard": "dmn:decision_table_rows",
+        "outputs": {
+          "Discount": "false"
+        }
+      },
+      {
+        "type": "gateway",
+        "element": "Gateway_13i0b7w",
+        "payload": {},
+        "guard": "Discount == false"
+      },
+      {
+        "type": "message",
+        "element": "Message_0g7m9tf",
+        "payload": {
+          "num": "sample-num",
+          "time2": "sample-time2"
+        },
+        "guard": "completed",
+        "sender": "Participant_0oa2za9",
+        "receiver": "Participant_0jwk4tk"
+      },
+      {
+        "type": "event",
+        "element": "Event_1o9guxu",
+        "payload": {}
+      }
+    ],
+    "states": [
+      {
+        "enabled_before": [
+          "Event_0ehnwwz"
+        ],
+        "trigger": "Event_0ehnwwz",
+        "guard_result": true,
+        "state_diff": {
+          "Event_0ehnwwz": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": [
+          "Message_0q9hvem"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Message_0q9hvem"
+        ],
+        "trigger": "Message_0q9hvem",
+        "guard_result": true,
+        "state_diff": {
+          "Message_0q9hvem": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {
+          "ProductAvalibale": "true"
+        },
+        "enabled_after": [
+          "Gateway_1ltys0e"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Gateway_1ltys0e"
+        ],
+        "trigger": "Gateway_1ltys0e",
+        "guard_result": true,
+        "state_diff": {
+          "Gateway_1ltys0e": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": [
+          "Message_1f0gefc"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Message_1f0gefc"
+        ],
+        "trigger": "Message_1f0gefc",
+        "guard_result": true,
+        "state_diff": {
+          "Message_1f0gefc": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {
+          "PriceOK": "true"
+        },
+        "enabled_after": [
+          "Gateway_025uwvp"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Gateway_025uwvp"
+        ],
+        "trigger": "Gateway_025uwvp",
+        "guard_result": true,
+        "state_diff": {
+          "Gateway_025uwvp": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": [
+          "Message_0mcktm6"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Message_0mcktm6"
+        ],
+        "trigger": "Message_0mcktm6",
+        "guard_result": true,
+        "state_diff": {
+          "Message_0mcktm6": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": [
+          "Activity_12arovy"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Activity_12arovy"
+        ],
+        "trigger": "Activity_12arovy",
+        "guard_result": true,
+        "state_diff": {
+          "Activity_12arovy": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {
+          "Discount": "false"
+        },
+        "enabled_after": [
+          "Gateway_13i0b7w"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Gateway_13i0b7w"
+        ],
+        "trigger": "Gateway_13i0b7w",
+        "guard_result": true,
+        "state_diff": {
+          "Gateway_13i0b7w": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": [
+          "Message_0g7m9tf"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Message_0g7m9tf"
+        ],
+        "trigger": "Message_0g7m9tf",
+        "guard_result": true,
+        "state_diff": {
+          "Message_0g7m9tf": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": [
+          "Event_1o9guxu"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Event_1o9guxu"
+        ],
+        "trigger": "Event_1o9guxu",
+        "guard_result": true,
+        "state_diff": {
+          "Event_1o9guxu": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": []
+      }
+    ],
+    "final_state": {
+      "element_states": {
+        "Message_05gz8u0": "INACTIVE",
+        "Message_08ms1jj": "INACTIVE",
+        "Message_0g7m9tf": "DONE",
+        "Message_0mcktm6": "DONE",
+        "Message_0q9hvem": "DONE",
+        "Message_14wu8ts": "INACTIVE",
+        "Message_15b83n1": "INACTIVE",
+        "Message_1f0gefc": "DONE",
+        "Gateway_1ltys0e": "DONE",
+        "Gateway_025uwvp": "DONE",
+        "Gateway_13i0b7w": "DONE",
+        "Event_0ehnwwz": "DONE",
+        "Event_0e3j88g": "INACTIVE",
+        "Event_1o9guxu": "DONE",
+        "Event_194zr5n": "INACTIVE",
+        "Activity_12arovy": "DONE"
+      },
+      "globals": {
+        "ProductAvalibale": "true",
+        "PriceOK": "true",
+        "Discount": "false"
+      },
+      "enabled": []
+    }
+  },
+  {
+    "path_id": "dsl_path_004",
+    "trace_signature": "7d66ec8a8d67bea9",
+    "steps": [
+      {
+        "type": "event",
+        "element": "Event_0ehnwwz",
+        "payload": {}
+      },
+      {
+        "type": "message",
+        "element": "Message_0q9hvem",
+        "payload": {
+          "orderContent": "sample-orderContent",
+          "productAvalibale": "true"
+        },
+        "guard": "completed",
+        "outputs": {
+          "ProductAvalibale": "true"
+        },
+        "sender": "Participant_0jwk4tk",
+        "receiver": "Participant_0oa2za9"
+      },
+      {
+        "type": "gateway",
+        "element": "Gateway_1ltys0e",
+        "payload": {},
+        "guard": "ProductAvalibale == true"
+      },
+      {
+        "type": "message",
+        "element": "Message_1f0gefc",
+        "payload": {
+          "MessageContent": "sample-MessageContent",
+          "priceOK": "true"
+        },
+        "guard": "completed",
+        "outputs": {
+          "PriceOK": "true"
+        },
+        "sender": "Participant_0oa2za9",
+        "receiver": "Participant_0jwk4tk"
+      },
+      {
+        "type": "gateway",
+        "element": "Gateway_025uwvp",
+        "payload": {},
+        "guard": "PriceOK == true"
+      },
+      {
+        "type": "message",
+        "element": "Message_0mcktm6",
+        "payload": {
+          "Price": 1,
+          "Time": "sample-Time"
+        },
+        "guard": "completed",
+        "sender": "Participant_0jwk4tk",
+        "receiver": "Participant_0oa2za9"
+      },
+      {
+        "type": "businessrule",
+        "element": "Activity_12arovy",
+        "payload": {},
+        "guard": "dmn:decision_table_rows",
+        "outputs": {
+          "Discount": "true"
+        }
+      },
+      {
+        "type": "gateway",
+        "element": "Gateway_13i0b7w",
+        "payload": {},
+        "guard": "Discount == true"
+      },
+      {
+        "type": "message",
+        "element": "Message_15b83n1",
+        "payload": {},
+        "guard": "completed",
+        "sender": "Participant_0oa2za9",
+        "receiver": "Participant_0jwk4tk"
+      },
+      {
+        "type": "message",
+        "element": "Message_08ms1jj",
+        "payload": {
+          "sale": "sample-sale"
+        },
+        "guard": "completed",
+        "sender": "Participant_0jwk4tk",
+        "receiver": "Participant_0oa2za9"
+      },
+      {
+        "type": "message",
+        "element": "Message_0g7m9tf",
+        "payload": {
+          "num": "sample-num",
+          "time2": "sample-time2"
+        },
+        "guard": "completed",
+        "sender": "Participant_0oa2za9",
+        "receiver": "Participant_0jwk4tk"
+      },
+      {
+        "type": "event",
+        "element": "Event_1o9guxu",
+        "payload": {}
+      }
+    ],
+    "states": [
+      {
+        "enabled_before": [
+          "Event_0ehnwwz"
+        ],
+        "trigger": "Event_0ehnwwz",
+        "guard_result": true,
+        "state_diff": {
+          "Event_0ehnwwz": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": [
+          "Message_0q9hvem"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Message_0q9hvem"
+        ],
+        "trigger": "Message_0q9hvem",
+        "guard_result": true,
+        "state_diff": {
+          "Message_0q9hvem": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {
+          "ProductAvalibale": "true"
+        },
+        "enabled_after": [
+          "Gateway_1ltys0e"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Gateway_1ltys0e"
+        ],
+        "trigger": "Gateway_1ltys0e",
+        "guard_result": true,
+        "state_diff": {
+          "Gateway_1ltys0e": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": [
+          "Message_1f0gefc"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Message_1f0gefc"
+        ],
+        "trigger": "Message_1f0gefc",
+        "guard_result": true,
+        "state_diff": {
+          "Message_1f0gefc": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {
+          "PriceOK": "true"
+        },
+        "enabled_after": [
+          "Gateway_025uwvp"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Gateway_025uwvp"
+        ],
+        "trigger": "Gateway_025uwvp",
+        "guard_result": true,
+        "state_diff": {
+          "Gateway_025uwvp": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": [
+          "Message_0mcktm6"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Message_0mcktm6"
+        ],
+        "trigger": "Message_0mcktm6",
+        "guard_result": true,
+        "state_diff": {
+          "Message_0mcktm6": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": [
+          "Activity_12arovy"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Activity_12arovy"
+        ],
+        "trigger": "Activity_12arovy",
+        "guard_result": true,
+        "state_diff": {
+          "Activity_12arovy": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {
+          "Discount": "true"
+        },
+        "enabled_after": [
+          "Gateway_13i0b7w"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Gateway_13i0b7w"
+        ],
+        "trigger": "Gateway_13i0b7w",
+        "guard_result": true,
+        "state_diff": {
+          "Gateway_13i0b7w": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": [
+          "Message_15b83n1"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Message_15b83n1"
+        ],
+        "trigger": "Message_15b83n1",
+        "guard_result": true,
+        "state_diff": {
+          "Message_15b83n1": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": [
+          "Message_08ms1jj"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Message_08ms1jj"
+        ],
+        "trigger": "Message_08ms1jj",
+        "guard_result": true,
+        "state_diff": {
+          "Message_08ms1jj": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": [
+          "Message_0g7m9tf"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Message_0g7m9tf"
+        ],
+        "trigger": "Message_0g7m9tf",
+        "guard_result": true,
+        "state_diff": {
+          "Message_0g7m9tf": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": [
+          "Event_1o9guxu"
+        ]
+      },
+      {
+        "enabled_before": [
+          "Event_1o9guxu"
+        ],
+        "trigger": "Event_1o9guxu",
+        "guard_result": true,
+        "state_diff": {
+          "Event_1o9guxu": [
+            "READY",
+            "DONE"
+          ]
+        },
+        "global_diff": {},
+        "enabled_after": []
+      }
+    ],
+    "final_state": {
+      "element_states": {
+        "Message_05gz8u0": "INACTIVE",
+        "Message_08ms1jj": "DONE",
+        "Message_0g7m9tf": "DONE",
+        "Message_0mcktm6": "DONE",
+        "Message_0q9hvem": "DONE",
+        "Message_14wu8ts": "INACTIVE",
+        "Message_15b83n1": "DONE",
+        "Message_1f0gefc": "DONE",
+        "Gateway_1ltys0e": "DONE",
+        "Gateway_025uwvp": "DONE",
+        "Gateway_13i0b7w": "DONE",
+        "Event_0ehnwwz": "DONE",
+        "Event_0e3j88g": "INACTIVE",
+        "Event_1o9guxu": "DONE",
+        "Event_194zr5n": "INACTIVE",
+        "Activity_12arovy": "DONE"
+      },
+      "globals": {
+        "ProductAvalibale": "true",
+        "PriceOK": "true",
+        "Discount": "true"
+      },
+      "enabled": []
+    }
+  }
+]

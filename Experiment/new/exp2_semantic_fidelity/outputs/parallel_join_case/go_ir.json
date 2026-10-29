@@ -1,0 +1,413 @@
+{
+  "contract": "chaincode",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/parallel_join_case/parallel_join_case.go",
+  "globals": [
+    {
+      "name": "Ready",
+      "type": "bool"
+    }
+  ],
+  "handlers": [
+    {
+      "name": "StartEvent_1",
+      "language": "go",
+      "element_kind": "event",
+      "element_name": "StartEvent_1",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_1"
+      },
+      "guards": [
+        "err != nil",
+        "actionEvent.EventState != ENABLED"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "ParallelGateway_1"
+        },
+        {
+          "op": "complete",
+          "target": "StartEvent_1"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "err != nil",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "actionEvent.EventState != ENABLED",
+          "actions": [],
+          "else_actions": []
+        }
+      ],
+      "body": "{\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\n\tactionEvent, err := cc.ReadEvent(ctx, instanceID, \"StartEvent_1\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif actionEvent.EventState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", actionEvent.EventID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeEventState(ctx, instance, \"StartEvent_1\", COMPLETED)\n\tstub.SetEvent(\"StartEvent_1\", []byte(\"Contract has been started successfully\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeGtwState(ctx, instance, \"ParallelGateway_1\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+    },
+    {
+      "name": "MsgA_Send",
+      "language": "go",
+      "element_kind": "message",
+      "element_name": "MsgA",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "MsgA"
+      },
+      "guards": [
+        "err != nil",
+        "cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false",
+        "msg.MsgState != ENABLED"
+      ],
+      "actions": [
+        {
+          "op": "complete",
+          "target": "MsgA"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "err != nil",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "msg.MsgState != ENABLED",
+          "actions": [],
+          "else_actions": []
+        }
+      ],
+      "body": "{\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"MsgA\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)\n\tcc.ChangeMsgState(ctx, instance, \"MsgA\", COMPLETED)\n\n\tstub.SetEvent(\"MsgA\", []byte(\"Message is waiting for confirmation\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+    },
+    {
+      "name": "MsgA_Complete",
+      "language": "go",
+      "element_kind": "message",
+      "element_name": "MsgA",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "MsgA"
+      },
+      "guards": [
+        "err != nil",
+        "cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false",
+        "msg.MsgState != WAITINGFORCONFIRMATION"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "ParallelGateway_2"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "err != nil",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "msg.MsgState != WAITINGFORCONFIRMATION",
+          "actions": [],
+          "else_actions": []
+        }
+      ],
+      "body": "{\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"MsgA\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != WAITINGFORCONFIRMATION {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgState(ctx, instance, msg.MessageID, COMPLETED)\n\tstub.SetEvent(\"MsgA\", []byte(\"Message has been done\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeGtwState(ctx, instance, \"ParallelGateway_2\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+    },
+    {
+      "name": "MsgB_Send",
+      "language": "go",
+      "element_kind": "message",
+      "element_name": "MsgB",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "MsgB"
+      },
+      "guards": [
+        "err != nil",
+        "cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false",
+        "msg.MsgState != ENABLED"
+      ],
+      "actions": [
+        {
+          "op": "complete",
+          "target": "MsgB"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "err != nil",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "msg.MsgState != ENABLED",
+          "actions": [],
+          "else_actions": []
+        }
+      ],
+      "body": "{\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"MsgB\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)\n\tcc.ChangeMsgState(ctx, instance, \"MsgB\", COMPLETED)\n\n\tstub.SetEvent(\"MsgB\", []byte(\"Message is waiting for confirmation\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+    },
+    {
+      "name": "MsgB_Complete",
+      "language": "go",
+      "element_kind": "message",
+      "element_name": "MsgB",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "MsgB"
+      },
+      "guards": [
+        "err != nil",
+        "cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false",
+        "msg.MsgState != WAITINGFORCONFIRMATION"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "ParallelGateway_2"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "err != nil",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "msg.MsgState != WAITINGFORCONFIRMATION",
+          "actions": [],
+          "else_actions": []
+        }
+      ],
+      "body": "{\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"MsgB\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != WAITINGFORCONFIRMATION {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgState(ctx, instance, msg.MessageID, COMPLETED)\n\tstub.SetEvent(\"MsgB\", []byte(\"Message has been done\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeGtwState(ctx, instance, \"ParallelGateway_2\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+    },
+    {
+      "name": "MsgC_Send",
+      "language": "go",
+      "element_kind": "message",
+      "element_name": "MsgC",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "MsgC"
+      },
+      "guards": [
+        "err != nil",
+        "cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false",
+        "msg.MsgState != ENABLED"
+      ],
+      "actions": [
+        {
+          "op": "complete",
+          "target": "MsgC"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "err != nil",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "msg.MsgState != ENABLED",
+          "actions": [],
+          "else_actions": []
+        }
+      ],
+      "body": "{\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"MsgC\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)\n\tcc.ChangeMsgState(ctx, instance, \"MsgC\", COMPLETED)\n\n\tstub.SetEvent(\"MsgC\", []byte(\"Message is waiting for confirmation\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+    },
+    {
+      "name": "MsgC_Complete",
+      "language": "go",
+      "element_kind": "message",
+      "element_name": "MsgC",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "MsgC"
+      },
+      "guards": [
+        "err != nil",
+        "cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false",
+        "msg.MsgState != WAITINGFORCONFIRMATION"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_1"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "err != nil",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "msg.MsgState != WAITINGFORCONFIRMATION",
+          "actions": [],
+          "else_actions": []
+        }
+      ],
+      "body": "{\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"MsgC\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != WAITINGFORCONFIRMATION {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgState(ctx, instance, msg.MessageID, COMPLETED)\n\tstub.SetEvent(\"MsgC\", []byte(\"Message has been done\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeEventState(ctx, instance, \"EndEvent_1\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+    },
+    {
+      "name": "ParallelGateway_1",
+      "language": "go",
+      "element_kind": "gateway",
+      "element_name": "ParallelGateway_1",
+      "trigger": {
+        "kind": "gateway_completed",
+        "name": "ParallelGateway_1"
+      },
+      "guards": [
+        "err != nil",
+        "gtw.GatewayState != ENABLED"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "MsgA"
+        },
+        {
+          "op": "enable",
+          "target": "MsgB"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "err != nil",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "gtw.GatewayState != ENABLED",
+          "actions": [],
+          "else_actions": []
+        }
+      ],
+      "body": "{\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tgtw, err := cc.ReadGtw(ctx, instanceID, \"ParallelGateway_1\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif gtw.GatewayState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Gateway state %s is not allowed\", gtw.GatewayID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeGtwState(ctx, instance, gtw.GatewayID, COMPLETED)\n\tstub.SetEvent(\"ParallelGateway_1\", []byte(\"Gateway has been completed\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeMsgState(ctx, instance, \"MsgA\", ENABLED)\n\tcc.ChangeMsgState(ctx, instance, \"MsgB\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\n\treturn nil\n}"
+    },
+    {
+      "name": "ParallelGateway_2",
+      "language": "go",
+      "element_kind": "gateway",
+      "element_name": "ParallelGateway_2",
+      "trigger": {
+        "kind": "gateway_completed",
+        "name": "ParallelGateway_2"
+      },
+      "guards": [
+        "err != nil",
+        "gtw.GatewayState != ENABLED",
+        "!(instance.InstanceMessages[\"MsgA\"].MsgState == COMPLETED && instance.InstanceMessages[\"MsgB\"].MsgState == COMPLETED)"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "MsgC"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "err != nil",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "gtw.GatewayState != ENABLED",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "!(instance.InstanceMessages[\"MsgA\"].MsgState == COMPLETED && instance.InstanceMessages[\"MsgB\"].MsgState == COMPLETED)",
+          "actions": [],
+          "else_actions": []
+        }
+      ],
+      "body": "{\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tgtw, err := cc.ReadGtw(ctx, instanceID, \"ParallelGateway_2\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif gtw.GatewayState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Gateway state %s is not allowed\", gtw.GatewayID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif !(instance.InstanceMessages[\"MsgA\"].MsgState == COMPLETED && instance.InstanceMessages[\"MsgB\"].MsgState == COMPLETED) {\n\t\treturn fmt.Errorf(\"Parallel gateway prerequisite not met\")\n\t}\n\n\tcc.ChangeGtwState(ctx, instance, gtw.GatewayID, COMPLETED)\n\tstub.SetEvent(\"ParallelGateway_2\", []byte(\"Gateway has been completed\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeMsgState(ctx, instance, \"MsgC\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\n\treturn nil\n}"
+    },
+    {
+      "name": "EndEvent_1",
+      "language": "go",
+      "element_kind": "event",
+      "element_name": "EndEvent_1",
+      "trigger": {
+        "kind": "event_completed",
+        "name": "EndEvent_1"
+      },
+      "guards": [
+        "err != nil",
+        "actionEvent.EventState != ENABLED"
+      ],
+      "actions": [
+        {
+          "op": "complete",
+          "target": "EndEvent_1"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "err != nil",
+          "actions": [],
+          "else_actions": []
+        },
+        {
+          "condition": "actionEvent.EventState != ENABLED",
+          "actions": [],
+          "else_actions": []
+        }
+      ],
+      "body": "{\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tactionEvent, err := cc.ReadEvent(ctx, instanceID, \"EndEvent_1\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif actionEvent.EventState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", actionEvent.EventID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeEventState(ctx, instance, \"EndEvent_1\", COMPLETED)\n\tstub.SetEvent(\"EndEvent_1\", []byte(\"Event has been completed\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}"
+    }
+  ],
+  "elements": {
+    "messages": [
+      "MsgA",
+      "MsgB",
+      "MsgC"
+    ],
+    "gateways": [
+      "ParallelGateway_1",
+      "ParallelGateway_2"
+    ],
+    "events": [
+      "EndEvent_1",
+      "StartEvent_1"
+    ],
+    "businessrules": []
+  },
+  "unsupported": [],
+  "raw_summary": {
+    "function_count": 44,
+    "struct_count": 11
+  }
+}

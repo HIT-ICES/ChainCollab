@@ -1,0 +1,197 @@
+{
+  "contract": "BusinessRuleContractE",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/positive/business_rule_contract_e/business_rule_contract_e.b2c",
+  "participants": [
+    {
+      "name": "TeamE",
+      "msp": "TeamEMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "attributes": {
+        "role": "team"
+      }
+    },
+    {
+      "name": "LeadE",
+      "msp": "LeadEMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "attributes": {
+        "role": "lead"
+      }
+    }
+  ],
+  "globals": [
+    {
+      "name": "MetricE",
+      "type": "int",
+      "initial_value": null
+    },
+    {
+      "name": "OkE",
+      "type": "bool",
+      "initial_value": null
+    }
+  ],
+  "messages": [
+    {
+      "name": "InputE",
+      "from": "TeamE",
+      "to": "LeadE",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "OutputE",
+      "from": "LeadE",
+      "to": "TeamE",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "StartEvent_BRE",
+      "type": "start",
+      "initial_state": "READY"
+    },
+    {
+      "name": "EndEvent_BRE",
+      "type": "end",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "GateE2",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [
+    {
+      "name": "RuleE",
+      "referenced_dmn": "rule_e.dmn",
+      "decision": "DecisionE",
+      "input_mapping": [
+        {
+          "param": "metric",
+          "global": "MetricE"
+        }
+      ],
+      "output_mapping": [
+        {
+          "param": "ok",
+          "global": "OkE"
+        }
+      ],
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "oracletasks": [],
+  "flows": [
+    {
+      "id": "flow_001",
+      "source_kind": "StartFlow",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_BRE"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "InputE"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_002",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "InputE"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "RuleE"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_003",
+      "source_kind": "RuleFlow",
+      "trigger": {
+        "kind": "rule_done",
+        "name": "RuleE"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "GateE2"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_004",
+      "source_kind": "GatewayFlow",
+      "trigger": {
+        "kind": "gateway_completed",
+        "name": "GateE2"
+      },
+      "actions": [],
+      "branches": [
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "OutputE"
+            }
+          ],
+          "condition": {
+            "kind": "compare",
+            "var": "OkE",
+            "relation": "==",
+            "value": ""
+          }
+        },
+        {
+          "kind": "GatewayElseBranch",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "EndEvent_BRE"
+            }
+          ],
+          "condition": {
+            "kind": "else"
+          }
+        }
+      ]
+    },
+    {
+      "id": "flow_005",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "OutputE"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_BRE"
+        }
+      ],
+      "branches": []
+    }
+  ],
+  "unsupported": []
+}

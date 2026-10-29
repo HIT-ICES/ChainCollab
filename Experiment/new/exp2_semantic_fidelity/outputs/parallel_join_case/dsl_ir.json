@@ -1,0 +1,196 @@
+{
+  "contract": "ParallelJoinCase",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/parallel_join_case/parallel_join_case.b2c",
+  "participants": [
+    {
+      "name": "A",
+      "msp": "AMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "attributes": {
+        "role": "a"
+      }
+    },
+    {
+      "name": "B",
+      "msp": "BMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "attributes": {
+        "role": "b"
+      }
+    },
+    {
+      "name": "C",
+      "msp": "CMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "attributes": {
+        "role": "c"
+      }
+    }
+  ],
+  "globals": [
+    {
+      "name": "Ready",
+      "type": "bool",
+      "initial_value": null
+    }
+  ],
+  "messages": [
+    {
+      "name": "MsgA",
+      "from": "A",
+      "to": "B",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "MsgB",
+      "from": "B",
+      "to": "C",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "MsgC",
+      "from": "C",
+      "to": "A",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "StartEvent_1",
+      "type": "start",
+      "initial_state": "READY"
+    },
+    {
+      "name": "EndEvent_1",
+      "type": "end",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "ParallelGateway_1",
+      "type": "parallel",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "ParallelGateway_2",
+      "type": "parallel",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [],
+  "oracletasks": [],
+  "flows": [
+    {
+      "id": "flow_001",
+      "source_kind": "StartFlow",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_1"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "ParallelGateway_1"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_002",
+      "source_kind": "GatewayFlow",
+      "trigger": {
+        "kind": "gateway_completed",
+        "name": "ParallelGateway_1"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "MsgA"
+        },
+        {
+          "op": "enable",
+          "target": "MsgB"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_003",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "MsgA"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "ParallelGateway_2"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_004",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "MsgB"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "ParallelGateway_2"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_005",
+      "source_kind": "ParallelJoin",
+      "trigger": {
+        "kind": "parallel_join",
+        "name": "ParallelGateway_2",
+        "sources": [
+          "MsgA",
+          "MsgB"
+        ]
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "MsgC"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_006",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "MsgC"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_1"
+        }
+      ],
+      "branches": []
+    }
+  ],
+  "unsupported": []
+}

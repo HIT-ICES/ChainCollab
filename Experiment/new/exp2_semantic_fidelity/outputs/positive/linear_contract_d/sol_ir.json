@@ -1,0 +1,164 @@
+{
+  "contract": "IOracle",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/positive/linear_contract_d/linear_contract_d.sol",
+  "globals": [
+    {
+      "name": "DeliverD",
+      "type": "bool"
+    }
+  ],
+  "handlers": [
+    {
+      "name": "StartEvent_D",
+      "language": "solidity",
+      "element_kind": "event",
+      "element_name": "StartEvent_D",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_D"
+      },
+      "guards": [
+        "require(ev.exists, \"event not set\")",
+        "require(ev.state == ElementState.ENABLED, \"event state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "SubmitD"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.StartEvent_D];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.StartEvent_D);\n        inst.messages[MessageKey.SubmitD].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "SubmitD_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "SubmitD",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "SubmitD"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "GateD"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.SubmitD];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.SubmitD, fireflyTranId);\n        inst.gateways[GatewayKey.GateD].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "ReturnD_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "ReturnD",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "ReturnD"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_D"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.ReturnD];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.ReturnD, fireflyTranId);\n        inst.events[EventKey.EndEvent_D].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "GateD",
+      "language": "solidity",
+      "element_kind": "gateway",
+      "element_name": "GateD",
+      "trigger": {
+        "kind": "gateway_completed",
+        "name": "GateD"
+      },
+      "guards": [
+        "inst.stateMemory.DeliverD == true",
+        "require(g.exists, \"gateway not set\")",
+        "require(g.state == ElementState.ENABLED, \"gateway state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "ReturnD"
+        },
+        {
+          "op": "enable",
+          "target": "EndEvent_D"
+        },
+        {
+          "op": "set",
+          "var": "DeliverD",
+          "value": "= true) {\n            inst.messages[MessageKey.ReturnD].state = ElementState.ENABLED"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "inst.stateMemory.DeliverD == true",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "ReturnD"
+            }
+          ],
+          "else_actions": [
+            {
+              "op": "enable",
+              "target": "EndEvent_D"
+            }
+          ]
+        }
+      ],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Gateway storage g = inst.gateways[GatewayKey.GateD];\n        require(g.exists, \"gateway not set\");\n        require(g.state == ElementState.ENABLED, \"gateway state not allowed\");\n\n        g.state = ElementState.COMPLETED;\n        emit GatewayDone(instanceId, GatewayKey.GateD);\n        if (inst.stateMemory.DeliverD == true) {\n            inst.messages[MessageKey.ReturnD].state = ElementState.ENABLED;\n        }\n        else {\n            inst.events[EventKey.EndEvent_D].state = ElementState.ENABLED;\n        }\n\n    }"
+    },
+    {
+      "name": "EndEvent_D",
+      "language": "solidity",
+      "element_kind": "event",
+      "element_name": "EndEvent_D",
+      "trigger": {
+        "kind": "event_completed",
+        "name": "EndEvent_D"
+      },
+      "guards": [
+        "require(ev.exists, \"event not set\")",
+        "require(ev.state == ElementState.ENABLED, \"event state not allowed\")"
+      ],
+      "actions": [],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.EndEvent_D];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.EndEvent_D);\n\n    }"
+    }
+  ],
+  "elements": {
+    "messages": [
+      "ReturnD",
+      "SubmitD"
+    ],
+    "gateways": [
+      "GateD"
+    ],
+    "events": [
+      "EndEvent_D",
+      "StartEvent_D"
+    ],
+    "businessrules": [
+      "PlaceholderBusinessRule"
+    ]
+  },
+  "unsupported": [],
+  "raw_summary": {
+    "function_count": 38,
+    "event_count": 5
+  }
+}

@@ -1,0 +1,681 @@
+[
+  {
+    "id": "Hotel_Booking",
+    "type": "dsl:contract",
+    "name": "Hotel_Booking",
+    "attrs": {}
+  },
+  {
+    "id": "Participant_1080bkg__attr__role",
+    "type": "dsl:attribute",
+    "name": "role",
+    "attrs": {
+      "key": "role",
+      "value": "Client"
+    }
+  },
+  {
+    "id": "Participant_1080bkg",
+    "type": "dsl:participant",
+    "name": "Participant_1080bkg",
+    "attrs": {
+      "msp": "ClientMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": {
+        "role": "Client"
+      }
+    }
+  },
+  {
+    "id": "Participant_0sktaei__attr__role",
+    "type": "dsl:attribute",
+    "name": "role",
+    "attrs": {
+      "key": "role",
+      "value": "Hotel"
+    }
+  },
+  {
+    "id": "Participant_0sktaei",
+    "type": "dsl:participant",
+    "name": "Participant_0sktaei",
+    "attrs": {
+      "msp": "HotelMSP",
+      "x509": "",
+      "isMulti": false,
+      "multiMin": 0,
+      "multiMax": 0,
+      "attributes": {
+        "role": "Hotel"
+      }
+    }
+  },
+  {
+    "id": "ID",
+    "type": "dsl:global",
+    "name": "ID",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "VIPLevel",
+    "type": "dsl:global",
+    "name": "VIPLevel",
+    "attrs": {
+      "type": "int"
+    }
+  },
+  {
+    "id": "VIPcardId",
+    "type": "dsl:global",
+    "name": "VIPcardId",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "VIPpoints",
+    "type": "dsl:global",
+    "name": "VIPpoints",
+    "attrs": {
+      "type": "int"
+    }
+  },
+  {
+    "id": "Bedrooms",
+    "type": "dsl:global",
+    "name": "Bedrooms",
+    "attrs": {
+      "type": "int"
+    }
+  },
+  {
+    "id": "Booking_id",
+    "type": "dsl:global",
+    "name": "Booking_id",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "Cancel",
+    "type": "dsl:global",
+    "name": "Cancel",
+    "attrs": {
+      "type": "bool"
+    }
+  },
+  {
+    "id": "Confirm",
+    "type": "dsl:global",
+    "name": "Confirm",
+    "attrs": {
+      "type": "bool"
+    }
+  },
+  {
+    "id": "Confirmation",
+    "type": "dsl:global",
+    "name": "Confirmation",
+    "attrs": {
+      "type": "bool"
+    }
+  },
+  {
+    "id": "Date",
+    "type": "dsl:global",
+    "name": "Date",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "Discount1",
+    "type": "dsl:global",
+    "name": "Discount1",
+    "attrs": {
+      "type": "int"
+    }
+  },
+  {
+    "id": "Discount2",
+    "type": "dsl:global",
+    "name": "Discount2",
+    "attrs": {
+      "type": "int"
+    }
+  },
+  {
+    "id": "Motivation",
+    "type": "dsl:global",
+    "name": "Motivation",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "Payableto",
+    "type": "dsl:global",
+    "name": "Payableto",
+    "attrs": {
+      "type": "string"
+    }
+  },
+  {
+    "id": "Quotation",
+    "type": "dsl:global",
+    "name": "Quotation",
+    "attrs": {
+      "type": "int"
+    }
+  },
+  {
+    "id": "Message_045i10y",
+    "type": "dsl:message",
+    "name": "Message_045i10y",
+    "attrs": {
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"date\":{\"type\":\"string\",\"description\":\"\"},\"bedrooms\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"date\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_04ikf2n",
+    "type": "dsl:message",
+    "name": "Message_04ikf2n",
+    "attrs": {
+      "sender": "Participant_0sktaei",
+      "receiver": "Participant_1080bkg",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"discount2\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0m9p3da",
+    "type": "dsl:message",
+    "name": "Message_0m9p3da",
+    "attrs": {
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"cancel\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"cancel\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0o8eyir",
+    "type": "dsl:message",
+    "name": "Message_0o8eyir",
+    "attrs": {
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"payableto\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"payableto\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0r9lypd",
+    "type": "dsl:message",
+    "name": "Message_0r9lypd",
+    "attrs": {
+      "sender": "Participant_0sktaei",
+      "receiver": "Participant_1080bkg",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"confirm\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"confirm\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0vlxzcv",
+    "type": "dsl:message",
+    "name": "Message_0vlxzcv",
+    "attrs": {
+      "sender": "Participant_0sktaei",
+      "receiver": "Participant_1080bkg",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"discount1\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"discount1\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_104h2tt",
+    "type": "dsl:message",
+    "name": "Message_104h2tt",
+    "attrs": {
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"VIPpoints\":{\"type\":\"number\",\"description\":\"\"},\"VIPcardId\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"VIPpoints\",\"VIPcardId\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1em0ee4",
+    "type": "dsl:message",
+    "name": "Message_1em0ee4",
+    "attrs": {
+      "sender": "Participant_0sktaei",
+      "receiver": "Participant_1080bkg",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"quotation\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"quotation\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1etcmvl",
+    "type": "dsl:message",
+    "name": "Message_1etcmvl",
+    "attrs": {
+      "sender": "Participant_0sktaei",
+      "receiver": "Participant_1080bkg",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"payableto\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"payableto\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1joj7ca",
+    "type": "dsl:message",
+    "name": "Message_1joj7ca",
+    "attrs": {
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"ID\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"ID\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1ljlm4g",
+    "type": "dsl:message",
+    "name": "Message_1ljlm4g",
+    "attrs": {
+      "sender": "Participant_0sktaei",
+      "receiver": "Participant_1080bkg",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"booking_id\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"booking_id\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1nlagx2",
+    "type": "dsl:message",
+    "name": "Message_1nlagx2",
+    "attrs": {
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"confirmation\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"confirmation\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1xm9dxy",
+    "type": "dsl:message",
+    "name": "Message_1xm9dxy",
+    "attrs": {
+      "sender": "Participant_1080bkg",
+      "receiver": "Participant_0sktaei",
+      "initialState": "INACTIVE",
+      "schema": "{\"properties\":{\"motivation\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"motivation\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "ExclusiveGateway_106je4z",
+    "type": "dsl:gateway",
+    "name": "ExclusiveGateway_106je4z",
+    "attrs": {
+      "gatewayType": "exclusive",
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "ExclusiveGateway_0hs3ztq",
+    "type": "dsl:gateway",
+    "name": "ExclusiveGateway_0hs3ztq",
+    "attrs": {
+      "gatewayType": "exclusive",
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "ExclusiveGateway_0nzwv7v",
+    "type": "dsl:gateway",
+    "name": "ExclusiveGateway_0nzwv7v",
+    "attrs": {
+      "gatewayType": "exclusive",
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Gateway_1jhfnrm",
+    "type": "dsl:gateway",
+    "name": "Gateway_1jhfnrm",
+    "attrs": {
+      "gatewayType": "exclusive",
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Gateway_1atxr3y",
+    "type": "dsl:gateway",
+    "name": "Gateway_1atxr3y",
+    "attrs": {
+      "gatewayType": "exclusive",
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "EventBasedGateway_1fxpmyn",
+    "type": "dsl:gateway",
+    "name": "EventBasedGateway_1fxpmyn",
+    "attrs": {
+      "gatewayType": "event",
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "StartEvent_1jtgn3j",
+    "type": "dsl:event",
+    "name": "StartEvent_1jtgn3j",
+    "attrs": {
+      "initialState": "READY"
+    }
+  },
+  {
+    "id": "EndEvent_0366pfz",
+    "type": "dsl:event",
+    "name": "EndEvent_0366pfz",
+    "attrs": {
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "EndEvent_08edp7f",
+    "type": "dsl:event",
+    "name": "EndEvent_08edp7f",
+    "attrs": {
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "EndEvent_146eii4",
+    "type": "dsl:event",
+    "name": "EndEvent_146eii4",
+    "attrs": {
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Activity_0b1f7uv",
+    "type": "dsl:businessrule",
+    "name": "Activity_0b1f7uv",
+    "attrs": {
+      "dmnResource": "Activity_0b1f7uv.dmn",
+      "decisionID": "Activity_0b1f7uv_DecisionID",
+      "initialState": "INACTIVE"
+    }
+  },
+  {
+    "id": "Activity_0b1f7uv__input__VIPpoints",
+    "type": "dsl:paramMapping",
+    "name": "VIPpoints",
+    "attrs": {
+      "dmnParam": "VIPpoints",
+      "globalRef": "VIPpoints",
+      "direction": "input"
+    }
+  },
+  {
+    "id": "Activity_0b1f7uv__output__VIPLevel",
+    "type": "dsl:paramMapping",
+    "name": "VIPLevel",
+    "attrs": {
+      "dmnParam": "VIPLevel",
+      "globalRef": "VIPLevel",
+      "direction": "output"
+    }
+  },
+  {
+    "id": "start__StartEvent_1jtgn3j__ExclusiveGateway_0hs3ztq",
+    "type": "dsl:startFlow",
+    "name": "start__StartEvent_1jtgn3j__ExclusiveGateway_0hs3ztq",
+    "attrs": {
+      "start": "StartEvent_1jtgn3j",
+      "target": "ExclusiveGateway_0hs3ztq"
+    }
+  },
+  {
+    "id": "messageFlow__Message_045i10y__83",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_045i10y__83",
+    "attrs": {
+      "message": "Message_045i10y",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_0r9lypd__167",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_0r9lypd__167",
+    "attrs": {
+      "message": "Message_0r9lypd",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_1em0ee4__260",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_1em0ee4__260",
+    "attrs": {
+      "message": "Message_1em0ee4",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_1nlagx2__344",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_1nlagx2__344",
+    "attrs": {
+      "message": "Message_1nlagx2",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_0o8eyir__438",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_0o8eyir__438",
+    "attrs": {
+      "message": "Message_0o8eyir",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_1xm9dxy__572",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_1xm9dxy__572",
+    "attrs": {
+      "message": "Message_1xm9dxy",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_1ljlm4g__707",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_1ljlm4g__707",
+    "attrs": {
+      "message": "Message_1ljlm4g",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_0m9p3da__791",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_0m9p3da__791",
+    "attrs": {
+      "message": "Message_0m9p3da",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_1joj7ca__884",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_1joj7ca__884",
+    "attrs": {
+      "message": "Message_1joj7ca",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_1etcmvl__968",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_1etcmvl__968",
+    "attrs": {
+      "message": "Message_1etcmvl",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_104h2tt__1053",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_104h2tt__1053",
+    "attrs": {
+      "message": "Message_104h2tt",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_0vlxzcv__1188",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_0vlxzcv__1188",
+    "attrs": {
+      "message": "Message_0vlxzcv",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "messageFlow__Message_04ikf2n__1272",
+    "type": "dsl:messageFlow",
+    "name": "messageFlow__Message_04ikf2n__1272",
+    "attrs": {
+      "message": "Message_04ikf2n",
+      "msgCond": "completed"
+    }
+  },
+  {
+    "id": "ruleFlow__Activity_0b1f7uv__2357",
+    "type": "dsl:ruleFlow",
+    "name": "ruleFlow__Activity_0b1f7uv__2357",
+    "attrs": {
+      "businessrule": "Activity_0b1f7uv",
+      "ruleCond": "done"
+    }
+  },
+  {
+    "id": "gatewayFlow__ExclusiveGateway_0hs3ztq__1595",
+    "type": "dsl:gatewayFlow",
+    "name": "gatewayFlow__ExclusiveGateway_0hs3ztq__1595",
+    "attrs": {
+      "gateway": "ExclusiveGateway_0hs3ztq",
+      "condition": "completed"
+    }
+  },
+  {
+    "id": "gatewayFlow__Gateway_1atxr3y__2130",
+    "type": "dsl:gatewayFlow",
+    "name": "gatewayFlow__Gateway_1atxr3y__2130",
+    "attrs": {
+      "gateway": "Gateway_1atxr3y",
+      "condition": "completed"
+    }
+  },
+  {
+    "id": "gatewayFlow__EventBasedGateway_1fxpmyn__2214",
+    "type": "dsl:gatewayFlow",
+    "name": "gatewayFlow__EventBasedGateway_1fxpmyn__2214",
+    "attrs": {
+      "gateway": "EventBasedGateway_1fxpmyn",
+      "condition": "completed"
+    }
+  },
+  {
+    "id": "gatewayChoose__ExclusiveGateway_106je4z__1357",
+    "type": "dsl:gatewayFlow",
+    "name": "gatewayChoose__ExclusiveGateway_106je4z__1357",
+    "attrs": {
+      "gateway": "ExclusiveGateway_106je4z",
+      "condition": "completed",
+      "mode": "choose"
+    }
+  },
+  {
+    "id": "gatewayChoose__ExclusiveGateway_106je4z__1357__branch__0",
+    "type": "dsl:gatewayCompareBranch",
+    "name": "gatewayChoose__ExclusiveGateway_106je4z__1357__branch__0",
+    "attrs": {
+      "branch_kind": "if",
+      "condition": "Confirm == true"
+    }
+  },
+  {
+    "id": "gatewayChoose__ExclusiveGateway_106je4z__1357__branch__1",
+    "type": "dsl:gatewayCompareBranch",
+    "name": "gatewayChoose__ExclusiveGateway_106je4z__1357__branch__1",
+    "attrs": {
+      "branch_kind": "if",
+      "condition": "Confirm == false"
+    }
+  },
+  {
+    "id": "gatewayChoose__ExclusiveGateway_0nzwv7v__1688",
+    "type": "dsl:gatewayFlow",
+    "name": "gatewayChoose__ExclusiveGateway_0nzwv7v__1688",
+    "attrs": {
+      "gateway": "ExclusiveGateway_0nzwv7v",
+      "condition": "completed",
+      "mode": "choose"
+    }
+  },
+  {
+    "id": "gatewayChoose__ExclusiveGateway_0nzwv7v__1688__branch__0",
+    "type": "dsl:gatewayCompareBranch",
+    "name": "gatewayChoose__ExclusiveGateway_0nzwv7v__1688__branch__0",
+    "attrs": {
+      "branch_kind": "if",
+      "condition": "Cancel == false"
+    }
+  },
+  {
+    "id": "gatewayChoose__ExclusiveGateway_0nzwv7v__1688__branch__1",
+    "type": "dsl:gatewayCompareBranch",
+    "name": "gatewayChoose__ExclusiveGateway_0nzwv7v__1688__branch__1",
+    "attrs": {
+      "branch_kind": "if",
+      "condition": "Cancel == true"
+    }
+  },
+  {
+    "id": "gatewayChoose__Gateway_1jhfnrm__1916",
+    "type": "dsl:gatewayFlow",
+    "name": "gatewayChoose__Gateway_1jhfnrm__1916",
+    "attrs": {
+      "gateway": "Gateway_1jhfnrm",
+      "condition": "completed",
+      "mode": "choose"
+    }
+  },
+  {
+    "id": "gatewayChoose__Gateway_1jhfnrm__1916__branch__0",
+    "type": "dsl:gatewayCompareBranch",
+    "name": "gatewayChoose__Gateway_1jhfnrm__1916__branch__0",
+    "attrs": {
+      "branch_kind": "if",
+      "condition": "VIPLevel < 3"
+    }
+  },
+  {
+    "id": "gatewayChoose__Gateway_1jhfnrm__1916__branch__1",
+    "type": "dsl:gatewayCompareBranch",
+    "name": "gatewayChoose__Gateway_1jhfnrm__1916__branch__1",
+    "attrs": {
+      "branch_kind": "if",
+      "condition": "VIPLevel == 3"
+    }
+  }
+]

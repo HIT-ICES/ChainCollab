@@ -1,0 +1,269 @@
+[
+  {
+    "id": "Participant_0w6qkdf",
+    "name": "Bulk buyer",
+    "is_multi": false,
+    "metadata": {
+      "msp": "Bulk_buyerMSP",
+      "x509": "",
+      "attributes": {
+        "role": "Bulk buyer"
+      }
+    }
+  },
+  {
+    "id": "Participant_19mgbdn",
+    "name": "Manufacturer",
+    "is_multi": false,
+    "metadata": {
+      "msp": "ManufacturerMSP",
+      "x509": "",
+      "attributes": {
+        "role": "Manufacturer"
+      }
+    }
+  },
+  {
+    "id": "Participant_09cjol2",
+    "name": "Middleman",
+    "is_multi": false,
+    "metadata": {
+      "msp": "MiddlemanMSP",
+      "x509": "",
+      "attributes": {
+        "role": "Middleman"
+      }
+    }
+  },
+  {
+    "id": "Participant_0sa2v7d",
+    "name": "Supplier",
+    "is_multi": false,
+    "metadata": {
+      "msp": "SupplierMSP",
+      "x509": "",
+      "attributes": {
+        "role": "Supplier"
+      }
+    }
+  },
+  {
+    "id": "Participant_19j1e3o",
+    "name": "Special carrier",
+    "is_multi": false,
+    "metadata": {
+      "msp": "Special_carrierMSP",
+      "x509": "",
+      "attributes": {
+        "role": "Special carrier"
+      }
+    }
+  },
+  {
+    "id": "Message_04wmlqe",
+    "type": "message",
+    "sender": "Participant_19mgbdn",
+    "receiver": "Participant_0w6qkdf",
+    "schema": "{\"properties\":{\"report\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0cba4t6",
+    "type": "message",
+    "sender": "Participant_0w6qkdf",
+    "receiver": "Participant_0sa2v7d",
+    "schema": "{\"properties\":{\"fwd_order\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0d2xte5",
+    "type": "message",
+    "sender": "Participant_19j1e3o",
+    "receiver": "Participant_19mgbdn",
+    "schema": "{\"properties\":{\"del_order\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0hpha6h",
+    "type": "message",
+    "sender": "Participant_0sa2v7d",
+    "receiver": "Participant_19j1e3o",
+    "schema": "{\"properties\":{\"pre_details\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0pm90nx",
+    "type": "message",
+    "sender": "Participant_0w6qkdf",
+    "receiver": "Participant_19j1e3o",
+    "schema": "{\"properties\":{\"transport_order\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0ps2yzo",
+    "type": "message",
+    "sender": "Participant_0w6qkdf",
+    "receiver": "Participant_19mgbdn",
+    "schema": "{\"properties\":{\"Self_pickup\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"Self_pickup\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0rwz1km",
+    "type": "message",
+    "sender": "Participant_19j1e3o",
+    "receiver": "Participant_0sa2v7d",
+    "schema": "{\"properties\":{\"req_details\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_196q1fj",
+    "type": "message",
+    "sender": "Participant_19mgbdn",
+    "receiver": "Participant_0w6qkdf",
+    "schema": "{\"properties\":{\"delivered_product\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1ajdm9l",
+    "type": "message",
+    "sender": "Participant_19mgbdn",
+    "receiver": "Participant_09cjol2",
+    "schema": "{\"properties\":{\"placed_order\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1io2g9u",
+    "type": "message",
+    "sender": "Participant_0sa2v7d",
+    "receiver": "Participant_19j1e3o",
+    "schema": "{\"properties\":{\"waybill\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1wswgqu",
+    "type": "message",
+    "sender": "Participant_0w6qkdf",
+    "receiver": "Participant_19mgbdn",
+    "schema": "{\"properties\":{\"order\":{\"type\":\"string\",\"description\":\"\"},\"amount\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"order\",\"amount\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_11hmo2k",
+    "type": "gateway",
+    "gateway_type": "exclusive",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_0onpe6x",
+    "type": "gateway",
+    "gateway_type": "parallel",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_1fbifca",
+    "type": "gateway",
+    "gateway_type": "parallel",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Event_06sexe6",
+    "type": "event",
+    "initial_state": "READY"
+  },
+  {
+    "id": "Event_13pbqdz",
+    "type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Event_0eoqvir",
+    "type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Activity_0fbi09z",
+    "type": "businessrule",
+    "inputs": [
+      [
+        "amount",
+        "Amount"
+      ],
+      [
+        "Self_pickup",
+        "Self_pickup"
+      ]
+    ],
+    "outputs": [
+      [
+        "deliver",
+        "Deliver"
+      ]
+    ],
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Self_pickup",
+    "type": "global",
+    "dsl_type": "bool"
+  },
+  {
+    "id": "Amount",
+    "type": "global",
+    "dsl_type": "int"
+  },
+  {
+    "id": "Del_order",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Deliver",
+    "type": "global",
+    "dsl_type": "bool"
+  },
+  {
+    "id": "Delivered_product",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Fwd_order",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Order",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Placed_order",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Pre_details",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Report",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Req_details",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Transport_order",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Waybill",
+    "type": "global",
+    "dsl_type": "string"
+  }
+]

@@ -1,0 +1,280 @@
+[
+  {
+    "id": "Participant_1080bkg",
+    "name": "Customer",
+    "is_multi": false,
+    "metadata": {
+      "msp": "CustomerMSP",
+      "x509": "",
+      "attributes": {
+        "role": "Customer"
+      }
+    }
+  },
+  {
+    "id": "Participant_0sktaei",
+    "name": "Service Provider",
+    "is_multi": false,
+    "metadata": {
+      "msp": "Service_ProviderMSP",
+      "x509": "",
+      "attributes": {
+        "role": "Service Provider"
+      }
+    }
+  },
+  {
+    "id": "Participant_1gcdqza",
+    "name": "External service provider",
+    "is_multi": false,
+    "metadata": {
+      "msp": "External_service_providerMSP",
+      "x509": "",
+      "attributes": {
+        "role": "External service provider"
+      }
+    }
+  },
+  {
+    "id": "Message_045i10y",
+    "type": "message",
+    "sender": "Participant_1080bkg",
+    "receiver": "Participant_0sktaei",
+    "schema": "{\"properties\":{\"VIPpoints\":{\"type\":\"number\",\"description\":\"points\"}},\"required\":[\"VIPpoints\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0m9p3da",
+    "type": "message",
+    "sender": "Participant_1080bkg",
+    "receiver": "Participant_0sktaei",
+    "schema": "{\"properties\":{\"invoice\":{\"type\":\"boolean\",\"description\":\"Do you need an invoice?\"},\"invoiceType\":{\"type\":\"string\",\"description\":\"type\"}},\"required\":[\"invoice\",\"invoiceType\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0o8eyir",
+    "type": "message",
+    "sender": "Participant_1080bkg",
+    "receiver": "Participant_0sktaei",
+    "schema": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0r9lypd",
+    "type": "message",
+    "sender": "Participant_0sktaei",
+    "receiver": "Participant_1080bkg",
+    "schema": "{\"properties\":{\"is_available\":{\"type\":\"boolean\",\"description\":\"Is the service available?\"}},\"required\":[\"is_available\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1em0ee4",
+    "type": "message",
+    "sender": "Participant_0sktaei",
+    "receiver": "Participant_1080bkg",
+    "schema": "{\"properties\":{\"need_external_provider\":{\"type\":\"boolean\",\"description\":\"Whether external service providers are required\"}},\"required\":[\"need_external_provider\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1etcmvl",
+    "type": "message",
+    "sender": "Participant_0sktaei",
+    "receiver": "Participant_1080bkg",
+    "schema": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1i8rlqn",
+    "type": "message",
+    "sender": "Participant_0sktaei",
+    "receiver": "Participant_1gcdqza",
+    "schema": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1joj7ca",
+    "type": "message",
+    "sender": "Participant_1080bkg",
+    "receiver": "Participant_0sktaei",
+    "schema": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1ljlm4g",
+    "type": "message",
+    "sender": "Participant_0sktaei",
+    "receiver": "Participant_1080bkg",
+    "schema": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1nlagx2",
+    "type": "message",
+    "sender": "Participant_1080bkg",
+    "receiver": "Participant_0sktaei",
+    "schema": "{\"properties\":{\"confirmation\":{\"type\":\"boolean\",\"description\":\"Whether to accept the service plan\"}},\"required\":[\"confirmation\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1q05nnw",
+    "type": "message",
+    "sender": "Participant_0sktaei",
+    "receiver": "Participant_1gcdqza",
+    "schema": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1qbk325",
+    "type": "message",
+    "sender": "Participant_1gcdqza",
+    "receiver": "Participant_0sktaei",
+    "schema": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1xm9dxy",
+    "type": "message",
+    "sender": "Participant_1080bkg",
+    "receiver": "Participant_0sktaei",
+    "schema": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "ExclusiveGateway_106je4z",
+    "type": "gateway",
+    "gateway_type": "exclusive",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "ExclusiveGateway_0hs3ztq",
+    "type": "gateway",
+    "gateway_type": "exclusive",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "ExclusiveGateway_0nzwv7v",
+    "type": "gateway",
+    "gateway_type": "exclusive",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_1bhtapl",
+    "type": "gateway",
+    "gateway_type": "exclusive",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_04h9e6e",
+    "type": "gateway",
+    "gateway_type": "exclusive",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "EventBasedGateway_1fxpmyn",
+    "type": "gateway",
+    "gateway_type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Event_1jtgn3j",
+    "type": "event",
+    "initial_state": "READY"
+  },
+  {
+    "id": "Event_0366pfz",
+    "type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Event_146eii4",
+    "type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Event_143ykco",
+    "type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Activity_1yl9tfp",
+    "type": "businessrule",
+    "inputs": [
+      [
+        "VIPpoints",
+        "VIPpoints"
+      ],
+      [
+        "need_external_provider",
+        "Need_external_provider"
+      ]
+    ],
+    "outputs": [
+      [
+        "externalAvailable",
+        "ExternalAvailable"
+      ]
+    ],
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Activity_0ibsbry",
+    "type": "businessrule",
+    "inputs": [
+      [
+        "invoiceType",
+        "InvoiceType"
+      ],
+      [
+        "invoice",
+        "Invoice"
+      ]
+    ],
+    "outputs": [
+      [
+        "invoiceAvailable",
+        "InvoiceAvailable"
+      ]
+    ],
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "VIPpoints",
+    "type": "global",
+    "dsl_type": "int"
+  },
+  {
+    "id": "Confirmation",
+    "type": "global",
+    "dsl_type": "bool"
+  },
+  {
+    "id": "ExternalAvailable",
+    "type": "global",
+    "dsl_type": "bool"
+  },
+  {
+    "id": "Invoice",
+    "type": "global",
+    "dsl_type": "bool"
+  },
+  {
+    "id": "InvoiceAvailable",
+    "type": "global",
+    "dsl_type": "bool"
+  },
+  {
+    "id": "InvoiceType",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Is_available",
+    "type": "global",
+    "dsl_type": "bool"
+  },
+  {
+    "id": "Need_external_provider",
+    "type": "global",
+    "dsl_type": "bool"
+  }
+]

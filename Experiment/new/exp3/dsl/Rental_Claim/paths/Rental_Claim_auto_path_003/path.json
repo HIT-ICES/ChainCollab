@@ -1,0 +1,34 @@
+{
+  "path_name": "Rental_Claim_auto_path_003",
+  "expect": "accepted",
+  "steps": [
+    {
+      "type": "gateway",
+      "element": "Gateway_10ut9pb"
+    },
+    {
+      "type": "message",
+      "element": "Message_0dckgao",
+      "payload": {
+        "BondContent": "sample-BondContent",
+        "damageNumber": 10
+      }
+    },
+    {
+      "type": "businessrule",
+      "element": "Activity_0oacu9j",
+      "payload": {},
+      "outputs": {
+        "refund": false
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_11zw5fs"
+    },
+    {
+      "type": "event",
+      "element": "Event_0kmeww3"
+    }
+  ]
+}

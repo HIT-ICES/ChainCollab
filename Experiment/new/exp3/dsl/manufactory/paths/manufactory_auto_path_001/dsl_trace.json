@@ -1,0 +1,500 @@
+{
+  "case_name": "manufactory",
+  "path_name": "manufactory_auto_path_001",
+  "platform": "dsl",
+  "bootstrap": [
+    {
+      "trigger": {
+        "type": "start",
+        "name": "Event_0okhbce"
+      },
+      "state_diff": {
+        "Message_00wpjke": [
+          "INACTIVE",
+          "READY"
+        ],
+        "Event_0okhbce": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "applied_actions": [
+        {
+          "kind": "enable",
+          "target": "Message_00wpjke",
+          "from": "INACTIVE",
+          "to": "READY"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "index": 0,
+      "trigger": {
+        "type": "message",
+        "name": "Message_00wpjke"
+      },
+      "enabled_before": [
+        "Message_00wpjke"
+      ],
+      "guard_result": true,
+      "payload": {
+        "QuoteRequest": "sample-QuoteRequest"
+      },
+      "outputs": {},
+      "accepted": true,
+      "logs": [
+        "message Message_00wpjke -> DONE",
+        "message payload: set QuoteRequest='sample-QuoteRequest'"
+      ],
+      "flow_results": [
+        {
+          "kind": "message_flow",
+          "trigger": {
+            "type": "message",
+            "name": "Message_00wpjke",
+            "state": "completed"
+          },
+          "accepted": true,
+          "applied_actions": [
+            {
+              "kind": "enable",
+              "target": "Message_1kazup6",
+              "from": "INACTIVE",
+              "to": "READY"
+            }
+          ]
+        }
+      ],
+      "state_diff": {
+        "Message_00wpjke": [
+          "READY",
+          "DONE"
+        ],
+        "Message_1kazup6": [
+          "INACTIVE",
+          "READY"
+        ]
+      },
+      "global_diff": {
+        "QuoteRequest": [
+          null,
+          "sample-QuoteRequest"
+        ]
+      }
+    },
+    {
+      "index": 1,
+      "trigger": {
+        "type": "message",
+        "name": "Message_1kazup6"
+      },
+      "enabled_before": [
+        "Message_1kazup6"
+      ],
+      "guard_result": true,
+      "payload": {
+        "QuoteContent": "sample-QuoteContent"
+      },
+      "outputs": {},
+      "accepted": true,
+      "logs": [
+        "message Message_1kazup6 -> DONE",
+        "message payload: set QuoteContent='sample-QuoteContent'"
+      ],
+      "flow_results": [
+        {
+          "kind": "message_flow",
+          "trigger": {
+            "type": "message",
+            "name": "Message_1kazup6",
+            "state": "completed"
+          },
+          "accepted": true,
+          "applied_actions": [
+            {
+              "kind": "enable",
+              "target": "Message_1y5d31x",
+              "from": "INACTIVE",
+              "to": "READY"
+            }
+          ]
+        }
+      ],
+      "state_diff": {
+        "Message_1kazup6": [
+          "READY",
+          "DONE"
+        ],
+        "Message_1y5d31x": [
+          "INACTIVE",
+          "READY"
+        ]
+      },
+      "global_diff": {
+        "QuoteContent": [
+          null,
+          "sample-QuoteContent"
+        ]
+      }
+    },
+    {
+      "index": 2,
+      "trigger": {
+        "type": "message",
+        "name": "Message_1y5d31x"
+      },
+      "enabled_before": [
+        "Message_1y5d31x"
+      ],
+      "guard_result": true,
+      "payload": {
+        "OrderContent": "sample-OrderContent",
+        "OrderAmount": 1
+      },
+      "outputs": {},
+      "accepted": true,
+      "logs": [
+        "message Message_1y5d31x -> DONE",
+        "message payload: set OrderContent='sample-OrderContent'",
+        "message payload: set OrderAmount=1"
+      ],
+      "flow_results": [
+        {
+          "kind": "message_flow",
+          "trigger": {
+            "type": "message",
+            "name": "Message_1y5d31x",
+            "state": "completed"
+          },
+          "accepted": true,
+          "applied_actions": [
+            {
+              "kind": "enable",
+              "target": "Gateway_085e7pr",
+              "from": "INACTIVE",
+              "to": "READY"
+            }
+          ]
+        }
+      ],
+      "state_diff": {
+        "Message_1y5d31x": [
+          "READY",
+          "DONE"
+        ],
+        "Gateway_085e7pr": [
+          "INACTIVE",
+          "READY"
+        ]
+      },
+      "global_diff": {
+        "OrderAmount": [
+          null,
+          1
+        ],
+        "OrderContent": [
+          null,
+          "sample-OrderContent"
+        ]
+      }
+    },
+    {
+      "index": 3,
+      "trigger": {
+        "type": "gateway",
+        "name": "Gateway_085e7pr"
+      },
+      "enabled_before": [
+        "Gateway_085e7pr"
+      ],
+      "guard_result": true,
+      "payload": {},
+      "outputs": {},
+      "accepted": true,
+      "logs": [
+        "gateway Gateway_085e7pr -> DONE"
+      ],
+      "flow_results": [
+        {
+          "kind": "gateway_flow",
+          "trigger": {
+            "type": "gateway",
+            "name": "Gateway_085e7pr",
+            "state": "completed"
+          },
+          "accepted": true,
+          "applied_actions": [
+            {
+              "kind": "enable",
+              "target": "Message_0z8kf0j",
+              "from": "INACTIVE",
+              "to": "READY"
+            },
+            {
+              "kind": "enable",
+              "target": "Message_03was4c",
+              "from": "INACTIVE",
+              "to": "READY"
+            }
+          ]
+        }
+      ],
+      "state_diff": {
+        "Message_03was4c": [
+          "INACTIVE",
+          "READY"
+        ],
+        "Message_0z8kf0j": [
+          "INACTIVE",
+          "READY"
+        ],
+        "Gateway_085e7pr": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {}
+    },
+    {
+      "index": 4,
+      "trigger": {
+        "type": "message",
+        "name": "Message_03was4c"
+      },
+      "enabled_before": [
+        "Message_03was4c",
+        "Message_0z8kf0j"
+      ],
+      "guard_result": true,
+      "payload": {
+        "confirm message": "sample-confirm message"
+      },
+      "outputs": {},
+      "accepted": true,
+      "logs": [
+        "message Message_03was4c -> DONE",
+        "message payload: set Confirm_message='sample-confirm message'"
+      ],
+      "flow_results": [
+        {
+          "kind": "message_flow",
+          "trigger": {
+            "type": "message",
+            "name": "Message_03was4c",
+            "state": "completed"
+          },
+          "accepted": true,
+          "applied_actions": [
+            {
+              "kind": "disable",
+              "target": "Message_0z8kf0j",
+              "from": "READY",
+              "to": "INACTIVE"
+            },
+            {
+              "kind": "enable",
+              "target": "Message_1yln43l",
+              "from": "INACTIVE",
+              "to": "READY"
+            }
+          ]
+        }
+      ],
+      "state_diff": {
+        "Message_03was4c": [
+          "READY",
+          "DONE"
+        ],
+        "Message_0z8kf0j": [
+          "READY",
+          "INACTIVE"
+        ],
+        "Message_1yln43l": [
+          "INACTIVE",
+          "READY"
+        ]
+      },
+      "global_diff": {
+        "Confirm_message": [
+          null,
+          "sample-confirm message"
+        ]
+      }
+    },
+    {
+      "index": 5,
+      "trigger": {
+        "type": "message",
+        "name": "Message_1yln43l"
+      },
+      "enabled_before": [
+        "Message_1yln43l"
+      ],
+      "guard_result": true,
+      "payload": {
+        "InvoiceContent": "sample-InvoiceContent"
+      },
+      "outputs": {},
+      "accepted": true,
+      "logs": [
+        "message Message_1yln43l -> DONE",
+        "message payload: set InvoiceContent='sample-InvoiceContent'"
+      ],
+      "flow_results": [
+        {
+          "kind": "message_flow",
+          "trigger": {
+            "type": "message",
+            "name": "Message_1yln43l",
+            "state": "completed"
+          },
+          "accepted": true,
+          "applied_actions": [
+            {
+              "kind": "enable",
+              "target": "Message_13l7271",
+              "from": "INACTIVE",
+              "to": "READY"
+            }
+          ]
+        }
+      ],
+      "state_diff": {
+        "Message_13l7271": [
+          "INACTIVE",
+          "READY"
+        ],
+        "Message_1yln43l": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {
+        "InvoiceContent": [
+          null,
+          "sample-InvoiceContent"
+        ]
+      }
+    },
+    {
+      "index": 6,
+      "trigger": {
+        "type": "message",
+        "name": "Message_13l7271"
+      },
+      "enabled_before": [
+        "Message_13l7271"
+      ],
+      "guard_result": true,
+      "payload": {
+        "payRecord": "sample-payRecord"
+      },
+      "outputs": {},
+      "accepted": true,
+      "logs": [
+        "message Message_13l7271 -> DONE",
+        "message payload: set PayRecord='sample-payRecord'"
+      ],
+      "flow_results": [
+        {
+          "kind": "message_flow",
+          "trigger": {
+            "type": "message",
+            "name": "Message_13l7271",
+            "state": "completed"
+          },
+          "accepted": true,
+          "applied_actions": [
+            {
+              "kind": "enable",
+              "target": "Event_0th6os0",
+              "from": "INACTIVE",
+              "to": "READY"
+            }
+          ]
+        }
+      ],
+      "state_diff": {
+        "Message_13l7271": [
+          "READY",
+          "DONE"
+        ],
+        "Event_0th6os0": [
+          "INACTIVE",
+          "READY"
+        ]
+      },
+      "global_diff": {
+        "PayRecord": [
+          null,
+          "sample-payRecord"
+        ]
+      }
+    },
+    {
+      "index": 7,
+      "trigger": {
+        "type": "event",
+        "name": "Event_0th6os0"
+      },
+      "enabled_before": [
+        "Event_0th6os0"
+      ],
+      "guard_result": true,
+      "payload": {},
+      "outputs": {},
+      "accepted": true,
+      "logs": [
+        "event Event_0th6os0 -> DONE"
+      ],
+      "flow_results": [],
+      "state_diff": {
+        "Event_0th6os0": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {}
+    }
+  ],
+  "final_state": {
+    "status": "accepted",
+    "reason": "",
+    "enabled_elements": [],
+    "element_states": {
+      "Message_00wpjke": "DONE",
+      "Message_03was4c": "DONE",
+      "Message_05uqcn2": "INACTIVE",
+      "Message_0z8kf0j": "INACTIVE",
+      "Message_0zt8q9t": "INACTIVE",
+      "Message_13l7271": "DONE",
+      "Message_1i5n14f": "INACTIVE",
+      "Message_1kazup6": "DONE",
+      "Message_1y5d31x": "DONE",
+      "Message_1yln43l": "DONE",
+      "Gateway_19zzj3s": "INACTIVE",
+      "Gateway_085e7pr": "DONE",
+      "Event_0okhbce": "DONE",
+      "Event_0th6os0": "DONE",
+      "Event_0awuo5v": "INACTIVE",
+      "Event_0zsq5na": "INACTIVE",
+      "Activity_1uktp5z": "INACTIVE"
+    },
+    "globals": {
+      "CancelFee": null,
+      "ConcelAck": null,
+      "Fee": null,
+      "InvoiceContent": "sample-InvoiceContent",
+      "OrderAmount": 1,
+      "OrderContent": "sample-OrderContent",
+      "QuoteContent": "sample-QuoteContent",
+      "QuoteRequest": "sample-QuoteRequest",
+      "Cancelation": null,
+      "Confirm_message": "sample-confirm message",
+      "PayMethod": null,
+      "PayRecord": "sample-payRecord"
+    }
+  }
+}

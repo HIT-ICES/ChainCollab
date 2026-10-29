@@ -5,7 +5,8 @@ Before cleanup, `dev-MultiBlockchain` and `dev-MultiBlockChain-fork` were given
 the **same complete Git tree** based on this baseline, including the existing
 API migration and frontend lock previously excluded by ignore rules, using merge commits that preserve their
 prior histories. Backup refs are under `backup/pre-release-cleanup-20261029/`.
-These development branches retain experiments, archives and developer tools.
+These development branches retain the complete baseline, archives and developer tools.
+Release also retains the original `Experiment/` tree without reorganizing it.
 
 | Path | Release decision | Reason |
 | --- | --- | --- |
@@ -18,7 +19,8 @@ These development branches retain experiments, archives and developer tools.
 | `src/relayer-node` | Keep | Active backend exposes status/control endpoints for this service |
 | `src/py_translator` | Local/development only | Already untracked; backend uses newTranslator |
 | `src/java-env-custom-image` | Local/development only | Existing separate Git repository; never deleted or incorporated |
-| `Experiment`, `artifacts`, manuscript evidence and old tutorials | Development branches | Not needed to launch the system |
+| `Experiment` | Keep unchanged | Original release experiment layout, models, scripts and recorded results, including supplementary performance tests |
+| `artifacts`, manuscript evidence and old tutorials | Development branches | Evidence archives and retired development documentation |
 | `examples/bpmn-dmn` | Keep | Structured BPMN/DMN inputs for reproduction |
 | newTranslator MDAcheck/build/dashboard and standalone developer dashboards | Development branches | Generated outputs or duplicate development interfaces |
 | Existing environments, pgdata, .env, credentials and runtime directories | Preserve locally, ignore in Git | Machine state is not release source |

@@ -1,0 +1,182 @@
+[
+  {
+    "kind": "start",
+    "trigger": "Event_0ehnwwz",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Message_0q9hvem"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_0q9hvem",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Gateway_1ltys0e"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_1f0gefc",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Gateway_025uwvp"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_14wu8ts",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Event_194zr5n"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_0mcktm6",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Activity_12arovy"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_05gz8u0",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Event_0e3j88g"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_0g7m9tf",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Event_1o9guxu"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_15b83n1",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Message_08ms1jj"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_08ms1jj",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Message_0g7m9tf"
+      }
+    ]
+  },
+  {
+    "kind": "gateway_choose",
+    "trigger": "Gateway_1ltys0e",
+    "branches": [
+      {
+        "guard": "ProductAvalibale == true",
+        "actions": [
+          {
+            "op": "enable",
+            "target": "Message_1f0gefc"
+          }
+        ]
+      },
+      {
+        "guard": "ProductAvalibale == false",
+        "actions": [
+          {
+            "op": "enable",
+            "target": "Message_14wu8ts"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "gateway_choose",
+    "trigger": "Gateway_025uwvp",
+    "branches": [
+      {
+        "guard": "PriceOK == true",
+        "actions": [
+          {
+            "op": "enable",
+            "target": "Message_0mcktm6"
+          }
+        ]
+      },
+      {
+        "guard": "PriceOK == false",
+        "actions": [
+          {
+            "op": "enable",
+            "target": "Message_05gz8u0"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "gateway_choose",
+    "trigger": "Gateway_13i0b7w",
+    "branches": [
+      {
+        "guard": "Discount == false",
+        "actions": [
+          {
+            "op": "enable",
+            "target": "Message_0g7m9tf"
+          }
+        ]
+      },
+      {
+        "guard": "Discount == true",
+        "actions": [
+          {
+            "op": "enable",
+            "target": "Message_15b83n1"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "businessrule",
+    "trigger": "Activity_12arovy",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Gateway_13i0b7w"
+      }
+    ]
+  }
+]

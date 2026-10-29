@@ -1,0 +1,34 @@
+contract LinearContractA {
+    participants {
+        participant SellerA { msp "SellerAMSP" attributes { role = "seller" } }
+        participant BuyerA { msp "BuyerAMSP" attributes { role = "buyer" } }
+    }
+    globals {
+        ApprovedA: bool
+    }
+    messages {
+        message RequestA from BuyerA to SellerA { initial state INACTIVE schema "{}" }
+        message ConfirmA from SellerA to BuyerA { initial state INACTIVE schema "{}" }
+    }
+    gateways {
+        gateway DecisionA { type exclusive initial state INACTIVE }
+    }
+    events {
+        event StartEvent_A { initial state READY }
+        event EndEvent_A { initial state INACTIVE }
+    }
+    businessrules {
+    }
+    oracletasks {
+    }
+    flows {
+        start event StartEvent_A enables RequestA;
+        when message RequestA completed then enable DecisionA;
+        when gateway DecisionA completed choose {
+            if ApprovedA == true then enable ConfirmA;
+            else then enable EndEvent_A;
+        }
+        when message ConfirmA completed then enable EndEvent_A;
+    }
+}
+

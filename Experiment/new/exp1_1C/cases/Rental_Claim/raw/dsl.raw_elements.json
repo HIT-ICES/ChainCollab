@@ -1,0 +1,215 @@
+[
+  {
+    "id": "Participant_1exbsak",
+    "name": "Landlord",
+    "is_multi": false,
+    "metadata": {
+      "msp": "LandlordMSP",
+      "x509": "",
+      "attributes": {
+        "role": "Landlord"
+      }
+    }
+  },
+  {
+    "id": "Participant_0h34s41",
+    "name": "RBO",
+    "is_multi": false,
+    "metadata": {
+      "msp": "RBOMSP",
+      "x509": "",
+      "attributes": {
+        "role": "RBO"
+      }
+    }
+  },
+  {
+    "id": "Participant_0wvo0aa",
+    "name": "Tenant",
+    "is_multi": false,
+    "metadata": {
+      "msp": "TenantMSP",
+      "x509": "",
+      "attributes": {
+        "role": "Tenant"
+      }
+    }
+  },
+  {
+    "id": "Message_066q5si",
+    "type": "message",
+    "sender": "Participant_0h34s41",
+    "receiver": "Participant_0wvo0aa",
+    "schema": "{\"properties\":{\"reason\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"reason\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_09eyqv0",
+    "type": "message",
+    "sender": "Participant_1exbsak",
+    "receiver": "Participant_0h34s41",
+    "schema": "{\"properties\":{\"FileContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0dckgao",
+    "type": "message",
+    "sender": "Participant_1exbsak",
+    "receiver": "Participant_0h34s41",
+    "schema": "{\"properties\":{\"BondContent\":{\"type\":\"string\",\"description\":\"\"},\"damageNumber\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"BondContent\",\"damageNumber\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0fm3vfa",
+    "type": "message",
+    "sender": "Participant_0h34s41",
+    "receiver": "Participant_1exbsak",
+    "schema": "{\"properties\":{\"transferDate\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"transferDate\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0z3zz01",
+    "type": "message",
+    "sender": "Participant_0wvo0aa",
+    "receiver": "Participant_0h34s41",
+    "schema": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0zoy0sz",
+    "type": "message",
+    "sender": "Participant_0h34s41",
+    "receiver": "Participant_0wvo0aa",
+    "schema": "{\"properties\":{\"refundbond\":{\"type\":\"number\",\"description\":\"\"}},\"required\":[\"refundbond\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1eb4q8q",
+    "type": "message",
+    "sender": "Participant_0h34s41",
+    "receiver": "Participant_0wvo0aa",
+    "schema": "{\"properties\":{\"claimContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1im6vvb",
+    "type": "message",
+    "sender": "Participant_0wvo0aa",
+    "receiver": "Participant_0h34s41",
+    "schema": "{\"properties\":{\"content\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1xlzl3n",
+    "type": "message",
+    "sender": "Participant_0h34s41",
+    "receiver": "Participant_1exbsak",
+    "schema": "{\"properties\":{\"reason\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"reason\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_11zw5fs",
+    "type": "gateway",
+    "gateway_type": "exclusive",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_10ut9pb",
+    "type": "gateway",
+    "gateway_type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_1v1x25n",
+    "type": "gateway",
+    "gateway_type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Event_19zgkxm",
+    "type": "event",
+    "initial_state": "READY"
+  },
+  {
+    "id": "Event_1pjpbaw",
+    "type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Event_120hui7",
+    "type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Event_0fzlrii",
+    "type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Event_0kmeww3",
+    "type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Activity_0oacu9j",
+    "type": "businessrule",
+    "inputs": [
+      [
+        "damageNumber",
+        "DamageNumber"
+      ]
+    ],
+    "outputs": [
+      [
+        "refund",
+        "Refund"
+      ]
+    ],
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "BondContent",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "FileContent",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "ClaimContent",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Content",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "DamageNumber",
+    "type": "global",
+    "dsl_type": "int"
+  },
+  {
+    "id": "Reason",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Refund",
+    "type": "global",
+    "dsl_type": "bool"
+  },
+  {
+    "id": "Refundbond",
+    "type": "global",
+    "dsl_type": "int"
+  },
+  {
+    "id": "TransferDate",
+    "type": "global",
+    "dsl_type": "string"
+  }
+]

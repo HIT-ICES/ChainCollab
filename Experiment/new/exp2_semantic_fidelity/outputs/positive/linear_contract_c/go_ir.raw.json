@@ -1,0 +1,4663 @@
+{
+  "contract": "chaincode",
+  "structs": [
+    "SmartContract",
+    "ContractInstance",
+    "ElementState",
+    "InstanceState",
+    "Participant",
+    "Message",
+    "Gateway",
+    "ActionEvent",
+    "BusinessRule",
+    "StateMemory",
+    "InitParameters"
+  ],
+  "state_fields": [
+    {
+      "name": "ReadyC",
+      "type": "bool"
+    }
+  ],
+  "functions": [
+    {
+      "name": "CreateBusinessRule",
+      "receiver": "*SmartContract",
+      "body": "{\n\n\tHash, err := cc.hashXML(ctx, DMNContent)\n\tif err != nil {\n\t\tfmt.Println(err.Error())\n\t\treturn nil, err\n\t}\n\n\tinstance.InstanceBusinessRules[BusinessRuleID] = \u0026BusinessRule{\n\t\tBusinessRuleID:\tBusinessRuleID,\n\t\tHash:\t\tHash,\n\t\tDecisionID:\tDecisionID,\n\t\tParamMapping:\tParamMapping,\n\t\tState:\t\tDISABLED,\n\t}\n\n\treturnBusinessRule, ok := instance.InstanceBusinessRules[BusinessRuleID]\n\tif !ok {\n\t\treturn nil, fmt.Errorf(\"无法将实例元素转换为BusinessRule\")\n\t}\n\n\treturn returnBusinessRule, nil\n}",
+      "calls": [
+        {
+          "callee": "cc.hashXML",
+          "args": [
+            "ctx",
+            "DMNContent"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "\"无法将实例元素转换为BusinessRule\""
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "Hash",
+            "err"
+          ],
+          "rhs": [
+            "cc.hashXML(ctx, DMNContent)"
+          ]
+        },
+        {
+          "lhs": [
+            "instance.InstanceBusinessRules[BusinessRuleID]"
+          ],
+          "rhs": [
+            "\u0026BusinessRule{\n\tBusinessRuleID:\tBusinessRuleID,\n\tHash:\t\tHash,\n\tDecisionID:\tDecisionID,\n\tParamMapping:\tParamMapping,\n\tState:\t\tDISABLED,\n}"
+          ]
+        },
+        {
+          "lhs": [
+            "returnBusinessRule",
+            "ok"
+          ],
+          "rhs": [
+            "instance.InstanceBusinessRules[BusinessRuleID]"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\tfmt.Println(err.Error())\n\treturn nil, err\n}"
+        },
+        {
+          "condition": "!ok",
+          "then": "{\n\treturn nil, fmt.Errorf(\"无法将实例元素转换为BusinessRule\")\n}"
+        }
+      ]
+    },
+    {
+      "name": "CreateParticipant",
+      "receiver": "*SmartContract",
+      "body": "{\n\n\tinstance.InstanceParticipants[participantID] = \u0026Participant{\n\t\tParticipantID:\tparticipantID,\n\t\tMSP:\t\tmsp,\n\t\tAttributes:\tattributes,\n\t\tIsMulti:\tIsMulti,\n\t\tMultiMaximum:\tMultiMaximum,\n\t\tMultiMinimum:\tMultiMinimum,\n\t\tX509:\t\tx509,\n\t}\n\n\treturnParticipant, ok := instance.InstanceParticipants[participantID]\n\tif !ok {\n\t\treturn nil, fmt.Errorf(\"无法将实例元素转换为Participant\")\n\t}\n\n\treturn returnParticipant, nil\n\n}",
+      "calls": [
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "\"无法将实例元素转换为Participant\""
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "instance.InstanceParticipants[participantID]"
+          ],
+          "rhs": [
+            "\u0026Participant{\n\tParticipantID:\tparticipantID,\n\tMSP:\t\tmsp,\n\tAttributes:\tattributes,\n\tIsMulti:\tIsMulti,\n\tMultiMaximum:\tMultiMaximum,\n\tMultiMinimum:\tMultiMinimum,\n\tX509:\t\tx509,\n}"
+          ]
+        },
+        {
+          "lhs": [
+            "returnParticipant",
+            "ok"
+          ],
+          "rhs": [
+            "instance.InstanceParticipants[participantID]"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "!ok",
+          "then": "{\n\treturn nil, fmt.Errorf(\"无法将实例元素转换为Participant\")\n}"
+        }
+      ]
+    },
+    {
+      "name": "CreateMessage",
+      "receiver": "*SmartContract",
+      "body": "{\n\n\tinstance.InstanceMessages[messageID] = \u0026Message{\n\t\tMessageID:\t\tmessageID,\n\t\tSendParticipantID:\tsendParticipantID,\n\t\tReceiveParticipantID:\treceiveParticipantID,\n\t\tFireflyTranID:\t\tfireflyTranID,\n\t\tMsgState:\t\tmsgState,\n\t\tFormat:\t\t\tformat,\n\t}\n\n\treturnMessage, ok := instance.InstanceMessages[messageID]\n\tif !ok {\n\t\treturn nil, fmt.Errorf(\"无法将实例元素转换为Message\")\n\t}\n\n\treturn returnMessage, nil\n}",
+      "calls": [
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "\"无法将实例元素转换为Message\""
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "instance.InstanceMessages[messageID]"
+          ],
+          "rhs": [
+            "\u0026Message{\n\tMessageID:\t\tmessageID,\n\tSendParticipantID:\tsendParticipantID,\n\tReceiveParticipantID:\treceiveParticipantID,\n\tFireflyTranID:\t\tfireflyTranID,\n\tMsgState:\t\tmsgState,\n\tFormat:\t\t\tformat,\n}"
+          ]
+        },
+        {
+          "lhs": [
+            "returnMessage",
+            "ok"
+          ],
+          "rhs": [
+            "instance.InstanceMessages[messageID]"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "!ok",
+          "then": "{\n\treturn nil, fmt.Errorf(\"无法将实例元素转换为Message\")\n}"
+        }
+      ]
+    },
+    {
+      "name": "CreateGateway",
+      "receiver": "*SmartContract",
+      "body": "{\n\n\tinstance.InstanceGateways[gatewayID] = \u0026Gateway{\n\t\tGatewayID:\tgatewayID,\n\t\tGatewayState:\tgatewayState,\n\t}\n\n\treturnGateway, ok := instance.InstanceGateways[gatewayID]\n\tif !ok {\n\t\treturn nil, fmt.Errorf(\"无法将实例元素转换为Gateway\")\n\t}\n\n\treturn returnGateway, nil\n}",
+      "calls": [
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "\"无法将实例元素转换为Gateway\""
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "instance.InstanceGateways[gatewayID]"
+          ],
+          "rhs": [
+            "\u0026Gateway{\n\tGatewayID:\tgatewayID,\n\tGatewayState:\tgatewayState,\n}"
+          ]
+        },
+        {
+          "lhs": [
+            "returnGateway",
+            "ok"
+          ],
+          "rhs": [
+            "instance.InstanceGateways[gatewayID]"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "!ok",
+          "then": "{\n\treturn nil, fmt.Errorf(\"无法将实例元素转换为Gateway\")\n}"
+        }
+      ]
+    },
+    {
+      "name": "CreateActionEvent",
+      "receiver": "*SmartContract",
+      "body": "{\n\n\tinstance.InstanceActionEvents[eventID] = \u0026ActionEvent{\n\t\tEventID:\teventID,\n\t\tEventState:\teventState,\n\t}\n\n\treturnEvent, ok := instance.InstanceActionEvents[eventID]\n\tif !ok {\n\t\treturn nil, fmt.Errorf(\"无法将实例元素转换为ActionEvent\")\n\t}\n\n\treturn returnEvent, nil\n\n}",
+      "calls": [
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "\"无法将实例元素转换为ActionEvent\""
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "instance.InstanceActionEvents[eventID]"
+          ],
+          "rhs": [
+            "\u0026ActionEvent{\n\tEventID:\teventID,\n\tEventState:\teventState,\n}"
+          ]
+        },
+        {
+          "lhs": [
+            "returnEvent",
+            "ok"
+          ],
+          "rhs": [
+            "instance.InstanceActionEvents[eventID]"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "!ok",
+          "then": "{\n\treturn nil, fmt.Errorf(\"无法将实例元素转换为ActionEvent\")\n}"
+        }
+      ]
+    },
+    {
+      "name": "GetInstance",
+      "receiver": "*SmartContract",
+      "body": "{\n\tinstanceJson, err := ctx.GetStub().GetState(instanceID)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tif instanceJson == nil {\n\t\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\t\tfmt.Println(errorMessage)\n\t\treturn nil, errors.New(errorMessage)\n\t}\n\n\tvar instance ContractInstance\n\terr = json.Unmarshal(instanceJson, \u0026instance)\n\tif err != nil {\n\t\tfmt.Println(err.Error())\n\t\treturn nil, err\n\t}\n\n\treturn \u0026instance, nil\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub().GetState",
+          "args": [
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Instance %s does not exist\"",
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "json.Unmarshal",
+          "args": [
+            "instanceJson",
+            "\u0026instance"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "instanceJson",
+            "err"
+          ],
+          "rhs": [
+            "ctx.GetStub().GetState(instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Instance %s does not exist\", instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "err"
+          ],
+          "rhs": [
+            "json.Unmarshal(instanceJson, \u0026instance)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn nil, err\n}"
+        },
+        {
+          "condition": "instanceJson == nil",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\tfmt.Println(errorMessage)\n\treturn nil, errors.New(errorMessage)\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\tfmt.Println(err.Error())\n\treturn nil, err\n}"
+        }
+      ]
+    },
+    {
+      "name": "SetInstance",
+      "receiver": "*SmartContract",
+      "body": "{\n\tinstanceJson, err := json.Marshal(instance)\n\tif err != nil {\n\t\tfmt.Println(err.Error())\n\t\treturn err\n\t}\n\n\terr = ctx.GetStub().PutState(instance.InstanceID, instanceJson)\n\tif err != nil {\n\t\tfmt.Println(err.Error())\n\t\treturn err\n\t}\n\n\treturn nil\n}",
+      "calls": [
+        {
+          "callee": "json.Marshal",
+          "args": [
+            "instance"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        },
+        {
+          "callee": "ctx.GetStub().PutState",
+          "args": [
+            "instance.InstanceID",
+            "instanceJson"
+          ]
+        },
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "instanceJson",
+            "err"
+          ],
+          "rhs": [
+            "json.Marshal(instance)"
+          ]
+        },
+        {
+          "lhs": [
+            "err"
+          ],
+          "rhs": [
+            "ctx.GetStub().PutState(instance.InstanceID, instanceJson)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\tfmt.Println(err.Error())\n\treturn err\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\tfmt.Println(err.Error())\n\treturn err\n}"
+        }
+      ]
+    },
+    {
+      "name": "ReadMsg",
+      "receiver": "*SmartContract",
+      "body": "{\n\tinstanceJson, err := ctx.GetStub().GetState(instanceID)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tif instanceJson == nil {\n\t\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\t\tfmt.Println(errorMessage)\n\t\treturn nil, errors.New(errorMessage)\n\t}\n\n\tvar instance ContractInstance\n\terr = json.Unmarshal(instanceJson, \u0026instance)\n\tif err != nil {\n\t\tfmt.Println(err.Error())\n\t\treturn nil, err\n\t}\n\n\tmsg, ok := instance.InstanceMessages[messageID]\n\tif !ok {\n\t\terrorMessage := fmt.Sprintf(\"Message %s does not exist\", messageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn nil, errors.New(errorMessage)\n\t}\n\n\treturn msg, nil\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub().GetState",
+          "args": [
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Instance %s does not exist\"",
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "json.Unmarshal",
+          "args": [
+            "instanceJson",
+            "\u0026instance"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Message %s does not exist\"",
+            "messageID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "errorMessage"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "instanceJson",
+            "err"
+          ],
+          "rhs": [
+            "ctx.GetStub().GetState(instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Instance %s does not exist\", instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "err"
+          ],
+          "rhs": [
+            "json.Unmarshal(instanceJson, \u0026instance)"
+          ]
+        },
+        {
+          "lhs": [
+            "msg",
+            "ok"
+          ],
+          "rhs": [
+            "instance.InstanceMessages[messageID]"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Message %s does not exist\", messageID)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn nil, err\n}"
+        },
+        {
+          "condition": "instanceJson == nil",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\tfmt.Println(errorMessage)\n\treturn nil, errors.New(errorMessage)\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\tfmt.Println(err.Error())\n\treturn nil, err\n}"
+        },
+        {
+          "condition": "!ok",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Message %s does not exist\", messageID)\n\tfmt.Println(errorMessage)\n\treturn nil, errors.New(errorMessage)\n}"
+        }
+      ]
+    },
+    {
+      "name": "ReadGtw",
+      "receiver": "*SmartContract",
+      "body": "{\n\n\tinstanceJson, err := ctx.GetStub().GetState(instanceID)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tif instanceJson == nil {\n\t\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\t\tfmt.Println(errorMessage)\n\t\treturn nil, errors.New(errorMessage)\n\t}\n\n\tvar instance ContractInstance\n\terr = json.Unmarshal(instanceJson, \u0026instance)\n\tif err != nil {\n\t\tfmt.Println(err.Error())\n\t\treturn nil, err\n\t}\n\n\tgtw, ok := instance.InstanceGateways[gatewayID]\n\tif !ok {\n\t\terrorMessage := fmt.Sprintf(\"Gateway %s does not exist\", gatewayID)\n\t\tfmt.Println(errorMessage)\n\t\treturn nil, errors.New(errorMessage)\n\t}\n\n\treturn gtw, nil\n\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub().GetState",
+          "args": [
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Instance %s does not exist\"",
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "json.Unmarshal",
+          "args": [
+            "instanceJson",
+            "\u0026instance"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Gateway %s does not exist\"",
+            "gatewayID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "errorMessage"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "instanceJson",
+            "err"
+          ],
+          "rhs": [
+            "ctx.GetStub().GetState(instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Instance %s does not exist\", instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "err"
+          ],
+          "rhs": [
+            "json.Unmarshal(instanceJson, \u0026instance)"
+          ]
+        },
+        {
+          "lhs": [
+            "gtw",
+            "ok"
+          ],
+          "rhs": [
+            "instance.InstanceGateways[gatewayID]"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Gateway %s does not exist\", gatewayID)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn nil, err\n}"
+        },
+        {
+          "condition": "instanceJson == nil",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\tfmt.Println(errorMessage)\n\treturn nil, errors.New(errorMessage)\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\tfmt.Println(err.Error())\n\treturn nil, err\n}"
+        },
+        {
+          "condition": "!ok",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Gateway %s does not exist\", gatewayID)\n\tfmt.Println(errorMessage)\n\treturn nil, errors.New(errorMessage)\n}"
+        }
+      ]
+    },
+    {
+      "name": "ReadEvent",
+      "receiver": "*SmartContract",
+      "body": "{\n\n\tinstanceJson, err := ctx.GetStub().GetState(instanceID)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tif instanceJson == nil {\n\t\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\t\tfmt.Println(errorMessage)\n\t\treturn nil, errors.New(errorMessage)\n\t}\n\n\tvar instance ContractInstance\n\terr = json.Unmarshal(instanceJson, \u0026instance)\n\tif err != nil {\n\t\tfmt.Println(err.Error())\n\t\treturn nil, err\n\t}\n\n\tactionEvent, ok := instance.InstanceActionEvents[eventID]\n\tif !ok {\n\t\terrorMessage := fmt.Sprintf(\"Event %s does not exist\", eventID)\n\t\tfmt.Println(errorMessage)\n\t\treturn nil, errors.New(errorMessage)\n\t}\n\n\treturn actionEvent, nil\n\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub().GetState",
+          "args": [
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Instance %s does not exist\"",
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "json.Unmarshal",
+          "args": [
+            "instanceJson",
+            "\u0026instance"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Event %s does not exist\"",
+            "eventID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "errorMessage"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "instanceJson",
+            "err"
+          ],
+          "rhs": [
+            "ctx.GetStub().GetState(instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Instance %s does not exist\", instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "err"
+          ],
+          "rhs": [
+            "json.Unmarshal(instanceJson, \u0026instance)"
+          ]
+        },
+        {
+          "lhs": [
+            "actionEvent",
+            "ok"
+          ],
+          "rhs": [
+            "instance.InstanceActionEvents[eventID]"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Event %s does not exist\", eventID)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn nil, err\n}"
+        },
+        {
+          "condition": "instanceJson == nil",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\tfmt.Println(errorMessage)\n\treturn nil, errors.New(errorMessage)\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\tfmt.Println(err.Error())\n\treturn nil, err\n}"
+        },
+        {
+          "condition": "!ok",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Event %s does not exist\", eventID)\n\tfmt.Println(errorMessage)\n\treturn nil, errors.New(errorMessage)\n}"
+        }
+      ]
+    },
+    {
+      "name": "ChangeMsgState",
+      "receiver": "*SmartContract",
+      "body": "{\n\tmsg, ok := instance.InstanceMessages[messageID]\n\tif !ok {\n\t\terrorMessage := fmt.Sprintf(\"Message %s does not exist\", messageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn errors.New(errorMessage)\n\t}\n\tmsg.MsgState = msgState\n\treturn nil\n}",
+      "calls": [
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Message %s does not exist\"",
+            "messageID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "errorMessage"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "msg",
+            "ok"
+          ],
+          "rhs": [
+            "instance.InstanceMessages[messageID]"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Message %s does not exist\", messageID)"
+          ]
+        },
+        {
+          "lhs": [
+            "msg.MsgState"
+          ],
+          "rhs": [
+            "msgState"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "!ok",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Message %s does not exist\", messageID)\n\tfmt.Println(errorMessage)\n\treturn errors.New(errorMessage)\n}"
+        }
+      ]
+    },
+    {
+      "name": "ChangeMsgFireflyTranID",
+      "receiver": "*SmartContract",
+      "body": "{\n\tmsg, ok := instance.InstanceMessages[messageID]\n\tif !ok {\n\t\terrorMessage := fmt.Sprintf(\"Message %s does not exist\", messageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn errors.New(errorMessage)\n\t}\n\tmsg.FireflyTranID = fireflyTranID\n\treturn nil\n\n}",
+      "calls": [
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Message %s does not exist\"",
+            "messageID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "errorMessage"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "msg",
+            "ok"
+          ],
+          "rhs": [
+            "instance.InstanceMessages[messageID]"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Message %s does not exist\", messageID)"
+          ]
+        },
+        {
+          "lhs": [
+            "msg.FireflyTranID"
+          ],
+          "rhs": [
+            "fireflyTranID"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "!ok",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Message %s does not exist\", messageID)\n\tfmt.Println(errorMessage)\n\treturn errors.New(errorMessage)\n}"
+        }
+      ]
+    },
+    {
+      "name": "ChangeGtwState",
+      "receiver": "*SmartContract",
+      "body": "{\n\tgtw, ok := instance.InstanceGateways[gatewayID]\n\tif !ok {\n\t\terrorMessage := fmt.Sprintf(\"Gateway %s does not exist\", gatewayID)\n\t\tfmt.Println(errorMessage)\n\t\treturn errors.New(errorMessage)\n\t}\n\tgtw.GatewayState = gtwState\n\treturn nil\n}",
+      "calls": [
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Gateway %s does not exist\"",
+            "gatewayID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "errorMessage"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "gtw",
+            "ok"
+          ],
+          "rhs": [
+            "instance.InstanceGateways[gatewayID]"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Gateway %s does not exist\", gatewayID)"
+          ]
+        },
+        {
+          "lhs": [
+            "gtw.GatewayState"
+          ],
+          "rhs": [
+            "gtwState"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "!ok",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Gateway %s does not exist\", gatewayID)\n\tfmt.Println(errorMessage)\n\treturn errors.New(errorMessage)\n}"
+        }
+      ]
+    },
+    {
+      "name": "ChangeEventState",
+      "receiver": "*SmartContract",
+      "body": "{\n\tactionEvent, ok := instance.InstanceActionEvents[eventID]\n\tif !ok {\n\t\terrorMessage := fmt.Sprintf(\"Event %s does not exist\", eventID)\n\t\tfmt.Println(errorMessage)\n\t\treturn errors.New(errorMessage)\n\t}\n\tactionEvent.EventState = eventState\n\treturn nil\n\n}",
+      "calls": [
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Event %s does not exist\"",
+            "eventID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "errorMessage"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "actionEvent",
+            "ok"
+          ],
+          "rhs": [
+            "instance.InstanceActionEvents[eventID]"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Event %s does not exist\", eventID)"
+          ]
+        },
+        {
+          "lhs": [
+            "actionEvent.EventState"
+          ],
+          "rhs": [
+            "eventState"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "!ok",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Event %s does not exist\", eventID)\n\tfmt.Println(errorMessage)\n\treturn errors.New(errorMessage)\n}"
+        }
+      ]
+    },
+    {
+      "name": "ChangeBusinessRuleState",
+      "receiver": "*SmartContract",
+      "body": "{\n\tbusinessRule, ok := instance.InstanceBusinessRules[BusinessRuleID]\n\tif !ok {\n\t\terrorMessage := fmt.Sprintf(\"BusinessRule %s does not exist\", BusinessRuleID)\n\t\tfmt.Println(errorMessage)\n\t\treturn errors.New(errorMessage)\n\t}\n\tbusinessRule.State = state\n\treturn nil\n\n}",
+      "calls": [
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"BusinessRule %s does not exist\"",
+            "BusinessRuleID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "errorMessage"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "businessRule",
+            "ok"
+          ],
+          "rhs": [
+            "instance.InstanceBusinessRules[BusinessRuleID]"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"BusinessRule %s does not exist\", BusinessRuleID)"
+          ]
+        },
+        {
+          "lhs": [
+            "businessRule.State"
+          ],
+          "rhs": [
+            "state"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "!ok",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"BusinessRule %s does not exist\", BusinessRuleID)\n\tfmt.Println(errorMessage)\n\treturn errors.New(errorMessage)\n}"
+        }
+      ]
+    },
+    {
+      "name": "GetAllMessages",
+      "receiver": "*SmartContract",
+      "body": "{\n\tinstanceJson, err := ctx.GetStub().GetState(instanceID)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tif instanceJson == nil {\n\t\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\t\tfmt.Println(errorMessage)\n\t\treturn nil, errors.New(errorMessage)\n\t}\n\n\tvar instance ContractInstance\n\terr = json.Unmarshal(instanceJson, \u0026instance)\n\tif err != nil {\n\t\tfmt.Println(err.Error())\n\t\treturn nil, err\n\t}\n\n\tvar messages []*Message\n\tfor _, msg := range instance.InstanceMessages {\n\t\tmessages = append(messages, msg)\n\t}\n\n\treturn messages, nil\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub().GetState",
+          "args": [
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Instance %s does not exist\"",
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "json.Unmarshal",
+          "args": [
+            "instanceJson",
+            "\u0026instance"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        },
+        {
+          "callee": "append",
+          "args": [
+            "messages",
+            "msg"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "instanceJson",
+            "err"
+          ],
+          "rhs": [
+            "ctx.GetStub().GetState(instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Instance %s does not exist\", instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "err"
+          ],
+          "rhs": [
+            "json.Unmarshal(instanceJson, \u0026instance)"
+          ]
+        },
+        {
+          "lhs": [
+            "messages"
+          ],
+          "rhs": [
+            "append(messages, msg)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn nil, err\n}"
+        },
+        {
+          "condition": "instanceJson == nil",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\tfmt.Println(errorMessage)\n\treturn nil, errors.New(errorMessage)\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\tfmt.Println(err.Error())\n\treturn nil, err\n}"
+        }
+      ]
+    },
+    {
+      "name": "GetAllGateways",
+      "receiver": "*SmartContract",
+      "body": "{\n\n\tinstanceJson, err := ctx.GetStub().GetState(instanceID)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tif instanceJson == nil {\n\t\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\t\tfmt.Println(errorMessage)\n\t\treturn nil, errors.New(errorMessage)\n\t}\n\n\tvar instance ContractInstance\n\terr = json.Unmarshal(instanceJson, \u0026instance)\n\tif err != nil {\n\t\tfmt.Println(err.Error())\n\t\treturn nil, err\n\t}\n\n\tvar gateways []*Gateway\n\tfor _, gtw := range instance.InstanceGateways {\n\t\tgateways = append(gateways, gtw)\n\t}\n\n\treturn gateways, nil\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub().GetState",
+          "args": [
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Instance %s does not exist\"",
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "json.Unmarshal",
+          "args": [
+            "instanceJson",
+            "\u0026instance"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        },
+        {
+          "callee": "append",
+          "args": [
+            "gateways",
+            "gtw"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "instanceJson",
+            "err"
+          ],
+          "rhs": [
+            "ctx.GetStub().GetState(instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Instance %s does not exist\", instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "err"
+          ],
+          "rhs": [
+            "json.Unmarshal(instanceJson, \u0026instance)"
+          ]
+        },
+        {
+          "lhs": [
+            "gateways"
+          ],
+          "rhs": [
+            "append(gateways, gtw)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn nil, err\n}"
+        },
+        {
+          "condition": "instanceJson == nil",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\tfmt.Println(errorMessage)\n\treturn nil, errors.New(errorMessage)\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\tfmt.Println(err.Error())\n\treturn nil, err\n}"
+        }
+      ]
+    },
+    {
+      "name": "GetAllActionEvents",
+      "receiver": "*SmartContract",
+      "body": "{\n\n\tinstanceJson, err := ctx.GetStub().GetState(instanceID)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tif instanceJson == nil {\n\t\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\t\tfmt.Println(errorMessage)\n\t\treturn nil, errors.New(errorMessage)\n\t}\n\n\tvar instance ContractInstance\n\terr = json.Unmarshal(instanceJson, \u0026instance)\n\tif err != nil {\n\t\tfmt.Println(err.Error())\n\t\treturn nil, err\n\t}\n\n\tvar actionEvents []*ActionEvent\n\tfor _, event := range instance.InstanceActionEvents {\n\t\tactionEvents = append(actionEvents, event)\n\t}\n\n\treturn actionEvents, nil\n\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub().GetState",
+          "args": [
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Instance %s does not exist\"",
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "json.Unmarshal",
+          "args": [
+            "instanceJson",
+            "\u0026instance"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        },
+        {
+          "callee": "append",
+          "args": [
+            "actionEvents",
+            "event"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "instanceJson",
+            "err"
+          ],
+          "rhs": [
+            "ctx.GetStub().GetState(instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Instance %s does not exist\", instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "err"
+          ],
+          "rhs": [
+            "json.Unmarshal(instanceJson, \u0026instance)"
+          ]
+        },
+        {
+          "lhs": [
+            "actionEvents"
+          ],
+          "rhs": [
+            "append(actionEvents, event)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn nil, err\n}"
+        },
+        {
+          "condition": "instanceJson == nil",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\tfmt.Println(errorMessage)\n\treturn nil, errors.New(errorMessage)\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\tfmt.Println(err.Error())\n\treturn nil, err\n}"
+        }
+      ]
+    },
+    {
+      "name": "GetAllParticipants",
+      "receiver": "*SmartContract",
+      "body": "{\n\n\tinstanceJson, err := ctx.GetStub().GetState(instanceID)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tif instanceJson == nil {\n\t\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\t\tfmt.Println(errorMessage)\n\t\treturn nil, errors.New(errorMessage)\n\t}\n\n\tvar instance ContractInstance\n\terr = json.Unmarshal(instanceJson, \u0026instance)\n\tif err != nil {\n\t\tfmt.Println(err.Error())\n\t\treturn nil, err\n\t}\n\n\tvar participants []*Participant\n\tfor _, participant := range instance.InstanceParticipants {\n\t\tparticipants = append(participants, participant)\n\t}\n\n\treturn participants, nil\n\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub().GetState",
+          "args": [
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Instance %s does not exist\"",
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "json.Unmarshal",
+          "args": [
+            "instanceJson",
+            "\u0026instance"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        },
+        {
+          "callee": "append",
+          "args": [
+            "participants",
+            "participant"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "instanceJson",
+            "err"
+          ],
+          "rhs": [
+            "ctx.GetStub().GetState(instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Instance %s does not exist\", instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "err"
+          ],
+          "rhs": [
+            "json.Unmarshal(instanceJson, \u0026instance)"
+          ]
+        },
+        {
+          "lhs": [
+            "participants"
+          ],
+          "rhs": [
+            "append(participants, participant)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn nil, err\n}"
+        },
+        {
+          "condition": "instanceJson == nil",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\tfmt.Println(errorMessage)\n\treturn nil, errors.New(errorMessage)\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\tfmt.Println(err.Error())\n\treturn nil, err\n}"
+        }
+      ]
+    },
+    {
+      "name": "GetAllBusinessRules",
+      "receiver": "*SmartContract",
+      "body": "{\n\n\tinstanceJson, err := ctx.GetStub().GetState(instanceID)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tif instanceJson == nil {\n\t\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\t\tfmt.Println(errorMessage)\n\t\treturn nil, errors.New(errorMessage)\n\t}\n\n\tvar instance ContractInstance\n\terr = json.Unmarshal(instanceJson, \u0026instance)\n\tif err != nil {\n\t\tfmt.Println(err.Error())\n\t\treturn nil, err\n\t}\n\n\tvar businessRules []*BusinessRule\n\tfor _, businessRule := range instance.InstanceBusinessRules {\n\t\tbusinessRules = append(businessRules, businessRule)\n\t}\n\n\treturn businessRules, nil\n\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub().GetState",
+          "args": [
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Instance %s does not exist\"",
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "json.Unmarshal",
+          "args": [
+            "instanceJson",
+            "\u0026instance"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        },
+        {
+          "callee": "append",
+          "args": [
+            "businessRules",
+            "businessRule"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "instanceJson",
+            "err"
+          ],
+          "rhs": [
+            "ctx.GetStub().GetState(instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Instance %s does not exist\", instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "err"
+          ],
+          "rhs": [
+            "json.Unmarshal(instanceJson, \u0026instance)"
+          ]
+        },
+        {
+          "lhs": [
+            "businessRules"
+          ],
+          "rhs": [
+            "append(businessRules, businessRule)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn nil, err\n}"
+        },
+        {
+          "condition": "instanceJson == nil",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\tfmt.Println(errorMessage)\n\treturn nil, errors.New(errorMessage)\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\tfmt.Println(err.Error())\n\treturn nil, err\n}"
+        }
+      ]
+    },
+    {
+      "name": "ReadGlobalVariable",
+      "receiver": "*SmartContract",
+      "body": "{\n\n\tinstanceJson, err := ctx.GetStub().GetState(instanceID)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tif instanceJson == nil {\n\t\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\t\tfmt.Println(errorMessage)\n\t\treturn nil, errors.New(errorMessage)\n\t}\n\n\tvar instance ContractInstance\n\terr = json.Unmarshal(instanceJson, \u0026instance)\n\tif err != nil {\n\t\tfmt.Println(err.Error())\n\t\treturn nil, err\n\t}\n\n\treturn \u0026instance.InstanceStateMemory, nil\n\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub().GetState",
+          "args": [
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Instance %s does not exist\"",
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "json.Unmarshal",
+          "args": [
+            "instanceJson",
+            "\u0026instance"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "instanceJson",
+            "err"
+          ],
+          "rhs": [
+            "ctx.GetStub().GetState(instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Instance %s does not exist\", instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "err"
+          ],
+          "rhs": [
+            "json.Unmarshal(instanceJson, \u0026instance)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn nil, err\n}"
+        },
+        {
+          "condition": "instanceJson == nil",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\tfmt.Println(errorMessage)\n\treturn nil, errors.New(errorMessage)\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\tfmt.Println(err.Error())\n\treturn nil, err\n}"
+        }
+      ]
+    },
+    {
+      "name": "SetGlobalVariable",
+      "receiver": "*SmartContract",
+      "body": "{\n\tinstance.InstanceStateMemory = *globalVariable\n\treturn nil\n}",
+      "calls": null,
+      "assignments": [
+        {
+          "lhs": [
+            "instance.InstanceStateMemory"
+          ],
+          "rhs": [
+            "*globalVariable"
+          ]
+        }
+      ],
+      "ifs": null
+    },
+    {
+      "name": "ReadBusinessRule",
+      "receiver": "*SmartContract",
+      "body": "{\n\tinstanceJson, err := ctx.GetStub().GetState(instanceID)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tif instanceJson == nil {\n\t\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\t\tfmt.Println(errorMessage)\n\t\treturn nil, errors.New(errorMessage)\n\t}\n\n\tvar instance ContractInstance\n\terr = json.Unmarshal(instanceJson, \u0026instance)\n\tif err != nil {\n\t\tfmt.Println(err.Error())\n\t\treturn nil, err\n\t}\n\n\tbusinessRule, ok := instance.InstanceBusinessRules[BusinessRuleID]\n\tif !ok {\n\t\terrorMessage := fmt.Sprintf(\"BusinessRule %s does not exist\", BusinessRuleID)\n\t\tfmt.Println(errorMessage)\n\t\treturn nil, errors.New(errorMessage)\n\t}\n\n\treturn businessRule, nil\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub().GetState",
+          "args": [
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Instance %s does not exist\"",
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "json.Unmarshal",
+          "args": [
+            "instanceJson",
+            "\u0026instance"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"BusinessRule %s does not exist\"",
+            "BusinessRuleID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "errorMessage"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "instanceJson",
+            "err"
+          ],
+          "rhs": [
+            "ctx.GetStub().GetState(instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Instance %s does not exist\", instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "err"
+          ],
+          "rhs": [
+            "json.Unmarshal(instanceJson, \u0026instance)"
+          ]
+        },
+        {
+          "lhs": [
+            "businessRule",
+            "ok"
+          ],
+          "rhs": [
+            "instance.InstanceBusinessRules[BusinessRuleID]"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"BusinessRule %s does not exist\", BusinessRuleID)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn nil, err\n}"
+        },
+        {
+          "condition": "instanceJson == nil",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\tfmt.Println(errorMessage)\n\treturn nil, errors.New(errorMessage)\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\tfmt.Println(err.Error())\n\treturn nil, err\n}"
+        },
+        {
+          "condition": "!ok",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"BusinessRule %s does not exist\", BusinessRuleID)\n\tfmt.Println(errorMessage)\n\treturn nil, errors.New(errorMessage)\n}"
+        }
+      ]
+    },
+    {
+      "name": "ReadParticipant",
+      "receiver": "*SmartContract",
+      "body": "{\n\n\tinstanceJson, err := ctx.GetStub().GetState(instanceID)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tif instanceJson == nil {\n\t\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\t\tfmt.Println(errorMessage)\n\t\treturn nil, errors.New(errorMessage)\n\t}\n\n\tvar instance ContractInstance\n\terr = json.Unmarshal(instanceJson, \u0026instance)\n\tif err != nil {\n\t\tfmt.Println(err.Error())\n\t\treturn nil, err\n\t}\n\n\tparticipant, ok := instance.InstanceParticipants[participantID]\n\tif !ok {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s does not exist\", participantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn nil, errors.New(errorMessage)\n\t}\n\n\treturn participant, nil\n\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub().GetState",
+          "args": [
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Instance %s does not exist\"",
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "json.Unmarshal",
+          "args": [
+            "instanceJson",
+            "\u0026instance"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Participant %s does not exist\"",
+            "participantID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "errorMessage"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "instanceJson",
+            "err"
+          ],
+          "rhs": [
+            "ctx.GetStub().GetState(instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Instance %s does not exist\", instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "err"
+          ],
+          "rhs": [
+            "json.Unmarshal(instanceJson, \u0026instance)"
+          ]
+        },
+        {
+          "lhs": [
+            "participant",
+            "ok"
+          ],
+          "rhs": [
+            "instance.InstanceParticipants[participantID]"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Participant %s does not exist\", participantID)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn nil, err\n}"
+        },
+        {
+          "condition": "instanceJson == nil",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\tfmt.Println(errorMessage)\n\treturn nil, errors.New(errorMessage)\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\tfmt.Println(err.Error())\n\treturn nil, err\n}"
+        },
+        {
+          "condition": "!ok",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Participant %s does not exist\", participantID)\n\tfmt.Println(errorMessage)\n\treturn nil, errors.New(errorMessage)\n}"
+        }
+      ]
+    },
+    {
+      "name": "WriteParticipant",
+      "receiver": "*SmartContract",
+      "body": "{\n\tstub := ctx.GetStub()\n\n\tinstanceJson, err := stub.GetState(instanceID)\n\tif err != nil {\n\t\treturn err\n\t}\n\tif instanceJson == nil {\n\t\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\t\tfmt.Println(errorMessage)\n\t\treturn errors.New(errorMessage)\n\t}\n\n\tvar instance ContractInstance\n\terr = json.Unmarshal(instanceJson, \u0026instance)\n\tif err != nil {\n\t\tfmt.Println(err.Error())\n\t\treturn err\n\t}\n\n\tinstance.InstanceParticipants[participantID] = participant\n\n\tinstanceJson, err = json.Marshal(instance)\n\tif err != nil {\n\t\tfmt.Println(err.Error())\n\t\treturn err\n\t}\n\n\terr = stub.PutState(instanceID, instanceJson)\n\tif err != nil {\n\t\tfmt.Println(err.Error())\n\t\treturn err\n\t}\n\n\treturn nil\n\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "stub.GetState",
+          "args": [
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Instance %s does not exist\"",
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "json.Unmarshal",
+          "args": [
+            "instanceJson",
+            "\u0026instance"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        },
+        {
+          "callee": "json.Marshal",
+          "args": [
+            "instance"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        },
+        {
+          "callee": "stub.PutState",
+          "args": [
+            "instanceID",
+            "instanceJson"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "stub"
+          ],
+          "rhs": [
+            "ctx.GetStub()"
+          ]
+        },
+        {
+          "lhs": [
+            "instanceJson",
+            "err"
+          ],
+          "rhs": [
+            "stub.GetState(instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Instance %s does not exist\", instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "err"
+          ],
+          "rhs": [
+            "json.Unmarshal(instanceJson, \u0026instance)"
+          ]
+        },
+        {
+          "lhs": [
+            "instance.InstanceParticipants[participantID]"
+          ],
+          "rhs": [
+            "participant"
+          ]
+        },
+        {
+          "lhs": [
+            "instanceJson",
+            "err"
+          ],
+          "rhs": [
+            "json.Marshal(instance)"
+          ]
+        },
+        {
+          "lhs": [
+            "err"
+          ],
+          "rhs": [
+            "stub.PutState(instanceID, instanceJson)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn err\n}"
+        },
+        {
+          "condition": "instanceJson == nil",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Instance %s does not exist\", instanceID)\n\tfmt.Println(errorMessage)\n\treturn errors.New(errorMessage)\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\tfmt.Println(err.Error())\n\treturn err\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\tfmt.Println(err.Error())\n\treturn err\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\tfmt.Println(err.Error())\n\treturn err\n}"
+        }
+      ]
+    },
+    {
+      "name": "check_msp",
+      "receiver": "*SmartContract",
+      "body": "{\n\n\ttargetParticipant, err := cc.ReadParticipant(ctx, instanceID, target_participant)\n\tif err != nil {\n\t\treturn false\n\t}\n\tmspID, err := ctx.GetClientIdentity().GetMSPID()\n\tif err != nil {\n\t\treturn false\n\t}\n\treturn mspID == targetParticipant.MSP\n}",
+      "calls": [
+        {
+          "callee": "cc.ReadParticipant",
+          "args": [
+            "ctx",
+            "instanceID",
+            "target_participant"
+          ]
+        },
+        {
+          "callee": "ctx.GetClientIdentity().GetMSPID",
+          "args": []
+        },
+        {
+          "callee": "ctx.GetClientIdentity",
+          "args": []
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "targetParticipant",
+            "err"
+          ],
+          "rhs": [
+            "cc.ReadParticipant(ctx, instanceID, target_participant)"
+          ]
+        },
+        {
+          "lhs": [
+            "mspID",
+            "err"
+          ],
+          "rhs": [
+            "ctx.GetClientIdentity().GetMSPID()"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn false\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn false\n}"
+        }
+      ]
+    },
+    {
+      "name": "check_attribute",
+      "receiver": "*SmartContract",
+      "body": "{\n\ttargetParticipant, err := cc.ReadParticipant(ctx, instanceID, target_participant)\n\tif err != nil {\n\t\treturn false\n\t}\n\tif ctx.GetClientIdentity().AssertAttributeValue(attributeName, targetParticipant.Attributes[attributeName]) != nil {\n\t\treturn false\n\t}\n\n\treturn true\n}",
+      "calls": [
+        {
+          "callee": "cc.ReadParticipant",
+          "args": [
+            "ctx",
+            "instanceID",
+            "target_participant"
+          ]
+        },
+        {
+          "callee": "ctx.GetClientIdentity().AssertAttributeValue",
+          "args": [
+            "attributeName",
+            "targetParticipant.Attributes[attributeName]"
+          ]
+        },
+        {
+          "callee": "ctx.GetClientIdentity",
+          "args": []
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "targetParticipant",
+            "err"
+          ],
+          "rhs": [
+            "cc.ReadParticipant(ctx, instanceID, target_participant)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn false\n}"
+        },
+        {
+          "condition": "ctx.GetClientIdentity().AssertAttributeValue(attributeName, targetParticipant.Attributes[attributeName]) != nil",
+          "then": "{\n\treturn false\n}"
+        }
+      ]
+    },
+    {
+      "name": "check_participant",
+      "receiver": "*SmartContract",
+      "body": "{\n\n\ttargetParticipant, err := cc.ReadParticipant(ctx, instanceID, target_participant)\n\tif err != nil {\n\t\treturn false\n\t}\n\n\tif !targetParticipant.IsMulti {\n\n\t\tmspID, _ := ctx.GetClientIdentity().GetMSPID()\n\t\tpid, _ := ctx.GetClientIdentity().GetID()\n\t\tif targetParticipant.X509 == pid+\"@\"+mspID {\n\t\t\treturn true\n\t\t} else {\n\t\t\treturn false\n\t\t}\n\t}\n\n\tif targetParticipant.MSP != \"\" \u0026\u0026 !cc.check_msp(ctx, instanceID, target_participant) {\n\t\treturn false\n\t}\n\n\tfor key := range targetParticipant.Attributes {\n\t\tif !cc.check_attribute(ctx, instanceID, target_participant, key) {\n\t\t\treturn false\n\t\t}\n\t}\n\n\treturn true\n}",
+      "calls": [
+        {
+          "callee": "cc.ReadParticipant",
+          "args": [
+            "ctx",
+            "instanceID",
+            "target_participant"
+          ]
+        },
+        {
+          "callee": "ctx.GetClientIdentity().GetMSPID",
+          "args": []
+        },
+        {
+          "callee": "ctx.GetClientIdentity",
+          "args": []
+        },
+        {
+          "callee": "ctx.GetClientIdentity().GetID",
+          "args": []
+        },
+        {
+          "callee": "ctx.GetClientIdentity",
+          "args": []
+        },
+        {
+          "callee": "cc.check_msp",
+          "args": [
+            "ctx",
+            "instanceID",
+            "target_participant"
+          ]
+        },
+        {
+          "callee": "cc.check_attribute",
+          "args": [
+            "ctx",
+            "instanceID",
+            "target_participant",
+            "key"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "targetParticipant",
+            "err"
+          ],
+          "rhs": [
+            "cc.ReadParticipant(ctx, instanceID, target_participant)"
+          ]
+        },
+        {
+          "lhs": [
+            "mspID",
+            "_"
+          ],
+          "rhs": [
+            "ctx.GetClientIdentity().GetMSPID()"
+          ]
+        },
+        {
+          "lhs": [
+            "pid",
+            "_"
+          ],
+          "rhs": [
+            "ctx.GetClientIdentity().GetID()"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn false\n}"
+        },
+        {
+          "condition": "!targetParticipant.IsMulti",
+          "then": "{\n\n\tmspID, _ := ctx.GetClientIdentity().GetMSPID()\n\tpid, _ := ctx.GetClientIdentity().GetID()\n\tif targetParticipant.X509 == pid+\"@\"+mspID {\n\t\treturn true\n\t} else {\n\t\treturn false\n\t}\n}"
+        },
+        {
+          "condition": "targetParticipant.X509 == pid+\"@\"+mspID",
+          "then": "{\n\treturn true\n}",
+          "else": "{\n\treturn false\n}"
+        },
+        {
+          "condition": "targetParticipant.MSP != \"\" \u0026\u0026 !cc.check_msp(ctx, instanceID, target_participant)",
+          "then": "{\n\treturn false\n}"
+        },
+        {
+          "condition": "!cc.check_attribute(ctx, instanceID, target_participant, key)",
+          "then": "{\n\treturn false\n}"
+        }
+      ]
+    },
+    {
+      "name": "InitLedger",
+      "receiver": "*SmartContract",
+      "body": "{\n\tstub := ctx.GetStub()\n\n\tisInitedBytes, err := stub.GetState(\"isInited\")\n\tif err != nil {\n\t\treturn fmt.Errorf(\"Failed to get isInited: %v\", err)\n\t}\n\tif isInitedBytes != nil {\n\t\terrorMessage := \"Chaincode has already been initialized\"\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tstub.PutState(\"currentInstanceID\", []byte(\"0\"))\n\n\tstub.PutState(\"isInited\", []byte(\"true\"))\n\n\tstub.SetEvent(\"initContractEvent\", []byte(\"Contract has been initialized successfully\"))\n\treturn nil\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "stub.GetState",
+          "args": [
+            "\"isInited\""
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "\"Failed to get isInited: %v\"",
+            "err"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "stub.PutState",
+          "args": [
+            "\"currentInstanceID\"",
+            "[]byte(\"0\")"
+          ]
+        },
+        {
+          "callee": "[]byte",
+          "args": [
+            "\"0\""
+          ]
+        },
+        {
+          "callee": "stub.PutState",
+          "args": [
+            "\"isInited\"",
+            "[]byte(\"true\")"
+          ]
+        },
+        {
+          "callee": "[]byte",
+          "args": [
+            "\"true\""
+          ]
+        },
+        {
+          "callee": "stub.SetEvent",
+          "args": [
+            "\"initContractEvent\"",
+            "[]byte(\"Contract has been initialized successfully\")"
+          ]
+        },
+        {
+          "callee": "[]byte",
+          "args": [
+            "\"Contract has been initialized successfully\""
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "stub"
+          ],
+          "rhs": [
+            "ctx.GetStub()"
+          ]
+        },
+        {
+          "lhs": [
+            "isInitedBytes",
+            "err"
+          ],
+          "rhs": [
+            "stub.GetState(\"isInited\")"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "\"Chaincode has already been initialized\""
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn fmt.Errorf(\"Failed to get isInited: %v\", err)\n}"
+        },
+        {
+          "condition": "isInitedBytes != nil",
+          "then": "{\n\terrorMessage := \"Chaincode has already been initialized\"\n\tfmt.Println(errorMessage)\n\treturn fmt.Errorf(errorMessage)\n}"
+        }
+      ]
+    },
+    {
+      "name": "hashXML",
+      "receiver": "*SmartContract",
+      "body": "{\n\n\thash := sha256.New()\n\thash.Write([]byte(xmlString))\n\thashInBytes := hash.Sum(nil)\n\thashString := hex.EncodeToString(hashInBytes)\n\tfmt.Print(hashString)\n\treturn hashString, nil\n}",
+      "calls": [
+        {
+          "callee": "sha256.New",
+          "args": []
+        },
+        {
+          "callee": "hash.Write",
+          "args": [
+            "[]byte(xmlString)"
+          ]
+        },
+        {
+          "callee": "[]byte",
+          "args": [
+            "xmlString"
+          ]
+        },
+        {
+          "callee": "hash.Sum",
+          "args": [
+            "nil"
+          ]
+        },
+        {
+          "callee": "hex.EncodeToString",
+          "args": [
+            "hashInBytes"
+          ]
+        },
+        {
+          "callee": "fmt.Print",
+          "args": [
+            "hashString"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "hash"
+          ],
+          "rhs": [
+            "sha256.New()"
+          ]
+        },
+        {
+          "lhs": [
+            "hashInBytes"
+          ],
+          "rhs": [
+            "hash.Sum(nil)"
+          ]
+        },
+        {
+          "lhs": [
+            "hashString"
+          ],
+          "rhs": [
+            "hex.EncodeToString(hashInBytes)"
+          ]
+        }
+      ],
+      "ifs": null
+    },
+    {
+      "name": "ReadState",
+      "receiver": "*SmartContract",
+      "body": "{\n\tstateJSON, err := ctx.GetStub().GetState(\"currentMemory\")\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\n\tif stateJSON == nil {\n\n\t\treturn \u0026StateMemory{}, nil\n\t}\n\n\tvar stateMemory StateMemory\n\terr = json.Unmarshal(stateJSON, \u0026stateMemory)\n\tif err != nil {\n\t\tfmt.Println(err.Error())\n\t\treturn nil, err\n\t}\n\n\treturn \u0026stateMemory, nil\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub().GetState",
+          "args": [
+            "\"currentMemory\""
+          ]
+        },
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "json.Unmarshal",
+          "args": [
+            "stateJSON",
+            "\u0026stateMemory"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "stateJSON",
+            "err"
+          ],
+          "rhs": [
+            "ctx.GetStub().GetState(\"currentMemory\")"
+          ]
+        },
+        {
+          "lhs": [
+            "err"
+          ],
+          "rhs": [
+            "json.Unmarshal(stateJSON, \u0026stateMemory)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn nil, err\n}"
+        },
+        {
+          "condition": "stateJSON == nil",
+          "then": "{\n\n\treturn \u0026StateMemory{}, nil\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\tfmt.Println(err.Error())\n\treturn nil, err\n}"
+        }
+      ]
+    },
+    {
+      "name": "PutState",
+      "receiver": "*SmartContract",
+      "body": "{\n\tstub := ctx.GetStub()\n\tcurrentMemory, err := cc.ReadState(ctx)\n\tif err != nil {\n\t\treturn err\n\t}\n\tval := reflect.ValueOf(currentMemory)\n\tif val.Kind() != reflect.Ptr || val.Elem().Kind() != reflect.Struct {\n\t\treturn errors.New(\"currentMemory is not a struct pointer\")\n\t}\n\tfield := val.Elem().FieldByName(stateName)\n\tif !field.IsValid() {\n\t\treturn errors.New(\"field does not exist\")\n\t}\n\tif !field.CanSet() {\n\t\treturn errors.New(\"field cannot be set\")\n\t}\n\n\tswitch field.Interface().(type) {\n\tcase string:\n\t\tstringValue, ok := stateValue.(string)\n\t\tif !ok {\n\t\t\treturn errors.New(\"stateValue is not a string\")\n\t\t}\n\t\tfield.SetString(stringValue)\n\tcase int:\n\t\tintValue, ok := stateValue.(int)\n\t\tif !ok {\n\t\t\treturn errors.New(\"stateValue is not an int\")\n\t\t}\n\t\tfield.SetInt(int64(intValue))\n\tcase float64:\n\t\tfloatValue, ok := stateValue.(float64)\n\t\tif !ok {\n\t\t\treturn errors.New(\"stateValue is not a float64\")\n\t\t}\n\t\tfield.SetFloat(floatValue)\n\tcase bool:\n\t\tboolValue, ok := stateValue.(bool)\n\t\tif !ok {\n\t\t\treturn errors.New(\"stateValue is not a bool\")\n\t\t}\n\t\tfield.SetBool(boolValue)\n\n\tdefault:\n\t\treturn errors.New(\"unsupported field type\")\n\t}\n\n\tcurrentMemoryJSON, err := json.Marshal(currentMemory)\n\tif err != nil {\n\t\tfmt.Println(err.Error())\n\t\treturn err\n\t}\n\n\terr = stub.PutState(\"currentMemory\", currentMemoryJSON)\n\tif err != nil {\n\t\tfmt.Println(err.Error())\n\t\treturn err\n\t}\n\n\treturn nil\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "cc.ReadState",
+          "args": [
+            "ctx"
+          ]
+        },
+        {
+          "callee": "reflect.ValueOf",
+          "args": [
+            "currentMemory"
+          ]
+        },
+        {
+          "callee": "val.Kind",
+          "args": []
+        },
+        {
+          "callee": "val.Elem().Kind",
+          "args": []
+        },
+        {
+          "callee": "val.Elem",
+          "args": []
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "\"currentMemory is not a struct pointer\""
+          ]
+        },
+        {
+          "callee": "val.Elem().FieldByName",
+          "args": [
+            "stateName"
+          ]
+        },
+        {
+          "callee": "val.Elem",
+          "args": []
+        },
+        {
+          "callee": "field.IsValid",
+          "args": []
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "\"field does not exist\""
+          ]
+        },
+        {
+          "callee": "field.CanSet",
+          "args": []
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "\"field cannot be set\""
+          ]
+        },
+        {
+          "callee": "field.Interface",
+          "args": []
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "\"stateValue is not a string\""
+          ]
+        },
+        {
+          "callee": "field.SetString",
+          "args": [
+            "stringValue"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "\"stateValue is not an int\""
+          ]
+        },
+        {
+          "callee": "field.SetInt",
+          "args": [
+            "int64(intValue)"
+          ]
+        },
+        {
+          "callee": "int64",
+          "args": [
+            "intValue"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "\"stateValue is not a float64\""
+          ]
+        },
+        {
+          "callee": "field.SetFloat",
+          "args": [
+            "floatValue"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "\"stateValue is not a bool\""
+          ]
+        },
+        {
+          "callee": "field.SetBool",
+          "args": [
+            "boolValue"
+          ]
+        },
+        {
+          "callee": "errors.New",
+          "args": [
+            "\"unsupported field type\""
+          ]
+        },
+        {
+          "callee": "json.Marshal",
+          "args": [
+            "currentMemory"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        },
+        {
+          "callee": "stub.PutState",
+          "args": [
+            "\"currentMemory\"",
+            "currentMemoryJSON"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "stub"
+          ],
+          "rhs": [
+            "ctx.GetStub()"
+          ]
+        },
+        {
+          "lhs": [
+            "currentMemory",
+            "err"
+          ],
+          "rhs": [
+            "cc.ReadState(ctx)"
+          ]
+        },
+        {
+          "lhs": [
+            "val"
+          ],
+          "rhs": [
+            "reflect.ValueOf(currentMemory)"
+          ]
+        },
+        {
+          "lhs": [
+            "field"
+          ],
+          "rhs": [
+            "val.Elem().FieldByName(stateName)"
+          ]
+        },
+        {
+          "lhs": [
+            "stringValue",
+            "ok"
+          ],
+          "rhs": [
+            "stateValue.(string)"
+          ]
+        },
+        {
+          "lhs": [
+            "intValue",
+            "ok"
+          ],
+          "rhs": [
+            "stateValue.(int)"
+          ]
+        },
+        {
+          "lhs": [
+            "floatValue",
+            "ok"
+          ],
+          "rhs": [
+            "stateValue.(float64)"
+          ]
+        },
+        {
+          "lhs": [
+            "boolValue",
+            "ok"
+          ],
+          "rhs": [
+            "stateValue.(bool)"
+          ]
+        },
+        {
+          "lhs": [
+            "currentMemoryJSON",
+            "err"
+          ],
+          "rhs": [
+            "json.Marshal(currentMemory)"
+          ]
+        },
+        {
+          "lhs": [
+            "err"
+          ],
+          "rhs": [
+            "stub.PutState(\"currentMemory\", currentMemoryJSON)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn err\n}"
+        },
+        {
+          "condition": "val.Kind() != reflect.Ptr || val.Elem().Kind() != reflect.Struct",
+          "then": "{\n\treturn errors.New(\"currentMemory is not a struct pointer\")\n}"
+        },
+        {
+          "condition": "!field.IsValid()",
+          "then": "{\n\treturn errors.New(\"field does not exist\")\n}"
+        },
+        {
+          "condition": "!field.CanSet()",
+          "then": "{\n\treturn errors.New(\"field cannot be set\")\n}"
+        },
+        {
+          "condition": "!ok",
+          "then": "{\n\treturn errors.New(\"stateValue is not a string\")\n}"
+        },
+        {
+          "condition": "!ok",
+          "then": "{\n\treturn errors.New(\"stateValue is not an int\")\n}"
+        },
+        {
+          "condition": "!ok",
+          "then": "{\n\treturn errors.New(\"stateValue is not a float64\")\n}"
+        },
+        {
+          "condition": "!ok",
+          "then": "{\n\treturn errors.New(\"stateValue is not a bool\")\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\tfmt.Println(err.Error())\n\treturn err\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\tfmt.Println(err.Error())\n\treturn err\n}"
+        }
+      ]
+    },
+    {
+      "name": "CreateInstance",
+      "receiver": "*SmartContract",
+      "body": "{\n\tstub := ctx.GetStub()\n\n\tisInitedBytes, err := stub.GetState(\"isInited\")\n\tif err != nil {\n\t\treturn \"\", fmt.Errorf(\"failed to read from world state. %s\", err.Error())\n\t}\n\n\tif isInitedBytes == nil {\n\t\treturn \"\", fmt.Errorf(\"The instance has not been initialized.\")\n\t}\n\n\tisInited, err := strconv.ParseBool(string(isInitedBytes))\n\n\tif err != nil {\n\t\treturn \"\", fmt.Errorf(\"fail To Resolve isInited\")\n\t}\n\tif !isInited {\n\t\treturn \"\", fmt.Errorf(\"The instance has not been initialized.\")\n\t}\n\n\tinstanceIDBytes, err := stub.GetState(\"currentInstanceID\")\n\tif err != nil {\n\t\treturn \"\", fmt.Errorf(\"failed to read from world state. %s\", err.Error())\n\t}\n\n\tinstanceID := string(instanceIDBytes)\n\n\t// Create the instance with the data from the InitParameters\n\tvar initParameters InitParameters\n\terr = json.Unmarshal([]byte(initParametersBytes), \u0026initParameters)\n\tif err != nil {\n\t\treturn \"\", fmt.Errorf(\"failed to unmarshal. %s\", err.Error())\n\t}\n\n\tinstance := ContractInstance{\n\t\tInstanceID:\t\tinstanceID,\n\t\tInstanceStateMemory:\tStateMemory{},\n\t\tInstanceMessages:\tmake(map[string]*Message),\n\t\tInstanceActionEvents:\tmake(map[string]*ActionEvent),\n\t\tInstanceGateways:\tmake(map[string]*Gateway),\n\t\tInstanceParticipants:\tmake(map[string]*Participant),\n\t\tInstanceBusinessRules:\tmake(map[string]*BusinessRule),\n\t}\n\n\tcc.CreateParticipant(ctx, \u0026instance, \"ManagerC\", initParameters.ManagerC.MSP, initParameters.ManagerC.Attributes, initParameters.ManagerC.X509, initParameters.ManagerC.IsMulti, 0, 0)\n\tcc.CreateParticipant(ctx, \u0026instance, \"WorkerC\", initParameters.WorkerC.MSP, initParameters.WorkerC.Attributes, initParameters.WorkerC.X509, initParameters.WorkerC.IsMulti, 0, 0)\n\tcc.CreateActionEvent(ctx, \u0026instance, \"StartEvent_C\", ENABLED)\n\tcc.CreateActionEvent(ctx, \u0026instance, \"EndEvent_C\", DISABLED)\n\tcc.CreateMessage(ctx, \u0026instance, \"TaskC\", \"ManagerC\", \"WorkerC\", \"\", DISABLED, `{\"schema\": \"{}\"}`)\n\tcc.CreateMessage(ctx, \u0026instance, \"ReportC\", \"WorkerC\", \"ManagerC\", \"\", DISABLED, `{\"schema\": \"{}\"}`)\n\tcc.CreateGateway(ctx, \u0026instance, \"ReviewC\", DISABLED)\n\n\tinstanceBytes, err := json.Marshal(instance)\n\tif err != nil {\n\t\treturn \"\", fmt.Errorf(\"failed to marshal. %s\", err.Error())\n\t}\n\n\terr = stub.PutState(instanceID, instanceBytes)\n\tif err != nil {\n\t\treturn \"\", fmt.Errorf(\"failed to put state. %s\", err.Error())\n\t}\n\n\teventPayload := map[string]string{\n\t\t\"InstanceID\": instanceID,\n\t}\n\n\teventPayloadAsBytes, err := json.Marshal(eventPayload)\n\tif err != nil {\n\t\treturn \"\", fmt.Errorf(\"failed to marshal event payload: %v\", err)\n\t}\n\n\terr = ctx.GetStub().SetEvent(\"InstanceCreated\", eventPayloadAsBytes)\n\tif err != nil {\n\t\treturn \"\", fmt.Errorf(\"failed to set event: %v\", err)\n\t}\n\n\tinstanceIDInt, err := strconv.Atoi(instanceID)\n\tif err != nil {\n\t\treturn \"\", fmt.Errorf(\"failed to convert instanceID to int. %s\", err.Error())\n\t}\n\n\tinstanceIDInt++\n\tinstanceID = strconv.Itoa(instanceIDInt)\n\n\tinstanceIDBytes = []byte(instanceID)\n\tif err != nil {\n\t\treturn \"\", fmt.Errorf(\"failed to marshal instanceID. %s\", err.Error())\n\t}\n\n\terr = stub.PutState(\"currentInstanceID\", instanceIDBytes)\n\tif err != nil {\n\t\treturn \"\", fmt.Errorf(\"failed to put state. %s\", err.Error())\n\t}\n\n\treturn instanceID, nil\n\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "stub.GetState",
+          "args": [
+            "\"isInited\""
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "\"failed to read from world state. %s\"",
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "\"The instance has not been initialized.\""
+          ]
+        },
+        {
+          "callee": "strconv.ParseBool",
+          "args": [
+            "string(isInitedBytes)"
+          ]
+        },
+        {
+          "callee": "string",
+          "args": [
+            "isInitedBytes"
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "\"fail To Resolve isInited\""
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "\"The instance has not been initialized.\""
+          ]
+        },
+        {
+          "callee": "stub.GetState",
+          "args": [
+            "\"currentInstanceID\""
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "\"failed to read from world state. %s\"",
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        },
+        {
+          "callee": "string",
+          "args": [
+            "instanceIDBytes"
+          ]
+        },
+        {
+          "callee": "json.Unmarshal",
+          "args": [
+            "[]byte(initParametersBytes)",
+            "\u0026initParameters"
+          ]
+        },
+        {
+          "callee": "[]byte",
+          "args": [
+            "initParametersBytes"
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "\"failed to unmarshal. %s\"",
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        },
+        {
+          "callee": "make",
+          "args": [
+            "map[string]*Message"
+          ]
+        },
+        {
+          "callee": "make",
+          "args": [
+            "map[string]*ActionEvent"
+          ]
+        },
+        {
+          "callee": "make",
+          "args": [
+            "map[string]*Gateway"
+          ]
+        },
+        {
+          "callee": "make",
+          "args": [
+            "map[string]*Participant"
+          ]
+        },
+        {
+          "callee": "make",
+          "args": [
+            "map[string]*BusinessRule"
+          ]
+        },
+        {
+          "callee": "cc.CreateParticipant",
+          "args": [
+            "ctx",
+            "\u0026instance",
+            "\"ManagerC\"",
+            "initParameters.ManagerC.MSP",
+            "initParameters.ManagerC.Attributes",
+            "initParameters.ManagerC.X509",
+            "initParameters.ManagerC.IsMulti",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "callee": "cc.CreateParticipant",
+          "args": [
+            "ctx",
+            "\u0026instance",
+            "\"WorkerC\"",
+            "initParameters.WorkerC.MSP",
+            "initParameters.WorkerC.Attributes",
+            "initParameters.WorkerC.X509",
+            "initParameters.WorkerC.IsMulti",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "callee": "cc.CreateActionEvent",
+          "args": [
+            "ctx",
+            "\u0026instance",
+            "\"StartEvent_C\"",
+            "ENABLED"
+          ]
+        },
+        {
+          "callee": "cc.CreateActionEvent",
+          "args": [
+            "ctx",
+            "\u0026instance",
+            "\"EndEvent_C\"",
+            "DISABLED"
+          ]
+        },
+        {
+          "callee": "cc.CreateMessage",
+          "args": [
+            "ctx",
+            "\u0026instance",
+            "\"TaskC\"",
+            "\"ManagerC\"",
+            "\"WorkerC\"",
+            "\"\"",
+            "DISABLED",
+            "`{\"schema\": \"{}\"}`"
+          ]
+        },
+        {
+          "callee": "cc.CreateMessage",
+          "args": [
+            "ctx",
+            "\u0026instance",
+            "\"ReportC\"",
+            "\"WorkerC\"",
+            "\"ManagerC\"",
+            "\"\"",
+            "DISABLED",
+            "`{\"schema\": \"{}\"}`"
+          ]
+        },
+        {
+          "callee": "cc.CreateGateway",
+          "args": [
+            "ctx",
+            "\u0026instance",
+            "\"ReviewC\"",
+            "DISABLED"
+          ]
+        },
+        {
+          "callee": "json.Marshal",
+          "args": [
+            "instance"
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "\"failed to marshal. %s\"",
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        },
+        {
+          "callee": "stub.PutState",
+          "args": [
+            "instanceID",
+            "instanceBytes"
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "\"failed to put state. %s\"",
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        },
+        {
+          "callee": "json.Marshal",
+          "args": [
+            "eventPayload"
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "\"failed to marshal event payload: %v\"",
+            "err"
+          ]
+        },
+        {
+          "callee": "ctx.GetStub().SetEvent",
+          "args": [
+            "\"InstanceCreated\"",
+            "eventPayloadAsBytes"
+          ]
+        },
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "\"failed to set event: %v\"",
+            "err"
+          ]
+        },
+        {
+          "callee": "strconv.Atoi",
+          "args": [
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "\"failed to convert instanceID to int. %s\"",
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        },
+        {
+          "callee": "strconv.Itoa",
+          "args": [
+            "instanceIDInt"
+          ]
+        },
+        {
+          "callee": "[]byte",
+          "args": [
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "\"failed to marshal instanceID. %s\"",
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        },
+        {
+          "callee": "stub.PutState",
+          "args": [
+            "\"currentInstanceID\"",
+            "instanceIDBytes"
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "\"failed to put state. %s\"",
+            "err.Error()"
+          ]
+        },
+        {
+          "callee": "err.Error",
+          "args": []
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "stub"
+          ],
+          "rhs": [
+            "ctx.GetStub()"
+          ]
+        },
+        {
+          "lhs": [
+            "isInitedBytes",
+            "err"
+          ],
+          "rhs": [
+            "stub.GetState(\"isInited\")"
+          ]
+        },
+        {
+          "lhs": [
+            "isInited",
+            "err"
+          ],
+          "rhs": [
+            "strconv.ParseBool(string(isInitedBytes))"
+          ]
+        },
+        {
+          "lhs": [
+            "instanceIDBytes",
+            "err"
+          ],
+          "rhs": [
+            "stub.GetState(\"currentInstanceID\")"
+          ]
+        },
+        {
+          "lhs": [
+            "instanceID"
+          ],
+          "rhs": [
+            "string(instanceIDBytes)"
+          ]
+        },
+        {
+          "lhs": [
+            "err"
+          ],
+          "rhs": [
+            "json.Unmarshal([]byte(initParametersBytes), \u0026initParameters)"
+          ]
+        },
+        {
+          "lhs": [
+            "instance"
+          ],
+          "rhs": [
+            "ContractInstance{\n\tInstanceID:\t\tinstanceID,\n\tInstanceStateMemory:\tStateMemory{},\n\tInstanceMessages:\tmake(map[string]*Message),\n\tInstanceActionEvents:\tmake(map[string]*ActionEvent),\n\tInstanceGateways:\tmake(map[string]*Gateway),\n\tInstanceParticipants:\tmake(map[string]*Participant),\n\tInstanceBusinessRules:\tmake(map[string]*BusinessRule),\n}"
+          ]
+        },
+        {
+          "lhs": [
+            "instanceBytes",
+            "err"
+          ],
+          "rhs": [
+            "json.Marshal(instance)"
+          ]
+        },
+        {
+          "lhs": [
+            "err"
+          ],
+          "rhs": [
+            "stub.PutState(instanceID, instanceBytes)"
+          ]
+        },
+        {
+          "lhs": [
+            "eventPayload"
+          ],
+          "rhs": [
+            "map[string]string{\n\t\"InstanceID\": instanceID,\n}"
+          ]
+        },
+        {
+          "lhs": [
+            "eventPayloadAsBytes",
+            "err"
+          ],
+          "rhs": [
+            "json.Marshal(eventPayload)"
+          ]
+        },
+        {
+          "lhs": [
+            "err"
+          ],
+          "rhs": [
+            "ctx.GetStub().SetEvent(\"InstanceCreated\", eventPayloadAsBytes)"
+          ]
+        },
+        {
+          "lhs": [
+            "instanceIDInt",
+            "err"
+          ],
+          "rhs": [
+            "strconv.Atoi(instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "instanceID"
+          ],
+          "rhs": [
+            "strconv.Itoa(instanceIDInt)"
+          ]
+        },
+        {
+          "lhs": [
+            "instanceIDBytes"
+          ],
+          "rhs": [
+            "[]byte(instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "err"
+          ],
+          "rhs": [
+            "stub.PutState(\"currentInstanceID\", instanceIDBytes)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn \"\", fmt.Errorf(\"failed to read from world state. %s\", err.Error())\n}"
+        },
+        {
+          "condition": "isInitedBytes == nil",
+          "then": "{\n\treturn \"\", fmt.Errorf(\"The instance has not been initialized.\")\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn \"\", fmt.Errorf(\"fail To Resolve isInited\")\n}"
+        },
+        {
+          "condition": "!isInited",
+          "then": "{\n\treturn \"\", fmt.Errorf(\"The instance has not been initialized.\")\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn \"\", fmt.Errorf(\"failed to read from world state. %s\", err.Error())\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn \"\", fmt.Errorf(\"failed to unmarshal. %s\", err.Error())\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn \"\", fmt.Errorf(\"failed to marshal. %s\", err.Error())\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn \"\", fmt.Errorf(\"failed to put state. %s\", err.Error())\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn \"\", fmt.Errorf(\"failed to marshal event payload: %v\", err)\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn \"\", fmt.Errorf(\"failed to set event: %v\", err)\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn \"\", fmt.Errorf(\"failed to convert instanceID to int. %s\", err.Error())\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn \"\", fmt.Errorf(\"failed to marshal instanceID. %s\", err.Error())\n}"
+        },
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn \"\", fmt.Errorf(\"failed to put state. %s\", err.Error())\n}"
+        }
+      ]
+    },
+    {
+      "name": "StartEvent_C",
+      "receiver": "*SmartContract",
+      "body": "{\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\n\tactionEvent, err := cc.ReadEvent(ctx, instanceID, \"StartEvent_C\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif actionEvent.EventState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", actionEvent.EventID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeEventState(ctx, instance, \"StartEvent_C\", COMPLETED)\n\tstub.SetEvent(\"StartEvent_C\", []byte(\"Contract has been started successfully\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeMsgState(ctx, instance, \"TaskC\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "cc.GetInstance",
+          "args": [
+            "ctx",
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "cc.ReadEvent",
+          "args": [
+            "ctx",
+            "instanceID",
+            "\"StartEvent_C\""
+          ]
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Event state %s is not allowed\"",
+            "actionEvent.EventID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "cc.ChangeEventState",
+          "args": [
+            "ctx",
+            "instance",
+            "\"StartEvent_C\"",
+            "COMPLETED"
+          ]
+        },
+        {
+          "callee": "stub.SetEvent",
+          "args": [
+            "\"StartEvent_C\"",
+            "[]byte(\"Contract has been started successfully\")"
+          ]
+        },
+        {
+          "callee": "[]byte",
+          "args": [
+            "\"Contract has been started successfully\""
+          ]
+        },
+        {
+          "callee": "cc.SetInstance",
+          "args": [
+            "ctx",
+            "instance"
+          ]
+        },
+        {
+          "callee": "cc.ChangeMsgState",
+          "args": [
+            "ctx",
+            "instance",
+            "\"TaskC\"",
+            "ENABLED"
+          ]
+        },
+        {
+          "callee": "cc.SetInstance",
+          "args": [
+            "ctx",
+            "instance"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "stub"
+          ],
+          "rhs": [
+            "ctx.GetStub()"
+          ]
+        },
+        {
+          "lhs": [
+            "instance",
+            "err"
+          ],
+          "rhs": [
+            "cc.GetInstance(ctx, instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "actionEvent",
+            "err"
+          ],
+          "rhs": [
+            "cc.ReadEvent(ctx, instanceID, \"StartEvent_C\")"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Event state %s is not allowed\", actionEvent.EventID)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn err\n}"
+        },
+        {
+          "condition": "actionEvent.EventState != ENABLED",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", actionEvent.EventID)\n\tfmt.Println(errorMessage)\n\treturn fmt.Errorf(errorMessage)\n}"
+        }
+      ]
+    },
+    {
+      "name": "TaskC_Send",
+      "receiver": "*SmartContract",
+      "body": "{\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"TaskC\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)\n\tcc.ChangeMsgState(ctx, instance, \"TaskC\", COMPLETED)\n\n\tstub.SetEvent(\"TaskC\", []byte(\"Message is waiting for confirmation\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "cc.GetInstance",
+          "args": [
+            "ctx",
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "cc.ReadMsg",
+          "args": [
+            "ctx",
+            "instanceID",
+            "\"TaskC\""
+          ]
+        },
+        {
+          "callee": "cc.check_participant",
+          "args": [
+            "ctx",
+            "instanceID",
+            "msg.SendParticipantID"
+          ]
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Participant %s is not allowed to send the message\"",
+            "msg.SendParticipantID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Message state %s is not allowed\"",
+            "msg.MessageID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "cc.ChangeMsgFireflyTranID",
+          "args": [
+            "ctx",
+            "instance",
+            "fireflyTranID",
+            "msg.MessageID"
+          ]
+        },
+        {
+          "callee": "cc.ChangeMsgState",
+          "args": [
+            "ctx",
+            "instance",
+            "\"TaskC\"",
+            "COMPLETED"
+          ]
+        },
+        {
+          "callee": "stub.SetEvent",
+          "args": [
+            "\"TaskC\"",
+            "[]byte(\"Message is waiting for confirmation\")"
+          ]
+        },
+        {
+          "callee": "[]byte",
+          "args": [
+            "\"Message is waiting for confirmation\""
+          ]
+        },
+        {
+          "callee": "cc.SetInstance",
+          "args": [
+            "ctx",
+            "instance"
+          ]
+        },
+        {
+          "callee": "cc.SetInstance",
+          "args": [
+            "ctx",
+            "instance"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "stub"
+          ],
+          "rhs": [
+            "ctx.GetStub()"
+          ]
+        },
+        {
+          "lhs": [
+            "instance",
+            "err"
+          ],
+          "rhs": [
+            "cc.GetInstance(ctx, instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "msg",
+            "err"
+          ],
+          "rhs": [
+            "cc.ReadMsg(ctx, instanceID, \"TaskC\")"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn err\n}"
+        },
+        {
+          "condition": "cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\tfmt.Println(errorMessage)\n\treturn fmt.Errorf(errorMessage)\n}"
+        },
+        {
+          "condition": "msg.MsgState != ENABLED",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)\n\tfmt.Println(errorMessage)\n\treturn fmt.Errorf(errorMessage)\n}"
+        }
+      ]
+    },
+    {
+      "name": "TaskC_Complete",
+      "receiver": "*SmartContract",
+      "body": "{\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"TaskC\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != WAITINGFORCONFIRMATION {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgState(ctx, instance, msg.MessageID, COMPLETED)\n\tstub.SetEvent(\"TaskC\", []byte(\"Message has been done\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeGtwState(ctx, instance, \"ReviewC\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "cc.GetInstance",
+          "args": [
+            "ctx",
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "cc.ReadMsg",
+          "args": [
+            "ctx",
+            "instanceID",
+            "\"TaskC\""
+          ]
+        },
+        {
+          "callee": "cc.check_participant",
+          "args": [
+            "ctx",
+            "instanceID",
+            "msg.ReceiveParticipantID"
+          ]
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Participant %s is not allowed to send the message\"",
+            "msg.SendParticipantID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Event state %s is not allowed\"",
+            "msg.MessageID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "cc.ChangeMsgState",
+          "args": [
+            "ctx",
+            "instance",
+            "msg.MessageID",
+            "COMPLETED"
+          ]
+        },
+        {
+          "callee": "stub.SetEvent",
+          "args": [
+            "\"TaskC\"",
+            "[]byte(\"Message has been done\")"
+          ]
+        },
+        {
+          "callee": "[]byte",
+          "args": [
+            "\"Message has been done\""
+          ]
+        },
+        {
+          "callee": "cc.SetInstance",
+          "args": [
+            "ctx",
+            "instance"
+          ]
+        },
+        {
+          "callee": "cc.ChangeGtwState",
+          "args": [
+            "ctx",
+            "instance",
+            "\"ReviewC\"",
+            "ENABLED"
+          ]
+        },
+        {
+          "callee": "cc.SetInstance",
+          "args": [
+            "ctx",
+            "instance"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "stub"
+          ],
+          "rhs": [
+            "ctx.GetStub()"
+          ]
+        },
+        {
+          "lhs": [
+            "instance",
+            "err"
+          ],
+          "rhs": [
+            "cc.GetInstance(ctx, instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "msg",
+            "err"
+          ],
+          "rhs": [
+            "cc.ReadMsg(ctx, instanceID, \"TaskC\")"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn err\n}"
+        },
+        {
+          "condition": "cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\tfmt.Println(errorMessage)\n\treturn fmt.Errorf(errorMessage)\n}"
+        },
+        {
+          "condition": "msg.MsgState != WAITINGFORCONFIRMATION",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)\n\tfmt.Println(errorMessage)\n\treturn fmt.Errorf(errorMessage)\n}"
+        }
+      ]
+    },
+    {
+      "name": "ReportC_Send",
+      "receiver": "*SmartContract",
+      "body": "{\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"ReportC\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)\n\tcc.ChangeMsgState(ctx, instance, \"ReportC\", COMPLETED)\n\n\tstub.SetEvent(\"ReportC\", []byte(\"Message is waiting for confirmation\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "cc.GetInstance",
+          "args": [
+            "ctx",
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "cc.ReadMsg",
+          "args": [
+            "ctx",
+            "instanceID",
+            "\"ReportC\""
+          ]
+        },
+        {
+          "callee": "cc.check_participant",
+          "args": [
+            "ctx",
+            "instanceID",
+            "msg.SendParticipantID"
+          ]
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Participant %s is not allowed to send the message\"",
+            "msg.SendParticipantID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Message state %s is not allowed\"",
+            "msg.MessageID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "cc.ChangeMsgFireflyTranID",
+          "args": [
+            "ctx",
+            "instance",
+            "fireflyTranID",
+            "msg.MessageID"
+          ]
+        },
+        {
+          "callee": "cc.ChangeMsgState",
+          "args": [
+            "ctx",
+            "instance",
+            "\"ReportC\"",
+            "COMPLETED"
+          ]
+        },
+        {
+          "callee": "stub.SetEvent",
+          "args": [
+            "\"ReportC\"",
+            "[]byte(\"Message is waiting for confirmation\")"
+          ]
+        },
+        {
+          "callee": "[]byte",
+          "args": [
+            "\"Message is waiting for confirmation\""
+          ]
+        },
+        {
+          "callee": "cc.SetInstance",
+          "args": [
+            "ctx",
+            "instance"
+          ]
+        },
+        {
+          "callee": "cc.SetInstance",
+          "args": [
+            "ctx",
+            "instance"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "stub"
+          ],
+          "rhs": [
+            "ctx.GetStub()"
+          ]
+        },
+        {
+          "lhs": [
+            "instance",
+            "err"
+          ],
+          "rhs": [
+            "cc.GetInstance(ctx, instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "msg",
+            "err"
+          ],
+          "rhs": [
+            "cc.ReadMsg(ctx, instanceID, \"ReportC\")"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn err\n}"
+        },
+        {
+          "condition": "cc.check_participant(ctx, instanceID, msg.SendParticipantID) == false",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\tfmt.Println(errorMessage)\n\treturn fmt.Errorf(errorMessage)\n}"
+        },
+        {
+          "condition": "msg.MsgState != ENABLED",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Message state %s is not allowed\", msg.MessageID)\n\tfmt.Println(errorMessage)\n\treturn fmt.Errorf(errorMessage)\n}"
+        }
+      ]
+    },
+    {
+      "name": "ReportC_Complete",
+      "receiver": "*SmartContract",
+      "body": "{\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tmsg, err := cc.ReadMsg(ctx, instanceID, \"ReportC\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false {\n\t\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tif msg.MsgState != WAITINGFORCONFIRMATION {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeMsgState(ctx, instance, msg.MessageID, COMPLETED)\n\tstub.SetEvent(\"ReportC\", []byte(\"Message has been done\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.ChangeEventState(ctx, instance, \"EndEvent_C\", ENABLED)\n\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "cc.GetInstance",
+          "args": [
+            "ctx",
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "cc.ReadMsg",
+          "args": [
+            "ctx",
+            "instanceID",
+            "\"ReportC\""
+          ]
+        },
+        {
+          "callee": "cc.check_participant",
+          "args": [
+            "ctx",
+            "instanceID",
+            "msg.ReceiveParticipantID"
+          ]
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Participant %s is not allowed to send the message\"",
+            "msg.SendParticipantID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Event state %s is not allowed\"",
+            "msg.MessageID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "cc.ChangeMsgState",
+          "args": [
+            "ctx",
+            "instance",
+            "msg.MessageID",
+            "COMPLETED"
+          ]
+        },
+        {
+          "callee": "stub.SetEvent",
+          "args": [
+            "\"ReportC\"",
+            "[]byte(\"Message has been done\")"
+          ]
+        },
+        {
+          "callee": "[]byte",
+          "args": [
+            "\"Message has been done\""
+          ]
+        },
+        {
+          "callee": "cc.SetInstance",
+          "args": [
+            "ctx",
+            "instance"
+          ]
+        },
+        {
+          "callee": "cc.ChangeEventState",
+          "args": [
+            "ctx",
+            "instance",
+            "\"EndEvent_C\"",
+            "ENABLED"
+          ]
+        },
+        {
+          "callee": "cc.SetInstance",
+          "args": [
+            "ctx",
+            "instance"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "stub"
+          ],
+          "rhs": [
+            "ctx.GetStub()"
+          ]
+        },
+        {
+          "lhs": [
+            "instance",
+            "err"
+          ],
+          "rhs": [
+            "cc.GetInstance(ctx, instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "msg",
+            "err"
+          ],
+          "rhs": [
+            "cc.ReadMsg(ctx, instanceID, \"ReportC\")"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn err\n}"
+        },
+        {
+          "condition": "cc.check_participant(ctx, instanceID, msg.ReceiveParticipantID) == false",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Participant %s is not allowed to send the message\", msg.SendParticipantID)\n\tfmt.Println(errorMessage)\n\treturn fmt.Errorf(errorMessage)\n}"
+        },
+        {
+          "condition": "msg.MsgState != WAITINGFORCONFIRMATION",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", msg.MessageID)\n\tfmt.Println(errorMessage)\n\treturn fmt.Errorf(errorMessage)\n}"
+        }
+      ]
+    },
+    {
+      "name": "ReviewC",
+      "receiver": "*SmartContract",
+      "body": "{\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tgtw, err := cc.ReadGtw(ctx, instanceID, \"ReviewC\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif gtw.GatewayState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Gateway state %s is not allowed\", gtw.GatewayID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeGtwState(ctx, instance, gtw.GatewayID, COMPLETED)\n\tstub.SetEvent(\"ReviewC\", []byte(\"Gateway has been completed\"))\n\tcc.SetInstance(ctx, instance)\n\tif instance.InstanceStateMemory.ReadyC == true {\n\t\tcc.ChangeMsgState(ctx, instance, \"ReportC\", ENABLED)\n\t} else {\n\t\tcc.ChangeEventState(ctx, instance, \"EndEvent_C\", ENABLED)\n\t}\n\n\tcc.SetInstance(ctx, instance)\n\n\treturn nil\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "cc.GetInstance",
+          "args": [
+            "ctx",
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "cc.ReadGtw",
+          "args": [
+            "ctx",
+            "instanceID",
+            "\"ReviewC\""
+          ]
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Gateway state %s is not allowed\"",
+            "gtw.GatewayID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "cc.ChangeGtwState",
+          "args": [
+            "ctx",
+            "instance",
+            "gtw.GatewayID",
+            "COMPLETED"
+          ]
+        },
+        {
+          "callee": "stub.SetEvent",
+          "args": [
+            "\"ReviewC\"",
+            "[]byte(\"Gateway has been completed\")"
+          ]
+        },
+        {
+          "callee": "[]byte",
+          "args": [
+            "\"Gateway has been completed\""
+          ]
+        },
+        {
+          "callee": "cc.SetInstance",
+          "args": [
+            "ctx",
+            "instance"
+          ]
+        },
+        {
+          "callee": "cc.ChangeMsgState",
+          "args": [
+            "ctx",
+            "instance",
+            "\"ReportC\"",
+            "ENABLED"
+          ]
+        },
+        {
+          "callee": "cc.ChangeEventState",
+          "args": [
+            "ctx",
+            "instance",
+            "\"EndEvent_C\"",
+            "ENABLED"
+          ]
+        },
+        {
+          "callee": "cc.SetInstance",
+          "args": [
+            "ctx",
+            "instance"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "stub"
+          ],
+          "rhs": [
+            "ctx.GetStub()"
+          ]
+        },
+        {
+          "lhs": [
+            "instance",
+            "err"
+          ],
+          "rhs": [
+            "cc.GetInstance(ctx, instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "gtw",
+            "err"
+          ],
+          "rhs": [
+            "cc.ReadGtw(ctx, instanceID, \"ReviewC\")"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Gateway state %s is not allowed\", gtw.GatewayID)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn err\n}"
+        },
+        {
+          "condition": "gtw.GatewayState != ENABLED",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Gateway state %s is not allowed\", gtw.GatewayID)\n\tfmt.Println(errorMessage)\n\treturn fmt.Errorf(errorMessage)\n}"
+        },
+        {
+          "condition": "instance.InstanceStateMemory.ReadyC == true",
+          "then": "{\n\tcc.ChangeMsgState(ctx, instance, \"ReportC\", ENABLED)\n}",
+          "else": "{\n\tcc.ChangeEventState(ctx, instance, \"EndEvent_C\", ENABLED)\n}"
+        }
+      ]
+    },
+    {
+      "name": "EndEvent_C",
+      "receiver": "*SmartContract",
+      "body": "{\n\tstub := ctx.GetStub()\n\tinstance, err := cc.GetInstance(ctx, instanceID)\n\tactionEvent, err := cc.ReadEvent(ctx, instanceID, \"EndEvent_C\")\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tif actionEvent.EventState != ENABLED {\n\t\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", actionEvent.EventID)\n\t\tfmt.Println(errorMessage)\n\t\treturn fmt.Errorf(errorMessage)\n\t}\n\n\tcc.ChangeEventState(ctx, instance, \"EndEvent_C\", COMPLETED)\n\tstub.SetEvent(\"EndEvent_C\", []byte(\"Event has been completed\"))\n\tcc.SetInstance(ctx, instance)\n\tcc.SetInstance(ctx, instance)\n\treturn nil\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "cc.GetInstance",
+          "args": [
+            "ctx",
+            "instanceID"
+          ]
+        },
+        {
+          "callee": "cc.ReadEvent",
+          "args": [
+            "ctx",
+            "instanceID",
+            "\"EndEvent_C\""
+          ]
+        },
+        {
+          "callee": "fmt.Sprintf",
+          "args": [
+            "\"Event state %s is not allowed\"",
+            "actionEvent.EventID"
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "errorMessage"
+          ]
+        },
+        {
+          "callee": "cc.ChangeEventState",
+          "args": [
+            "ctx",
+            "instance",
+            "\"EndEvent_C\"",
+            "COMPLETED"
+          ]
+        },
+        {
+          "callee": "stub.SetEvent",
+          "args": [
+            "\"EndEvent_C\"",
+            "[]byte(\"Event has been completed\")"
+          ]
+        },
+        {
+          "callee": "[]byte",
+          "args": [
+            "\"Event has been completed\""
+          ]
+        },
+        {
+          "callee": "cc.SetInstance",
+          "args": [
+            "ctx",
+            "instance"
+          ]
+        },
+        {
+          "callee": "cc.SetInstance",
+          "args": [
+            "ctx",
+            "instance"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "stub"
+          ],
+          "rhs": [
+            "ctx.GetStub()"
+          ]
+        },
+        {
+          "lhs": [
+            "instance",
+            "err"
+          ],
+          "rhs": [
+            "cc.GetInstance(ctx, instanceID)"
+          ]
+        },
+        {
+          "lhs": [
+            "actionEvent",
+            "err"
+          ],
+          "rhs": [
+            "cc.ReadEvent(ctx, instanceID, \"EndEvent_C\")"
+          ]
+        },
+        {
+          "lhs": [
+            "errorMessage"
+          ],
+          "rhs": [
+            "fmt.Sprintf(\"Event state %s is not allowed\", actionEvent.EventID)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "err != nil",
+          "then": "{\n\treturn err\n}"
+        },
+        {
+          "condition": "actionEvent.EventState != ENABLED",
+          "then": "{\n\terrorMessage := fmt.Sprintf(\"Event state %s is not allowed\", actionEvent.EventID)\n\tfmt.Println(errorMessage)\n\treturn fmt.Errorf(errorMessage)\n}"
+        }
+      ]
+    },
+    {
+      "name": "Invoke_Other_chaincode",
+      "receiver": "*SmartContract",
+      "body": "{\n\tstub := ctx.GetStub()\n\tresponse := stub.InvokeChaincode(chaincodeName, _args, channel)\n\n\tif response.Status != shim.OK {\n\t\treturn []byte(\"\"), fmt.Errorf(\"failed to invoke chaincode. Response status: %d. Response message: %s\", response.Status, response.Message)\n\t}\n\n\tfmt.Print(\"response.Payload: \")\n\tfmt.Println(string(response.Payload))\n\n\treturn response.Payload, nil\n}",
+      "calls": [
+        {
+          "callee": "ctx.GetStub",
+          "args": []
+        },
+        {
+          "callee": "stub.InvokeChaincode",
+          "args": [
+            "chaincodeName",
+            "_args",
+            "channel"
+          ]
+        },
+        {
+          "callee": "[]byte",
+          "args": [
+            "\"\""
+          ]
+        },
+        {
+          "callee": "fmt.Errorf",
+          "args": [
+            "\"failed to invoke chaincode. Response status: %d. Response message: %s\"",
+            "response.Status",
+            "response.Message"
+          ]
+        },
+        {
+          "callee": "fmt.Print",
+          "args": [
+            "\"response.Payload: \""
+          ]
+        },
+        {
+          "callee": "fmt.Println",
+          "args": [
+            "string(response.Payload)"
+          ]
+        },
+        {
+          "callee": "string",
+          "args": [
+            "response.Payload"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "lhs": [
+            "stub"
+          ],
+          "rhs": [
+            "ctx.GetStub()"
+          ]
+        },
+        {
+          "lhs": [
+            "response"
+          ],
+          "rhs": [
+            "stub.InvokeChaincode(chaincodeName, _args, channel)"
+          ]
+        }
+      ],
+      "ifs": [
+        {
+          "condition": "response.Status != shim.OK",
+          "then": "{\n\treturn []byte(\"\"), fmt.Errorf(\"failed to invoke chaincode. Response status: %d. Response message: %s\", response.Status, response.Message)\n}"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,177 @@
+[{
+    "name": "landlord_claim_process_2",
+    "steps": [
+      {
+        "element_name": "Event_19zgkxm",
+        "element_type": "Event",
+        "metaInfo": "",
+        "parameters": [],
+        "invoker": "",
+        "state_change": [
+          {
+            "element_name": "Event_19zgkxm",
+            "element_type": "Event",
+            "pre_state": "enable",
+            "post_state": "done"
+          }
+        ]
+      },
+      {
+        "element_name": "Gateway_10ut9pb",
+        "element_type": "Gateway",
+        "metaInfo": "",
+        "parameters": [],
+        "invoker": "",
+        "state_change": [
+          {
+            "element_name": "Gateway_10ut9pb",
+            "element_type": "Gateway",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Event_19zgkxm",
+            "element_type": "Event",
+            "pre_state": "done",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Message_09eyqv0",
+        "element_type": "Message",
+        "metaInfo": "{\"properties\":{\"FileContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+        "parameters": ["first_claim_file_content"],
+        "invoker": "Participant_1exbsak",
+        "state_change": [
+          {
+            "element_name": "Message_09eyqv0",
+            "element_type": "Message",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Gateway_10ut9pb",
+            "element_type": "Gateway",
+            "pre_state": "done",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Message_1eb4q8q",
+        "element_type": "Message",
+        "metaInfo": "{\"properties\":{\"claimContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+        "parameters": ["Claim notification content"],
+        "invoker": "Participant_0h34s41",
+        "state_change": [
+          {
+            "element_name": "Message_1eb4q8q",
+            "element_type": "Message",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Message_09eyqv0",
+            "element_type": "Message",
+            "pre_state": "done",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Gateway_1v1x25n",
+        "element_type": "Gateway",
+        "metaInfo": "",
+        "parameters": [],
+        "invoker": "",
+        "state_change": [
+          {
+            "element_name": "Gateway_1v1x25n",
+            "element_type": "Gateway",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Message_1eb4q8q",
+            "element_type": "Message",
+            "pre_state": "done",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Message_1im6vvb",
+        "element_type": "Message",
+        "metaInfo": "{\"properties\":{\"content\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+        "parameters": ["Accept claim content"],
+        "invoker": "Participant_0wvo0aa",
+        "state_change": [
+          {
+            "element_name": "Message_1im6vvb",
+            "element_type": "Message",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Gateway_1v1x25n",
+            "element_type": "Gateway",
+            "pre_state": "done",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Message_0fm3vfa",
+        "element_type": "Message",
+        "metaInfo": "{\"properties\":{\"transfer date\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"transfer date\"],\"files\":{},\"file required\":[]}",
+        "parameters": ["2023-12-01"],
+        "invoker": "Participant_0h34s41",
+        "state_change": [
+          {
+            "element_name": "Message_0fm3vfa",
+            "element_type": "Message",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Message_1im6vvb",
+            "element_type": "Message",
+            "pre_state": "done",
+            "post_state": "enable"
+          }
+        ]
+      },
+      {
+        "element_name": "Event_120hui7",
+        "element_type": "Event",
+        "metaInfo": "",
+        "parameters": [],
+        "invoker": "",
+        "state_change": [
+          {
+            "element_name": "Event_120hui7",
+            "element_type": "Event",
+            "pre_state": "enable",
+            "post_state": "done"
+          },
+          {
+            "element_name": "Message_0fm3vfa",
+            "element_type": "Message",
+            "pre_state": "done",
+            "post_state": "enable"
+          }
+        ]
+      }
+    ],
+    "invoke_path": [
+      "Event_19zgkxm",
+      "Gateway_10ut9pb",
+      "Message_09eyqv0",
+      "Message_1eb4q8q",
+      "Gateway_1v1x25n",
+      "Message_1im6vvb",
+      "Message_0fm3vfa",
+      "Event_120hui7"
+    ]
+  }]

@@ -1,0 +1,1676 @@
+{
+  "tag_version": "0.1.0",
+  "case_name": "customer",
+  "model_type": "bpmn",
+  "source_file": "/root/code/ChainCollab/Experiment/BPMNwithDMNcase/customer.bpmn",
+  "extractor": {
+    "name": "extract_bpmn_structure",
+    "version": "0.1.0",
+    "implementation_basis": [
+      "src/newTranslator/generator/parser/choreography_parser/parser.py",
+      "src/newTranslator/generator/parser/choreography_parser/elements.py"
+    ]
+  },
+  "nodes": [
+    {
+      "id": "Participant_1080bkg",
+      "type": "bpmn:participant",
+      "name": "Customer",
+      "attrs": {
+        "is_multi": false,
+        "multi_minimum": 0,
+        "multi_maximum": 0
+      }
+    },
+    {
+      "id": "Participant_0sktaei",
+      "type": "bpmn:participant",
+      "name": "Service Provider",
+      "attrs": {
+        "is_multi": false,
+        "multi_minimum": 0,
+        "multi_maximum": 0
+      }
+    },
+    {
+      "id": "Participant_1gcdqza",
+      "type": "bpmn:participant",
+      "name": "External service provider",
+      "attrs": {
+        "is_multi": false,
+        "multi_minimum": 0,
+        "multi_maximum": 0
+      }
+    },
+    {
+      "id": "Message_1qbk325",
+      "type": "bpmn:message",
+      "name": "delivered product information",
+      "attrs": {
+        "documentation": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_1q05nnw",
+      "type": "bpmn:message",
+      "name": "payment amount",
+      "attrs": {
+        "documentation": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_1i8rlqn",
+      "type": "bpmn:message",
+      "name": "External service information",
+      "attrs": {
+        "documentation": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_0m9p3da",
+      "type": "bpmn:message",
+      "name": "Invoice demand",
+      "attrs": {
+        "documentation": "{\"properties\":{\"invoice\":{\"type\":\"boolean\",\"description\":\"Do you need an invoice?\"},\"invoiceType\":{\"type\":\"string\",\"description\":\"type\"}},\"required\":[\"invoice\",\"invoiceType\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_0m9p3da__property__invoice",
+      "type": "bpmn:messageProperty",
+      "name": "invoice",
+      "attrs": {
+        "name": "invoice",
+        "global_name": "Invoice",
+        "type": "boolean",
+        "dsl_type": "bool",
+        "description": "Do you need an invoice?",
+        "owner": "Message_0m9p3da",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_0m9p3da__property__invoiceType",
+      "type": "bpmn:messageProperty",
+      "name": "invoiceType",
+      "attrs": {
+        "name": "invoiceType",
+        "global_name": "InvoiceType",
+        "type": "string",
+        "dsl_type": "string",
+        "description": "type",
+        "owner": "Message_0m9p3da",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_1etcmvl",
+      "type": "bpmn:message",
+      "name": "invoice_file",
+      "attrs": {
+        "documentation": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_1joj7ca",
+      "type": "bpmn:message",
+      "name": "invoice information",
+      "attrs": {
+        "documentation": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_1ljlm4g",
+      "type": "bpmn:message",
+      "name": "delivered product information",
+      "attrs": {
+        "documentation": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_1xm9dxy",
+      "type": "bpmn:message",
+      "name": "cancel order information",
+      "attrs": {
+        "documentation": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_0o8eyir",
+      "type": "bpmn:message",
+      "name": "payment amount",
+      "attrs": {
+        "documentation": "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_1nlagx2",
+      "type": "bpmn:message",
+      "name": "plan confirmation",
+      "attrs": {
+        "documentation": "{\"properties\":{\"confirmation\":{\"type\":\"boolean\",\"description\":\"Whether to accept the service plan\"}},\"required\":[\"confirmation\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_1nlagx2__property__confirmation",
+      "type": "bpmn:messageProperty",
+      "name": "confirmation",
+      "attrs": {
+        "name": "confirmation",
+        "global_name": "Confirmation",
+        "type": "boolean",
+        "dsl_type": "bool",
+        "description": "Whether to accept the service plan",
+        "owner": "Message_1nlagx2",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_1em0ee4",
+      "type": "bpmn:message",
+      "name": "Service plan and quotation",
+      "attrs": {
+        "documentation": "{\"properties\":{\"need_external_provider\":{\"type\":\"boolean\",\"description\":\"Whether external service providers are required\"}},\"required\":[\"need_external_provider\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_1em0ee4__property__need_external_provider",
+      "type": "bpmn:messageProperty",
+      "name": "need_external_provider",
+      "attrs": {
+        "name": "need_external_provider",
+        "global_name": "Need_external_provider",
+        "type": "boolean",
+        "dsl_type": "bool",
+        "description": "Whether external service providers are required",
+        "owner": "Message_1em0ee4",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_0r9lypd",
+      "type": "bpmn:message",
+      "name": "service availability",
+      "attrs": {
+        "documentation": "{\"properties\":{\"is_available\":{\"type\":\"boolean\",\"description\":\"Is the service available?\"}},\"required\":[\"is_available\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_0r9lypd__property__is_available",
+      "type": "bpmn:messageProperty",
+      "name": "is_available",
+      "attrs": {
+        "name": "is_available",
+        "global_name": "Is_available",
+        "type": "boolean",
+        "dsl_type": "bool",
+        "description": "Is the service available?",
+        "owner": "Message_0r9lypd",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Message_045i10y",
+      "type": "bpmn:message",
+      "name": "The requested service",
+      "attrs": {
+        "documentation": "{\"properties\":{\"VIPpoints\":{\"type\":\"number\",\"description\":\"points\"}},\"required\":[\"VIPpoints\"],\"files\":{},\"file required\":[]}"
+      }
+    },
+    {
+      "id": "Message_045i10y__property__VIPpoints",
+      "type": "bpmn:messageProperty",
+      "name": "VIPpoints",
+      "attrs": {
+        "name": "VIPpoints",
+        "global_name": "VIPpoints",
+        "type": "number",
+        "dsl_type": "int",
+        "description": "points",
+        "owner": "Message_045i10y",
+        "source_kind": "message"
+      }
+    },
+    {
+      "id": "Event_1jtgn3j",
+      "type": "bpmn:startEvent",
+      "name": "",
+      "attrs": {
+        "incoming": [],
+        "outgoing": [
+          "SequenceFlow_17yeafe"
+        ]
+      }
+    },
+    {
+      "id": "Event_0366pfz",
+      "type": "bpmn:endEvent",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "SequenceFlow_0pgfk71"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Event_146eii4",
+      "type": "bpmn:endEvent",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "SequenceFlow_1fe2fxr"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Event_143ykco",
+      "type": "bpmn:endEvent",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "Flow_0191jxi"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "ExclusiveGateway_106je4z",
+      "type": "bpmn:exclusiveGateway",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "Flow_1lzzci7"
+        ],
+        "outgoing": [
+          "SequenceFlow_10il97h",
+          "SequenceFlow_14sd0ji"
+        ]
+      }
+    },
+    {
+      "id": "ExclusiveGateway_0hs3ztq",
+      "type": "bpmn:exclusiveGateway",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "SequenceFlow_14sd0ji",
+          "SequenceFlow_17yeafe"
+        ],
+        "outgoing": [
+          "SequenceFlow_01sam3q"
+        ]
+      }
+    },
+    {
+      "id": "ExclusiveGateway_0nzwv7v",
+      "type": "bpmn:exclusiveGateway",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "Flow_1i177uo"
+        ],
+        "outgoing": [
+          "SequenceFlow_1f6x9dz",
+          "Flow_0191jxi"
+        ]
+      }
+    },
+    {
+      "id": "Gateway_1bhtapl",
+      "type": "bpmn:exclusiveGateway",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "Flow_02sms1i"
+        ],
+        "outgoing": [
+          "Flow_0gwxg7b",
+          "Flow_0ayd49a"
+        ]
+      }
+    },
+    {
+      "id": "Gateway_04h9e6e",
+      "type": "bpmn:exclusiveGateway",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "Flow_0ayd49a",
+          "Flow_0bl3c43"
+        ],
+        "outgoing": [
+          "Flow_0324qhk"
+        ]
+      }
+    },
+    {
+      "id": "EventBasedGateway_1fxpmyn",
+      "type": "bpmn:eventBasedGateway",
+      "name": "",
+      "attrs": {
+        "incoming": [
+          "SequenceFlow_1bi5p2u"
+        ],
+        "outgoing": [
+          "SequenceFlow_1erfsjw",
+          "SequenceFlow_0cvalmr"
+        ]
+      }
+    },
+    {
+      "id": "Activity_1yl9tfp",
+      "type": "bpmn:businessRuleTask",
+      "name": "external",
+      "attrs": {
+        "incoming": [
+          "Flow_1858yke"
+        ],
+        "outgoing": [
+          "Flow_02sms1i"
+        ],
+        "documentation": "{\"inputs\":[{\"name\":\"VIPpoints\",\"type\":\"number\",\"description\":\"points\"},{\"name\":\"need_external_provider\",\"type\":\"boolean\",\"description\":\"Whether external service providers are required\"}],\"outputs\":[{\"name\":\"externalAvailable\",\"type\":\"boolean\",\"description\":\"\"}]}"
+      }
+    },
+    {
+      "id": "Activity_1yl9tfp__input__VIPpoints",
+      "type": "bpmn:businessRuleParameter",
+      "name": "VIPpoints",
+      "attrs": {
+        "name": "VIPpoints",
+        "global_name": "VIPpoints",
+        "direction": "input",
+        "type": "number",
+        "dsl_type": "int",
+        "owner": "Activity_1yl9tfp"
+      }
+    },
+    {
+      "id": "Activity_1yl9tfp__input__need_external_provider",
+      "type": "bpmn:businessRuleParameter",
+      "name": "need_external_provider",
+      "attrs": {
+        "name": "need_external_provider",
+        "global_name": "Need_external_provider",
+        "direction": "input",
+        "type": "boolean",
+        "dsl_type": "bool",
+        "owner": "Activity_1yl9tfp"
+      }
+    },
+    {
+      "id": "Activity_1yl9tfp__output__externalAvailable",
+      "type": "bpmn:businessRuleParameter",
+      "name": "externalAvailable",
+      "attrs": {
+        "name": "externalAvailable",
+        "global_name": "ExternalAvailable",
+        "direction": "output",
+        "type": "boolean",
+        "dsl_type": "bool",
+        "owner": "Activity_1yl9tfp"
+      }
+    },
+    {
+      "id": "Activity_0ibsbry",
+      "type": "bpmn:businessRuleTask",
+      "name": "invoiceAvailable",
+      "attrs": {
+        "incoming": [
+          "SequenceFlow_0nxtqz1"
+        ],
+        "outgoing": [
+          "Flow_1i177uo"
+        ],
+        "documentation": "{\"inputs\":[{\"name\":\"invoiceType\",\"type\":\"string\",\"description\":\"type\"},{\"name\":\"invoice\",\"type\":\"boolean\",\"description\":\"Do you need an invoice?\"}],\"outputs\":[{\"name\":\"invoiceAvailable\",\"type\":\"boolean\",\"description\":\"\"}]}"
+      }
+    },
+    {
+      "id": "Activity_0ibsbry__input__invoiceType",
+      "type": "bpmn:businessRuleParameter",
+      "name": "invoiceType",
+      "attrs": {
+        "name": "invoiceType",
+        "global_name": "InvoiceType",
+        "direction": "input",
+        "type": "string",
+        "dsl_type": "string",
+        "owner": "Activity_0ibsbry"
+      }
+    },
+    {
+      "id": "Activity_0ibsbry__input__invoice",
+      "type": "bpmn:businessRuleParameter",
+      "name": "invoice",
+      "attrs": {
+        "name": "invoice",
+        "global_name": "Invoice",
+        "direction": "input",
+        "type": "boolean",
+        "dsl_type": "bool",
+        "owner": "Activity_0ibsbry"
+      }
+    },
+    {
+      "id": "Activity_0ibsbry__output__invoiceAvailable",
+      "type": "bpmn:businessRuleParameter",
+      "name": "invoiceAvailable",
+      "attrs": {
+        "name": "invoiceAvailable",
+        "global_name": "InvoiceAvailable",
+        "direction": "output",
+        "type": "boolean",
+        "dsl_type": "bool",
+        "owner": "Activity_0ibsbry"
+      }
+    },
+    {
+      "id": "ChoreographyTask_1jv6c24",
+      "type": "bpmn:choreographyTask",
+      "name": "Request service",
+      "attrs": {
+        "incoming": "SequenceFlow_01sam3q",
+        "outgoing": "Flow_1lzzci7",
+        "participants": [
+          "Participant_1080bkg",
+          "Participant_0sktaei"
+        ],
+        "initiatingParticipantRef": "Participant_1080bkg",
+        "messageFlowRefs": [
+          "MessageFlow_19g4eua",
+          "MessageFlow_0zxzleu"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_13nkbkb",
+      "type": "bpmn:choreographyTask",
+      "name": "Confirm plan",
+      "attrs": {
+        "incoming": "SequenceFlow_10il97h",
+        "outgoing": "SequenceFlow_1bi5p2u",
+        "participants": [
+          "Participant_0sktaei",
+          "Participant_1080bkg"
+        ],
+        "initiatingParticipantRef": "Participant_0sktaei",
+        "messageFlowRefs": [
+          "MessageFlow_1o6utvb",
+          "MessageFlow_1bermr1"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_177ikw5",
+      "type": "bpmn:choreographyTask",
+      "name": "Accept payment",
+      "attrs": {
+        "incoming": "SequenceFlow_1erfsjw",
+        "outgoing": "Flow_1858yke",
+        "participants": [
+          "Participant_1080bkg",
+          "Participant_0sktaei"
+        ],
+        "initiatingParticipantRef": "Participant_1080bkg",
+        "messageFlowRefs": [
+          "MessageFlow_1o7kyb6"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_09lf521",
+      "type": "bpmn:choreographyTask",
+      "name": "Reject order",
+      "attrs": {
+        "incoming": "SequenceFlow_0cvalmr",
+        "outgoing": "SequenceFlow_0pgfk71",
+        "participants": [
+          "Participant_1080bkg",
+          "Participant_0sktaei"
+        ],
+        "initiatingParticipantRef": "Participant_1080bkg",
+        "messageFlowRefs": [
+          "MessageFlow_0z9qel3"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_0suxm4u",
+      "type": "bpmn:choreographyTask",
+      "name": "Deliver the product",
+      "attrs": {
+        "incoming": "Flow_0324qhk",
+        "outgoing": "SequenceFlow_0nxtqz1",
+        "participants": [
+          "Participant_0sktaei",
+          "Participant_1080bkg"
+        ],
+        "initiatingParticipantRef": "Participant_0sktaei",
+        "messageFlowRefs": [
+          "MessageFlow_1lxxqv0",
+          "MessageFlow_0dy2v5w"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_1iimt7t",
+      "type": "bpmn:choreographyTask",
+      "name": "Issue an invoice",
+      "attrs": {
+        "incoming": "SequenceFlow_1f6x9dz",
+        "outgoing": "SequenceFlow_1fe2fxr",
+        "participants": [
+          "Participant_1080bkg",
+          "Participant_0sktaei"
+        ],
+        "initiatingParticipantRef": "Participant_1080bkg",
+        "messageFlowRefs": [
+          "MessageFlow_0fb4qv7",
+          "MessageFlow_13k266b"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_1khafgk",
+      "type": "bpmn:choreographyTask",
+      "name": "Request external service",
+      "attrs": {
+        "incoming": "Flow_0gwxg7b",
+        "outgoing": "Flow_1naa7u0",
+        "participants": [
+          "Participant_0sktaei",
+          "Participant_1gcdqza"
+        ],
+        "initiatingParticipantRef": "Participant_0sktaei",
+        "messageFlowRefs": [
+          "MessageFlow_0u8ij05"
+        ]
+      }
+    },
+    {
+      "id": "ChoreographyTask_1c9swul",
+      "type": "bpmn:choreographyTask",
+      "name": "Pay",
+      "attrs": {
+        "incoming": "Flow_1naa7u0",
+        "outgoing": "Flow_0bl3c43",
+        "participants": [
+          "Participant_0sktaei",
+          "Participant_1gcdqza"
+        ],
+        "initiatingParticipantRef": "Participant_0sktaei",
+        "messageFlowRefs": [
+          "MessageFlow_03ynrhs",
+          "MessageFlow_0tjt3sl"
+        ]
+      }
+    },
+    {
+      "id": "SequenceFlow_10il97h__condition__Is_available",
+      "type": "bpmn:sequenceConditionVariable",
+      "name": "is_available",
+      "attrs": {
+        "name": "is_available",
+        "relation": "==",
+        "value": "true",
+        "global_name": "Is_available",
+        "dsl_type": "string",
+        "sequenceFlow": "SequenceFlow_10il97h"
+      }
+    },
+    {
+      "id": "SequenceFlow_14sd0ji__condition__Is_available",
+      "type": "bpmn:sequenceConditionVariable",
+      "name": "is_available",
+      "attrs": {
+        "name": "is_available",
+        "relation": "==",
+        "value": "false",
+        "global_name": "Is_available",
+        "dsl_type": "string",
+        "sequenceFlow": "SequenceFlow_14sd0ji"
+      }
+    },
+    {
+      "id": "SequenceFlow_1f6x9dz__condition__InvoiceAvailable",
+      "type": "bpmn:sequenceConditionVariable",
+      "name": "invoiceAvailable",
+      "attrs": {
+        "name": "invoiceAvailable",
+        "relation": "==",
+        "value": "true",
+        "global_name": "InvoiceAvailable",
+        "dsl_type": "string",
+        "sequenceFlow": "SequenceFlow_1f6x9dz"
+      }
+    },
+    {
+      "id": "Flow_0gwxg7b__condition__ExternalAvailable",
+      "type": "bpmn:sequenceConditionVariable",
+      "name": "externalAvailable",
+      "attrs": {
+        "name": "externalAvailable",
+        "relation": "==",
+        "value": "true",
+        "global_name": "ExternalAvailable",
+        "dsl_type": "string",
+        "sequenceFlow": "Flow_0gwxg7b"
+      }
+    },
+    {
+      "id": "Flow_0ayd49a__condition__ExternalAvailable",
+      "type": "bpmn:sequenceConditionVariable",
+      "name": "externalAvailable",
+      "attrs": {
+        "name": "externalAvailable",
+        "relation": "==",
+        "value": "false",
+        "global_name": "ExternalAvailable",
+        "dsl_type": "string",
+        "sequenceFlow": "Flow_0ayd49a"
+      }
+    },
+    {
+      "id": "Flow_0191jxi__condition__InvoiceAvailable",
+      "type": "bpmn:sequenceConditionVariable",
+      "name": "invoiceAvailable",
+      "attrs": {
+        "name": "invoiceAvailable",
+        "relation": "==",
+        "value": "false",
+        "global_name": "InvoiceAvailable",
+        "dsl_type": "string",
+        "sequenceFlow": "Flow_0191jxi"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "MessageFlow_03ynrhs",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_1gcdqza",
+      "target": "Participant_0sktaei",
+      "attrs": {
+        "message": "Message_1qbk325",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_03ynrhs__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_03ynrhs",
+      "target": "Message_1qbk325",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_0tjt3sl",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_0sktaei",
+      "target": "Participant_1gcdqza",
+      "attrs": {
+        "message": "Message_1q05nnw",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_0tjt3sl__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_0tjt3sl",
+      "target": "Message_1q05nnw",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_0u8ij05",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_0sktaei",
+      "target": "Participant_1gcdqza",
+      "attrs": {
+        "message": "Message_1i8rlqn",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_0u8ij05__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_0u8ij05",
+      "target": "Message_1i8rlqn",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_1lxxqv0",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_1080bkg",
+      "target": "Participant_0sktaei",
+      "attrs": {
+        "message": "Message_0m9p3da",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_1lxxqv0__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_1lxxqv0",
+      "target": "Message_0m9p3da",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_0fb4qv7",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_0sktaei",
+      "target": "Participant_1080bkg",
+      "attrs": {
+        "message": "Message_1etcmvl",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_0fb4qv7__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_0fb4qv7",
+      "target": "Message_1etcmvl",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_13k266b",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_1080bkg",
+      "target": "Participant_0sktaei",
+      "attrs": {
+        "message": "Message_1joj7ca",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_13k266b__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_13k266b",
+      "target": "Message_1joj7ca",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_0dy2v5w",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_0sktaei",
+      "target": "Participant_1080bkg",
+      "attrs": {
+        "message": "Message_1ljlm4g",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_0dy2v5w__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_0dy2v5w",
+      "target": "Message_1ljlm4g",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_0z9qel3",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_1080bkg",
+      "target": "Participant_0sktaei",
+      "attrs": {
+        "message": "Message_1xm9dxy",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_0z9qel3__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_0z9qel3",
+      "target": "Message_1xm9dxy",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_1o7kyb6",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_1080bkg",
+      "target": "Participant_0sktaei",
+      "attrs": {
+        "message": "Message_0o8eyir",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_1o7kyb6__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_1o7kyb6",
+      "target": "Message_0o8eyir",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_1o6utvb",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_1080bkg",
+      "target": "Participant_0sktaei",
+      "attrs": {
+        "message": "Message_1nlagx2",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_1o6utvb__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_1o6utvb",
+      "target": "Message_1nlagx2",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_1bermr1",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_0sktaei",
+      "target": "Participant_1080bkg",
+      "attrs": {
+        "message": "Message_1em0ee4",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_1bermr1__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_1bermr1",
+      "target": "Message_1em0ee4",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_19g4eua",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_0sktaei",
+      "target": "Participant_1080bkg",
+      "attrs": {
+        "message": "Message_0r9lypd",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_19g4eua__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_19g4eua",
+      "target": "Message_0r9lypd",
+      "attrs": {}
+    },
+    {
+      "id": "MessageFlow_0zxzleu",
+      "type": "bpmn:messageFlow",
+      "source": "Participant_1080bkg",
+      "target": "Participant_0sktaei",
+      "attrs": {
+        "message": "Message_045i10y",
+        "name": ""
+      }
+    },
+    {
+      "id": "MessageFlow_0zxzleu__messageRef",
+      "type": "bpmn:messageRef",
+      "source": "MessageFlow_0zxzleu",
+      "target": "Message_045i10y",
+      "attrs": {}
+    },
+    {
+      "id": "Message_0m9p3da__documentationProperty__invoice",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_0m9p3da",
+      "target": "Message_0m9p3da__property__invoice",
+      "attrs": {}
+    },
+    {
+      "id": "Message_0m9p3da__documentationProperty__invoiceType",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_0m9p3da",
+      "target": "Message_0m9p3da__property__invoiceType",
+      "attrs": {}
+    },
+    {
+      "id": "Message_1nlagx2__documentationProperty__confirmation",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_1nlagx2",
+      "target": "Message_1nlagx2__property__confirmation",
+      "attrs": {}
+    },
+    {
+      "id": "Message_1em0ee4__documentationProperty__need_external_provider",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_1em0ee4",
+      "target": "Message_1em0ee4__property__need_external_provider",
+      "attrs": {}
+    },
+    {
+      "id": "Message_0r9lypd__documentationProperty__is_available",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_0r9lypd",
+      "target": "Message_0r9lypd__property__is_available",
+      "attrs": {}
+    },
+    {
+      "id": "Message_045i10y__documentationProperty__VIPpoints",
+      "type": "bpmn:documentationProperty",
+      "source": "Message_045i10y",
+      "target": "Message_045i10y__property__VIPpoints",
+      "attrs": {}
+    },
+    {
+      "id": "Activity_1yl9tfp__documentationInput__VIPpoints",
+      "type": "bpmn:documentationInput",
+      "source": "Activity_1yl9tfp",
+      "target": "Activity_1yl9tfp__input__VIPpoints",
+      "attrs": {}
+    },
+    {
+      "id": "Activity_1yl9tfp__documentationInput__need_external_provider",
+      "type": "bpmn:documentationInput",
+      "source": "Activity_1yl9tfp",
+      "target": "Activity_1yl9tfp__input__need_external_provider",
+      "attrs": {}
+    },
+    {
+      "id": "Activity_1yl9tfp__documentationOutput__externalAvailable",
+      "type": "bpmn:documentationOutput",
+      "source": "Activity_1yl9tfp",
+      "target": "Activity_1yl9tfp__output__externalAvailable",
+      "attrs": {}
+    },
+    {
+      "id": "Activity_0ibsbry__documentationInput__invoiceType",
+      "type": "bpmn:documentationInput",
+      "source": "Activity_0ibsbry",
+      "target": "Activity_0ibsbry__input__invoiceType",
+      "attrs": {}
+    },
+    {
+      "id": "Activity_0ibsbry__documentationInput__invoice",
+      "type": "bpmn:documentationInput",
+      "source": "Activity_0ibsbry",
+      "target": "Activity_0ibsbry__input__invoice",
+      "attrs": {}
+    },
+    {
+      "id": "Activity_0ibsbry__documentationOutput__invoiceAvailable",
+      "type": "bpmn:documentationOutput",
+      "source": "Activity_0ibsbry",
+      "target": "Activity_0ibsbry__output__invoiceAvailable",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1jv6c24__participantRef__Participant_1080bkg",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_1jv6c24",
+      "target": "Participant_1080bkg",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1jv6c24__participantRef__Participant_0sktaei",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_1jv6c24",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1jv6c24__initiatingParticipant__Participant_1080bkg",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_1jv6c24",
+      "target": "Participant_1080bkg",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1jv6c24__messageFlowRef__MessageFlow_19g4eua",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_1jv6c24",
+      "target": "MessageFlow_19g4eua",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1jv6c24__messageFlowRef__MessageFlow_0zxzleu",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_1jv6c24",
+      "target": "MessageFlow_0zxzleu",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_13nkbkb__participantRef__Participant_0sktaei",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_13nkbkb",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_13nkbkb__participantRef__Participant_1080bkg",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_13nkbkb",
+      "target": "Participant_1080bkg",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_13nkbkb__initiatingParticipant__Participant_0sktaei",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_13nkbkb",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_13nkbkb__messageFlowRef__MessageFlow_1o6utvb",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_13nkbkb",
+      "target": "MessageFlow_1o6utvb",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_13nkbkb__messageFlowRef__MessageFlow_1bermr1",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_13nkbkb",
+      "target": "MessageFlow_1bermr1",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_177ikw5__participantRef__Participant_1080bkg",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_177ikw5",
+      "target": "Participant_1080bkg",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_177ikw5__participantRef__Participant_0sktaei",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_177ikw5",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_177ikw5__initiatingParticipant__Participant_1080bkg",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_177ikw5",
+      "target": "Participant_1080bkg",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_177ikw5__messageFlowRef__MessageFlow_1o7kyb6",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_177ikw5",
+      "target": "MessageFlow_1o7kyb6",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_09lf521__participantRef__Participant_1080bkg",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_09lf521",
+      "target": "Participant_1080bkg",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_09lf521__participantRef__Participant_0sktaei",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_09lf521",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_09lf521__initiatingParticipant__Participant_1080bkg",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_09lf521",
+      "target": "Participant_1080bkg",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_09lf521__messageFlowRef__MessageFlow_0z9qel3",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_09lf521",
+      "target": "MessageFlow_0z9qel3",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0suxm4u__participantRef__Participant_0sktaei",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_0suxm4u",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0suxm4u__participantRef__Participant_1080bkg",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_0suxm4u",
+      "target": "Participant_1080bkg",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0suxm4u__initiatingParticipant__Participant_0sktaei",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_0suxm4u",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0suxm4u__messageFlowRef__MessageFlow_1lxxqv0",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_0suxm4u",
+      "target": "MessageFlow_1lxxqv0",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_0suxm4u__messageFlowRef__MessageFlow_0dy2v5w",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_0suxm4u",
+      "target": "MessageFlow_0dy2v5w",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1iimt7t__participantRef__Participant_1080bkg",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_1iimt7t",
+      "target": "Participant_1080bkg",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1iimt7t__participantRef__Participant_0sktaei",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_1iimt7t",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1iimt7t__initiatingParticipant__Participant_1080bkg",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_1iimt7t",
+      "target": "Participant_1080bkg",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1iimt7t__messageFlowRef__MessageFlow_0fb4qv7",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_1iimt7t",
+      "target": "MessageFlow_0fb4qv7",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1iimt7t__messageFlowRef__MessageFlow_13k266b",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_1iimt7t",
+      "target": "MessageFlow_13k266b",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1khafgk__participantRef__Participant_0sktaei",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_1khafgk",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1khafgk__participantRef__Participant_1gcdqza",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_1khafgk",
+      "target": "Participant_1gcdqza",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1khafgk__initiatingParticipant__Participant_0sktaei",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_1khafgk",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1khafgk__messageFlowRef__MessageFlow_0u8ij05",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_1khafgk",
+      "target": "MessageFlow_0u8ij05",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1c9swul__participantRef__Participant_0sktaei",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_1c9swul",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1c9swul__participantRef__Participant_1gcdqza",
+      "type": "bpmn:participantRef",
+      "source": "ChoreographyTask_1c9swul",
+      "target": "Participant_1gcdqza",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1c9swul__initiatingParticipant__Participant_0sktaei",
+      "type": "bpmn:initiatingParticipant",
+      "source": "ChoreographyTask_1c9swul",
+      "target": "Participant_0sktaei",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1c9swul__messageFlowRef__MessageFlow_03ynrhs",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_1c9swul",
+      "target": "MessageFlow_03ynrhs",
+      "attrs": {}
+    },
+    {
+      "id": "ChoreographyTask_1c9swul__messageFlowRef__MessageFlow_0tjt3sl",
+      "type": "bpmn:messageFlowRef",
+      "source": "ChoreographyTask_1c9swul",
+      "target": "MessageFlow_0tjt3sl",
+      "attrs": {}
+    },
+    {
+      "id": "SequenceFlow_10il97h",
+      "type": "bpmn:sequenceFlow",
+      "source": "ExclusiveGateway_106je4z",
+      "target": "ChoreographyTask_13nkbkb",
+      "attrs": {
+        "name": "is_available==true",
+        "condition_expression": "is_available==true"
+      }
+    },
+    {
+      "id": "SequenceFlow_10il97h__condition",
+      "type": "bpmn:condition",
+      "source": "SequenceFlow_10il97h",
+      "target": "SequenceFlow_10il97h__condition__Is_available",
+      "attrs": {}
+    },
+    {
+      "id": "SequenceFlow_01sam3q",
+      "type": "bpmn:sequenceFlow",
+      "source": "ExclusiveGateway_0hs3ztq",
+      "target": "ChoreographyTask_1jv6c24",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "SequenceFlow_14sd0ji",
+      "type": "bpmn:sequenceFlow",
+      "source": "ExclusiveGateway_106je4z",
+      "target": "ExclusiveGateway_0hs3ztq",
+      "attrs": {
+        "name": "is_available==false",
+        "condition_expression": "is_available==false"
+      }
+    },
+    {
+      "id": "SequenceFlow_14sd0ji__condition",
+      "type": "bpmn:condition",
+      "source": "SequenceFlow_14sd0ji",
+      "target": "SequenceFlow_14sd0ji__condition__Is_available",
+      "attrs": {}
+    },
+    {
+      "id": "SequenceFlow_17yeafe",
+      "type": "bpmn:sequenceFlow",
+      "source": "Event_1jtgn3j",
+      "target": "ExclusiveGateway_0hs3ztq",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "SequenceFlow_1bi5p2u",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_13nkbkb",
+      "target": "EventBasedGateway_1fxpmyn",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "SequenceFlow_1erfsjw",
+      "type": "bpmn:sequenceFlow",
+      "source": "EventBasedGateway_1fxpmyn",
+      "target": "ChoreographyTask_177ikw5",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "SequenceFlow_0cvalmr",
+      "type": "bpmn:sequenceFlow",
+      "source": "EventBasedGateway_1fxpmyn",
+      "target": "ChoreographyTask_09lf521",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "SequenceFlow_0pgfk71",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_09lf521",
+      "target": "Event_0366pfz",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "SequenceFlow_0nxtqz1",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_0suxm4u",
+      "target": "Activity_0ibsbry",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "SequenceFlow_1f6x9dz",
+      "type": "bpmn:sequenceFlow",
+      "source": "ExclusiveGateway_0nzwv7v",
+      "target": "ChoreographyTask_1iimt7t",
+      "attrs": {
+        "name": "invoiceAvailable==true",
+        "condition_expression": "invoiceAvailable==true"
+      }
+    },
+    {
+      "id": "SequenceFlow_1f6x9dz__condition",
+      "type": "bpmn:condition",
+      "source": "SequenceFlow_1f6x9dz",
+      "target": "SequenceFlow_1f6x9dz__condition__InvoiceAvailable",
+      "attrs": {}
+    },
+    {
+      "id": "SequenceFlow_1fe2fxr",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_1iimt7t",
+      "target": "Event_146eii4",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_1lzzci7",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_1jv6c24",
+      "target": "ExclusiveGateway_106je4z",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_1858yke",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_177ikw5",
+      "target": "Activity_1yl9tfp",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_0gwxg7b",
+      "type": "bpmn:sequenceFlow",
+      "source": "Gateway_1bhtapl",
+      "target": "ChoreographyTask_1khafgk",
+      "attrs": {
+        "name": "externalAvailable==true",
+        "condition_expression": "externalAvailable==true"
+      }
+    },
+    {
+      "id": "Flow_0gwxg7b__condition",
+      "type": "bpmn:condition",
+      "source": "Flow_0gwxg7b",
+      "target": "Flow_0gwxg7b__condition__ExternalAvailable",
+      "attrs": {}
+    },
+    {
+      "id": "Flow_0324qhk",
+      "type": "bpmn:sequenceFlow",
+      "source": "Gateway_04h9e6e",
+      "target": "ChoreographyTask_0suxm4u",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_0ayd49a",
+      "type": "bpmn:sequenceFlow",
+      "source": "Gateway_1bhtapl",
+      "target": "Gateway_04h9e6e",
+      "attrs": {
+        "name": "externalAvailable==false",
+        "condition_expression": "externalAvailable==false"
+      }
+    },
+    {
+      "id": "Flow_0ayd49a__condition",
+      "type": "bpmn:condition",
+      "source": "Flow_0ayd49a",
+      "target": "Flow_0ayd49a__condition__ExternalAvailable",
+      "attrs": {}
+    },
+    {
+      "id": "Flow_1naa7u0",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_1khafgk",
+      "target": "ChoreographyTask_1c9swul",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_0bl3c43",
+      "type": "bpmn:sequenceFlow",
+      "source": "ChoreographyTask_1c9swul",
+      "target": "Gateway_04h9e6e",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_02sms1i",
+      "type": "bpmn:sequenceFlow",
+      "source": "Activity_1yl9tfp",
+      "target": "Gateway_1bhtapl",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_1i177uo",
+      "type": "bpmn:sequenceFlow",
+      "source": "Activity_0ibsbry",
+      "target": "ExclusiveGateway_0nzwv7v",
+      "attrs": {
+        "name": "",
+        "condition_expression": ""
+      }
+    },
+    {
+      "id": "Flow_0191jxi",
+      "type": "bpmn:sequenceFlow",
+      "source": "ExclusiveGateway_0nzwv7v",
+      "target": "Event_143ykco",
+      "attrs": {
+        "name": "invoiceAvailable==false",
+        "condition_expression": "invoiceAvailable==false"
+      }
+    },
+    {
+      "id": "Flow_0191jxi__condition",
+      "type": "bpmn:condition",
+      "source": "Flow_0191jxi",
+      "target": "Flow_0191jxi__condition__InvoiceAvailable",
+      "attrs": {}
+    }
+  ],
+  "derived": [
+    {
+      "id": "Derive_Invoice",
+      "type": "bpmn:message_property",
+      "target": "Invoice",
+      "sources": [
+        "Message_0m9p3da"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "invoice",
+        "type": "boolean",
+        "dsl_type": "bool"
+      }
+    },
+    {
+      "id": "Derive_InvoiceType",
+      "type": "bpmn:message_property",
+      "target": "InvoiceType",
+      "sources": [
+        "Message_0m9p3da"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "invoiceType",
+        "type": "string",
+        "dsl_type": "string"
+      }
+    },
+    {
+      "id": "Derive_Confirmation",
+      "type": "bpmn:message_property",
+      "target": "Confirmation",
+      "sources": [
+        "Message_1nlagx2"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "confirmation",
+        "type": "boolean",
+        "dsl_type": "bool"
+      }
+    },
+    {
+      "id": "Derive_Need_external_provider",
+      "type": "bpmn:message_property",
+      "target": "Need_external_provider",
+      "sources": [
+        "Message_1em0ee4"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "need_external_provider",
+        "type": "boolean",
+        "dsl_type": "bool"
+      }
+    },
+    {
+      "id": "Derive_Is_available",
+      "type": "bpmn:message_property",
+      "target": "Is_available",
+      "sources": [
+        "Message_0r9lypd"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "is_available",
+        "type": "boolean",
+        "dsl_type": "bool"
+      }
+    },
+    {
+      "id": "Derive_VIPpoints",
+      "type": "bpmn:message_property",
+      "target": "VIPpoints",
+      "sources": [
+        "Message_045i10y"
+      ],
+      "rule": "MessageProperty2GlobalVar",
+      "attrs": {
+        "name": "VIPpoints",
+        "type": "number",
+        "dsl_type": "int"
+      }
+    },
+    {
+      "id": "Derive_Is_available",
+      "type": "bpmn:condition_variable",
+      "target": "Is_available",
+      "sources": [
+        "SequenceFlow_10il97h"
+      ],
+      "rule": "SequenceConditionVariable2GlobalVar",
+      "attrs": {
+        "name": "is_available",
+        "relation": "==",
+        "value": "true"
+      }
+    },
+    {
+      "id": "Derive_Is_available",
+      "type": "bpmn:condition_variable",
+      "target": "Is_available",
+      "sources": [
+        "SequenceFlow_14sd0ji"
+      ],
+      "rule": "SequenceConditionVariable2GlobalVar",
+      "attrs": {
+        "name": "is_available",
+        "relation": "==",
+        "value": "false"
+      }
+    },
+    {
+      "id": "Derive_InvoiceAvailable",
+      "type": "bpmn:condition_variable",
+      "target": "InvoiceAvailable",
+      "sources": [
+        "SequenceFlow_1f6x9dz"
+      ],
+      "rule": "SequenceConditionVariable2GlobalVar",
+      "attrs": {
+        "name": "invoiceAvailable",
+        "relation": "==",
+        "value": "true"
+      }
+    },
+    {
+      "id": "Derive_ExternalAvailable",
+      "type": "bpmn:condition_variable",
+      "target": "ExternalAvailable",
+      "sources": [
+        "Flow_0gwxg7b"
+      ],
+      "rule": "SequenceConditionVariable2GlobalVar",
+      "attrs": {
+        "name": "externalAvailable",
+        "relation": "==",
+        "value": "true"
+      }
+    },
+    {
+      "id": "Derive_ExternalAvailable",
+      "type": "bpmn:condition_variable",
+      "target": "ExternalAvailable",
+      "sources": [
+        "Flow_0ayd49a"
+      ],
+      "rule": "SequenceConditionVariable2GlobalVar",
+      "attrs": {
+        "name": "externalAvailable",
+        "relation": "==",
+        "value": "false"
+      }
+    },
+    {
+      "id": "Derive_InvoiceAvailable",
+      "type": "bpmn:condition_variable",
+      "target": "InvoiceAvailable",
+      "sources": [
+        "Flow_0191jxi"
+      ],
+      "rule": "SequenceConditionVariable2GlobalVar",
+      "attrs": {
+        "name": "invoiceAvailable",
+        "relation": "==",
+        "value": "false"
+      }
+    }
+  ],
+  "warnings": []
+}

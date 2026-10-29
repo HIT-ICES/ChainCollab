@@ -1,0 +1,125 @@
+{
+  "case_name": "Blood_analysis",
+  "path_name": "Blood_analysis_dsl_path_010",
+  "description": "Auto materialized from BPMN/DSL consistent path by exp1_1C.",
+  "source_model": "/root/code/ChainCollab/Experiment/new/exp1_1C/cases/Blood_analysis/translator/dsl.b2c",
+  "expect": "accepted",
+  "steps": [
+    {
+      "type": "event",
+      "element": "StartEvent_0m7hz56",
+      "payload": {}
+    },
+    {
+      "type": "gateway",
+      "element": "ParallelGateway_1pgjqtw",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_0wq8mc6",
+      "payload": {
+        "patientData": "sample-patientData"
+      },
+      "guard": "completed",
+      "sender": "Participant_0ggs0ck",
+      "receiver": "Participant_0tkhpj2"
+    },
+    {
+      "type": "message",
+      "element": "Message_0gswvmq",
+      "payload": {
+        "sample": "sample-sample"
+      },
+      "guard": "completed",
+      "sender": "Participant_0ggs0ck",
+      "receiver": "Participant_1v6wnpq"
+    },
+    {
+      "type": "message",
+      "element": "Message_1vzqd37",
+      "payload": {
+        "result": "sample-result"
+      },
+      "guard": "completed",
+      "sender": "Participant_1v6wnpq",
+      "receiver": "Participant_0ggs0ck"
+    },
+    {
+      "type": "message",
+      "element": "Message_13mh6mk",
+      "payload": {
+        "reportContent": "sample-reportContent"
+      },
+      "guard": "completed",
+      "sender": "Participant_0tkhpj2",
+      "receiver": "Participant_0ggs0ck"
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_1m6dgym",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_1rqbibd",
+      "payload": {
+        "result": "sample-result"
+      },
+      "guard": "completed",
+      "sender": "Participant_0ggs0ck",
+      "receiver": "Participant_0tkhpj2"
+    },
+    {
+      "type": "businessrule",
+      "element": "Activity_1mj4mr7",
+      "payload": {},
+      "guard": "dmn:decision_table_rows",
+      "outputs": {
+        "FurtherCheck": "true"
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_0o8snyv",
+      "payload": {},
+      "guard": "FurtherCheck == true"
+    },
+    {
+      "type": "message",
+      "element": "Message_0gd0z61",
+      "payload": {
+        "furtherCheckPlace": "sample-furtherCheckPlace",
+        "furtherCheckDate": "sample-furtherCheckDate"
+      },
+      "guard": "completed",
+      "sender": "Participant_0tkhpj2",
+      "receiver": "Participant_0ggs0ck"
+    },
+    {
+      "type": "event",
+      "element": "EndEvent_110myff",
+      "payload": {}
+    }
+  ],
+  "generated_path": {
+    "final_enabled_elements": [],
+    "final_element_states": {
+      "Message_0gd0z61": "DONE",
+      "Message_0gswvmq": "DONE",
+      "Message_0wq8mc6": "DONE",
+      "Message_13mh6mk": "DONE",
+      "Message_1rqbibd": "DONE",
+      "Message_1vzqd37": "DONE",
+      "Gateway_0o8snyv": "DONE",
+      "ParallelGateway_1pgjqtw": "DONE",
+      "Gateway_1m6dgym": "DONE",
+      "StartEvent_0m7hz56": "DONE",
+      "EndEvent_110myff": "DONE",
+      "Activity_1mj4mr7": "DONE"
+    },
+    "final_globals": {
+      "FurtherCheck": "true"
+    }
+  }
+}

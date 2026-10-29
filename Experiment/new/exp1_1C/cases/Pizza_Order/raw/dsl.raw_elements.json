@@ -1,0 +1,193 @@
+[
+  {
+    "id": "Participant_1ssz56y",
+    "name": "Customer",
+    "is_multi": false,
+    "metadata": {
+      "msp": "CustomerMSP",
+      "x509": "",
+      "attributes": {
+        "role": "Customer"
+      }
+    }
+  },
+  {
+    "id": "Participant_1f296fx",
+    "name": "Pizza Place",
+    "is_multi": false,
+    "metadata": {
+      "msp": "Pizza_PlaceMSP",
+      "x509": "",
+      "attributes": {
+        "role": "Pizza Place"
+      }
+    }
+  },
+  {
+    "id": "Participant_0szm9kv",
+    "name": "Delivery Driver",
+    "is_multi": false,
+    "metadata": {
+      "msp": "Delivery_DriverMSP",
+      "x509": "",
+      "attributes": {
+        "role": "Delivery Driver"
+      }
+    }
+  },
+  {
+    "id": "Message_0gm7yco",
+    "type": "message",
+    "sender": "Participant_1f296fx",
+    "receiver": "Participant_1ssz56y",
+    "schema": "{\"properties\":{\"PickUpTime\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"PickUpTime\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0nc7bj9",
+    "type": "message",
+    "sender": "Participant_1f296fx",
+    "receiver": "Participant_1ssz56y",
+    "schema": "{\"properties\":{\"bikePrepare\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"bikePrepare\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0phlgzx",
+    "type": "message",
+    "sender": "Participant_1f296fx",
+    "receiver": "Participant_0szm9kv",
+    "schema": "{\"properties\":{\"DeliveryInfomation\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_10c1p7j",
+    "type": "message",
+    "sender": "Participant_1ssz56y",
+    "receiver": "Participant_1f296fx",
+    "schema": "{\"properties\":{\"Address\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"Address\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1hi03zn",
+    "type": "message",
+    "sender": "Participant_1ssz56y",
+    "receiver": "Participant_0szm9kv",
+    "schema": "{\"properties\":{\"Signature\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"Signature\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1kyybzd",
+    "type": "message",
+    "sender": "Participant_1f296fx",
+    "receiver": "Participant_1ssz56y",
+    "schema": "{\"properties\":{\"carPrepare\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[\"carPrepare\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1l76ppu",
+    "type": "message",
+    "sender": "Participant_1f296fx",
+    "receiver": "Participant_1ssz56y",
+    "schema": "{\"properties\":{\"Signature\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1wwub0e",
+    "type": "message",
+    "sender": "Participant_1ssz56y",
+    "receiver": "Participant_1f296fx",
+    "schema": "{\"properties\":{\"OrderContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"OrderContent\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_0ckb278",
+    "type": "gateway",
+    "gateway_type": "exclusive",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_18xv5wc",
+    "type": "gateway",
+    "gateway_type": "exclusive",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_1rwnujh",
+    "type": "gateway",
+    "gateway_type": "exclusive",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_1k9qf30",
+    "type": "gateway",
+    "gateway_type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Event_17c6iyi",
+    "type": "event",
+    "initial_state": "READY"
+  },
+  {
+    "id": "Event_1bxai2s",
+    "type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Activity_0pzravo",
+    "type": "businessrule",
+    "inputs": [
+      [
+        "Address",
+        "Address"
+      ]
+    ],
+    "outputs": [
+      [
+        "distance",
+        "Distance"
+      ]
+    ],
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Address",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "DeliveryInfomation",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "OrderContent",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "PickUpTime",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Signature",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "BikePrepare",
+    "type": "global",
+    "dsl_type": "bool"
+  },
+  {
+    "id": "CarPrepare",
+    "type": "global",
+    "dsl_type": "bool"
+  },
+  {
+    "id": "Distance",
+    "type": "global",
+    "dsl_type": "int"
+  }
+]

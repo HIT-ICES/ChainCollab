@@ -1,0 +1,32 @@
+contract MultiMessageContractC {
+    participants {
+        participant C1 { msp "C1MSP" attributes { role = "c1" } }
+        participant C2 { msp "C2MSP" attributes { role = "c2" } }
+        participant C3 { msp "C3MSP" attributes { role = "c3" } }
+    }
+    globals {
+        FlagC: bool
+    }
+    messages {
+        message MC1 from C1 to C2 { initial state INACTIVE schema "{}" }
+        message MC2 from C2 to C3 { initial state INACTIVE schema "{}" }
+        message MC3 from C3 to C1 { initial state INACTIVE schema "{}" }
+    }
+    gateways {
+    }
+    events {
+        event StartEvent_MC { initial state READY }
+        event EndEvent_MC { initial state INACTIVE }
+    }
+    businessrules {
+    }
+    oracletasks {
+    }
+    flows {
+        start event StartEvent_MC enables MC1;
+        when message MC1 completed then enable MC2;
+        when message MC2 completed then enable MC3;
+        when message MC3 completed then enable EndEvent_MC;
+    }
+}
+

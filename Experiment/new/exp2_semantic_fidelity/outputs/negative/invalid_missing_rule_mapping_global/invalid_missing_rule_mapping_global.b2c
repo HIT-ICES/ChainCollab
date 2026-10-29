@@ -1,0 +1,35 @@
+contract InvalidRuleMappingGlobal {
+    participants {
+        participant Clerk { msp "ClerkMSP" attributes { role = "clerk" } }
+        participant Reviewer { msp "ReviewerMSP" attributes { role = "reviewer" } }
+    }
+    globals {
+        Score: int
+    }
+    messages {
+        message Submit from Clerk to Reviewer { initial state INACTIVE schema "{}" }
+    }
+    gateways {
+        gateway Choice { type exclusive initial state INACTIVE }
+    }
+    events {
+        event StartEvent_1 { initial state READY }
+        event EndEvent_1 { initial state INACTIVE }
+    }
+    businessrules {
+        businessrule Rule1 {
+            dmn "rule1.dmn"
+            decision "Decision1"
+            input mapping {
+                score -> MissingScore
+            }
+            initial state INACTIVE
+        }
+    }
+    oracletasks {
+    }
+    flows {
+        start event StartEvent_1 enables Submit;
+        when message Submit completed then enable Rule1;
+    }
+}

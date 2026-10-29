@@ -1,0 +1,31 @@
+contract MultiMessageContractD {
+    participants {
+        participant D1 { msp "D1MSP" attributes { role = "d1" } }
+        participant D2 { msp "D2MSP" attributes { role = "d2" } }
+        participant D3 { msp "D3MSP" attributes { role = "d3" } }
+    }
+    globals {
+        FlagD: bool
+    }
+    messages {
+        message MD1 from D1 to D2 { initial state INACTIVE schema "{}" }
+        message MD2 from D2 to D3 { initial state INACTIVE schema "{}" }
+        message MD3 from D3 to D1 { initial state INACTIVE schema "{}" }
+    }
+    gateways {
+    }
+    events {
+        event StartEvent_MD { initial state READY }
+        event EndEvent_MD { initial state INACTIVE }
+    }
+    businessrules {
+    }
+    oracletasks {
+    }
+    flows {
+        start event StartEvent_MD enables MD1;
+        when message MD1 completed then enable MD2;
+        when message MD2 completed then enable MD3;
+        when message MD3 completed then enable EndEvent_MD;
+    }
+}

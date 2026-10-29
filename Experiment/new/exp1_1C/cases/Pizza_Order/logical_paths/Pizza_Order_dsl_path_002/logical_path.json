@@ -1,0 +1,122 @@
+{
+  "case_name": "Pizza_Order",
+  "path_name": "Pizza_Order_dsl_path_002",
+  "description": "Auto materialized from BPMN/DSL consistent path by exp1_1C.",
+  "source_model": "/root/code/ChainCollab/Experiment/new/exp1_1C/cases/Pizza_Order/translator/dsl.b2c",
+  "expect": "accepted",
+  "steps": [
+    {
+      "type": "event",
+      "element": "Event_17c6iyi",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_1wwub0e",
+      "payload": {
+        "OrderContent": "sample-OrderContent"
+      },
+      "guard": "completed",
+      "sender": "Participant_1ssz56y",
+      "receiver": "Participant_1f296fx"
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_1k9qf30",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_10c1p7j",
+      "payload": {
+        "Address": "sample-Address"
+      },
+      "guard": "completed",
+      "sender": "Participant_1ssz56y",
+      "receiver": "Participant_1f296fx"
+    },
+    {
+      "type": "businessrule",
+      "element": "Activity_0pzravo",
+      "payload": {},
+      "guard": "dmn:decision_table_rows",
+      "outputs": {
+        "Distance": "10"
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_0ckb278",
+      "payload": {},
+      "guard": "Distance >= 10"
+    },
+    {
+      "type": "message",
+      "element": "Message_0nc7bj9",
+      "payload": {
+        "bikePrepare": true
+      },
+      "guard": "completed",
+      "sender": "Participant_1f296fx",
+      "receiver": "Participant_1ssz56y"
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_18xv5wc",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_0phlgzx",
+      "payload": {
+        "DeliveryInfomation": "sample-DeliveryInfomation"
+      },
+      "guard": "completed",
+      "sender": "Participant_1f296fx",
+      "receiver": "Participant_0szm9kv"
+    },
+    {
+      "type": "message",
+      "element": "Message_1hi03zn",
+      "payload": {
+        "Signature": "sample-Signature"
+      },
+      "guard": "completed",
+      "sender": "Participant_1ssz56y",
+      "receiver": "Participant_0szm9kv"
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_1rwnujh",
+      "payload": {}
+    },
+    {
+      "type": "event",
+      "element": "Event_1bxai2s",
+      "payload": {}
+    }
+  ],
+  "generated_path": {
+    "final_enabled_elements": [],
+    "final_element_states": {
+      "Message_0gm7yco": "INACTIVE",
+      "Message_0nc7bj9": "DONE",
+      "Message_0phlgzx": "DONE",
+      "Message_10c1p7j": "DONE",
+      "Message_1hi03zn": "DONE",
+      "Message_1kyybzd": "INACTIVE",
+      "Message_1l76ppu": "INACTIVE",
+      "Message_1wwub0e": "DONE",
+      "Gateway_0ckb278": "DONE",
+      "Gateway_18xv5wc": "DONE",
+      "Gateway_1rwnujh": "DONE",
+      "Gateway_1k9qf30": "DONE",
+      "Event_17c6iyi": "DONE",
+      "Event_1bxai2s": "DONE",
+      "Activity_0pzravo": "DONE"
+    },
+    "final_globals": {
+      "Distance": "10"
+    }
+  }
+}

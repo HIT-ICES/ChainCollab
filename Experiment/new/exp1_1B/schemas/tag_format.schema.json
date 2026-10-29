@@ -1,0 +1,313 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chaincollab.local/experiment/1b/tag_format.schema.json",
+  "title": "Experiment 1B Typed Attributed Graph Format",
+  "description": "Unified TAG container used for both BPMN-TAG and DSL-TAG. The container format is identical; node/edge type vocabularies and attrs differ by model_type.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tag_version",
+    "case_name",
+    "model_type",
+    "source_file",
+    "extractor",
+    "nodes",
+    "edges"
+  ],
+  "properties": {
+    "tag_version": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "case_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model_type": {
+      "type": "string",
+      "enum": [
+        "bpmn",
+        "dsl"
+      ]
+    },
+    "source_file": {
+      "type": "string",
+      "minLength": 1
+    },
+    "extractor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version",
+        "implementation_basis"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "implementation_basis": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "namespaces": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/node"
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/edge"
+      }
+    },
+    "derived": {
+      "type": "array",
+      "description": "Optional derivation records, mainly for DSL globals inferred from BPMN documentation or conditions.",
+      "items": {
+        "$ref": "#/$defs/derived"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "name",
+        "attrs"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "pattern": "^(bpmn|dsl):[A-Za-z][A-Za-z0-9_]*$"
+        },
+        "name": {
+          "type": "string"
+        },
+        "attrs": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "source_location": {
+          "$ref": "#/$defs/source_location"
+        },
+        "trace_hints": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "source",
+        "target",
+        "attrs"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "pattern": "^(bpmn|dsl):[A-Za-z][A-Za-z0-9_]*$"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "attrs": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "source_location": {
+          "$ref": "#/$defs/source_location"
+        },
+        "trace_hints": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "derived": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "target",
+        "sources",
+        "rule"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "dsl:global_derivation",
+            "dsl:participant_metadata_derivation",
+            "dsl:message_schema_derivation",
+            "dsl:businessrule_mapping_derivation",
+            "dsl:oracletask_mapping_derivation",
+            "bpmn:message_property",
+            "bpmn:business_rule_parameter",
+            "bpmn:oracle_output_parameter",
+            "bpmn:condition_variable"
+          ]
+        },
+        "target": {
+          "type": "string"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rule": {
+          "type": "string"
+        },
+        "attrs": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "source_location": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "xml_id": {
+          "type": "string"
+        },
+        "section": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "column": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  },
+  "x-chaincollab-type-vocabulary": {
+    "bpmn_node_types": [
+      "bpmn:participant",
+      "bpmn:message",
+      "bpmn:startEvent",
+      "bpmn:endEvent",
+      "bpmn:choreographyTask",
+      "bpmn:exclusiveGateway",
+      "bpmn:parallelGateway",
+      "bpmn:eventBasedGateway",
+      "bpmn:businessRuleTask",
+      "bpmn:receiveTask",
+      "bpmn:scriptTask",
+      "bpmn:dataTask",
+      "bpmn:messageProperty",
+      "bpmn:businessRuleParameter",
+      "bpmn:oracleOutputParameter",
+      "bpmn:sequenceConditionVariable"
+    ],
+    "bpmn_edge_types": [
+      "bpmn:messageFlow",
+      "bpmn:sequenceFlow",
+      "bpmn:participantRef",
+      "bpmn:initiatingParticipant",
+      "bpmn:messageFlowRef",
+      "bpmn:messageRef",
+      "bpmn:incoming",
+      "bpmn:outgoing",
+      "bpmn:condition",
+      "bpmn:documentationProperty",
+      "bpmn:documentationInput",
+      "bpmn:documentationOutput"
+    ],
+    "dsl_node_types": [
+      "dsl:contract",
+      "dsl:participant",
+      "dsl:attribute",
+      "dsl:global",
+      "dsl:message",
+      "dsl:gateway",
+      "dsl:event",
+      "dsl:businessrule",
+      "dsl:oracletask",
+      "dsl:flowItem",
+      "dsl:startFlow",
+      "dsl:messageFlow",
+      "dsl:gatewayFlow",
+      "dsl:ruleFlow",
+      "dsl:oracleTaskFlow",
+      "dsl:eventFlow",
+      "dsl:parallelJoin",
+      "dsl:gatewayCompareBranch",
+      "dsl:gatewayExpressionBranch",
+      "dsl:gatewayElseBranch",
+      "dsl:paramMapping",
+      "dsl:literal"
+    ],
+    "dsl_edge_types": [
+      "dsl:contains",
+      "dsl:participant_attribute",
+      "dsl:message_sender",
+      "dsl:message_receiver",
+      "dsl:start_enables",
+      "dsl:enable",
+      "dsl:disable",
+      "dsl:set_global",
+      "dsl:flow_trigger",
+      "dsl:flow_action",
+      "dsl:gateway_branch",
+      "dsl:parallel_join_source",
+      "dsl:param_global_ref",
+      "dsl:businessrule_input",
+      "dsl:businessrule_output",
+      "dsl:oracletask_output",
+      "dsl:oracle_data_source",
+      "dsl:oracle_compute_script"
+    ]
+  }
+}

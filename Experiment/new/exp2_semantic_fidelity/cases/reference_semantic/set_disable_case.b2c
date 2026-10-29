@@ -1,0 +1,37 @@
+contract SetDisableCase {
+    participants {
+        participant Buyer { msp "BuyerMSP" attributes { role = "buyer" } }
+        participant Seller { msp "SellerMSP" attributes { role = "seller" } }
+    }
+    globals {
+        Counter: int
+        Retry: bool
+    }
+    messages {
+        message Offer from Seller to Buyer { initial state INACTIVE schema "{}" }
+        message Cancel from Buyer to Seller { initial state INACTIVE schema "{}" }
+        message Accept from Buyer to Seller { initial state INACTIVE schema "{}" }
+    }
+    gateways {
+        gateway Decide { type exclusive initial state INACTIVE }
+    }
+    events {
+        event StartEvent_1 { initial state READY }
+        event EndEvent_1 { initial state INACTIVE }
+    }
+    businessrules {
+    }
+    oracletasks {
+    }
+    flows {
+        start event StartEvent_1 enables Offer;
+        when message Offer completed then set Counter = 1, enable Decide;
+        when gateway Decide completed choose {
+            if Retry == true then enable Cancel;
+            else then enable Accept;
+        }
+        when message Cancel completed then disable Accept, enable EndEvent_1;
+        when message Accept completed then enable EndEvent_1;
+    }
+}
+

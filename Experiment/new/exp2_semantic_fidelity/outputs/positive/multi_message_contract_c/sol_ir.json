@@ -1,0 +1,139 @@
+{
+  "contract": "IOracle",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/positive/multi_message_contract_c/multi_message_contract_c.sol",
+  "globals": [
+    {
+      "name": "FlagC",
+      "type": "bool"
+    }
+  ],
+  "handlers": [
+    {
+      "name": "StartEvent_MC",
+      "language": "solidity",
+      "element_kind": "event",
+      "element_name": "StartEvent_MC",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_MC"
+      },
+      "guards": [
+        "require(ev.exists, \"event not set\")",
+        "require(ev.state == ElementState.ENABLED, \"event state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "MC1"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.StartEvent_MC];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.StartEvent_MC);\n        inst.messages[MessageKey.MC1].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "MC1_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "MC1",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "MC1"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "MC2"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.MC1];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.MC1, fireflyTranId);\n        inst.messages[MessageKey.MC2].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "MC2_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "MC2",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "MC2"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "MC3"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.MC2];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.MC2, fireflyTranId);\n        inst.messages[MessageKey.MC3].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "MC3_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "MC3",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "MC3"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_MC"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.MC3];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.MC3, fireflyTranId);\n        inst.events[EventKey.EndEvent_MC].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "EndEvent_MC",
+      "language": "solidity",
+      "element_kind": "event",
+      "element_name": "EndEvent_MC",
+      "trigger": {
+        "kind": "event_completed",
+        "name": "EndEvent_MC"
+      },
+      "guards": [
+        "require(ev.exists, \"event not set\")",
+        "require(ev.state == ElementState.ENABLED, \"event state not allowed\")"
+      ],
+      "actions": [],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.EndEvent_MC];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.EndEvent_MC);\n\n    }"
+    }
+  ],
+  "elements": {
+    "messages": [
+      "MC1",
+      "MC2",
+      "MC3"
+    ],
+    "gateways": [
+      "PlaceholderGateway"
+    ],
+    "events": [
+      "EndEvent_MC",
+      "StartEvent_MC"
+    ],
+    "businessrules": [
+      "PlaceholderBusinessRule"
+    ]
+  },
+  "unsupported": [],
+  "raw_summary": {
+    "function_count": 38,
+    "event_count": 5
+  }
+}

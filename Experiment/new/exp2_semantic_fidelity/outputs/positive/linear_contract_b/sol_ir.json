@@ -1,0 +1,164 @@
+{
+  "contract": "IOracle",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/positive/linear_contract_b/linear_contract_b.sol",
+  "globals": [
+    {
+      "name": "AcceptedB",
+      "type": "bool"
+    }
+  ],
+  "handlers": [
+    {
+      "name": "StartEvent_B",
+      "language": "solidity",
+      "element_kind": "event",
+      "element_name": "StartEvent_B",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_B"
+      },
+      "guards": [
+        "require(ev.exists, \"event not set\")",
+        "require(ev.state == ElementState.ENABLED, \"event state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "QuoteB"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.StartEvent_B];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.StartEvent_B);\n        inst.messages[MessageKey.QuoteB].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "QuoteB_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "QuoteB",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "QuoteB"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "ChoiceB"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.QuoteB];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.QuoteB, fireflyTranId);\n        inst.gateways[GatewayKey.ChoiceB].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "AckB_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "AckB",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "AckB"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_B"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.AckB];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.AckB, fireflyTranId);\n        inst.events[EventKey.EndEvent_B].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "ChoiceB",
+      "language": "solidity",
+      "element_kind": "gateway",
+      "element_name": "ChoiceB",
+      "trigger": {
+        "kind": "gateway_completed",
+        "name": "ChoiceB"
+      },
+      "guards": [
+        "inst.stateMemory.AcceptedB == true",
+        "require(g.exists, \"gateway not set\")",
+        "require(g.state == ElementState.ENABLED, \"gateway state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "AckB"
+        },
+        {
+          "op": "enable",
+          "target": "EndEvent_B"
+        },
+        {
+          "op": "set",
+          "var": "AcceptedB",
+          "value": "= true) {\n            inst.messages[MessageKey.AckB].state = ElementState.ENABLED"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "inst.stateMemory.AcceptedB == true",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "AckB"
+            }
+          ],
+          "else_actions": [
+            {
+              "op": "enable",
+              "target": "EndEvent_B"
+            }
+          ]
+        }
+      ],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Gateway storage g = inst.gateways[GatewayKey.ChoiceB];\n        require(g.exists, \"gateway not set\");\n        require(g.state == ElementState.ENABLED, \"gateway state not allowed\");\n\n        g.state = ElementState.COMPLETED;\n        emit GatewayDone(instanceId, GatewayKey.ChoiceB);\n        if (inst.stateMemory.AcceptedB == true) {\n            inst.messages[MessageKey.AckB].state = ElementState.ENABLED;\n        }\n        else {\n            inst.events[EventKey.EndEvent_B].state = ElementState.ENABLED;\n        }\n\n    }"
+    },
+    {
+      "name": "EndEvent_B",
+      "language": "solidity",
+      "element_kind": "event",
+      "element_name": "EndEvent_B",
+      "trigger": {
+        "kind": "event_completed",
+        "name": "EndEvent_B"
+      },
+      "guards": [
+        "require(ev.exists, \"event not set\")",
+        "require(ev.state == ElementState.ENABLED, \"event state not allowed\")"
+      ],
+      "actions": [],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.EndEvent_B];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.EndEvent_B);\n\n    }"
+    }
+  ],
+  "elements": {
+    "messages": [
+      "AckB",
+      "QuoteB"
+    ],
+    "gateways": [
+      "ChoiceB"
+    ],
+    "events": [
+      "EndEvent_B",
+      "StartEvent_B"
+    ],
+    "businessrules": [
+      "PlaceholderBusinessRule"
+    ]
+  },
+  "unsupported": [],
+  "raw_summary": {
+    "function_count": 38,
+    "event_count": 5
+  }
+}

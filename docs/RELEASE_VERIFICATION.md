@@ -64,6 +64,13 @@ access to the chosen package and image registries.
 
 ## Scope limits
 
+The initial cleanup removed `Experiment/` too broadly. It has been restored
+from `cf1e6f75b973eb9e6425cb8ee9d039e40bd9cf9c`: all 3,631 tracked files under
+`BPMNwithDMNcase/`, `NoiseExperiment/`, `PerformanceTest/` and `new/`.
+The restored Git tree is identical to that baseline, preserving the original
+release layout and recorded data. This restoration does not rerun experiments
+or import development-only experiment directories.
+
 Oracle/OCR, Fabric/Geth network provisioning, FireFly contract registration,
 real DMN evaluation and cross-chain relaying require their external components
 and selected environment configuration. They were retained and documented,

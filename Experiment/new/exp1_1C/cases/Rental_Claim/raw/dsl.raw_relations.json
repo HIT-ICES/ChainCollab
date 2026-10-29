@@ -1,0 +1,189 @@
+[
+  {
+    "kind": "start",
+    "trigger": "Event_19zgkxm",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Gateway_10ut9pb"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_09eyqv0",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "disable",
+        "target": "Message_0dckgao"
+      },
+      {
+        "op": "enable",
+        "target": "Message_1eb4q8q"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_0dckgao",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "disable",
+        "target": "Message_09eyqv0"
+      },
+      {
+        "op": "enable",
+        "target": "Activity_0oacu9j"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_1eb4q8q",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Gateway_1v1x25n"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_0z3zz01",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "disable",
+        "target": "Message_1im6vvb"
+      },
+      {
+        "op": "enable",
+        "target": "Message_066q5si"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_066q5si",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Message_1xlzl3n"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_1im6vvb",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "disable",
+        "target": "Message_0z3zz01"
+      },
+      {
+        "op": "enable",
+        "target": "Message_0fm3vfa"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_1xlzl3n",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Event_1pjpbaw"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_0fm3vfa",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Event_120hui7"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_0zoy0sz",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Event_0fzlrii"
+      }
+    ]
+  },
+  {
+    "kind": "gateway",
+    "trigger": "Gateway_10ut9pb",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Message_09eyqv0"
+      },
+      {
+        "op": "enable",
+        "target": "Message_0dckgao"
+      }
+    ]
+  },
+  {
+    "kind": "gateway",
+    "trigger": "Gateway_1v1x25n",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Message_0z3zz01"
+      },
+      {
+        "op": "enable",
+        "target": "Message_1im6vvb"
+      }
+    ]
+  },
+  {
+    "kind": "gateway_choose",
+    "trigger": "Gateway_11zw5fs",
+    "branches": [
+      {
+        "guard": "Refund == true",
+        "actions": [
+          {
+            "op": "enable",
+            "target": "Message_0zoy0sz"
+          }
+        ]
+      },
+      {
+        "guard": "Refund == false",
+        "actions": [
+          {
+            "op": "enable",
+            "target": "Event_0kmeww3"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "businessrule",
+    "trigger": "Activity_0oacu9j",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Gateway_11zw5fs"
+      }
+    ]
+  }
+]

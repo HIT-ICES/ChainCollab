@@ -1,0 +1,32 @@
+contract MultiMessageContractB {
+    participants {
+        participant P1B { msp "P1BMSP" attributes { role = "p1" } }
+        participant P2B { msp "P2BMSP" attributes { role = "p2" } }
+        participant P3B { msp "P3BMSP" attributes { role = "p3" } }
+    }
+    globals {
+        FlagB: bool
+    }
+    messages {
+        message MB1 from P1B to P2B { initial state INACTIVE schema "{}" }
+        message MB2 from P2B to P3B { initial state INACTIVE schema "{}" }
+        message MB3 from P3B to P1B { initial state INACTIVE schema "{}" }
+    }
+    gateways {
+    }
+    events {
+        event StartEvent_MB { initial state READY }
+        event EndEvent_MB { initial state INACTIVE }
+    }
+    businessrules {
+    }
+    oracletasks {
+    }
+    flows {
+        start event StartEvent_MB enables MB1;
+        when message MB1 completed then enable MB2;
+        when message MB2 completed then enable MB3;
+        when message MB3 completed then enable EndEvent_MB;
+    }
+}
+
