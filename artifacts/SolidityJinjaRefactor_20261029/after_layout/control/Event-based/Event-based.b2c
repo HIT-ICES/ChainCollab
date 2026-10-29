@@ -1,0 +1,152 @@
+contract Event_based {
+
+    participants {
+        participant Participant_09y8npn {
+            msp "New_Participant_1MSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "New Participant 1"
+
+            }
+        }
+        participant Participant_0tzltz7 {
+            msp "New_Participant_2MSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "New Participant 2"
+
+            }
+        }
+
+    }
+
+
+
+    globals {
+
+    }
+
+
+
+    messages {
+        message Message_03lcbpo from Participant_09y8npn to Participant_0tzltz7 {
+            initial state INACTIVE
+            schema "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}"
+        }
+        message Message_0473mtp from Participant_09y8npn to Participant_0tzltz7 {
+            initial state INACTIVE
+            schema "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}"
+        }
+        message Message_06lwi6g from Participant_09y8npn to Participant_0tzltz7 {
+            initial state INACTIVE
+            schema "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}"
+        }
+        message Message_09084zb from Participant_09y8npn to Participant_0tzltz7 {
+            initial state INACTIVE
+            schema "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}"
+        }
+        message Message_0bf4mum from Participant_09y8npn to Participant_0tzltz7 {
+            initial state INACTIVE
+            schema "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}"
+        }
+        message Message_0k9tnvh from Participant_09y8npn to Participant_0tzltz7 {
+            initial state INACTIVE
+            schema "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}"
+        }
+        message Message_0pa84xc from Participant_09y8npn to Participant_0tzltz7 {
+            initial state INACTIVE
+            schema "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}"
+        }
+        message Message_13pjbjx from Participant_09y8npn to Participant_0tzltz7 {
+            initial state INACTIVE
+            schema "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1rymt7w from Participant_09y8npn to Participant_0tzltz7 {
+            initial state INACTIVE
+            schema "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}"
+        }
+        message Message_1v18nat from Participant_09y8npn to Participant_0tzltz7 {
+            initial state INACTIVE
+            schema "{\"properties\":{},\"required\":[],\"files\":{},\"file required\":[]}"
+        }
+
+    }
+
+
+
+    gateways {
+        gateway Gateway_1cd5ytu {
+            type exclusive
+            initial state INACTIVE
+        }
+        gateway Gateway_186s0jf {
+            type event
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    events {
+        event Event_0t1u1wv {
+            initial state READY
+        }
+        event Event_0ib1fj9 {
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    businessrules {
+
+    }
+
+
+
+    oracletasks {
+
+    }
+
+
+
+    flows {
+        start event Event_0t1u1wv enables Gateway_186s0jf;
+
+        when message Message_0pa84xc completed
+        then disable Message_09084zb, disable Message_06lwi6g, disable Message_1v18nat, disable Message_03lcbpo, disable Message_0473mtp, disable Message_1rymt7w, disable Message_0k9tnvh, disable Message_0bf4mum, disable Message_13pjbjx, enable Gateway_1cd5ytu;
+        when message Message_09084zb completed
+        then disable Message_06lwi6g, disable Message_0pa84xc, disable Message_1v18nat, disable Message_03lcbpo, disable Message_0473mtp, disable Message_1rymt7w, disable Message_0k9tnvh, disable Message_0bf4mum, disable Message_13pjbjx, enable Gateway_1cd5ytu;
+        when message Message_13pjbjx completed
+        then disable Message_09084zb, disable Message_06lwi6g, disable Message_0pa84xc, disable Message_1v18nat, disable Message_03lcbpo, disable Message_0473mtp, disable Message_1rymt7w, disable Message_0k9tnvh, disable Message_0bf4mum, enable Gateway_1cd5ytu;
+        when message Message_06lwi6g completed
+        then disable Message_09084zb, disable Message_0pa84xc, disable Message_1v18nat, disable Message_03lcbpo, disable Message_0473mtp, disable Message_1rymt7w, disable Message_0k9tnvh, disable Message_0bf4mum, disable Message_13pjbjx, enable Gateway_1cd5ytu;
+        when message Message_0bf4mum completed
+        then disable Message_09084zb, disable Message_06lwi6g, disable Message_0pa84xc, disable Message_1v18nat, disable Message_03lcbpo, disable Message_0473mtp, disable Message_1rymt7w, disable Message_0k9tnvh, disable Message_13pjbjx, enable Gateway_1cd5ytu;
+        when message Message_1v18nat completed
+        then disable Message_09084zb, disable Message_06lwi6g, disable Message_0pa84xc, disable Message_03lcbpo, disable Message_0473mtp, disable Message_1rymt7w, disable Message_0k9tnvh, disable Message_0bf4mum, disable Message_13pjbjx, enable Gateway_1cd5ytu;
+        when message Message_03lcbpo completed
+        then disable Message_09084zb, disable Message_06lwi6g, disable Message_0pa84xc, disable Message_1v18nat, disable Message_0473mtp, disable Message_1rymt7w, disable Message_0k9tnvh, disable Message_0bf4mum, disable Message_13pjbjx, enable Gateway_1cd5ytu;
+        when message Message_0473mtp completed
+        then disable Message_09084zb, disable Message_06lwi6g, disable Message_0pa84xc, disable Message_1v18nat, disable Message_03lcbpo, disable Message_1rymt7w, disable Message_0k9tnvh, disable Message_0bf4mum, disable Message_13pjbjx, enable Gateway_1cd5ytu;
+        when message Message_1rymt7w completed
+        then disable Message_09084zb, disable Message_06lwi6g, disable Message_0pa84xc, disable Message_1v18nat, disable Message_03lcbpo, disable Message_0473mtp, disable Message_0k9tnvh, disable Message_0bf4mum, disable Message_13pjbjx, enable Gateway_1cd5ytu;
+        when message Message_0k9tnvh completed
+        then disable Message_09084zb, disable Message_06lwi6g, disable Message_0pa84xc, disable Message_1v18nat, disable Message_03lcbpo, disable Message_0473mtp, disable Message_1rymt7w, disable Message_0bf4mum, disable Message_13pjbjx, enable Gateway_1cd5ytu;
+
+        when gateway Gateway_1cd5ytu completed
+        then enable Event_0ib1fj9;
+        when gateway Gateway_186s0jf completed
+        then enable Message_09084zb, enable Message_06lwi6g, enable Message_0pa84xc, enable Message_1v18nat, enable Message_03lcbpo, enable Message_0473mtp, enable Message_1rymt7w, enable Message_0k9tnvh, enable Message_0bf4mum, enable Message_13pjbjx;
+
+    }
+
+}

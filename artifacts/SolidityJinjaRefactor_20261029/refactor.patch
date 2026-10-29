@@ -1,0 +1,585 @@
+diff --git a/src/newTranslator/CodeGenerator/b2cdsl-go/b2cdsl_go/__init__.py b/src/newTranslator/CodeGenerator/b2cdsl-go/b2cdsl_go/__init__.py
+index 63d672db..805bc410 100644
+--- a/src/newTranslator/CodeGenerator/b2cdsl-go/b2cdsl_go/__init__.py
++++ b/src/newTranslator/CodeGenerator/b2cdsl-go/b2cdsl_go/__init__.py
+@@ -336,34 +336,13 @@ class FlowRenderer:
+                 )
+ 
+             done_actions = "".join(self.oracle_actions.get((task.name, "done"), []))
+-            body = f"""func (cc *SmartContract) {task.name}(ctx contractapi.TransactionContextInterface, instanceID string{param_sig}) error {{
+-    stub := ctx.GetStub()
+-
+-    instance, err := cc.GetInstance(ctx, instanceID)
+-    if err != nil {{
+-        return err
+-    }}
+-
+-    oracleTask, err := cc.ReadEvent(ctx, instanceID, "{task.name}")
+-    if err != nil {{
+-        return err
+-    }}
+-
+-    if oracleTask.EventState != ENABLED {{
+-        errorMessage := fmt.Sprintf("Oracle task state %s is not allowed", oracleTask.EventID)
+-        fmt.Println(errorMessage)
+-        return fmt.Errorf(errorMessage)
+-    }}
+-
+-    cc.ChangeEventState(ctx, instance, "{task.name}", COMPLETED)
+-{self._indent(set_globals, 1)}{self._indent(done_actions, 1)}    stub.SetEvent("{task.name}", []byte("Oracle task has been completed"))
+-    err = cc.SetInstance(ctx, instance)
+-    if err != nil {{
+-        return err
+-    }}
+-
+-    return nil
+-}}"""
++            body = self._render_template(
++                "flows/oracle_task.go.jinja",
++                task_name=task.name,
++                more_parameters=param_sig,
++                parameter_assignments=self._indent(set_globals, 1),
++                after_hooks=self._indent(done_actions, 1),
++            )
+             blocks.append(body)
+         return blocks
+ 
+diff --git a/src/newTranslator/CodeGenerator/b2cdsl-solidity/b2cdsl_solidity/__init__.py b/src/newTranslator/CodeGenerator/b2cdsl-solidity/b2cdsl_solidity/__init__.py
+index 2bb2bfb1..4aef228f 100644
+--- a/src/newTranslator/CodeGenerator/b2cdsl-solidity/b2cdsl_solidity/__init__.py
++++ b/src/newTranslator/CodeGenerator/b2cdsl-solidity/b2cdsl_solidity/__init__.py
+@@ -378,6 +378,9 @@ class SolidityFlowRenderer:
+         self.oracle_actions: dict[tuple[str, str], List[str]] = {}
+         self._collect_flow_actions()
+ 
++    def _render_template(self, template_name: str, **context: Any) -> str:
++        return TEMPLATE_ENV.get_template(template_name).render(**context)
++
+     def render_blocks(self) -> List[str]:
+         blocks: List[str] = []
+         blocks.extend(self._render_start_events())
+@@ -438,16 +441,11 @@ class SolidityFlowRenderer:
+         functions: List[str] = []
+         for event_name, actions in self.start_event_actions.items():
+             enum_name = self.enum_maps["event"].get(event_name, sanitize_identifier(event_name))
+-            body = f"""function {enum_name}(uint256 instanceId) external onlyInitialized {{
+-        Instance storage inst = _getInstance(instanceId);
+-        ActionEvent storage ev = inst.events[EventKey.{enum_name}];
+-        require(ev.exists, "event not set");
+-        require(ev.state == ElementState.ENABLED, "event state not allowed");
+-
+-        ev.state = ElementState.COMPLETED;
+-        emit ActionEventDone(instanceId, EventKey.{enum_name});
+-{self._indent("".join(actions), 2)}
+-    }}"""
++            body = self._render_template(
++                "flows/start_event.sol.jinja",
++                event_name=enum_name,
++                after_hooks=self._indent("".join(actions), 2),
++            )
+             functions.append(body)
+         return functions
+ 
+@@ -461,19 +459,13 @@ class SolidityFlowRenderer:
+             # message follow-up flow is not dropped when the DSL uses `completed`.
+             send_actions = self._indent("".join(self._message_transition_actions(message.name)), 2)
+             signature = ", ".join(["uint256 instanceId", "string calldata fireflyTranId", *method_params])
+-            body = f"""function {enum_name}_Send({signature}) external onlyInitialized {{
+-        Instance storage inst = _getInstance(instanceId);
+-        Message storage m = inst.messages[MessageKey.{enum_name}];
+-        require(m.exists, "message not set");
+-        _checkParticipant(inst, m.sendParticipant);
+-        require(m.state == ElementState.ENABLED, "message state not allowed");
+-
+-        m.fireflyTranId = fireflyTranId;
+-{assignment_block}\
+-        m.state = ElementState.COMPLETED;
+-        emit MessageSent(instanceId, MessageKey.{enum_name}, fireflyTranId);
+-{send_actions}
+-    }}"""
++            body = self._render_template(
++                "actions/message_send.sol.jinja",
++                message_name=enum_name,
++                signature=signature,
++                parameter_assignments=assignment_block,
++                after_hooks=send_actions,
++            )
+             functions.append(body)
+         return functions
+ 
+@@ -561,16 +553,11 @@ class SolidityFlowRenderer:
+             conditional_raw = self.gateway_branch_blocks.get(gateway.name, "")
+             conditional_block = self._indent(conditional_raw, 2) if conditional_raw else ""
+             action_block = guard_block + (conditional_block or normal_actions)
+-            body = f"""function {enum_name}(uint256 instanceId) external onlyInitialized {{
+-        Instance storage inst = _getInstance(instanceId);
+-        Gateway storage g = inst.gateways[GatewayKey.{enum_name}];
+-        require(g.exists, "gateway not set");
+-        require(g.state == ElementState.ENABLED, "gateway state not allowed");
+-
+-        g.state = ElementState.COMPLETED;
+-        emit GatewayDone(instanceId, GatewayKey.{enum_name});
+-{action_block}
+-    }}"""
++            body = self._render_template(
++                "flows/gateway.sol.jinja",
++                gateway_name=enum_name,
++                action_block=action_block,
++            )
+             functions.append(body)
+         return functions
+ 
+@@ -604,47 +591,21 @@ class SolidityFlowRenderer:
+                     }
+                 )
+ 
+-            assign_lines: List[str] = []
+-            for idx, mapping in enumerate(output_mappings):
+-                value_var = f"oracleValue{idx}"
+-                param_literal = mapping["param_literal"]
+-                if oracle_type == "compute-task":
+-                    source_call = (
+-                        f'oracle.runComputeTask(instanceId, {task_name_literal}, '
+-                        f'{compute_script_literal}, {param_literal})'
+-                    )
+-                else:
+-                    source_call = (
+-                        f'oracle.getExternalData(instanceId, {task_name_literal}, '
+-                        f'{data_source_literal}, {param_literal})'
+-                    )
+-                assign_lines.append(f"        string memory {value_var} = {source_call};")
+-                if mapping["sol_type"] == "int256":
+-                    assign_lines.append(
+-                        f"        inst.stateMemory.{mapping['slot_name']} = _stringToInt({value_var});"
+-                    )
+-                elif mapping["sol_type"] == "bool":
+-                    assign_lines.append(
+-                        f"        inst.stateMemory.{mapping['slot_name']} = _stringToBool({value_var});"
+-                    )
+-                else:
+-                    assign_lines.append(
+-                        f"        inst.stateMemory.{mapping['slot_name']} = {value_var};"
+-                    )
+-            assign_block = "\n".join(assign_lines)
+-            if assign_block:
+-                assign_block += "\n"
++            assign_block = self._render_template(
++                "actions/oracle_outputs.sol.jinja",
++                output_mappings=output_mappings,
++                oracle_type=oracle_type,
++                task_name_literal=task_name_literal,
++                data_source_literal=data_source_literal,
++                compute_script_literal=compute_script_literal,
++            )
+             done_actions = self._indent("".join(self.oracle_actions.get((task.name, "done"), [])), 2)
+-            body = f"""function {enum_name}(uint256 instanceId) external onlyInitialized {{
+-        Instance storage inst = _getInstance(instanceId);
+-        ActionEvent storage ev = inst.events[EventKey.{enum_name}];
+-        require(ev.exists, "oracle task not set");
+-        require(ev.state == ElementState.ENABLED, "oracle task state not allowed");
+-
+-{assign_block}        ev.state = ElementState.COMPLETED;
+-        emit ActionEventDone(instanceId, EventKey.{enum_name});
+-{done_actions}
+-    }}"""
++            body = self._render_template(
++                "actions/oracle_task.sol.jinja",
++                task_name=enum_name,
++                output_assignments=assign_block,
++                after_hooks=done_actions,
++            )
+             functions.append(body)
+         return functions
+ 
+@@ -656,16 +617,11 @@ class SolidityFlowRenderer:
+                 continue
+             enum_name = self.enum_maps["event"].get(event.name, sanitize_identifier(event.name))
+             actions = self._indent("".join(self.event_actions.get(event.name, [])), 2)
+-            body = f"""function {enum_name}(uint256 instanceId) external onlyInitialized {{
+-        Instance storage inst = _getInstance(instanceId);
+-        ActionEvent storage ev = inst.events[EventKey.{enum_name}];
+-        require(ev.exists, "event not set");
+-        require(ev.state == ElementState.ENABLED, "event state not allowed");
+-
+-        ev.state = ElementState.COMPLETED;
+-        emit ActionEventDone(instanceId, EventKey.{enum_name});
+-{actions}
+-    }}"""
++            body = self._render_template(
++                "flows/event.sol.jinja",
++                event_name=enum_name,
++                after_hooks=actions,
++            )
+             functions.append(body)
+         return functions
+ 
+@@ -793,9 +749,12 @@ class SolidityFlowRenderer:
+             clause = ""
+             if condition and prefix != "else":
+                 clause = f" ({condition})"
+-            block = f"{prefix}{clause} {{\n"
+-            block += self._indent(actions, 1)
+-            block += "}\n"
++            block = self._render_template(
++                "flows/gateway_branch.sol.jinja",
++                prefix=prefix,
++                clause=clause,
++                actions=self._indent(actions, 1),
++            )
+             blocks.append(block)
+             branch_index += 1
+         return "".join(blocks)
+@@ -825,7 +784,7 @@ class SolidityFlowRenderer:
+         if not checks:
+             return ""
+         condition = " && ".join(checks)
+-        return f"if (!({condition})) {{\n            revert(\"Parallel gateway prerequisites not met\");\n        }}\n"
++        return self._render_template("flows/parallel_guard.sol.jinja", condition=condition)
+ 
+     def _element_ready_check(self, element: Any) -> Optional[str]:
+         cls_name = element.__class__.__name__
+diff --git a/src/newTranslator/CodeGenerator/b2cdsl-go/templates/flows/oracle_task.go.jinja b/src/newTranslator/CodeGenerator/b2cdsl-go/templates/flows/oracle_task.go.jinja
+new file mode 100644
+index 00000000..ed479bcc
+--- /dev/null
++++ b/src/newTranslator/CodeGenerator/b2cdsl-go/templates/flows/oracle_task.go.jinja
+@@ -0,0 +1,28 @@
++func (cc *SmartContract) {{ task_name }}(ctx contractapi.TransactionContextInterface, instanceID string{{ more_parameters }}) error {
++    stub := ctx.GetStub()
++
++    instance, err := cc.GetInstance(ctx, instanceID)
++    if err != nil {
++        return err
++    }
++
++    oracleTask, err := cc.ReadEvent(ctx, instanceID, "{{ task_name }}")
++    if err != nil {
++        return err
++    }
++
++    if oracleTask.EventState != ENABLED {
++        errorMessage := fmt.Sprintf("Oracle task state %s is not allowed", oracleTask.EventID)
++        fmt.Println(errorMessage)
++        return fmt.Errorf(errorMessage)
++    }
++
++    cc.ChangeEventState(ctx, instance, "{{ task_name }}", COMPLETED)
++{{ parameter_assignments }}{{ after_hooks }}    stub.SetEvent("{{ task_name }}", []byte("Oracle task has been completed"))
++    err = cc.SetInstance(ctx, instance)
++    if err != nil {
++        return err
++    }
++
++    return nil
++}
+diff --git a/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/actions/message_send.sol.jinja b/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/actions/message_send.sol.jinja
+new file mode 100644
+index 00000000..024b17ad
+--- /dev/null
++++ b/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/actions/message_send.sol.jinja
+@@ -0,0 +1,12 @@
++function {{ message_name }}_Send({{ signature }}) external onlyInitialized {
++        Instance storage inst = _getInstance(instanceId);
++        Message storage m = inst.messages[MessageKey.{{ message_name }}];
++        require(m.exists, "message not set");
++        _checkParticipant(inst, m.sendParticipant);
++        require(m.state == ElementState.ENABLED, "message state not allowed");
++
++        m.fireflyTranId = fireflyTranId;
++{{ parameter_assignments }}        m.state = ElementState.COMPLETED;
++        emit MessageSent(instanceId, MessageKey.{{ message_name }}, fireflyTranId);
++{{ after_hooks }}
++    }
+diff --git a/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/actions/oracle_outputs.sol.jinja b/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/actions/oracle_outputs.sol.jinja
+new file mode 100644
+index 00000000..249b78ce
+--- /dev/null
++++ b/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/actions/oracle_outputs.sol.jinja
+@@ -0,0 +1,7 @@
++{% for mapping in output_mappings %}
++        string memory oracleValue{{ loop.index0 }} = oracle.{% if oracle_type == 'compute-task' %}runComputeTask(instanceId, {{ task_name_literal }}, {{ compute_script_literal }}, {{ mapping.param_literal }});{{ '\n' }}{% else %}getExternalData(instanceId, {{ task_name_literal }}, {{ data_source_literal }}, {{ mapping.param_literal }});{{ '\n' }}{% endif %}
++{% if mapping.sol_type == 'int256' %}
++        inst.stateMemory.{{ mapping.slot_name }} = _stringToInt(oracleValue{{ loop.index0 }});{{ '\n' }}{% elif mapping.sol_type == 'bool' %}
++        inst.stateMemory.{{ mapping.slot_name }} = _stringToBool(oracleValue{{ loop.index0 }});{{ '\n' }}{% else %}
++        inst.stateMemory.{{ mapping.slot_name }} = oracleValue{{ loop.index0 }};{{ '\n' }}{% endif %}
++{% endfor %}
+diff --git a/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/actions/oracle_task.sol.jinja b/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/actions/oracle_task.sol.jinja
+new file mode 100644
+index 00000000..7c57143d
+--- /dev/null
++++ b/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/actions/oracle_task.sol.jinja
+@@ -0,0 +1,10 @@
++function {{ task_name }}(uint256 instanceId) external onlyInitialized {
++        Instance storage inst = _getInstance(instanceId);
++        ActionEvent storage ev = inst.events[EventKey.{{ task_name }}];
++        require(ev.exists, "oracle task not set");
++        require(ev.state == ElementState.ENABLED, "oracle task state not allowed");
++
++{{ output_assignments }}        ev.state = ElementState.COMPLETED;
++        emit ActionEventDone(instanceId, EventKey.{{ task_name }});
++{{ after_hooks }}
++    }
+diff --git a/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/flows/event.sol.jinja b/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/flows/event.sol.jinja
+new file mode 100644
+index 00000000..873d8ebd
+--- /dev/null
++++ b/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/flows/event.sol.jinja
+@@ -0,0 +1,10 @@
++function {{ event_name }}(uint256 instanceId) external onlyInitialized {
++        Instance storage inst = _getInstance(instanceId);
++        ActionEvent storage ev = inst.events[EventKey.{{ event_name }}];
++        require(ev.exists, "event not set");
++        require(ev.state == ElementState.ENABLED, "event state not allowed");
++
++        ev.state = ElementState.COMPLETED;
++        emit ActionEventDone(instanceId, EventKey.{{ event_name }});
++{{ after_hooks }}
++    }
+diff --git a/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/flows/gateway.sol.jinja b/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/flows/gateway.sol.jinja
+new file mode 100644
+index 00000000..5602b5c0
+--- /dev/null
++++ b/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/flows/gateway.sol.jinja
+@@ -0,0 +1,10 @@
++function {{ gateway_name }}(uint256 instanceId) external onlyInitialized {
++        Instance storage inst = _getInstance(instanceId);
++        Gateway storage g = inst.gateways[GatewayKey.{{ gateway_name }}];
++        require(g.exists, "gateway not set");
++        require(g.state == ElementState.ENABLED, "gateway state not allowed");
++
++        g.state = ElementState.COMPLETED;
++        emit GatewayDone(instanceId, GatewayKey.{{ gateway_name }});
++{{ action_block }}
++    }
+diff --git a/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/flows/gateway_branch.sol.jinja b/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/flows/gateway_branch.sol.jinja
+new file mode 100644
+index 00000000..55030f6c
+--- /dev/null
++++ b/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/flows/gateway_branch.sol.jinja
+@@ -0,0 +1,3 @@
++{{ prefix }}{{ clause }} {
++{{ actions }}}
++{{ '' }}
+\ No newline at end of file
+diff --git a/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/flows/parallel_guard.sol.jinja b/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/flows/parallel_guard.sol.jinja
+new file mode 100644
+index 00000000..3f6cc425
+--- /dev/null
++++ b/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/flows/parallel_guard.sol.jinja
+@@ -0,0 +1,4 @@
++if (!({{ condition }})) {
++            revert("Parallel gateway prerequisites not met");
++        }
++{{ '' }}
+\ No newline at end of file
+diff --git a/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/flows/start_event.sol.jinja b/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/flows/start_event.sol.jinja
+new file mode 100644
+index 00000000..873d8ebd
+--- /dev/null
++++ b/src/newTranslator/CodeGenerator/b2cdsl-solidity/templates/flows/start_event.sol.jinja
+@@ -0,0 +1,10 @@
++function {{ event_name }}(uint256 instanceId) external onlyInitialized {
++        Instance storage inst = _getInstance(instanceId);
++        ActionEvent storage ev = inst.events[EventKey.{{ event_name }}];
++        require(ev.exists, "event not set");
++        require(ev.state == ElementState.ENABLED, "event state not allowed");
++
++        ev.state = ElementState.COMPLETED;
++        emit ActionEventDone(instanceId, EventKey.{{ event_name }});
++{{ after_hooks }}
++    }
+diff --git a/src/newTranslator/CodeGenerator/b2cdsl-solidity/tests/fixtures/flow_template_regression.b2c b/src/newTranslator/CodeGenerator/b2cdsl-solidity/tests/fixtures/flow_template_regression.b2c
+new file mode 100644
+index 00000000..22ea5e68
+--- /dev/null
++++ b/src/newTranslator/CodeGenerator/b2cdsl-solidity/tests/fixtures/flow_template_regression.b2c
+@@ -0,0 +1,41 @@
++contract FlowTemplateRegression {
++ participants { participant Sender {} participant Receiver {} }
++ globals { Count: int Flag: bool Label: string Ratio: float }
++ messages {
++  message MessageFields from Sender to Receiver { initial state READY schema '{"properties":{"count":{"type":"number"},"flag":{"type":"boolean"},"label":{"type":"string"},"instanceId":{"type":"string"},"1field":{"type":"number"}},"files":{"receipt":{}}}' }
++  message MessageEmpty from Sender to Receiver {}
++ }
++ gateways {
++  gateway Choice { type exclusive }
++  gateway ChoiceBool { type exclusive }
++  gateway ChoiceInt { type exclusive }
++  gateway Join { type parallel }
++  gateway EmptyGateway { type event }
++ }
++ events { event Start { initial state READY } event End {} event EmptyEnd {} }
++ businessrules {
++  businessrule Rule { dmn 'test-only.dmn' decision 'test-only' input mapping { count -> Count flag -> Flag label -> Label } output mapping { resultCount -> Count resultFlag -> Flag resultLabel -> Label } }
++ }
++ oracletasks {
++  oracletask Feed { type external-data dataSource 'test-only://data' output mapping { count -> Count flag -> Flag label -> Label ratio -> Ratio } }
++  oracletask Compute { type compute-task computeScript 'test-only script' output mapping { count -> Count flag -> Flag label -> Label } }
++  oracletask EmptyOracle { type external-data }
++ }
++ flows {
++  start event Start enables MessageFields;
++  when message MessageFields sent then enable Choice, set Count = 1;
++  when message MessageFields completed then enable Choice, disable MessageEmpty;
++  when gateway Choice completed choose {
++   if Label == 'High' then enable Feed;
++   if Label != 'Low' then enable Compute;
++   else then enable EmptyOracle;
++  }
++  when gateway ChoiceBool completed choose { if Flag == true then enable Rule; else then enable End; }
++  when gateway ChoiceInt completed choose { if Count >= 10 then set Label = 'large'; else then set Flag = false; }
++  parallel gateway Join await MessageFields, Choice, End, Rule, Feed then enable EmptyEnd;
++  when oracletask Feed done then enable Compute;
++  when oracletask Compute done then enable Rule;
++  when businessrule Rule done then enable Join;
++  when event End completed then enable EmptyEnd;
++ }
++}
+diff --git a/src/newTranslator/CodeGenerator/b2cdsl-solidity/tests/fixtures/flow_template_regression.sha256.json b/src/newTranslator/CodeGenerator/b2cdsl-solidity/tests/fixtures/flow_template_regression.sha256.json
+new file mode 100644
+index 00000000..3f63556b
+--- /dev/null
++++ b/src/newTranslator/CodeGenerator/b2cdsl-solidity/tests/fixtures/flow_template_regression.sha256.json
+@@ -0,0 +1,61 @@
++{
++  "origin": "Captured before refactoring be8bd359 working tree; test-only DSL fixture, not an experiment",
++  "files": {
++    "go": "fec1b4dffb4a928a337947d9b82bee557d1f139c1475fea851c99c2ba3617e29",
++    "solidity": "c08b255268d859ab0eb107ca17b0983c0ccf5487b5ac7454e6df8b72b9961c1b"
++  },
++  "solidity_flow_blocks": [
++    {
++      "signature": "function Start(uint256 instanceId) external onlyInitialized {",
++      "sha256": "91c598b9602f66d554dc55451d3f6cb361b6f9848e157b0636fe04cb5dcccda5"
++    },
++    {
++      "signature": "function MessageFields_Send(uint256 instanceId, string calldata fireflyTranId, int256 count, bool flag, string calldata label, string calldata instanceId_value, int256 field_1field, string calldata receipt) external onlyInitialized {",
++      "sha256": "5b5105f0b399914299bed44ad89791959256ab121308b8b9ab41db57c4e755d9"
++    },
++    {
++      "signature": "function MessageEmpty_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {",
++      "sha256": "e8365b51898c2007f94c92accac092d771ddb9578545c0f12dc18e434adb4d67"
++    },
++    {
++      "signature": "function Choice(uint256 instanceId) external onlyInitialized {",
++      "sha256": "e353842246762edb6eb175dc7f8e900ac558b5551e61dea12235437a58ddadde"
++    },
++    {
++      "signature": "function ChoiceBool(uint256 instanceId) external onlyInitialized {",
++      "sha256": "8f761432f79d1582403ba517cfad9b971c401bb7d3c38cd3c815801973a2799f"
++    },
++    {
++      "signature": "function ChoiceInt(uint256 instanceId) external onlyInitialized {",
++      "sha256": "4c66d1c8dad662ca53e15c2a64196405aa0269e3ea8debdc8fddc730e2bf1e73"
++    },
++    {
++      "signature": "function Join(uint256 instanceId) external onlyInitialized {",
++      "sha256": "947427711f5f09b572b5da7e0f402a01e5d0eb8b5c945bd2fdcc5bc4f0ba45de"
++    },
++    {
++      "signature": "function EmptyGateway(uint256 instanceId) external onlyInitialized {",
++      "sha256": "c43b72dd96a048010caa4c569b587125e60da305270baf233b572285ceec7d7c"
++    },
++    {
++      "signature": "function Feed(uint256 instanceId) external onlyInitialized {",
++      "sha256": "0210c67374e5fe2e2cc3f117d6fbce159512627844f3a0fa075bc3053c521150"
++    },
++    {
++      "signature": "function Compute(uint256 instanceId) external onlyInitialized {",
++      "sha256": "4641d6740766ab5ec043ab20c7f7cdb77cc4d26619894a8e79e5ea02def2d379"
++    },
++    {
++      "signature": "function EmptyOracle(uint256 instanceId) external onlyInitialized {",
++      "sha256": "33445995316126c5d3c79c04ce9defd169521f916cf2e019e8ba10b3bff737f8"
++    },
++    {
++      "signature": "function End(uint256 instanceId) external onlyInitialized {",
++      "sha256": "d093bd89369c7d0aed5d10771aeb56968b593491152f64cfd997431561134bc8"
++    },
++    {
++      "signature": "function EmptyEnd(uint256 instanceId) external onlyInitialized {",
++      "sha256": "b9f490abe28b3d0b3855f44f6e1f3cf8324469e2cc78dcd32c6ed3ccf38acea8"
++    }
++  ]
++}
+diff --git a/src/newTranslator/CodeGenerator/b2cdsl-solidity/tests/test_flow_templates.py b/src/newTranslator/CodeGenerator/b2cdsl-solidity/tests/test_flow_templates.py
+new file mode 100644
+index 00000000..df1609bc
+--- /dev/null
++++ b/src/newTranslator/CodeGenerator/b2cdsl-solidity/tests/test_flow_templates.py
+@@ -0,0 +1,75 @@
++"""Golden generation regressions captured before the Jinja-only skeleton refactor.
++
++The DSL fixture is synthetic test data. Hashes cover exact output bytes,
++including whitespace, as well as individual flow blocks for useful diagnostics.
++Run: python -m unittest discover -s <this directory> -v
++"""
++from __future__ import annotations
++
++import hashlib
++import json
++from pathlib import Path
++import sys
++from tempfile import TemporaryDirectory
++import unittest
++
++TEST_DIR = Path(__file__).resolve().parent
++TRANSLATOR_ROOT = TEST_DIR.parents[2]
++for package in (
++    TRANSLATOR_ROOT / "CodeGenerator/b2cdsl-solidity",
++    TRANSLATOR_ROOT / "CodeGenerator/b2cdsl-go",
++    TRANSLATOR_ROOT / "DSL/B2CDSL",
++):
++    sys.path.insert(0, str(package))
++
++import b2cdsl_go
++import b2cdsl_solidity
++from textx import metamodel_from_file
++
++
++class FlowTemplateGoldenTests(unittest.TestCase):
++    @classmethod
++    def setUpClass(cls):
++        cls.fixture = TEST_DIR / "fixtures/flow_template_regression.b2c"
++        cls.expected = json.loads(
++            (TEST_DIR / "fixtures/flow_template_regression.sha256.json").read_text()
++        )
++        cls.metamodel = metamodel_from_file(
++            str(TRANSLATOR_ROOT / "DSL/B2CDSL/b2cdsl/b2c.tx")
++        )
++
++    def model(self):
++        return self.metamodel.model_from_file(str(self.fixture))
++
++    def assert_generated_bytes(self, module, target, extension):
++        with TemporaryDirectory() as folder:
++            output = Path(folder) / (self.fixture.stem + extension)
++            module.generator_callback(self.model(), str(output))
++            self.assertEqual(
++                hashlib.sha256(output.read_bytes()).hexdigest(),
++                self.expected["files"][target],
++                "Generated bytes differ from the pre-refactor baseline",
++            )
++
++    def test_go_full_contract_matches_pre_refactor_bytes(self):
++        self.assert_generated_bytes(b2cdsl_go, "go", ".go")
++
++    def test_solidity_full_contract_matches_pre_refactor_bytes(self):
++        self.assert_generated_bytes(b2cdsl_solidity, "solidity", ".sol")
++
++    def test_each_solidity_flow_matches_pre_refactor_bytes(self):
++        adapter = b2cdsl_solidity.DSLContractAdapter(self.model().contracts[0])
++        blocks = b2cdsl_solidity.SolidityRenderer(adapter).build_context()["flow_functions"]
++        expected = self.expected["solidity_flow_blocks"]
++        self.assertEqual(len(blocks), len(expected))
++        for block, original in zip(blocks, expected):
++            with self.subTest(function=original["signature"]):
++                self.assertEqual(block.splitlines()[0], original["signature"])
++                self.assertEqual(
++                    hashlib.sha256(block.encode("utf-8")).hexdigest(),
++                    original["sha256"],
++                )
++
++
++if __name__ == "__main__":
++    unittest.main()

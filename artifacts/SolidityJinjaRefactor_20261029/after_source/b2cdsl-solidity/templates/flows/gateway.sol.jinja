@@ -1,0 +1,10 @@
+function {{ gateway_name }}(uint256 instanceId) external onlyInitialized {
+        Instance storage inst = _getInstance(instanceId);
+        Gateway storage g = inst.gateways[GatewayKey.{{ gateway_name }}];
+        require(g.exists, "gateway not set");
+        require(g.state == ElementState.ENABLED, "gateway state not allowed");
+
+        g.state = ElementState.COMPLETED;
+        emit GatewayDone(instanceId, GatewayKey.{{ gateway_name }});
+{{ action_block }}
+    }

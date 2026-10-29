@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/2.0" id="definitions_1olsuce" name="definitions" namespace="http://camunda.org/schema/1.0/dmn" exporter="dmn-js (https://demo.bpmn.io/dmn)" exporterVersion="16.4.0">
+  <decision id="decision_0tybghz" name="">
+    <decisionTable id="decisionTable_1v3tii8">
+      <input id="input1" label="Self_pickup" biodi:width="192">
+        <inputExpression id="inputExpression1" typeRef="boolean">
+          <text>Self_pickup</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_1rzuuec" label="amount">
+        <inputExpression id="LiteralExpression_0w17iu8" typeRef="number">
+          <text>amount</text>
+        </inputExpression>
+      </input>
+      <output id="output1" label="deliver" name="deliver" typeRef="boolean" biodi:width="192" />
+      <rule id="DecisionRule_0l7fvlu">
+        <inputEntry id="UnaryTests_0kbzfrw">
+          <text>false</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_18sz0ew">
+          <text>&gt;10</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_14icroy">
+          <text>true</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0huny0n">
+        <inputEntry id="UnaryTests_0m6xq7a">
+          <text>false</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0yrufcv">
+          <text>&lt;=10</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1t7l5uz">
+          <text>false</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1qnqn1p">
+        <inputEntry id="UnaryTests_0r8mmx6">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0d0fxep">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0jna9g1">
+          <text>false</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>
