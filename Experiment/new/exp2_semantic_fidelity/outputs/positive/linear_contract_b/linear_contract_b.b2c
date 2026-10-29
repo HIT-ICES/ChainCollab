@@ -1,0 +1,34 @@
+contract LinearContractB {
+    participants {
+        participant ProviderB { msp "ProviderBMSP" attributes { role = "provider" } }
+        participant ClientB { msp "ClientBMSP" attributes { role = "client" } }
+    }
+    globals {
+        AcceptedB: bool
+    }
+    messages {
+        message QuoteB from ProviderB to ClientB { initial state INACTIVE schema "{}" }
+        message AckB from ClientB to ProviderB { initial state INACTIVE schema "{}" }
+    }
+    gateways {
+        gateway ChoiceB { type exclusive initial state INACTIVE }
+    }
+    events {
+        event StartEvent_B { initial state READY }
+        event EndEvent_B { initial state INACTIVE }
+    }
+    businessrules {
+    }
+    oracletasks {
+    }
+    flows {
+        start event StartEvent_B enables QuoteB;
+        when message QuoteB completed then enable ChoiceB;
+        when gateway ChoiceB completed choose {
+            if AcceptedB == true then enable AckB;
+            else then enable EndEvent_B;
+        }
+        when message AckB completed then enable EndEvent_B;
+    }
+}
+

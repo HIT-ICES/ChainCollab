@@ -5,8 +5,6 @@ services:
     build:
       context: ./cdmn-python-server
       dockerfile: Dockerfile
-      args:
-        BASE_IMAGE: ${CDMN_BASE_IMAGE:-python:3.9-slim}
     image: chaincollab-cdmn-server:latest
     container_name: cdmn-node1
     restart: unless-stopped
@@ -15,8 +13,13 @@ services:
       - OCR_LISTENER_ENABLED=true
       - OCR_RPC_URL=${OCR_RPC_URL:-http://system-geth-node:8545}
       - OCR_AGGREGATOR_ADDRESS=${OCR_AGGREGATOR_ADDRESS}
+      - FIREFLY_CORE_URL=${FIREFLY_CORE_URL:-http://host.docker.internal:5002}
+      - IPFS_GATEWAY_URL=${IPFS_GATEWAY_URL:-http://host.docker.internal:10207/ipfs}
+      - DMN_FETCH_TIMEOUT=${DMN_FETCH_TIMEOUT:-15}
     ports:
       - "8081:5000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - existing_network
 
@@ -24,8 +27,6 @@ services:
     build:
       context: ./cdmn-python-server
       dockerfile: Dockerfile
-      args:
-        BASE_IMAGE: ${CDMN_BASE_IMAGE:-python:3.9-slim}
     image: chaincollab-cdmn-server:latest
     container_name: cdmn-node2
     restart: unless-stopped
@@ -34,8 +35,13 @@ services:
       - OCR_LISTENER_ENABLED=true
       - OCR_RPC_URL=${OCR_RPC_URL:-http://system-geth-node:8545}
       - OCR_AGGREGATOR_ADDRESS=${OCR_AGGREGATOR_ADDRESS}
+      - FIREFLY_CORE_URL=${FIREFLY_CORE_URL:-http://host.docker.internal:5002}
+      - IPFS_GATEWAY_URL=${IPFS_GATEWAY_URL:-http://host.docker.internal:10207/ipfs}
+      - DMN_FETCH_TIMEOUT=${DMN_FETCH_TIMEOUT:-15}
     ports:
       - "8082:5000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - existing_network
 
@@ -43,8 +49,6 @@ services:
     build:
       context: ./cdmn-python-server
       dockerfile: Dockerfile
-      args:
-        BASE_IMAGE: ${CDMN_BASE_IMAGE:-python:3.9-slim}
     image: chaincollab-cdmn-server:latest
     container_name: cdmn-node3
     restart: unless-stopped
@@ -53,8 +57,13 @@ services:
       - OCR_LISTENER_ENABLED=true
       - OCR_RPC_URL=${OCR_RPC_URL:-http://system-geth-node:8545}
       - OCR_AGGREGATOR_ADDRESS=${OCR_AGGREGATOR_ADDRESS}
+      - FIREFLY_CORE_URL=${FIREFLY_CORE_URL:-http://host.docker.internal:5002}
+      - IPFS_GATEWAY_URL=${IPFS_GATEWAY_URL:-http://host.docker.internal:10207/ipfs}
+      - DMN_FETCH_TIMEOUT=${DMN_FETCH_TIMEOUT:-15}
     ports:
       - "8083:5000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - existing_network
 
@@ -62,8 +71,6 @@ services:
     build:
       context: ./cdmn-python-server
       dockerfile: Dockerfile
-      args:
-        BASE_IMAGE: ${CDMN_BASE_IMAGE:-python:3.9-slim}
     image: chaincollab-cdmn-server:latest
     container_name: cdmn-node4
     restart: unless-stopped
@@ -72,8 +79,13 @@ services:
       - OCR_LISTENER_ENABLED=true
       - OCR_RPC_URL=${OCR_RPC_URL:-http://system-geth-node:8545}
       - OCR_AGGREGATOR_ADDRESS=${OCR_AGGREGATOR_ADDRESS}
+      - FIREFLY_CORE_URL=${FIREFLY_CORE_URL:-http://host.docker.internal:5002}
+      - IPFS_GATEWAY_URL=${IPFS_GATEWAY_URL:-http://host.docker.internal:10207/ipfs}
+      - DMN_FETCH_TIMEOUT=${DMN_FETCH_TIMEOUT:-15}
     ports:
       - "8084:5000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - existing_network
 

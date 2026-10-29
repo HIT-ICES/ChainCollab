@@ -52,12 +52,12 @@ public class BatchValidateOclReportTest {
         MeaningResolver meaningResolver = MeaningResolver.fromCompleteOclFile(ocl);
 
         String xmiDirProp = System.getProperty("xmiDir");
-        Assume.assumeTrue("xmiDir is not set; skipping batch report test", xmiDirProp != null && !xmiDirProp.isBlank());
+        Assume.assumeTrue("xmiDir is not set; skipping batch report test", !isUnset(xmiDirProp));
         Path xmiDir = resolveExistingDir(xmiDirProp);
         Assume.assumeTrue("xmiDir does not exist: " + xmiDir, Files.isDirectory(xmiDir));
 
         String xmiGlob = System.getProperty("xmiGlob");
-        if (xmiGlob == null || xmiGlob.isBlank()) {
+        if (isUnset(xmiGlob)) {
             xmiGlob = ".xmi";
         }
 
@@ -181,7 +181,7 @@ public class BatchValidateOclReportTest {
 
     private static File resolveFile(String key, File defaultFile) {
         String value = System.getProperty(key);
-        if (value == null || value.isBlank()) {
+        if (isUnset(value)) {
             return defaultFile;
         }
         return resolveExistingFile(value, defaultFile);
@@ -189,7 +189,7 @@ public class BatchValidateOclReportTest {
 
     private static Path resolvePath(String key, Path defaultPath) {
         String value = System.getProperty(key);
-        if (value == null || value.isBlank()) {
+        if (isUnset(value)) {
             return defaultPath;
         }
         return resolvePathPreferProjectRoot(value, defaultPath);
@@ -197,10 +197,14 @@ public class BatchValidateOclReportTest {
 
     private static boolean resolveBoolean(String key, boolean defaultValue) {
         String value = System.getProperty(key);
-        if (value == null || value.isBlank()) {
+        if (isUnset(value)) {
             return defaultValue;
         }
         return "true".equalsIgnoreCase(value.trim()) || "1".equals(value.trim()) || "yes".equalsIgnoreCase(value.trim());
+    }
+
+    private static boolean isUnset(String value) {
+        return value == null || value.isBlank() || "null".equalsIgnoreCase(value.trim());
     }
 
     private static void writeUtf8(Path path, String content) {

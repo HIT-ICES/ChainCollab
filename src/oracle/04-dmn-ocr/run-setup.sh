@@ -11,6 +11,8 @@ FEATURES_04="$ORACLE_ROOT/04-dmn-ocr"
 FEATURES_03="$ORACLE_ROOT/03-ocr-multinode"
 export OCR_RPC_URL="${OCR_RPC_URL:-http://system-geth-node:8545}"
 SYSTEM_GETH_CONTAINER="${SYSTEM_GETH_CONTAINER:-system-geth-node}"
+CDMN_IMAGE="${CDMN_IMAGE:-chaincollab-cdmn-server:latest}"
+CDMN_BASE_IMAGE="${CDMN_BASE_IMAGE:-python:3.9-slim}"
 
 resolve_host_rpc_url() {
   if [ -n "${RPC_URL:-}" ]; then
@@ -28,8 +30,26 @@ resolve_host_rpc_url() {
   printf 'http://localhost:8545\n'
 }
 
+ensure_cdmn_image() {
+  if docker image inspect "$CDMN_IMAGE" >/dev/null 2>&1; then
+    echo "== [cdmn] 复用已有镜像: ${CDMN_IMAGE} =="
+    return 0
+  fi
+
+  echo "== [cdmn] 首次构建镜像: ${CDMN_IMAGE} =="
+  (
+    cd "$FEATURES_04/cdmn-python-server"
+    docker build \
+      --build-arg "BASE_IMAGE=${CDMN_BASE_IMAGE}" \
+      -t "$CDMN_IMAGE" \
+      .
+  )
+}
+
 export RPC_URL="${RPC_URL:-$(resolve_host_rpc_url)}"
 echo "== [rpc] host RPC: ${RPC_URL} =="
+
+ensure_cdmn_image
 
 echo "== [1] 启动 OCR 多节点网络（含从节点，含 DMN 服务） =="
 cd "$FEATURES_03"

@@ -149,13 +149,14 @@ class EthContractGenerateResponse(BaseModel):
     artifactPath: Optional[str] = None
     dslPath: Optional[str] = None
     ffiPath: Optional[str] = None
+    executionLayout: Dict[str, Any] = {}
 
 
 @app.post("/api/v1/chaincode/generate-eth")
 async def generate_eth_contract(params: EthContractGenerateParams):
     translator = SolidityContractTranslator(params.bpmnContent)
     try:
-        contract_content, dsl_content = translator.generate_contract_bundle(
+        contract_content, dsl_content, execution_layout = translator.generate_contract_bundle(
             contract_name=params.artifactName
         )
     except ValueError as exc:
@@ -178,6 +179,7 @@ async def generate_eth_contract(params: EthContractGenerateParams):
         artifactPath=persist_result.get("artifactPath"),
         dslPath=persist_result.get("dslPath"),
         ffiPath=persist_result.get("ffiPath"),
+        executionLayout=execution_layout,
     )
 
 

@@ -15,6 +15,141 @@ import DmnDrawer from "./DmnDrawer"
 import Draggable from 'react-draggable';
 import type { DraggableEvent, DraggableData } from 'react-draggable';
 
+const localName = (item) => {
+    return item?.$type?.split(':').pop() || item?.localName || item?.tagName?.split(':').pop();
+};
+
+const requiredValue = (value) => {
+    return value === true || value === 'true' || value === '1';
+};
+
+const parseDefinition = (item) => {
+    if (!item?.definition) {
+        return {};
+    }
+    try {
+        return JSON.parse(item.definition);
+    } catch (error) {
+        return {};
+    }
+};
+
+const readMessageFieldsFromExtension = (businessObject) => {
+    const values = businessObject?.extensionElements?.values || [];
+    const schema = values.find((value) => localName(value) === 'MessageSchema');
+    if (!schema) {
+        return null;
+    }
+
+    return (schema.properties || []).map((property) => {
+        const definition = parseDefinition(property);
+        return {
+            name: property.name || definition.name,
+            type: definition.type || property.type || 'string',
+            description: definition.description || property.description || '',
+            required: requiredValue(definition.required ?? property.required)
+        };
+    }).filter((field) => field.name);
+};
+
+const readMessageFieldsFromDocumentation = (businessObject) => {
+    const documentation = businessObject?.documentation;
+    if (!documentation?.length || !documentation[0]?.text) {
+        return [];
+    }
+    try {
+        const content = JSON.parse(documentation[0].text).properties || {};
+        return Object.keys(content).map((key) => {
+            return {
+                name: key,
+                type: content[key].type,
+                description: content[key].description
+            }
+        });
+    } catch (error) {
+        return [];
+    }
+};
+
+const parseBusinessRuleItem = (item) => {
+    const definition = parseDefinition(item);
+    return {
+        name: item?.name || definition.name || '',
+        type: definition.type || item?.type || 'string',
+        description: definition.description || item?.description || ''
+    };
+};
+
+const readBusinessRuleFromExtension = (businessObject) => {
+    const values = businessObject?.extensionElements?.values || [];
+    const businessRule = values.find((value) => localName(value) === 'BusinessRule');
+    if (!businessRule) {
+        return null;
+    }
+    return {
+        inputs: (businessRule.inputs || []).map(parseBusinessRuleItem).filter((item) => item.name),
+        outputs: (businessRule.outputs || []).map(parseBusinessRuleItem).filter((item) => item.name)
+    };
+};
+
+const readBusinessRuleFromDocumentation = (businessObject) => {
+    const documentation = businessObject?.documentation;
+    if (!documentation?.length || !documentation[0]?.text) {
+        return null;
+    }
+    try {
+        const content = JSON.parse(documentation[0].text);
+        if (!content || typeof content !== 'object') {
+            return null;
+        }
+        return {
+            inputs: Array.isArray(content.inputs) ? content.inputs : [],
+            outputs: Array.isArray(content.outputs) ? content.outputs : []
+        };
+    } catch (error) {
+        return null;
+    }
+};
+
+const buildBusinessRuleExtension = (modeler, shape, inputs, outputs) => {
+    const extensionElements = shape.businessObject.extensionElements
+        || modeler._moddle.create('bpmn:ExtensionElements', { values: [] });
+    const businessRule = modeler._moddle.create('abc:BusinessRule', {
+        inputs: [],
+        outputs: []
+    });
+
+    inputs.forEach((item) => {
+        const input = modeler._moddle.create('abc:Input', {
+            name: item.name,
+            type: item.type,
+            description: item.description,
+            definition: JSON.stringify(item)
+        });
+        input.$parent = businessRule;
+        businessRule.inputs.push(input);
+    });
+
+    outputs.forEach((item) => {
+        const output = modeler._moddle.create('abc:Output', {
+            name: item.name,
+            type: item.type,
+            description: item.description,
+            definition: JSON.stringify(item)
+        });
+        output.$parent = businessRule;
+        businessRule.outputs.push(output);
+    });
+
+    businessRule.$parent = extensionElements;
+    extensionElements.values = (extensionElements.values || [])
+        .filter((value) => localName(value) !== 'BusinessRule')
+        .concat(businessRule);
+    extensionElements.$parent = shape.businessObject;
+
+    return extensionElements;
+};
+
 
 const IOBlock = ({
     index, type, item, handleChange, handleRemove
@@ -176,20 +311,9 @@ const DmnModal = ({ dataElementId, xmlData, open: isModalOpen, onClose, onSave }
     const messageList = Object.keys(elementRegistry._elements).map(
         (key) => elementRegistry._elements[key]
     ).filter((element) => element.element.type === 'bpmn:Message').map((element) => {
-        const documentation = element.element.businessObject.documentation;
-        let fields = []
-        if (documentation) {
-            const doc = element.element.businessObject.documentation[0]
-            const content = JSON.parse(doc.text).properties
-            // {\"input1\":{\"type\":\"string\",\"description\":\"123\"}
-            fields = Object.keys(content).map((key) => {
-                return {
-                    name: key,
-                    type: content[key].type,
-                    description: content[key].description
-                }
-            })
-        }
+        const businessObject = element.element.businessObject;
+        const fields = readMessageFieldsFromExtension(businessObject)
+            || readMessageFieldsFromDocumentation(businessObject);
         return {
             name: element.element.businessObject.id,
             fields: fields
@@ -204,15 +328,11 @@ const DmnModal = ({ dataElementId, xmlData, open: isModalOpen, onClose, onSave }
 
     useEffect(() => {
         if (isModalOpen === false) return
-        const doc = shape.businessObject.documentation[0];
-        if (doc) {
-            const content = JSON.parse(doc.text);
-            if (content.inputs) {
-                setInputs(content.inputs);
-            }
-            if (content.outputs) {
-                setOutputs(content.outputs);
-            }
+        const content = readBusinessRuleFromExtension(shape.businessObject)
+            || readBusinessRuleFromDocumentation(shape.businessObject);
+        if (content) {
+            setInputs(content.inputs || []);
+            setOutputs(content.outputs || []);
         }
         const businessRuleTaskName = shape.businessObject.name;
         if (businessRuleTaskName) {
@@ -224,14 +344,8 @@ const DmnModal = ({ dataElementId, xmlData, open: isModalOpen, onClose, onSave }
         commandStack.execute('element.updateProperties', {
             element: shape,
             properties: {
-                'documentation': [
-                    modeler._moddle.create("bpmn:Documentation", {
-                        text: JSON.stringify({
-                            "inputs": inputs,
-                            "outputs": outputs
-                        })
-                    })
-                ]
+                'extensionElements': buildBusinessRuleExtension(modeler, shape, inputs, outputs),
+                'documentation': []
             }
         });
         commandStack.execute('element.updateLabel', {

@@ -14,7 +14,7 @@ observationSource = """
     decode_cbor  [type="cborparse" data="$(decode_log.data)"]
     parse_input  [type="jsonparse" data="$(decode_cbor.inputData)"]
     call_cache   [type="http" method=POST url="<DMN_CACHE_URL>/api/dmn/calc"
-                  requestData="{\\\"requestId\\\": $(decode_log.requestId), \\\"dmnContent\\\": $(decode_cbor.dmnContent), \\\"decisionId\\\": $(decode_cbor.decisionId), \\\"inputData\\\": $(parse_input)}"
+                  requestData="{\\\"requestId\\\": $(decode_log.requestId), \\\"dmnCid\\\": $(decode_cbor.dmnCid), \\\"decisionId\\\": $(decode_cbor.decisionId), \\\"inputData\\\": $(parse_input)}"
                   contentType="application/json"
                   allowUnrestrictedNetworkAccess="true"]
 

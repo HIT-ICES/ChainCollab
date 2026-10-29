@@ -1,0 +1,164 @@
+{
+  "contract": "IOracle",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/positive/linear_contract_c/linear_contract_c.sol",
+  "globals": [
+    {
+      "name": "ReadyC",
+      "type": "bool"
+    }
+  ],
+  "handlers": [
+    {
+      "name": "StartEvent_C",
+      "language": "solidity",
+      "element_kind": "event",
+      "element_name": "StartEvent_C",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_C"
+      },
+      "guards": [
+        "require(ev.exists, \"event not set\")",
+        "require(ev.state == ElementState.ENABLED, \"event state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "TaskC"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.StartEvent_C];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.StartEvent_C);\n        inst.messages[MessageKey.TaskC].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "TaskC_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "TaskC",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "TaskC"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "ReviewC"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.TaskC];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.TaskC, fireflyTranId);\n        inst.gateways[GatewayKey.ReviewC].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "ReportC_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "ReportC",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "ReportC"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_C"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.ReportC];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.ReportC, fireflyTranId);\n        inst.events[EventKey.EndEvent_C].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "ReviewC",
+      "language": "solidity",
+      "element_kind": "gateway",
+      "element_name": "ReviewC",
+      "trigger": {
+        "kind": "gateway_completed",
+        "name": "ReviewC"
+      },
+      "guards": [
+        "inst.stateMemory.ReadyC == true",
+        "require(g.exists, \"gateway not set\")",
+        "require(g.state == ElementState.ENABLED, \"gateway state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "ReportC"
+        },
+        {
+          "op": "enable",
+          "target": "EndEvent_C"
+        },
+        {
+          "op": "set",
+          "var": "ReadyC",
+          "value": "= true) {\n            inst.messages[MessageKey.ReportC].state = ElementState.ENABLED"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "inst.stateMemory.ReadyC == true",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "ReportC"
+            }
+          ],
+          "else_actions": [
+            {
+              "op": "enable",
+              "target": "EndEvent_C"
+            }
+          ]
+        }
+      ],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Gateway storage g = inst.gateways[GatewayKey.ReviewC];\n        require(g.exists, \"gateway not set\");\n        require(g.state == ElementState.ENABLED, \"gateway state not allowed\");\n\n        g.state = ElementState.COMPLETED;\n        emit GatewayDone(instanceId, GatewayKey.ReviewC);\n        if (inst.stateMemory.ReadyC == true) {\n            inst.messages[MessageKey.ReportC].state = ElementState.ENABLED;\n        }\n        else {\n            inst.events[EventKey.EndEvent_C].state = ElementState.ENABLED;\n        }\n\n    }"
+    },
+    {
+      "name": "EndEvent_C",
+      "language": "solidity",
+      "element_kind": "event",
+      "element_name": "EndEvent_C",
+      "trigger": {
+        "kind": "event_completed",
+        "name": "EndEvent_C"
+      },
+      "guards": [
+        "require(ev.exists, \"event not set\")",
+        "require(ev.state == ElementState.ENABLED, \"event state not allowed\")"
+      ],
+      "actions": [],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.EndEvent_C];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.EndEvent_C);\n\n    }"
+    }
+  ],
+  "elements": {
+    "messages": [
+      "ReportC",
+      "TaskC"
+    ],
+    "gateways": [
+      "ReviewC"
+    ],
+    "events": [
+      "EndEvent_C",
+      "StartEvent_C"
+    ],
+    "businessrules": [
+      "PlaceholderBusinessRule"
+    ]
+  },
+  "unsupported": [],
+  "raw_summary": {
+    "function_count": 38,
+    "event_count": 5
+  }
+}

@@ -1,0 +1,26 @@
+contract InvalidMissingMessageTrigger {
+    participants {
+        participant A { msp "AMSP" attributes { role = "a" } }
+        participant B { msp "BMSP" attributes { role = "b" } }
+    }
+    globals {
+        G: bool
+    }
+    messages {
+        message KnownMsg from A to B { initial state INACTIVE schema "{}" }
+    }
+    gateways {
+    }
+    events {
+        event StartEvent_1 { initial state READY }
+        event EndEvent_1 { initial state INACTIVE }
+    }
+    businessrules {
+    }
+    oracletasks {
+    }
+    flows {
+        start event StartEvent_1 enables KnownMsg;
+        when message MissingMsg completed then enable EndEvent_1;
+    }
+}

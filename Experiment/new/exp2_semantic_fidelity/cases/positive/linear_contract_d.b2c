@@ -1,0 +1,34 @@
+contract LinearContractD {
+    participants {
+        participant LabD { msp "LabDMSP" attributes { role = "lab" } }
+        participant UserD { msp "UserDMSP" attributes { role = "user" } }
+    }
+    globals {
+        DeliverD: bool
+    }
+    messages {
+        message SubmitD from UserD to LabD { initial state INACTIVE schema "{}" }
+        message ReturnD from LabD to UserD { initial state INACTIVE schema "{}" }
+    }
+    gateways {
+        gateway GateD { type exclusive initial state INACTIVE }
+    }
+    events {
+        event StartEvent_D { initial state READY }
+        event EndEvent_D { initial state INACTIVE }
+    }
+    businessrules {
+    }
+    oracletasks {
+    }
+    flows {
+        start event StartEvent_D enables SubmitD;
+        when message SubmitD completed then enable GateD;
+        when gateway GateD completed choose {
+            if DeliverD == true then enable ReturnD;
+            else then enable EndEvent_D;
+        }
+        when message ReturnD completed then enable EndEvent_D;
+    }
+}
+

@@ -16,19 +16,25 @@ echo -e "${BLUE}  合约编译脚本${NC}"
 echo -e "${BLUE}================================================${NC}"
 echo ""
 
+SOLC_IMAGE="${SOLC_IMAGE:-ethereum/solc:0.8.19}"
+SOLC_MODE="local"
+
+show_local_solc_help() {
+    echo "请安装本机 Solidity 编译器 (原生 solc, 不推荐 npm 全局 solcjs):"
+    echo "  Ubuntu/Debian: sudo apt-get update && sudo apt-get install solc"
+    echo "  macOS: brew install solidity"
+    echo "  或使用 solc-select / 官方静态二进制安装原生 solc"
+    echo ""
+    echo "说明: npm install -g solc 安装的通常是 solcjs, 可能不支持本项目脚本所需参数。"
+}
+
 # 检查 solc 是否安装
 if ! command -v solc &> /dev/null; then
     echo -e "${RED}❌ solc 未安装${NC}"
     echo ""
-    echo "请安装 Solidity 编译器:"
-    echo "  Ubuntu/Debian: sudo apt-get install solc"
-    echo "  macOS: brew install solidity"
-    echo "  或使用 npm: npm install -g solc"
+    show_local_solc_help
     exit 1
 fi
-
-SOLC_IMAGE="${SOLC_IMAGE:-ethereum/solc:0.8.19}"
-SOLC_MODE="local"
 
 if ! solc --version >/dev/null 2>&1; then
     if command -v docker &> /dev/null; then
@@ -158,6 +164,7 @@ if compile_contracts; then
 else
     if [ "$SOLC_MODE" != "docker" ] && command -v docker &> /dev/null; then
         echo -e "${YELLOW}⚠️  本机 solc 编译失败，改用 Docker 版编译器重试${NC}"
+        echo -e "${YELLOW}   如果你希望强制使用本机编译器，请安装原生 solc，并确认其支持 --evm-version / --via-ir 参数。${NC}"
         SOLC_MODE="docker"
         if compile_contracts; then
             echo -e "${GREEN}✅ 合约编译成功${NC}"

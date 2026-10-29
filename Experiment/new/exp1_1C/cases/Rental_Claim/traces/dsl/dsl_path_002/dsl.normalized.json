@@ -1,0 +1,157 @@
+{
+  "schema_version": "exp1c.normalized_trace.v1",
+  "model_type": "dsl",
+  "case_name": "Rental_Claim",
+  "path_id": "dsl_path_002",
+  "trace_signature": "372b9d578a03fa59",
+  "steps": [
+    {
+      "enabled_before": [
+        "Event_19zgkxm"
+      ],
+      "trigger": "Event_19zgkxm",
+      "guard_result": true,
+      "state_diff": {
+        "Event_19zgkxm": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "enabled_after": [
+        "Gateway_10ut9pb"
+      ]
+    },
+    {
+      "enabled_before": [
+        "Gateway_10ut9pb"
+      ],
+      "trigger": "Gateway_10ut9pb",
+      "guard_result": true,
+      "state_diff": {
+        "Gateway_10ut9pb": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "enabled_after": [
+        "Message_09eyqv0",
+        "Message_0dckgao"
+      ]
+    },
+    {
+      "enabled_before": [
+        "Message_09eyqv0",
+        "Message_0dckgao"
+      ],
+      "trigger": "Message_0dckgao",
+      "guard_result": true,
+      "state_diff": {
+        "Message_0dckgao": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "enabled_after": [
+        "Activity_0oacu9j"
+      ]
+    },
+    {
+      "enabled_before": [
+        "Activity_0oacu9j"
+      ],
+      "trigger": "Activity_0oacu9j",
+      "guard_result": true,
+      "state_diff": {
+        "Activity_0oacu9j": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {
+        "Refund": "true"
+      },
+      "enabled_after": [
+        "Gateway_11zw5fs"
+      ]
+    },
+    {
+      "enabled_before": [
+        "Gateway_11zw5fs"
+      ],
+      "trigger": "Gateway_11zw5fs",
+      "guard_result": true,
+      "state_diff": {
+        "Gateway_11zw5fs": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "enabled_after": [
+        "Message_0zoy0sz"
+      ]
+    },
+    {
+      "enabled_before": [
+        "Message_0zoy0sz"
+      ],
+      "trigger": "Message_0zoy0sz",
+      "guard_result": true,
+      "state_diff": {
+        "Message_0zoy0sz": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "enabled_after": [
+        "Event_0fzlrii"
+      ]
+    },
+    {
+      "enabled_before": [
+        "Event_0fzlrii"
+      ],
+      "trigger": "Event_0fzlrii",
+      "guard_result": true,
+      "state_diff": {
+        "Event_0fzlrii": [
+          "READY",
+          "DONE"
+        ]
+      },
+      "global_diff": {},
+      "enabled_after": []
+    }
+  ],
+  "final_state": {
+    "status": "COMPLETED",
+    "element_states": {
+      "Message_066q5si": "INACTIVE",
+      "Message_09eyqv0": "INACTIVE",
+      "Message_0dckgao": "DONE",
+      "Message_0fm3vfa": "INACTIVE",
+      "Message_0z3zz01": "INACTIVE",
+      "Message_0zoy0sz": "DONE",
+      "Message_1eb4q8q": "INACTIVE",
+      "Message_1im6vvb": "INACTIVE",
+      "Message_1xlzl3n": "INACTIVE",
+      "Gateway_11zw5fs": "DONE",
+      "Gateway_10ut9pb": "DONE",
+      "Gateway_1v1x25n": "INACTIVE",
+      "Event_19zgkxm": "DONE",
+      "Event_1pjpbaw": "INACTIVE",
+      "Event_120hui7": "INACTIVE",
+      "Event_0fzlrii": "DONE",
+      "Event_0kmeww3": "INACTIVE",
+      "Activity_0oacu9j": "DONE"
+    },
+    "enabled_elements": [],
+    "globals": {
+      "Refund": "true"
+    }
+  }
+}

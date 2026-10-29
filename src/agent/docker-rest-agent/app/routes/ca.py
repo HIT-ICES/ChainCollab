@@ -37,8 +37,10 @@ def ca_operation(ca_name):
     if command == "start":
         try:
             container = get_container_or_404(ca_name)
-            container.start()
-            time.sleep(2)
+            container.reload()
+            if container.status != "running":
+                container.start()
+                time.sleep(2)
             max_attempts = 30
             for _ in range(max_attempts):
                 container.reload()
@@ -50,12 +52,13 @@ def ca_operation(ca_name):
                         file_response = send_file(file_path, as_attachment=True)
                         file_response.status_code = 200
                         return file_response
-                    return build_response(
-                        msg="start ca success but ca_cert missing",
-                        code=FAIL_CODE,
-                        status=500,
-                    )
                 time.sleep(1)
+
+            return build_response(
+                msg="start ca success but ca_cert missing",
+                code=FAIL_CODE,
+                status=500,
+            )
         except Exception as exc:
             logging.exception("start ca failed for %s", ca_name)
             return build_response(

@@ -1,0 +1,197 @@
+{
+  "contract": "BusinessRuleContractB",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/positive/business_rule_contract_b/business_rule_contract_b.b2c",
+  "participants": [
+    {
+      "name": "ClerkB",
+      "msp": "ClerkBMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "attributes": {
+        "role": "clerk"
+      }
+    },
+    {
+      "name": "ReviewerB",
+      "msp": "ReviewerBMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "attributes": {
+        "role": "reviewer"
+      }
+    }
+  ],
+  "globals": [
+    {
+      "name": "ScoreB",
+      "type": "int",
+      "initial_value": null
+    },
+    {
+      "name": "ApprovedB",
+      "type": "bool",
+      "initial_value": null
+    }
+  ],
+  "messages": [
+    {
+      "name": "SubmitB",
+      "from": "ClerkB",
+      "to": "ReviewerB",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "ResultB",
+      "from": "ReviewerB",
+      "to": "ClerkB",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "StartEvent_BRB",
+      "type": "start",
+      "initial_state": "READY"
+    },
+    {
+      "name": "EndEvent_BRB",
+      "type": "end",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "ReviewDecisionB",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [
+    {
+      "name": "RuleB",
+      "referenced_dmn": "rule_b.dmn",
+      "decision": "DecisionB",
+      "input_mapping": [
+        {
+          "param": "score",
+          "global": "ScoreB"
+        }
+      ],
+      "output_mapping": [
+        {
+          "param": "approved",
+          "global": "ApprovedB"
+        }
+      ],
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "oracletasks": [],
+  "flows": [
+    {
+      "id": "flow_001",
+      "source_kind": "StartFlow",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_BRB"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "SubmitB"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_002",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "SubmitB"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "RuleB"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_003",
+      "source_kind": "RuleFlow",
+      "trigger": {
+        "kind": "rule_done",
+        "name": "RuleB"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "ReviewDecisionB"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_004",
+      "source_kind": "GatewayFlow",
+      "trigger": {
+        "kind": "gateway_completed",
+        "name": "ReviewDecisionB"
+      },
+      "actions": [],
+      "branches": [
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "ResultB"
+            }
+          ],
+          "condition": {
+            "kind": "compare",
+            "var": "ApprovedB",
+            "relation": "==",
+            "value": ""
+          }
+        },
+        {
+          "kind": "GatewayElseBranch",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "EndEvent_BRB"
+            }
+          ],
+          "condition": {
+            "kind": "else"
+          }
+        }
+      ]
+    },
+    {
+      "id": "flow_005",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "ResultB"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_BRB"
+        }
+      ],
+      "branches": []
+    }
+  ],
+  "unsupported": []
+}

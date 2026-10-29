@@ -428,6 +428,34 @@ class Channel(models.Model):
         ordering = ("-created_at",)
         app_label = "api"
 
+    @property
+    def network(self):
+        if not self.resource_set:
+            return None
+        sub_resource_set = self.resource_set.get_sub_resource_set()
+        return getattr(sub_resource_set, "network", None)
+
+    @property
+    def organizations(self):
+        network = self.network
+        if network is None:
+            return FabricResourceSet.objects.none()
+        return FabricResourceSet.objects.filter(network=network)
+
+    @property
+    def create_ts(self):
+        return self.created_at
+
+    def get_channel_artifacts_path(self, filename):
+        from apps.api.config import CELLO_HOME
+
+        network = self.network
+        network_name = network.name if network else ""
+        return os.path.join(CELLO_HOME, network_name, "channel-artifacts", filename)
+
+    def get_channel_config_path(self):
+        return self.get_channel_artifacts_path("config_block.pb")
+
 
 class ResourceSet(models.Model):
     """
@@ -476,6 +504,13 @@ class ResourceSet(models.Model):
     class Meta:
         ordering = ("-id",)
         app_label = "api"
+
+    def get_sub_resource_set(self):
+        if hasattr(self, "sub_resource_set"):
+            return self.sub_resource_set
+        if hasattr(self, "ethereum_sub_resource_set"):
+            return self.ethereum_sub_resource_set
+        return None
 
 
 class FabricIdentity(models.Model):

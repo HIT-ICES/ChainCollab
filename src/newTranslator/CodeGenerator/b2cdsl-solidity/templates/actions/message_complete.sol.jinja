@@ -1,0 +1,11 @@
+function {{ message_name }}_Complete(uint256 instanceId) external onlyInitialized {
+        Instance storage inst = _getInstance(instanceId);
+        Message storage m = inst.messages[MessageKey.{{ message_name }}];
+        require(m.exists, "message not set");
+        _checkParticipant(inst, m.receiveParticipant);
+        require(m.state == ElementState.WAITING_FOR_CONFIRMATION, "message not waiting");
+
+        m.state = ElementState.COMPLETED;
+        emit MessageCompleted(instanceId, MessageKey.{{ message_name }}, m.fireflyTranId);
+{{ after_hooks }}
+    }

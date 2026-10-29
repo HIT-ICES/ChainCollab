@@ -4,6 +4,7 @@ from typing import Any, Dict, Literal, Optional
 import requests
 
 from apps.api.config import CURRENT_IP
+from .chaincode_postprocess import transform_go_message_confirmation
 
 
 TranslatorTarget = Literal["go", "solidity"]
@@ -43,6 +44,7 @@ class NewTranslatorClient:
         target: TranslatorTarget,
         artifact_name: Optional[str] = None,
         persist_to_runtime: bool = False,
+        message_confirmation_mode: str = "explicit",
     ) -> Dict[str, Any]:
         if target == "solidity":
             result = self._post(
@@ -58,6 +60,7 @@ class NewTranslatorClient:
                 "dslContent": result.get("dslContent", ""),
                 "chaincodeContent": result.get("contractContent", ""),
                 "ffiContent": result.get("ffiContent", "{}"),
+                "executionLayout": result.get("executionLayout", {}),
                 "outputDir": result.get("outputDir", ""),
                 "artifactPath": result.get("artifactPath", ""),
                 "dslPath": result.get("dslPath", ""),
@@ -83,11 +86,18 @@ class NewTranslatorClient:
         ffi_content = compile_result.get("ffiContent")
         if not ffi_content or ffi_content == "{}":
             ffi_content = dsl_result.get("ffiContent", "{}")
+        chaincode_content = compile_result.get("chaincodeContent", "")
+        chaincode_content = transform_go_message_confirmation(
+            chaincode_content,
+            mode=message_confirmation_mode,
+            ffi_content=ffi_content,
+        )
         return {
             "target": "go",
             "dslContent": dsl_content,
-            "chaincodeContent": compile_result.get("chaincodeContent", ""),
+            "chaincodeContent": chaincode_content,
             "ffiContent": ffi_content,
+            "executionLayout": {},
             "outputDir": dsl_result.get("outputDir", ""),
             "artifactPath": dsl_result.get("artifactPath", ""),
             "dslPath": dsl_result.get("dslPath", ""),

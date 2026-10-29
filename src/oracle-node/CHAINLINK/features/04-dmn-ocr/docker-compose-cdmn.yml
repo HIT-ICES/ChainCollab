@@ -13,8 +13,13 @@ services:
       - OCR_LISTENER_ENABLED=true
       - OCR_RPC_URL=http://mybootnode:8545
       - OCR_AGGREGATOR_ADDRESS=${OCR_AGGREGATOR_ADDRESS}
+      - FIREFLY_CORE_URL=${FIREFLY_CORE_URL:-http://host.docker.internal:5002}
+      - IPFS_GATEWAY_URL=${IPFS_GATEWAY_URL:-http://host.docker.internal:10207/ipfs}
+      - DMN_FETCH_TIMEOUT=${DMN_FETCH_TIMEOUT:-15}
     ports:
       - "8081:5000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - existing_network
 
@@ -27,8 +32,13 @@ services:
       - OCR_LISTENER_ENABLED=true
       - OCR_RPC_URL=http://mybootnode:8545
       - OCR_AGGREGATOR_ADDRESS=${OCR_AGGREGATOR_ADDRESS}
+      - FIREFLY_CORE_URL=${FIREFLY_CORE_URL:-http://host.docker.internal:5002}
+      - IPFS_GATEWAY_URL=${IPFS_GATEWAY_URL:-http://host.docker.internal:10207/ipfs}
+      - DMN_FETCH_TIMEOUT=${DMN_FETCH_TIMEOUT:-15}
     ports:
       - "8082:5000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - existing_network
 
@@ -41,8 +51,13 @@ services:
       - OCR_LISTENER_ENABLED=true
       - OCR_RPC_URL=http://mybootnode:8545
       - OCR_AGGREGATOR_ADDRESS=${OCR_AGGREGATOR_ADDRESS}
+      - FIREFLY_CORE_URL=${FIREFLY_CORE_URL:-http://host.docker.internal:5002}
+      - IPFS_GATEWAY_URL=${IPFS_GATEWAY_URL:-http://host.docker.internal:10207/ipfs}
+      - DMN_FETCH_TIMEOUT=${DMN_FETCH_TIMEOUT:-15}
     ports:
       - "8083:5000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - existing_network
 
@@ -55,8 +70,13 @@ services:
       - OCR_LISTENER_ENABLED=true
       - OCR_RPC_URL=http://mybootnode:8545
       - OCR_AGGREGATOR_ADDRESS=${OCR_AGGREGATOR_ADDRESS}
+      - FIREFLY_CORE_URL=${FIREFLY_CORE_URL:-http://host.docker.internal:5002}
+      - IPFS_GATEWAY_URL=${IPFS_GATEWAY_URL:-http://host.docker.internal:10207/ipfs}
+      - DMN_FETCH_TIMEOUT=${DMN_FETCH_TIMEOUT:-15}
     ports:
       - "8084:5000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - existing_network
 

@@ -70,6 +70,32 @@ class FireflyViewSet(viewsets.ModelViewSet):
     ]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
+    def _is_eth_route(self, request) -> bool:
+        path = request.path or ""
+        return "/eth-environments/" in path
+
+    def _get_target_resource_sets(self, request):
+        org_id = request.query_params.get("org_id", None)
+        env_id = request.parser_context["kwargs"].get("environment_id")
+        membership_id = request.query_params.get("membership_id", None)
+
+        if self._is_eth_route(request):
+            env = EthEnvironment.objects.get(id=env_id)
+            resource_sets = ResourceSet.objects.filter(eth_environment=env)
+        else:
+            env = Environment.objects.get(id=env_id)
+            resource_sets = ResourceSet.objects.filter(environment=env)
+
+        if org_id:
+            organization = LoleidoOrganization.objects.get(id=org_id)
+            memberships = Membership.objects.filter(loleido_organization=organization)
+            resource_sets = resource_sets.filter(membership__in=memberships)
+        elif membership_id:
+            membership = Membership.objects.get(id=membership_id)
+            resource_sets = resource_sets.filter(membership=membership)
+
+        return resource_sets
+
     def _start_task(self, task, handler, *args, **kwargs):
         def runner():
             log_path = _task_log_path(str(task.id))
@@ -285,26 +311,7 @@ class FireflyViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         try:
-            org_id = request.query_params.get("org_id", None)
-            env_id = request.parser_context["kwargs"].get("environment_id")
-            membership_id = request.query_params.get("membership_id", None)
-            env = Environment.objects.get(id=env_id)
-            if org_id:
-                organization = LoleidoOrganization.objects.get(id=org_id)
-                memberships = Membership.objects.filter(
-                    loleido_organization=organization
-                )
-                resource_sets = ResourceSet.objects.filter(
-                    environment=env, membership__in=memberships
-                )
-            elif membership_id:
-                membership = Membership.objects.get(id=membership_id)
-                resource_sets = ResourceSet.objects.filter(
-                    environment=env, membership=membership
-                )
-            else:
-                resource_sets = ResourceSet.objects.filter(environment=env)
-
+            resource_sets = self._get_target_resource_sets(request)
             fireflys = Firefly.objects.filter(resource_set__in=resource_sets)
             data = []
             for firefly in fireflys:
@@ -326,7 +333,8 @@ class FireflyViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         try:
             firefly_id = request.parser_context["kwargs"].get("pk")
-            firefly = Firefly.objects.get(id=firefly_id)
+            resource_sets = self._get_target_resource_sets(request)
+            firefly = Firefly.objects.get(id=firefly_id, resource_set__in=resource_sets)
             data = {
                 "id": firefly.id,
                 "org_name": firefly.org_name,

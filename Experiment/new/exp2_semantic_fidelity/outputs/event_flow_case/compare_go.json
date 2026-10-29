@@ -1,0 +1,88 @@
+{
+  "language": "go",
+  "dsl_source": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/event_flow_case/event_flow_case.b2c",
+  "code_source": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/event_flow_case/event_flow_case.go",
+  "structure": {
+    "globals": {
+      "matched": [
+        "Done"
+      ],
+      "missing": [],
+      "extra": [],
+      "unsupported": []
+    },
+    "messages": {
+      "matched": [
+        "Ping"
+      ],
+      "missing": [],
+      "extra": [],
+      "unsupported": []
+    },
+    "events": {
+      "matched": [
+        "EndEvent_1",
+        "StartEvent_1"
+      ],
+      "missing": [
+        "MidEvent_1"
+      ],
+      "extra": [],
+      "unsupported": []
+    },
+    "gateways": {
+      "matched": [],
+      "missing": [],
+      "extra": [],
+      "unsupported": []
+    },
+    "businessrules": {
+      "matched": [],
+      "missing": [],
+      "extra": [],
+      "unsupported": []
+    }
+  },
+  "flow_results": [
+    {
+      "rule_id": "flow_001",
+      "matched": true,
+      "trigger_match": true,
+      "handler": "StartEvent_1",
+      "action_match_ratio": 1.0,
+      "missing_actions": [],
+      "notes": []
+    },
+    {
+      "rule_id": "flow_002",
+      "matched": true,
+      "trigger_match": true,
+      "handler": "Ping_Complete",
+      "action_match_ratio": 1.0,
+      "missing_actions": [],
+      "notes": []
+    },
+    {
+      "rule_id": "flow_003",
+      "matched": false,
+      "trigger_match": false,
+      "action_match_ratio": 0.0,
+      "missing_actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_1"
+        }
+      ],
+      "notes": [
+        "no matching handler"
+      ]
+    }
+  ],
+  "summary": {
+    "flow_total": 3,
+    "flow_matched": 2,
+    "flow_coverage": 0.6667,
+    "unsupported_constructs": [],
+    "verdict": "PARTIAL"
+  }
+}

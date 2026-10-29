@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { css } from "@emotion/css";
 import { useLocation } from "react-router-dom";
 import {
@@ -97,6 +97,252 @@ const getElementId = (element: any): string =>
 	element?.BusinessRuleID ||
 	"";
 
+const getElementStateMeta = (state: number) => {
+	switch (state) {
+		case 1:
+			return { label: "READY", color: "processing" as const };
+		case 2:
+			return { label: "WAIT_CONFIRM", color: "error" as const };
+		case 3:
+			return { label: "DONE", color: "success" as const };
+		default:
+			return { label: "DISABLED", color: "default" as const };
+	}
+};
+
+const getStatePalette = () =>
+	({
+		0: { fill: "#f1f5f9", stroke: "#cbd5e1", opacity: 0.65 },
+		1: { fill: "#dbeafe", stroke: "#2563eb", opacity: 0.95 },
+		2: { fill: "#fee2e2", stroke: "#dc2626", opacity: 0.98 },
+		3: { fill: "#dcfce7", stroke: "#16a34a", opacity: 0.95 },
+	}) as Record<number, { fill: string; stroke: string; opacity: number }>;
+
+const parseElementFormat = (rawFormat: any) => {
+	const parsed =
+		typeof rawFormat === "string"
+			? (() => {
+					try {
+						return JSON.parse(rawFormat);
+					} catch {
+						return {};
+					}
+			  })()
+			: rawFormat || {};
+	const resolved =
+		typeof parsed?.schema === "string"
+			? (() => {
+					try {
+						return JSON.parse(parsed.schema);
+					} catch {
+						return parsed;
+					}
+			  })()
+			: parsed?.schema && typeof parsed.schema === "object"
+			? parsed.schema
+			: parsed;
+	return {
+		properties:
+			resolved && typeof resolved.properties === "object" && resolved.properties !== null
+				? resolved.properties
+				: {},
+		files:
+			resolved && typeof resolved.files === "object" && resolved.files !== null
+				? resolved.files
+				: {},
+		required: Array.isArray(resolved?.required) ? resolved.required : [],
+		fileRequired: Array.isArray(resolved?.["file required"])
+			? resolved["file required"]
+			: [],
+	};
+};
+
+const getSchemaFieldDescription = (fieldDef: any, fallbackName: string) =>
+	String(fieldDef?.description || fieldDef?.title || `${fallbackName} input`).trim();
+
+const normalizeUploadValue = (event: any) => {
+	if (Array.isArray(event)) {
+		return event;
+	}
+	return event?.fileList || [];
+};
+
+const extractOriginFile = (value: any) => {
+	if (!value) {
+		return null;
+	}
+	if (value instanceof File || value instanceof Blob) {
+		return value;
+	}
+	if (Array.isArray(value)) {
+		const lastItem = value[value.length - 1];
+		return lastItem?.originFileObj || lastItem?.file || null;
+	}
+	return value?.originFileObj || value?.file || null;
+};
+
+const inferFabricFieldType = (fieldDef: any, methodParam?: any) => {
+	const raw = String(
+		fieldDef?.type ||
+			methodParam?.schema?.type ||
+			methodParam?.type ||
+			"",
+	).toLowerCase();
+	if (raw === "boolean" || raw === "bool") return "boolean";
+	if (raw === "number" || raw === "integer" || raw === "int") return "number";
+	return "string";
+};
+
+const findMethodParamByFieldName = (methodDef: any, key: string) =>
+	(methodDef?.params || []).find((param: any) => {
+		const name = String(param?.name || "");
+		return name === key || name.toLowerCase() === key.toLowerCase();
+	}) || null;
+
+const resolveParticipantBindingDefault = (
+	fieldName: string,
+	participantBindings: Record<string, any>,
+) => {
+	const lowerName = fieldName.toLowerCase();
+	for (const [participantId, binding] of Object.entries(participantBindings || {})) {
+		const participantLower = participantId.toLowerCase();
+		if (lowerName === participantLower || lowerName === `${participantLower}_participant`) {
+			return (
+				(binding as any)?.signer ||
+				(binding as any)?.name ||
+				(binding as any)?.address ||
+				(binding as any)?.org_name ||
+				(binding as any)?.msp ||
+				""
+			);
+		}
+		if (
+			lowerName === `${participantLower}_org` ||
+			lowerName === `${participantLower}org`
+		) {
+			return (binding as any)?.org_name || (binding as any)?.msp || "";
+		}
+		if (
+			lowerName === `${participantLower}_msp` ||
+			lowerName === `${participantLower}msp`
+		) {
+			return (binding as any)?.msp || (binding as any)?.org_name || "";
+		}
+		if (
+			lowerName === `${participantLower}_identity` ||
+			lowerName === `${participantLower}identity` ||
+			lowerName === `${participantLower}_signer`
+		) {
+			return (
+				(binding as any)?.signer ||
+				(binding as any)?.name ||
+				(binding as any)?.firefly_identity_id ||
+				""
+			);
+		}
+	}
+	return "";
+};
+
+const getFabricFieldDefaultValue = ({
+	fieldName,
+	fieldDef,
+	methodParam,
+	elementId,
+	instanceId,
+	identity,
+	executionBindings,
+}: {
+	fieldName: string;
+	fieldDef?: any;
+	methodParam?: any;
+	elementId: string;
+	instanceId: any;
+	identity?: any;
+	executionBindings?: any;
+}) => {
+	const lowerName = String(fieldName || "").toLowerCase();
+	const fieldType = inferFabricFieldType(fieldDef, methodParam);
+	const participantBindings = executionBindings?.participants || {};
+	const participantDefault = resolveParticipantBindingDefault(
+		fieldName,
+		participantBindings,
+	);
+	if (lowerName === "instanceid" || lowerName === "instance_id") {
+		return String(instanceId || 0);
+	}
+	if (lowerName.includes("fireflytran")) {
+		return `ff-${instanceId || 0}-${elementId || "message"}`;
+	}
+	if (fieldType === "boolean") {
+		return false;
+	}
+	if (fieldType === "number") {
+		return 1;
+	}
+	if (participantDefault) {
+		return participantDefault;
+	}
+	if (lowerName.includes("membership")) {
+		return identity?.membership || "";
+	}
+	if (lowerName.endsWith("msp") || lowerName.includes("_msp")) {
+		return identity?.msp || "";
+	}
+	if (
+		lowerName.endsWith("org") ||
+		lowerName.includes("_org") ||
+		lowerName.includes("organization")
+	) {
+		return identity?.msp || "";
+	}
+	if (
+		lowerName.includes("identity") ||
+		lowerName.includes("participant") ||
+		lowerName.includes("signer")
+	) {
+		return identity?.name || "";
+	}
+	if (lowerName.endsWith("id") || lowerName.includes("requestid")) {
+		return `${elementId || "message"}-${instanceId || 0}`;
+	}
+	const description = getSchemaFieldDescription(fieldDef, fieldName);
+	return description && description !== `${fieldName} input`
+		? description.length > 48
+			? description.slice(0, 48)
+			: description
+		: `sample-${fieldName}`;
+};
+
+const buildFormatAutoFilledValues = (
+	format: {
+		properties: Record<string, any>;
+		files: Record<string, any>;
+		required: string[];
+		fileRequired: string[];
+	},
+	elementId: string,
+	instanceId: any,
+	methodDef?: any,
+	executionBindings?: any,
+	identity?: any,
+) =>
+	Object.entries(format.properties || {}).reduce(
+		(acc, [key, fieldDef]: [string, any]) => {
+			acc[key] = getFabricFieldDefaultValue({
+				fieldName: key,
+				fieldDef,
+				methodParam: findMethodParamByFieldName(methodDef, key),
+				elementId,
+				instanceId,
+				identity,
+				executionBindings,
+			});
+			return acc;
+		},
+		{} as Record<string, any>,
+	);
+
 const parseMockElementsFromSvg = (svgContent?: string) => {
 	if (!svgContent) return [];
 	const seen = new Set<string>();
@@ -158,8 +404,43 @@ const InputComponentForMessage = ({
 	instanceId,
 	the_identity,
 	onActionRecord,
+	onActionSuccess,
 }) => {
-	const format = JSON.parse(currentElement.Format);
+	const format = parseElementFormat(currentElement?.Format);
+	const propertyEntries = Object.entries(format.properties || {});
+	const fileEntries = Object.entries(format.files || {});
+	const [form] = Form.useForm();
+	const buildAutoFilledValues = () =>
+		buildFormatAutoFilledValues(
+			format,
+			currentElement?.MessageID || "message",
+			instanceId,
+			(contractMethodDes.methods || []).find((item: any) => item?.name === methodName),
+			bpmnInstance?.execution_bindings || {},
+			the_identity,
+		);
+	const fillEmptyFieldsWithDefaults = () => {
+		const defaults = buildAutoFilledValues();
+		const currentValues = form.getFieldsValue();
+		const nextValues = { ...currentValues };
+		let changed = false;
+		for (const [key, value] of Object.entries(defaults)) {
+			if (
+				nextValues[key] === undefined ||
+				nextValues[key] === null ||
+				nextValues[key] === ""
+			) {
+				nextValues[key] = value;
+				changed = true;
+			}
+		}
+		if (changed) {
+			form.setFieldsValue(nextValues);
+		}
+	};
+	const applyAutoFill = () => {
+		form.setFieldsValue(buildAutoFilledValues());
+	};
 
 	const transValue = (key, value) => {
 		if (format.properties[key]?.type === "string") return value;
@@ -168,7 +449,6 @@ const InputComponentForMessage = ({
 		return value;
 	};
 
-	const formRef = useRef(null);
 	const isSender = currentElement.state === 1;
 	const methodName =
 		currentElement.MessageID + (isSender ? "_Send" : "_Complete");
@@ -204,6 +484,7 @@ const InputComponentForMessage = ({
 				payload: res,
 			});
 			message.success("Message confirmed");
+			onActionSuccess?.();
 		} catch (error: any) {
 			onActionRecord?.({
 				traceId,
@@ -271,7 +552,11 @@ const InputComponentForMessage = ({
 
 	useEffect(() => {
 		if (isSender) {
-			// setMessageToConfirm("Please confirm the message to send");
+			if (propertyEntries.length > 0) {
+				setTimeout(() => {
+					fillEmptyFieldsWithDefaults();
+				}, 0);
+			}
 			return;
 		}
 		const fetchData = async () => {
@@ -297,7 +582,17 @@ const InputComponentForMessage = ({
 			}
 		};
 		fetchData();
-	}, [currentElement]);
+	}, [
+		currentElement,
+		isSender,
+		propertyEntries.length,
+		instanceId,
+		bpmnInstance?.execution_bindings,
+		the_identity?.name,
+		the_identity?.membership,
+		the_identity?.msp,
+		form,
+	]);
 
 	if (!isSender) {
 		return (
@@ -318,12 +613,14 @@ const InputComponentForMessage = ({
 						})}
 				</Typography.Text>
 				<Button
-					style={{ backgroundColor: "mediumspringgreen", marginTop: "10px" }}
+					type="primary"
+					danger
+					style={{ marginTop: "10px" }}
 					onClick={() => {
 						confirmMessage();
 					}}
 				>
-					Confirm
+					Confirm Message
 				</Button>
 			</div>
 		);
@@ -342,18 +639,18 @@ const InputComponentForMessage = ({
 		try {
 			const Identity = "did:firefly:" + the_identity?.name;
 
-			let file_ids = [];
-			for (let key in format.files) {
-				const file = values[key];
-				if (file) {
-					const res = await TimeDecorator(
-						fireflyFileTransfer,
-						"File",
-						"default/data",
-					)(coreURL, file.file);
-					file_ids.push(res.id);
+				let file_ids = [];
+				for (let key in format.files) {
+					const file = extractOriginFile(values[key]);
+					if (file) {
+						const res = await TimeDecorator(
+							fireflyFileTransfer,
+							"File",
+							"default/data",
+						)(coreURL, file);
+						file_ids.push(res.id);
+					}
 				}
-			}
 			if (file_ids.length > 0) {
 				await new Promise((resolve) => setTimeout(resolve, 2000));
 			}
@@ -451,6 +748,7 @@ const InputComponentForMessage = ({
 				},
 			});
 			message.success("Message sent and contract invoked");
+			onActionSuccess?.();
 		} catch (error: any) {
 			onActionRecord?.({
 				traceId,
@@ -474,13 +772,13 @@ const InputComponentForMessage = ({
 			}}
 		>
 				<TestComponentV2
-					processFunc={async () => {
-						const output_obj = {};
-						try {
-							await onHandleMessage(formRef.current.getFieldsValue(), output_obj);
-						} catch (error) {
-							return {};
-						}
+								processFunc={async () => {
+									const output_obj = {};
+									try {
+										await onHandleMessage(form.getFieldsValue(), output_obj);
+									} catch (error) {
+										return {};
+									}
 						const core_url = coreURL;
 					await sleep(3000);
 					const message = await getMessageWithId(
@@ -532,58 +830,129 @@ const InputComponentForMessage = ({
 					return res;
 				}}
 			/>
-			<Form
-				layout="horizontal"
-				className={flexContainerStyle}
-				labelCol={{ span: 8 }}
-				wrapperCol={{ span: 16 }}
-				ref={formRef}
-				onFinish={onHandleMessage}
-			>
-				<h1>LOGRES</h1>
-				{Object.keys(format.properties).map((key) => {
-					return (
-						<Form.Item
-							label={key}
-							name={key}
-							key={key}
-							rules={[
-								{
-									required: format.required.includes(key),
-									message: `${key} is required!`,
-								},
-							]}
-						>
-							<div>
-								<Tag>{format.properties[key].type}</Tag>
-								<Input placeholder={format.properties[key].description} />
+					<Form
+						form={form}
+						layout="horizontal"
+						className={flexContainerStyle}
+						labelCol={{ span: 8 }}
+						wrapperCol={{ span: 16 }}
+						onFinish={onHandleMessage}
+					>
+					<h1>LOGRES</h1>
+					<div
+						style={{
+							width: "100%",
+							padding: 12,
+							borderRadius: 10,
+							background: "#f8fafc",
+							border: "1px solid #e2e8f0",
+							marginBottom: 8,
+						}}
+					>
+						<Space wrap size={8}>
+							<Tag color="blue">Params: {propertyEntries.length}</Tag>
+							<Tag color="purple">Files: {fileEntries.length}</Tag>
+							<Tag color="gold">Required: {format.required.length}</Tag>
+							<Button size="small" onClick={applyAutoFill}>
+								Auto Fill
+							</Button>
+						</Space>
+						{propertyEntries.length > 0 ? (
+							<div style={{ marginTop: 10, display: "grid", gap: 8 }}>
+								{propertyEntries.map(([key, fieldDef]: [string, any]) => (
+									<div
+										key={`meta-${key}`}
+										style={{
+											padding: 8,
+											borderRadius: 8,
+											background: "#fff",
+											border: "1px solid #e2e8f0",
+										}}
+									>
+										<Space wrap size={8}>
+											<Typography.Text strong>{key}</Typography.Text>
+											<Tag>{String(fieldDef?.type || "string")}</Tag>
+											{format.required.includes(key) ? (
+												<Tag color="error">required</Tag>
+											) : (
+												<Tag>optional</Tag>
+											)}
+										</Space>
+									<div style={{ marginTop: 4 }}>
+										<Typography.Text type="secondary">
+											{getSchemaFieldDescription(fieldDef, key)}
+										</Typography.Text>
+									</div>
+								</div>
+								))}
 							</div>
-						</Form.Item>
-					);
-				})}
-				{Object.keys(format.files).map((key) => {
-					return (
-						<Form.Item
-							label={key}
-							name={key}
-							key={key}
-							rules={[
-								{
-									required: format["file required"].includes(key),
-									message: `${key} is required!`,
-								},
-							]}
-						>
-							<Upload
-								beforeUpload={(file) => {
-									return false;
-								}}
+						) : (
+							<div style={{ marginTop: 10 }}>
+								<Typography.Text type="secondary">
+									This message has no editable scalar parameters.
+								</Typography.Text>
+							</div>
+						)}
+					</div>
+					{propertyEntries.map(([key, fieldDef]: [string, any]) => {
+						return (
+							<Form.Item
+								label={key}
+								key={key}
 							>
-								<Button icon={<UploadOutlined />}>Upload</Button>
-							</Upload>
-						</Form.Item>
-					);
-				})}
+								<Space>
+									<Tag>{String(fieldDef?.type || "string")}</Tag>
+									<Form.Item
+										name={key}
+										noStyle
+										rules={[
+											{
+												required: format.required.includes(key),
+												message: `${key} is required!`,
+											},
+										]}
+									>
+										<Input placeholder={getSchemaFieldDescription(fieldDef, key)} />
+									</Form.Item>
+								</Space>
+							</Form.Item>
+						);
+					})}
+					{fileEntries.map(([key, fieldDef]: [string, any]) => {
+						return (
+								<Form.Item
+									label={key}
+									key={key}
+								>
+									<div>
+										<div style={{ marginBottom: 6 }}>
+											<Typography.Text type="secondary">
+												{getSchemaFieldDescription(fieldDef, key)}
+											</Typography.Text>
+										</div>
+										<Form.Item
+											name={key}
+											noStyle
+											valuePropName="fileList"
+											getValueFromEvent={normalizeUploadValue}
+											rules={[
+												{
+													required: format.fileRequired.includes(key),
+													message: `${key} is required!`,
+												},
+											]}
+										>
+											<Upload
+												maxCount={1}
+												beforeUpload={() => false}
+											>
+											<Button icon={<UploadOutlined />}>Upload</Button>
+											</Upload>
+										</Form.Item>
+									</div>
+								</Form.Item>
+						);
+					})}
 				<Form.Item>
 					<Button
 						style={{ backgroundColor: "mediumspringgreen" }}
@@ -643,9 +1012,15 @@ const ControlPanel = ({
 	executionMode,
 	onMockAction,
 	mockProcessingElementId,
+	onActionSuccess,
 }) => {
 	const type = currentElement?.type;
 	const elementId = getElementId(currentElement);
+	const displayName = currentElement?.DisplayName || elementId;
+	const formatInfo = parseElementFormat(currentElement?.Format);
+	const propertyEntries = Object.entries(formatInfo.properties || {});
+	const fileEntries = Object.entries(formatInfo.files || {});
+	const stateMeta = getElementStateMeta(Number(currentElement?.state ?? 0));
 	const isYourTurn = (() => {
 		if (type === "event" || type === "gateway" || type === "businessRule")
 			return currentElement?.state === 1;
@@ -656,13 +1031,109 @@ const ControlPanel = ({
 			);
 	})();
 	const showTransactionId = type === "message" && currentElement?.state === 2;
+	const renderCard = (content: React.ReactNode, actionLabel: string) => (
+		<div
+			style={{
+				display: "flex",
+				flexDirection: "column",
+				border: "1px solid #e2e8f0",
+				borderRadius: 10,
+				padding: 12,
+				background: "#f8fafc",
+				minWidth: 320,
+				maxWidth: 520,
+				gap: 10,
+			}}
+			>
+				<Space wrap size={8}>
+					<Tag color="blue">{type}</Tag>
+					<Tag color={stateMeta.color}>{stateMeta.label}</Tag>
+					<Typography.Text strong>{displayName}</Typography.Text>
+					{displayName !== elementId ? <Tag>{elementId}</Tag> : null}
+				</Space>
+			{currentElement?.Documentation ? (
+				<Typography.Text type="secondary">
+					{currentElement.Documentation}
+				</Typography.Text>
+			) : null}
+			{type === "message" ? (
+				<div
+					style={{
+						padding: 10,
+						borderRadius: 8,
+						background: "#fff",
+						border: "1px solid #e2e8f0",
+					}}
+				>
+					<Space wrap size={8}>
+						<Tag color="geekblue">Params: {propertyEntries.length}</Tag>
+						<Tag color="purple">Files: {fileEntries.length}</Tag>
+						<Tag color="gold">Required: {formatInfo.required.length}</Tag>
+					</Space>
+					{propertyEntries.length > 0 ? (
+						<div style={{ marginTop: 8, display: "grid", gap: 6 }}>
+							{propertyEntries.map(([key, fieldDef]: [string, any]) => (
+								<div key={`summary-${elementId}-${key}`}>
+									<Typography.Text>
+										{key}
+										{" "}
+										<Tag>{String(fieldDef?.type || "string")}</Tag>
+									</Typography.Text>
+									<div>
+										<Typography.Text type="secondary">
+											{getSchemaFieldDescription(fieldDef, key)}
+										</Typography.Text>
+									</div>
+								</div>
+							))}
+						</div>
+					) : (
+						<div style={{ marginTop: 8 }}>
+							<Typography.Text type="secondary">
+								This message has no editable scalar parameters.
+							</Typography.Text>
+						</div>
+					)}
+				</div>
+			) : null}
+			{type === "businessRule" &&
+			(Array.isArray(currentElement?.Inputs) || Array.isArray(currentElement?.Outputs)) ? (
+				<div
+					style={{
+						padding: 10,
+						borderRadius: 8,
+						background: "#fff",
+						border: "1px solid #e2e8f0",
+					}}
+				>
+					{Array.isArray(currentElement?.Inputs) && currentElement.Inputs.length > 0 ? (
+						<Typography.Text type="secondary">
+							Inputs: {currentElement.Inputs.map((item: any) => item?.name || item).join(", ")}
+						</Typography.Text>
+					) : null}
+					{Array.isArray(currentElement?.Outputs) && currentElement.Outputs.length > 0 ? (
+						<div style={{ marginTop: 6 }}>
+							<Typography.Text type="secondary">
+								Outputs: {currentElement.Outputs.map((item: any) => item?.name || item).join(", ")}
+							</Typography.Text>
+						</div>
+					) : null}
+				</div>
+			) : null}
+			<div>
+				<Typography.Text type="secondary">{actionLabel}</Typography.Text>
+			</div>
+			{content}
+		</div>
+	);
 
 	if (!isYourTurn) return null;
 
-	if (executionMode === "mock") {
-		const isMessageConfirm = type === "message" && currentElement?.state === 2;
-		const isProcessing = mockProcessingElementId === elementId;
-		return (
+		if (executionMode === "mock") {
+			const isMessageConfirm = type === "message" && currentElement?.state === 2;
+			const isProcessing = mockProcessingElementId === elementId;
+			const mockStateMeta = getElementStateMeta(Number(currentElement?.state ?? 0));
+			return (
 			<div
 				style={{
 					display: "flex",
@@ -675,18 +1146,17 @@ const ControlPanel = ({
 					gap: 8,
 				}}
 			>
-				<Typography.Text strong>
-					{type} · {elementId}
-				</Typography.Text>
-				<Tag color={isMessageConfirm ? "orange" : "blue"}>
-					{isMessageConfirm ? "WAIT_CONFIRM" : "READY"}
-				</Tag>
-				<Button
-					type="primary"
-					loading={isProcessing}
-					onClick={() =>
-						onMockAction?.(currentElement, isMessageConfirm ? "confirm" : "execute")
-					}
+					<Typography.Text strong>
+						{type} · {elementId}
+					</Typography.Text>
+					<Tag color={mockStateMeta.color}>{mockStateMeta.label}</Tag>
+					<Button
+						type="primary"
+						danger={isMessageConfirm}
+						loading={isProcessing}
+						onClick={() =>
+							onMockAction?.(currentElement, isMessageConfirm ? "confirm" : "execute")
+						}
 				>
 					{isMessageConfirm ? "Mock Confirm" : "Mock Execute"}
 				</Button>
@@ -724,6 +1194,7 @@ const ControlPanel = ({
 				payload: res,
 			});
 			message.success("Event invoked");
+			onActionSuccess?.();
 		} catch (error: any) {
 			onActionRecord?.({
 				traceId,
@@ -739,22 +1210,18 @@ const ControlPanel = ({
 	};
 
 	if (type === "event")
-		return (
-			<div
-				style={{
-					display: "flex",
-					flexDirection: "column",
-				}}
-			>
-				<Button
-					style={{ backgroundColor: "mediumspringgreen" }}
-					onClick={() => {
-						onHandleEvent();
-					}}
-				>
-					Next
-				</Button>
-			</div>
+		return renderCard(
+			<div style={{ display: "flex", flexDirection: "column" }}>
+					<Button
+						style={{ backgroundColor: "mediumspringgreen" }}
+						onClick={() => {
+							onHandleEvent();
+						}}
+					>
+						Next
+					</Button>
+				</div>,
+			"Execute event",
 		);
 
 	const onHandleGateway = async () => {
@@ -785,6 +1252,7 @@ const ControlPanel = ({
 				payload: res,
 			});
 			message.success("Gateway invoked");
+			onActionSuccess?.();
 		} catch (error: any) {
 			onActionRecord?.({
 				traceId,
@@ -800,22 +1268,18 @@ const ControlPanel = ({
 	};
 
 	if (type === "gateway")
-		return (
-			<div
-				style={{
-					display: "flex",
-					flexDirection: "column",
-				}}
-			>
-				<Button
-					style={{ backgroundColor: "mediumspringgreen" }}
-					onClick={() => {
-						onHandleGateway();
-					}}
-				>
-					Next
-				</Button>
-			</div>
+		return renderCard(
+			<div style={{ display: "flex", flexDirection: "column" }}>
+					<Button
+						style={{ backgroundColor: "mediumspringgreen" }}
+						onClick={() => {
+							onHandleGateway();
+						}}
+					>
+						Next
+					</Button>
+				</div>,
+			"Execute gateway",
 		);
 
 	const onHandleBusinessRule = async (output={}) => {
@@ -845,6 +1309,7 @@ const ControlPanel = ({
 				txId: res?.tx,
 				payload: res,
 			});
+			onActionSuccess?.();
 			return res;
 		} catch (error: any) {
 			onActionRecord?.({
@@ -861,24 +1326,19 @@ const ControlPanel = ({
 	};
 
 	if (type === "businessRule")
-		return (
-			<div
-				style={{
-					display: "flex",
-					flexDirection: "column",
-				}}
-			>
-				<Button
-					style={{ backgroundColor: "mediumspringgreen" }}
-					onClick={() => {
-						onHandleBusinessRule().catch((error: any) => {
-							message.error(error?.message || "Business rule invoke failed");
+		return renderCard(
+			<div style={{ display: "flex", flexDirection: "column" }}>
+					<Button
+						style={{ backgroundColor: "mediumspringgreen" }}
+						onClick={() => {
+							onHandleBusinessRule().catch((error: any) => {
+								message.error(error?.message || "Business rule invoke failed");
 						});
 					}}
 				>
 					Next
 				</Button>
-				<TestComponentV2
+					<TestComponentV2
 					processFunc={async (readFromRedis) => {
 						const output = {};
 						const data = await onHandleBusinessRule(output);
@@ -945,36 +1405,41 @@ const ControlPanel = ({
 							}
 						]
 						return res;
-					}}
-				/>
-			</div>
+						}}
+					/>
+				</div>,
+			currentElement?.state === 2 ? "Continue business rule" : "Request DMN",
 		);
 
 	if (type === "message")
-		return (
+		return renderCard(
 			<div>
 				{showTransactionId ? (
-					<div>Transaction ID: {currentElement.FireflyTranID}</div>
+					<div style={{ marginBottom: 8 }}>
+						<Typography.Text type="secondary">
+							Transaction ID: {currentElement.FireflyTranID}
+						</Typography.Text>
+					</div>
 				) : null}
-				{currentElement.Format && currentElement.Format !== "{}" ? (
-						<InputComponentForMessage
-							currentElement={currentElement}
-							contractName={contractName}
-							coreURL={coreURL}
-							bpmnName={bpmnName}
-							contractMethodDes={contractMethodDes}
-							bpmn={bpmn}
-							bpmnInstance={bpmnInstance}
-						instanceId={instanceId}
-						the_identity={identity}
-						onActionRecord={onActionRecord}
-					/>
-				) : null}
-			</div>
+				<InputComponentForMessage
+					currentElement={currentElement}
+					contractName={contractName}
+					coreURL={coreURL}
+					bpmnName={bpmnName}
+					contractMethodDes={contractMethodDes}
+					bpmn={bpmn}
+					bpmnInstance={bpmnInstance}
+					instanceId={instanceId}
+					the_identity={identity}
+					onActionRecord={onActionRecord}
+					onActionSuccess={onActionSuccess}
+				/>
+			</div>,
+			showTransactionId ? "Confirm message" : "Send message",
 		);
 };
 
-import { useAvailableIdentity } from "./hook.ts";
+import { useAvailableEthereumIdentity, useAvailableIdentity } from "./hook.ts";
 
 const IdentitySelector = ({ identity, setIdentity }) => {
 	// 1. get all membership and participant based on user identity
@@ -983,12 +1448,58 @@ const IdentitySelector = ({ identity, setIdentity }) => {
 	const normalizedIdentities = Array.isArray(availableIdentities)
 		? availableIdentities
 		: [];
+	const currentMembershipGroup = normalizedIdentities.find(
+		(item) => item.membership_id === currentMembership,
+	);
+
+	const applyIdentity = async (membershipId: string, fireflyIdentityId: string) => {
+		const selectedMembership = normalizedIdentities.find(
+			(item) => item.membership_id === membershipId,
+		);
+		const the_one = selectedMembership?.identities.find(
+			(item) => item.firefly_identity_id === fireflyIdentityId,
+		);
+		if (!the_one?.core_url || !fireflyIdentityId) {
+			return;
+		}
+		const resolvedIdentity = await getFireflyIdentity(
+			"http://" + the_one.core_url,
+			fireflyIdentityId,
+		);
+
+		setIdentity({
+			name: the_one.name,
+			membership: membershipId,
+			idInFirefly: fireflyIdentityId,
+			core_url: the_one.core_url,
+			identity: resolvedIdentity,
+			msp: the_one.firefly_msp,
+		});
+	};
 
 	useEffect(() => {
 		if (!currentMembership && normalizedIdentities.length > 0) {
 			setCurrentMembership(normalizedIdentities[0].membership_id);
 		}
 	}, [currentMembership, normalizedIdentities]);
+
+	useEffect(() => {
+		if (!currentMembershipGroup?.identities?.length) {
+			return;
+		}
+		const identityExistsInCurrentMembership = currentMembershipGroup.identities.some(
+			(item) => item.firefly_identity_id === identity.idInFirefly,
+		);
+		if (identityExistsInCurrentMembership) {
+			return;
+		}
+		const firstIdentityId =
+			currentMembershipGroup.identities[0]?.firefly_identity_id || "";
+		if (!firstIdentityId) {
+			return;
+		}
+		applyIdentity(currentMembershipGroup.membership_id, firstIdentityId);
+	}, [currentMembershipGroup, identity.idInFirefly]);
 
 	if (isLoading) {
 		return <div>Loading</div>;
@@ -1020,30 +1531,10 @@ const IdentitySelector = ({ identity, setIdentity }) => {
 				style={{ width: 200 }}
 				value={identity.idInFirefly}
 				onChange={async (value) => {
-					const the_one = normalizedIdentities
-						.find((item) => item.membership_id === currentMembership)
-						?.identities.find((item) => item.firefly_identity_id === value);
-					if (!the_one) {
-						return;
-					}
-					const identity = await getFireflyIdentity(
-						"http://" + the_one.core_url,
-						value,
-					);
-
-					setIdentity({
-						name: the_one.name,
-						membership: currentMembership,
-						idInFirefly: value,
-						core_url: the_one.core_url,
-						identity: identity,
-						msp: the_one.firefly_msp,
-					});
+					await applyIdentity(currentMembership, value);
 				}}
 			>
-				{normalizedIdentities
-					.find((item) => item.membership_id === currentMembership)
-					?.identities.map((item) => {
+				{currentMembershipGroup?.identities.map((item) => {
 						return (
 							<Select.Option
 								key={item.firefly_identity_id}
@@ -1054,6 +1545,54 @@ const IdentitySelector = ({ identity, setIdentity }) => {
 						);
 					})}
 			</Select>
+		</div>
+	);
+};
+
+const EthereumIdentitySelector = ({
+	ethEnvironmentId,
+	selectedKey,
+	onSelect,
+}: {
+	ethEnvironmentId: string;
+	selectedKey: string;
+	onSelect: (identity: any) => void;
+}) => {
+	const [availableIdentities, isLoading, refetch] =
+		useAvailableEthereumIdentity(ethEnvironmentId);
+
+	useEffect(() => {
+		if (!selectedKey && availableIdentities.length > 0) {
+			onSelect(availableIdentities[0]);
+		}
+	}, [availableIdentities, onSelect, selectedKey]);
+
+	return (
+		<div style={{ marginBottom: 12 }}>
+			<Space wrap size={12}>
+				<Typography.Text strong>Ethereum Signer</Typography.Text>
+				<Button size="small" onClick={() => refetch()}>
+					Refresh
+				</Button>
+				<Select
+					loading={isLoading}
+					style={{ minWidth: 360 }}
+					value={selectedKey || undefined}
+					placeholder="Select Ethereum identity"
+					onChange={(value) => {
+						const matched = availableIdentities.find(
+							(item: any) => item?.address === value,
+						);
+						if (matched) {
+							onSelect(matched);
+						}
+					}}
+					options={availableIdentities.map((item: any) => ({
+						value: item?.address || "",
+						label: `${item?.name || "Identity"} (${item?.address || "-"})`,
+					}))}
+				/>
+			</Space>
 		</div>
 	);
 };
@@ -1071,36 +1610,270 @@ const inferEthereumParamType = (param: any) => {
 	return "string";
 };
 
+const getEthereumParamDefaultValue = (
+	param: any,
+	instanceId: any,
+	element?: any,
+) => {
+	const name = String(param?.name || "");
+	const paramType = inferEthereumParamType(param);
+	const lowerName = name.toLowerCase();
+	const messageFormat = element?.type === "message" ? element?.Format || {} : {};
+	const propertyDef =
+		messageFormat?.properties?.[name] ||
+		messageFormat?.properties?.[lowerName] ||
+		messageFormat?.files?.[name] ||
+		messageFormat?.files?.[lowerName] ||
+		null;
+
+	if (name === "instanceId" || name === "InstanceID") {
+		return Number(instanceId || 0);
+	}
+	if (lowerName.includes("fireflytran")) {
+		const elementId = getElementId(element) || "action";
+		return `ff-${instanceId || 0}-${elementId}`;
+	}
+	if (paramType === "boolean") {
+		return false;
+	}
+	if (paramType === "number") {
+		return 1;
+	}
+	if (messageFormat?.files?.[name] || messageFormat?.files?.[lowerName]) {
+		return `${name || "file"}.dat`;
+	}
+	if (lowerName.endsWith("id") || lowerName.includes("requestid")) {
+		const elementId = getElementId(element) || "item";
+		return `${elementId}-${instanceId || 0}`;
+	}
+	const description = String(propertyDef?.description || "").trim();
+	if (description) {
+		return description.length > 40 ? description.slice(0, 40) : description;
+	}
+	return `sample-${name || "value"}`;
+};
+
 const buildEthereumMethodPayload = (method: any, instanceId: any) => {
 	const payload: Record<string, any> = {};
 	for (const param of method?.params || []) {
 		const name = param?.name;
 		if (!name) continue;
-		if (name === "instanceId" || name === "InstanceID") {
-			payload[name] = Number(instanceId || 0);
-			continue;
-		}
-		if (name.toLowerCase().includes("fireflytran")) {
-			payload[name] = `ff-${Date.now()}`;
-			continue;
-		}
-		const kind = inferEthereumParamType(param);
-		payload[name] = kind === "number" ? 0 : kind === "boolean" ? false : "";
+		payload[name] = getEthereumParamDefaultValue(param, instanceId);
 	}
 	return payload;
 };
 
-const getEthereumEnumIds = (methods: any[]) => {
-	const messageIds = methods
+const safeParseJsonText = (value: string) => {
+	if (!value || typeof value !== "string") return null;
+	try {
+		return JSON.parse(value);
+	} catch {
+		return null;
+	}
+};
+
+const getBpmnDocumentationText = (element: Element) => {
+	const docNode = Array.from(element.children).find(
+		(child) => child.localName === "documentation",
+	);
+	return docNode?.textContent?.trim() || "";
+};
+
+const readMessageSchemaExtension = (element: Element) => {
+	const extensionElements = Array.from(element.children).find(
+		(child) => child.localName === "extensionElements",
+	);
+	if (!extensionElements) return null;
+
+	const schemaElement = Array.from(extensionElements.children).find(
+		(child) => child.localName === "MessageSchema",
+	);
+	if (!schemaElement) return null;
+
+	const schema = {
+		properties: {} as Record<string, any>,
+		required: [] as string[],
+		files: {} as Record<string, any>,
+		"file required": [] as string[],
+	};
+
+	Array.from(schemaElement.children).forEach((child) => {
+		const name = child.getAttribute("name") || "";
+		if (!name) return;
+		let definition: Record<string, any> = {};
+		const rawDefinition = child.getAttribute("definition") || "";
+		if (rawDefinition) {
+			try {
+				const parsed = JSON.parse(rawDefinition);
+				if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+					definition = parsed;
+				}
+			} catch {
+				definition = {};
+			}
+		}
+		definition.type = definition.type || child.getAttribute("type") || "string";
+		if (!definition.description && child.hasAttribute("description")) {
+			definition.description = child.getAttribute("description") || "";
+		}
+		const isRequired = ["1", "true", "yes"].includes(
+			(child.getAttribute("required") || "").toLowerCase(),
+		);
+
+		if (child.localName === "Property") {
+			schema.properties[name] = definition;
+			if (isRequired) schema.required.push(name);
+		}
+		if (child.localName === "File") {
+			schema.files[name] = definition;
+			if (isRequired) schema["file required"].push(name);
+		}
+	});
+
+	return schema;
+};
+
+const readBusinessRuleExtension = (element: Element) => {
+	const extensionElements = Array.from(element.children).find(
+		(child) => child.localName === "extensionElements",
+	);
+	if (!extensionElements) return null;
+
+	const businessRuleElement = Array.from(extensionElements.children).find(
+		(child) => child.localName === "BusinessRule",
+	);
+	if (!businessRuleElement) return null;
+
+	const readItem = (child: Element) => {
+		let definition: Record<string, any> = {};
+		const rawDefinition = child.getAttribute("definition") || "";
+		if (rawDefinition) {
+			try {
+				const parsed = JSON.parse(rawDefinition);
+				if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+					definition = parsed;
+				}
+			} catch {
+				definition = {};
+			}
+		}
+		return {
+			name: definition.name || child.getAttribute("name") || "",
+			type: definition.type || child.getAttribute("type") || "string",
+			description: definition.description || child.getAttribute("description") || "",
+		};
+	};
+
+	return {
+		inputs: Array.from(businessRuleElement.children)
+			.filter((child) => child.localName === "Input")
+			.map(readItem)
+			.filter((item) => item.name),
+		outputs: Array.from(businessRuleElement.children)
+			.filter((child) => child.localName === "Output")
+			.map(readItem)
+			.filter((item) => item.name),
+	};
+};
+
+const parseBpmnExecutionMeta = (bpmnContent?: string) => {
+	const meta = {
+		messages: {} as Record<string, any>,
+		gateways: {} as Record<string, any>,
+		events: {} as Record<string, any>,
+		businessRules: {} as Record<string, any>,
+	};
+	if (!bpmnContent || typeof DOMParser === "undefined") {
+		return meta;
+	}
+	try {
+		const doc = new DOMParser().parseFromString(bpmnContent, "text/xml");
+		const nodes = Array.from(doc.querySelectorAll("[id]"));
+		nodes.forEach((node) => {
+			const id = node.getAttribute("id") || "";
+			if (!id) return;
+			const name = node.getAttribute("name") || id;
+			const documentation = getBpmnDocumentationText(node);
+			const messageSchema = id.startsWith("Message_")
+				? readMessageSchemaExtension(node)
+				: null;
+			const businessRuleConfig = id.startsWith("Activity_") && node.localName === "businessRuleTask"
+				? readBusinessRuleExtension(node)
+				: null;
+			const parsedDoc = messageSchema || businessRuleConfig || safeParseJsonText(documentation);
+			const entry = {
+				id,
+				name,
+				documentation:
+					documentation || (messageSchema ? JSON.stringify(messageSchema) : ""),
+				parsedDoc,
+				type: node.localName,
+			};
+			if (id.startsWith("Message_")) {
+				meta.messages[id] = {
+					...entry,
+					format: parsedDoc,
+				};
+				return;
+			}
+			if (id.startsWith("Gateway_")) {
+				meta.gateways[id] = entry;
+				return;
+			}
+			if (
+				id.startsWith("Event_") ||
+				id.startsWith("StartEvent_") ||
+				id.startsWith("EndEvent_") ||
+				id.startsWith("Intermediate")
+			) {
+				meta.events[id] = entry;
+				return;
+			}
+			if (id.startsWith("Activity_") && node.localName === "businessRuleTask") {
+				meta.businessRules[id] = {
+					...entry,
+					inputs: Array.isArray(parsedDoc?.inputs) ? parsedDoc.inputs : [],
+					outputs: Array.isArray(parsedDoc?.outputs) ? parsedDoc.outputs : [],
+				};
+			}
+		});
+	} catch (error) {
+		console.error("Failed to parse BPMN execution metadata", error);
+	}
+	return meta;
+};
+
+const getEthereumEnumIds = (methods: any[], executionLayout?: any) => {
+	const layoutMessages = Array.isArray(executionLayout?.messages)
+		? executionLayout.messages
+				.map((item: any) => (typeof item === "string" ? item : item?.id))
+				.filter(Boolean)
+		: [];
+	const layoutGateways = Array.isArray(executionLayout?.gateways)
+		? executionLayout.gateways
+				.map((item: any) => (typeof item === "string" ? item : item?.id))
+				.filter(Boolean)
+		: [];
+	const layoutEvents = Array.isArray(executionLayout?.events)
+		? executionLayout.events
+				.map((item: any) => (typeof item === "string" ? item : item?.id))
+				.filter(Boolean)
+		: [];
+	const layoutBusinessRules = Array.isArray(executionLayout?.businessRules)
+		? executionLayout.businessRules
+				.map((item: any) => (typeof item === "string" ? item : item?.id))
+				.filter(Boolean)
+		: [];
+	const messageIds = layoutMessages.length > 0 ? layoutMessages : methods
 		.filter((method: any) => /^Message_.+_Send$/.test(method?.name || ""))
 		.map((method: any) => String(method.name).replace(/_Send$/, ""));
-	const gatewayIds = methods
+	const gatewayIds = layoutGateways.length > 0 ? layoutGateways : methods
 		.filter((method: any) => /^Gateway_/.test(method?.name || ""))
 		.map((method: any) => String(method.name));
-	const eventIds = methods
+	const eventIds = layoutEvents.length > 0 ? layoutEvents : methods
 		.filter((method: any) => /^Event_/.test(method?.name || ""))
 		.map((method: any) => String(method.name));
-	const businessRuleIds = methods
+	const businessRuleIds = layoutBusinessRules.length > 0 ? layoutBusinessRules : methods
 		.filter(
 			(method: any) =>
 				/^Activity_/.test(method?.name || "") &&
@@ -1173,27 +1946,40 @@ const toNumericState = (value: any) => {
 const buildEthereumExecutionElements = (
 	methods: any[],
 	snapshot: ReturnType<typeof extractSnapshotOutput>,
+	meta: ReturnType<typeof parseBpmnExecutionMeta>,
+	executionLayout?: any,
 ) => {
-	const enumIds = getEthereumEnumIds(methods);
+	const enumIds = getEthereumEnumIds(methods, executionLayout);
 	const messageElements = enumIds.messageIds.map((id, index) => ({
 		type: "message",
 		MessageID: id,
+		DisplayName: meta.messages[id]?.name || id,
+		Documentation: meta.messages[id]?.documentation || "",
+		Format: meta.messages[id]?.format || null,
 		state: toNumericState(snapshot.messageStates[index]),
 		FireflyTranID: String(snapshot.messageFireflyTranIds[index] ?? ""),
 	}));
 	const gatewayElements = enumIds.gatewayIds.map((id, index) => ({
 		type: "gateway",
 		GatewayID: id,
+		DisplayName: meta.gateways[id]?.name || id,
+		Documentation: meta.gateways[id]?.documentation || "",
 		state: toNumericState(snapshot.gatewayStates[index]),
 	}));
 	const eventElements = enumIds.eventIds.map((id, index) => ({
 		type: "event",
 		EventID: id,
+		DisplayName: meta.events[id]?.name || id,
+		Documentation: meta.events[id]?.documentation || "",
 		state: toNumericState(snapshot.eventStates[index]),
 	}));
 	const businessRuleElements = enumIds.businessRuleIds.map((id, index) => ({
 		type: "businessRule",
 		BusinessRuleID: id,
+		DisplayName: meta.businessRules[id]?.name || id,
+		Documentation: meta.businessRules[id]?.documentation || "",
+		Inputs: meta.businessRules[id]?.inputs || [],
+		Outputs: meta.businessRules[id]?.outputs || [],
 		state: toNumericState(snapshot.businessRuleStates[index]),
 		RequestID: String(snapshot.businessRuleRequestIds[index] ?? ""),
 	}));
@@ -1214,12 +2000,7 @@ const buildSvgStyleForElements = (
 		acc[item.elementId] = item.status;
 		return acc;
 	}, {} as Record<string, string>);
-	const palette = {
-		0: { fill: "#f1f5f9", stroke: "#cbd5e1", opacity: 0.65 },
-		1: { fill: "#dbeafe", stroke: "#2563eb", opacity: 0.95 },
-		2: { fill: "#fef3c7", stroke: "#d97706", opacity: 0.95 },
-		3: { fill: "#dcfce7", stroke: "#16a34a", opacity: 0.95 },
-	} as Record<number, { fill: string; stroke: string; opacity: number }>;
+	const palette = getStatePalette();
 
 	const styles = { "& svg": {} as Record<string, any> };
 	elementList.forEach((item) => {
@@ -1227,7 +2008,7 @@ const buildSvgStyleForElements = (
 		if (!elementId) return;
 		const selector = `& g[data-element-id="${elementId}"]`;
 		const stateStyle = palette[item.state] || palette[0];
-		const actionStyle = latestActionStatus[elementId];
+		const actionStyle = item.state === 3 ? undefined : latestActionStatus[elementId];
 		const fill =
 			actionStyle === "failed"
 				? "#fee2e2"
@@ -1266,53 +2047,116 @@ const buildSvgStyleForElements = (
 const getEthereumActionConfig = (
 	element: any,
 	instanceId: number,
-	messageInputs: Record<string, string>,
+	methodsByName: Record<string, any>,
+	actionInputs: Record<string, Record<string, any>>,
 ) => {
+	const hasBusinessRuleRequestId =
+		typeof element?.RequestID === "string" &&
+		element.RequestID !== "" &&
+		element.RequestID !== "0x" &&
+		element.RequestID !==
+			"0x0000000000000000000000000000000000000000000000000000000000000000";
 	if (element?.type === "message" && element?.state === 1) {
+		const methodName = `${element.MessageID}_Send`;
+		const method = methodsByName[methodName];
+		const payload = buildEthereumMethodPayload(method, instanceId);
+		const overrides = actionInputs[element.MessageID] || {};
 		return {
 			type: "message" as const,
 			label: "Send",
-			method: `${element.MessageID}_Send`,
-			payload: {
-				instanceId,
-				fireflyTranId:
-					messageInputs[element.MessageID] || `ff-${Date.now()}`,
-			},
+			method: methodName,
+			methodDef: method,
+			payload: { ...payload, ...overrides },
+		};
+	}
+	if (element?.type === "message" && element?.state === 2) {
+		const methodName = `${element.MessageID}_Complete`;
+		const method = methodsByName[methodName];
+		if (!method) return null;
+		return {
+			type: "message" as const,
+			label: "Confirm receipt",
+			method: methodName,
+			methodDef: method,
+			payload: buildEthereumMethodPayload(method, instanceId),
 		};
 	}
 	if (element?.type === "gateway" && element?.state === 1) {
+		const method = methodsByName[element.GatewayID];
 		return {
 			type: "gateway" as const,
 			label: "Execute",
 			method: element.GatewayID,
-			payload: { instanceId },
+			methodDef: method,
+			payload: {
+				...buildEthereumMethodPayload(method, instanceId),
+				...(actionInputs[element.GatewayID] || {}),
+			},
 		};
 	}
 	if (element?.type === "event" && element?.state === 1) {
+		const method = methodsByName[element.EventID];
 		return {
 			type: "event" as const,
 			label: "Execute",
 			method: element.EventID,
-			payload: { instanceId },
+			methodDef: method,
+			payload: {
+				...buildEthereumMethodPayload(method, instanceId),
+				...(actionInputs[element.EventID] || {}),
+			},
 		};
 	}
 	if (element?.type === "businessRule" && element?.state === 1) {
+		const method = methodsByName[element.BusinessRuleID];
 		return {
 			type: "businessRule" as const,
 			label: "Request DMN",
 			method: element.BusinessRuleID,
-			payload: { instanceId },
+			methodDef: method,
+			payload: {
+				...buildEthereumMethodPayload(method, instanceId),
+				...(actionInputs[element.BusinessRuleID] || {}),
+			},
 		};
 	}
 	if (element?.type === "businessRule" && element?.state === 2) {
+		if (!hasBusinessRuleRequestId) {
+			return null;
+		}
+		const methodName = `${element.BusinessRuleID}_Continue`;
+		const method = methodsByName[methodName];
 		return {
 			type: "businessRule" as const,
 			label: "Continue",
-			method: `${element.BusinessRuleID}_Continue`,
-			payload: { instanceId },
+			method: methodName,
+			methodDef: method,
+			payload: {
+				...buildEthereumMethodPayload(method, instanceId),
+				...(actionInputs[element.BusinessRuleID] || {}),
+			},
 		};
 	}
 	return null;
+};
+
+const getEthereumActionKey = (element: any, method: string) =>
+	`${getElementId(element)}:${method}`;
+
+const buildEthereumActionInputDefaults = (
+	element: any,
+	config: any,
+	instanceId: number,
+) => {
+	const defaults: Record<string, any> = {};
+	for (const param of config?.methodDef?.params || []) {
+		const name = param?.name;
+		if (!name || name === "instanceId" || name === "InstanceID") {
+			continue;
+		}
+		defaults[name] = getEthereumParamDefaultValue(param, instanceId, element);
+	}
+	return defaults;
 };
 
 const EthereumExecutionView = ({
@@ -1332,6 +2176,20 @@ const EthereumExecutionView = ({
 	const methods = Array.isArray(contractMethodDes?.methods)
 		? contractMethodDes.methods
 		: [];
+	const ethEnvironmentId = String(bpmnData?.eth_environment || "");
+	const methodsByName = useMemo(
+		() =>
+			methods.reduce((acc, item) => {
+				if (item?.name) acc[item.name] = item;
+				return acc;
+			}, {} as Record<string, any>),
+		[methods],
+	);
+	const executionMeta = useMemo(
+		() => parseBpmnExecutionMeta(bpmnData?.bpmnContent),
+		[bpmnData?.bpmnContent],
+	);
+	const executionLayout = bpmnData?.execution_layout || {};
 	const instanceId = Number(bpmnInstance?.instance_chaincode_id ?? 0);
 	const executableMethods = methods.filter((method: any) => {
 		const name = method?.name || "";
@@ -1362,8 +2220,18 @@ const EthereumExecutionView = ({
 	const [snapshotLoading, setSnapshotLoading] = useState(false);
 	const [snapshotError, setSnapshotError] = useState<string | null>(null);
 	const [snapshotElements, setSnapshotElements] = useState<any[]>([]);
-	const [messageInputs, setMessageInputs] = useState<Record<string, string>>({});
+	const [actionInputs, setActionInputs] = useState<Record<string, Record<string, any>>>(
+		{},
+	);
 	const [svgStyle, setSvgStyle] = useState({});
+	const [selectedEthereumIdentity, setSelectedEthereumIdentity] = useState<any>(null);
+	const selectedEthereumKey = selectedEthereumIdentity?.address || "";
+	const [pendingActionKeys, setPendingActionKeys] = useState<Record<string, boolean>>(
+		{},
+	);
+	const [autoExecuteEnabled, setAutoExecuteEnabled] = useState(false);
+	const [autoExecuteIntervalMs, setAutoExecuteIntervalMs] = useState(3000);
+	const [autoExecuteRunning, setAutoExecuteRunning] = useState(false);
 
 	useEffect(() => {
 		const method =
@@ -1389,12 +2257,12 @@ const EthereumExecutionView = ({
 		if (!apiBaseUrl) {
 			setSnapshotError("Execution API is not ready");
 			setSnapshotElements([]);
-			return;
+			return [] as any[];
 		}
 		if (!Number.isFinite(instanceId)) {
 			setSnapshotError("Instance id is invalid");
 			setSnapshotElements([]);
-			return;
+			return [] as any[];
 		}
 		setSnapshotLoading(true);
 		setSnapshotError(null);
@@ -1406,12 +2274,19 @@ const EthereumExecutionView = ({
 				"query",
 			);
 			const snapshot = extractSnapshotOutput(response);
-			const elements = buildEthereumExecutionElements(methods, snapshot);
+			const elements = buildEthereumExecutionElements(
+				methods,
+				snapshot,
+				executionMeta,
+				executionLayout,
+			);
 			setSnapshotElements(elements);
+			return elements;
 		} catch (error: any) {
 			const errorText = String(error?.message || error || "Snapshot query failed");
 			setSnapshotError(errorText);
 			setSnapshotElements([]);
+			throw error;
 		} finally {
 			setSnapshotLoading(false);
 		}
@@ -1419,7 +2294,7 @@ const EthereumExecutionView = ({
 
 	useEffect(() => {
 		refreshSnapshot();
-	}, [apiBaseUrl, instanceId, methods.length]);
+	}, [apiBaseUrl, instanceId, methods.length, executionMeta, executionLayout]);
 
 	useEffect(() => {
 		setSvgStyle(buildSvgStyleForElements(snapshotElements, actionRecords));
@@ -1437,15 +2312,94 @@ const EthereumExecutionView = ({
 		{ disabled: 0, ready: 0, confirm: 0, done: 0 },
 	);
 	const actionableElements = snapshotElements.filter((item) =>
-		Boolean(getEthereumActionConfig(item, instanceId, messageInputs)),
+		Boolean(getEthereumActionConfig(item, instanceId, methodsByName, actionInputs)),
 	);
 
-	const invokeElementAction = async (element: any) => {
-		const config = getEthereumActionConfig(element, instanceId, messageInputs);
-		if (!config) {
-			message.info("No executable action for current state");
+	useEffect(() => {
+		if (snapshotElements.length === 0) {
 			return;
 		}
+		setActionInputs((prev) => {
+			let changed = false;
+			const next = { ...prev };
+			for (const element of snapshotElements) {
+				const config = getEthereumActionConfig(
+					element,
+					instanceId,
+					methodsByName,
+					prev,
+				);
+				if (!config) {
+					continue;
+				}
+				const elementId = getElementId(element);
+				if (!elementId) {
+					continue;
+				}
+				const current = { ...(next[elementId] || {}) };
+				const defaults = buildEthereumActionInputDefaults(
+					element,
+					config,
+					instanceId,
+				);
+				for (const [name, value] of Object.entries(defaults)) {
+					if (
+						current[name] === undefined ||
+						current[name] === null ||
+						current[name] === ""
+					) {
+						current[name] = value;
+						changed = true;
+					}
+				}
+				next[elementId] = current;
+			}
+			return changed ? next : prev;
+		});
+	}, [snapshotElements, instanceId, methodsByName]);
+
+	const invokeElementAction = async (element: any) => {
+		const config = getEthereumActionConfig(
+			element,
+			instanceId,
+			methodsByName,
+			actionInputs,
+		);
+		if (!config) {
+			message.info("No executable action for current state");
+			return false;
+		}
+		if (!selectedEthereumKey) {
+			message.error("Select an Ethereum signer first");
+			return false;
+		}
+		const actionKey = getEthereumActionKey(element, config.method);
+		if (pendingActionKeys[actionKey]) {
+			message.info("This action is already pending");
+			return false;
+		}
+		try {
+			const latestElements = await refreshSnapshot();
+			const latestElement = latestElements.find(
+				(item: any) => getElementId(item) === getElementId(element),
+			);
+			const latestConfig = latestElement
+				? getEthereumActionConfig(
+						latestElement,
+						instanceId,
+						methodsByName,
+						actionInputs,
+				  )
+				: null;
+			if (!latestConfig || latestConfig.method !== config.method) {
+				message.warning("Element is no longer actionable. Snapshot has been refreshed.");
+				return false;
+			}
+		} catch {
+			message.error("Failed to refresh execution snapshot before invoke");
+			return false;
+		}
+		setPendingActionKeys((prev) => ({ ...prev, [actionKey]: true }));
 		const traceId = createTraceId(`eth-${config.type}`);
 		onActionRecord?.({
 			traceId,
@@ -1462,6 +2416,7 @@ const EthereumExecutionView = ({
 				config.method,
 				config.payload,
 				"invoke",
+				selectedEthereumKey,
 			);
 			setResultText(JSON.stringify(response, null, 2));
 			onActionRecord?.({
@@ -1476,6 +2431,7 @@ const EthereumExecutionView = ({
 			});
 			await refreshSnapshot();
 			message.success(`${config.label} success`);
+			return true;
 		} catch (error: any) {
 			const errorText = String(error?.message || error || "Action failed");
 			setResultText(errorText);
@@ -1489,12 +2445,97 @@ const EthereumExecutionView = ({
 				error: errorText,
 			});
 			message.error(errorText);
+			return false;
+		} finally {
+			setPendingActionKeys((prev) => {
+				const next = { ...prev };
+				delete next[actionKey];
+				return next;
+			});
 		}
 	};
+
+	useEffect(() => {
+		if (!autoExecuteEnabled) {
+			setAutoExecuteRunning(false);
+			return;
+		}
+		if (!selectedEthereumKey) {
+			return;
+		}
+		if (snapshotLoading || running || autoExecuteRunning) {
+			return;
+		}
+		if (Object.keys(pendingActionKeys).length > 0) {
+			return;
+		}
+		const nextElement = actionableElements[0];
+		if (!nextElement) {
+			return;
+		}
+		const timer = window.setTimeout(async () => {
+			setAutoExecuteRunning(true);
+			try {
+				const ok = await invokeElementAction(nextElement);
+				if (!ok) {
+					setAutoExecuteEnabled(false);
+				}
+			} finally {
+				setAutoExecuteRunning(false);
+			}
+		}, autoExecuteIntervalMs);
+		return () => {
+			window.clearTimeout(timer);
+		};
+	}, [
+		autoExecuteEnabled,
+		autoExecuteIntervalMs,
+		selectedEthereumKey,
+		snapshotLoading,
+		running,
+		autoExecuteRunning,
+		pendingActionKeys,
+		actionableElements,
+	]);
+
+	useEffect(() => {
+		if (!autoExecuteEnabled || !selectedEthereumKey || !apiBaseUrl) {
+			return;
+		}
+		if (!Number.isFinite(instanceId)) {
+			return;
+		}
+		const loop = window.setInterval(() => {
+			if (snapshotLoading || running || autoExecuteRunning) {
+				return;
+			}
+			refreshSnapshot().catch(() => {
+				// refreshSnapshot already records snapshotError; keep auto polling alive
+			});
+		}, document.visibilityState === "visible"
+			? autoExecuteIntervalMs
+			: Math.max(autoExecuteIntervalMs, 15000));
+		return () => {
+			window.clearInterval(loop);
+		};
+	}, [
+		autoExecuteEnabled,
+		selectedEthereumKey,
+		apiBaseUrl,
+		instanceId,
+		autoExecuteIntervalMs,
+		snapshotLoading,
+		running,
+		autoExecuteRunning,
+	]);
 
 	const invokeMethod = async () => {
 		if (!apiBaseUrl || !selectedMethod) {
 			message.error("Execution API is not ready");
+			return;
+		}
+		if (requestMode === "invoke" && !selectedEthereumKey) {
+			message.error("Select an Ethereum signer first");
 			return;
 		}
 		let payload: Record<string, any> = {};
@@ -1521,6 +2562,7 @@ const EthereumExecutionView = ({
 				selectedMethod,
 				payload,
 				requestMode,
+				requestMode === "invoke" ? selectedEthereumKey : undefined,
 			);
 			setResultText(JSON.stringify(response, null, 2));
 			onActionRecord?.({
@@ -1561,6 +2603,28 @@ const EthereumExecutionView = ({
 				description="This page uses the BPMN's registered FireFly API directly. State is rendered from getExecutionSnapshot(instanceId)."
 				style={{ marginBottom: 12 }}
 			/>
+			<EthereumIdentitySelector
+				ethEnvironmentId={ethEnvironmentId}
+				selectedKey={selectedEthereumKey}
+				onSelect={setSelectedEthereumIdentity}
+			/>
+			{!selectedEthereumKey ? (
+				<Alert
+					type="warning"
+					showIcon
+					message="No Ethereum signer selected"
+					description="Invoke actions use the selected Ethereum identity address as FireFly key. Without it, participant checks will revert."
+					style={{ marginBottom: 12 }}
+				/>
+			) : (
+				<Alert
+					type="success"
+					showIcon
+					message="Ethereum signer ready"
+					description={`Current signer: ${selectedEthereumIdentity?.name || "Identity"} (${selectedEthereumKey})`}
+					style={{ marginBottom: 12 }}
+				/>
+			)}
 			<div
 				style={{
 					display: "flex",
@@ -1573,13 +2637,48 @@ const EthereumExecutionView = ({
 				<Tag color="purple">API: {apiBaseUrl || "-"}</Tag>
 				<Tag color="cyan">Methods: {methods.length}</Tag>
 				<Tag color="processing">Ready: {stateCounter.ready}</Tag>
-				<Tag color="orange">Waiting: {stateCounter.confirm}</Tag>
+					<Tag color="error">Waiting: {stateCounter.confirm}</Tag>
 				<Tag color="success">Done: {stateCounter.done}</Tag>
 				<Tag color="default">Disabled: {stateCounter.disabled}</Tag>
 				<Tag color="geekblue">Actionable: {actionableElements.length}</Tag>
+				<Tag color={autoExecuteEnabled ? "green" : "default"}>
+					Auto Execute: {autoExecuteEnabled ? "ON" : "OFF"}
+				</Tag>
 				<Button size="small" loading={snapshotLoading} onClick={refreshSnapshot}>
 					Refresh Snapshot
 				</Button>
+			</div>
+			<div
+				style={{
+					display: "flex",
+					flexWrap: "wrap",
+					gap: 12,
+					marginBottom: 12,
+					alignItems: "center",
+				}}
+			>
+				<Switch
+					checked={autoExecuteEnabled}
+					onChange={setAutoExecuteEnabled}
+					checkedChildren="Auto Execute"
+					unCheckedChildren="Manual"
+					disabled={!selectedEthereumKey}
+				/>
+				<Select
+					value={autoExecuteIntervalMs}
+					style={{ width: 180 }}
+					onChange={(value) => setAutoExecuteIntervalMs(value)}
+					options={[
+						{ label: "1s interval", value: 1000 },
+						{ label: "2s interval", value: 2000 },
+						{ label: "3s interval", value: 3000 },
+						{ label: "5s interval", value: 5000 },
+					]}
+					disabled={!selectedEthereumKey}
+				/>
+				<Typography.Text type="secondary">
+					Auto mode executes the first actionable element with current default parameters and selected signer.
+				</Typography.Text>
 			</div>
 			{snapshotError ? (
 				<Alert
@@ -1619,10 +2718,22 @@ const EthereumExecutionView = ({
 										const config = getEthereumActionConfig(
 											element,
 											instanceId,
-											messageInputs,
+											methodsByName,
+											actionInputs,
 										);
 										if (!config) return null;
 										const elementId = getElementId(element);
+										const actionKey = getEthereumActionKey(
+											element,
+											config.method,
+										);
+										const isPending = Boolean(pendingActionKeys[actionKey]);
+										const editableParams = (config.methodDef?.params || []).filter(
+											(param: any) =>
+												param?.name &&
+												param.name !== "instanceId" &&
+												param.name !== "InstanceID",
+										);
 										return (
 											<div
 												key={`${element.type}-${elementId}`}
@@ -1632,32 +2743,112 @@ const EthereumExecutionView = ({
 													borderRadius: 8,
 													background: "#f8fafc",
 												}}
-											>
-												<Space wrap size={8}>
-													<Tag color="blue">{element.type}</Tag>
-													<Tag color="purple">{element.state}</Tag>
-													<Typography.Text strong>{elementId}</Typography.Text>
-												</Space>
-												{element.type === "message" ? (
+												>
+													<Space wrap size={8}>
+														<Tag color="blue">{element.type}</Tag>
+														<Tag color="purple">{element.state}</Tag>
+														<Typography.Text strong>
+															{element.DisplayName || elementId}
+														</Typography.Text>
+														{element.DisplayName &&
+														element.DisplayName !== elementId ? (
+															<Tag>{elementId}</Tag>
+														) : null}
+													</Space>
+												{element.Documentation ? (
 													<div style={{ marginTop: 8 }}>
 														<Typography.Text type="secondary">
-															fireflyTranId
+															{element.Documentation}
 														</Typography.Text>
-														<Input
-															style={{ marginTop: 4 }}
-															value={
-																messageInputs[element.MessageID] ||
-																`ff-${instanceId}-${element.MessageID}`
-															}
-															onChange={(event) =>
-																setMessageInputs((prev) => ({
-																	...prev,
-																	[element.MessageID]: event.target.value,
-																}))
-															}
-														/>
 													</div>
 												) : null}
+												{element.type === "message" &&
+												element.Format &&
+												typeof element.Format === "object" ? (
+													<div style={{ marginTop: 8 }}>
+														<Typography.Text type="secondary">
+															Message Schema
+														</Typography.Text>
+														<div style={{ marginTop: 4, display: "flex", flexWrap: "wrap", gap: 6 }}>
+															{Object.keys(element.Format?.properties || {}).map((key) => (
+																<Tag key={key} color="geekblue">
+																	{key}:{String(
+																		element.Format.properties?.[key]?.type || "string",
+																	)}
+																</Tag>
+															))}
+															{Object.keys(element.Format?.files || {}).map((key) => (
+																<Tag key={key} color="purple">
+																	file:{key}
+																</Tag>
+															))}
+														</div>
+													</div>
+												) : null}
+												{element.type === "businessRule" &&
+												(Array.isArray(element.Inputs) || Array.isArray(element.Outputs)) ? (
+													<div style={{ marginTop: 8, display: "grid", gap: 4 }}>
+														{Array.isArray(element.Inputs) && element.Inputs.length > 0 ? (
+															<Typography.Text type="secondary">
+																Inputs: {element.Inputs.map((item: any) => item?.name || item).join(", ")}
+															</Typography.Text>
+														) : null}
+														{Array.isArray(element.Outputs) && element.Outputs.length > 0 ? (
+															<Typography.Text type="secondary">
+																Outputs: {element.Outputs.map((item: any) => item?.name || item).join(", ")}
+															</Typography.Text>
+														) : null}
+													</div>
+												) : null}
+												{editableParams.map((param: any) => {
+													const name = param.name;
+													const paramType = inferEthereumParamType(param);
+													const currentValue =
+														actionInputs[elementId]?.[name] ??
+														config.payload?.[name] ??
+														"";
+													return (
+														<div key={`${elementId}-${name}`} style={{ marginTop: 8 }}>
+															<Typography.Text type="secondary">
+																{name}
+															</Typography.Text>
+															{paramType === "boolean" ? (
+																<div style={{ marginTop: 4 }}>
+																	<Switch
+																		checked={Boolean(currentValue)}
+																		onChange={(checked) =>
+																			setActionInputs((prev) => ({
+																				...prev,
+																				[elementId]: {
+																					...(prev[elementId] || {}),
+																					[name]: checked,
+																				},
+																			}))
+																		}
+																	/>
+																</div>
+															) : (
+																<Input
+																	style={{ marginTop: 4 }}
+																	type={paramType === "number" ? "number" : "text"}
+																	value={String(currentValue ?? "")}
+																	onChange={(event) =>
+																		setActionInputs((prev) => ({
+																			...prev,
+																			[elementId]: {
+																				...(prev[elementId] || {}),
+																				[name]:
+																					paramType === "number"
+																						? Number(event.target.value || 0)
+																						: event.target.value,
+																			},
+																		}))
+																	}
+																/>
+															)}
+														</div>
+													);
+												})}
 												{element.type === "businessRule" && element.RequestID ? (
 													<div style={{ marginTop: 8 }}>
 														<Typography.Text type="secondary">
@@ -1665,9 +2856,23 @@ const EthereumExecutionView = ({
 														</Typography.Text>
 													</div>
 												) : null}
+												{element.type === "businessRule" &&
+												element.state === 2 &&
+												(!element.RequestID ||
+													element.RequestID === "0x" ||
+													element.RequestID ===
+														"0x0000000000000000000000000000000000000000000000000000000000000000") ? (
+													<div style={{ marginTop: 8 }}>
+														<Typography.Text type="secondary">
+															Waiting for off-chain worker to bind DMN requestId.
+														</Typography.Text>
+													</div>
+												) : null}
 												<Button
 													style={{ marginTop: 8 }}
 													type="primary"
+													loading={isPending}
+													disabled={isPending}
 													onClick={() => invokeElementAction(element)}
 												>
 													{config.label}
@@ -1979,6 +3184,15 @@ const ExecutionPage = (props) => {
 		setMockProcessingElementId("");
 	};
 
+	const refreshAfterRealAction = () => {
+		if (executionMode !== "real") return;
+		setIsRefreshing(true);
+		setLastManualRefreshAt(new Date().toISOString());
+		syncFireflyData();
+		window.setTimeout(syncFireflyData, 1500);
+		window.setTimeout(syncFireflyData, 4000);
+	};
+
 	const getNextMockActionable = (): {
 		element: any;
 		op: "execute" | "confirm";
@@ -2155,12 +3369,7 @@ const ExecutionPage = (props) => {
 			acc[item.elementId] = item.status;
 			return acc;
 		}, {} as Record<string, string>);
-		const palette = {
-			0: { fill: "#f1f5f9", stroke: "#cbd5e1", opacity: 0.65 },
-			1: { fill: "#dbeafe", stroke: "#2563eb", opacity: 0.95 },
-			2: { fill: "#fef3c7", stroke: "#d97706", opacity: 0.95 },
-			3: { fill: "#dcfce7", stroke: "#16a34a", opacity: 0.95 },
-		} as Record<number, { fill: string; stroke: string; opacity: number }>;
+			const palette = getStatePalette();
 
 		const generateStylesWithMsgList = (msgList) => {
 			const styles = { "& svg": {} as Record<string, any> };
@@ -2169,7 +3378,7 @@ const ExecutionPage = (props) => {
 				if (!elementId) return;
 				const selector = `& g[data-element-id="${elementId}"]`;
 				const stateStyle = palette[msg.state] || palette[0];
-				const actionStyle = latestActionStatus[elementId];
+				const actionStyle = msg.state === 3 ? undefined : latestActionStatus[elementId];
 				const fill =
 					actionStyle === "failed"
 						? "#fee2e2"
@@ -2389,7 +3598,7 @@ const ExecutionPage = (props) => {
 						FireFly: {executionMode === "mock" ? "SKIPPED (MOCK)" : fireflyMeta?.connected ? "CONNECTED" : "DISCONNECTED"}
 					</Tag>
 					<Tag color="blue">Ready: {stateCounter.ready}</Tag>
-					<Tag color="orange">Wait Confirm: {stateCounter.confirm}</Tag>
+					<Tag color="error">Wait Confirm: {stateCounter.confirm}</Tag>
 					<Tag color="default">Disabled: {stateCounter.disabled}</Tag>
 					<Tag color="purple">Done: {stateCounter.done}</Tag>
 					<Tag color="cyan">Actionable: {currentElements.length}</Tag>
@@ -2614,36 +3823,37 @@ const ExecutionPage = (props) => {
 
 			{/* <Tag color="blue">Participant: {" " + getParticipantName(participant)}</Tag> */}
 
-			<div
-				style={{
-					display: "flex",
-					flexWrap: "wrap",
-					gap: 12,
-					marginTop: 20,
-					padding: 12,
-					border: "1px solid #e2e8f0",
+				<div
+					style={{
+						display: "grid",
+						gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+						gap: 16,
+						marginTop: 20,
+						padding: 12,
+						border: "1px solid #e2e8f0",
 					borderRadius: 10,
 					background: "#ffffff",
 				}}
 			>
 				{currentElements.map((currentElement) => {
 					return (
-						<ControlPanel
-							key={`${currentElement.type}-${currentElement.EventID || currentElement.GatewayID || currentElement.MessageID || currentElement.BusinessRuleID}`}
-							currentElement={currentElement}
-							contractName={contractName}
-							coreURL={full_core_url}
-							bpmnName={bpmnData.name}
-							contractMethodDes={contractMethodDes}
-							bpmn={bpmnData}
-							bpmnInstance={bpmnInstance}
-							instanceId={bpmnInstance.instance_chaincode_id}
-							identity={identity}
-							onActionRecord={onActionRecord}
-							executionMode={executionMode}
-							onMockAction={runMockAction}
-							mockProcessingElementId={mockProcessingElementId}
-						/>
+							<ControlPanel
+								key={`${currentElement.type}-${currentElement.EventID || currentElement.GatewayID || currentElement.MessageID || currentElement.BusinessRuleID}`}
+								currentElement={currentElement}
+								contractName={contractName}
+								coreURL={full_core_url}
+								bpmnName={bpmnData.name}
+								contractMethodDes={contractMethodDes}
+								bpmn={bpmnData}
+								bpmnInstance={bpmnInstance}
+								instanceId={bpmnInstance.instance_chaincode_id}
+								identity={identity}
+								onActionRecord={onActionRecord}
+								executionMode={executionMode}
+								onMockAction={runMockAction}
+								mockProcessingElementId={mockProcessingElementId}
+								onActionSuccess={refreshAfterRealAction}
+							/>
 					);
 				})}
 			</div>

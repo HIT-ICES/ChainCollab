@@ -1,0 +1,353 @@
+{
+  "contract_name": "GeneratedContract",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/Blood_analysis/dsl.b2c",
+  "participants": [
+    {
+      "name": "Participant_0ggs0ck",
+      "msp": "GynecologistMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0
+    },
+    {
+      "name": "Participant_1v6wnpq",
+      "msp": "LabMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0
+    },
+    {
+      "name": "Participant_0tkhpj2",
+      "msp": "HospitalMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0
+    }
+  ],
+  "globals": [
+    {
+      "name": "FurtherCheck",
+      "type": "bool"
+    },
+    {
+      "name": "FurtherCheckDate",
+      "type": "string"
+    },
+    {
+      "name": "FurtherCheckPlace",
+      "type": "string"
+    },
+    {
+      "name": "PatientData",
+      "type": "string"
+    },
+    {
+      "name": "ReportContent",
+      "type": "string"
+    },
+    {
+      "name": "Result",
+      "type": "string"
+    },
+    {
+      "name": "Sample",
+      "type": "string"
+    }
+  ],
+  "messages": [
+    {
+      "name": "Message_0gd0z61",
+      "from": "Participant_0tkhpj2",
+      "to": "Participant_0ggs0ck",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"furtherCheckPlace\":{\"type\":\"string\",\"description\":\"\"},\"furtherCheckDate\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"furtherCheckPlace\",\"furtherCheckDate\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_0gswvmq",
+      "from": "Participant_0ggs0ck",
+      "to": "Participant_1v6wnpq",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"sample\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"sample\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_0wq8mc6",
+      "from": "Participant_0ggs0ck",
+      "to": "Participant_0tkhpj2",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"patientData\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"patientData\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_13mh6mk",
+      "from": "Participant_0tkhpj2",
+      "to": "Participant_0ggs0ck",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"reportContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"reportContent\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_1rqbibd",
+      "from": "Participant_0ggs0ck",
+      "to": "Participant_0tkhpj2",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"result\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"result\"],\"files\":{},\"file required\":[]}"
+    },
+    {
+      "name": "Message_1vzqd37",
+      "from": "Participant_1v6wnpq",
+      "to": "Participant_0ggs0ck",
+      "initial_state": "INACTIVE",
+      "schema": "{\"properties\":{\"result\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"result\"],\"files\":{},\"file required\":[]}"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "Gateway_0o8snyv",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "ParallelGateway_1pgjqtw",
+      "type": "parallel",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "Gateway_1m6dgym",
+      "type": "parallel",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "StartEvent_0m7hz56",
+      "initial_state": "READY"
+    },
+    {
+      "name": "EndEvent_110myff",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [
+    {
+      "name": "Activity_1mj4mr7",
+      "dmn": "Activity_1mj4mr7.dmn",
+      "decision": "Activity_1mj4mr7_DecisionID",
+      "input_mapping": [
+        {
+          "dmn_param": "result",
+          "global": "Result"
+        }
+      ],
+      "output_mapping": [
+        {
+          "dmn_param": "FurtherCheck",
+          "global": "FurtherCheck"
+        }
+      ],
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "oracletasks": [],
+  "flows": [
+    {
+      "kind": "start_flow",
+      "trigger": {
+        "type": "start",
+        "name": "StartEvent_0m7hz56",
+        "state": "ready"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "ParallelGateway_1pgjqtw"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0gswvmq",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1vzqd37"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0wq8mc6",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_13mh6mk"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_1vzqd37",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1m6dgym"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_1rqbibd",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Activity_1mj4mr7"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_0gd0z61",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "EndEvent_110myff"
+        }
+      ]
+    },
+    {
+      "kind": "message_flow",
+      "trigger": {
+        "type": "message",
+        "name": "Message_13mh6mk",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_1m6dgym"
+        }
+      ]
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "Gateway_0o8snyv",
+        "state": "completed"
+      },
+      "conditions": [
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "EndEvent_110myff"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "FurtherCheck",
+          "relation": "==",
+          "value": false
+        },
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "kind": "enable",
+              "target": "Message_0gd0z61"
+            }
+          ],
+          "condition_kind": "compare",
+          "var": "FurtherCheck",
+          "relation": "==",
+          "value": true
+        }
+      ],
+      "actions": []
+    },
+    {
+      "kind": "gateway_flow",
+      "trigger": {
+        "type": "gateway",
+        "name": "ParallelGateway_1pgjqtw",
+        "state": "completed"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_0gswvmq"
+        },
+        {
+          "kind": "enable",
+          "target": "Message_0wq8mc6"
+        }
+      ]
+    },
+    {
+      "kind": "parallel_join",
+      "trigger": {
+        "type": "parallel",
+        "name": "Gateway_1m6dgym",
+        "state": "await"
+      },
+      "conditions": [
+        {
+          "condition_kind": "await_all",
+          "sources": [
+            "Message_1vzqd37",
+            "Message_13mh6mk"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Message_1rqbibd"
+        }
+      ]
+    },
+    {
+      "kind": "rule_flow",
+      "trigger": {
+        "type": "businessrule",
+        "name": "Activity_1mj4mr7",
+        "state": "done"
+      },
+      "conditions": [],
+      "actions": [
+        {
+          "kind": "enable",
+          "target": "Gateway_0o8snyv"
+        }
+      ]
+    }
+  ]
+}

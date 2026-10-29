@@ -23,6 +23,11 @@ class BpmnPageQuerySerializer(serializers.Serializer):
 class BpmnGenerateSerializer(serializers.Serializer):
     target = serializers.ChoiceField(choices=("go", "solidity"), required=False)
     artifact_name = serializers.CharField(required=False, allow_blank=True)
+    message_confirmation_mode = serializers.ChoiceField(
+        choices=("explicit", "implicit"),
+        required=False,
+        default="explicit",
+    )
 
 class ChaincodeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -89,6 +94,7 @@ class BpmnListSerializer(serializers.ModelSerializer):
             "chaincode_content",
             "firefly_url",
             "ffiContent",
+            "execution_layout",
             "environment_id",
             "eth_environment_id",
             "environment_name",

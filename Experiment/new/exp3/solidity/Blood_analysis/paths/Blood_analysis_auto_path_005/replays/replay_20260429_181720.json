@@ -1,0 +1,1606 @@
+{
+  "config_path": "/root/code/ChainCollab/Experiment/new/exp3/solidity/Blood_analysis/paths/replay_bound_eth_instance.template.json",
+  "bpmn_id": "ededda5c-3dd5-443b-96d1-10491f180d1c",
+  "bpmn_name": "Blood_analysis.bpmn",
+  "contract_base_url": "http://127.0.0.1:5001/api/v1/namespaces/default/apis/Blood_analysis-2c6aeb-ededda-9b5a9e",
+  "create_response": {
+    "id": "bb7c9932-91f3-42e8-ae14-e52645e52efb",
+    "namespace": "default",
+    "tx": "177f04b4-2e56-4fd6-88a9-4e312271e716",
+    "type": "blockchain_invoke",
+    "status": "Pending",
+    "plugin": "ethereum",
+    "input": {
+      "input": {
+        "params": {
+          "Activity_1mj4mr7": {
+            "allowedCaller": "0x0000000000000000000000000000000000000000",
+            "callerRestricted": false,
+            "decisionId": "decision_0tybghz",
+            "dmnCid": "QmV2Jb2Tt3ZrH6gj2bkB6c8LxQ9t7iWNrA6sArHJWfztYy",
+            "dmnHash": "0xc90de4cc57fa54ecca6686656ccbaaacc24fd172ff89aa27d7de8e2ac57ebbff"
+          },
+          "Participant_0ggs0ck_account": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+          "Participant_0ggs0ck_org": "Atlas-KB4-Aegis-KB4",
+          "Participant_0tkhpj2_account": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+          "Participant_0tkhpj2_org": "Atlas-KB4-Aegis-KB4",
+          "Participant_1v6wnpq_account": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+          "Participant_1v6wnpq_org": "Atlas-KB4-Aegis-KB4",
+          "dmnEvalUrl": "http://cdmn-node1:5000/api/dmn/evaluate",
+          "dmnLiteAddress": "0x9fcf193d45cde39f5054098a0c621e8881de190a",
+          "enforceBusinessRuleCaller": false,
+          "identityContractAddress": "0xfbfc86cc7cede82ef9aff3a723a7a7e0559eed05"
+        }
+      },
+      "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+      "key": "0xc8bf5c59e3298eb2fb7c609b42d1a0375604ee1e",
+      "location": {
+        "address": "0x6596da30fd0c9f96f49021f44d92c7caf99b5a9e"
+      },
+      "method": {
+        "description": "",
+        "details": {
+          "stateMutability": "nonpayable"
+        },
+        "id": "39290570-bbe1-4287-aba4-f97d143a201f",
+        "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+        "name": "createInstance",
+        "namespace": "default",
+        "params": [
+          {
+            "name": "params",
+            "schema": {
+              "details": {
+                "internalType": "struct Blood_analysis.InitParameters",
+                "type": "tuple"
+              },
+              "properties": {
+                "Activity_1mj4mr7": {
+                  "details": {
+                    "index": 10,
+                    "internalType": "struct Blood_analysis.BusinessRuleInit",
+                    "type": "tuple"
+                  },
+                  "properties": {
+                    "allowedCaller": {
+                      "description": "A hex encoded set of bytes, with an optional '0x' prefix",
+                      "details": {
+                        "index": 4,
+                        "internalType": "address",
+                        "type": "address"
+                      },
+                      "type": "string"
+                    },
+                    "callerRestricted": {
+                      "description": "A boolean. You can use a boolean or a string true/false as input",
+                      "details": {
+                        "index": 3,
+                        "internalType": "bool",
+                        "type": "bool"
+                      },
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "boolean"
+                        }
+                      ]
+                    },
+                    "decisionId": {
+                      "details": {
+                        "index": 2,
+                        "internalType": "string",
+                        "type": "string"
+                      },
+                      "type": "string"
+                    },
+                    "dmnCid": {
+                      "details": {
+                        "index": 0,
+                        "internalType": "string",
+                        "type": "string"
+                      },
+                      "type": "string"
+                    },
+                    "dmnHash": {
+                      "description": "A hex encoded set of bytes, with an optional '0x' prefix",
+                      "details": {
+                        "index": 1,
+                        "internalType": "bytes32",
+                        "type": "bytes32"
+                      },
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "Participant_0ggs0ck_account": {
+                  "description": "A hex encoded set of bytes, with an optional '0x' prefix",
+                  "details": {
+                    "index": 4,
+                    "internalType": "address",
+                    "type": "address"
+                  },
+                  "type": "string"
+                },
+                "Participant_0ggs0ck_org": {
+                  "details": {
+                    "index": 5,
+                    "internalType": "string",
+                    "type": "string"
+                  },
+                  "type": "string"
+                },
+                "Participant_0tkhpj2_account": {
+                  "description": "A hex encoded set of bytes, with an optional '0x' prefix",
+                  "details": {
+                    "index": 8,
+                    "internalType": "address",
+                    "type": "address"
+                  },
+                  "type": "string"
+                },
+                "Participant_0tkhpj2_org": {
+                  "details": {
+                    "index": 9,
+                    "internalType": "string",
+                    "type": "string"
+                  },
+                  "type": "string"
+                },
+                "Participant_1v6wnpq_account": {
+                  "description": "A hex encoded set of bytes, with an optional '0x' prefix",
+                  "details": {
+                    "index": 6,
+                    "internalType": "address",
+                    "type": "address"
+                  },
+                  "type": "string"
+                },
+                "Participant_1v6wnpq_org": {
+                  "details": {
+                    "index": 7,
+                    "internalType": "string",
+                    "type": "string"
+                  },
+                  "type": "string"
+                },
+                "dmnEvalUrl": {
+                  "details": {
+                    "index": 2,
+                    "internalType": "string",
+                    "type": "string"
+                  },
+                  "type": "string"
+                },
+                "dmnLiteAddress": {
+                  "description": "A hex encoded set of bytes, with an optional '0x' prefix",
+                  "details": {
+                    "index": 1,
+                    "internalType": "address",
+                    "type": "address"
+                  },
+                  "type": "string"
+                },
+                "enforceBusinessRuleCaller": {
+                  "description": "A boolean. You can use a boolean or a string true/false as input",
+                  "details": {
+                    "index": 3,
+                    "internalType": "bool",
+                    "type": "bool"
+                  },
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "boolean"
+                    }
+                  ]
+                },
+                "identityContractAddress": {
+                  "description": "A hex encoded set of bytes, with an optional '0x' prefix",
+                  "details": {
+                    "index": 0,
+                    "internalType": "address",
+                    "type": "address"
+                  },
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        ],
+        "pathname": "createInstance",
+        "returns": [
+          {
+            "name": "instanceId",
+            "schema": {
+              "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum.",
+              "details": {
+                "internalType": "uint256",
+                "type": "uint256"
+              },
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "methodPath": "createInstance",
+      "options": null,
+      "type": "invoke"
+    },
+    "created": "2026-04-29T10:14:51.948760147Z",
+    "updated": "2026-04-29T10:14:51.948760147Z"
+  },
+  "local_instance_id": "76493646-8f00-4447-b3e6-bc5e09bdc61d",
+  "local_instance_patch": {
+    "id": "76493646-8f00-4447-b3e6-bc5e09bdc61d",
+    "name": "Blood_analysis-10",
+    "instance_chaincode_id": 10,
+    "execution_bindings": {
+      "participants": {
+        "Participant_0ggs0ck": {
+          "address": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+          "org_name": "Atlas-KB4-Aegis-KB4"
+        },
+        "Participant_1v6wnpq": {
+          "address": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+          "org_name": "Atlas-KB4-Aegis-KB4"
+        },
+        "Participant_0tkhpj2": {
+          "address": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+          "org_name": "Atlas-KB4-Aegis-KB4"
+        }
+      },
+      "business_rules": {
+        "Activity_1mj4mr7": {
+          "dmnCid": "QmV2Jb2Tt3ZrH6gj2bkB6c8LxQ9t7iWNrA6sArHJWfztYy",
+          "dmnHash": "0xc90de4cc57fa54ecca6686656ccbaaacc24fd172ff89aa27d7de8e2ac57ebbff",
+          "decisionId": "decision_0tybghz",
+          "callerRestricted": false,
+          "allowedCaller": "0x0000000000000000000000000000000000000000"
+        }
+      }
+    },
+    "create_at": "2026-04-29T10:15:02.612573Z",
+    "update_at": "2026-04-29T10:15:02.680223Z",
+    "bpmn": "ededda5c-3dd5-443b-96d1-10491f180d1c"
+  },
+  "on_chain_instance_id": 10,
+  "default_signer": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+  "participant_signers": {
+    "Participant_0ggs0ck": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+    "Participant_1v6wnpq": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+    "Participant_0tkhpj2": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04"
+  },
+  "steps": [
+    {
+      "element_type": "event",
+      "element_id": "StartEvent_0m7hz56",
+      "method": "StartEvent_0m7hz56",
+      "signer": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+      "payload": {
+        "instanceId": 10
+      },
+      "response": {
+        "id": "88ac0045-1723-4471-84db-e71f680be2bc",
+        "namespace": "default",
+        "tx": "0850ad95-dce2-4588-928b-ed9bf29a4ad9",
+        "type": "blockchain_invoke",
+        "status": "Pending",
+        "plugin": "ethereum",
+        "input": {
+          "input": {
+            "instanceId": 10
+          },
+          "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+          "key": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+          "location": {
+            "address": "0x6596da30fd0c9f96f49021f44d92c7caf99b5a9e"
+          },
+          "method": {
+            "description": "",
+            "details": {
+              "stateMutability": "nonpayable"
+            },
+            "id": "2a85e5d3-3aca-4d57-8e0e-f93dc89a9215",
+            "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+            "name": "StartEvent_0m7hz56",
+            "namespace": "default",
+            "params": [
+              {
+                "name": "instanceId",
+                "schema": {
+                  "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum.",
+                  "details": {
+                    "internalType": "uint256",
+                    "type": "uint256"
+                  },
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ]
+                }
+              }
+            ],
+            "pathname": "StartEvent_0m7hz56",
+            "returns": []
+          },
+          "methodPath": "StartEvent_0m7hz56",
+          "options": null,
+          "type": "invoke"
+        },
+        "created": "2026-04-29T10:15:02.792152102Z",
+        "updated": "2026-04-29T10:15:02.792152102Z"
+      },
+      "snapshot_after": {
+        "messageStates": [
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        "messageFireflyTranIds": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "gatewayStates": [
+          "0",
+          "1",
+          "0"
+        ],
+        "eventStates": [
+          "3",
+          "0"
+        ],
+        "businessRuleStates": [
+          "0"
+        ],
+        "businessRuleRequestIds": [
+          "0x0000000000000000000000000000000000000000000000000000000000000000"
+        ]
+      }
+    },
+    {
+      "element_type": "gateway",
+      "element_id": "ParallelGateway_1pgjqtw",
+      "method": "ParallelGateway_1pgjqtw",
+      "signer": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+      "payload": {
+        "instanceId": 10
+      },
+      "response": {
+        "id": "f228d487-e5ae-46c0-b572-c1946ad32d57",
+        "namespace": "default",
+        "tx": "b8c79933-a932-4286-8d39-194916a15396",
+        "type": "blockchain_invoke",
+        "status": "Pending",
+        "plugin": "ethereum",
+        "input": {
+          "input": {
+            "instanceId": 10
+          },
+          "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+          "key": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+          "location": {
+            "address": "0x6596da30fd0c9f96f49021f44d92c7caf99b5a9e"
+          },
+          "method": {
+            "description": "",
+            "details": {
+              "stateMutability": "nonpayable"
+            },
+            "id": "a3c6e134-d04f-4bf5-af09-bbf9902087db",
+            "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+            "name": "ParallelGateway_1pgjqtw",
+            "namespace": "default",
+            "params": [
+              {
+                "name": "instanceId",
+                "schema": {
+                  "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum.",
+                  "details": {
+                    "internalType": "uint256",
+                    "type": "uint256"
+                  },
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ]
+                }
+              }
+            ],
+            "pathname": "ParallelGateway_1pgjqtw",
+            "returns": []
+          },
+          "methodPath": "ParallelGateway_1pgjqtw",
+          "options": null,
+          "type": "invoke"
+        },
+        "created": "2026-04-29T10:15:05.103228828Z",
+        "updated": "2026-04-29T10:15:05.103228828Z"
+      },
+      "snapshot_after": {
+        "messageStates": [
+          "0",
+          "1",
+          "1",
+          "0",
+          "0",
+          "0"
+        ],
+        "messageFireflyTranIds": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "gatewayStates": [
+          "0",
+          "3",
+          "0"
+        ],
+        "eventStates": [
+          "3",
+          "0"
+        ],
+        "businessRuleStates": [
+          "0"
+        ],
+        "businessRuleRequestIds": [
+          "0x0000000000000000000000000000000000000000000000000000000000000000"
+        ]
+      }
+    },
+    {
+      "element_type": "message",
+      "element_id": "Message_0gswvmq",
+      "method": "Message_0gswvmq_Send",
+      "signer": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+      "payload": {
+        "fireflyTranId": "ff-10-Message_0gswvmq",
+        "sample": "sample-sample",
+        "instanceId": 10
+      },
+      "response": {
+        "id": "1c879b07-c05e-46b9-84d0-68d7f20ebe0c",
+        "namespace": "default",
+        "tx": "b1f3d6d8-8c89-4930-95b0-ca284fd9367a",
+        "type": "blockchain_invoke",
+        "status": "Pending",
+        "plugin": "ethereum",
+        "input": {
+          "input": {
+            "fireflyTranId": "ff-10-Message_0gswvmq",
+            "instanceId": 10,
+            "sample": "sample-sample"
+          },
+          "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+          "key": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+          "location": {
+            "address": "0x6596da30fd0c9f96f49021f44d92c7caf99b5a9e"
+          },
+          "method": {
+            "description": "",
+            "details": {
+              "stateMutability": "nonpayable"
+            },
+            "id": "8bbc29dc-9d92-4ca6-abcc-8f111ecd4a6b",
+            "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+            "name": "Message_0gswvmq_Send",
+            "namespace": "default",
+            "params": [
+              {
+                "name": "instanceId",
+                "schema": {
+                  "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum.",
+                  "details": {
+                    "internalType": "uint256",
+                    "type": "uint256"
+                  },
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "fireflyTranId",
+                "schema": {
+                  "details": {
+                    "internalType": "string",
+                    "type": "string"
+                  },
+                  "type": "string"
+                }
+              },
+              {
+                "name": "sample",
+                "schema": {
+                  "details": {
+                    "internalType": "string",
+                    "type": "string"
+                  },
+                  "type": "string"
+                }
+              }
+            ],
+            "pathname": "Message_0gswvmq_Send",
+            "returns": []
+          },
+          "methodPath": "Message_0gswvmq_Send",
+          "options": null,
+          "type": "invoke"
+        },
+        "created": "2026-04-29T10:15:14.998570265Z",
+        "updated": "2026-04-29T10:15:14.998570265Z"
+      },
+      "snapshot_after": {
+        "messageStates": [
+          "0",
+          "3",
+          "1",
+          "0",
+          "0",
+          "1"
+        ],
+        "messageFireflyTranIds": [
+          "",
+          "ff-10-Message_0gswvmq",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "gatewayStates": [
+          "0",
+          "3",
+          "0"
+        ],
+        "eventStates": [
+          "3",
+          "0"
+        ],
+        "businessRuleStates": [
+          "0"
+        ],
+        "businessRuleRequestIds": [
+          "0x0000000000000000000000000000000000000000000000000000000000000000"
+        ]
+      }
+    },
+    {
+      "element_type": "message",
+      "element_id": "Message_1vzqd37",
+      "method": "Message_1vzqd37_Send",
+      "signer": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+      "payload": {
+        "fireflyTranId": "ff-10-Message_1vzqd37",
+        "result": "healthy",
+        "instanceId": 10
+      },
+      "response": {
+        "id": "ed3ebe3b-2cce-45c7-8b70-59027f715472",
+        "namespace": "default",
+        "tx": "5d31dcba-639d-4a8e-8d42-0a03ed37fc79",
+        "type": "blockchain_invoke",
+        "status": "Pending",
+        "plugin": "ethereum",
+        "input": {
+          "input": {
+            "fireflyTranId": "ff-10-Message_1vzqd37",
+            "instanceId": 10,
+            "result": "healthy"
+          },
+          "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+          "key": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+          "location": {
+            "address": "0x6596da30fd0c9f96f49021f44d92c7caf99b5a9e"
+          },
+          "method": {
+            "description": "",
+            "details": {
+              "stateMutability": "nonpayable"
+            },
+            "id": "21a81c46-189d-4a1c-8ca7-493786510423",
+            "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+            "name": "Message_1vzqd37_Send",
+            "namespace": "default",
+            "params": [
+              {
+                "name": "instanceId",
+                "schema": {
+                  "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum.",
+                  "details": {
+                    "internalType": "uint256",
+                    "type": "uint256"
+                  },
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "fireflyTranId",
+                "schema": {
+                  "details": {
+                    "internalType": "string",
+                    "type": "string"
+                  },
+                  "type": "string"
+                }
+              },
+              {
+                "name": "result",
+                "schema": {
+                  "details": {
+                    "internalType": "string",
+                    "type": "string"
+                  },
+                  "type": "string"
+                }
+              }
+            ],
+            "pathname": "Message_1vzqd37_Send",
+            "returns": []
+          },
+          "methodPath": "Message_1vzqd37_Send",
+          "options": null,
+          "type": "invoke"
+        },
+        "created": "2026-04-29T10:15:32.152031692Z",
+        "updated": "2026-04-29T10:15:32.152031692Z"
+      },
+      "snapshot_after": {
+        "messageStates": [
+          "0",
+          "3",
+          "1",
+          "0",
+          "0",
+          "3"
+        ],
+        "messageFireflyTranIds": [
+          "",
+          "ff-10-Message_0gswvmq",
+          "",
+          "",
+          "",
+          "ff-10-Message_1vzqd37"
+        ],
+        "gatewayStates": [
+          "0",
+          "3",
+          "1"
+        ],
+        "eventStates": [
+          "3",
+          "0"
+        ],
+        "businessRuleStates": [
+          "0"
+        ],
+        "businessRuleRequestIds": [
+          "0x0000000000000000000000000000000000000000000000000000000000000000"
+        ]
+      }
+    },
+    {
+      "element_type": "message",
+      "element_id": "Message_0wq8mc6",
+      "method": "Message_0wq8mc6_Send",
+      "signer": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+      "payload": {
+        "fireflyTranId": "ff-10-Message_0wq8mc6",
+        "patientData": "sample-patientData",
+        "instanceId": 10
+      },
+      "response": {
+        "id": "d20a2681-9e7e-4d0e-a5ee-cf9f428b91ca",
+        "namespace": "default",
+        "tx": "5b4cb513-472b-4d7b-b298-25eafeb227ff",
+        "type": "blockchain_invoke",
+        "status": "Pending",
+        "plugin": "ethereum",
+        "input": {
+          "input": {
+            "fireflyTranId": "ff-10-Message_0wq8mc6",
+            "instanceId": 10,
+            "patientData": "sample-patientData"
+          },
+          "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+          "key": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+          "location": {
+            "address": "0x6596da30fd0c9f96f49021f44d92c7caf99b5a9e"
+          },
+          "method": {
+            "description": "",
+            "details": {
+              "stateMutability": "nonpayable"
+            },
+            "id": "789ac1ff-625c-45d3-8f61-10e0bdaf0a54",
+            "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+            "name": "Message_0wq8mc6_Send",
+            "namespace": "default",
+            "params": [
+              {
+                "name": "instanceId",
+                "schema": {
+                  "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum.",
+                  "details": {
+                    "internalType": "uint256",
+                    "type": "uint256"
+                  },
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "fireflyTranId",
+                "schema": {
+                  "details": {
+                    "internalType": "string",
+                    "type": "string"
+                  },
+                  "type": "string"
+                }
+              },
+              {
+                "name": "patientData",
+                "schema": {
+                  "details": {
+                    "internalType": "string",
+                    "type": "string"
+                  },
+                  "type": "string"
+                }
+              }
+            ],
+            "pathname": "Message_0wq8mc6_Send",
+            "returns": []
+          },
+          "methodPath": "Message_0wq8mc6_Send",
+          "options": null,
+          "type": "invoke"
+        },
+        "created": "2026-04-29T10:15:47.402419712Z",
+        "updated": "2026-04-29T10:15:47.402419712Z"
+      },
+      "snapshot_after": {
+        "messageStates": [
+          "0",
+          "3",
+          "3",
+          "1",
+          "0",
+          "3"
+        ],
+        "messageFireflyTranIds": [
+          "",
+          "ff-10-Message_0gswvmq",
+          "ff-10-Message_0wq8mc6",
+          "",
+          "",
+          "ff-10-Message_1vzqd37"
+        ],
+        "gatewayStates": [
+          "0",
+          "3",
+          "1"
+        ],
+        "eventStates": [
+          "3",
+          "0"
+        ],
+        "businessRuleStates": [
+          "0"
+        ],
+        "businessRuleRequestIds": [
+          "0x0000000000000000000000000000000000000000000000000000000000000000"
+        ]
+      }
+    },
+    {
+      "element_type": "message",
+      "element_id": "Message_13mh6mk",
+      "method": "Message_13mh6mk_Send",
+      "signer": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+      "payload": {
+        "fireflyTranId": "ff-10-Message_13mh6mk",
+        "reportContent": "sample-reportContent",
+        "instanceId": 10
+      },
+      "response": {
+        "id": "af15612b-022d-4fe7-aef4-ff99bd4b3838",
+        "namespace": "default",
+        "tx": "5f5a2da8-c797-4e9f-afc1-510c989d494c",
+        "type": "blockchain_invoke",
+        "status": "Pending",
+        "plugin": "ethereum",
+        "input": {
+          "input": {
+            "fireflyTranId": "ff-10-Message_13mh6mk",
+            "instanceId": 10,
+            "reportContent": "sample-reportContent"
+          },
+          "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+          "key": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+          "location": {
+            "address": "0x6596da30fd0c9f96f49021f44d92c7caf99b5a9e"
+          },
+          "method": {
+            "description": "",
+            "details": {
+              "stateMutability": "nonpayable"
+            },
+            "id": "e2c81ede-c809-4e81-8ca8-5d5fb1908cae",
+            "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+            "name": "Message_13mh6mk_Send",
+            "namespace": "default",
+            "params": [
+              {
+                "name": "instanceId",
+                "schema": {
+                  "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum.",
+                  "details": {
+                    "internalType": "uint256",
+                    "type": "uint256"
+                  },
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "fireflyTranId",
+                "schema": {
+                  "details": {
+                    "internalType": "string",
+                    "type": "string"
+                  },
+                  "type": "string"
+                }
+              },
+              {
+                "name": "reportContent",
+                "schema": {
+                  "details": {
+                    "internalType": "string",
+                    "type": "string"
+                  },
+                  "type": "string"
+                }
+              }
+            ],
+            "pathname": "Message_13mh6mk_Send",
+            "returns": []
+          },
+          "methodPath": "Message_13mh6mk_Send",
+          "options": null,
+          "type": "invoke"
+        },
+        "created": "2026-04-29T10:15:57.083735853Z",
+        "updated": "2026-04-29T10:15:57.083735853Z"
+      },
+      "snapshot_after": {
+        "messageStates": [
+          "0",
+          "3",
+          "3",
+          "3",
+          "0",
+          "3"
+        ],
+        "messageFireflyTranIds": [
+          "",
+          "ff-10-Message_0gswvmq",
+          "ff-10-Message_0wq8mc6",
+          "ff-10-Message_13mh6mk",
+          "",
+          "ff-10-Message_1vzqd37"
+        ],
+        "gatewayStates": [
+          "0",
+          "3",
+          "1"
+        ],
+        "eventStates": [
+          "3",
+          "0"
+        ],
+        "businessRuleStates": [
+          "0"
+        ],
+        "businessRuleRequestIds": [
+          "0x0000000000000000000000000000000000000000000000000000000000000000"
+        ]
+      }
+    },
+    {
+      "element_type": "gateway",
+      "element_id": "Gateway_1m6dgym",
+      "method": "Gateway_1m6dgym",
+      "signer": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+      "payload": {
+        "instanceId": 10
+      },
+      "response": {
+        "id": "0297d683-707d-43e8-b830-40da74fad3ad",
+        "namespace": "default",
+        "tx": "55a53da4-1d8a-4364-b643-39a89e22f011",
+        "type": "blockchain_invoke",
+        "status": "Pending",
+        "plugin": "ethereum",
+        "input": {
+          "input": {
+            "instanceId": 10
+          },
+          "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+          "key": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+          "location": {
+            "address": "0x6596da30fd0c9f96f49021f44d92c7caf99b5a9e"
+          },
+          "method": {
+            "description": "",
+            "details": {
+              "stateMutability": "nonpayable"
+            },
+            "id": "f74a2343-1f7d-4409-9bca-552ded332433",
+            "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+            "name": "Gateway_1m6dgym",
+            "namespace": "default",
+            "params": [
+              {
+                "name": "instanceId",
+                "schema": {
+                  "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum.",
+                  "details": {
+                    "internalType": "uint256",
+                    "type": "uint256"
+                  },
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ]
+                }
+              }
+            ],
+            "pathname": "Gateway_1m6dgym",
+            "returns": []
+          },
+          "methodPath": "Gateway_1m6dgym",
+          "options": null,
+          "type": "invoke"
+        },
+        "created": "2026-04-29T10:16:08.948617269Z",
+        "updated": "2026-04-29T10:16:08.948617269Z"
+      },
+      "snapshot_after": {
+        "messageStates": [
+          "0",
+          "3",
+          "3",
+          "3",
+          "1",
+          "3"
+        ],
+        "messageFireflyTranIds": [
+          "",
+          "ff-10-Message_0gswvmq",
+          "ff-10-Message_0wq8mc6",
+          "ff-10-Message_13mh6mk",
+          "",
+          "ff-10-Message_1vzqd37"
+        ],
+        "gatewayStates": [
+          "0",
+          "3",
+          "3"
+        ],
+        "eventStates": [
+          "3",
+          "0"
+        ],
+        "businessRuleStates": [
+          "0"
+        ],
+        "businessRuleRequestIds": [
+          "0x0000000000000000000000000000000000000000000000000000000000000000"
+        ]
+      }
+    },
+    {
+      "element_type": "message",
+      "element_id": "Message_1rqbibd",
+      "method": "Message_1rqbibd_Send",
+      "signer": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+      "payload": {
+        "fireflyTranId": "ff-10-Message_1rqbibd",
+        "result": "healthy",
+        "instanceId": 10
+      },
+      "response": {
+        "id": "2882181a-a379-4b28-a682-4da96e9748d4",
+        "namespace": "default",
+        "tx": "6d06b1cc-3b77-4744-a331-b4792557d0f3",
+        "type": "blockchain_invoke",
+        "status": "Pending",
+        "plugin": "ethereum",
+        "input": {
+          "input": {
+            "fireflyTranId": "ff-10-Message_1rqbibd",
+            "instanceId": 10,
+            "result": "healthy"
+          },
+          "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+          "key": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+          "location": {
+            "address": "0x6596da30fd0c9f96f49021f44d92c7caf99b5a9e"
+          },
+          "method": {
+            "description": "",
+            "details": {
+              "stateMutability": "nonpayable"
+            },
+            "id": "9ff4784f-40ea-4fe3-ba81-e8feb9eaa8ef",
+            "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+            "name": "Message_1rqbibd_Send",
+            "namespace": "default",
+            "params": [
+              {
+                "name": "instanceId",
+                "schema": {
+                  "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum.",
+                  "details": {
+                    "internalType": "uint256",
+                    "type": "uint256"
+                  },
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "fireflyTranId",
+                "schema": {
+                  "details": {
+                    "internalType": "string",
+                    "type": "string"
+                  },
+                  "type": "string"
+                }
+              },
+              {
+                "name": "result",
+                "schema": {
+                  "details": {
+                    "internalType": "string",
+                    "type": "string"
+                  },
+                  "type": "string"
+                }
+              }
+            ],
+            "pathname": "Message_1rqbibd_Send",
+            "returns": []
+          },
+          "methodPath": "Message_1rqbibd_Send",
+          "options": null,
+          "type": "invoke"
+        },
+        "created": "2026-04-29T10:16:23.043991389Z",
+        "updated": "2026-04-29T10:16:23.043991389Z"
+      },
+      "snapshot_after": {
+        "messageStates": [
+          "0",
+          "3",
+          "3",
+          "3",
+          "3",
+          "3"
+        ],
+        "messageFireflyTranIds": [
+          "",
+          "ff-10-Message_0gswvmq",
+          "ff-10-Message_0wq8mc6",
+          "ff-10-Message_13mh6mk",
+          "ff-10-Message_1rqbibd",
+          "ff-10-Message_1vzqd37"
+        ],
+        "gatewayStates": [
+          "0",
+          "3",
+          "3"
+        ],
+        "eventStates": [
+          "3",
+          "0"
+        ],
+        "businessRuleStates": [
+          "1"
+        ],
+        "businessRuleRequestIds": [
+          "0x0000000000000000000000000000000000000000000000000000000000000000"
+        ]
+      }
+    },
+    {
+      "element_type": "businessRule",
+      "element_id": "Activity_1mj4mr7",
+      "method": "Activity_1mj4mr7",
+      "signer": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+      "payload": {
+        "instanceId": 10
+      },
+      "response": {
+        "id": "59e89dfb-2663-459e-89b6-812ccffb57a6",
+        "namespace": "default",
+        "tx": "6c123364-4576-4ab3-8972-04fa3c238823",
+        "type": "blockchain_invoke",
+        "status": "Pending",
+        "plugin": "ethereum",
+        "input": {
+          "input": {
+            "instanceId": 10
+          },
+          "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+          "key": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+          "location": {
+            "address": "0x6596da30fd0c9f96f49021f44d92c7caf99b5a9e"
+          },
+          "method": {
+            "description": "",
+            "details": {
+              "stateMutability": "nonpayable"
+            },
+            "id": "885d7c0d-1e99-4242-8ae8-835187f1d909",
+            "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+            "name": "Activity_1mj4mr7",
+            "namespace": "default",
+            "params": [
+              {
+                "name": "instanceId",
+                "schema": {
+                  "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum.",
+                  "details": {
+                    "internalType": "uint256",
+                    "type": "uint256"
+                  },
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ]
+                }
+              }
+            ],
+            "pathname": "Activity_1mj4mr7",
+            "returns": []
+          },
+          "methodPath": "Activity_1mj4mr7",
+          "options": null,
+          "type": "invoke"
+        },
+        "created": "2026-04-29T10:16:30.662319924Z",
+        "updated": "2026-04-29T10:16:30.662319924Z"
+      },
+      "snapshot_after": {
+        "messageStates": [
+          "0",
+          "3",
+          "3",
+          "3",
+          "3",
+          "3"
+        ],
+        "messageFireflyTranIds": [
+          "",
+          "ff-10-Message_0gswvmq",
+          "ff-10-Message_0wq8mc6",
+          "ff-10-Message_13mh6mk",
+          "ff-10-Message_1rqbibd",
+          "ff-10-Message_1vzqd37"
+        ],
+        "gatewayStates": [
+          "0",
+          "3",
+          "3"
+        ],
+        "eventStates": [
+          "3",
+          "0"
+        ],
+        "businessRuleStates": [
+          "2"
+        ],
+        "businessRuleRequestIds": [
+          "0x098dfb26c55fb08c364a39c0fa9bbb4eda9b893a108165371250cb060b7c7ebc"
+        ]
+      }
+    },
+    {
+      "element_type": "businessRule",
+      "element_id": "Activity_1mj4mr7",
+      "method": "Activity_1mj4mr7_Continue",
+      "signer": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+      "payload": {
+        "instanceId": 10
+      },
+      "response": {
+        "id": "db6269c7-1bed-47e1-8614-a59c80346037",
+        "namespace": "default",
+        "tx": "0f293b1f-ff81-480d-995f-d7a74881f8a5",
+        "type": "blockchain_invoke",
+        "status": "Pending",
+        "plugin": "ethereum",
+        "input": {
+          "input": {
+            "instanceId": 10
+          },
+          "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+          "key": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+          "location": {
+            "address": "0x6596da30fd0c9f96f49021f44d92c7caf99b5a9e"
+          },
+          "method": {
+            "description": "",
+            "details": {
+              "stateMutability": "nonpayable"
+            },
+            "id": "47bbf6be-42c4-4a4a-a00a-dd1fe2a32c3c",
+            "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+            "name": "Activity_1mj4mr7_Continue",
+            "namespace": "default",
+            "params": [
+              {
+                "name": "instanceId",
+                "schema": {
+                  "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum.",
+                  "details": {
+                    "internalType": "uint256",
+                    "type": "uint256"
+                  },
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ]
+                }
+              }
+            ],
+            "pathname": "Activity_1mj4mr7_Continue",
+            "returns": []
+          },
+          "methodPath": "Activity_1mj4mr7_Continue",
+          "options": null,
+          "type": "invoke"
+        },
+        "created": "2026-04-29T10:17:07.805695932Z",
+        "updated": "2026-04-29T10:17:07.805695932Z"
+      },
+      "snapshot_after": {
+        "messageStates": [
+          "0",
+          "3",
+          "3",
+          "3",
+          "3",
+          "3"
+        ],
+        "messageFireflyTranIds": [
+          "",
+          "ff-10-Message_0gswvmq",
+          "ff-10-Message_0wq8mc6",
+          "ff-10-Message_13mh6mk",
+          "ff-10-Message_1rqbibd",
+          "ff-10-Message_1vzqd37"
+        ],
+        "gatewayStates": [
+          "1",
+          "3",
+          "3"
+        ],
+        "eventStates": [
+          "3",
+          "0"
+        ],
+        "businessRuleStates": [
+          "3"
+        ],
+        "businessRuleRequestIds": [
+          "0x098dfb26c55fb08c364a39c0fa9bbb4eda9b893a108165371250cb060b7c7ebc"
+        ]
+      }
+    },
+    {
+      "element_type": "gateway",
+      "element_id": "Gateway_0o8snyv",
+      "method": "Gateway_0o8snyv",
+      "signer": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+      "payload": {
+        "instanceId": 10
+      },
+      "response": {
+        "id": "ac8967cd-19d0-4af9-87e6-948e066e8b6c",
+        "namespace": "default",
+        "tx": "7f0a6bc2-e879-4179-87c5-4105838a48ac",
+        "type": "blockchain_invoke",
+        "status": "Pending",
+        "plugin": "ethereum",
+        "input": {
+          "input": {
+            "instanceId": 10
+          },
+          "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+          "key": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+          "location": {
+            "address": "0x6596da30fd0c9f96f49021f44d92c7caf99b5a9e"
+          },
+          "method": {
+            "description": "",
+            "details": {
+              "stateMutability": "nonpayable"
+            },
+            "id": "fa7061ca-eb97-454b-b48a-38b6fb8d35a8",
+            "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+            "name": "Gateway_0o8snyv",
+            "namespace": "default",
+            "params": [
+              {
+                "name": "instanceId",
+                "schema": {
+                  "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum.",
+                  "details": {
+                    "internalType": "uint256",
+                    "type": "uint256"
+                  },
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ]
+                }
+              }
+            ],
+            "pathname": "Gateway_0o8snyv",
+            "returns": []
+          },
+          "methodPath": "Gateway_0o8snyv",
+          "options": null,
+          "type": "invoke"
+        },
+        "created": "2026-04-29T10:17:11.174518043Z",
+        "updated": "2026-04-29T10:17:11.174518043Z"
+      },
+      "snapshot_after": {
+        "messageStates": [
+          "0",
+          "3",
+          "3",
+          "3",
+          "3",
+          "3"
+        ],
+        "messageFireflyTranIds": [
+          "",
+          "ff-10-Message_0gswvmq",
+          "ff-10-Message_0wq8mc6",
+          "ff-10-Message_13mh6mk",
+          "ff-10-Message_1rqbibd",
+          "ff-10-Message_1vzqd37"
+        ],
+        "gatewayStates": [
+          "3",
+          "3",
+          "3"
+        ],
+        "eventStates": [
+          "3",
+          "1"
+        ],
+        "businessRuleStates": [
+          "3"
+        ],
+        "businessRuleRequestIds": [
+          "0x098dfb26c55fb08c364a39c0fa9bbb4eda9b893a108165371250cb060b7c7ebc"
+        ]
+      }
+    },
+    {
+      "element_type": "event",
+      "element_id": "EndEvent_110myff",
+      "method": "EndEvent_110myff",
+      "signer": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+      "payload": {
+        "instanceId": 10
+      },
+      "response": {
+        "id": "7ad757fd-ecb5-469f-a798-f83e4da56546",
+        "namespace": "default",
+        "tx": "4fd94c60-18bc-471a-b694-6b038504ea5c",
+        "type": "blockchain_invoke",
+        "status": "Pending",
+        "plugin": "ethereum",
+        "input": {
+          "input": {
+            "instanceId": 10
+          },
+          "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+          "key": "0xca8894cc2c03e0d8611958a74a697aaa83d07b04",
+          "location": {
+            "address": "0x6596da30fd0c9f96f49021f44d92c7caf99b5a9e"
+          },
+          "method": {
+            "description": "",
+            "details": {
+              "stateMutability": "nonpayable"
+            },
+            "id": "76237b8f-6fd2-4244-99da-3a636a370671",
+            "interface": "4a855a49-e19a-4362-bc33-16d8c35f837b",
+            "name": "EndEvent_110myff",
+            "namespace": "default",
+            "params": [
+              {
+                "name": "instanceId",
+                "schema": {
+                  "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum.",
+                  "details": {
+                    "internalType": "uint256",
+                    "type": "uint256"
+                  },
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ]
+                }
+              }
+            ],
+            "pathname": "EndEvent_110myff",
+            "returns": []
+          },
+          "methodPath": "EndEvent_110myff",
+          "options": null,
+          "type": "invoke"
+        },
+        "created": "2026-04-29T10:17:15.752817487Z",
+        "updated": "2026-04-29T10:17:15.752817487Z"
+      },
+      "snapshot_after": {
+        "messageStates": [
+          "0",
+          "3",
+          "3",
+          "3",
+          "3",
+          "3"
+        ],
+        "messageFireflyTranIds": [
+          "",
+          "ff-10-Message_0gswvmq",
+          "ff-10-Message_0wq8mc6",
+          "ff-10-Message_13mh6mk",
+          "ff-10-Message_1rqbibd",
+          "ff-10-Message_1vzqd37"
+        ],
+        "gatewayStates": [
+          "3",
+          "3",
+          "3"
+        ],
+        "eventStates": [
+          "3",
+          "3"
+        ],
+        "businessRuleStates": [
+          "3"
+        ],
+        "businessRuleRequestIds": [
+          "0x098dfb26c55fb08c364a39c0fa9bbb4eda9b893a108165371250cb060b7c7ebc"
+        ]
+      }
+    }
+  ],
+  "final_snapshot": {
+    "messageStates": [
+      "0",
+      "3",
+      "3",
+      "3",
+      "3",
+      "3"
+    ],
+    "messageFireflyTranIds": [
+      "",
+      "ff-10-Message_0gswvmq",
+      "ff-10-Message_0wq8mc6",
+      "ff-10-Message_13mh6mk",
+      "ff-10-Message_1rqbibd",
+      "ff-10-Message_1vzqd37"
+    ],
+    "gatewayStates": [
+      "3",
+      "3",
+      "3"
+    ],
+    "eventStates": [
+      "3",
+      "3"
+    ],
+    "businessRuleStates": [
+      "3"
+    ],
+    "businessRuleRequestIds": [
+      "0x098dfb26c55fb08c364a39c0fa9bbb4eda9b893a108165371250cb060b7c7ebc"
+    ]
+  },
+  "success": true
+}

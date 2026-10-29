@@ -210,6 +210,21 @@ def write_pid_file(pids: dict[str, int]):
             handle.write(f"{name} {pid}\n")
 
 
+def read_pid_file() -> dict[str, int]:
+    if not PID_FILE.exists():
+        return {}
+    entries: dict[str, int] = {}
+    for line in PID_FILE.read_text(encoding="utf-8").splitlines():
+        parts = line.strip().split()
+        if len(parts) < 2:
+            continue
+        try:
+            entries[parts[0]] = int(parts[1])
+        except ValueError:
+            continue
+    return entries
+
+
 def archive_runtime_logs(tag: str):
     ensure_runtime_dir()
     timestamp = time.strftime("%Y%m%d-%H%M%S")
@@ -543,26 +558,12 @@ def start_stack(
 
 
 def stop_stack():
-    if not PID_FILE.exists():
-        print(f"[dev] PID file not found: {PID_FILE}")
-        return
-    entries: list[tuple[str, int]] = []
-    for line in PID_FILE.read_text(encoding="utf-8").splitlines():
-        parts = line.strip().split()
-        if len(parts) < 2:
-            continue
-        name, pid_str = parts[0], parts[1]
-        try:
-            pid = int(pid_str)
-        except ValueError:
-            continue
-        entries.append((name, pid))
-
+    entries = read_pid_file()
     if not entries:
-        print(f"[dev] No valid PIDs found in {PID_FILE}")
+        print(f"[dev] PID file not found or empty: {PID_FILE}")
         return
 
-    for name, pid in entries:
+    for name, pid in entries.items():
         stop_pid(pid, name)
 
     archive_runtime_logs("down")
@@ -573,17 +574,60 @@ def stop_stack():
         return
 
 
+def restart_backend_service():
+    restart_named_service("backend")
+
+
+def restart_new_translator_service():
+    restart_named_service("newTranslator")
+
+
+def restart_named_service(service_name: str):
+    ensure_runtime_dir()
+    entries = read_pid_file()
+    service_pid = entries.get(service_name)
+    if service_pid is not None:
+        stop_pid(service_pid, service_name)
+    else:
+        print(f"[dev] {service_name} PID not found in runtime file; checking port")
+
+    service_port = SERVICE_PORTS[service_name]
+    if not port_is_available(service_port):
+        holders = pids_for_port(service_port)
+        if holders:
+            print(f"[dev] terminating processes holding port {service_port}: {holders}")
+            terminate_pids(holders)
+        if not port_is_available(service_port):
+            print(f"[dev] Port {service_port} still in use; {service_name} restart aborted")
+            sys.exit(1)
+
+    spec = SERVICE_DEFS[service_name]
+    devtools = spec["devtools"]
+    if not devtools.exists():
+        print(f"[dev] {service_name} devtools not found at {devtools}")
+        sys.exit(1)
+
+    pid = spawn_service(
+        service_name,
+        [sys.executable, str(devtools), *spec["args"]],
+        cwd=devtools.parent,
+        log_path=LOG_FILES[service_name],
+        log_to_file=True,
+        pipe_logs=False,
+        env=spec["env"],
+        startup_wait=0.0,
+    )
+    if not pid_is_running(pid):
+        print(f"[dev] {service_name} failed to start")
+        sys.exit(1)
+
+    entries[service_name] = pid
+    write_pid_file(entries)
+    print(f"[dev] {service_name} restarted (PID {pid})")
+
+
 def show_status():
-    entries: dict[str, int] = {}
-    if PID_FILE.exists():
-        for line in PID_FILE.read_text(encoding="utf-8").splitlines():
-            parts = line.strip().split()
-            if len(parts) < 2:
-                continue
-            try:
-                entries[parts[0]] = int(parts[1])
-            except ValueError:
-                continue
+    entries = read_pid_file()
 
     print("Stack Status")
     print("============")
@@ -690,6 +734,8 @@ def build_parser() -> argparse.ArgumentParser:
             "  devtools.sh down\n"
             "  devtools.sh status\n"
             "  devtools.sh backend\n"
+            "  devtools.sh backend-restart\n"
+            "  devtools.sh new-translator-restart\n"
             "  devtools.sh front help\n"
             "  devtools.sh front dev -- --host 0.0.0.0\n"
             "  devtools.sh host cello.com org.com\n"
@@ -727,6 +773,8 @@ def build_parser() -> argparse.ArgumentParser:
         help="Skip pre-start governance validation once.",
     )
     sub.add_parser("status", help="Show process and port status for core stack.")
+    sub.add_parser("backend-restart", help="Restart only backend and update runtime PID file.")
+    sub.add_parser("new-translator-restart", help="Restart only newTranslator and update runtime PID file.")
     front_parser = sub.add_parser("front", help="Proxy to front_devtools.sh.")
     front_parser.add_argument("extra", nargs=argparse.REMAINDER)
     agent_parser = sub.add_parser("agent", help="Proxy to agent_devtools.sh.")
@@ -773,6 +821,8 @@ def main():
         "clean": run_clean,
         "down": stop_stack,
         "status": show_status,
+        "backend-restart": restart_backend_service,
+        "new-translator-restart": restart_new_translator_service,
     }
 
     passthrough = {

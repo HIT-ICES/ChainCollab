@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Card, Row, Col, Button, Typography, Steps, Modal, TableProps, Table, Select, Input, Tag, List } from "antd"
+import React, { useEffect, useMemo, useState } from 'react';
+import { Card, Row, Col, Button, Typography, Steps, Modal, TableProps, Table, Select, Input, Tag, List, Switch, message } from "antd"
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAppSelector } from "@/redux/hooks";
 import { useParticipantsData, useAvailableMembers } from "../hooks"
@@ -7,7 +7,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { useFabricIdentities } from '@/views/Consortium/FabricUsers/hooks';
 import { useEthereumIdentities } from '@/views/Consortium/EthereumUsers/hooks';
 
-import {getMembershipList} from "@/api/platformAPI";
+import {getFabricIdentityList, getEthereumIdentityList, getMembershipList} from "@/api/platformAPI";
+import { getResourceSets } from "@/api/resourceAPI";
 
 const AttrTable = ({ dataSource, _setShowBingParticipantValue, clickedActionIndex }) => {
 
@@ -108,12 +109,80 @@ interface membershipItemType {
   consortiumId: string;
 }
 
+interface bindingValueType {
+  selectedValidationType?: string;
+  selectedMembershipId?: string;
+  selectedUser?: string;
+  Attr?: Array<{ key: string; attr: string; value: string }>;
+}
+
+const normalizeBindingText = (value: string) =>
+  String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, " ")
+    .trim();
+
+const splitBindingTokens = (value: string) =>
+  normalizeBindingText(value)
+    .split(/\s+/)
+    .filter(Boolean);
+
+const scoreMembershipForParticipant = (participantName: string, membershipName: string) => {
+  const participantNorm = normalizeBindingText(participantName);
+  const membershipNorm = normalizeBindingText(membershipName);
+  if (!participantNorm || !membershipNorm) return 0;
+  if (participantNorm === membershipNorm) return 100;
+  let score = 0;
+  if (participantNorm.includes(membershipNorm) || membershipNorm.includes(participantNorm)) {
+    score += 40;
+  }
+  const participantTokens = splitBindingTokens(participantName);
+  const membershipTokens = splitBindingTokens(membershipName);
+  const commonCount = membershipTokens.filter((token) => participantTokens.includes(token)).length;
+  score += commonCount * 15;
+  return score;
+};
+
+const getIdentityDisplayName = (identity: any) =>
+  identity?.name ||
+  identity?.name_of_fabric_identity ||
+  identity?.name_of_identity ||
+  "";
+
+const scoreIdentityForParticipant = (participantName: string, identity: any) => {
+  const displayName = getIdentityDisplayName(identity);
+  const signerName = identity?.signer || identity?.name_of_identity || "";
+  return Math.max(
+    scoreMembershipForParticipant(participantName, displayName),
+    scoreMembershipForParticipant(participantName, signerName),
+  );
+};
+
+const pickBestFabricIdentityId = (participantName: string, identities: any[]) => {
+  if (!Array.isArray(identities) || identities.length === 0) {
+    return "";
+  }
+  if (identities.length === 1) {
+    return identities[0]?.id || "";
+  }
+  const bestIdentity = identities
+    .map((identity) => ({
+      identity,
+      score: scoreIdentityForParticipant(participantName, identity),
+    }))
+    .sort((a, b) => b.score - a.score)[0];
+  if (bestIdentity?.identity?.id) {
+    return bestIdentity.identity.id;
+  }
+  return identities[0]?.id || "";
+};
+
 const BindingParticipantComponent = ({ clickedActionIndex, showBindingParticipantMap, setShowBindingParticipantMap, showBindingParticipantValueMap, setShowBindingParticipantValueMap, envId, envType }) => {
 
   const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
   const currentEnvType = useAppSelector((state) => state.env.currentEnvType);
-  const effectiveEnvId = envId || currentEnvId;
-  const effectiveEnvType = envType || currentEnvType;
+  const effectiveEnvId = typeof envId === "string" && envId.length > 0 ? envId : currentEnvId;
+  const effectiveEnvType = typeof envType === "string" && envType.length > 0 ? envType : currentEnvType;
 
   // fetch datas
   const [identities, { isLoading, isError, isSuccess }, refetch] = effectiveEnvType === "Ethereum"
@@ -123,10 +192,11 @@ const BindingParticipantComponent = ({ clickedActionIndex, showBindingParticipan
 
   const [membershipList, setMembershipList] = useState<membershipItemType[]>([]);
 
-  const renameMembership = ({ loleido_organization, consortium, ...rest }) => ({
-    ...rest,
-    orgId: loleido_organization,
-    consortiumId: consortium,
+  const renameMembership = (item: any): membershipItemType => ({
+    id: item.id,
+    name: item.name,
+    orgId: item.loleido_organization,
+    consortiumId: item.consortium,
   });
 
   const consortiumId = useAppSelector(
@@ -136,11 +206,13 @@ const BindingParticipantComponent = ({ clickedActionIndex, showBindingParticipan
   useEffect(() => {
     const fetchAndSetData = async (consortiumId: string) => {
       const data = await getMembershipList(consortiumId);
-      const newMembershipList = data.map(renameMembership);
+      const newMembershipList = Array.isArray(data) ? data.map(renameMembership) : [];
       setMembershipList(newMembershipList);
     };
 
-    fetchAndSetData(consortiumId);
+    if (consortiumId) {
+      fetchAndSetData(consortiumId);
+    }
   }, [consortiumId]);
 
   const _setShowBingParticipant = (id, updates) => {
@@ -290,12 +362,222 @@ export const BindingParticipant = ({ participants, showBindingParticipantMap, se
 }) => {
 
   const [clickedActionIndex, setClickedActionIndex] = useState("");
+  const [autoBinding, setAutoBinding] = useState(false);
+  const [useFirstMembershipForAll, setUseFirstMembershipForAll] = useState(false);
+  const currentEnvId = useAppSelector((state) => state.env.currentEnvId);
+  const currentEnvType = useAppSelector((state) => state.env.currentEnvType);
+  const effectiveEnvId = typeof envId === "string" && envId.length > 0 ? envId : currentEnvId;
+  const effectiveEnvType = typeof envType === "string" && envType.length > 0 ? envType : currentEnvType;
+  const consortiumId = useAppSelector(
+    (state) => state.consortium
+  ).currentConsortiumId;
+  const [membershipList, setMembershipList] = useState<membershipItemType[]>([]);
+
+  const renameMembership = (item: any): membershipItemType => ({
+    id: item.id,
+    name: item.name,
+    orgId: item.loleido_organization,
+    consortiumId: item.consortium,
+  });
+
+  useEffect(() => {
+    const fetchAndSetData = async (targetConsortiumId: string) => {
+      const data = await getMembershipList(targetConsortiumId);
+      const newMembershipList = Array.isArray(data) ? data.map(renameMembership) : [];
+      setMembershipList(newMembershipList);
+    };
+
+    if (consortiumId) {
+      fetchAndSetData(consortiumId);
+    }
+  }, [consortiumId]);
+
+  const currentBindings = useMemo(() => {
+    return participants.map((participant) => {
+      const binding = (showBindingParticipantValueMap.get(participant.id) || {}) as bindingValueType;
+      const membershipName = membershipList.find((item) => item.id === binding.selectedMembershipId)?.name || "";
+      return {
+        participantId: participant.id,
+        selectedValidationType: binding.selectedValidationType || "",
+        selectedMembershipId: binding.selectedMembershipId || "",
+        selectedUser: binding.selectedUser || "",
+        membershipName,
+      };
+    });
+  }, [participants, showBindingParticipantValueMap, membershipList]);
+
+  const setParticipantBindingState = (participantId: string, updates: Record<string, any>) => {
+    setShowBindingParticipantMap(prev => {
+      const currentObj = prev.get(participantId) || {};
+      const updatedObj = { ...currentObj, ...updates };
+      return new Map(prev).set(participantId, updatedObj);
+    });
+  };
+
+  const setParticipantBindingValue = (participantId: string, updates: Record<string, any>) => {
+    setShowBindingParticipantValueMap(prev => {
+      const currentObj = prev.get(participantId) || {};
+      const updatedObj = { ...currentObj, ...updates };
+      return new Map(prev).set(participantId, updatedObj);
+    });
+  };
+
+  const handleAutoBind = async () => {
+    if (!effectiveEnvId) {
+      message.error("Environment is not selected");
+      return;
+    }
+    if (useFirstMembershipForAll && membershipList.length === 0) {
+      message.error("No memberships available for auto binding");
+      return;
+    }
+    setAutoBinding(true);
+    try {
+      const nextMap = new Map(showBindingParticipantMap);
+      const nextValueMap = new Map(showBindingParticipantValueMap);
+      let autoBoundCount = 0;
+      const firstParticipantId = participants[0]?.id || "";
+      const firstParticipantValue = firstParticipantId
+        ? ((nextValueMap.get(firstParticipantId) || {}) as bindingValueType)
+        : ({} as bindingValueType);
+      const firstMembershipId =
+        firstParticipantValue.selectedMembershipId || membershipList[0]?.id || "";
+      let referenceBinding: Record<string, any> | null = null;
+
+      if (useFirstMembershipForAll && firstParticipantValue.selectedMembershipId) {
+        referenceBinding = {
+          selectedValidationType: firstParticipantValue.selectedValidationType || "equal",
+          selectedMembershipId: firstParticipantValue.selectedMembershipId || "",
+          selectedUser: firstParticipantValue.selectedUser || "",
+          Attr: firstParticipantValue.Attr || [],
+        };
+      }
+
+      for (const participant of participants) {
+        const bestMembership = membershipList
+          .map((membership) => ({
+            membership,
+            score: scoreMembershipForParticipant(participant.name, membership.name),
+          }))
+          .sort((a, b) => b.score - a.score)[0];
+
+        const selectedMembershipId = useFirstMembershipForAll
+          ? firstMembershipId
+          : bestMembership && bestMembership.score > 0
+            ? bestMembership.membership.id
+            : membershipList.length === 1
+              ? membershipList[0].id
+              : "";
+
+        const currentValue = (nextValueMap.get(participant.id) || {}) as bindingValueType;
+        const previousMembershipId = currentValue.selectedMembershipId || "";
+        const resolvedMembershipId = useFirstMembershipForAll
+          ? selectedMembershipId
+          : currentValue.selectedMembershipId || selectedMembershipId;
+        const mergedValue: Record<string, any> = useFirstMembershipForAll && referenceBinding
+          ? {
+              selectedValidationType: referenceBinding.selectedValidationType || "equal",
+              selectedMembershipId: referenceBinding.selectedMembershipId || "",
+              selectedUser: referenceBinding.selectedUser || "",
+              Attr: referenceBinding.Attr || [],
+            }
+          : {
+              selectedValidationType: currentValue.selectedValidationType || "equal",
+              selectedMembershipId: resolvedMembershipId,
+              selectedUser: currentValue.selectedUser || "",
+              Attr: currentValue.Attr || [],
+            };
+
+        if ((!referenceBinding || participant.id === firstParticipantId) && mergedValue.selectedValidationType === "equal" && mergedValue.selectedMembershipId) {
+          if (effectiveEnvType === "Ethereum") {
+            const identities = await getEthereumIdentityList(effectiveEnvId, mergedValue.selectedMembershipId);
+            const identityIds = Array.isArray(identities) ? identities.map((item) => item?.id).filter(Boolean) : [];
+            const shouldRematch =
+              !mergedValue.selectedUser ||
+              (previousMembershipId !== mergedValue.selectedMembershipId && !identityIds.includes(mergedValue.selectedUser));
+            if (shouldRematch && identityIds.length === 1) {
+              mergedValue.selectedUser = identityIds[0];
+            } else if (previousMembershipId !== mergedValue.selectedMembershipId && !identityIds.includes(mergedValue.selectedUser)) {
+              mergedValue.selectedUser = "";
+            }
+          } else {
+            const resourceSets = await getResourceSets(effectiveEnvId, null, mergedValue.selectedMembershipId);
+            const resourceSet = Array.isArray(resourceSets) && resourceSets.length > 0 ? resourceSets[0] : null;
+            if (resourceSet?.id) {
+              const identities = await getFabricIdentityList(resourceSet.id);
+              if (Array.isArray(identities) && identities.length > 0) {
+                const identityIds = identities.map((item) => item?.id).filter(Boolean);
+                const shouldRematch =
+                  !mergedValue.selectedUser ||
+                  (previousMembershipId !== mergedValue.selectedMembershipId && !identityIds.includes(mergedValue.selectedUser));
+                if (shouldRematch) {
+                  mergedValue.selectedUser = pickBestFabricIdentityId(participant.name, identities);
+                }
+              } else if (previousMembershipId !== mergedValue.selectedMembershipId) {
+                mergedValue.selectedUser = "";
+              }
+            }
+          }
+        }
+
+        if (useFirstMembershipForAll && participant.id === firstParticipantId) {
+          referenceBinding = {
+            selectedValidationType: mergedValue.selectedValidationType || "equal",
+            selectedMembershipId: mergedValue.selectedMembershipId || "",
+            selectedUser: mergedValue.selectedUser || "",
+            Attr: mergedValue.Attr || [],
+          };
+        }
+
+        nextValueMap.set(participant.id, mergedValue);
+        nextMap.set(participant.id, {
+          ...((nextMap.get(participant.id) || {}) as Record<string, any>),
+          showUserSection: mergedValue.selectedValidationType === "equal",
+          showAttributeSection: mergedValue.selectedValidationType === "group",
+          showMspSection: true,
+        });
+
+        if (mergedValue.selectedMembershipId) {
+          autoBoundCount += 1;
+        }
+      }
+
+      setShowBindingParticipantMap(nextMap);
+      setShowBindingParticipantValueMap(nextValueMap);
+      message.success(
+        useFirstMembershipForAll
+          ? `已按第一个 membership 自动填充 ${autoBoundCount}/${participants.length} 个 participant 绑定`
+          : `已自动填充 ${autoBoundCount}/${participants.length} 个 participant 绑定`,
+      );
+    } catch (error: any) {
+      message.error(error?.message || "自动绑定失败");
+    } finally {
+      setAutoBinding(false);
+    }
+  };
 
   const columns = [
     {
       title: "Participant",
       dataIndex: "participantName",
       key: "participant",
+    },
+    {
+      title: "Binding",
+      dataIndex: "binding",
+      key: "binding",
+      render: (_text, record) => {
+        const binding = currentBindings.find((item) => item.participantId === record.participantId);
+        if (!binding?.selectedMembershipId) {
+          return <Tag>未绑定</Tag>;
+        }
+        return (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            <Tag color="blue">{binding.membershipName || binding.selectedMembershipId}</Tag>
+            {binding.selectedUser ? <Tag color="green">{binding.selectedUser.slice(0, 8)}</Tag> : null}
+          </div>
+        );
+      }
     },
     {
       title: "Action",
@@ -323,6 +605,18 @@ export const BindingParticipant = ({ participants, showBindingParticipantMap, se
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'stretch' }}>
       <div style={{ flex: 1, marginRight: '20px' }}> {/* 为Table组件添加右边距 */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Switch
+              checked={useFirstMembershipForAll}
+              onChange={setUseFirstMembershipForAll}
+            />
+            <span>全部使用第一个 membership</span>
+          </div>
+          <Button type="primary" ghost loading={autoBinding} onClick={handleAutoBind}>
+            一键自动绑定
+          </Button>
+        </div>
         <Table
           columns={columns}
           dataSource={data}

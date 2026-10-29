@@ -1,0 +1,140 @@
+[
+  {
+    "kind": "start",
+    "trigger": "StartEvent_0m7hz56",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "ParallelGateway_1pgjqtw"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_0gswvmq",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Message_1vzqd37"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_0wq8mc6",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Message_13mh6mk"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_1vzqd37",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Gateway_1m6dgym"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_1rqbibd",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Activity_1mj4mr7"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_0gd0z61",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "EndEvent_110myff"
+      }
+    ]
+  },
+  {
+    "kind": "message",
+    "trigger": "Message_13mh6mk",
+    "condition": "completed",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Gateway_1m6dgym"
+      }
+    ]
+  },
+  {
+    "kind": "gateway",
+    "trigger": "ParallelGateway_1pgjqtw",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Message_0gswvmq"
+      },
+      {
+        "op": "enable",
+        "target": "Message_0wq8mc6"
+      }
+    ]
+  },
+  {
+    "kind": "gateway_choose",
+    "trigger": "Gateway_0o8snyv",
+    "branches": [
+      {
+        "guard": "FurtherCheck == false",
+        "actions": [
+          {
+            "op": "enable",
+            "target": "EndEvent_110myff"
+          }
+        ]
+      },
+      {
+        "guard": "FurtherCheck == true",
+        "actions": [
+          {
+            "op": "enable",
+            "target": "Message_0gd0z61"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "parallel_join",
+    "trigger": "Gateway_1m6dgym",
+    "sources": [
+      "Message_1vzqd37",
+      "Message_13mh6mk"
+    ],
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Message_1rqbibd"
+      }
+    ]
+  },
+  {
+    "kind": "businessrule",
+    "trigger": "Activity_1mj4mr7",
+    "actions": [
+      {
+        "op": "enable",
+        "target": "Gateway_0o8snyv"
+      }
+    ]
+  }
+]

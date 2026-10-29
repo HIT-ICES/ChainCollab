@@ -81,7 +81,7 @@ contract MyChainlinkRequesterDMN is ChainlinkClient, ConfirmedOwner {
     // 调用这个函数发起 DMN 决策请求
     function requestDMNDecision(
         string calldata url,
-        string calldata dmnContent,
+        string calldata dmnCid,
         string calldata decisionId,
         string calldata inputData  // 输入数据的 JSON 字符串
     ) external returns (bytes32 requestId) {
@@ -89,7 +89,7 @@ contract MyChainlinkRequesterDMN is ChainlinkClient, ConfirmedOwner {
 
         // 添加参数:这是传给节点的参数,节点会根据 Job Spec 去处理
         req._add("url", url);
-        req._add("dmnContent", dmnContent);
+        req._add("dmnCid", dmnCid);
         req._add("decisionId", decisionId);
         req._add("inputData", inputData);
 

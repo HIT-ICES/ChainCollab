@@ -1,0 +1,84 @@
+{
+  "case_name": "customer",
+  "description": "Auto materialized from generated DSL executable path.",
+  "source_b2c": "/root/code/ChainCollab/src/runtime/newTranslator/20260505-073111-730109/customer.b2c",
+  "paths": [
+    {
+      "path_name": "customer_auto_path_010",
+      "expect": "accepted",
+      "steps": [
+        {
+          "type": "gateway",
+          "element": "ExclusiveGateway_0hs3ztq"
+        },
+        {
+          "type": "message",
+          "element": "Message_045i10y",
+          "payload": {
+            "VIPpoints": 1
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_0r9lypd",
+          "payload": {
+            "is_available": false
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "ExclusiveGateway_106je4z"
+        },
+        {
+          "type": "gateway",
+          "element": "ExclusiveGateway_0hs3ztq"
+        },
+        {
+          "type": "message",
+          "element": "Message_045i10y",
+          "payload": {
+            "VIPpoints": 1
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_0r9lypd",
+          "payload": {
+            "is_available": true
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "ExclusiveGateway_106je4z"
+        },
+        {
+          "type": "message",
+          "element": "Message_1em0ee4",
+          "payload": {
+            "need_external_provider": true
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_1nlagx2",
+          "payload": {
+            "confirmation": true
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "EventBasedGateway_1fxpmyn"
+        },
+        {
+          "type": "message",
+          "element": "Message_1xm9dxy",
+          "payload": {}
+        },
+        {
+          "type": "event",
+          "element": "Event_0366pfz"
+        }
+      ]
+    }
+  ]
+}

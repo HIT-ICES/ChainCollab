@@ -1,0 +1,118 @@
+{
+  "language": "go",
+  "dsl_source": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/parallel_join_case/parallel_join_case.b2c",
+  "code_source": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/parallel_join_case/parallel_join_case.go",
+  "structure": {
+    "globals": {
+      "matched": [
+        "Ready"
+      ],
+      "missing": [],
+      "extra": [],
+      "unsupported": []
+    },
+    "messages": {
+      "matched": [
+        "MsgA",
+        "MsgB",
+        "MsgC"
+      ],
+      "missing": [],
+      "extra": [],
+      "unsupported": []
+    },
+    "events": {
+      "matched": [
+        "EndEvent_1",
+        "StartEvent_1"
+      ],
+      "missing": [],
+      "extra": [],
+      "unsupported": []
+    },
+    "gateways": {
+      "matched": [
+        "ParallelGateway_1",
+        "ParallelGateway_2"
+      ],
+      "missing": [],
+      "extra": [],
+      "unsupported": []
+    },
+    "businessrules": {
+      "matched": [],
+      "missing": [],
+      "extra": [],
+      "unsupported": []
+    }
+  },
+  "flow_results": [
+    {
+      "rule_id": "flow_001",
+      "matched": true,
+      "trigger_match": true,
+      "handler": "StartEvent_1",
+      "action_match_ratio": 1.0,
+      "missing_actions": [],
+      "notes": []
+    },
+    {
+      "rule_id": "flow_002",
+      "matched": true,
+      "trigger_match": true,
+      "handler": "ParallelGateway_1",
+      "action_match_ratio": 1.0,
+      "missing_actions": [],
+      "notes": []
+    },
+    {
+      "rule_id": "flow_003",
+      "matched": true,
+      "trigger_match": true,
+      "handler": "MsgA_Complete",
+      "action_match_ratio": 1.0,
+      "missing_actions": [],
+      "notes": []
+    },
+    {
+      "rule_id": "flow_004",
+      "matched": true,
+      "trigger_match": true,
+      "handler": "MsgB_Complete",
+      "action_match_ratio": 1.0,
+      "missing_actions": [],
+      "notes": []
+    },
+    {
+      "rule_id": "flow_005",
+      "matched": false,
+      "trigger_match": false,
+      "action_match_ratio": 0.0,
+      "missing_actions": [
+        {
+          "op": "enable",
+          "target": "MsgC"
+        }
+      ],
+      "notes": [
+        "no matching handler"
+      ]
+    },
+    {
+      "rule_id": "flow_006",
+      "matched": true,
+      "trigger_match": true,
+      "handler": "MsgC_Complete",
+      "action_match_ratio": 1.0,
+      "missing_actions": [],
+      "notes": []
+    }
+  ],
+  "summary": {
+    "flow_total": 6,
+    "flow_matched": 5,
+    "flow_coverage": 0.8333,
+    "unsupported_constructs": [],
+    "verdict": "PARTIAL"
+  }
+}

@@ -1,0 +1,375 @@
+[{
+    "name": "Supply Chain Process Experiment - Very Low Priority",
+    "steps": [
+        {
+            "element_name": "Event_06sexe6",
+            "element_type": "Event",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Event_06sexe6",
+                    "element_type": "Event",
+                    "pre_state": "enable",
+                    "post_state": "done"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_1wswgqu",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"orderDetails\":{\"type\":\"string\",\"description\":\"Detailed list of goods ordered\"}},\"required\":[\"orderDetails\"],\"files\":{},\"file required\":[]}",
+            "parameters": ["Sample order details"],
+            "invoker": "Participant_0w6qkdf",
+            "state_change": [
+                {
+                    "element_name": "Event_06sexe6",
+                    "element_type": "Event",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Message_1wswgqu",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_1ajdm9l",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"supplyOrderDetails\":{\"type\":\"string\",\"description\":\" Details of the supplies needed\"}},\"required\":[\"supplyOrderDetails\"],\"files\":{},\"file required\":[]}",
+            "parameters": ["Supply order details"],
+            "invoker": "Participant_19mgbdn",
+            "state_change": [
+                {
+                    "element_name": "Message_1wswgqu",
+                    "element_type": "Message",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Message_1ajdm9l",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Gateway_0onpe6x",
+            "element_type": "Gateway",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Message_1ajdm9l",
+                    "element_type": "Message",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Gateway_0onpe6x",
+                    "element_type": "Gateway",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_0cba4t6",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"supplyOrderId\":{\"type\":\"string\",\"description\":\" Identifier of the supply order being forwarded\"}},\"required\":[\"supplyOrderId\"],\"files\":{},\"file required\":[]}",
+            "parameters": ["SO12345"],
+            "invoker": "Participant_09cjol2",
+            "state_change": [
+                {
+                    "element_name": "Gateway_0onpe6x",
+                    "element_type": "Gateway",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Message_0cba4t6",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_0pm90nx",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"transportOrderId\":{\"type\":\"string\",\"description\":\"Identifier of the transport order being forwarded\"}},\"required\":[\"transportOrderId\"],\"files\":{},\"file required\":[]}",
+            "parameters": ["TO12345"],
+            "invoker": "Participant_09cjol2",
+            "state_change": [
+                {
+                    "element_name": "Message_0cba4t6",
+                    "element_type": "Message",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Message_0pm90nx",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Gateway_1fbifca",
+            "element_type": "Gateway",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Message_0pm90nx",
+                    "element_type": "Message",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Gateway_1fbifca",
+                    "element_type": "Gateway",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_0rwz1km",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"requestId\":{\"type\":\"number\",\"description\":\" Unique identifier of the request for additional details \"},\"numberOfUnits\":{\"type\":\"number\",\"description\":\" Total number of units in the order requested\"},\"urgent\":{\"type\":\"boolean\",\"description\":\"Indicates whether the order requires urgent delivery.\"}},\"required\":[\"requestId\",\"numberOfUnits\",\"urgent\"],\"files\":{},\"file required\":[]}",
+            "parameters": [4, 15, false],
+            "invoker": "Participant_19j1e3o",
+            "state_change": [
+                {
+                    "element_name": "Gateway_1fbifca",
+                    "element_type": "Gateway",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Message_0rwz1km",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_0hpha6h",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"requestId\":{\"type\":\"number\",\"description\":\"Unique identifier of the request for additional details \"},\"supplierReputation\":{\"type\":\"number\",\"description\":\"A numerical rating representing the supplier's reputation.\"}},\"required\":[\"requestId\",\"supplierReputation\"],\"files\":{},\"file required\":[]}",
+            "parameters": [4, 1],
+            "invoker": "Participant_0sa2v7d",
+            "state_change": [
+                {
+                    "element_name": "Message_0rwz1km",
+                    "element_type": "Message",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Message_0hpha6h",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_1io2g9u",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{},\"required\":[],\"files\":{\"waybill\":{\"type\":\"file\",\"description\":\"Digital or physical waybill document，detailing the shipment contents and destination.\"}},\"file required\":[\"waybill\"]}",
+            "parameters": ["waybill.pdf"],
+            "invoker": "Participant_0sa2v7d",
+            "state_change": [
+                {
+                    "element_name": "Message_0hpha6h",
+                    "element_type": "Message",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Message_1io2g9u",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Activity_0rm8bkp",
+            "element_type": "Activity",
+            "metaInfo": "{\"inputs\":[{\"name\":\"numberOfUnits\",\"type\":\"number\",\"description\":\" Total number of units in the order requested\"},{\"name\":\"urgent\",\"type\":\"boolean\",\"description\":\"Indicates whether the order requires urgent delivery.\"},{\"name\":\"supplierReputation\",\"type\":\"number\",\"description\":\"A numerical rating representing the supplier's reputation.\"}],\"outputs\":[{\"name\":\"finalPriority\",\"type\":\"string\",\"description\":\"\"}]}",
+            "parameters": [100, false, 1],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Message_1io2g9u",
+                    "element_type": "Message",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Activity_0rm8bkp",
+                    "element_type": "Activity",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Gateway_0ep8cuh",
+            "element_type": "Gateway",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Activity_0rm8bkp",
+                    "element_type": "Activity",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Gateway_0ep8cuh",
+                    "element_type": "Gateway",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_0d2xte5",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"deliveryConfirmation\":{\"type\":\"boolean\",\"description\":\"Confirmation of whether the supplies have been successfully delivered\"}},\"required\":[\"deliveryConfirmation\"],\"files\":{},\"file required\":[]}",
+            "parameters": [true],
+            "invoker": "Participant_19j1e3o",
+            "state_change": [
+                {
+                    "element_name": "Gateway_0ep8cuh",
+                    "element_type": "Gateway",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Message_0d2xte5",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Gateway_1cr0nma",
+            "element_type": "Gateway",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Message_0d2xte5",
+                    "element_type": "Message",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Gateway_1cr0nma",
+                    "element_type": "Gateway",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_04wmlqe",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{\"productionStart\":{\"type\":\"string\",\"description\":\"Notification of the commencement of production, including the date and time\"}},\"required\":[\"productionStart\"],\"files\":{},\"file required\":[]}",
+            "parameters": ["2023-10-10T10:00:00"],
+            "invoker": "Participant_19mgbdn",
+            "state_change": [
+                {
+                    "element_name": "Gateway_1cr0nma",
+                    "element_type": "Gateway",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Message_04wmlqe",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Message_196q1fj",
+            "element_type": "Message",
+            "metaInfo": "{\"properties\":{},\"required\":[],\"files\":{\"deliveryNote\":{\"type\":\"file\",\"description\":\"A document confirming the delivery of goods\"}},\"file required\":[\"deliveryNote\"]}",
+            "parameters": ["deliveryNote.pdf"],
+            "invoker": "Participant_19mgbdn",
+            "state_change": [
+                {
+                    "element_name": "Message_04wmlqe",
+                    "element_type": "Message",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Message_196q1fj",
+                    "element_type": "Message",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        },
+        {
+            "element_name": "Event_13pbqdz",
+            "element_type": "Event",
+            "metaInfo": "",
+            "parameters": [],
+            "invoker": "",
+            "state_change": [
+                {
+                    "element_name": "Message_196q1fj",
+                    "element_type": "Message",
+                    "pre_state": "done",
+                    "post_state": "enable"
+                },
+                {
+                    "element_name": "Event_13pbqdz",
+                    "element_type": "Event",
+                    "pre_state": "disable",
+                    "post_state": "enable"
+                }
+            ]
+        }
+    ],
+    "invoke_path": [
+        "Event_06sexe6",
+        "Message_1wswgqu",
+        "Message_1ajdm9l",
+        "Gateway_0onpe6x",
+        "Message_0cba4t6",
+        "Message_0pm90nx",
+        "Gateway_1fbifca",
+        "Message_0rwz1km",
+        "Message_0hpha6h",
+        "Message_1io2g9u",
+        "Activity_0rm8bkp",
+        "Gateway_0ep8cuh",
+        "Message_0d2xte5",
+        "Gateway_1cr0nma",
+        "Message_04wmlqe",
+        "Message_196q1fj",
+        "Event_13pbqdz"
+    ]
+}]

@@ -81,27 +81,27 @@ contract GeneratedContract {
     messages {
         message Message_04wmlqe from Participant_19mgbdn to Participant_0w6qkdf {
             initial state INACTIVE
-            schema "productionStart"
+            schema "{\"properties\":{\"productionStart\":{\"type\":\"string\",\"description\":\"Notification of the commencement of production, including the date and time\"}},\"required\":[\"productionStart\"],\"files\":{},\"file required\":[]}"
         }
         message Message_0cba4t6 from Participant_09cjol2 to Participant_0sa2v7d {
             initial state INACTIVE
-            schema "supplyOrderId"
+            schema "{\"properties\":{\"supplyOrderId\":{\"type\":\"string\",\"description\":\" Identifier of the supply order being forwarded\"}},\"required\":[\"supplyOrderId\"],\"files\":{},\"file required\":[]}"
         }
         message Message_0d2xte5 from Participant_19j1e3o to Participant_19mgbdn {
             initial state INACTIVE
-            schema "deliveryConfirmation"
+            schema "{\"properties\":{\"deliveryConfirmation\":{\"type\":\"boolean\",\"description\":\"Confirmation of whether the supplies have been successfully delivered\"}},\"required\":[\"deliveryConfirmation\"],\"files\":{},\"file required\":[]}"
         }
         message Message_0hpha6h from Participant_0sa2v7d to Participant_19j1e3o {
             initial state INACTIVE
-            schema "requestId + supplierReputation"
+            schema "{\"properties\":{\"requestId\":{\"type\":\"number\",\"description\":\"Unique identifier of the request for additional details \"},\"supplierReputation\":{\"type\":\"number\",\"description\":\"A numerical rating representing the supplier's reputation.\"}},\"required\":[\"requestId\",\"supplierReputation\"],\"files\":{},\"file required\":[]}"
         }
         message Message_0pm90nx from Participant_09cjol2 to Participant_19j1e3o {
             initial state INACTIVE
-            schema "transportOrderId"
+            schema "{\"properties\":{\"transportOrderId\":{\"type\":\"string\",\"description\":\"Identifier of the transport order being forwarded\"}},\"required\":[\"transportOrderId\"],\"files\":{},\"file required\":[]}"
         }
         message Message_0rwz1km from Participant_19j1e3o to Participant_0sa2v7d {
             initial state INACTIVE
-            schema "requestId + numberOfUnits + urgent"
+            schema "{\"properties\":{\"requestId\":{\"type\":\"number\",\"description\":\" Unique identifier of the request for additional details \"},\"numberOfUnits\":{\"type\":\"number\",\"description\":\" Total number of units in the order requested\"},\"urgent\":{\"type\":\"boolean\",\"description\":\"Indicates whether the order requires urgent delivery.\"}},\"required\":[\"requestId\",\"numberOfUnits\",\"urgent\"],\"files\":{},\"file required\":[]}"
         }
         message Message_196q1fj from Participant_19mgbdn to Participant_0w6qkdf {
             initial state INACTIVE
@@ -109,7 +109,7 @@ contract GeneratedContract {
         }
         message Message_1ajdm9l from Participant_19mgbdn to Participant_09cjol2 {
             initial state INACTIVE
-            schema "supplyOrderDetails"
+            schema "{\"properties\":{\"supplyOrderDetails\":{\"type\":\"string\",\"description\":\" Details of the supplies needed\"}},\"required\":[\"supplyOrderDetails\"],\"files\":{},\"file required\":[]}"
         }
         message Message_1dmeexg from Participant_19j1e3o to Participant_19mgbdn {
             initial state INACTIVE
@@ -121,7 +121,7 @@ contract GeneratedContract {
         }
         message Message_1io2g9u from Participant_0sa2v7d to Participant_19j1e3o {
             initial state INACTIVE
-            schema "{\"properties\":{},\"required\":[],\"files\":{\"waybill\":{\"type\":\"file\",\"description\":\"Digital or physical waybill document，detailing the shipment contents and destination.\"}},\"file required\":[\"waybill\"]}"
+            schema "{\"properties\":{},\"required\":[],\"files\":{\"waybill\":{\"type\":\"file\",\"description\":\"Digital or physical waybill document\uff0cdetailing the shipment contents and destination.\"}},\"file required\":[\"waybill\"]}"
         }
         message Message_1oxmq1k from Participant_19j1e3o to Participant_19mgbdn {
             initial state INACTIVE
@@ -129,7 +129,7 @@ contract GeneratedContract {
         }
         message Message_1wswgqu from Participant_0w6qkdf to Participant_19mgbdn {
             initial state INACTIVE
-            schema "orderDetails"
+            schema "{\"properties\":{\"orderDetails\":{\"type\":\"string\",\"description\":\"Detailed list of goods ordered\"}},\"required\":[\"orderDetails\"],\"files\":{},\"file required\":[]}"
         }
 
     }

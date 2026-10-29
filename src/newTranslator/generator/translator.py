@@ -65,21 +65,29 @@ def public_the_name(name: str) -> str:
 
 
 def summarize_message_schema(message: Message) -> str:
-    """Produce a short schema summary string from message documentation."""
+    """Preserve structured message documentation for downstream generators."""
     documentation = message.documentation or ""
     try:
         doc = json.loads(documentation)
     except (TypeError, json.JSONDecodeError):
         return documentation or ""
-    properties = doc.get("properties", {})
-    if not properties:
+    if not isinstance(doc, dict):
         return documentation or ""
-    return " + ".join(properties.keys())
+    if doc.get("properties") or doc.get("files"):
+        return json.dumps(doc, separators=(",", ":"))
+    return documentation or ""
 
 
 def escape_quotes(value: str) -> str:
     """Escape double quotes so schema strings can live inside DSL literals."""
     return value.replace("\"", "\\\"")
+
+
+def strip_outer_quotes(value: str) -> str:
+    """Remove a single matching pair of surrounding quotes from a literal."""
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+        return value[1:-1]
+    return value
 
 
 def parse_json_documentation(documentation: Optional[str]) -> dict:
@@ -112,7 +120,7 @@ def _load_b2c_metamodel():
     return _B2C_METAMODEL
 
 
-def _render_solidity_contract(dsl_content: str) -> str:
+def _render_solidity_bundle(dsl_content: str) -> tuple[str, dict]:
     from b2cdsl_solidity import (
         DSLContractAdapter as SolidityDSLContractAdapter,
         SolidityRenderer,
@@ -129,7 +137,13 @@ def _render_solidity_contract(dsl_content: str) -> str:
     renderer = SolidityRenderer(adapter)
     context = renderer.build_context()
     template = SOL_TEMPLATE_ENV.get_template(SOL_CONTRACT_TEMPLATE)
-    return template.render(**context).strip() + "\n"
+    execution_layout = renderer.build_execution_layout()
+    return template.render(**context).strip() + "\n", execution_layout
+
+
+def _render_solidity_contract(dsl_content: str) -> str:
+    contract_content, _ = _render_solidity_bundle(dsl_content)
+    return contract_content
 
 
 @dataclass
@@ -421,6 +435,9 @@ class FlowPlanner:
             init_flow = element.init_message_flow
             if init_flow:
                 return init_flow.message.id
+            return_flow = element.return_message_flow
+            if return_flow:
+                return return_flow.message.id
             return None
         return element.id
 
@@ -445,14 +462,18 @@ class FlowPlanner:
         mapping: Dict[str, List[str]] = {}
         for task in self._choreography.query_element_with_type(NodeType.CHOREOGRAPHY_TASK):
             init_flow = task.init_message_flow
-            if not init_flow:
+            if not init_flow and not task.return_message_flow:
                 continue
-            init_message = init_flow.message.id
-            if task.return_message_flow:
+            if init_flow and task.return_message_flow:
+                init_message = init_flow.message.id
                 mapping[init_message] = [task.return_message_flow.message.id]
                 mapping[task.return_message_flow.message.id] = self._targets_from_element(task.outgoing.target)
-            else:
+            elif init_flow:
+                init_message = init_flow.message.id
                 mapping[init_message] = self._targets_from_element(task.outgoing.target)
+            else:
+                return_message = task.return_message_flow.message.id
+                mapping[return_message] = self._targets_from_element(task.outgoing.target)
         return mapping
 
     @staticmethod
@@ -932,7 +953,8 @@ class ParameterExtractor:
         for relation in ("==", "!=", ">=", "<=", ">", "<"):
             if relation in raw_condition:
                 prop, value = raw_condition.split(relation, 1)
-                return prop.strip(), relation, value.strip()
+                literal = strip_outer_quotes(value.strip())
+                return prop.strip(), relation, literal
         return None
 
     @staticmethod
@@ -1208,12 +1230,12 @@ class SolidityContractTranslator(GoChaincodeTranslator):
         output_path: Optional[str] = None,
         is_output: bool = False,
         contract_name: Optional[str] = None,
-    ) -> tuple[str, str]:
+    ) -> tuple[str, str, dict]:
         dsl_content = self.generate_chaincode(contract_name=contract_name)
-        contract_content = _render_solidity_contract(dsl_content)
+        contract_content, execution_layout = _render_solidity_bundle(dsl_content)
         if is_output and output_path:
             Path(output_path).write_text(contract_content, encoding="utf8")
-        return contract_content, dsl_content
+        return contract_content, dsl_content, execution_layout
 
     def generate_contract(
         self,
@@ -1221,7 +1243,7 @@ class SolidityContractTranslator(GoChaincodeTranslator):
         is_output: bool = False,
         contract_name: Optional[str] = None,
     ) -> str:
-        contract_content, _ = self.generate_contract_bundle(
+        contract_content, _, _ = self.generate_contract_bundle(
             output_path=output_path,
             is_output=is_output,
             contract_name=contract_name,

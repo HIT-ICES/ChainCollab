@@ -1,0 +1,411 @@
+[
+  {
+    "id": "Participant_0ggs0ck",
+    "type": "bpmn:participant",
+    "name": "Gynecologist",
+    "attrs": {
+      "is_multi": false,
+      "multi_minimum": 0,
+      "multi_maximum": 0
+    }
+  },
+  {
+    "id": "Participant_1v6wnpq",
+    "type": "bpmn:participant",
+    "name": "Lab",
+    "attrs": {
+      "is_multi": false,
+      "multi_minimum": 0,
+      "multi_maximum": 0
+    }
+  },
+  {
+    "id": "Participant_0tkhpj2",
+    "type": "bpmn:participant",
+    "name": "Hospital",
+    "attrs": {
+      "is_multi": false,
+      "multi_minimum": 0,
+      "multi_maximum": 0
+    }
+  },
+  {
+    "id": "Message_13mh6mk",
+    "type": "bpmn:message",
+    "name": "report",
+    "attrs": {
+      "documentation": "{\"properties\":{\"reportContent\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"reportContent\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_13mh6mk__property__reportContent",
+    "type": "bpmn:messageProperty",
+    "name": "reportContent",
+    "attrs": {
+      "name": "reportContent",
+      "global_name": "ReportContent",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_13mh6mk",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0gd0z61",
+    "type": "bpmn:message",
+    "name": "furtherCheck",
+    "attrs": {
+      "documentation": "{\"properties\":{\"furtherCheckPlace\":{\"type\":\"string\",\"description\":\"\"},\"furtherCheckDate\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"furtherCheckPlace\",\"furtherCheckDate\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0gd0z61__property__furtherCheckPlace",
+    "type": "bpmn:messageProperty",
+    "name": "furtherCheckPlace",
+    "attrs": {
+      "name": "furtherCheckPlace",
+      "global_name": "FurtherCheckPlace",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_0gd0z61",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0gd0z61__property__furtherCheckDate",
+    "type": "bpmn:messageProperty",
+    "name": "furtherCheckDate",
+    "attrs": {
+      "name": "furtherCheckDate",
+      "global_name": "FurtherCheckDate",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_0gd0z61",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_1rqbibd",
+    "type": "bpmn:message",
+    "name": "bloodResults",
+    "attrs": {
+      "documentation": "{\"properties\":{\"result\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"result\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1rqbibd__property__result",
+    "type": "bpmn:messageProperty",
+    "name": "result",
+    "attrs": {
+      "name": "result",
+      "global_name": "Result",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_1rqbibd",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_1vzqd37",
+    "type": "bpmn:message",
+    "name": "result",
+    "attrs": {
+      "documentation": "{\"properties\":{\"result\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"result\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_1vzqd37__property__result",
+    "type": "bpmn:messageProperty",
+    "name": "result",
+    "attrs": {
+      "name": "result",
+      "global_name": "Result",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_1vzqd37",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0wq8mc6",
+    "type": "bpmn:message",
+    "name": "data",
+    "attrs": {
+      "documentation": "{\"properties\":{\"patientData\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"patientData\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0wq8mc6__property__patientData",
+    "type": "bpmn:messageProperty",
+    "name": "patientData",
+    "attrs": {
+      "name": "patientData",
+      "global_name": "PatientData",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_0wq8mc6",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "Message_0gswvmq",
+    "type": "bpmn:message",
+    "name": "sample",
+    "attrs": {
+      "documentation": "{\"properties\":{\"sample\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[\"sample\"],\"files\":{},\"file required\":[]}"
+    }
+  },
+  {
+    "id": "Message_0gswvmq__property__sample",
+    "type": "bpmn:messageProperty",
+    "name": "sample",
+    "attrs": {
+      "name": "sample",
+      "global_name": "Sample",
+      "type": "string",
+      "dsl_type": "string",
+      "description": "",
+      "owner": "Message_0gswvmq",
+      "source_kind": "message"
+    }
+  },
+  {
+    "id": "StartEvent_0m7hz56",
+    "type": "bpmn:startEvent",
+    "name": "",
+    "attrs": {
+      "incoming": [],
+      "outgoing": [
+        "SequenceFlow_003ukt2"
+      ]
+    }
+  },
+  {
+    "id": "EndEvent_110myff",
+    "type": "bpmn:endEvent",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_1mgir0p",
+        "Flow_0nnch33"
+      ],
+      "outgoing": []
+    }
+  },
+  {
+    "id": "Gateway_0o8snyv",
+    "type": "bpmn:exclusiveGateway",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_0xlfi9k"
+      ],
+      "outgoing": [
+        "Flow_1mgir0p",
+        "Flow_0yz57zs"
+      ]
+    }
+  },
+  {
+    "id": "ParallelGateway_1pgjqtw",
+    "type": "bpmn:parallelGateway",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "SequenceFlow_003ukt2"
+      ],
+      "outgoing": [
+        "SequenceFlow_1508by9",
+        "SequenceFlow_0vcyll2"
+      ]
+    }
+  },
+  {
+    "id": "Gateway_1m6dgym",
+    "type": "bpmn:parallelGateway",
+    "name": "",
+    "attrs": {
+      "incoming": [
+        "Flow_140jch4",
+        "Flow_02kp0tj"
+      ],
+      "outgoing": [
+        "Flow_1f4e65t"
+      ]
+    }
+  },
+  {
+    "id": "Activity_1mj4mr7",
+    "type": "bpmn:businessRuleTask",
+    "name": "blood",
+    "attrs": {
+      "incoming": [
+        "SequenceFlow_1muj86l"
+      ],
+      "outgoing": [
+        "Flow_0xlfi9k"
+      ],
+      "documentation": "{\"inputs\":[{\"name\":\"result\",\"type\":\"string\",\"description\":\"\"}],\"outputs\":[{\"name\":\"FurtherCheck\",\"type\":\"boolean\",\"description\":\"\"}]}"
+    }
+  },
+  {
+    "id": "Activity_1mj4mr7__input__result",
+    "type": "bpmn:businessRuleParameter",
+    "name": "result",
+    "attrs": {
+      "name": "result",
+      "global_name": "Result",
+      "direction": "input",
+      "type": "string",
+      "dsl_type": "string",
+      "owner": "Activity_1mj4mr7"
+    }
+  },
+  {
+    "id": "Activity_1mj4mr7__output__FurtherCheck",
+    "type": "bpmn:businessRuleParameter",
+    "name": "FurtherCheck",
+    "attrs": {
+      "name": "FurtherCheck",
+      "global_name": "FurtherCheck",
+      "direction": "output",
+      "type": "boolean",
+      "dsl_type": "bool",
+      "owner": "Activity_1mj4mr7"
+    }
+  },
+  {
+    "id": "ChoreographyTask_10lckh7",
+    "type": "bpmn:choreographyTask",
+    "name": "Take sample",
+    "attrs": {
+      "incoming": "SequenceFlow_1508by9",
+      "outgoing": "SequenceFlow_1pwdk1i",
+      "participants": [
+        "Participant_0ggs0ck",
+        "Participant_1v6wnpq"
+      ],
+      "initiatingParticipantRef": "Participant_0ggs0ck",
+      "messageFlowRefs": [
+        "MessageFlow_16uaf5s"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_131v44n",
+    "type": "bpmn:choreographyTask",
+    "name": "Give patient data",
+    "attrs": {
+      "incoming": "SequenceFlow_0vcyll2",
+      "outgoing": "Flow_1o58bqb",
+      "participants": [
+        "Participant_0ggs0ck",
+        "Participant_0tkhpj2"
+      ],
+      "initiatingParticipantRef": "Participant_0ggs0ck",
+      "messageFlowRefs": [
+        "MessageFlow_0vz56a0"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_1732eky",
+    "type": "bpmn:choreographyTask",
+    "name": "Give result",
+    "attrs": {
+      "incoming": "SequenceFlow_1pwdk1i",
+      "outgoing": "Flow_140jch4",
+      "participants": [
+        "Participant_1v6wnpq",
+        "Participant_0ggs0ck"
+      ],
+      "initiatingParticipantRef": "Participant_1v6wnpq",
+      "messageFlowRefs": [
+        "MessageFlow_0r5mbr1"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_1bkb191",
+    "type": "bpmn:choreographyTask",
+    "name": "Blood test results",
+    "attrs": {
+      "incoming": "Flow_1f4e65t",
+      "outgoing": "SequenceFlow_1muj86l",
+      "participants": [
+        "Participant_0ggs0ck",
+        "Participant_0tkhpj2"
+      ],
+      "initiatingParticipantRef": "Participant_0ggs0ck",
+      "messageFlowRefs": [
+        "MessageFlow_09o9s93"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_1qmxi43",
+    "type": "bpmn:choreographyTask",
+    "name": "DoFurtherCheck",
+    "attrs": {
+      "incoming": "Flow_0yz57zs",
+      "outgoing": "Flow_0nnch33",
+      "participants": [
+        "Participant_0tkhpj2",
+        "Participant_0ggs0ck"
+      ],
+      "initiatingParticipantRef": "Participant_0tkhpj2",
+      "messageFlowRefs": [
+        "MessageFlow_1ueexfr"
+      ]
+    }
+  },
+  {
+    "id": "ChoreographyTask_0rxioe7",
+    "type": "bpmn:choreographyTask",
+    "name": "report",
+    "attrs": {
+      "incoming": "Flow_1o58bqb",
+      "outgoing": "Flow_02kp0tj",
+      "participants": [
+        "Participant_0tkhpj2",
+        "Participant_0ggs0ck"
+      ],
+      "initiatingParticipantRef": "Participant_0tkhpj2",
+      "messageFlowRefs": [
+        "MessageFlow_0axr6ym"
+      ]
+    }
+  },
+  {
+    "id": "Flow_1mgir0p__condition__FurtherCheck",
+    "type": "bpmn:sequenceConditionVariable",
+    "name": "FurtherCheck",
+    "attrs": {
+      "name": "FurtherCheck",
+      "relation": "==",
+      "value": "false",
+      "global_name": "FurtherCheck",
+      "dsl_type": "string",
+      "sequenceFlow": "Flow_1mgir0p"
+    }
+  },
+  {
+    "id": "Flow_0yz57zs__condition__FurtherCheck",
+    "type": "bpmn:sequenceConditionVariable",
+    "name": "FurtherCheck",
+    "attrs": {
+      "name": "FurtherCheck",
+      "relation": "==",
+      "value": "true",
+      "global_name": "FurtherCheck",
+      "dsl_type": "string",
+      "sequenceFlow": "Flow_0yz57zs"
+    }
+  }
+]

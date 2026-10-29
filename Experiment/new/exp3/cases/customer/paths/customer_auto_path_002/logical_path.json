@@ -1,0 +1,145 @@
+{
+  "case_name": "customer",
+  "path_name": "customer_auto_path_002",
+  "description": "Auto materialized from generated DSL executable path.",
+  "source_model": "/root/code/ChainCollab/src/runtime/newTranslator/20260505-073111-730109/customer.b2c",
+  "expect": "accepted",
+  "steps": [
+    {
+      "type": "event",
+      "element": "Event_1jtgn3j"
+    },
+    {
+      "type": "gateway",
+      "element": "ExclusiveGateway_0hs3ztq"
+    },
+    {
+      "type": "message",
+      "element": "Message_045i10y",
+      "payload": {
+        "VIPpoints": 9999
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_0r9lypd",
+      "payload": {
+        "is_available": true
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "ExclusiveGateway_106je4z"
+    },
+    {
+      "type": "message",
+      "element": "Message_1em0ee4",
+      "payload": {
+        "need_external_provider": true
+      }
+    },
+    {
+      "type": "message",
+      "element": "Message_1nlagx2",
+      "payload": {
+        "confirmation": true
+      }
+    },
+    {
+      "type": "gateway",
+      "element": "EventBasedGateway_1fxpmyn"
+    },
+    {
+      "type": "message",
+      "element": "Message_0o8eyir",
+      "payload": {}
+    },
+    {
+      "type": "businessrule",
+      "element": "Activity_1yl9tfp",
+      "outputs": {
+        "externalAvailable": false
+      },
+      "payload": {},
+      "continue_payload": {}
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_1bhtapl"
+    },
+    {
+      "type": "gateway",
+      "element": "Gateway_04h9e6e"
+    },
+    {
+      "type": "message",
+      "element": "Message_1ljlm4g",
+      "payload": {}
+    },
+    {
+      "type": "message",
+      "element": "Message_0m9p3da",
+      "payload": {
+        "invoice": true,
+        "invoiceType": "sample-invoiceType"
+      }
+    },
+    {
+      "type": "businessrule",
+      "element": "Activity_0ibsbry",
+      "outputs": {
+        "invoiceAvailable": false
+      },
+      "payload": {},
+      "continue_payload": {}
+    },
+    {
+      "type": "gateway",
+      "element": "ExclusiveGateway_0nzwv7v"
+    },
+    {
+      "type": "event",
+      "element": "Event_143ykco"
+    }
+  ],
+  "generated_path": {
+    "final_enabled_elements": [],
+    "final_element_states": {
+      "Message_045i10y": "DONE",
+      "Message_0m9p3da": "DONE",
+      "Message_0o8eyir": "DONE",
+      "Message_0r9lypd": "DONE",
+      "Message_1em0ee4": "DONE",
+      "Message_1etcmvl": "INACTIVE",
+      "Message_1i8rlqn": "INACTIVE",
+      "Message_1joj7ca": "INACTIVE",
+      "Message_1ljlm4g": "DONE",
+      "Message_1nlagx2": "DONE",
+      "Message_1q05nnw": "INACTIVE",
+      "Message_1qbk325": "INACTIVE",
+      "Message_1xm9dxy": "INACTIVE",
+      "ExclusiveGateway_106je4z": "DONE",
+      "ExclusiveGateway_0hs3ztq": "DONE",
+      "ExclusiveGateway_0nzwv7v": "DONE",
+      "Gateway_1bhtapl": "DONE",
+      "Gateway_04h9e6e": "DONE",
+      "EventBasedGateway_1fxpmyn": "DONE",
+      "Event_1jtgn3j": "DONE",
+      "Event_0366pfz": "INACTIVE",
+      "Event_146eii4": "INACTIVE",
+      "Event_143ykco": "DONE",
+      "Activity_1yl9tfp": "DONE",
+      "Activity_0ibsbry": "DONE"
+    },
+    "final_globals": {
+      "VIPpoints": 1,
+      "Confirmation": true,
+      "ExternalAvailable": false,
+      "Invoice": true,
+      "InvoiceAvailable": false,
+      "InvoiceType": "sample-invoiceType",
+      "Is_available": true,
+      "Need_external_provider": true
+    }
+  }
+}

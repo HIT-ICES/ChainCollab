@@ -1,0 +1,147 @@
+{
+  "contract": "MultiMessageContractC",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/positive/multi_message_contract_c/multi_message_contract_c.b2c",
+  "participants": [
+    {
+      "name": "C1",
+      "msp": "C1MSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "attributes": {
+        "role": "c1"
+      }
+    },
+    {
+      "name": "C2",
+      "msp": "C2MSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "attributes": {
+        "role": "c2"
+      }
+    },
+    {
+      "name": "C3",
+      "msp": "C3MSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "attributes": {
+        "role": "c3"
+      }
+    }
+  ],
+  "globals": [
+    {
+      "name": "FlagC",
+      "type": "bool",
+      "initial_value": null
+    }
+  ],
+  "messages": [
+    {
+      "name": "MC1",
+      "from": "C1",
+      "to": "C2",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "MC2",
+      "from": "C2",
+      "to": "C3",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "MC3",
+      "from": "C3",
+      "to": "C1",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "StartEvent_MC",
+      "type": "start",
+      "initial_state": "READY"
+    },
+    {
+      "name": "EndEvent_MC",
+      "type": "end",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "gateways": [],
+  "businessrules": [],
+  "oracletasks": [],
+  "flows": [
+    {
+      "id": "flow_001",
+      "source_kind": "StartFlow",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_MC"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "MC1"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_002",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "MC1"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "MC2"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_003",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "MC2"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "MC3"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_004",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "MC3"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_MC"
+        }
+      ],
+      "branches": []
+    }
+  ],
+  "unsupported": []
+}

@@ -1,0 +1,197 @@
+{
+  "contract": "BusinessRuleContractC",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/positive/business_rule_contract_c/business_rule_contract_c.b2c",
+  "participants": [
+    {
+      "name": "InitiatorC",
+      "msp": "InitiatorCMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "attributes": {
+        "role": "initiator"
+      }
+    },
+    {
+      "name": "AuditorC",
+      "msp": "AuditorCMSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "attributes": {
+        "role": "auditor"
+      }
+    }
+  ],
+  "globals": [
+    {
+      "name": "InputC",
+      "type": "int",
+      "initial_value": null
+    },
+    {
+      "name": "PassedC",
+      "type": "bool",
+      "initial_value": null
+    }
+  ],
+  "messages": [
+    {
+      "name": "SendC",
+      "from": "InitiatorC",
+      "to": "AuditorC",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "NotifyC",
+      "from": "AuditorC",
+      "to": "InitiatorC",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "StartEvent_BRC",
+      "type": "start",
+      "initial_state": "READY"
+    },
+    {
+      "name": "EndEvent_BRC",
+      "type": "end",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "ChoiceC",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [
+    {
+      "name": "RuleC",
+      "referenced_dmn": "rule_c.dmn",
+      "decision": "DecisionC",
+      "input_mapping": [
+        {
+          "param": "input",
+          "global": "InputC"
+        }
+      ],
+      "output_mapping": [
+        {
+          "param": "passed",
+          "global": "PassedC"
+        }
+      ],
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "oracletasks": [],
+  "flows": [
+    {
+      "id": "flow_001",
+      "source_kind": "StartFlow",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_BRC"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "SendC"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_002",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "SendC"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "RuleC"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_003",
+      "source_kind": "RuleFlow",
+      "trigger": {
+        "kind": "rule_done",
+        "name": "RuleC"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "ChoiceC"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_004",
+      "source_kind": "GatewayFlow",
+      "trigger": {
+        "kind": "gateway_completed",
+        "name": "ChoiceC"
+      },
+      "actions": [],
+      "branches": [
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "NotifyC"
+            }
+          ],
+          "condition": {
+            "kind": "compare",
+            "var": "PassedC",
+            "relation": "==",
+            "value": ""
+          }
+        },
+        {
+          "kind": "GatewayElseBranch",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "EndEvent_BRC"
+            }
+          ],
+          "condition": {
+            "kind": "else"
+          }
+        }
+      ]
+    },
+    {
+      "id": "flow_005",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "NotifyC"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_BRC"
+        }
+      ],
+      "branches": []
+    }
+  ],
+  "unsupported": []
+}

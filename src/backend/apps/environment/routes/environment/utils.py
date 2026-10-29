@@ -12,6 +12,21 @@ from common.enums import FabricCAOrgType, FabricNodeType
 LOG = logging.getLogger(__name__)
 
 
+def _ensure_success_response(response, action: str, env_id: str):
+    if str(response.status_code).startswith("2"):
+        return response
+    LOG.warning(
+        "Chaincode action=%s failed env=%s status=%s body=%s",
+        action,
+        env_id,
+        response.status_code,
+        response.text,
+    )
+    raise Exception(
+        f"{action.capitalize()} chaincode failed: {response.status_code} {response.text}"
+    )
+
+
 def get_all_peer_of_env(env_id: str, including_system: bool = False) -> list:
     try:
         target_env = Environment.objects.get(id=env_id)
@@ -107,8 +122,7 @@ def installChaincodeForEnv(env_id: str, chaincode_id: str, auth: str):
         json=data,
         headers={"Authorization": auth, "Content-Type": "application/json"},
     )
-
-    return res
+    return _ensure_success_response(res, "install", env_id)
 
 
 def approveChaincodeForEnv(env_id: str, channel_name, chaincode_name: str, auth: str):
@@ -130,6 +144,7 @@ def approveChaincodeForEnv(env_id: str, channel_name, chaincode_name: str, auth:
             data=data,
             headers={"Authorization": auth},
         )
+        _ensure_success_response(res, "approve", env_id)
         all_res.append(res)
     return all_res
 
@@ -155,4 +170,4 @@ def commmitChaincodeForEnv(
         data=data,
         headers={"Authorization": auth},
     )
-    return res
+    return _ensure_success_response(res, "commit", env_id)

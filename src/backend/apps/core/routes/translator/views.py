@@ -24,6 +24,9 @@ class TranslatorProxyViewSet(viewsets.ViewSet):
                 target=serializer.validated_data.get("target") or "go",
                 artifact_name=serializer.validated_data.get("artifact_name"),
                 persist_to_runtime=True,
+                message_confirmation_mode=serializer.validated_data.get(
+                    "message_confirmation_mode", "explicit"
+                ),
             )
         except NewTranslatorError as exc:
             return Response({"message": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
@@ -33,6 +36,7 @@ class TranslatorProxyViewSet(viewsets.ViewSet):
                 "bpmnContent": generated.get("chaincodeContent", ""),
                 "dslContent": generated.get("dslContent", ""),
                 "ffiContent": generated.get("ffiContent", "{}"),
+                "executionLayout": generated.get("executionLayout", {}),
                 "target": generated.get("target", "go"),
             },
             status=status.HTTP_200_OK,

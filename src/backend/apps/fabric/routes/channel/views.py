@@ -90,8 +90,7 @@ class ChannelViewSet(viewsets.ViewSet):
                 # org = request.user.organization
                 env_id = request.parser_context["kwargs"].get("environment_id")
                 env = Environment.objects.get(id=env_id)
-                network = env.network
-                channels = Channel.objects.filter(network=network)
+                channels = Channel.objects.filter(resource_set__environment=env)
                 channel_list = [
                     {
                         "id": channel.id,
@@ -257,16 +256,12 @@ class ChannelViewSet(viewsets.ViewSet):
 
                 # DB handler
 
-                channel = Channel(name=name, network=network)
+                channel = Channel(
+                    name=name,
+                    resource_set=target_peer_fabric_resource_set.resource_set,
+                    genesisblock=block_path,
+                )
                 channel.save()
-                fabric_resource_sets_to_add = [
-                    node.fabric_resource_set for node in peer_nodes
-                ]
-                for frs in fabric_resource_sets_to_add:
-                    channel.fabric_resource_set.add(frs)
-                orderers_to_add = [Node.objects.get(id=node) for node in orderers]
-                for orderer in orderers_to_add:
-                    channel.orderers.add(orderer)
                 response = ChannelIDSerializer(data=channel.__dict__)
                 if response.is_valid(raise_exception=True):
                     return Response(

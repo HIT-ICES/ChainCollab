@@ -1,0 +1,200 @@
+{
+  "contract": "IOracle",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/set_disable_case/set_disable_case.sol",
+  "globals": [
+    {
+      "name": "Counter",
+      "type": "int256"
+    },
+    {
+      "name": "Retry",
+      "type": "bool"
+    }
+  ],
+  "handlers": [
+    {
+      "name": "StartEvent_1",
+      "language": "solidity",
+      "element_kind": "event",
+      "element_name": "StartEvent_1",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_1"
+      },
+      "guards": [
+        "require(ev.exists, \"event not set\")",
+        "require(ev.state == ElementState.ENABLED, \"event state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Offer"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.StartEvent_1];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.StartEvent_1);\n        inst.messages[MessageKey.Offer].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "Offer_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "Offer",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "Offer"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Decide"
+        },
+        {
+          "op": "set",
+          "var": "Counter",
+          "value": "1"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.Offer];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.Offer, fireflyTranId);\n        inst.stateMemory.Counter = 1;\n        inst.gateways[GatewayKey.Decide].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "Cancel_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "Cancel",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "Cancel"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "disable",
+          "target": "Accept"
+        },
+        {
+          "op": "enable",
+          "target": "EndEvent_1"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.Cancel];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.Cancel, fireflyTranId);\n        inst.messages[MessageKey.Accept].state = ElementState.DISABLED;\n        inst.events[EventKey.EndEvent_1].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "Accept_Send",
+      "language": "solidity",
+      "element_kind": "message",
+      "element_name": "Accept",
+      "trigger": {
+        "kind": "message_sent",
+        "name": "Accept"
+      },
+      "guards": [
+        "require(m.exists, \"message not set\")",
+        "require(m.state == ElementState.ENABLED, \"message state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_1"
+        }
+      ],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Message storage m = inst.messages[MessageKey.Accept];\n        require(m.exists, \"message not set\");\n        _checkParticipant(inst, m.sendParticipant);\n        require(m.state == ElementState.ENABLED, \"message state not allowed\");\n\n        m.fireflyTranId = fireflyTranId;\n        m.state = ElementState.COMPLETED;\n        emit MessageSent(instanceId, MessageKey.Accept, fireflyTranId);\n        inst.events[EventKey.EndEvent_1].state = ElementState.ENABLED;\n\n    }"
+    },
+    {
+      "name": "Decide",
+      "language": "solidity",
+      "element_kind": "gateway",
+      "element_name": "Decide",
+      "trigger": {
+        "kind": "gateway_completed",
+        "name": "Decide"
+      },
+      "guards": [
+        "inst.stateMemory.Retry == true",
+        "require(g.exists, \"gateway not set\")",
+        "require(g.state == ElementState.ENABLED, \"gateway state not allowed\")"
+      ],
+      "actions": [
+        {
+          "op": "enable",
+          "target": "Cancel"
+        },
+        {
+          "op": "enable",
+          "target": "Accept"
+        },
+        {
+          "op": "set",
+          "var": "Retry",
+          "value": "= true) {\n            inst.messages[MessageKey.Cancel].state = ElementState.ENABLED"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "inst.stateMemory.Retry == true",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "Cancel"
+            }
+          ],
+          "else_actions": [
+            {
+              "op": "enable",
+              "target": "Accept"
+            }
+          ]
+        }
+      ],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        Gateway storage g = inst.gateways[GatewayKey.Decide];\n        require(g.exists, \"gateway not set\");\n        require(g.state == ElementState.ENABLED, \"gateway state not allowed\");\n\n        g.state = ElementState.COMPLETED;\n        emit GatewayDone(instanceId, GatewayKey.Decide);\n        if (inst.stateMemory.Retry == true) {\n            inst.messages[MessageKey.Cancel].state = ElementState.ENABLED;\n        }\n        else {\n            inst.messages[MessageKey.Accept].state = ElementState.ENABLED;\n        }\n\n    }"
+    },
+    {
+      "name": "EndEvent_1",
+      "language": "solidity",
+      "element_kind": "event",
+      "element_name": "EndEvent_1",
+      "trigger": {
+        "kind": "event_completed",
+        "name": "EndEvent_1"
+      },
+      "guards": [
+        "require(ev.exists, \"event not set\")",
+        "require(ev.state == ElementState.ENABLED, \"event state not allowed\")"
+      ],
+      "actions": [],
+      "branches": [],
+      "body": "{\n        Instance storage inst = _getInstance(instanceId);\n        ActionEvent storage ev = inst.events[EventKey.EndEvent_1];\n        require(ev.exists, \"event not set\");\n        require(ev.state == ElementState.ENABLED, \"event state not allowed\");\n\n        ev.state = ElementState.COMPLETED;\n        emit ActionEventDone(instanceId, EventKey.EndEvent_1);\n\n    }"
+    }
+  ],
+  "elements": {
+    "messages": [
+      "Accept",
+      "Cancel",
+      "Offer"
+    ],
+    "gateways": [
+      "Decide"
+    ],
+    "events": [
+      "EndEvent_1",
+      "StartEvent_1"
+    ],
+    "businessrules": [
+      "PlaceholderBusinessRule"
+    ]
+  },
+  "unsupported": [],
+  "raw_summary": {
+    "function_count": 39,
+    "event_count": 5
+  }
+}

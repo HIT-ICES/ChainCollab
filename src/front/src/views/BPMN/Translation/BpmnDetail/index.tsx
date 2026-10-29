@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Card, Row, Col, Button, Steps, Modal, Select, Tag, Collapse, Typography, Tabs } from "antd"
+import { Card, Row, Col, Button, Steps, Modal, Select, Tag, Collapse, Typography, Tabs, Segmented } from "antd"
 import { useLocation, useNavigate } from "react-router-dom";
 import { retrieveBPMN, packageBpmn, installBpmnEthContract, registerBpmnEthContract, updateBPMNStatus, updateBPMN, updateBpmnEnv, updateBPMNFireflyUrl, updateBpmnEvents, generateBpmnArtifacts } from "@/api/externalResource"
 import { getMessagesByBpmnContent } from "@/api/translator"
@@ -68,6 +68,7 @@ const BPMNOverview = () => {
     const [editorOpen, setEditorOpen] = useState(false);
     const [editorKey, setEditorKey] = useState<"dsl" | "chaincode" | "ffi">("dsl");
     const [activeTabKey, setActiveTabKey] = useState<"dsl" | "chaincode">("dsl");
+    const [messageConfirmationMode, setMessageConfirmationMode] = useState<"explicit" | "implicit">("explicit");
 
 
     const navigate = useNavigate();
@@ -175,7 +176,9 @@ const BPMNOverview = () => {
             const res = await generateBpmnArtifacts(
                 bpmnId,
                 target,
-                currentConsortiumId || "1"
+                currentConsortiumId || "1",
+                undefined,
+                target === "go" ? messageConfirmationMode : "explicit",
             );
             const generated = res?.data || {};
             const chaincode_content = generated.chaincodeContent || "";
@@ -485,7 +488,8 @@ const BPMNOverview = () => {
                     ffiContentForModify,
                     currentOrgId,
                     bpmnId,
-                    currentConsortiumId || "1"
+                    currentConsortiumId || "1",
+                    messageConfirmationMode,
                 );
             }
             refetchBpmn();
@@ -623,8 +627,23 @@ const BPMNOverview = () => {
                         justify="end"
                         style={{ width: "100%", height: "100%", marginTop: 16 }}
                     >
+                        {currentEnvType !== "Ethereum" ? (
+                            <Col flex="auto" style={{ textAlign: "left" }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                                    <Text type="secondary">消息确认模式</Text>
+                                    <Segmented
+                                        value={messageConfirmationMode}
+                                        onChange={(value) => setMessageConfirmationMode(value as "explicit" | "implicit")}
+                                        options={[
+                                            { label: "需要确认", value: "explicit" },
+                                            { label: "发送即完成", value: "implicit" },
+                                        ]}
+                                    />
+                                </div>
+                            </Col>
+                        ) : null}
                         <Col
-                            flex="auto"
+                            flex={currentEnvType !== "Ethereum" ? "none" : "auto"}
                             style={{ textAlign: "right", marginRight: "0px" }}
                         >
                             {/* <Button type="primary"
@@ -712,6 +731,22 @@ const BPMNOverview = () => {
                             ? '生成动作已通过 backend 调用 NewTranslator。当前产物包含 DSL、Solidity 合约和 FFI；下一步 Install 会走后端统一的上传、编译和 FireFly 部署链路。'
                             : '生成动作已通过 backend 调用 NewTranslator。当前产物包含 DSL、Go 链码和 FFI；下一步是 Package。'}
                     </Text>
+                    {currentEnvType !== "Ethereum" ? (
+                        <div style={{ marginTop: 12, marginBottom: 16, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                            <Text type="secondary">当前模式</Text>
+                            <Tag color={messageConfirmationMode === "explicit" ? "red" : "blue"}>
+                                {messageConfirmationMode === "explicit" ? "需要确认" : "发送即完成"}
+                            </Tag>
+                            <Segmented
+                                value={messageConfirmationMode}
+                                onChange={(value) => setMessageConfirmationMode(value as "explicit" | "implicit")}
+                                options={[
+                                    { label: "需要确认", value: "explicit" },
+                                    { label: "发送即完成", value: "implicit" },
+                                ]}
+                            />
+                        </div>
+                    ) : null}
                     <Tabs
                         defaultActiveKey="dsl"
                         onChange={(key) => setActiveTabKey(key as "dsl" | "chaincode")}

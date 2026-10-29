@@ -894,13 +894,22 @@ export const commitChaincode = async (chaincodeName: string, chaincodeVersion: s
     }
 }
 
-export const getFireflyList = async (envId: string, orgId: string, membershipId: string = null) => {
+export const getFireflyList = async (
+    envId: string,
+    orgId: string,
+    membershipId: string = null,
+    envType: string = "Fabric",
+) => {
     if (envId === "") {
         return [];
     }
     try {
+        const basePath =
+            envType === "Ethereum"
+                ? `/eth-environments/${envId}/fireflys`
+                : `/environments/${envId}/fireflys`;
 
-        const response = await api.get(`/environments/${envId}/fireflys`, {
+        const response = await api.get(basePath, {
             params: {
                 org_id: orgId ? orgId : null,
                 membership_id: membershipId ? membershipId : null
@@ -925,8 +934,20 @@ export const getFireflyList = async (envId: string, orgId: string, membershipId:
 }
 
 export const getFireflyDetail = async (envId: string, fireflyId: string) => {
+    return getFireflyDetailByEnvType(envId, fireflyId, "Fabric");
+}
+
+export const getFireflyDetailByEnvType = async (
+    envId: string,
+    fireflyId: string,
+    envType: string = "Fabric",
+) => {
     try {
-        const response = await api.get(`/environments/${envId}/fireflys/${fireflyId}`)
+        const basePath =
+            envType === "Ethereum"
+                ? `/eth-environments/${envId}/fireflys/${fireflyId}`
+                : `/environments/${envId}/fireflys/${fireflyId}`;
+        const response = await api.get(basePath)
         const item = response.data.data;
         return {
             id: item.id,

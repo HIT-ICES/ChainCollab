@@ -22,8 +22,7 @@ interface IDmnLite {
         string calldata url,
         string calldata dmnContent,
         string calldata decisionId,
-        string calldata inputData,
-        uint256 requiredOrganizations
+        string calldata inputData
     ) external returns (bytes32 requestId);
 
     function getRequestStatus(bytes32 requestId)
@@ -137,7 +136,6 @@ contract SupplyChainPaper7777 {
         string decisionId;
         bool callerRestricted;
         address allowedCaller;
-        uint256 requiredOrganizations;
     }
 
     struct BusinessRule {
@@ -147,7 +145,6 @@ contract SupplyChainPaper7777 {
         string decisionId;
         bool callerRestricted;
         address allowedCaller;
-        uint256 requiredOrganizations;
         ElementState state;
         bytes32 requestId;
         uint256 requestedAt;
@@ -335,7 +332,6 @@ contract SupplyChainPaper7777 {
             decisionId: config.decisionId,
             callerRestricted: config.callerRestricted,
             allowedCaller: config.allowedCaller,
-            requiredOrganizations: config.requiredOrganizations,
             state: ElementState.DISABLED,
             requestId: bytes32(0),
             requestedAt: 0,
@@ -806,8 +802,7 @@ contract SupplyChainPaper7777 {
             inst.dmnEvalUrl,
             br.dmnContent,
             br.decisionId,
-            inputData,
-            br.requiredOrganizations
+            inputData
         );
 
         br.requestId = requestId;
@@ -849,6 +844,7 @@ contract SupplyChainPaper7777 {
 
         emit BusinessRuleCompleted(instanceId, BusinessRuleKey.Activity_0rm8bkp, br.requestId);
     }
+
 
 function Event_06sexe6(uint256 instanceId) external onlyInitialized {
         Instance storage inst = _getInstance(instanceId);

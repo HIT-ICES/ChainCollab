@@ -1,0 +1,33 @@
+contract MultiMessageCase {
+    participants {
+        participant P1 { msp "P1MSP" attributes { role = "p1" } }
+        participant P2 { msp "P2MSP" attributes { role = "p2" } }
+        participant P3 { msp "P3MSP" attributes { role = "p3" } }
+    }
+    globals {
+        Flag: bool
+    }
+    messages {
+        message M1 from P1 to P2 { initial state INACTIVE schema "{}" }
+        message M2 from P2 to P3 { initial state INACTIVE schema "{}" }
+        message M3 from P3 to P1 { initial state INACTIVE schema "{}" }
+    }
+    gateways {
+        gateway G1 { type parallel initial state INACTIVE }
+    }
+    events {
+        event StartEvent_1 { initial state READY }
+        event EndEvent_1 { initial state INACTIVE }
+    }
+    businessrules {
+    }
+    oracletasks {
+    }
+    flows {
+        start event StartEvent_1 enables M1;
+        when message M1 completed then enable M2;
+        when message M2 completed then enable M3;
+        when message M3 completed then enable EndEvent_1;
+    }
+}
+

@@ -391,7 +391,7 @@ node scripts/deploy-contract.js
 
 - **Docker & Docker Compose**: 必需,用于运行服务
 - **Node.js**: 必需,用于部署脚本
-- **solc**: 编译合约需要,可选
+- **solc**: 推荐安装原生编译器,脚本优先使用本机 `solc`
 - **jq**: 格式化 JSON 输出,可选但推荐
 
 ### 安装依赖
@@ -401,12 +401,22 @@ node scripts/deploy-contract.js
 sudo apt-get update
 sudo apt-get install docker.io docker-compose nodejs npm solc jq
 
+# 如果系统仓库没有 solc，可使用 Python 安装 solc-select
+python3 -m pip install solc-select
+solc-select install 0.8.19
+solc-select use 0.8.19
+
 # macOS
 brew install docker docker-compose node solidity jq
 
 # Node.js 依赖
 npm install
 ```
+
+补充说明:
+
+- 不推荐 `npm install -g solc`, 这通常提供的是 `solcjs`, 可能不支持项目脚本需要的 `--evm-version`、`--via-ir` 等参数
+- 如果本机 `solc` 不可用, `compile.sh` 会回退到 Docker 版 Solidity 编译器
 
 ---
 
@@ -598,4 +608,3 @@ node scripts/create-job.js         # 创建 Job
 5. **合约地址**: 清理后需要重新部署合约,地址会改变
 
 ---
-

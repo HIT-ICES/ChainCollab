@@ -15,6 +15,7 @@ import MainPage from './modeler/pop-up/MainPage';
 import UploadDmnModal from './modeler/pop-up/UploadDmnModal';
 import TestPaletteProvider from './modeler/lib-provider/external-elements';
 import oracleModdle from './modeler/moddle/oracle.json';
+import abcModdle from './modeler/moddle/abc.json';
 import customRendererModule from './custom/customerRenderer.js'
 import qaExtension from './custom/qa.json'
 import CustomPalette from './custom/customerPalette.js';
@@ -47,6 +48,163 @@ export interface ChorModelerProps {
   serviceOverrides?: Partial<ChorApiClient>;
   onBpmnUpload?: (response: unknown) => void;
 }
+
+const localModdleName = (item: any) => {
+  return item?.$type?.split(':').pop();
+};
+
+const parseLegacyMessageDocumentation = (businessObject: any) => {
+  const documentation = businessObject?.documentation;
+  if (!documentation?.length || !documentation[0]?.text) {
+    return null;
+  }
+  try {
+    const parsed = JSON.parse(documentation[0].text);
+    if (!parsed || typeof parsed !== 'object' || (!parsed.properties && !parsed.files)) {
+      return null;
+    }
+    return {
+      properties: parsed.properties ?? {},
+      required: parsed.required ?? [],
+      files: parsed.files ?? {},
+      'file required': parsed['file required'] ?? []
+    };
+  } catch (error) {
+    return null;
+  }
+};
+
+const parseLegacyBusinessRuleDocumentation = (businessObject: any) => {
+  const documentation = businessObject?.documentation;
+  if (!documentation?.length || !documentation[0]?.text) {
+    return null;
+  }
+  try {
+    const parsed = JSON.parse(documentation[0].text);
+    if (!parsed || typeof parsed !== 'object' || (!parsed.inputs && !parsed.outputs)) {
+      return null;
+    }
+    return {
+      inputs: Array.isArray(parsed.inputs) ? parsed.inputs : [],
+      outputs: Array.isArray(parsed.outputs) ? parsed.outputs : []
+    };
+  } catch (error) {
+    return null;
+  }
+};
+
+const buildMessageSchemaExtension = (modeler: any, element: any, payload: any) => {
+  const businessObject = element.businessObject;
+  const moddle = modeler._moddle;
+  const extensionElements = businessObject.extensionElements
+    || moddle.create('bpmn:ExtensionElements', { values: [] });
+  const messageSchema = moddle.create('abc:MessageSchema', {
+    properties: [],
+    files: []
+  });
+
+  Object.keys(payload.properties).forEach((name) => {
+    const definition = payload.properties[name];
+    const required = payload.required.includes(name);
+    const property = moddle.create('abc:Property', {
+      name,
+      type: definition.type,
+      description: definition.description,
+      required,
+      definition: JSON.stringify(definition)
+    });
+    property.$parent = messageSchema;
+    messageSchema.properties.push(property);
+  });
+
+  Object.keys(payload.files).forEach((name) => {
+    const definition = payload.files[name];
+    const required = payload['file required'].includes(name);
+    const file = moddle.create('abc:File', {
+      name,
+      type: definition.type,
+      description: definition.description,
+      required,
+      definition: JSON.stringify(definition)
+    });
+    file.$parent = messageSchema;
+    messageSchema.files.push(file);
+  });
+
+  messageSchema.$parent = extensionElements;
+  extensionElements.values = (extensionElements.values || [])
+    .filter((value: any) => localModdleName(value) !== 'MessageSchema')
+    .concat(messageSchema);
+  extensionElements.$parent = businessObject;
+
+  return extensionElements;
+};
+
+const buildBusinessRuleExtension = (modeler: any, element: any, payload: any) => {
+  const businessObject = element.businessObject;
+  const moddle = modeler._moddle;
+  const extensionElements = businessObject.extensionElements
+    || moddle.create('bpmn:ExtensionElements', { values: [] });
+  const businessRule = moddle.create('abc:BusinessRule', {
+    inputs: [],
+    outputs: []
+  });
+
+  payload.inputs.forEach((item: any) => {
+    const input = moddle.create('abc:Input', {
+      name: item.name,
+      type: item.type,
+      description: item.description,
+      definition: JSON.stringify(item)
+    });
+    input.$parent = businessRule;
+    businessRule.inputs.push(input);
+  });
+
+  payload.outputs.forEach((item: any) => {
+    const output = moddle.create('abc:Output', {
+      name: item.name,
+      type: item.type,
+      description: item.description,
+      definition: JSON.stringify(item)
+    });
+    output.$parent = businessRule;
+    businessRule.outputs.push(output);
+  });
+
+  businessRule.$parent = extensionElements;
+  extensionElements.values = (extensionElements.values || [])
+    .filter((value: any) => localModdleName(value) !== 'BusinessRule')
+    .concat(businessRule);
+  extensionElements.$parent = businessObject;
+
+  return extensionElements;
+};
+
+const normalizeDocumentationExtensions = (modeler: any) => {
+  const elementRegistry = modeler.get('elementRegistry');
+  const eventBus = modeler.get('eventBus');
+  elementRegistry.forEach((element: any) => {
+    if (element.type === 'bpmn:Message') {
+      const payload = parseLegacyMessageDocumentation(element.businessObject);
+      if (!payload) {
+        return;
+      }
+      element.businessObject.extensionElements = buildMessageSchemaExtension(modeler, element, payload);
+      element.businessObject.documentation = [];
+      eventBus.fire('element.changed', { element });
+    }
+    if (element.type === 'bpmn:BusinessRuleTask') {
+      const payload = parseLegacyBusinessRuleDocumentation(element.businessObject);
+      if (!payload) {
+        return;
+      }
+      element.businessObject.extensionElements = buildBusinessRuleExtension(modeler, element, payload);
+      element.businessObject.documentation = [];
+      eventBus.fire('element.changed', { element });
+    }
+  });
+};
 
 const ChorModelerApp: React.FC<ChorModelerProps> = ({
   consortiumId,
@@ -114,6 +272,7 @@ const ChorModelerApp: React.FC<ChorModelerProps> = ({
       return;
     }
     await modeler.current.importXML(newXml);
+    normalizeDocumentationExtensions(modeler.current);
     isDirtyRef.current = false;
   }, []);
 
@@ -220,7 +379,8 @@ const ChorModelerApp: React.FC<ChorModelerProps> = ({
         },
         moddleExtensions: {
           qa:qaExtension,
-          oracle: oracleModdle
+          oracle: oracleModdle,
+          abc: abcModdle
         },
         additionalModules: [
           PropertiesPanelModule,

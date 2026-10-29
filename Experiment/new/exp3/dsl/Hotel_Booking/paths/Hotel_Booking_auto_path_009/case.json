@@ -1,0 +1,65 @@
+{
+  "case_name": "Hotel_Booking",
+  "description": "Auto materialized from generated DSL executable path.",
+  "source_b2c": "/root/code/ChainCollab/Experiment/new/exp2_semantic_verification/results/cases/Hotel_Booking/dsl.b2c",
+  "paths": [
+    {
+      "path_name": "Hotel_Booking_auto_path_009",
+      "expect": "accepted",
+      "steps": [
+        {
+          "type": "gateway",
+          "element": "ExclusiveGateway_0hs3ztq"
+        },
+        {
+          "type": "message",
+          "element": "Message_045i10y",
+          "payload": {
+            "date": "sample-date",
+            "bedrooms": 1
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_0r9lypd",
+          "payload": {
+            "confirm": true
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "ExclusiveGateway_106je4z"
+        },
+        {
+          "type": "message",
+          "element": "Message_1em0ee4",
+          "payload": {
+            "quotation": 1
+          }
+        },
+        {
+          "type": "message",
+          "element": "Message_1nlagx2",
+          "payload": {
+            "confirmation": true
+          }
+        },
+        {
+          "type": "gateway",
+          "element": "EventBasedGateway_1fxpmyn"
+        },
+        {
+          "type": "message",
+          "element": "Message_1xm9dxy",
+          "payload": {
+            "motivation": "sample-motivation"
+          }
+        },
+        {
+          "type": "event",
+          "element": "EndEvent_0366pfz"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="ASCII"?>
+<b2c:Contract xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:b2c="https://chaincollab/newTranslator/b2c" name="LbCCsHaTObrsTF4mRfiLSyVvgeTuziYKm23SV8592GDHBVlArIZ6yljHCen">
+  <sections xsi:type="b2c:MessageSection">
+    <messages name="8ChikDCXyAxsGvRcXj6anVGYYOL1RhRizPtO51zq6QF8Unhrn2Ko4yS8VvCTgMcYuq" initialState="PENDING_CONFIRMATION" schema="Euzl3wS7DhMa1uTRXrXWh1otVPmy5pOocX1PbkQ8Vos4qIa0HkOeDJ98QC"/>
+    <messages name="KovVSXVA1IBNjEjpkDZrSxQdZIgYRESBtPruQyc6jpd5Hnx4ZdYMsozMouXxeK3" initialState="READY" schema="tkDJO1BlQLplIaW4jWbHFY3rk83SMpZLaAip2CO09lppdxrwICDSNNzJjAsl3euJH"/>
+    <messages name="Vsg5awqM05vowvyBdBLgzelUM5TTnOP0xUlYHH1vhqGyNEgmSQD7I3n704uY9k" initialState="PENDING_CONFIRMATION" schema="9Cxenp9Ml9tmIxbprlKzly3EpLd1lfp8ioozJTLOJkYLXDwfS5Q6kIe7vU"/>
+    <messages name="7uUextpRwPIAc9Eden0H0K0hjVQiYmNM8ovq0WagmguyQ17BUtVPkICQIoX71P0pB" initialState="READY" schema="O24pXIEAzAYVdZ5RiatvgJY68vVXeqk47WXEazR4IVRr9ivJVBmn62SB8ioHDAqrAs6z"/>
+    <messages name="bzW2IGToyhaMU8sQ41rlyP2lCym81j6B0tvTvXoJJIbgIyxdJzzzfaPoGOrOj5w" initialState="DONE" schema="QU3yEmLsHXra1618KUfeeE7qHoYMCwEAdLmtY4GH5fFjCj3zNhvaXpw3GccOrPNRV"/>
+    <messages name="Nf9lIRPAHHYA3FRtnOjHByiFSGuQlKsGFLR2V3K2oWFplB3PRE8QBhI7PRHRx" schema="QP9gsJ9D7AnFQOeQHY7HzrAH9xZJ0v0euK6fZh97GNDplDnwFfVPUjObHOrnpFU"/>
+    <messages name="x1PhWq3xsJh293PSO6RiTSiOrETf94WEDVSP8JZt0N8oVJUKjw0jZ0MGw8Ze" initialState="PENDING_CONFIRMATION" schema="acWlaINgx6eVX943BRlKj77aS9mPAYEdrKEjU2DJh6yKsZt8rINEdgmP5o96D"/>
+    <messages name="NuBJs19QQis6skYEl9baCrThKepDJE10hvBLjCuvj8y7USXyEjdEC0begpUVHiIBU" initialState="READY" schema="g4w1E7qJJ0LEkXakwwDL561X93a7TlEvpDWWTTdMtXXAUN1Wzpm4zJkErPx76l76"/>
+    <messages name="DiVUWJ7PxyVYNcb1EQHYVz6To9oPrhGq2XSeeAyUmkUErRKG1MHjvx0U6dr" initialState="DONE" schema="7sr84XfksjP16i5ZC83XAlhGoPU4t8wAnhrlTs7CCAW0pwCirSPk80XFlZmd"/>
+  </sections>
+  <sections xsi:type="b2c:EventSection">
+    <events name="vUmiXO67IsgNpS88vdlDj82QeNYAZj2UUA4n3DZx2mgdpSOPbJU0LTRpGG4wN0WH" initialState="DONE"/>
+    <events name="Y9saTsGM28qjJLWtRNMbJ3qO78cJIpYAjLxZYhRobkOHWrkIWMMZEQocKy0P" initialState="DONE"/>
+    <events name="pW5VzusGHVHDiRFqQMm9TBjqvcLuHr1Fmt4pbDPofl7PiSvYZXQeetBCRMC4pH" initialState="PENDING_CONFIRMATION"/>
+    <events name="ATZJuJIqVHusLrFVzTIvQevSc3ssSHosgUx5vJAX2cCFpaOvOd7Q3qlsC58qyX7" initialState="READY"/>
+    <events name="oUn1VOJNQNwTJrHQVMOtPay2u4DTayd7dv83ZzKnTqUMDGhhN5HQNbTA83" initialState="PENDING_CONFIRMATION"/>
+    <events name="Js3dLa2i01KcEfZAgz4RqAWH51TtCTtqdhNyIbzQaJ3hGwaa98aIUkXIFedvZfMV" initialState="PENDING_CONFIRMATION"/>
+    <events name="stYUSaVnscAIEJxIWcklyl0HCFPjnD3j6bQGrfQPXO9lFE3J0fwg5KOQXSTVl4qqtXsRS"/>
+    <events name="5lozQ6JFusDTQTAJmu3DzluO3tNX6h41bhGy8zKhkQWn2kadINyflauFXHWk0927i6L" initialState="DONE"/>
+  </sections>
+  <sections xsi:type="b2c:FlowSection">
+    <flowItems xsi:type="b2c:StartFlow" start="//@sections.1/@events.4">
+      <target target="//@sections.0/@messages.6"/>
+    </flowItems>
+    <flowItems xsi:type="b2c:ParallelJoin" sources="//@sections.1/@events.2 //@sections.0/@messages.7 //@sections.1/@events.5 //@sections.0/@messages.4 //@sections.1/@events.6 //@sections.1/@events.0">
+      <actions xsi:type="b2c:SetGlobalAction">
+        <expr stringValue="dQBDPwROM0cJJal47wb7cwEFH8YjxPB7mcj1cLSwMQHBZtDfrVsqTeAKmwi" intValue="31277616" boolValue="false"/>
+      </actions>
+      <actions xsi:type="b2c:SetGlobalAction">
+        <expr stringValue="YZk2twZqBq3RcU3p9uLx9NtVDRPVof0DoXJUZbzwmod8aSply0gCaMy4abX" intValue="-332283567" boolValue="true"/>
+      </actions>
+      <actions xsi:type="b2c:SetGlobalAction">
+        <expr stringValue="YnpuYvlGYXF1WJU1q7uvIHmVm8jXuID0rC2OZciEaxmRhSm4XNuXalDq3UbKJct" intValue="-1213715546" boolValue="false"/>
+      </actions>
+      <actions xsi:type="b2c:EnableAction" target="//@sections.0/@messages.1"/>
+      <actions xsi:type="b2c:SetGlobalAction">
+        <expr stringValue="9F5vnJ4bNhlwbXw4JiesuJK7sSdauRUbco7g7TZeBxJ7Lv0g0F4ztb0zfNCLB" intValue="-1115806573" boolValue="false"/>
+      </actions>
+      <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.4"/>
+      <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.4"/>
+    </flowItems>
+    <flowItems xsi:type="b2c:ParallelJoin" sources="//@sections.1/@events.4 //@sections.1/@events.7 //@sections.1/@events.1 //@sections.1/@events.2 //@sections.1/@events.6 //@sections.0/@messages.4 //@sections.0/@messages.3 //@sections.0/@messages.2">
+      <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.5"/>
+      <actions xsi:type="b2c:SetGlobalAction">
+        <expr stringValue="3p4xSDADC6PCawjyXWB1CVRj1xhnwQT3pxzbX00LVHUatc4ysSI5mkCCeruWIBPqKgx" intValue="1597316578" boolValue="true"/>
+      </actions>
+      <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.4"/>
+      <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.3"/>
+      <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.0"/>
+      <actions xsi:type="b2c:EnableAction" target="//@sections.0/@messages.0"/>
+      <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.4"/>
+      <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.2"/>
+    </flowItems>
+    <flowItems xsi:type="b2c:GatewayFlow">
+      <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.3"/>
+      <actions xsi:type="b2c:SetGlobalAction">
+        <expr stringValue="QTlLh2un10FFS4BJCVMDzZlnxmo1qKBtRycL3vzNl0drJ0PFkTIynw388ZjN41" intValue="-287860028" boolValue="true"/>
+      </actions>
+      <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.6"/>
+      <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.4"/>
+      <actions xsi:type="b2c:SetGlobalAction">
+        <expr stringValue="T4Au19dp3g3JhiMqK3MQFEdW81f8fKXt3OMijLZaivgPTUqoczWOS293ytGHX6CZTNY" intValue="-806187390" boolValue="true"/>
+      </actions>
+      <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.0"/>
+      <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.7"/>
+      <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.2"/>
+      <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.8"/>
+      <branches xsi:type="b2c:GatewayExpressionBranch" expr="HcFFj2f55Gg0ROL8dc5jZcMbsvih4Ykna3afSPGIBUASHpxPiNcESyiFqBDvAzN">
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="vlh1dzdlrL6Eg8YEbXjOiInk6A52nm4BE1fxAvGvtFVmlCdRDQSC6R1NsF5yDTL5zI" intValue="-1179916329" boolValue="false"/>
+        </actions>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.1"/>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="WQMYFUYnZNooW5OZKYqy5rTRA4jP0umAbTFyxM0ueDbBgAnkIz88siImP2VGFEPZnQTfA" intValue="1765876872" boolValue="false"/>
+        </actions>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="zHL0qnZ6TIp2fMUbGfXXVCSc9DIRFJz2gw13FcuXb5hQEnD5RAAv6okYNAcW" intValue="-1445120292" boolValue="true"/>
+        </actions>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.6"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.0/@messages.8"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.2"/>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="dq8FWb4zSXPjdC89J4QAda3Z0Ip54lnnLxo2m9lcZhNTPya4ZDI11mmexk5" intValue="-1049288927" boolValue="false"/>
+        </actions>
+      </branches>
+      <branches xsi:type="b2c:GatewayExpressionBranch" expr="r4hwrr4N0QIPAVbbLhdPohobdHjbovfdOSxf4I2cv2XcFclSWZ3ciw3RfWWcA">
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="KcMSIiYo5XlSoKehfXUdBActUuL3L10mbCemymwuJAqkBOgYoiYvA6YCsJ8nvRhg" intValue="-1656649501" boolValue="false"/>
+        </actions>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="rGzo7dRUsJpMI1Tz2jma2IPWb6yJUiicpwxQMpQX9oiMrhaR5J0uqIL9L1I" intValue="-1352750303" boolValue="false"/>
+        </actions>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="66eS4QcEqsEonvPJiswTJsCGoUlxChTIeg7ZxjjlP0goc7gYnazxaOw5bFffDRrs95" intValue="-2102280452" boolValue="false"/>
+        </actions>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="tjqxOTp19DLG4tix0v1GRcXecfsNZimU0GWmwisGyPU7wypa0eUB3u126gNNH6K" intValue="-1147160178" boolValue="true"/>
+        </actions>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.2"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.7"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.0/@messages.3"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.4"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.5"/>
+      </branches>
+      <branches xsi:type="b2c:GatewayElseBranch">
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.0"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.7"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.3"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.7"/>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="0ct8RbZiDqti659JnQtETWxAfX1UjIpDkUviyZTeUi5YsRPNWcxJH1gt4xLKxNsqLKBAp" intValue="-1212632081" boolValue="false"/>
+        </actions>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.0"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.0/@messages.3"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.6"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.1"/>
+      </branches>
+      <branches xsi:type="b2c:GatewayElseBranch">
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.1"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.4"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.5"/>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="P5hSdwkUkP4128pjPW8SKYEIEAyY3umZIG2siw3z9jSwRuImqDFu4wdWKI4" intValue="760686356" boolValue="true"/>
+        </actions>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="bB54GHcwO55uFOQRyDfwoY2W8y1sICEMTmQ7hI6qFMVIFKkFWHvpEQrbMb0EfWXXREk" intValue="-449792969" boolValue="false"/>
+        </actions>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.7"/>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="kEXErSpG5QOMzE8t8cd6375y5pPQUGlgE1T2MP6RXOvx0VQsBzX7Onb4iHOyl63py6fwNE" intValue="-1611016625" boolValue="false"/>
+        </actions>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.7"/>
+      </branches>
+      <branches xsi:type="b2c:GatewayExpressionBranch" expr="aQ2vowmIIfFIuP43u7Sja86JunM9aZEiYyD1jvPMZIxvyhRpcSZr3dafmwnNa">
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.3"/>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="bDAnsB834FrX0KBax91Uxn3MKsLabIz5JI2Sm0EmlzPk4I1eVY09Umo5pOcnO0TpYAtQ" intValue="-1232852505" boolValue="true"/>
+        </actions>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.5"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.7"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.0/@messages.4"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.7"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.6"/>
+      </branches>
+      <branches xsi:type="b2c:GatewayElseBranch">
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.8"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.0/@messages.2"/>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="MJOGKmmgWdPWM6tUlfvJvN4KKli75ylx1KJc291XWnCVfLoIB5lCi70xt0" intValue="1797145403" boolValue="true"/>
+        </actions>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.0"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.2"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.8"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.0/@messages.4"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.4"/>
+      </branches>
+      <branches xsi:type="b2c:GatewayCompareBranch" relation="Sw1NG9aYOIOP3hGyxDnVKzzhGptE3gup1EzAeIY6tdokTRbRBTCINx2xy707NY">
+        <value stringValue="6InJ2DUe0AcAUrojp7FD7XSfhQMcV5bXPLHQ9dIUsugfWHaoRNlzTwyCv1piQNJVPVH" intValue="-1346268570" boolValue="true"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.6"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.0/@messages.1"/>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="P6Mm2vtcV0MfDGbg7eIVzkEnine4nWjR4JwgnvTPgAGFXimsY4cLfdL42UPVwMR" intValue="-1528610669" boolValue="true"/>
+        </actions>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.7"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.2"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.7"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.4"/>
+      </branches>
+      <branches xsi:type="b2c:GatewayElseBranch">
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.5"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.2"/>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="UUVYFMrJhnkQutQmahVa7oEZpdylshIzmZlzYfETsmMZVfK65NxZRcb9aN2K" intValue="-170553734" boolValue="true"/>
+        </actions>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="ND9RRNe8T3CL1WBG1lhMww3P6oL5rBQU4z0tiGyolhTSDs4nqKJStNQCDaJVwMfYQb93" intValue="231097724" boolValue="true"/>
+        </actions>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.1"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.6"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.4"/>
+      </branches>
+    </flowItems>
+    <flowItems xsi:type="b2c:GatewayFlow">
+      <actions xsi:type="b2c:SetGlobalAction">
+        <expr stringValue="x1Dzch03vB9CXomItYmT373NJqoKedd3cMgDDdl1LDIJK5I5FW3toKsVEOEAMpVsQp1" intValue="845724219" boolValue="false"/>
+      </actions>
+      <actions xsi:type="b2c:SetGlobalAction">
+        <expr stringValue="DvT0PK8znrstjnEh9y5tJJkWtoFcD65CuCUhLOTBhhPc5JKIjyuhrxmgDbHL" intValue="-1625920232" boolValue="false"/>
+      </actions>
+      <actions xsi:type="b2c:SetGlobalAction">
+        <expr stringValue="J9GJYBoMl7V46679QLvVvaXbSxgieBndPbjaaE0YyIlTS0lLSXkUGWLCWrkkQCVj8" intValue="769878997" boolValue="true"/>
+      </actions>
+      <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.1"/>
+      <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.5"/>
+      <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.7"/>
+      <actions xsi:type="b2c:EnableAction" target="//@sections.0/@messages.8"/>
+      <branches xsi:type="b2c:GatewayCompareBranch" relation="oVku3hyqCO5m0TOXReKr3seseDIOWsRUtyNU7BOsvawuGg3bOcpz11mSdg7">
+        <value stringValue="rZUbmQYmrbK2vaeinmI2BZxYv9GlU0pYyLQHxALvF55mKOLYUWlAYxQCrpIuEYh" intValue="927982551" boolValue="true"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.4"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.0/@messages.2"/>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="IBr3Sd5pb5DJL1fGY0LRnt8agvYVhEY7D0oIh1Ia38ZSK3Ver6ZCT70Q6RwYae7lzM" intValue="-237880755" boolValue="true"/>
+        </actions>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.2"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.4"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.0"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.1"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.3"/>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="VEqfiJdQrTXdKXFPPCidSewhxz9lz2VFEOgqFZrmTmoOUguKBrzEnys9UXFPaZiBQY9q0" intValue="729312408" boolValue="true"/>
+        </actions>
+      </branches>
+      <branches xsi:type="b2c:GatewayElseBranch">
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="4JLbRJxHr6gspl6TfX7mREFCvixpXRbYCogttXRGXDSpCjcA5gtBl5cfe7c5De65n5cX" intValue="-1064905190" boolValue="false"/>
+        </actions>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.7"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.0"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.5"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.0"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.0/@messages.5"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.2"/>
+      </branches>
+      <branches xsi:type="b2c:GatewayCompareBranch" relation="nKt1Zt1cFYhWstg0tRQv9hiy4uSfXcYu9YOoUyxEqdgnXCLNbqZA6q0JYo7yYB">
+        <value stringValue="UIZCr9ZgutV3SGVMqwdtlFhOOnwKJK0tAIYPPD6VMuwLsQmUKuNOg4zXRCq1" intValue="-538887167" boolValue="false"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.6"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.5"/>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="cKe8lXTv8szQ9QM2zmXCIddBOz7j8RRcpdrrcTUILl4waclnj2K5rgWRnluYudyJFyXAW" intValue="-939096402" boolValue="true"/>
+        </actions>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="uLkjN05N512Ngvluq0UdJpaS3Ll67JKykY56LumixhwsF2anFbPIqNFs1RsR" intValue="1062715651" boolValue="true"/>
+        </actions>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.1"/>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="hp1Z6WqNkaTo6kkhRYajVsYZdIqJmQz6rdyDjjv4WiaPlf3Aa81tryl5ST5bDy2szqQ0" intValue="-10576395" boolValue="true"/>
+        </actions>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.8"/>
+      </branches>
+      <branches xsi:type="b2c:GatewayCompareBranch" relation="DlGfnrVQ4LlENqvAVkj5jtz9jkjE2UwcfvsqiAvQBEPM6S6o4DKZ6Uzc8Cfzv181kRF1">
+        <value stringValue="BClHxdRq7fl0hS35l62Ks9lYxdSlSKfQ3zPlYpxbGzfZQFMZvOkSBH0BUWvMvfZMhytH" intValue="-721583605" boolValue="false"/>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="GZGcSPzrvJJ7tka8IFJhhQHOTOUaFAWGqWeXvD5OVTpDfrwuSxfbqjPWUptzdx82E2dmRs" intValue="1366100894" boolValue="true"/>
+        </actions>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.0/@messages.7"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.8"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.0"/>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="X27Kf4YOQjoiTf08n3EVeClwF8DpiUS0qXarSvoZ0efxU7lB7IODSUd1BRD8rMiARz" intValue="-2033991542" boolValue="false"/>
+        </actions>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="WMUuxJie46q98m7mhKQVg9hdjkFcScI0GJ1ltcRwiBzmpq9XYebEDVAfvRK4" intValue="1703623503" boolValue="true"/>
+        </actions>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="KNl4NGfbWL5OJGmYfWFifTINKSKSMu0R88f0QlyCQI65Hhf1Ofn6m71it1odn" intValue="1538616284" boolValue="true"/>
+        </actions>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="hoiZoLHiLrR2N0J0CImjvvz854xPU0dRxWsJAb91pF8qxRjBrg5t0L2MqER" intValue="958908418" boolValue="true"/>
+        </actions>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.6"/>
+      </branches>
+      <branches xsi:type="b2c:GatewayExpressionBranch" expr="GCX1P95zDaJpIisW6pvk22AxLmEcjOOIliqLlHkx2OzujQ8kmcVLG9hHzlZO">
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="M3DnqY5OiqjgX7v1G1e3GHBuRsaomFHlgAyA6wWhRlHYKOClgIU9oilWvyMW" intValue="-158718504" boolValue="false"/>
+        </actions>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.7"/>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="z14zSa1vnv48anCZc56mHw3fyDd1tQjUpZRN5Se0MDQAe2SqQFsTSh28qtGr3x3O" intValue="1869152756" boolValue="false"/>
+        </actions>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.5"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.3"/>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="HXSvAlcuNOj04cXNPSvjMmZLidtSUL7dAFvYsFDpUAGmTCC5cbRodLhRxAN0s92e1c6Sk" intValue="2010095359" boolValue="false"/>
+        </actions>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.4"/>
+      </branches>
+      <branches xsi:type="b2c:GatewayExpressionBranch" expr="H0jWF6qkZh3NegV69UDEcIBelkIGeu5Z1T0p76qwyqn30XIE6SoT3jsDA5g">
+        <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.2"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.5"/>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="DtAe5EYjTGPRab2xLHvQAeY1vqjWkODfKnlwYKpna7ZWKdab1LNr3d6XeP9sBBZhNqt3" intValue="-1771857589" boolValue="false"/>
+        </actions>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="18zhIDQJFlIitKj3EVrrhlvb9zJgrj6toSX3ks2VcKcXlF5llfQZkOG9fHW" intValue="1259535247" boolValue="true"/>
+        </actions>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.5"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.7"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.1"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.5"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.8"/>
+      </branches>
+      <branches xsi:type="b2c:GatewayExpressionBranch" expr="FbTvVltnZ3wcBJWK7PC5u5ipR67qGmA1ivwgCvNiOIzWSl20yFUlgv5cV4k0hu62">
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="XQxhURkbXxZhoQ1zy35hVVIk770sagPvrW5W9DucErgqO1o6wTPGWWZpCfdRPxJU18E" intValue="-757443503" boolValue="false"/>
+        </actions>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="6rVNUhqpwdl1McdHDjbfQumJNtxeLHRXKpGusL8JeMG6tx6jLHXhTaVUjKMIFx0DdDS" intValue="-1643011385" boolValue="true"/>
+        </actions>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.1"/>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.0"/>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="z8s5aOL7QIOOPcCBCbeWRRLuIX4cnMyA7aUcgUSqlMoM0BQ7i0J6A6AJCjvQ9BV4jDGG" intValue="-453870061" boolValue="true"/>
+        </actions>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="i70BZx2tQ0hCVcoVdnCSXRJ1aIpZKRQL31BUq4weZToRxyG4zEXqw5IjB6eIqrdlL7kwrb" intValue="1039073368" boolValue="true"/>
+        </actions>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.0/@messages.6"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.0/@messages.6"/>
+      </branches>
+      <branches xsi:type="b2c:GatewayExpressionBranch" expr="Qn1kxLLzaML4MU6L9FzmIsb0q7aCxT3xt9quAn4czACWmyO9fQaYaDtiw9YY2V7JMTDy">
+        <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.1"/>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="3oDNmO6QbGYNCjs8UDJQ5xAcjZBdTvyeIIUpzldMbF5ymtsKPJDHq4oyRPjLVxOK" intValue="48188292" boolValue="false"/>
+        </actions>
+        <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.1"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.0/@messages.8"/>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="K1miG6Y9HXxy8R2aIINGBFbO3G7Jz8FCBlg7wDPU2lZ2buIbucAdRq3Ti2fD" intValue="1894372380" boolValue="false"/>
+        </actions>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="xUoYYMOWphtJMl5s8aTxrXUHSPKhVvVlILMzQjB0koQpMQ7CggahZUbZVm" intValue="1451582161" boolValue="true"/>
+        </actions>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.0/@messages.0"/>
+      </branches>
+      <branches xsi:type="b2c:GatewayCompareBranch" relation="KmiUxDjGvz29hSwU1tT1Wq0jBUTi0jQRSt3q60Oz2GGbiV7QaLAfYAGoNrNs8p1iSD">
+        <value stringValue="1qWDucx76UFxRAHmp2wzfMWIAM5wONXhSXzBTqyVjMa4hItiiuqJ307nCT1POcAvLA" intValue="287216432" boolValue="false"/>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="Q1Qb7Ki3vd0j0vbiLzrkzHunAzdQajrIZKywW608FaFfRFGn6vxQ7oeCNlRdzW" intValue="-2085514395" boolValue="false"/>
+        </actions>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.7"/>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="R0W1QRrQw1D64U6wAVUKB28BCKgCrXhMBCiDSzhgwggcLcuvJO3sSy9om7tNp" intValue="-199311814" boolValue="false"/>
+        </actions>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.5"/>
+        <actions xsi:type="b2c:SetGlobalAction">
+          <expr stringValue="MugI1AUE0Hwr2tQ9czgm71ps9SQyFW5vWuuyhTPn7v5XBsjaxhGUpPyPcCH188Wx" intValue="2045025609" boolValue="true"/>
+        </actions>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.0/@messages.5"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.2"/>
+        <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.4"/>
+      </branches>
+    </flowItems>
+    <flowItems xsi:type="b2c:StartFlow" start="//@sections.1/@events.2">
+      <target target="//@sections.1/@events.2"/>
+    </flowItems>
+    <flowItems xsi:type="b2c:OracleTaskFlow"/>
+    <flowItems xsi:type="b2c:ParallelJoin" sources="//@sections.1/@events.0 //@sections.0/@messages.4 //@sections.1/@events.5 //@sections.1/@events.4 //@sections.1/@events.2">
+      <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.3"/>
+      <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.6"/>
+      <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.1"/>
+      <actions xsi:type="b2c:EnableAction" target="//@sections.0/@messages.3"/>
+      <actions xsi:type="b2c:EnableAction" target="//@sections.0/@messages.2"/>
+      <actions xsi:type="b2c:SetGlobalAction">
+        <expr stringValue="81JKOvNfn51AhGZ9lUf6k3O4vKgCBctBLmFPpCstJVuzyU1K0iobUnG5xMpdE9cu" intValue="-1372426277" boolValue="true"/>
+      </actions>
+      <actions xsi:type="b2c:DisableAction" target="//@sections.0/@messages.5"/>
+      <actions xsi:type="b2c:EnableAction" target="//@sections.1/@events.4"/>
+      <actions xsi:type="b2c:DisableAction" target="//@sections.1/@events.5"/>
+    </flowItems>
+    <flowItems xsi:type="b2c:GatewayFlow"/>
+  </sections>
+  <sections xsi:type="b2c:GatewaySection"/>
+  <sections xsi:type="b2c:GlobalSection"/>
+  <sections xsi:type="b2c:GatewaySection"/>
+  <sections xsi:type="b2c:EventSection"/>
+</b2c:Contract>

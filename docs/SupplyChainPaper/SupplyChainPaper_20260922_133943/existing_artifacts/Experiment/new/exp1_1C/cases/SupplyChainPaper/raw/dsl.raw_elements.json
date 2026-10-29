@@ -1,0 +1,295 @@
+[
+  {
+    "id": "Participant_0w6qkdf",
+    "name": "Bulk buyer",
+    "is_multi": false,
+    "metadata": {
+      "msp": "Bulk_buyerMSP",
+      "x509": "",
+      "attributes": {
+        "role": "Bulk buyer"
+      }
+    }
+  },
+  {
+    "id": "Participant_19mgbdn",
+    "name": "Manufacturer",
+    "is_multi": false,
+    "metadata": {
+      "msp": "ManufacturerMSP",
+      "x509": "",
+      "attributes": {
+        "role": "Manufacturer"
+      }
+    }
+  },
+  {
+    "id": "Participant_09cjol2",
+    "name": "Middleman",
+    "is_multi": false,
+    "metadata": {
+      "msp": "MiddlemanMSP",
+      "x509": "",
+      "attributes": {
+        "role": "Middleman"
+      }
+    }
+  },
+  {
+    "id": "Participant_0sa2v7d",
+    "name": "Supplier",
+    "is_multi": false,
+    "metadata": {
+      "msp": "SupplierMSP",
+      "x509": "",
+      "attributes": {
+        "role": "Supplier"
+      }
+    }
+  },
+  {
+    "id": "Participant_19j1e3o",
+    "name": "Special carrier",
+    "is_multi": false,
+    "metadata": {
+      "msp": "Special_carrierMSP",
+      "x509": "",
+      "attributes": {
+        "role": "Special carrier"
+      }
+    }
+  },
+  {
+    "id": "Message_04wmlqe",
+    "type": "message",
+    "sender": "Participant_19mgbdn",
+    "receiver": "Participant_0w6qkdf",
+    "schema": "{\"properties\":{\"productionStart\":{\"type\":\"string\",\"description\":\"Notification of the commencement of production, including the date and time\"}},\"required\":[\"productionStart\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0cba4t6",
+    "type": "message",
+    "sender": "Participant_09cjol2",
+    "receiver": "Participant_0sa2v7d",
+    "schema": "{\"properties\":{\"supplyOrderId\":{\"type\":\"string\",\"description\":\" Identifier of the supply order being forwarded\"}},\"required\":[\"supplyOrderId\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0d2xte5",
+    "type": "message",
+    "sender": "Participant_19j1e3o",
+    "receiver": "Participant_19mgbdn",
+    "schema": "{\"properties\":{\"deliveryConfirmation\":{\"type\":\"boolean\",\"description\":\"Confirmation of whether the supplies have been successfully delivered\"}},\"required\":[\"deliveryConfirmation\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0hpha6h",
+    "type": "message",
+    "sender": "Participant_0sa2v7d",
+    "receiver": "Participant_19j1e3o",
+    "schema": "{\"properties\":{\"requestId\":{\"type\":\"number\",\"description\":\"Unique identifier of the request for additional details \"},\"supplierReputation\":{\"type\":\"number\",\"description\":\"A numerical rating representing the supplier's reputation.\"}},\"required\":[\"requestId\",\"supplierReputation\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0pm90nx",
+    "type": "message",
+    "sender": "Participant_09cjol2",
+    "receiver": "Participant_19j1e3o",
+    "schema": "{\"properties\":{\"transportOrderId\":{\"type\":\"string\",\"description\":\"Identifier of the transport order being forwarded\"}},\"required\":[\"transportOrderId\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_0rwz1km",
+    "type": "message",
+    "sender": "Participant_19j1e3o",
+    "receiver": "Participant_0sa2v7d",
+    "schema": "{\"properties\":{\"requestId\":{\"type\":\"number\",\"description\":\" Unique identifier of the request for additional details \"},\"numberOfUnits\":{\"type\":\"number\",\"description\":\" Total number of units in the order requested\"},\"urgent\":{\"type\":\"boolean\",\"description\":\"Indicates whether the order requires urgent delivery.\"}},\"required\":[\"requestId\",\"numberOfUnits\",\"urgent\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_196q1fj",
+    "type": "message",
+    "sender": "Participant_19mgbdn",
+    "receiver": "Participant_0w6qkdf",
+    "schema": "{\"properties\":{},\"required\":[],\"files\":{\"deliveryNote\":{\"type\":\"file\",\"description\":\"A document confirming the delivery of goods\"}},\"file required\":[\"deliveryNote\"]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1ajdm9l",
+    "type": "message",
+    "sender": "Participant_19mgbdn",
+    "receiver": "Participant_09cjol2",
+    "schema": "{\"properties\":{\"supplyOrderDetails\":{\"type\":\"string\",\"description\":\" Details of the supplies needed\"}},\"required\":[\"supplyOrderDetails\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1dmeexg",
+    "type": "message",
+    "sender": "Participant_19j1e3o",
+    "receiver": "Participant_19mgbdn",
+    "schema": "{\"properties\":{\"confirm3\":{\"type\":\"string\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1dzkcn0",
+    "type": "message",
+    "sender": "Participant_19j1e3o",
+    "receiver": "Participant_19mgbdn",
+    "schema": "{\"properties\":{\"confirm2\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1io2g9u",
+    "type": "message",
+    "sender": "Participant_0sa2v7d",
+    "receiver": "Participant_19j1e3o",
+    "schema": "{\"properties\":{},\"required\":[],\"files\":{\"waybill\":{\"type\":\"file\",\"description\":\"Digital or physical waybill document，detailing the shipment contents and destination.\"}},\"file required\":[\"waybill\"]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1oxmq1k",
+    "type": "message",
+    "sender": "Participant_19j1e3o",
+    "receiver": "Participant_19mgbdn",
+    "schema": "{\"properties\":{\"confirm1\":{\"type\":\"boolean\",\"description\":\"\"}},\"required\":[],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Message_1wswgqu",
+    "type": "message",
+    "sender": "Participant_0w6qkdf",
+    "receiver": "Participant_19mgbdn",
+    "schema": "{\"properties\":{\"orderDetails\":{\"type\":\"string\",\"description\":\"Detailed list of goods ordered\"}},\"required\":[\"orderDetails\"],\"files\":{},\"file required\":[]}",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_1cr0nma",
+    "type": "gateway",
+    "gateway_type": "exclusive",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_0ep8cuh",
+    "type": "gateway",
+    "gateway_type": "exclusive",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_0onpe6x",
+    "type": "gateway",
+    "gateway_type": "parallel",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Gateway_1fbifca",
+    "type": "gateway",
+    "gateway_type": "parallel",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Event_06sexe6",
+    "type": "event",
+    "initial_state": "READY"
+  },
+  {
+    "id": "Event_13pbqdz",
+    "type": "event",
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Activity_0rm8bkp",
+    "type": "businessrule",
+    "inputs": [
+      [
+        "numberOfUnits",
+        "NumberOfUnits"
+      ],
+      [
+        "urgent",
+        "Urgent"
+      ],
+      [
+        "supplierReputation",
+        "SupplierReputation"
+      ]
+    ],
+    "outputs": [
+      [
+        "finalPriority",
+        "FinalPriority"
+      ]
+    ],
+    "initial_state": "INACTIVE"
+  },
+  {
+    "id": "Confirm1",
+    "type": "global",
+    "dsl_type": "bool"
+  },
+  {
+    "id": "Confirm2",
+    "type": "global",
+    "dsl_type": "bool"
+  },
+  {
+    "id": "Confirm3",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "DeliveryConfirmation",
+    "type": "global",
+    "dsl_type": "bool"
+  },
+  {
+    "id": "FinalPriority",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "NumberOfUnits",
+    "type": "global",
+    "dsl_type": "int"
+  },
+  {
+    "id": "OrderDetails",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "ProductionStart",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "RequestId",
+    "type": "global",
+    "dsl_type": "int"
+  },
+  {
+    "id": "SupplierReputation",
+    "type": "global",
+    "dsl_type": "int"
+  },
+  {
+    "id": "SupplyOrderDetails",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "SupplyOrderId",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "TransportOrderId",
+    "type": "global",
+    "dsl_type": "string"
+  },
+  {
+    "id": "Urgent",
+    "type": "global",
+    "dsl_type": "bool"
+  }
+]

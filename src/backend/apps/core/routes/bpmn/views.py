@@ -2,6 +2,8 @@ import logging
 import os
 import re
 import time
+import hashlib
+import io
 from pathlib import Path
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
@@ -36,7 +38,11 @@ from xml.etree import ElementTree as ET
 # from api.routes.bpmn  import BpmnCreateBody
 from rest_framework import viewsets, status
 from requests import delete, get, post
-from apps.core.services import NewTranslatorClient, NewTranslatorError
+from apps.core.services import (
+    NewTranslatorClient,
+    NewTranslatorError,
+    transform_go_message_confirmation,
+)
 from common.lib.ethereum.identity_flow import IdentityContractFlow
 from common.lib.ethereum.firefly_contracts import (
     abi_event_names,
@@ -48,6 +54,171 @@ from common.lib.ethereum.firefly_contracts import (
 
 
 logger = logging.getLogger(__name__)
+
+ABC_NS = "https://chaincollab.io/schema/abc"
+
+
+def _local_name(tag: str) -> str:
+    return tag.split("}", 1)[-1] if "}" in tag else tag
+
+
+def _register_xml_namespaces(xml_content: str):
+    try:
+        for _, namespace in ET.iterparse(io.StringIO(xml_content), events=("start-ns",)):
+            prefix, uri = namespace
+            ET.register_namespace(prefix, uri)
+    except Exception:
+        pass
+    ET.register_namespace("abc", ABC_NS)
+
+
+def _message_schema_documentation_to_extension(element: ET.Element) -> bool:
+    documentation_node = next(
+        (child for child in list(element) if _local_name(child.tag) == "documentation"),
+        None,
+    )
+    if documentation_node is None or not (documentation_node.text or "").strip():
+        return False
+
+    try:
+        documentation = json.loads(documentation_node.text or "{}")
+    except Exception:
+        return False
+    if not isinstance(documentation, dict):
+        return False
+    if not (documentation.get("properties") or documentation.get("files")):
+        return False
+
+    element_ns = element.tag[1:].split("}", 1)[0] if element.tag.startswith("{") else ""
+    extension_tag = f"{{{element_ns}}}extensionElements" if element_ns else "extensionElements"
+    extension_elements = next(
+        (child for child in list(element) if _local_name(child.tag) == "extensionElements"),
+        None,
+    )
+    if extension_elements is None:
+        extension_elements = ET.Element(extension_tag)
+        element.insert(0, extension_elements)
+
+    for child in list(extension_elements):
+        if _local_name(child.tag) == "MessageSchema":
+            extension_elements.remove(child)
+
+    schema = ET.SubElement(extension_elements, f"{{{ABC_NS}}}MessageSchema")
+    required = set(documentation.get("required") or [])
+    file_required = set(documentation.get("file required") or [])
+
+    for name, definition in (documentation.get("properties") or {}).items():
+        if not isinstance(definition, dict):
+            definition = {"type": str(definition)}
+        attrs = {
+            "name": str(name),
+            "type": str(definition.get("type", "string")),
+            "description": str(definition.get("description", "")),
+            "required": "true" if name in required else "false",
+            "definition": json.dumps(definition, ensure_ascii=False, separators=(",", ":")),
+        }
+        ET.SubElement(schema, f"{{{ABC_NS}}}Property", attrs)
+
+    for name, definition in (documentation.get("files") or {}).items():
+        if not isinstance(definition, dict):
+            definition = {"type": str(definition)}
+        attrs = {
+            "name": str(name),
+            "type": str(definition.get("type", "file")),
+            "description": str(definition.get("description", "")),
+            "required": "true" if name in file_required else "false",
+            "definition": json.dumps(definition, ensure_ascii=False, separators=(",", ":")),
+        }
+        ET.SubElement(schema, f"{{{ABC_NS}}}File", attrs)
+
+    element.remove(documentation_node)
+    return True
+
+
+def _business_rule_documentation_to_extension(element: ET.Element) -> bool:
+    documentation_node = next(
+        (child for child in list(element) if _local_name(child.tag) == "documentation"),
+        None,
+    )
+    if documentation_node is None or not (documentation_node.text or "").strip():
+        return False
+
+    try:
+        documentation = json.loads(documentation_node.text or "{}")
+    except Exception:
+        return False
+    if not isinstance(documentation, dict):
+        return False
+    if not (documentation.get("inputs") or documentation.get("outputs")):
+        return False
+
+    element_ns = element.tag[1:].split("}", 1)[0] if element.tag.startswith("{") else ""
+    extension_tag = f"{{{element_ns}}}extensionElements" if element_ns else "extensionElements"
+    extension_elements = next(
+        (child for child in list(element) if _local_name(child.tag) == "extensionElements"),
+        None,
+    )
+    if extension_elements is None:
+        extension_elements = ET.Element(extension_tag)
+        element.insert(0, extension_elements)
+
+    for child in list(extension_elements):
+        if _local_name(child.tag) == "BusinessRule":
+            extension_elements.remove(child)
+
+    business_rule = ET.SubElement(extension_elements, f"{{{ABC_NS}}}BusinessRule")
+
+    for item in documentation.get("inputs") or []:
+        if not isinstance(item, dict):
+            continue
+        attrs = {
+            "name": str(item.get("name", "")),
+            "type": str(item.get("type", "string")),
+            "description": str(item.get("description", "")),
+            "definition": json.dumps(item, ensure_ascii=False, separators=(",", ":")),
+        }
+        if attrs["name"]:
+            ET.SubElement(business_rule, f"{{{ABC_NS}}}Input", attrs)
+
+    for item in documentation.get("outputs") or []:
+        if not isinstance(item, dict):
+            continue
+        attrs = {
+            "name": str(item.get("name", "")),
+            "type": str(item.get("type", "string")),
+            "description": str(item.get("description", "")),
+            "definition": json.dumps(item, ensure_ascii=False, separators=(",", ":")),
+        }
+        if attrs["name"]:
+            ET.SubElement(business_rule, f"{{{ABC_NS}}}Output", attrs)
+
+    element.remove(documentation_node)
+    return True
+
+
+def _normalize_abc_extensions(bpmn_content: str | None) -> str | None:
+    if not bpmn_content:
+        return bpmn_content
+    try:
+        _register_xml_namespaces(bpmn_content)
+        root = ET.fromstring(bpmn_content)
+    except Exception:
+        return bpmn_content
+
+    changed = False
+    for element in root.iter():
+        if _local_name(element.tag) == "message":
+            changed = _message_schema_documentation_to_extension(element) or changed
+        if _local_name(element.tag) == "businessRuleTask":
+            changed = _business_rule_documentation_to_extension(element) or changed
+    if not changed:
+        return bpmn_content
+
+    try:
+        ET.indent(root, space="  ")
+    except Exception:
+        pass
+    return ET.tostring(root, encoding="unicode")
 
 
 def _seed_bpmn_dir() -> Path:
@@ -99,6 +270,15 @@ def _default_artifact_name(name: str) -> str:
     if sanitized[0].isdigit():
         sanitized = f"WorkflowContract_{sanitized}"
     return sanitized
+
+
+def _hash_dmn_content(dmn_content: str | None) -> str | None:
+    if not dmn_content:
+        return None
+    try:
+        return "0x" + hashlib.sha3_256(dmn_content.encode("utf-8")).hexdigest()
+    except Exception:
+        return None
 
 
 def _build_ff_datatype_payload(datatype_name: str, documentation: str) -> dict | None:
@@ -190,6 +370,7 @@ def _autoload_initial_bpmns(consortium_id: str, request_user):
             logger.exception("Failed to read initial BPMN file: %s", bpmn_path)
             failed += 1
             continue
+        bpmn_content = _normalize_abc_extensions(bpmn_content)
         svg_path = bpmn_path.with_suffix(".svg")
         if svg_path.exists():
             try:
@@ -231,7 +412,9 @@ class BPMNViewsSet(viewsets.ModelViewSet):
             consortiumid = request.data.get("consortiumid")
             orgid = request.data.get("orgid")
             name = request.data.get("name")
-            bpmnContent = request.data.get("bpmnContent")
+            bpmnContent = _normalize_abc_extensions(
+                request.data.get("bpmnContent")
+            )
             svgContent = request.data.get("svgContent")
             raw_participants = request.data.get("participants")  # [P1,P2]
             participants = [
@@ -303,7 +486,9 @@ class BPMNViewsSet(viewsets.ModelViewSet):
             if "name" in request.data:
                 bpmn.name = request.data.get("name")
             if "bpmnContent" in request.data:
-                bpmn.bpmnContent = request.data.get("bpmnContent")
+                bpmn.bpmnContent = _normalize_abc_extensions(
+                    request.data.get("bpmnContent")
+                )
                 if "participants" not in request.data:
                     bpmn.participants = json.dumps(
                         _extract_participants_from_bpmn(bpmn.bpmnContent)
@@ -329,6 +514,8 @@ class BPMNViewsSet(viewsets.ModelViewSet):
                 bpmn.chaincode_content = request.data.get("chaincode_content")
             if "ffiContent" in request.data:
                 bpmn.ffiContent = request.data.get("ffiContent")
+            if "execution_layout" in request.data:
+                bpmn.execution_layout = request.data.get("execution_layout") or {}
             if "envId" in request.data:
                 envId = request.data.get("envId")
                 envType = request.data.get("envType", "fabric")  # 默认为 fabric
@@ -392,11 +579,15 @@ class BPMNViewsSet(viewsets.ModelViewSet):
                 target=target,
                 artifact_name=artifact_name,
                 persist_to_runtime=True,
+                message_confirmation_mode=serializer.validated_data.get(
+                    "message_confirmation_mode", "explicit"
+                ),
             )
 
             bpmn.chaincode_content = generated.get("chaincodeContent") or ""
             bpmn.ffiContent = generated.get("ffiContent") or "{}"
-            bpmn.save(update_fields=["chaincode_content", "ffiContent"])
+            bpmn.execution_layout = generated.get("executionLayout") or {}
+            bpmn.save(update_fields=["chaincode_content", "ffiContent", "execution_layout"])
 
             return Response(data=ok(generated), status=status.HTTP_200_OK)
         except BPMN.DoesNotExist:
@@ -447,12 +638,21 @@ class BPMNViewsSet(viewsets.ModelViewSet):
             chaincodeContent = request.data.get("chaincodeContent") or bpmn.chaincode_content
             ffiContent = request.data.get("ffiContent") or bpmn.ffiContent
             env_id = bpmn.environment.id
+            message_confirmation_mode = request.data.get(
+                "message_confirmation_mode", "explicit"
+            )
 
             if not chaincodeContent:
                 return Response(
                     err("No generated chaincode content found for this BPMN."),
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+
+            chaincodeContent = transform_go_message_confirmation(
+                chaincodeContent,
+                mode=message_confirmation_mode,
+                ffi_content=ffiContent,
+            )
 
             with open(
                 BPMN_CHAINCODE_STORE + "/chaincode-go-bpmn/chaincode/smartcontract.go",
@@ -1256,8 +1456,12 @@ class BPMNInstanceViewSet(viewsets.ModelViewSet):
             bpmn = BPMN.objects.get(pk=bpmn_id)
             instance_chaincode_id = request.data.get("instance_chaincode_id")
             name = request.data.get("name")
+            execution_bindings = request.data.get("execution_bindings") or {}
             bpmn_instance = BPMNInstance.objects.create(
-                bpmn=bpmn, instance_chaincode_id=instance_chaincode_id, name=name
+                bpmn=bpmn,
+                instance_chaincode_id=instance_chaincode_id,
+                name=name,
+                execution_bindings=execution_bindings,
             )
             bpmn_instance.save()
             serializer = BpmnInstanceSerializer(bpmn_instance)
@@ -1323,6 +1527,10 @@ class DmnViewSet(viewsets.ModelViewSet):
                 name=request.data.get("name"),
                 dmnContent=request.data.get("dmnContent"),
                 svgContent=request.data.get("svgContent"),
+                fireflyDataId=request.data.get("fireflyDataId"),
+                cid=request.data.get("cid"),
+                contentHash=request.data.get("contentHash")
+                or _hash_dmn_content(request.data.get("dmnContent")),
             )
             dmn.save()
             serializer = DmnSerializer(dmn)
@@ -1364,8 +1572,19 @@ class DmnViewSet(viewsets.ModelViewSet):
                 dmn.name = request.data.get("name")
             if "dmnContent" in request.data:
                 dmn.dmnContent = request.data.get("dmnContent")
+                dmn.contentHash = request.data.get("contentHash") or _hash_dmn_content(
+                    request.data.get("dmnContent")
+                )
             if "dmnSvgContent" in request.data:
                 dmn.dmnSvgContent = request.data.get("dmnSvgContent")
+            if "svgContent" in request.data:
+                dmn.svgContent = request.data.get("svgContent")
+            if "fireflyDataId" in request.data:
+                dmn.fireflyDataId = request.data.get("fireflyDataId")
+            if "cid" in request.data:
+                dmn.cid = request.data.get("cid")
+            if "contentHash" in request.data and "dmnContent" not in request.data:
+                dmn.contentHash = request.data.get("contentHash")
             if "consortiumid" in request.data:
                 dmn.consortiumid = request.data.get("consortiumid")
             if "orgid" in request.data:

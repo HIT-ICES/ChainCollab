@@ -15,7 +15,7 @@ public class ValidateOclTest {
     @Test
     public void validateCompleteOclAgainstXmi() {
         String xmiDirProp = System.getProperty("xmiDir");
-        Assume.assumeTrue("xmiDir is set; skipping single-file validation test", xmiDirProp == null || xmiDirProp.isBlank());
+        Assume.assumeTrue("xmiDir is set; skipping single-file validation test", isUnset(xmiDirProp));
 
         Path cwd = Path.of("").toAbsolutePath().normalize();
         File ecore = resolveArg("ecore", cwd.resolve("MDAcheck/b2c.ecore").toFile());
@@ -43,10 +43,14 @@ public class ValidateOclTest {
 
     private static File resolveArg(String key, File defaultFile) {
         String value = System.getProperty(key);
-        if (value == null || value.isBlank()) {
+        if (isUnset(value)) {
             return defaultFile;
         }
         return resolveFile(value, defaultFile);
+    }
+
+    private static boolean isUnset(String value) {
+        return value == null || value.isBlank() || "null".equalsIgnoreCase(value.trim());
     }
 
     private static File resolveFile(String value, File fallback) {

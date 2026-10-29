@@ -1,0 +1,158 @@
+{
+  "contract": "LinearContractE",
+  "source_file": "/root/code/ChainCollab/Experiment/new/exp2_semantic_fidelity/outputs/positive/linear_contract_e/linear_contract_e.b2c",
+  "participants": [
+    {
+      "name": "OrgE1",
+      "msp": "OrgE1MSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "attributes": {
+        "role": "org1"
+      }
+    },
+    {
+      "name": "OrgE2",
+      "msp": "OrgE2MSP",
+      "x509": "",
+      "is_multi": false,
+      "multi_min": 0,
+      "multi_max": 0,
+      "attributes": {
+        "role": "org2"
+      }
+    }
+  ],
+  "globals": [
+    {
+      "name": "ContinueE",
+      "type": "bool",
+      "initial_value": null
+    }
+  ],
+  "messages": [
+    {
+      "name": "MsgE1",
+      "from": "OrgE1",
+      "to": "OrgE2",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    },
+    {
+      "name": "MsgE2",
+      "from": "OrgE2",
+      "to": "OrgE1",
+      "payload": "{}",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "events": [
+    {
+      "name": "StartEvent_E",
+      "type": "start",
+      "initial_state": "READY"
+    },
+    {
+      "name": "EndEvent_E",
+      "type": "end",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "GateE",
+      "type": "exclusive",
+      "initial_state": "INACTIVE"
+    }
+  ],
+  "businessrules": [],
+  "oracletasks": [],
+  "flows": [
+    {
+      "id": "flow_001",
+      "source_kind": "StartFlow",
+      "trigger": {
+        "kind": "start_event",
+        "name": "StartEvent_E"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "MsgE1"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_002",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "MsgE1"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "GateE"
+        }
+      ],
+      "branches": []
+    },
+    {
+      "id": "flow_003",
+      "source_kind": "GatewayFlow",
+      "trigger": {
+        "kind": "gateway_completed",
+        "name": "GateE"
+      },
+      "actions": [],
+      "branches": [
+        {
+          "kind": "GatewayCompareBranch",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "MsgE2"
+            }
+          ],
+          "condition": {
+            "kind": "compare",
+            "var": "ContinueE",
+            "relation": "==",
+            "value": ""
+          }
+        },
+        {
+          "kind": "GatewayElseBranch",
+          "actions": [
+            {
+              "op": "enable",
+              "target": "EndEvent_E"
+            }
+          ],
+          "condition": {
+            "kind": "else"
+          }
+        }
+      ]
+    },
+    {
+      "id": "flow_004",
+      "source_kind": "MessageFlow",
+      "trigger": {
+        "kind": "message_completed",
+        "name": "MsgE2"
+      },
+      "actions": [
+        {
+          "op": "enable",
+          "target": "EndEvent_E"
+        }
+      ],
+      "branches": []
+    }
+  ],
+  "unsupported": []
+}

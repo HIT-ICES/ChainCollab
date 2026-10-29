@@ -12,8 +12,12 @@ from textx.generators import gen_file, get_output_filename
 SOLIDITY_TYPE = {
     "string": "string",
     "int": "int256",
+    "integer": "int256",
+    "number": "int256",
     "bool": "bool",
+    "boolean": "bool",
     "float": "int256",
+    "float64": "int256",
 }
 
 STATE_ALIAS = {
@@ -49,6 +53,10 @@ def sanitize_contract_name(name: str) -> str:
     if identifier[0].isdigit():
         return f"WorkflowContract_{identifier}"
     return identifier
+
+
+def _message_param_type(type_name: str) -> str:
+    return SOLIDITY_TYPE.get((type_name or "string").lower(), "string")
 
 
 class DSLContractAdapter:
@@ -108,6 +116,78 @@ class SolidityRenderer:
             "globals": self._global_variables(),
             "business_rules": self._business_rule_payload(rule_done_actions),
             "flow_functions": flow_functions,
+        }
+
+    def build_execution_layout(self) -> dict:
+        return {
+            "messages": [
+                {
+                    "id": item["enum_name"],
+                    "sender": item["sender"],
+                    "receiver": item["receiver"],
+                    "sendMethod": f"{item['enum_name']}_Send",
+                    "completeMethod": f"{item['enum_name']}_Complete",
+                }
+                for item in self._message_payload()
+            ],
+            "gateways": [
+                {"id": item["enum_name"]}
+                for item in self._simple_payload(self.adapter.gateways)
+            ],
+            "events": [
+                {"id": item["enum_name"]}
+                for item in self._simple_payload(self.adapter.events)
+            ],
+            "businessRules": [
+                {
+                    "id": item["enum_name"],
+                    "method": item["enum_name"],
+                    "continueMethod": f"{item['enum_name']}_Continue",
+                    "inputs": [
+                        {
+                            "name": mapping["param_name"],
+                            "slot": mapping["slot_name"],
+                            "type": mapping["sol_type"],
+                        }
+                        for mapping in item["input_mappings"]
+                    ],
+                    "outputs": [
+                        {
+                            "name": mapping["param_name"],
+                            "slot": mapping["slot_name"],
+                            "type": mapping["sol_type"],
+                        }
+                        for mapping in item["output_mappings"]
+                    ],
+                }
+                for item in self._business_rule_payload({})
+            ],
+            "methodMap": {
+                **{
+                    item["enum_name"]: f"{item['enum_name']}_Send"
+                    for item in self._message_payload()
+                },
+                **{
+                    f"{item['enum_name']}#complete": f"{item['enum_name']}_Complete"
+                    for item in self._message_payload()
+                },
+                **{
+                    item["enum_name"]: item["enum_name"]
+                    for item in self._simple_payload(self.adapter.gateways)
+                },
+                **{
+                    item["enum_name"]: item["enum_name"]
+                    for item in self._simple_payload(self.adapter.events)
+                },
+                **{
+                    item["enum_name"]: item["enum_name"]
+                    for item in self._business_rule_payload({})
+                },
+                **{
+                    f"{item['enum_name']}#continue": f"{item['enum_name']}_Continue"
+                    for item in self._business_rule_payload({})
+                },
+            },
         }
 
     def _enum_maps(self) -> dict[str, dict[str, str]]:
@@ -271,7 +351,8 @@ class SolidityRenderer:
                     "name": rule.name,
                     "enum_name": enum_name,
                     "config_param": enum_name,
-                    "content_param": "dmnContent",
+                    "content_param": "dmnCid",
+                    "hash_param": "dmnHash",
                     "decision_param": "decisionId",
                     "caller_restricted_param": "callerRestricted",
                     "allowed_caller_param": "allowedCaller",
@@ -302,6 +383,9 @@ class SolidityFlowRenderer:
         self.rule_actions: dict[tuple[str, str], List[str]] = {}
         self.oracle_actions: dict[tuple[str, str], List[str]] = {}
         self._collect_flow_actions()
+
+    def _render_template(self, template_name: str, **context: Any) -> str:
+        return TEMPLATE_ENV.get_template(template_name).render(**context)
 
     def render_blocks(self) -> List[str]:
         blocks: List[str] = []
@@ -363,16 +447,11 @@ class SolidityFlowRenderer:
         functions: List[str] = []
         for event_name, actions in self.start_event_actions.items():
             enum_name = self.enum_maps["event"].get(event_name, sanitize_identifier(event_name))
-            body = f"""function {enum_name}(uint256 instanceId) external onlyInitialized {{
-        Instance storage inst = _getInstance(instanceId);
-        ActionEvent storage ev = inst.events[EventKey.{enum_name}];
-        require(ev.exists, "event not set");
-        require(ev.state == ElementState.ENABLED, "event state not allowed");
-
-        ev.state = ElementState.COMPLETED;
-        emit ActionEventDone(instanceId, EventKey.{enum_name});
-{self._indent("".join(actions), 2)}
-    }}"""
+            body = self._render_template(
+                "flows/start_event.sol.jinja",
+                event_name=enum_name,
+                after_hooks=self._indent("".join(actions), 2),
+            )
             functions.append(body)
         return functions
 
@@ -380,21 +459,89 @@ class SolidityFlowRenderer:
         functions: List[str] = []
         for message in self.adapter.messages:
             enum_name = self.enum_maps["message"].get(message.name, sanitize_identifier(message.name))
-            send_actions = self._indent("".join(self.message_actions.get((message.name, "sent"), [])), 2)
-            body = f"""function {enum_name}_Send(uint256 instanceId, string calldata fireflyTranId) external onlyInitialized {{
-        Instance storage inst = _getInstance(instanceId);
-        Message storage m = inst.messages[MessageKey.{enum_name}];
-        require(m.exists, "message not set");
-        _checkParticipant(inst, m.sendParticipant);
-        require(m.state == ElementState.ENABLED, "message state not allowed");
-
-        m.fireflyTranId = fireflyTranId;
-        m.state = ElementState.COMPLETED;
-        emit MessageSent(instanceId, MessageKey.{enum_name}, fireflyTranId);
-{send_actions}
-    }}"""
+            method_params, assignment_block = self._message_method_signature(message)
+            send_actions = self._indent(
+                "".join(self.message_actions.get((message.name, "sent"), [])), 2
+            )
+            complete_actions = self._indent(
+                "".join(self.message_actions.get((message.name, "completed"), [])), 2
+            )
+            signature = ", ".join(["uint256 instanceId", "string calldata fireflyTranId", *method_params])
+            body = self._render_template(
+                "actions/message_send.sol.jinja",
+                message_name=enum_name,
+                signature=signature,
+                parameter_assignments=assignment_block,
+                after_hooks=send_actions,
+            )
             functions.append(body)
+            functions.append(
+                self._render_template(
+                    "actions/message_complete.sol.jinja",
+                    message_name=enum_name,
+                    after_hooks=complete_actions,
+                )
+            )
         return functions
+
+    def _message_method_signature(self, message: Any) -> tuple[List[str], str]:
+        schema_doc = self._parse_message_schema(getattr(message, "schema", "") or "")
+        params: List[str] = []
+        assignments: List[str] = []
+        seen_param_names: set[str] = {"instanceId", "fireflyTranId"}
+        global_slots = {
+            sanitize_identifier(public_the_name(name)): self.global_type_map.get(name, "string")
+            for name in self.global_type_map.keys()
+        }
+
+        def append_param(source_name: str, type_name: str, assign_to_state: bool):
+            param_name = sanitize_identifier(source_name) or "value"
+            if param_name[0].isdigit():
+                param_name_local = f"field_{param_name}"
+            else:
+                param_name_local = param_name
+            while param_name_local in seen_param_names:
+                param_name_local = f"{param_name_local}_value"
+            seen_param_names.add(param_name_local)
+
+            sol_type = _message_param_type(type_name)
+            if sol_type == "string":
+                params.append(f"string calldata {param_name_local}")
+            else:
+                params.append(f"{sol_type} {param_name_local}")
+
+            if not assign_to_state:
+                return
+
+            slot_name = sanitize_identifier(public_the_name(source_name))
+            if not slot_name:
+                return
+            if slot_name not in global_slots:
+                return
+            assignments.append(
+                f"        inst.stateMemory.{slot_name} = {param_name_local};\n"
+            )
+
+        for field_name, definition in (schema_doc.get("properties") or {}).items():
+            append_param(
+                field_name,
+                str((definition or {}).get("type", self.global_type_map.get(field_name, "string"))),
+                True,
+            )
+
+        for field_name in (schema_doc.get("files") or {}).keys():
+            append_param(field_name, "string", field_name in global_slots)
+
+        return params, "".join(assignments)
+
+    def _parse_message_schema(self, raw_schema: str) -> dict[str, Any]:
+        if not raw_schema:
+            return {}
+        try:
+            parsed = json.loads(raw_schema)
+        except (TypeError, json.JSONDecodeError):
+            return {}
+        return parsed if isinstance(parsed, dict) else {}
 
     def _render_gateways(self) -> List[str]:
         functions: List[str] = []
@@ -410,16 +557,11 @@ class SolidityFlowRenderer:
             conditional_raw = self.gateway_branch_blocks.get(gateway.name, "")
             conditional_block = self._indent(conditional_raw, 2) if conditional_raw else ""
             action_block = guard_block + (conditional_block or normal_actions)
-            body = f"""function {enum_name}(uint256 instanceId) external onlyInitialized {{
-        Instance storage inst = _getInstance(instanceId);
-        Gateway storage g = inst.gateways[GatewayKey.{enum_name}];
-        require(g.exists, "gateway not set");
-        require(g.state == ElementState.ENABLED, "gateway state not allowed");
-
-        g.state = ElementState.COMPLETED;
-        emit GatewayDone(instanceId, GatewayKey.{enum_name});
-{action_block}
-    }}"""
+            body = self._render_template(
+                "flows/gateway.sol.jinja",
+                gateway_name=enum_name,
+                action_block=action_block,
+            )
             functions.append(body)
         return functions
 
@@ -453,47 +595,21 @@ class SolidityFlowRenderer:
                     }
                 )
 
-            assign_lines: List[str] = []
-            for idx, mapping in enumerate(output_mappings):
-                value_var = f"oracleValue{idx}"
-                param_literal = mapping["param_literal"]
-                if oracle_type == "compute-task":
-                    source_call = (
-                        f'oracle.runComputeTask(instanceId, {task_name_literal}, '
-                        f'{compute_script_literal}, {param_literal})'
-                    )
-                else:
-                    source_call = (
-                        f'oracle.getExternalData(instanceId, {task_name_literal}, '
-                        f'{data_source_literal}, {param_literal})'
-                    )
-                assign_lines.append(f"        string memory {value_var} = {source_call};")
-                if mapping["sol_type"] == "int256":
-                    assign_lines.append(
-                        f"        inst.stateMemory.{mapping['slot_name']} = _stringToInt({value_var});"
-                    )
-                elif mapping["sol_type"] == "bool":
-                    assign_lines.append(
-                        f"        inst.stateMemory.{mapping['slot_name']} = _stringToBool({value_var});"
-                    )
-                else:
-                    assign_lines.append(
-                        f"        inst.stateMemory.{mapping['slot_name']} = {value_var};"
-                    )
-            assign_block = "\n".join(assign_lines)
-            if assign_block:
-                assign_block += "\n"
+            assign_block = self._render_template(
+                "actions/oracle_outputs.sol.jinja",
+                output_mappings=output_mappings,
+                oracle_type=oracle_type,
+                task_name_literal=task_name_literal,
+                data_source_literal=data_source_literal,
+                compute_script_literal=compute_script_literal,
+            )
             done_actions = self._indent("".join(self.oracle_actions.get((task.name, "done"), [])), 2)
-            body = f"""function {enum_name}(uint256 instanceId) external onlyInitialized {{
-        Instance storage inst = _getInstance(instanceId);
-        ActionEvent storage ev = inst.events[EventKey.{enum_name}];
-        require(ev.exists, "oracle task not set");
-        require(ev.state == ElementState.ENABLED, "oracle task state not allowed");
-
-{assign_block}        ev.state = ElementState.COMPLETED;
-        emit ActionEventDone(instanceId, EventKey.{enum_name});
-{done_actions}
-    }}"""
+            body = self._render_template(
+                "actions/oracle_task.sol.jinja",
+                task_name=enum_name,
+                output_assignments=assign_block,
+                after_hooks=done_actions,
+            )
             functions.append(body)
         return functions
 
@@ -505,16 +621,11 @@ class SolidityFlowRenderer:
                 continue
             enum_name = self.enum_maps["event"].get(event.name, sanitize_identifier(event.name))
             actions = self._indent("".join(self.event_actions.get(event.name, [])), 2)
-            body = f"""function {enum_name}(uint256 instanceId) external onlyInitialized {{
-        Instance storage inst = _getInstance(instanceId);
-        ActionEvent storage ev = inst.events[EventKey.{enum_name}];
-        require(ev.exists, "event not set");
-        require(ev.state == ElementState.ENABLED, "event state not allowed");
-
-        ev.state = ElementState.COMPLETED;
-        emit ActionEventDone(instanceId, EventKey.{enum_name});
-{actions}
-    }}"""
+            body = self._render_template(
+                "flows/event.sol.jinja",
+                event_name=enum_name,
+                after_hooks=actions,
+            )
             functions.append(body)
         return functions
 
@@ -642,9 +753,12 @@ class SolidityFlowRenderer:
             clause = ""
             if condition and prefix != "else":
                 clause = f" ({condition})"
-            block = f"{prefix}{clause} {{\n"
-            block += self._indent(actions, 1)
-            block += "}\n"
+            block = self._render_template(
+                "flows/gateway_branch.sol.jinja",
+                prefix=prefix,
+                clause=clause,
+                actions=self._indent(actions, 1),
+            )
             blocks.append(block)
             branch_index += 1
         return "".join(blocks)
@@ -674,7 +788,7 @@ class SolidityFlowRenderer:
         if not checks:
             return ""
         condition = " && ".join(checks)
-        return f"if (!({condition})) {{\n            revert(\"Parallel gateway prerequisites not met\");\n        }}\n"
+        return self._render_template("flows/parallel_guard.sol.jinja", condition=condition)
 
     def _element_ready_check(self, element: Any) -> Optional[str]:
         cls_name = element.__class__.__name__

@@ -1,0 +1,34 @@
+contract LinearContractC {
+    participants {
+        participant ManagerC { msp "ManagerCMSP" attributes { role = "manager" } }
+        participant WorkerC { msp "WorkerCMSP" attributes { role = "worker" } }
+    }
+    globals {
+        ReadyC: bool
+    }
+    messages {
+        message TaskC from ManagerC to WorkerC { initial state INACTIVE schema "{}" }
+        message ReportC from WorkerC to ManagerC { initial state INACTIVE schema "{}" }
+    }
+    gateways {
+        gateway ReviewC { type exclusive initial state INACTIVE }
+    }
+    events {
+        event StartEvent_C { initial state READY }
+        event EndEvent_C { initial state INACTIVE }
+    }
+    businessrules {
+    }
+    oracletasks {
+    }
+    flows {
+        start event StartEvent_C enables TaskC;
+        when message TaskC completed then enable ReviewC;
+        when gateway ReviewC completed choose {
+            if ReadyC == true then enable ReportC;
+            else then enable EndEvent_C;
+        }
+        when message ReportC completed then enable EndEvent_C;
+    }
+}
+

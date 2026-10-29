@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Geth Performance Test Summary</title>
+  <style>
+    body { margin: 0; background: #f7f8fa; color: #111827; font-family: Arial, Helvetica, sans-serif; }
+    main { max-width: 1180px; margin: 36px auto; padding: 0 18px; }
+    h1 { margin: 0 0 6px; font-size: 26px; font-weight: 600; }
+    h2 { margin: 24px 0 10px; font-size: 17px; font-weight: 600; }
+    .meta { margin: 0 0 22px; color: #5b6472; font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #555; font-size: 12px; }
+    th, td { border: 1px solid #555; padding: 8px 10px; text-align: left; white-space: nowrap; }
+    th { background: #eee; font-weight: 600; text-align: center; }
+    td:not(:first-child):not(:last-child) { text-align: right; }
+    a { color: #1264d8; text-decoration: none; }
+    .chart { width: 100%; max-width: 820px; height: auto; background: #fff; border: 1px solid #555; }
+    .axis { stroke: #555; stroke-width: 1; } .grid { stroke: #d7dce2; stroke-width: 1; }
+    .line { fill: none; stroke: #1264d8; stroke-width: 2; }
+    circle { fill: #1264d8; }
+    text { fill: #111827; font-size: 11px; text-anchor: middle; }
+    .label { text-anchor: start; font-weight: 600; } .tick { fill: #5b6472; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Geth Performance Test Summary</h1>
+    <p class="meta">Generated from 8 Geth JSON reports at 2026-09-14T11:05:35.200Z</p>
+    <table><thead><tr><th>Name</th><th>Succ</th><th>Fail</th><th>Send Rate (TPS)</th><th>Max Latency (s)</th><th>Min Latency (s)</th><th>Avg Latency (s)</th><th>Throughput (TPS)</th><th>Report</th></tr></thead><tbody>
+          <tr>
+            <td>performance-test-10tps</td>
+            <td>1000</td>
+            <td>0</td>
+            <td>10.0</td>
+            <td>99.92</td>
+            <td>15.25</td>
+            <td>53.57</td>
+            <td>8.5</td>
+            <td><a href="report-performance-test-10tps.html">HTML</a></td>
+          </tr>
+          <tr>
+            <td>performance-test-50tps-r2</td>
+            <td>1000</td>
+            <td>0</td>
+            <td>50.1</td>
+            <td>45.15</td>
+            <td>29.88</td>
+            <td>36.38</td>
+            <td>16.7</td>
+            <td><a href="report-performance-test-50tps-r2.html">HTML</a></td>
+          </tr>
+          <tr>
+            <td>performance-test-100tps-r2</td>
+            <td>1000</td>
+            <td>0</td>
+            <td>100.2</td>
+            <td>50.13</td>
+            <td>12.18</td>
+            <td>22.36</td>
+            <td>17.0</td>
+            <td><a href="report-performance-test-100tps-r2.html">HTML</a></td>
+          </tr>
+          <tr>
+            <td>performance-test-150tps</td>
+            <td>1000</td>
+            <td>0</td>
+            <td>124.7</td>
+            <td>24.57</td>
+            <td>6.07</td>
+            <td>11.47</td>
+            <td>32.1</td>
+            <td><a href="report-performance-test-150tps.html">HTML</a></td>
+          </tr>
+          <tr>
+            <td>performance-test-180tps</td>
+            <td>1000</td>
+            <td>0</td>
+            <td>180.5</td>
+            <td>47.53</td>
+            <td>30.56</td>
+            <td>40.46</td>
+            <td>19.3</td>
+            <td><a href="report-performance-test-180tps.html">HTML</a></td>
+          </tr>
+          <tr>
+            <td>performance-test-200tps-r2</td>
+            <td>1000</td>
+            <td>0</td>
+            <td>200.6</td>
+            <td>31.20</td>
+            <td>4.48</td>
+            <td>20.04</td>
+            <td>28.1</td>
+            <td><a href="report-performance-test-200tps-r2.html">HTML</a></td>
+          </tr>
+          <tr>
+            <td>performance-test-250tps-r2</td>
+            <td>1000</td>
+            <td>0</td>
+            <td>256.3</td>
+            <td>40.98</td>
+            <td>21.15</td>
+            <td>27.30</td>
+            <td>22.6</td>
+            <td><a href="report-performance-test-250tps-r2.html">HTML</a></td>
+          </tr>
+          <tr>
+            <td>performance-test-300tps</td>
+            <td>1000</td>
+            <td>0</td>
+            <td>296.8</td>
+            <td>44.83</td>
+            <td>2.07</td>
+            <td>19.63</td>
+            <td>20.8</td>
+            <td><a href="report-performance-test-300tps.html">HTML</a></td>
+          </tr>
+    </tbody></table>
+    <h2>Throughput Curve</h2>
+    <svg class="chart" viewBox="0 0 760 280" role="img" aria-label="Throughput by requested TPS">
+      <line class="axis" x1="50" y1="230" x2="735" y2="230" />
+      <line class="axis" x1="50" y1="25" x2="50" y2="230" />
+      <line class="grid" x1="50" y1="126.3" x2="735" y2="126.3" />
+      <text class="label" x="50" y="22">Throughput (TPS)</text>
+      <text class="label" x="605" y="270">Requested TPS</text>
+        <text class="tick" x="50.0" y="254">0</text>
+        <text class="tick" x="162.5" y="254">50</text>
+        <text class="tick" x="275.0" y="254">100</text>
+        <text class="tick" x="387.5" y="254">150</text>
+        <text class="tick" x="500.0" y="254">200</text>
+        <text class="tick" x="612.5" y="254">250</text>
+        <text class="tick" x="725.0" y="254">300</text>
+      <polyline class="line" points="72.5,175.1 162.5,122.0 275.0,120.1 387.5,22.5 455.0,105.2 500.0,48.4 612.5,83.9 725.0,95.5" />
+        <circle cx="72.5" cy="175.1" r="4"><title>performance-test-10tps: 8.5 TPS</title></circle>
+        <circle cx="162.5" cy="122.0" r="4"><title>performance-test-50tps-r2: 16.7 TPS</title></circle>
+        <circle cx="275.0" cy="120.1" r="4"><title>performance-test-100tps-r2: 17 TPS</title></circle>
+        <circle cx="387.5" cy="22.5" r="4"><title>performance-test-150tps: 32.1 TPS</title></circle>
+        <circle cx="455.0" cy="105.2" r="4"><title>performance-test-180tps: 19.3 TPS</title></circle>
+        <circle cx="500.0" cy="48.4" r="4"><title>performance-test-200tps-r2: 28.1 TPS</title></circle>
+        <circle cx="612.5" cy="83.9" r="4"><title>performance-test-250tps-r2: 22.6 TPS</title></circle>
+        <circle cx="725.0" cy="95.5" r="4"><title>performance-test-300tps: 20.8 TPS</title></circle>
+        <text x="72.5" y="165.1">8.5</text>
+        <text x="162.5" y="112.0">16.7</text>
+        <text x="275.0" y="110.1">17</text>
+        <text x="387.5" y="18.0">32.1</text>
+        <text x="455.0" y="95.2">19.3</text>
+        <text x="500.0" y="38.4">28.1</text>
+        <text x="612.5" y="73.9">22.6</text>
+        <text x="725.0" y="85.5">20.8</text>
+    </svg>
+  </main>
+</body>
+</html>

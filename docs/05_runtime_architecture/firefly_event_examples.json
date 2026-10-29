@@ -1,0 +1,51 @@
+{
+  "examples": [
+    {
+      "provenance": "actual_fabric_firefly_log",
+      "type": "blockchain_event_received",
+      "topic": "InstanceCreated-purcha",
+      "blockchainEvent": {
+        "source": "fabric",
+        "name": "InstanceCreated",
+        "tx": {
+          "blockchainId": "25903c138faa458f57a02fd3e5bd97c248aaa3b541a463b094eee24e169d8948"
+        },
+        "output": {
+          "InstanceID": "31",
+          "Activity_12arovy": "<DMN XML omitted>"
+        },
+        "info": {
+          "chaincodeId": "purcha",
+          "eventName": "InstanceCreated"
+        }
+      },
+      "subscription": {
+        "name": "InstanceCreated-purcha"
+      }
+    },
+    {
+      "provenance": "representative_geth_firefly_event_based_on_listener_registration_and_solidity_event_schema",
+      "type": "blockchain_event_received",
+      "topic": "MessageSent-SupplyChain",
+      "blockchainEvent": {
+        "source": "ethereum",
+        "name": "MessageSent",
+        "tx": {
+          "blockchainId": "0x9f3a1d2b4c5e6f778899aabbccddeeff00112233445566778899aabbccddeeff"
+        },
+        "output": {
+          "instanceId": 1,
+          "messageKey": "Message_1wswgqu",
+          "fireflyTranId": "ff-tx-001"
+        },
+        "info": {
+          "address": "0x1234567890abcdef1234567890abcdef12345678",
+          "eventName": "MessageSent"
+        }
+      },
+      "subscription": {
+        "name": "MessageSent-SupplyChain"
+      }
+    }
+  ]
+}

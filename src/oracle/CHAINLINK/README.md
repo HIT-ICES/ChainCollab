@@ -121,6 +121,39 @@ PostgreSQL:    localhost:5432
 
 ## 快速开始
 
+### 环境依赖
+
+推荐先在本机准备以下依赖:
+
+- Docker / Docker Compose
+- Node.js + npm
+- 原生 `solc` 编译器
+- `jq` (推荐)
+
+安装示例:
+
+```bash
+# Ubuntu/Debian
+sudo apt-get update
+sudo apt-get install docker.io docker-compose nodejs npm solc jq
+
+# 如果系统仓库没有 solc，可使用 Python 安装 solc-select
+python3 -m pip install solc-select
+solc-select install 0.8.19
+solc-select use 0.8.19
+
+# macOS
+brew install docker docker-compose node solidity jq
+
+# Node.js 项目依赖
+npm install --registry=https://registry.npmmirror.com
+```
+
+注意:
+
+- 本项目优先使用本机 `solc`
+- 不推荐使用 `npm install -g solc`, 这通常安装的是 `solcjs`, 可能不支持脚本所需参数
+- 若本机 `solc` 不可用, `compile.sh` 才会回退到 Docker 编译器
 ### 方式 1: 一键启动 (推荐)
 
 ```bash

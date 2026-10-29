@@ -5,6 +5,8 @@ import json
 import hashlib
 import time
 import os
+import re
+import requests
 from dotenv import load_dotenv
 from web3 import Web3
 import threading
@@ -28,6 +30,9 @@ OCR_LISTENER_ENABLED = os.getenv('OCR_LISTENER_ENABLED', 'true').lower() in ['1'
 OCR_RPC_URL = os.getenv('OCR_RPC_URL', 'http://localhost:8545')
 OCR_AGGREGATOR_ADDRESS = os.getenv('OCR_AGGREGATOR_ADDRESS', '').strip()
 OCR_POLL_INTERVAL = float(os.getenv('OCR_POLL_INTERVAL', '2'))
+FIREFLY_CORE_URL = os.getenv('FIREFLY_CORE_URL', '').strip().rstrip('/')
+IPFS_GATEWAY_URL = os.getenv('IPFS_GATEWAY_URL', '').strip().rstrip('/')
+DMN_FETCH_TIMEOUT = int(os.getenv('DMN_FETCH_TIMEOUT', '15'))
 
 
 class CachedResult:
@@ -39,6 +44,35 @@ class CachedResult:
         self.hash_hex = hash_hex
         self.hash_dec = hash_dec
         self.updated_at = int(time.time() * 1000)
+
+
+def normalize_output_value(value):
+    """Recursively normalize DMN output payload for downstream consumers."""
+    if isinstance(value, list):
+        return [normalize_output_value(item) for item in value]
+    if isinstance(value, dict):
+        return {key: normalize_output_value(item) for key, item in value.items()}
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return text
+
+        previous = None
+        while text and text != previous:
+            previous = text
+            try:
+                parsed = json.loads(text)
+                if isinstance(parsed, str):
+                    text = parsed.strip()
+                    continue
+            except Exception:
+                pass
+
+            if (text.startswith('"') and text.endswith('"')) or \
+               (text.startswith("'") and text.endswith("'")):
+                text = text[1:-1].strip()
+        return text
+    return value
 
 
 @app.route('/api/dmn/health', methods=['GET'])
@@ -57,21 +91,23 @@ def evaluate_decision():
     """Evaluate DMN decision endpoint"""
     try:
         data = request.get_json()
-        dmn_content = data.get('dmnContent')
+        dmn_content = resolve_dmn_content(data)
         decision_id = data.get('decisionId')
         input_data = normalize_input_data(data.get('inputData'))
 
         if not all([dmn_content, decision_id, input_data]):
             return jsonify({
                 "success": False,
-                "error": "缺少必要参数：dmnContent, decisionId 或 inputData"
+                "error": "缺少必要参数：dmnContent/dmnCid, decisionId 或 inputData"
             }), 400
 
         app.logger.info(f"正在执行决策: {decision_id}")
         app.logger.info(f"输入数据: {input_data}")
 
         # Evaluate decision
-        result = dmn_engine.evaluate(dmn_content, decision_id, input_data)
+        result = normalize_output_value(
+            dmn_engine.evaluate(dmn_content, decision_id, input_data)
+        )
 
         app.logger.info(f"决策结果: {result}")
 
@@ -97,18 +133,20 @@ def calc_and_cache():
     try:
         data = request.get_json()
         request_id = normalize_request_id(data.get('requestId'))
-        dmn_content = data.get('dmnContent')
+        dmn_content = resolve_dmn_content(data)
         decision_id = data.get('decisionId')
         input_data = normalize_input_data(data.get('inputData'))
 
         if not all([dmn_content, decision_id, input_data]):
             return jsonify({
                 "ok": False,
-                "error": "缺少必要参数：dmnContent, decisionId 或 inputData"
+                "error": "缺少必要参数：dmnContent/dmnCid, decisionId 或 inputData"
             }), 400
 
         # Evaluate decision
-        result = dmn_engine.evaluate(dmn_content, decision_id, input_data)
+        result = normalize_output_value(
+            dmn_engine.evaluate(dmn_content, decision_id, input_data)
+        )
         raw = json.dumps(result)
         hash_hex = calculate_sha3_hash(raw)
         hash_dec = int(hash_hex, 16) & ((1 << 128) - 1)
@@ -286,12 +324,12 @@ def get_input_info():
     """Get DMN input info endpoint"""
     try:
         data = request.get_json()
-        dmn_content = data.get('dmnContent')
+        dmn_content = resolve_dmn_content(data)
 
         if not dmn_content:
             return jsonify({
                 "success": False,
-                "error": "缺少必要参数：dmnContent"
+                "error": "缺少必要参数：dmnContent 或 dmnCid"
             }), 400
 
         input_info = dmn_engine.get_input_info(dmn_content)
@@ -324,8 +362,141 @@ def normalize_input_data(input_data):
         try:
             return json.loads(raw)
         except Exception:
+            repaired = repair_loose_json(raw)
+            if repaired and repaired != raw:
+                try:
+                    app.logger.warning(
+                        "normalize_input_data repaired non-standard JSON inputData: %s -> %s",
+                        raw,
+                        repaired
+                    )
+                    return json.loads(repaired)
+                except Exception:
+                    return None
             return None
     return None
+
+
+def repair_loose_json(raw):
+    """Repair simple JS-like object literals into valid JSON."""
+    if not isinstance(raw, str):
+        return None
+    candidate = raw.strip()
+    if not candidate.startswith("{") or not candidate.endswith("}"):
+        return candidate
+
+    candidate = re.sub(
+        r'([{\[,]\s*)([A-Za-z_][A-Za-z0-9_]*)\s*:',
+        r'\1"\2":',
+        candidate
+    )
+    return candidate
+
+
+def is_inline_dmn(value):
+    if value is None:
+        return False
+    raw = str(value).strip()
+    return raw.startswith("<") and "<definitions" in raw
+
+
+def looks_like_ipfs_cid(value):
+    if value is None:
+        return False
+    raw = str(value).strip()
+    return raw.startswith("Qm") or raw.startswith("bafy")
+
+
+def extract_cid_from_blob_public(public_url):
+    if not public_url:
+        return None
+    match = re.search(r"/ipfs/([^/?#]+)", str(public_url))
+    if match:
+        return match.group(1)
+    return None
+
+
+def fetch_json(url):
+    response = requests.get(url, timeout=DMN_FETCH_TIMEOUT)
+    response.raise_for_status()
+    return response.json()
+
+
+def fetch_text(url):
+    response = requests.get(url, timeout=DMN_FETCH_TIMEOUT)
+    response.raise_for_status()
+    return response.text
+
+
+def fetch_dmn_via_firefly(data_id):
+    if not FIREFLY_CORE_URL:
+        return None
+
+    data_url = f"{FIREFLY_CORE_URL}/api/v1/namespaces/default/data/{data_id}"
+    app.logger.info(f"Resolving DMN via FireFly data record: {data_url}")
+    payload = fetch_json(data_url)
+    blob = payload.get("blob") or {}
+    public_url = blob.get("public")
+    if public_url:
+        return fetch_text(public_url)
+
+    cid = extract_cid_from_blob_public(public_url) or blob.get("hash")
+    if cid and IPFS_GATEWAY_URL:
+        return fetch_text(f"{IPFS_GATEWAY_URL}/{cid}")
+    return None
+
+
+def fetch_dmn_via_ipfs(cid):
+    if not IPFS_GATEWAY_URL:
+        return None
+    url = f"{IPFS_GATEWAY_URL}/{cid}"
+    app.logger.info(f"Resolving DMN via IPFS gateway: {url}")
+    return fetch_text(url)
+
+
+def resolve_dmn_content(data):
+    if not isinstance(data, dict):
+        return None
+
+    dmn_content = data.get('dmnContent')
+    if is_inline_dmn(dmn_content):
+        return str(dmn_content)
+    if dmn_content and not data.get('dmnCid'):
+        return dmn_content
+
+    dmn_cid = data.get('dmnCid')
+    if is_inline_dmn(dmn_cid):
+        return str(dmn_cid)
+    if not dmn_cid:
+        return None
+
+    errors = []
+    if looks_like_ipfs_cid(dmn_cid):
+        try:
+            content = fetch_dmn_via_ipfs(str(dmn_cid).strip())
+            if content:
+                return content
+        except Exception as exc:
+            errors.append(f"ipfs: {exc}")
+
+    try:
+        content = fetch_dmn_via_firefly(str(dmn_cid).strip())
+        if content:
+            return content
+    except Exception as exc:
+        errors.append(f"firefly: {exc}")
+
+    if not looks_like_ipfs_cid(dmn_cid):
+        try:
+            content = fetch_dmn_via_ipfs(str(dmn_cid).strip())
+            if content:
+                return content
+        except Exception as exc:
+            errors.append(f"ipfs-fallback: {exc}")
+
+    raise Exception(
+        f"无法解析 DMN 内容: dmnCid={dmn_cid}, errors={'; '.join(errors) if errors else 'none'}"
+    )
 
 
 def normalize_request_id(request_id):

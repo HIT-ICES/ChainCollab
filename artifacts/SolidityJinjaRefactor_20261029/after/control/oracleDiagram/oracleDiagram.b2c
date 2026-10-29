@@ -1,0 +1,60 @@
+contract oracleDiagram {
+
+    participants {
+
+    }
+
+
+
+    globals {
+        DataTask_1_result: string
+
+    }
+
+
+
+    messages {
+
+    }
+
+
+
+    gateways {
+
+    }
+
+
+
+    events {
+
+    }
+
+
+
+    businessrules {
+
+    }
+
+
+
+    oracletasks {
+        oracletask DataTask_1 {
+            type external-data
+            dataSource "oracle://source"
+            computeScript ""
+            output mapping {
+                DataTask_1_result -> DataTask_1_result
+
+            }
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    flows {
+
+    }
+
+}

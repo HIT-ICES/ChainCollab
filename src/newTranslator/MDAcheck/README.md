@@ -49,6 +49,18 @@ bash MDAcheck/run_ocl_validate.sh
 
 # 批量：对目录下所有 .xmi 生成 JSON 报告（默认跑 emf-random/b2c）
 bash MDAcheck/run_ocl_validate_batch.sh
+
+# 按配额构造实验数据集：
+# - positive: 从已有正例里挑通过 OCL 的模型
+# - targeted_negative: 从定向 mutation 样本里按规则挑选
+# - random_negative: 用 emf-random 生成，再按目标规则筛选
+./.venv/bin/python MDAcheck/generate_balanced_dataset.py \
+  --output-dir MDAcheck/datasets/demo \
+  --positive-quota 10 \
+  --targeted Message::SenderNotReceiver=5 \
+  --targeted Participant::MultiBoundsOrder=5 \
+  --random LiteralExpr::ExactlyOneLiteralKind=10 \
+  --random Contract::FlowSectionNotEmpty=10
 ```
 
 ## 2) 在 Eclipse 里使用（概要）

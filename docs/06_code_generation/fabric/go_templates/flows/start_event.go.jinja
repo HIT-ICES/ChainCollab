@@ -1,0 +1,31 @@
+func (cc *SmartContract) {{ event_name }}(ctx contractapi.TransactionContextInterface, instanceID string) error {
+	stub := ctx.GetStub()
+	instance, err := cc.GetInstance(ctx, instanceID)
+
+	actionEvent, err := cc.ReadEvent(ctx, instanceID, "{{ event_name }}")
+	if err != nil {
+		return err
+	}
+
+	if actionEvent.EventState != ENABLED {
+		errorMessage := fmt.Sprintf("Event state %s is not allowed", actionEvent.EventID)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	cc.ChangeEventState(ctx, instance, "{{ event_name }}", COMPLETED)
+	stub.SetEvent("{{ event_name }}", []byte("Contract has been started successfully"))
+	cc.SetInstance(ctx, instance)
+{% if pre_activate_hooks %}
+{{ pre_activate_hooks }}
+{% endif %}
+{% if next_state_block %}
+{{ next_state_block }}
+{% endif %}
+{% if after_hooks %}
+{{ after_hooks }}
+{% endif %}
+	cc.SetInstance(ctx, instance)
+	return nil
+}
+
