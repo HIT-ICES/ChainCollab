@@ -1,5 +1,25 @@
 import { fireflyAPI } from './apiConfig.ts';
 import axios from 'axios';
+import api from './apiConfig.ts';
+
+export const prepareEthereumFileMessage = async (
+    bpmnId: string, instanceId: string, messageId: string,
+    values: Record<string, any>, files: Record<string, File | Blob>,
+) => {
+    const form = new FormData();
+    form.append('messageId', messageId);
+    form.append('values', JSON.stringify(values));
+    for (const [name, file] of Object.entries(files)) form.append(name, file);
+    try {
+        const response = await api.post(
+            `/bpmns/${bpmnId}/bpmn-instances/${instanceId}/prepare-file-message`, form,
+            { headers: { 'Content-Type': 'multipart/form-data' } },
+        );
+        return response.data as { messageId: string; fileIds: Record<string, string> };
+    } catch (error: any) {
+        throw new Error(error?.response?.data?.msg || error?.response?.data?.message || error?.response?.data?.error || error?.message || 'File message preparation failed');
+    }
+};
 // Register Interface and Contract
 
 

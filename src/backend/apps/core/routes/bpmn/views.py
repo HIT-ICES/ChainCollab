@@ -1447,6 +1447,35 @@ class BPMNInstanceViewSet(viewsets.ModelViewSet):
     queryset = BPMNInstance.objects.all()
     serializer_class = BpmnInstanceSerializer
 
+    @action(methods=["post"], detail=True, url_path="prepare-file-message",
+            parser_classes=[MultiPartParser, FormParser], permission_classes=[IsAuthenticated])
+    def prepare_file_message(self, request, pk=None, *args, **kwargs):
+        from apps.core.services.ethereum_message import prepare_ethereum_message
+        from apps.ethereum.models import EthereumIdentity
+
+        instance = self.get_object()
+        if str(instance.bpmn_id) != str(kwargs.get("bpmn_id")):
+            return Response(err("BPMN instance not found"), status=status.HTTP_404_NOT_FOUND)
+        try:
+            values = json.loads(request.data.get("values", "{}"))
+            if not isinstance(values, dict):
+                raise ValueError("Message values must be an object")
+
+            def identity_lookup(binding, environment_id):
+                identities = EthereumIdentity.objects.filter(eth_environment_id=environment_id)
+                if binding.get("ethereum_identity_id"):
+                    return identities.filter(pk=binding["ethereum_identity_id"]).first()
+                if binding.get("address"):
+                    return identities.filter(address__iexact=binding["address"]).first()
+                return None
+
+            result = prepare_ethereum_message(
+                instance, request.data.get("messageId"), values, request.FILES, identity_lookup,
+            )
+            return Response(result)
+        except Exception as exc:
+            return Response(err(str(exc)), status=status.HTTP_400_BAD_REQUEST)
+
     def create(self, request, *args, **kwargs):
         """
         创建Bpmn实例

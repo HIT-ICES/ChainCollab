@@ -54,6 +54,7 @@ import {
 	fireflyDataTransfer,
 	invokeMessageAction,
 	callFireflyContract,
+	prepareEthereumFileMessage,
 } from "@/api/executionAPI.ts";
 
 type ActionPhase = "start" | "success" | "error";
@@ -2232,6 +2233,35 @@ const EthereumExecutionView = ({
 	const [autoExecuteEnabled, setAutoExecuteEnabled] = useState(false);
 	const [autoExecuteIntervalMs, setAutoExecuteIntervalMs] = useState(3000);
 	const [autoExecuteRunning, setAutoExecuteRunning] = useState(false);
+	const [messageFiles, setMessageFiles] = useState<Record<string, Record<string, any[]>>>({});
+
+	useEffect(() => {
+		setMessageFiles({});
+		setActionInputs({});
+	}, [bpmnInstance?.id]);
+
+	const prepareFilePayload = async (element: any, payload: Record<string, any>, methodDef: any) => {
+		const format = parseElementFormat(element?.Format);
+		if (element?.type !== "message" || !String(methodDef?.name || "").endsWith("_Send") || !Object.keys(format.files).length) return { payload };
+		const params = methodDef?.params || [];
+		const messageParam = params.find((param: any) => /fireflytran/i.test(param.name));
+		if (!messageParam) throw new Error("Contract method has no FireFly message ID parameter");
+		const files: Record<string, File | Blob> = {};
+		for (const name of Object.keys(format.files)) {
+			const file = extractOriginFile(messageFiles[element.MessageID]?.[name]);
+			if (file) files[name] = file;
+			else if (format.fileRequired.includes(name)) throw new Error(`File ${name} is required`);
+		}
+		const prepared = await prepareEthereumFileMessage(
+			bpmnData.id, bpmnInstance.id, element.MessageID, payload, files,
+		);
+		const input = { ...payload, [messageParam.name]: prepared.messageId };
+		for (const name of Object.keys(format.files)) {
+			const param = params.find((item: any) => item.name.toLowerCase() === name.toLowerCase());
+			if (param) input[param.name] = prepared.fileIds[name] || "";
+		}
+		return { payload: input, fireflyId: prepared.messageId };
+	};
 
 	useEffect(() => {
 		const method =
@@ -2411,10 +2441,11 @@ const EthereumExecutionView = ({
 			payload: config.payload,
 		});
 		try {
+			const prepared = await prepareFilePayload(element, config.payload, config.methodDef);
 			const response = await callFireflyContract(
 				apiBaseUrl,
 				config.method,
-				config.payload,
+				prepared.payload,
 				"invoke",
 				selectedEthereumKey,
 			);
@@ -2426,6 +2457,7 @@ const EthereumExecutionView = ({
 				action: config.method,
 				elementId: getElementId(element),
 				detail: `${config.label} success`,
+				fireflyId: prepared.fireflyId,
 				payload: response,
 				txId: response?.tx,
 			});
@@ -2557,10 +2589,14 @@ const EthereumExecutionView = ({
 		});
 		setRunning(true);
 		try {
+			const element = snapshotElements.find((item) => `${item.MessageID}_Send` === selectedMethod);
+			const prepared = requestMode === "invoke" && element
+				? await prepareFilePayload(element, payload, methodsByName[selectedMethod])
+				: { payload, fireflyId: undefined };
 			const response = await callFireflyContract(
 				apiBaseUrl,
 				selectedMethod,
-				payload,
+				prepared.payload,
 				requestMode,
 				requestMode === "invoke" ? selectedEthereumKey : undefined,
 			);
@@ -2572,6 +2608,7 @@ const EthereumExecutionView = ({
 				action: selectedMethod,
 				elementId: selectedMethod,
 				detail: `Ethereum ${requestMode} success`,
+				fireflyId: prepared.fireflyId,
 				payload: response,
 				txId: response?.tx,
 			});
@@ -2608,6 +2645,7 @@ const EthereumExecutionView = ({
 				selectedKey={selectedEthereumKey}
 				onSelect={setSelectedEthereumIdentity}
 			/>
+
 			{!selectedEthereumKey ? (
 				<Alert
 					type="warning"
@@ -2728,11 +2766,15 @@ const EthereumExecutionView = ({
 											config.method,
 										);
 										const isPending = Boolean(pendingActionKeys[actionKey]);
+										const fileFormat = parseElementFormat(element.Format);
+										const fileEntries = element.type === "message" && element.state === 1 ? Object.entries(fileFormat.files) : [];
 										const editableParams = (config.methodDef?.params || []).filter(
 											(param: any) =>
 												param?.name &&
 												param.name !== "instanceId" &&
-												param.name !== "InstanceID",
+												param.name !== "InstanceID" &&
+												!(fileEntries.length && (/fireflytran/i.test(param.name) ||
+													fileEntries.some(([name]) => name.toLowerCase() === param.name.toLowerCase()))),
 										);
 										return (
 											<div
@@ -2800,6 +2842,22 @@ const EthereumExecutionView = ({
 														) : null}
 													</div>
 												) : null}
+												{fileEntries.map(([name, definition]) => (
+													<div key={`${elementId}-file-${name}`} style={{ marginTop: 8 }}>
+														<Typography.Text>{name}{fileFormat.fileRequired.includes(name) ? " *" : ""}</Typography.Text>
+														<div><Typography.Text type="secondary">{getSchemaFieldDescription(definition, name)}</Typography.Text></div>
+														<Upload beforeUpload={() => false} maxCount={1} disabled={isPending || running}
+															fileList={messageFiles[elementId]?.[name] || []}
+															onChange={({ fileList }) => setMessageFiles((prev) => ({
+																...prev, [elementId]: { ...prev[elementId], [name]: fileList },
+															}))}>
+															<Button icon={<UploadOutlined />}>Upload</Button>
+														</Upload>
+													</div>
+												))}
+												{fileEntries.length > 0 && <Typography.Paragraph type="secondary" style={{ marginTop: 8 }}>
+													Files are sent through FireFly to the bound receiver. The generated message ID is passed to the contract.
+												</Typography.Paragraph>}
 												{editableParams.map((param: any) => {
 													const name = param.name;
 													const paramType = inferEthereumParamType(param);
