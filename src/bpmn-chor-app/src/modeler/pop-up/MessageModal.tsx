@@ -214,7 +214,7 @@ export default function MessageModal({ dataElementId, open: isModalOpen, onClose
   console.log(dataElementId, shape)
 
 
-  const [name, setName] = React.useState(shape !== null ? shape.businessObject.name : "");
+  const [name, setName] = React.useState(shape?.businessObject.name || "");
   const [dataSource, setDataSource] = React.useState([]);
 
   const loadDataFromBPMN = () => {
@@ -247,14 +247,11 @@ export default function MessageModal({ dataElementId, open: isModalOpen, onClose
   }
 
   React.useEffect(() => {
-    if (shape !=null){
-      setName(shape.businessObject.name)
+    if (isModalOpen && shape != null) {
+      setName(shape.businessObject.name || '');
+      loadDataFromBPMN();
     }
-  }, [shape]);
-
-  React.useEffect(() => {
-    loadDataFromBPMN();
-  }, [shape]);
+  }, [shape, isModalOpen]);
 
   const updateDataToBPMN = () => {
     // update标题
@@ -286,7 +283,7 @@ export default function MessageModal({ dataElementId, open: isModalOpen, onClose
       dataIndex: 'type',
       key: 'type',
       render: (text, record) => (
-        <Select defaultValue={record.type} style={{ width: 120 }} onChange={(value) => {
+        <Select value={record.type} style={{ width: 120 }} onChange={(value) => {
           const copy = [...dataSource];
           copy[record.key].type = value;
           setDataSource(copy);
