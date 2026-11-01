@@ -1,0 +1,25 @@
+<ns0:definitions xmlns:ns0="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:ns1="https://chaincollab.io/schema/abc" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://bpmn.io/schema/bpmn">
+  <ns0:message id="Message_1wswgqu" name="Goods Order Request">
+    <ns0:extensionElements>
+      <ns1:MessageSchema>
+        <ns1:File name="orderDetails" type="file" description="Detailed list of goods ordered" required="true" definition="{&quot;type&quot;:&quot;file&quot;,&quot;description&quot;:&quot;Detailed list of goods ordered&quot;}" />
+      <ns1:Property name="requestId" type="number" required="true" description="Fixed experiment request number" definition="{&quot;type&quot;: &quot;number&quot;, &quot;description&quot;: &quot;Fixed experiment request number&quot;}" /></ns1:MessageSchema>
+    </ns0:extensionElements>
+  </ns0:message>
+  <ns0:choreography id="Choreography">
+    <ns0:participant id="Participant_0w6qkdf" name="Bulk buyer" />
+    <ns0:participant id="Participant_19mgbdn" name="Manufacturer" />
+    <ns0:messageFlow id="MessageFlow_06374xt" sourceRef="Participant_0w6qkdf" targetRef="Participant_19mgbdn" messageRef="Message_1wswgqu" />
+    <ns0:startEvent id="Event_06sexe6">
+      <ns0:outgoing>Flow_1btgvf6</ns0:outgoing>
+    </ns0:startEvent>
+    <ns0:choreographyTask id="ChoreographyTask_0tyax7p" name="Order goods" initiatingParticipantRef="Participant_0w6qkdf">
+      <ns0:incoming>Flow_1btgvf6</ns0:incoming>
+      <ns0:outgoing>Flow_timingEnd</ns0:outgoing>
+      <ns0:participantRef>Participant_0w6qkdf</ns0:participantRef>
+      <ns0:participantRef>Participant_19mgbdn</ns0:participantRef>
+      <ns0:messageFlowRef>MessageFlow_06374xt</ns0:messageFlowRef>
+    </ns0:choreographyTask>
+    <ns0:sequenceFlow id="Flow_1btgvf6" sourceRef="Event_06sexe6" targetRef="ChoreographyTask_0tyax7p" />
+    <ns0:sequenceFlow id="Flow_timingEnd" sourceRef="ChoreographyTask_0tyax7p" targetRef="Event_timingEnd" /><ns0:endEvent id="Event_timingEnd"><ns0:incoming>Flow_timingEnd</ns0:incoming></ns0:endEvent></ns0:choreography>
+  </ns0:definitions>
