@@ -25,6 +25,7 @@ import {
 	getFireflyIdentity,
 } from "@/api/externalResource.ts";
 import TestComponentV2 from "./testComponent.jsx";
+import MessageTimingTest from "./MessageTimingTest";
 
 import {
 	getMessageWithId,
@@ -2646,6 +2647,15 @@ const EthereumExecutionView = ({
 				onSelect={setSelectedEthereumIdentity}
 			/>
 
+			<MessageTimingTest disabled={!selectedEthereumKey || running || autoExecuteEnabled}
+				context={{ apiBaseUrl, signer: selectedEthereumKey, protectedInstanceId: instanceId,
+					elementsFromSnapshot: snapshot => buildEthereumExecutionElements(methods, extractSnapshotOutput(snapshot), executionMeta, executionLayout),
+					payloadForMessage: (element, newInstanceId) => {
+						const method = methodsByName[`${element.MessageID}_Send`];
+						return { ...buildEthereumMethodPayload(method, newInstanceId),
+							...buildEthereumActionInputDefaults(element, { methodDef: method }, newInstanceId) };
+					},
+				}} />
 			{!selectedEthereumKey ? (
 				<Alert
 					type="warning"
