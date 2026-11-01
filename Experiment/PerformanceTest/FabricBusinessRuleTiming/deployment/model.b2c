@@ -1,0 +1,97 @@
+contract BusinessRuleTiming {
+
+    participants {
+        participant Participant_A {
+            msp "RequesterMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Requester"
+
+            }
+        }
+        participant Participant_B {
+            msp "ReviewerMSP"
+            x509 ""
+            isMulti false
+            multiMin 0
+            multiMax 0
+            attributes {
+                role = "Reviewer"
+
+            }
+        }
+
+    }
+
+
+
+    globals {
+        Approved: bool
+        Score: string
+
+    }
+
+
+
+    messages {
+
+    }
+
+
+
+    gateways {
+
+    }
+
+
+
+    events {
+        event Event_brtStart {
+            initial state READY
+        }
+        event Event_brtEnd {
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    businessrules {
+        businessrule Activity_timingbrt {
+            dmn "Activity_timingbrt.dmn"
+            decision "Activity_timingbrt_DecisionID"
+            input mapping {
+                score -> Score
+
+            }
+            output mapping {
+                approved -> Approved
+
+            }
+
+            initial state INACTIVE
+        }
+
+    }
+
+
+
+    oracletasks {
+
+    }
+
+
+
+    flows {
+        start event Event_brtStart enables Activity_timingbrt;
+
+        when businessrule Activity_timingbrt done
+        then enable Event_brtEnd;
+
+    }
+
+}
