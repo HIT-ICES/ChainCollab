@@ -1,0 +1,315 @@
+{
+  "platform": "geth",
+  "status": "passed",
+  "requestedRounds": 100,
+  "config": {
+    "core": "http://127.0.0.1:5002/api/v1/namespaces/default",
+    "api": "http://127.0.0.1:5002/api/v1/namespaces/default/apis/GethBrtTiming1102025258-9b56f6",
+    "contract_address": "0xe7f534c92082e793fba0ee68df8a64d3809b56f6",
+    "bpmn_id": "b4be57b9-9dc2-49e7-9954-77c009aa9045",
+    "identity_address": "0x354ddf90ccb36952780051c01c52e6f0ca0652d3",
+    "dmn_address": "0x61cf5c04da75bf9045409a86a4250af0f2099049",
+    "dmn_api": "http://127.0.0.1:5002/api/v1/namespaces/default/apis/DMNRequest-099049-a06d04",
+    "ipfs_gateway": "http://127.0.0.1:10207",
+    "dmn_file": "/root/code/ChainCollab/Experiment/PerformanceTest/GethBusinessRuleTiming/deployment/rule.dmn",
+    "rule_method": "Activity_timingbrt",
+    "start_method": "Event_brtStart",
+    "decision_id": "Decision_timing",
+    "dmn_eval_url": "http://cdmn-node1:5000/api/dmn/calc",
+    "chainlink_ports": [
+      6688,
+      6689,
+      6691,
+      6692
+    ],
+    "cdmn_containers": [
+      "cdmn-node1",
+      "cdmn-node2",
+      "cdmn-node3",
+      "cdmn-node4"
+    ],
+    "rpc_url": "http://127.0.0.1:20313"
+  },
+  "attemptCount": 145,
+  "outlierThresholds_ms": {
+    "Result commit on chain": 25000,
+    "Request to Chainlink job": 60000
+  },
+  "pipeline": "Unmodified generated BPMN → existing DMN Lite → Chainlink directrequest → CDMN/IPFS → commitBaselineFromRaw → BPMN Continue",
+  "notes": [
+    "Includes real existing Chainlink jobs; not a Fabric-style substitute executor",
+    "Request to Chainlink job overlaps initial API/chain transaction; other nested intervals must not be summed",
+    "IPFS is observed on the actual CDMN worker that first committed a valid result",
+    "BPMN Continue SC is final workflow application; DMN calculation occurs off-chain in CDMN"
+  ],
+  "fulfillmentListener": {
+    "id": "4614ae62-d10e-462c-a344-89c5171879ac",
+    "interface": {},
+    "namespace": "default",
+    "name": "GethBrtTiming-RequestFulfilled-9b56f6",
+    "backendId": "01a19a3d-5786-0556-09b9-7578a090a139",
+    "location": {
+      "address": "0x61cf5c04da75bf9045409a86a4250af0f2099049"
+    },
+    "created": "2026-11-02T03:11:13.798798392Z",
+    "event": {
+      "name": "RequestFulfilled",
+      "description": "",
+      "params": [
+        {
+          "name": "requestId",
+          "schema": {
+            "type": "string",
+            "details": {
+              "type": "bytes32",
+              "internalType": "bytes32",
+              "indexed": true
+            },
+            "description": "A hex encoded set of bytes, with an optional '0x' prefix"
+          }
+        },
+        {
+          "name": "timestamp",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "details": {
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum."
+          }
+        }
+      ]
+    },
+    "signature": "RequestFulfilled(bytes32,uint256)",
+    "topic": "GethBrtTiming-RequestFulfilled-9b56f6",
+    "options": {
+      "firstEvent": "newest"
+    }
+  },
+  "dmnPublication": {
+    "dataId": "1f92ca7b-8dfd-4bca-8a7c-a49a78fb531e",
+    "cid": "QmXZ4EznPGHuCH16zzSF7n5G4tpnaxbZhGSr4DgotKmhTo",
+    "bytes": 899,
+    "sha256": "6cfcd17f699542369cac226f49407ff30d3212657239a5a5eb467da6fe8b632e"
+  },
+  "observerStartup": {
+    "cdmn-node1": {
+      "type": "ready",
+      "pid": 221,
+      "monotonic_ms": 159800530.999367,
+      "wall_ms": 1793594308329.5852
+    },
+    "cdmn-node2": {
+      "type": "ready",
+      "pid": 195,
+      "monotonic_ms": 159800690.385189,
+      "wall_ms": 1793594308488.9744
+    },
+    "cdmn-node3": {
+      "type": "ready",
+      "pid": 189,
+      "monotonic_ms": 159800841.298153,
+      "wall_ms": 1793594308639.902
+    },
+    "cdmn-node4": {
+      "type": "ready",
+      "pid": 189,
+      "monotonic_ms": 159801001.01606,
+      "wall_ms": 1793594308799.6062
+    }
+  },
+  "linkBalanceBefore": "29900000000000000000",
+  "summary": [
+    {
+      "step": "API Invoker",
+      "count": 100,
+      "mean_ms": 55.77725915580988,
+      "median_ms": 52.70274110138416,
+      "min_ms": 44.48227408528328,
+      "max_ms": 213.053815305233
+    },
+    {
+      "step": "BPMN SC",
+      "count": 100,
+      "mean_ms": 13154.66819946289,
+      "median_ms": 9741.484130859375,
+      "min_ms": 1769.041748046875,
+      "max_ms": 44957.91735839844
+    },
+    {
+      "step": "Request to Chainlink job",
+      "count": 100,
+      "mean_ms": 34136.36734460503,
+      "median_ms": 34129.85226768255,
+      "min_ms": 6133.0044467151165,
+      "max_ms": 59512.86895087361
+    },
+    {
+      "step": "Chainlink Executor",
+      "count": 100,
+      "mean_ms": 28.74205810546875,
+      "median_ms": 25.149658203125,
+      "min_ms": 14.86181640625,
+      "max_ms": 216.124267578125
+    },
+    {
+      "step": "IPFS download",
+      "count": 100,
+      "mean_ms": 6.7194560110569,
+      "median_ms": 5.584259495139122,
+      "min_ms": 3.748165011405945,
+      "max_ms": 53.2303169965744
+    },
+    {
+      "step": "Result commit on chain",
+      "count": 100,
+      "mean_ms": 10895.662805175782,
+      "median_ms": 9839.157775878906,
+      "min_ms": 1159.6055908203125,
+      "max_ms": 24026.9140625
+    },
+    {
+      "step": "API Invoker2",
+      "count": 100,
+      "mean_ms": 66.36787075728178,
+      "median_ms": 59.142090886831284,
+      "min_ms": 46.36719223856926,
+      "max_ms": 224.5690992474556
+    },
+    {
+      "step": "BPMN Continue SC",
+      "count": 100,
+      "mean_ms": 12734.612814941407,
+      "median_ms": 9106.861083984375,
+      "min_ms": 1468.530029296875,
+      "max_ms": 69283.77416992188
+    }
+  ],
+  "endToEnd": {
+    "definition": "First BRT request start to final Continue success event",
+    "count": 100,
+    "mean_ms": 58293.760181519094,
+    "min_ms": 11852.449270933867,
+    "max_ms": 111150.53577646613
+  },
+  "sampleFiles": [
+    "round-1/result.json",
+    "round-2/result.json",
+    "round-3/result.json",
+    "round-4/result.json",
+    "round-5/result.json",
+    "round-6/result.json",
+    "round-7/result.json",
+    "round-8/result.json",
+    "round-9/result.json",
+    "round-10/result.json",
+    "round-11/result.json",
+    "round-12/result.json",
+    "round-13/result.json",
+    "round-14/result.json",
+    "round-15/result.json",
+    "round-16/result.json",
+    "round-17/result.json",
+    "round-18/result.json",
+    "round-19/result.json",
+    "round-20/result.json",
+    "round-21/result.json",
+    "round-22/result.json",
+    "round-23/result.json",
+    "round-24/result.json",
+    "round-25/result.json",
+    "round-26/result.json",
+    "round-27/result.json",
+    "round-28/result.json",
+    "round-29/result.json",
+    "round-30/result.json",
+    "round-31/result.json",
+    "round-32/result.json",
+    "round-33/result.json",
+    "round-34/result.json",
+    "round-35/result.json",
+    "round-36/result.json",
+    "round-37/result.json",
+    "round-38/result.json",
+    "round-39/result.json",
+    "round-40/result.json",
+    "round-41/result.json",
+    "round-42/result.json",
+    "round-43/result.json",
+    "round-44/result.json",
+    "round-45/result.json",
+    "round-46/result.json",
+    "round-47/result.json",
+    "round-48/result.json",
+    "round-49/result.json",
+    "round-50/result.json",
+    "round-51/result.json",
+    "round-52/result.json",
+    "round-53/result.json",
+    "round-54/result.json",
+    "round-55/result.json",
+    "round-56/result.json",
+    "round-57/result.json",
+    "round-58/result.json",
+    "round-59/result.json",
+    "round-60/result.json",
+    "round-61/result.json",
+    "round-62/result.json",
+    "round-63/result.json",
+    "round-64/result.json",
+    "round-65/result.json",
+    "round-66/result.json",
+    "round-67/result.json",
+    "round-68/result.json",
+    "round-69/result.json",
+    "round-70/result.json",
+    "round-71/result.json",
+    "round-72/result.json",
+    "round-73/result.json",
+    "round-74/result.json",
+    "round-75/result.json",
+    "round-76/result.json",
+    "round-77/result.json",
+    "round-78/result.json",
+    "round-79/result.json",
+    "round-80/result.json",
+    "round-81/result.json",
+    "round-82/result.json",
+    "round-83/result.json",
+    "round-84/result.json",
+    "round-85/result.json",
+    "round-86/result.json",
+    "round-87/result.json",
+    "round-88/result.json",
+    "round-89/result.json",
+    "round-90/result.json",
+    "round-91/result.json",
+    "round-92/result.json",
+    "round-93/result.json",
+    "round-94/result.json",
+    "round-95/result.json",
+    "round-96/result.json",
+    "round-97/result.json",
+    "round-98/result.json",
+    "round-99/result.json",
+    "round-100/result.json"
+  ],
+  "excludedCounts": {
+    "clock": 17,
+    "latency_threshold": 28
+  },
+  "cleanup": {
+    "validRecordsPreserved": 100,
+    "excludedDetailsRemoved": 45,
+    "duplicateInlineSamplesRemoved": true,
+    "note": "Only valid raw samples retained. Excluded sample counts remain part of the selection report."
+  }
+}

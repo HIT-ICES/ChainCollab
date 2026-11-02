@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:abc="https://chaincollab.io/schema/abc" id="Definitions_brtTiming" targetNamespace="http://chaincollab.io/experiment">
+ <bpmn2:choreography id="Choreography_brtTiming">
+  <bpmn2:participant id="Participant_A" name="Requester"/>
+  <bpmn2:participant id="Participant_B" name="Reviewer"/>
+  <bpmn2:startEvent id="Event_brtStart"><bpmn2:outgoing>Flow_startBrt</bpmn2:outgoing></bpmn2:startEvent>
+  <bpmn2:businessRuleTask id="Activity_timingbrt" name="Score Decision">
+   <bpmn2:extensionElements><abc:BusinessRule>
+    <abc:Input name="score" type="string" description="Score input" definition='{"name":"score","type":"string"}'/>
+    <abc:Output name="approved" type="boolean" description="Decision output" definition='{"name":"approved","type":"boolean"}'/>
+   </abc:BusinessRule></bpmn2:extensionElements>
+   <bpmn2:incoming>Flow_startBrt</bpmn2:incoming><bpmn2:outgoing>Flow_brtEnd</bpmn2:outgoing>
+  </bpmn2:businessRuleTask>
+  <bpmn2:sequenceFlow id="Flow_startBrt" sourceRef="Event_brtStart" targetRef="Activity_timingbrt"/>
+  <bpmn2:sequenceFlow id="Flow_brtEnd" sourceRef="Activity_timingbrt" targetRef="Event_brtEnd"/>
+  <bpmn2:endEvent id="Event_brtEnd"><bpmn2:incoming>Flow_brtEnd</bpmn2:incoming></bpmn2:endEvent>
+ </bpmn2:choreography>
+</bpmn2:definitions>
