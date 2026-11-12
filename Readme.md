@@ -176,7 +176,7 @@ python3 scripts/chaincollab.py check
 ```text
 Experiment/                     Paper experiment models, scripts, and results
 Experiment/BPMNwithDMNcase/      Structured BPMN/DMN examples
-Experiment/verification/         Model and runtime verification scripts and evidence
+Experiment/RQ1A-… through RQ5-…  Experiment directories matching the paper
 scripts/chaincollab.py           Shared setup / doctor / up / down / check entry point
 src/backend/                    Django, migrations, and blockchain deployment resources
 src/agent/docker-rest-agent/     Docker resource connector

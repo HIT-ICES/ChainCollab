@@ -19,7 +19,7 @@ The RQ3, RQ4, and RQ5 checks above inspect recorded runs. Repeating live measure
 
 ## Layout update
 
-The structured examples are under `Experiment/BPMNwithDMNcase/`. The verification suite moved from `Experiment/new/` to `Experiment/verification/`. The archived reports retain the paths recorded at the time of each run.
+The structured examples are under `Experiment/BPMNwithDMNcase/`. The seven experiment units are grouped by research question in `Experiment/`. The archived reports retain the paths recorded at the time of each run.
 
 ## Original release cleanup
 
