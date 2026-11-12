@@ -1,28 +1,68 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xs="http://www.w3.org/2001/XMLSchema" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://bpmn.io/schema/bpmn">
+<bpmn2:definitions xmlns:abc="https://chaincollab.io/schema/abc" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://bpmn.io/schema/bpmn">
   <bpmn2:message id="Message_1b1qlzd" name="Notification of application failure">
-    <bpmn2:documentation>{"properties":{"reason":{"type":"string","description":""},"result":{"type":"string","description":""}},"required":["reason","result"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="reason" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+        <abc:Property name="result" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_01jq2zl" name="send Deduction amount">
-    <bpmn2:documentation>{"properties":{"amount":{"type":"number","description":""}},"required":["amount"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="amount" type="number" description="" required="true" definition="{&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_12n6jjk" name="submit form">
-    <bpmn2:documentation>{"properties":{"requestType":{"type":"string","description":""},"duration":{"type":"number","description":""}},"required":["requestType","duration"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="requestType" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+        <abc:Property name="duration" type="number" description="" required="true" definition="{&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_076ulzs" name="details1">
-    <bpmn2:documentation>{"properties":{"time":{"type":"string","description":""},"description":{"type":"string","description":""},"EC2 resource ID":{"type":"string","description":""},"logs":{"type":"string","description":""},"other information":{"type":"string","description":""}},"required":["time","description","EC2 resource ID","logs"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="time" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+        <abc:Property name="description" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+        <abc:Property name="EC2 resource ID" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+        <abc:Property name="logs" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+        <abc:Property name="other information" type="string" description="" required="false" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_068kmzv" name="details2">
-    <bpmn2:documentation>{"properties":{"time":{"type":"string","description":""},"instance ID":{"type":"string","description":""},"logs":{"type":"string","description":""}},"required":["time","instance ID","logs"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="time" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+        <abc:Property name="instance ID" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+        <abc:Property name="logs" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_09krt7c" name="create questions">
-    <bpmn2:documentation>{"properties":{"question name":{"type":"string","description":""},"description":{"type":"string","description":""}},"required":["question name","description"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="question name" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+        <abc:Property name="description" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_1bhhp1n" name="Regional level application">
-    <bpmn2:documentation>{"properties":{"serviceType":{"type":"string","description":""}},"required":["serviceType"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="serviceType" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_0ywghlt" name="instance level application">
-    <bpmn2:documentation>{"properties":{"serviceType":{"type":"string","description":""}},"required":["serviceType"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="serviceType" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:choreography id="Choreography">
     <bpmn2:participant id="Participant_1p9owwo" name="amazon support center" />
@@ -100,7 +140,13 @@
     </bpmn2:choreographyTask>
     <bpmn2:sequenceFlow id="Flow_0rawiic" sourceRef="Gateway_0auc3he" targetRef="ChoreographyTask_14x309o" />
     <bpmn2:businessRuleTask id="Activity_0tya4bp" name="">
-      <bpmn2:documentation>{"inputs":[{"name":"duration","type":"number","description":""},{"name":"requestType","type":"string","description":""}],"outputs":[{"name":"confirm","type":"boolean","description":""}]}</bpmn2:documentation>
+      <bpmn2:extensionElements>
+        <abc:BusinessRule>
+          <abc:Input name="duration" type="number" description="" definition="{&quot;name&quot;:&quot;duration&quot;,&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;&quot;}" />
+          <abc:Input name="requestType" type="string" description="" definition="{&quot;name&quot;:&quot;requestType&quot;,&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+          <abc:Output name="confirm" type="boolean" description="" definition="{&quot;name&quot;:&quot;confirm&quot;,&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;&quot;}" />
+        </abc:BusinessRule>
+      </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1bh56yy</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1m6mf5r</bpmn2:outgoing>
     </bpmn2:businessRuleTask>

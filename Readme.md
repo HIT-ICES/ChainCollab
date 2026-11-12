@@ -2,13 +2,13 @@
 
 ChainCollab supports collaborative business processes modeled with BPMN choreography and DMN. It provides modeling, organization and consortium management, Fabric/Geth environment management, Go/Solidity code generation, and execution of messages, decisions, and cross-chain calls.
 
-The `release-MultiBlockchain` branch contains application source, generation templates, deployment resources, examples, and the original release experiment directory. **Run all commands from the repository root**, unless a command explicitly changes directories. Use the startup entry point below; earlier terminal aliases and legacy translator tutorials are no longer the startup guide.
+The `release-MultiBlockchain` branch contains application source, generation templates, deployment resources, examples, and the paper's experiment materials. **Run all commands from the repository root**, unless a command explicitly changes directories. Use the startup entry point below; earlier terminal aliases and legacy translator tutorials are no longer the startup guide.
 
 ## 1. Branches and existing installations
 
 For the paper's Section V, start with the [experiment and evidence index](Experiment/README.md). It maps RQ1A–RQ5 to inputs, verification code, archived results, and reproduction prerequisites.
 
-The complete pre-cleanup implementation is preserved on `dev-MultiBlockchain` and `dev-MultiBlockChain-fork`. Both preserve the same runnable baseline based on release commit `eaea6028`, including the existing frontend lockfile and database migration previously excluded by ignore rules. Their earlier histories are retained. These development branches also retain manuscript evidence archives and the editor development project. Release retains `Experiment/` with its original layout and contents.
+The complete pre-cleanup implementation is preserved on `dev-MultiBlockchain` and `dev-MultiBlockChain-fork`. Both preserve the same runnable baseline based on release commit `eaea6028`, including the existing frontend lockfile and database migration previously excluded by ignore rules. Their earlier histories are retained. These development branches also retain manuscript evidence archives and the editor development project. Release includes the paper's experiment inputs and evidence.
 
 Before switching from release to a development branch, run `python3 scripts/chaincollab.py down`, switch branches, and follow that branch's startup instructions. Existing databases and dependency environments remain on the machine.
 
@@ -138,7 +138,7 @@ python3 scripts/chaincollab.py manage createsuperuser
 
 Open the frontend, register or sign in, create an organization and consortium, and invite participating organizations or members. Select Fabric or Geth to create an environment, then follow the interface to initialize nodes, networks, and FireFly. Before deployment, verify that required images are accessible, Docker networking is configured, and Go and `ff` are available.
 
-Import `examples/bpmn-dmn/SupplyChainPaper.bpmn` and its companion `supplyChainPaper.dmn`, assign participants, generate and deploy code, create an instance, and execute its message, gateway, and decision nodes.
+Import `Experiment/BPMNwithDMNcase/SupplyChainPaper.bpmn` and its companion `supplyChainPaper.dmn`, assign participants, generate and deploy code, create an instance, and execute its message, gateway, and decision nodes.
 
 Code generation does not establish a runtime DMN service binding. Configure bindings using the decision IDs in the actual DMN file. Messages follow Send → wait for receipt confirmation → Complete → completion. BusinessRule tasks follow Request → wait for a result → Continue → output writeback and completion. See the [message confirmation protocol](docs/Solidity_Message_Confirmation.md).
 
@@ -153,7 +153,7 @@ The following workflow does not require a database, frontend, or blockchain node
 ```bash
 mkdir -p .runtime/generated/go .runtime/generated/solidity
 src/newTranslator/.venv/bin/python src/newTranslator/generator/bpmn_to_dsl.py \
-  examples/bpmn-dmn/SupplyChainPaper.bpmn \
+  Experiment/BPMNwithDMNcase/SupplyChainPaper.bpmn \
   -o .runtime/generated/SupplyChainPaper.b2c -n SupplyChainPaper
 src/newTranslator/.venv/bin/textx generate .runtime/generated/SupplyChainPaper.b2c \
   --target go --output-path .runtime/generated/go --overwrite
@@ -174,8 +174,9 @@ python3 scripts/chaincollab.py check
 ## 7. Repository layout and experiment materials
 
 ```text
-Experiment/                     Original release experiment models, scripts, and results
-examples/bpmn-dmn/               Structured BPMN/DMN inputs for the generation example
+Experiment/                     Paper experiment models, scripts, and results
+Experiment/BPMNwithDMNcase/      Structured BPMN/DMN examples
+Experiment/verification/         Model and runtime verification scripts and evidence
 scripts/chaincollab.py           Shared setup / doctor / up / down / check entry point
 src/backend/                    Django, migrations, and blockchain deployment resources
 src/agent/docker-rest-agent/     Docker resource connector
@@ -187,7 +188,7 @@ src/geth_identity_contract/      Participant identity contract for Geth instance
 docs/                           Release scope, operating guides, and verification records
 ```
 
-`Experiment/` retains the original release layout and includes the four timing experiments used in the paper. The structured SupplyChainPaper model is at `Experiment/BPMNwithDMNcase/new/SupplyChainPaper.bpmn`. Use `examples/bpmn-dmn/` for standalone generation and the [experiment index](Experiment/README.md) for the paper's workloads and recorded evidence.
+`Experiment/` includes the verification suite and the four timing experiments used in the paper. The structured SupplyChainPaper model is at `Experiment/BPMNwithDMNcase/SupplyChainPaper.bpmn`. See the [experiment index](Experiment/README.md) for the paper's workloads and recorded evidence.
 
 The [release scope record](docs/RELEASE_LAYOUT.md) explains which development materials remain on development branches. `.gitignore` excludes retained local development directories, virtual environments, `node_modules`, configuration, and runtime data from new release checkouts.
 

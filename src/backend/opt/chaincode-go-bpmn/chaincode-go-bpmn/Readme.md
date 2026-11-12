@@ -1,1 +1,3 @@
-1. go.mod 参考fabric-2.2的版本 修改
+# Fabric BPMN chaincode template
+
+This Go module provides the Fabric chaincode package used by the backend. Follow the [repository setup guide](../../../../../Readme.md) to generate and deploy workflow-specific chaincode.

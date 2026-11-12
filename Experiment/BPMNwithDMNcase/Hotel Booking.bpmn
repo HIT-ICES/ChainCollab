@@ -1,43 +1,96 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xs="http://www.w3.org/2001/XMLSchema" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://www.signavio.com">
+<bpmn2:definitions xmlns:abc="https://chaincollab.io/schema/abc" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://www.signavio.com">
   <bpmn2:message id="Message_04ikf2n" name="discountInfo">
-    <bpmn2:documentation>{"properties":{"discount2":{"type":"number","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="discount2" type="number" description="" required="false" definition="{&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_0vlxzcv" name="discountInfo">
-    <bpmn2:documentation>{"properties":{"discount1":{"type":"number","description":""}},"required":["discount1"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="discount1" type="number" description="" required="true" definition="{&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_104h2tt" name="haveVIPCard">
-    <bpmn2:documentation>{"properties":{"VIPpoints":{"type":"number","description":""},"VIPcardId":{"type":"string","description":""}},"required":["VIPpoints","VIPcardId"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="VIPpoints" type="number" description="" required="true" definition="{&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;&quot;}" />
+        <abc:Property name="VIPcardId" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_0m9p3da" name="cancel_order">
-    <bpmn2:documentation>{"properties":{"cancel":{"type":"boolean","description":""}},"required":["cancel"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="cancel" type="boolean" description="" required="true" definition="{&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_1etcmvl" name="payment1">
-    <bpmn2:documentation>{"properties":{"payableto":{"type":"string","description":""}},"required":["payableto"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="payableto" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_1joj7ca" name="ask_refund">
-    <bpmn2:documentation>{"properties":{"ID":{"type":"string","description":""}},"required":["ID"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="ID" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_1ljlm4g" name="Give_ID">
-    <bpmn2:documentation>{"properties":{"booking_id":{"type":"string","description":""}},"required":["booking_id"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="booking_id" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_1xm9dxy" name="Cancel_order">
-    <bpmn2:documentation>{"properties":{"motivation":{"type":"string","description":""}},"required":["motivation"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="motivation" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_0o8eyir" name="payment0">
-    <bpmn2:documentation>{"properties":{"payableto":{"type":"string","description":""}},"required":["payableto"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="payableto" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_1nlagx2" name="Book_room">
-    <bpmn2:documentation>{"properties":{"confirmation":{"type":"boolean","description":""}},"required":["confirmation"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="confirmation" type="boolean" description="" required="true" definition="{&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_1em0ee4" name="Price_quotation">
-    <bpmn2:documentation>{"properties":{"quotation":{"type":"number","description":""}},"required":["quotation"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="quotation" type="number" description="" required="true" definition="{&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_0r9lypd" name="Give_availability">
-    <bpmn2:documentation>{"properties":{"confirm":{"type":"boolean","description":""}},"required":["confirm"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="confirm" type="boolean" description="" required="true" definition="{&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_045i10y" name="Check_room">
-    <bpmn2:documentation>{"properties":{"date":{"type":"string","description":""},"bedrooms":{"type":"number","description":""}},"required":["date"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="date" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+        <abc:Property name="bedrooms" type="number" description="" required="false" definition="{&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:choreography id="Choreography">
     <bpmn2:participant id="Participant_1080bkg" name="Client" />
@@ -158,7 +211,12 @@
     </bpmn2:choreographyTask>
     <bpmn2:sequenceFlow id="Flow_00urpax" sourceRef="EventBasedGateway_1fxpmyn" targetRef="ChoreographyTask_0yime3t" />
     <bpmn2:businessRuleTask id="Activity_0b1f7uv" name="vipSale">
-      <bpmn2:documentation>{"inputs":[{"name":"VIPpoints","type":"number","description":""}],"outputs":[{"name":"VIPLevel","type":"number","description":""}]}</bpmn2:documentation>
+      <bpmn2:extensionElements>
+        <abc:BusinessRule>
+          <abc:Input name="VIPpoints" type="number" description="" definition="{&quot;name&quot;:&quot;VIPpoints&quot;,&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;&quot;}" />
+          <abc:Output name="VIPLevel" type="number" description="" definition="{&quot;name&quot;:&quot;VIPLevel&quot;,&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;&quot;}" />
+        </abc:BusinessRule>
+      </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1byvr2b</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0webz0z</bpmn2:outgoing>
     </bpmn2:businessRuleTask>
@@ -176,7 +234,7 @@
       <bpmn2:participantRef>Participant_1080bkg</bpmn2:participantRef>
       <bpmn2:messageFlowRef>MessageFlow_1lnn8yt</bpmn2:messageFlowRef>
     </bpmn2:choreographyTask>
-    <bpmn2:sequenceFlow id="Flow_0y0y9gl" name="VIPLevel&#60;3" sourceRef="Gateway_1jhfnrm" targetRef="ChoreographyTask_1jk0ir4" />
+    <bpmn2:sequenceFlow id="Flow_0y0y9gl" name="VIPLevel&lt;3" sourceRef="Gateway_1jhfnrm" targetRef="ChoreographyTask_1jk0ir4" />
     <bpmn2:choreographyTask id="ChoreographyTask_0oyz7te" name="discount2" initiatingParticipantRef="Participant_0sktaei">
       <bpmn2:incoming>Flow_0rr6350</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0hg4qa0</bpmn2:outgoing>

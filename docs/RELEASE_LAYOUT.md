@@ -6,7 +6,7 @@ the **same complete Git tree** based on this baseline, including the existing
 API migration and frontend lock previously excluded by ignore rules, using merge commits that preserve their
 prior histories. Backup refs are under `backup/pre-release-cleanup-20261029/`.
 These development branches retain the complete baseline, archives and developer tools.
-Release retains the original experiment layout and adds the four timing workloads for Section V. See the [experiment index](../Experiment/README.md).
+Release groups the verification materials under `Experiment/verification/` and the timing workloads under `Experiment/PerformanceTest/`. See the [experiment index](../Experiment/README.md).
 
 | Path | Release decision | Reason |
 | --- | --- | --- |
@@ -19,10 +19,11 @@ Release retains the original experiment layout and adds the four timing workload
 | `src/relayer-node` | Keep | Active backend exposes status/control endpoints for this service |
 | `src/py_translator` | Local/development only | Already untracked; backend uses newTranslator |
 | `src/java-env-custom-image` | Local/development only | Existing separate Git repository; never deleted or incorporated |
-| `Experiment` | Keep and extend | Original experiment directories and four RQ5 workloads, with deployment-specific live configurations kept locally |
+| `Experiment` | Keep and extend | Verification evidence, path perturbation, and four RQ5 workloads, with deployment-specific live configurations kept locally |
 | `src/newTranslator/MDAcheck` | Keep selected files | Ecore, OCL, validation runner, and eleven DSL inputs used by the experiment checkers |
 | `artifacts`, manuscript evidence and old tutorials | Development branches | Evidence archives and retired development documentation |
-| `examples/bpmn-dmn` | Keep | Structured BPMN/DMN inputs for reproduction |
+| `Experiment/BPMNwithDMNcase` | Keep | Canonical structured BPMN/DMN examples |
+| `Experiment/verification/fixtures` | Keep | Eleven historical BPMN inputs for the archived RQ1B and RQ1C runs |
 | Other MDAcheck datasets, newTranslator build/dashboard and standalone developer dashboards | Development branches | Additional generated outputs or duplicate development interfaces |
 | Existing environments, pgdata, .env, credentials and runtime directories | Preserve locally, ignore in Git | Machine state is not release source |
 

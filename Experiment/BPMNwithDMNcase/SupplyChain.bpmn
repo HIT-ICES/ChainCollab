@@ -1,37 +1,81 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xs="http://www.w3.org/2001/XMLSchema" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://bpmn.io/schema/bpmn">
+<bpmn2:definitions xmlns:abc="https://chaincollab.io/schema/abc" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://bpmn.io/schema/bpmn">
   <bpmn2:message id="Message_0ps2yzo" name="Self_pickup">
-    <bpmn2:documentation>{"properties":{"Self_pickup":{"type":"boolean","description":""}},"required":["Self_pickup"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="Self_pickup" type="boolean" description="" required="true" definition="{&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_196q1fj" name="deliverd_product">
-    <bpmn2:documentation>{"properties":{"delivered_product":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="delivered_product" type="string" description="" required="false" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_04wmlqe" name="report">
-    <bpmn2:documentation>{"properties":{"report":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="report" type="string" description="" required="false" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_0d2xte5" name="deliverd_order">
-    <bpmn2:documentation>{"properties":{"del_order":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="del_order" type="string" description="" required="false" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_1io2g9u" name="waybill">
-    <bpmn2:documentation>{"properties":{"waybill":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="waybill" type="string" description="" required="false" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_0hpha6h" name="provided_details">
-    <bpmn2:documentation>{"properties":{"pre_details":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="pre_details" type="string" description="" required="false" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_0rwz1km" name="requested_details">
-    <bpmn2:documentation>{"properties":{"req_details":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="req_details" type="string" description="" required="false" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_0pm90nx" name="transport_order">
-    <bpmn2:documentation>{"properties":{"transport_order":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="transport_order" type="string" description="" required="false" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_0cba4t6" name="fwd_order">
-    <bpmn2:documentation>{"properties":{"fwd_order":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="fwd_order" type="string" description="" required="false" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_1ajdm9l" name="placed_order">
-    <bpmn2:documentation>{"properties":{"placed_order":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="placed_order" type="string" description="" required="false" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_1wswgqu" name="order">
-    <bpmn2:documentation>{"properties":{"order":{"type":"string","description":""},"amount":{"type":"number","description":""}},"required":["order","amount"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="order" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+        <abc:Property name="amount" type="number" description="" required="true" definition="{&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:choreography id="Choreography">
     <bpmn2:participant id="Participant_0w6qkdf" name="Bulk buyer" />
@@ -158,7 +202,13 @@
     </bpmn2:choreographyTask>
     <bpmn2:sequenceFlow id="Flow_1r9e0fl" sourceRef="ChoreographyTask_0s4ig1m" targetRef="ChoreographyTask_1ynktv4" />
     <bpmn2:businessRuleTask id="Activity_0fbi09z" name="">
-      <bpmn2:documentation>{"inputs":[{"name":"amount","type":"number","description":""},{"name":"Self_pickup","type":"boolean","description":""}],"outputs":[{"name":"deliver","type":"boolean","description":""}]}</bpmn2:documentation>
+      <bpmn2:extensionElements>
+        <abc:BusinessRule>
+          <abc:Input name="amount" type="number" description="" definition="{&quot;name&quot;:&quot;amount&quot;,&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;&quot;}" />
+          <abc:Input name="Self_pickup" type="boolean" description="" definition="{&quot;name&quot;:&quot;Self_pickup&quot;,&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;&quot;}" />
+          <abc:Output name="deliver" type="boolean" description="" definition="{&quot;name&quot;:&quot;deliver&quot;,&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;&quot;}" />
+        </abc:BusinessRule>
+      </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1hbgb5i</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0i9c5yv</bpmn2:outgoing>
     </bpmn2:businessRuleTask>

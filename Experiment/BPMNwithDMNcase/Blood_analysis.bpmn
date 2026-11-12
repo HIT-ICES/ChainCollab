@@ -1,22 +1,46 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xs="http://www.w3.org/2001/XMLSchema" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://www.signavio.com">
+<bpmn2:definitions xmlns:abc="https://chaincollab.io/schema/abc" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://www.signavio.com">
   <bpmn2:message id="Message_13mh6mk" name="report">
-    <bpmn2:documentation>{"properties":{"reportContent":{"type":"string","description":""}},"required":["reportContent"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="reportContent" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_0gd0z61" name="furtherCheck">
-    <bpmn2:documentation>{"properties":{"furtherCheckPlace":{"type":"string","description":""},"furtherCheckDate":{"type":"string","description":""}},"required":["furtherCheckPlace","furtherCheckDate"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="furtherCheckPlace" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+        <abc:Property name="furtherCheckDate" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_1rqbibd" name="bloodResults">
-    <bpmn2:documentation>{"properties":{"result":{"type":"string","description":""}},"required":["result"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="result" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_1vzqd37" name="result">
-    <bpmn2:documentation>{"properties":{"result":{"type":"string","description":""}},"required":["result"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="result" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_0wq8mc6" name="data">
-    <bpmn2:documentation>{"properties":{"patientData":{"type":"string","description":""}},"required":["patientData"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="patientData" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_0gswvmq" name="sample">
-    <bpmn2:documentation>{"properties":{"sample":{"type":"string","description":""}},"required":["sample"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="sample" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:choreography id="Choreography">
     <bpmn2:participant id="Participant_0ggs0ck" name="Gynecologist" />
@@ -74,7 +98,12 @@
     </bpmn2:endEvent>
     <bpmn2:sequenceFlow id="SequenceFlow_1muj86l" sourceRef="ChoreographyTask_1bkb191" targetRef="Activity_1mj4mr7" />
     <bpmn2:businessRuleTask id="Activity_1mj4mr7" name="blood">
-      <bpmn2:documentation>{"inputs":[{"name":"result","type":"string","description":""}],"outputs":[{"name":"FurtherCheck","type":"boolean","description":""}]}</bpmn2:documentation>
+      <bpmn2:extensionElements>
+        <abc:BusinessRule>
+          <abc:Input name="result" type="string" description="" definition="{&quot;name&quot;:&quot;result&quot;,&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+          <abc:Output name="FurtherCheck" type="boolean" description="" definition="{&quot;name&quot;:&quot;FurtherCheck&quot;,&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;&quot;}" />
+        </abc:BusinessRule>
+      </bpmn2:extensionElements>
       <bpmn2:incoming>SequenceFlow_1muj86l</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0xlfi9k</bpmn2:outgoing>
     </bpmn2:businessRuleTask>

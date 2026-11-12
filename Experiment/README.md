@@ -1,16 +1,16 @@
 # ChainCollab experimental artifact
 
-This index follows Section V of the ChainCollab paper. The release uses the application and timing workloads from `dev-MultiBlockchain` at `afaa3e7717b891741fd5c5edae7e1e969e803cd2`, together with the existing release experiment layout. See the [installation guide](../Readme.md) for the system setup. Run the commands below from the repository root.
+This index follows Section V of the ChainCollab paper. The release uses the application and timing workloads from `dev-MultiBlockchain` at `afaa3e7717b891741fd5c5edae7e1e969e803cd2`, together with the archived verification results. See the [installation guide](../Readme.md) for the system setup. Run the commands below from the repository root.
 
-The [structured BPMN and companion DMN models](BPMNwithDMNcase/new/) include the eleven case studies and the SupplyChainPaper example. The [parent directory](BPMNwithDMNcase/) retains the earlier inputs referenced by the archived verification reports. Use the input attached to each recorded experiment when inspecting or replaying that run.
+The [structured BPMN and companion DMN models](BPMNwithDMNcase/) are the canonical example set. The eleven [historical BPMN fixtures](verification/fixtures/) preserve the source models used in the archived RQ1B and RQ1C runs. Both sets use the same DMN files. Older paths in archived reports identify the source of the recorded run.
 
 | Paper section | Experiment | Code and evidence |
 | --- | --- | --- |
-| V-B · RQ1A | Target-model legality | [Ecore and OCL checker](../src/newTranslator/MDAcheck/), [dataset manifest](new/exp1_mapping/target_model_validity/all_ocl_rules_try1/dataset_manifest.json), [coverage report](new/exp1_mapping/target_model_validity/all_ocl_rules_try1/coverage_completion_report.md). The archive includes 11 positive, 299 random negative, and 140 targeted negative XMI inputs. |
-| V-B · RQ1B | Structural preservation | [Mapping contract](new/exp1_1B/contracts/default_mapping_contract.json), [checker](new/exp1_1B/scripts/), and [eleven-case batch report](new/exp1_1B/cases/batch_summary.md). Per-case reports are in `cases/<case>/reports/`. |
-| V-B · RQ1C | Bounded behavioral preservation | [UBTS scripts](new/exp1_1C/scripts/) and [case evidence](new/exp1_1C/cases/). Each case includes its logical paths and comparison results. The 75 logical paths feed RQ3. |
-| V-C · RQ2 | Static semantic fidelity | [AST-based checker](new/exp2_semantic_verification/scripts/), [eleven DSL inputs](../src/newTranslator/MDAcheck/bpmn-positive/b2c/), and [archived results](new/exp2_semantic_verification/results/). The archived tooling uses its historical SV identifiers. Consult the paper for the assertion numbering used in Section V. |
-| V-D · RQ3 | Cross-platform runtime traces | [Replay and comparison scripts](new/exp3/scripts/) and [normalized traces and comparison reports](new/exp3/outputs/). There are 75 reports for each of DSL–Fabric, DSL–Geth, and Fabric–Geth, covering 1,100 aligned steps per platform and zero reported mismatches. |
+| V-B · RQ1A | Target-model legality | [Ecore and OCL checker](../src/newTranslator/MDAcheck/), [dataset manifest](verification/exp1_mapping/target_model_validity/all_ocl_rules_try1/dataset_manifest.json), [coverage report](verification/exp1_mapping/target_model_validity/all_ocl_rules_try1/coverage_completion_report.md). The archive includes 11 positive, 299 random negative, and 140 targeted negative XMI inputs. |
+| V-B · RQ1B | Structural preservation | [Mapping contract](verification/exp1_1B/contracts/default_mapping_contract.json), [checker](verification/exp1_1B/scripts/), and [eleven-case batch report](verification/exp1_1B/cases/batch_summary.md). Per-case reports are in `cases/<case>/reports/`. |
+| V-B · RQ1C | Bounded behavioral preservation | [UBTS scripts](verification/exp1_1C/scripts/) and [case evidence](verification/exp1_1C/cases/). Each case includes its logical paths and comparison results. The 75 logical paths feed RQ3. |
+| V-C · RQ2 | Static semantic fidelity | [AST-based checker](verification/exp2_semantic_verification/scripts/), [eleven DSL inputs](../src/newTranslator/MDAcheck/bpmn-positive/b2c/), and [archived results](verification/exp2_semantic_verification/results/). The archived tooling uses its historical SV identifiers. Consult the paper for the assertion numbering used in Section V. |
+| V-D · RQ3 | Cross-platform runtime traces | [Replay and comparison scripts](verification/exp3/scripts/) and [normalized traces and comparison reports](verification/exp3/outputs/). There are 75 reports for each of DSL–Fabric, DSL–Geth, and Fabric–Geth, covering 1,100 aligned steps per platform and zero reported mismatches. |
 | V-E · RQ4 | Execution correctness | [Path perturbation and Fabric replay](NoiseExperiment/) and [archived inputs and outcomes](NoiseExperiment/done/). See the evidence coverage note below. |
 | V-F · RQ5 | Runtime performance | [Four timing workloads and recorded results](#rq5-runtime-performance). |
 
@@ -20,7 +20,7 @@ After installing ChainCollab, validate the archived RQ1A XMI corpus with Java 17
 
 ```bash
 checker="$PWD/src/newTranslator/MDAcheck"
-dataset="$PWD/Experiment/new/exp1_mapping/target_model_validity/all_ocl_rules_try1"
+dataset="$PWD/Experiment/verification/exp1_mapping/target_model_validity/all_ocl_rules_try1"
 bash "$checker/run_ocl_validate_batch.sh" "$dataset" "$checker/b2c.ecore" \
   "$checker/check.ocl" "$PWD/.runtime/paper-experiments/rq1a"
 ```
@@ -28,23 +28,23 @@ bash "$checker/run_ocl_validate_batch.sh" "$dataset" "$checker/b2c.ecore" \
 To regenerate the RQ1B structural checks for the archived inputs:
 
 ```bash
-src/newTranslator/.venv/bin/python Experiment/new/exp1_1B/scripts/run_all_bpmn_cases.py \
-  --bpmn-dir Experiment/BPMNwithDMNcase \
+src/newTranslator/.venv/bin/python Experiment/verification/exp1_1B/scripts/run_all_bpmn_cases.py \
+  --bpmn-dir Experiment/verification/fixtures \
   --out-dir .runtime/paper-experiments/rq1b
 ```
 
-For RQ1C, the [UBTS pipeline](new/exp1_1C/scripts/) defaults to SupplyChainPaper and the bound `K = (30, 2, 200)`. Use a separate output root for new runs:
+For RQ1C, the [UBTS pipeline](verification/exp1_1C/scripts/) defaults to SupplyChainPaper and the bound `K = (30, 2, 200)`. Use a separate output root for new runs:
 
 ```bash
 EXP1C_OUTPUT_ROOT=.runtime/paper-experiments/rq1c \
   src/newTranslator/.venv/bin/python \
-  Experiment/new/exp1_1C/scripts/run_supplychainpaper_pipeline.py
+  Experiment/verification/exp1_1C/scripts/run_supplychainpaper_pipeline.py
 ```
 
-For other cases, set `EXP1C_CASE_NAME` and `EXP1C_BPMN_FILE` to the case ID and the absolute path of its archived source model. For RQ2, install the [checker dependencies](new/exp2_semantic_verification/requirements.txt) and make Go, Node.js, and the Solidity compiler available:
+For other cases, set `EXP1C_CASE_NAME` and `EXP1C_BPMN_FILE` to the case ID and the absolute path of its archived source model. For RQ2, install the [checker dependencies](verification/exp2_semantic_verification/requirements.txt) and make Go, Node.js, and the Solidity compiler available:
 
 ```bash
-src/newTranslator/.venv/bin/python Experiment/new/exp2_semantic_verification/scripts/run_exp2.py \
+src/newTranslator/.venv/bin/python Experiment/verification/exp2_semantic_verification/scripts/run_exp2.py \
   --results-dir .runtime/paper-experiments/rq2
 ```
 
@@ -53,13 +53,13 @@ The RQ2 checker recognizes the current Solidity `Complete` function as the handl
 To compare an existing RQ3 trace pair offline:
 
 ```bash
-trace_dir=Experiment/new/exp3/outputs/SupplyChainPaper/paths/SupplyChainPaper_auto_path_001/normalized
-python3 Experiment/new/exp3/scripts/compare_normalized_traces.py \
+trace_dir=Experiment/verification/exp3/outputs/SupplyChainPaper/paths/SupplyChainPaper_auto_path_001/normalized
+python3 Experiment/verification/exp3/scripts/compare_normalized_traces.py \
   --left "$trace_dir/dsl.normalized.json" \
   --right "$trace_dir/solidity.normalized.json"
 ```
 
-Each path has three normalized traces and three pairwise comparison reports. `comparison.json` compares DSL–Geth, `comparison.dsl_fabric.json` compares DSL–Fabric, and `comparison.solidity_fabric.json` compares Geth–Fabric. Live replay requires the corresponding network, deployed contracts, FireFly API, participant bindings, and rule services. Configure the current deployment using the [replay guide](new/exp3/README.md). Absolute paths and deployment identifiers inside saved reports refer to the original runs.
+Each path has three normalized traces and three pairwise comparison reports. `comparison.json` compares DSL–Geth, `comparison.dsl_fabric.json` compares DSL–Fabric, and `comparison.solidity_fabric.json` compares Geth–Fabric. Live replay requires the corresponding network, deployed contracts, FireFly API, participant bindings, and rule services. Configure the current deployment using the [replay guide](verification/exp3/README.md). Absolute paths and deployment identifiers inside saved reports refer to the original runs.
 
 ## RQ4 evidence coverage
 

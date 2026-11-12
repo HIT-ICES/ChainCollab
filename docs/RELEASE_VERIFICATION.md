@@ -17,6 +17,10 @@ The [experiment index](../Experiment/README.md) maps the seven experiment units 
 
 The RQ3, RQ4, and RQ5 checks above inspect recorded runs. Repeating live measurements requires the corresponding Fabric/Geth, FireFly, and rule-service deployments.
 
+## Layout update
+
+The structured examples are under `Experiment/BPMNwithDMNcase/`. The verification suite moved from `Experiment/new/` to `Experiment/verification/`. The archived reports retain the paths recorded at the time of each run.
+
 ## Original release cleanup
 
 This records repository cleanup and startup verification, not a new research

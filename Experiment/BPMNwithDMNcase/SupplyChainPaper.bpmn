@@ -1,43 +1,97 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xs="http://www.w3.org/2001/XMLSchema" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://bpmn.io/schema/bpmn">
+<bpmn2:definitions xmlns:abc="https://chaincollab.io/schema/abc" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://bpmn.io/schema/bpmn">
   <bpmn2:message id="Message_1dmeexg" name="Supplies Delivery Confirmation4">
-    <bpmn2:documentation>{"properties":{"confirm3":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="confirm3" type="string" description="" required="false" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_1dzkcn0" name="Supplies Delivery Confirmation3">
-    <bpmn2:documentation>{"properties":{"confirm2":{"type":"boolean","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="confirm2" type="boolean" description="" required="false" definition="{&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_1oxmq1k" name="Supplies Delivery Confirmation2">
-    <bpmn2:documentation>{"properties":{"confirm1":{"type":"boolean","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="confirm1" type="boolean" description="" required="false" definition="{&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_196q1fj" name="Goods Delivery Confirmation">
-    <bpmn2:documentation>{"properties":{},"required":[],"files":{"deliveryNote":{"type":"file","description":"A document confirming the delivery of goods"}},"file required":["deliveryNote"]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:File name="deliveryNote" type="file" description="A document confirming the delivery of goods" required="true" definition="{&quot;type&quot;:&quot;file&quot;,&quot;description&quot;:&quot;A document confirming the delivery of goods&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_04wmlqe" name="Supplies Delivery Information">
-    <bpmn2:documentation>{"properties":{"productionStart":{"type":"string","description":"Notification of the commencement of production, including the date and time"}},"required":["productionStart"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="productionStart" type="string" description="Notification of the commencement of production, including the date and time" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;Notification of the commencement of production, including the date and time&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_0d2xte5" name="Supplies Delivery Confirmation1">
-    <bpmn2:documentation>{"properties":{"deliveryConfirmation":{"type":"boolean","description":"Confirmation of whether the supplies have been successfully delivered"}},"required":["deliveryConfirmation"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="deliveryConfirmation" type="boolean" description="Confirmation of whether the supplies have been successfully delivered" required="true" definition="{&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;Confirmation of whether the supplies have been successfully delivered&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_1io2g9u" name="Waybill Transmission">
-    <bpmn2:documentation>{"properties":{},"required":[],"files":{"waybill":{"type":"file","description":"Digital or physical waybill document，detailing the shipment contents and destination."}},"file required":["waybill"]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:File name="waybill" type="file" description="Digital or physical waybill document，detailing the shipment contents and destination." required="true" definition="{&quot;type&quot;:&quot;file&quot;,&quot;description&quot;:&quot;Digital or physical waybill document，detailing the shipment contents and destination.&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_0hpha6h" name="Details Provision">
-    <bpmn2:documentation>{"properties":{"requestId":{"type":"number","description":"Unique identifier of the request for additional details "},"supplierReputation":{"type":"number","description":"A numerical rating representing the supplier's reputation."}},"required":["requestId","supplierReputation"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="requestId" type="number" description="Unique identifier of the request for additional details " required="true" definition="{&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;Unique identifier of the request for additional details &quot;}" />
+        <abc:Property name="supplierReputation" type="number" description="A numerical rating representing the supplier's reputation." required="true" definition="{&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;A numerical rating representing the supplier's reputation.&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_0rwz1km" name="Request Details">
-    <bpmn2:documentation>{"properties":{"requestId":{"type":"number","description":" Unique identifier of the request for additional details "},"numberOfUnits":{"type":"number","description":" Total number of units in the order requested"},"urgent":{"type":"boolean","description":"Indicates whether the order requires urgent delivery."}},"required":["requestId","numberOfUnits","urgent"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="requestId" type="number" description=" Unique identifier of the request for additional details " required="true" definition="{&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot; Unique identifier of the request for additional details &quot;}" />
+        <abc:Property name="numberOfUnits" type="number" description=" Total number of units in the order requested" required="true" definition="{&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot; Total number of units in the order requested&quot;}" />
+        <abc:Property name="urgent" type="boolean" description="Indicates whether the order requires urgent delivery." required="true" definition="{&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;Indicates whether the order requires urgent delivery.&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_0pm90nx" name="Transport Order Forwarding">
-    <bpmn2:documentation>{"properties":{"transportOrderId":{"type":"string","description":"Identifier of the transport order being forwarded"}},"required":["transportOrderId"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="transportOrderId" type="string" description="Identifier of the transport order being forwarded" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;Identifier of the transport order being forwarded&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_0cba4t6" name="Supply Order Forwarding">
-    <bpmn2:documentation>{"properties":{"supplyOrderId":{"type":"string","description":" Identifier of the supply order being forwarded"}},"required":["supplyOrderId"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="supplyOrderId" type="string" description=" Identifier of the supply order being forwarded" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot; Identifier of the supply order being forwarded&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_1ajdm9l" name="Supply Order Request">
-    <bpmn2:documentation>{"properties":{"supplyOrderDetails":{"type":"string","description":" Details of the supplies needed"}},"required":["supplyOrderDetails"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="supplyOrderDetails" type="string" description=" Details of the supplies needed" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot; Details of the supplies needed&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_1wswgqu" name="Goods Order Request">
-    <bpmn2:documentation>{"properties":{"orderDetails":{"type":"string","description":"Detailed list of goods ordered"}},"required":["orderDetails"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="orderDetails" type="string" description="Detailed list of goods ordered" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;Detailed list of goods ordered&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:choreography id="Choreography">
     <bpmn2:participant id="Participant_0w6qkdf" name="Bulk buyer" />
@@ -156,7 +210,14 @@
     <bpmn2:sequenceFlow id="Flow_1tf8ufi" sourceRef="ChoreographyTask_0s4ig1m" targetRef="ChoreographyTask_1q3p8t2" />
     <bpmn2:sequenceFlow id="Flow_0imjwmb" sourceRef="ChoreographyTask_1cceq4q" targetRef="ChoreographyTask_1tkm8jm" />
     <bpmn2:businessRuleTask id="Activity_0rm8bkp" name="Priority Decision">
-      <bpmn2:documentation>{"inputs":[{"name":"numberOfUnits","type":"number","description":" Total number of units in the order requested"},{"name":"urgent","type":"boolean","description":"Indicates whether the order requires urgent delivery."},{"name":"supplierReputation","type":"number","description":"A numerical rating representing the supplier's reputation."}],"outputs":[{"name":"finalPriority","type":"string","description":""}]}</bpmn2:documentation>
+      <bpmn2:extensionElements>
+        <abc:BusinessRule>
+          <abc:Input name="numberOfUnits" type="number" description=" Total number of units in the order requested" definition="{&quot;name&quot;:&quot;numberOfUnits&quot;,&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot; Total number of units in the order requested&quot;}" />
+          <abc:Input name="urgent" type="boolean" description="Indicates whether the order requires urgent delivery." definition="{&quot;name&quot;:&quot;urgent&quot;,&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;Indicates whether the order requires urgent delivery.&quot;}" />
+          <abc:Input name="supplierReputation" type="number" description="A numerical rating representing the supplier's reputation." definition="{&quot;name&quot;:&quot;supplierReputation&quot;,&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;A numerical rating representing the supplier's reputation.&quot;}" />
+          <abc:Output name="finalPriority" type="string" description="" definition="{&quot;name&quot;:&quot;finalPriority&quot;,&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+        </abc:BusinessRule>
+      </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_19s99wl</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1jxt9fr</bpmn2:outgoing>
     </bpmn2:businessRuleTask>
@@ -193,9 +254,9 @@
     </bpmn2:exclusiveGateway>
     <bpmn2:sequenceFlow id="Flow_1rdmhkh" sourceRef="ChoreographyTask_0p8dcch" targetRef="Gateway_1cr0nma" />
     <bpmn2:sequenceFlow id="Flow_0kh4ywx" sourceRef="Gateway_1cr0nma" targetRef="ChoreographyTask_0s4ig1m" />
-    <bpmn2:sequenceFlow id="Flow_0bna2ku" name="finalPriority==&#34;Low&#34;" sourceRef="Gateway_0ep8cuh" targetRef="ChoreographyTask_1573x71" />
-    <bpmn2:sequenceFlow id="Flow_1ihncup" name="finalPriority==&#34;Medium&#34;" sourceRef="Gateway_0ep8cuh" targetRef="ChoreographyTask_1qfvx9k" />
-    <bpmn2:sequenceFlow id="Flow_0r6rayf" name="finalPriority==&#34;High&#34;" sourceRef="Gateway_0ep8cuh" targetRef="ChoreographyTask_01sje89" />
+    <bpmn2:sequenceFlow id="Flow_0bna2ku" name="finalPriority==&quot;Low&quot;" sourceRef="Gateway_0ep8cuh" targetRef="ChoreographyTask_1573x71" />
+    <bpmn2:sequenceFlow id="Flow_1ihncup" name="finalPriority==&quot;Medium&quot;" sourceRef="Gateway_0ep8cuh" targetRef="ChoreographyTask_1qfvx9k" />
+    <bpmn2:sequenceFlow id="Flow_0r6rayf" name="finalPriority==&quot;High&quot;" sourceRef="Gateway_0ep8cuh" targetRef="ChoreographyTask_01sje89" />
     <bpmn2:sequenceFlow id="Flow_12cq02s" sourceRef="ChoreographyTask_1573x71" targetRef="Gateway_1cr0nma" />
     <bpmn2:sequenceFlow id="Flow_0ieovgu" sourceRef="ChoreographyTask_1qfvx9k" targetRef="Gateway_1cr0nma" />
     <bpmn2:sequenceFlow id="Flow_1sdqx53" sourceRef="ChoreographyTask_01sje89" targetRef="Gateway_1cr0nma" />
@@ -206,7 +267,7 @@
       <bpmn2:outgoing>Flow_1ihncup</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_0005j8y</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
-    <bpmn2:sequenceFlow id="Flow_0005j8y" name="finalPriority==&#34;VeryLow&#34;" sourceRef="Gateway_0ep8cuh" targetRef="ChoreographyTask_0p8dcch" />
+    <bpmn2:sequenceFlow id="Flow_0005j8y" name="finalPriority==&quot;VeryLow&quot;" sourceRef="Gateway_0ep8cuh" targetRef="ChoreographyTask_0p8dcch" />
   </bpmn2:choreography>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_Choreography_1" bpmnElement="Choreography">

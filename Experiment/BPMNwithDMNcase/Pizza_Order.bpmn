@@ -1,28 +1,59 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xs="http://www.w3.org/2001/XMLSchema" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://bpmn.io/schema/bpmn">
+<bpmn2:definitions xmlns:abc="https://chaincollab.io/schema/abc" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="_tTv5YOycEeiHGOQ2NkJZNQ" targetNamespace="http://bpmn.io/schema/bpmn">
   <bpmn2:message id="Message_1hi03zn" name="Receipt">
-    <bpmn2:documentation>{"properties":{"Signature":{"type":"string","description":""}},"required":["Signature"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="Signature" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_1l76ppu" name="Receipt">
-    <bpmn2:documentation>{"properties":{"Signature":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="Signature" type="string" description="" required="false" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_0phlgzx" name="DeliveryTask">
-    <bpmn2:documentation>{"properties":{"DeliveryInfomation":{"type":"string","description":""}},"required":[],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="DeliveryInfomation" type="string" description="" required="false" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_0nc7bj9" name="bikePrepare">
-    <bpmn2:documentation>{"properties":{"bikePrepare":{"type":"boolean","description":""}},"required":["bikePrepare"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="bikePrepare" type="boolean" description="" required="true" definition="{&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_1kyybzd" name="carPrepare">
-    <bpmn2:documentation>{"properties":{"carPrepare":{"type":"boolean","description":""}},"required":["carPrepare"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="carPrepare" type="boolean" description="" required="true" definition="{&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_10c1p7j" name="Delivery Address">
-    <bpmn2:documentation>{"properties":{"Address":{"type":"string","description":""}},"required":["Address"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="Address" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_0gm7yco" name="Pick-up Time">
-    <bpmn2:documentation>{"properties":{"PickUpTime":{"type":"string","description":""}},"required":["PickUpTime"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="PickUpTime" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:message id="Message_1wwub0e" name="Pizza Order">
-    <bpmn2:documentation>{"properties":{"OrderContent":{"type":"string","description":""}},"required":["OrderContent"],"files":{},"file required":[]}</bpmn2:documentation>
+    <bpmn2:extensionElements>
+      <abc:MessageSchema>
+        <abc:Property name="OrderContent" type="string" description="" required="true" definition="{&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+      </abc:MessageSchema>
+    </bpmn2:extensionElements>
   </bpmn2:message>
   <bpmn2:choreography id="Choreography">
     <bpmn2:participant id="Participant_1ssz56y" name="Customer" />
@@ -70,7 +101,12 @@
     </bpmn2:choreographyTask>
     <bpmn2:sequenceFlow id="Flow_01jdkr7" sourceRef="Gateway_1k9qf30" targetRef="ChoreographyTask_1bje0eq" />
     <bpmn2:businessRuleTask id="Activity_0pzravo" name="delivery">
-      <bpmn2:documentation>{"inputs":[{"name":"Address","type":"string","description":""}],"outputs":[{"name":"distance","type":"number","description":""}]}</bpmn2:documentation>
+      <bpmn2:extensionElements>
+        <abc:BusinessRule>
+          <abc:Input name="Address" type="string" description="" definition="{&quot;name&quot;:&quot;Address&quot;,&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&quot;}" />
+          <abc:Output name="distance" type="number" description="" definition="{&quot;name&quot;:&quot;distance&quot;,&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;&quot;}" />
+        </abc:BusinessRule>
+      </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0l16nm2</bpmn2:incoming>
       <bpmn2:outgoing>Flow_11h09u6</bpmn2:outgoing>
     </bpmn2:businessRuleTask>
@@ -88,7 +124,7 @@
       <bpmn2:participantRef>Participant_1ssz56y</bpmn2:participantRef>
       <bpmn2:messageFlowRef>MessageFlow_109r7bt</bpmn2:messageFlowRef>
     </bpmn2:choreographyTask>
-    <bpmn2:sequenceFlow id="Flow_0innpda" name="distance&#62;=10" sourceRef="Gateway_0ckb278" targetRef="ChoreographyTask_0s52z3o" />
+    <bpmn2:sequenceFlow id="Flow_0innpda" name="distance&gt;=10" sourceRef="Gateway_0ckb278" targetRef="ChoreographyTask_0s52z3o" />
     <bpmn2:choreographyTask id="ChoreographyTask_0x29lpx" name="CarDelivery" initiatingParticipantRef="Participant_1f296fx">
       <bpmn2:incoming>Flow_0c89z3g</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1pgz820</bpmn2:outgoing>
@@ -96,7 +132,7 @@
       <bpmn2:participantRef>Participant_1ssz56y</bpmn2:participantRef>
       <bpmn2:messageFlowRef>MessageFlow_06l2hci</bpmn2:messageFlowRef>
     </bpmn2:choreographyTask>
-    <bpmn2:sequenceFlow id="Flow_0c89z3g" name="distance&#60;10" sourceRef="Gateway_0ckb278" targetRef="ChoreographyTask_0x29lpx" />
+    <bpmn2:sequenceFlow id="Flow_0c89z3g" name="distance&lt;10" sourceRef="Gateway_0ckb278" targetRef="ChoreographyTask_0x29lpx" />
     <bpmn2:exclusiveGateway id="Gateway_18xv5wc">
       <bpmn2:incoming>Flow_073fja5</bpmn2:incoming>
       <bpmn2:incoming>Flow_1pgz820</bpmn2:incoming>
