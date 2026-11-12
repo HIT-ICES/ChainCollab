@@ -10,7 +10,7 @@ from pathlib import Path
 from tag_utils import write_json
 
 
-ROOT = Path("/root/code/ChainCollab")
+ROOT = Path(__file__).resolve().parents[4]
 EXP_DIR = ROOT / "Experiment/new/exp1_1B"
 SCRIPTS = EXP_DIR / "scripts"
 DEFAULT_BPMN = ROOT / "Experiment/BPMNwithDMNcase/SupplyChainPaper.bpmn"
@@ -45,9 +45,10 @@ def main() -> int:
     parser.add_argument("--out-dir", type=Path)
     args = parser.parse_args()
 
+    args.bpmn_file = args.bpmn_file.resolve()
     args.case_name = args.case_name or safe_case_name(args.bpmn_file.stem)
     args.out_dir = args.out_dir or EXP_DIR / "cases" / args.case_name
-    out = args.out_dir
+    out = args.out_dir.resolve()
     bpmn_out = out / "bpmn"
     dsl_out = out / "dsl"
     trace_out = out / "trace"

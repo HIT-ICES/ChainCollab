@@ -465,6 +465,12 @@ def verify_flow_go(flow: Dict[str, Any], go_ast: Dict[str, Any]) -> MatchResult:
 
 def verify_flow_sol(flow: Dict[str, Any], sol_ast: Dict[str, Any]) -> MatchResult:
     function_names = flow_trigger_candidates(flow, "solidity")
+    trigger = flow.get("trigger", {})
+    trigger_name = trigger.get("name")
+    if trigger_name and trigger.get("type") == "message" and trigger.get("state") == "completed":
+        completion = find_exact_function(sol_ast.get("functions", []), f"{trigger_name}_Complete")
+        if completion:
+            function_names = [completion["name"]]
     functions = [entry for entry in sol_ast.get("functions", []) if normalize_name(entry.get("name")) in {normalize_name(name) for name in function_names}]
     assignments = select_assignments(sol_ast.get("assignments", []), [entry["name"] for entry in functions])
     conditions = select_conditions(sol_ast.get("if_conditions", []), [entry["name"] for entry in functions]) + select_conditions(sol_ast.get("requires", []), [entry["name"] for entry in functions])

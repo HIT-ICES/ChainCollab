@@ -6,23 +6,24 @@ the **same complete Git tree** based on this baseline, including the existing
 API migration and frontend lock previously excluded by ignore rules, using merge commits that preserve their
 prior histories. Backup refs are under `backup/pre-release-cleanup-20261029/`.
 These development branches retain the complete baseline, archives and developer tools.
-Release also retains the original `Experiment/` tree without reorganizing it.
+Release retains the original experiment layout and adds the four timing workloads for Section V. See the [experiment index](../Experiment/README.md).
 
 | Path | Release decision | Reason |
 | --- | --- | --- |
 | `src/backend`, `src/agent/docker-rest-agent`, `src/front` | Keep | Main control plane and Docker connector |
 | `src/newTranslator` core, grammar, templates and tests | Keep | Active Go/Solidity generator called by the backend |
 | `src/bpmn-chor-app` development project | Development branches | Frontend uses its packaged library, not its source server |
-| `src/front/vendor/bpmn-chor-app-0.1.2.tgz` | Keep | Same original archive bytes; installable by npm in a clean checkout |
+| `src/front/vendor/bpmn-chor-app-0.1.2.tgz` | Keep | Packaged editor from dev, with its checksum pinned in the release lockfile |
 | `src/oracle/CHAINLINK`, `src/oracle/03-ocr-multinode`, `src/oracle/04-dmn-ocr` | Keep | All participate in the backend's Oracle/OCR setup chain |
 | `src/oracle-node` | Development branches | Parallel old stack; active backend resolves `src/oracle` |
 | `src/relayer-node` | Keep | Active backend exposes status/control endpoints for this service |
 | `src/py_translator` | Local/development only | Already untracked; backend uses newTranslator |
 | `src/java-env-custom-image` | Local/development only | Existing separate Git repository; never deleted or incorporated |
-| `Experiment` | Keep unchanged | Original release experiment layout, models, scripts and recorded results, including supplementary performance tests |
+| `Experiment` | Keep and extend | Original experiment directories and four RQ5 workloads, with deployment-specific live configurations kept locally |
+| `src/newTranslator/MDAcheck` | Keep selected files | Ecore, OCL, validation runner, and eleven DSL inputs used by the experiment checkers |
 | `artifacts`, manuscript evidence and old tutorials | Development branches | Evidence archives and retired development documentation |
 | `examples/bpmn-dmn` | Keep | Structured BPMN/DMN inputs for reproduction |
-| newTranslator MDAcheck/build/dashboard and standalone developer dashboards | Development branches | Generated outputs or duplicate development interfaces |
+| Other MDAcheck datasets, newTranslator build/dashboard and standalone developer dashboards | Development branches | Additional generated outputs or duplicate development interfaces |
 | Existing environments, pgdata, .env, credentials and runtime directories | Preserve locally, ignore in Git | Machine state is not release source |
 
 The active Oracle/OCR directories cannot be removed merely because they resemble

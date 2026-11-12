@@ -132,7 +132,7 @@ def resolve_case(case_dir: Path) -> Dict[str, Any]:
         "description": manifest.get("description", ""),
         "bpmn": case_dir / "input.bpmn" if (case_dir / "input.bpmn").exists() else None,
         "b2c": case_dir / "input.b2c" if (case_dir / "input.b2c").exists() else None,
-        "source_b2c": Path(manifest["source_b2c"]).resolve() if manifest.get("source_b2c") else None,
+        "source_b2c": (CHAINCOLLAB_ROOT / manifest["source_b2c"]).resolve() if manifest.get("source_b2c") else None,
         "dmn": case_dir / "input.dmn" if (case_dir / "input.dmn").exists() else None,
     }
 

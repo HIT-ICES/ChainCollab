@@ -1,0 +1,39 @@
+{
+  "messages": [],
+  "gateways": [],
+  "events": [
+    {
+      "id": "Event_brtStart"
+    },
+    {
+      "id": "Event_brtEnd"
+    }
+  ],
+  "businessRules": [
+    {
+      "id": "Activity_timingbrt",
+      "method": "Activity_timingbrt",
+      "continueMethod": "Activity_timingbrt_Continue",
+      "inputs": [
+        {
+          "name": "score",
+          "slot": "Score",
+          "type": "string"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "approved",
+          "slot": "Approved",
+          "type": "bool"
+        }
+      ]
+    }
+  ],
+  "methodMap": {
+    "Event_brtStart": "Event_brtStart",
+    "Event_brtEnd": "Event_brtEnd",
+    "Activity_timingbrt": "Activity_timingbrt",
+    "Activity_timingbrt#continue": "Activity_timingbrt_Continue"
+  }
+}

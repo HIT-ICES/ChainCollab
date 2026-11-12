@@ -1,5 +1,24 @@
 # Release verification — 2026-10-29
 
+## Section V artifact update — 2026-11-12
+
+The [experiment index](../Experiment/README.md) maps the seven experiment units to their inputs, scripts, and evidence. The release integrates the file-message implementation and timing workloads from dev commit `afaa3e77`. Archived results retain their original contents.
+
+| Check | Outcome |
+| --- | --- |
+| RQ1A, Eclipse OCL | Validated 450 archived XMI inputs. All 11 positives passed and all 439 negatives produced violations. |
+| RQ1B, structural checker | Regenerated reports for the 11 archived source cases. All passed. |
+| RQ1C, bounded behavior | Regenerated the 11 case reports and 75 logical paths. All case reports passed. |
+| RQ2, Go and Solidity static checks | All 11 cases passed with the current generator and the checker that follows Solidity message completion. |
+| RQ3, archived comparisons | All three pairs have 75 consistent comparisons and 1,100 steps per platform. A fresh offline comparison of a SupplyChainPaper trace pair also passed. |
+| RQ4, available archive | Counted 6,917 records from the Fabric perturbation runs. The final 6,920-record set and matching Geth archive remain to be located. |
+| RQ5, archived timing | All 439 files listed under `results-100` in the paper's transfer manifest matched SHA-256. The four groups contain 100 per-round records each. The Geth BRT verifier replayed 800 stage intervals offline. |
+| Application checks | Five file-message service tests, four generator regression tests, Django checks, TypeScript checking, clean dependency installation, and the frontend production build passed. |
+
+The RQ3, RQ4, and RQ5 checks above inspect recorded runs. Repeating live measurements requires the corresponding Fabric/Geth, FireFly, and rule-service deployments.
+
+## Original release cleanup
+
 This records repository cleanup and startup verification, not a new research
 experiment. Existing benchmark data and live-chain results were not rerun or
 rewritten.

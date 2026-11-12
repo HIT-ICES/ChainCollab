@@ -1,0 +1,10 @@
+--- generator-output.go
++++ repeatable-test.go
+@@ -969,7 +969,6 @@
+ 	}
+ 
+ 	cc.ChangeMsgFireflyTranID(ctx, instance, fireflyTranID, msg.MessageID)
+-	cc.ChangeMsgState(ctx, instance, "Message_1wswgqu", WAITINGFORCONFIRMATION)
+ 
+ globalMemory,readGloabolError := cc.ReadGlobalVariable(ctx, instanceID)
+ 	if readGloabolError != nil {

@@ -16,10 +16,11 @@ from pathlib import Path
 from typing import Any
 
 
-ROOT = Path("/root/code/ChainCollab")
+ROOT = Path(__file__).resolve().parents[4]
 EXP_ROOT = ROOT / "Experiment" / "new" / "exp1_1C"
 CASE_NAME = os.environ.get("EXP1C_CASE_NAME", "SupplyChainPaper")
-CASE_DIR = EXP_ROOT / "cases" / CASE_NAME
+OUTPUT_ROOT = Path(os.environ.get("EXP1C_OUTPUT_ROOT", EXP_ROOT)).resolve()
+CASE_DIR = OUTPUT_ROOT / "cases" / CASE_NAME
 BPMN_FILE = Path(os.environ.get("EXP1C_BPMN_FILE", str(ROOT / "Experiment" / "BPMNwithDMNcase" / f"{CASE_NAME}.bpmn")))
 TRACE_FILE = ROOT / "Experiment" / "new" / "exp1_1B" / "cases" / CASE_NAME / "trace" / "bpmn_dsl_trace.json"
 TRANSLATOR_ROOT = ROOT / "src" / "newTranslator"
@@ -38,7 +39,7 @@ DIRS = {
     "traces": CASE_DIR / "traces",
     "logical_paths": CASE_DIR / "logical_paths",
     "reports": CASE_DIR / "reports",
-    "all_reports": EXP_ROOT / "reports",
+    "all_reports": OUTPUT_ROOT / "reports",
 }
 
 

@@ -1,0 +1,553 @@
+{
+  "contracts": {
+    "contract.sol": {
+      "GethBrtTiming1102025258": {
+        "storageLayout": {
+          "storage": [
+            {
+              "astId": 236,
+              "contract": "contract.sol:GethBrtTiming1102025258",
+              "label": "owner",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_address"
+            },
+            {
+              "astId": 238,
+              "contract": "contract.sol:GethBrtTiming1102025258",
+              "label": "isInited",
+              "offset": 20,
+              "slot": "0",
+              "type": "t_bool"
+            },
+            {
+              "astId": 240,
+              "contract": "contract.sol:GethBrtTiming1102025258",
+              "label": "currentInstanceId",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_uint256"
+            },
+            {
+              "astId": 243,
+              "contract": "contract.sol:GethBrtTiming1102025258",
+              "label": "oracle",
+              "offset": 0,
+              "slot": "2",
+              "type": "t_contract(IOracle)28"
+            },
+            {
+              "astId": 248,
+              "contract": "contract.sol:GethBrtTiming1102025258",
+              "label": "instances",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_mapping(t_uint256,t_struct(Instance)214_storage)"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "encoding": "inplace",
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_bool": {
+              "encoding": "inplace",
+              "label": "bool",
+              "numberOfBytes": "1"
+            },
+            "t_bytes32": {
+              "encoding": "inplace",
+              "label": "bytes32",
+              "numberOfBytes": "32"
+            },
+            "t_contract(IOracle)28": {
+              "encoding": "inplace",
+              "label": "contract IOracle",
+              "numberOfBytes": "20"
+            },
+            "t_enum(BusinessRuleKey)89": {
+              "encoding": "inplace",
+              "label": "enum GethBrtTiming1102025258.BusinessRuleKey",
+              "numberOfBytes": "1"
+            },
+            "t_enum(ElementState)77": {
+              "encoding": "inplace",
+              "label": "enum GethBrtTiming1102025258.ElementState",
+              "numberOfBytes": "1"
+            },
+            "t_enum(EventKey)87": {
+              "encoding": "inplace",
+              "label": "enum GethBrtTiming1102025258.EventKey",
+              "numberOfBytes": "1"
+            },
+            "t_enum(GatewayKey)84": {
+              "encoding": "inplace",
+              "label": "enum GethBrtTiming1102025258.GatewayKey",
+              "numberOfBytes": "1"
+            },
+            "t_enum(MessageKey)82": {
+              "encoding": "inplace",
+              "label": "enum GethBrtTiming1102025258.MessageKey",
+              "numberOfBytes": "1"
+            },
+            "t_enum(ParticipantKey)80": {
+              "encoding": "inplace",
+              "label": "enum GethBrtTiming1102025258.ParticipantKey",
+              "numberOfBytes": "1"
+            },
+            "t_mapping(t_enum(BusinessRuleKey)89,t_struct(BusinessRule)168_storage)": {
+              "encoding": "mapping",
+              "key": "t_enum(BusinessRuleKey)89",
+              "label": "mapping(enum GethBrtTiming1102025258.BusinessRuleKey => struct GethBrtTiming1102025258.BusinessRule)",
+              "numberOfBytes": "32",
+              "value": "t_struct(BusinessRule)168_storage"
+            },
+            "t_mapping(t_enum(EventKey)87,t_struct(ActionEvent)133_storage)": {
+              "encoding": "mapping",
+              "key": "t_enum(EventKey)87",
+              "label": "mapping(enum GethBrtTiming1102025258.EventKey => struct GethBrtTiming1102025258.ActionEvent)",
+              "numberOfBytes": "32",
+              "value": "t_struct(ActionEvent)133_storage"
+            },
+            "t_mapping(t_enum(GatewayKey)84,t_struct(Gateway)127_storage)": {
+              "encoding": "mapping",
+              "key": "t_enum(GatewayKey)84",
+              "label": "mapping(enum GethBrtTiming1102025258.GatewayKey => struct GethBrtTiming1102025258.Gateway)",
+              "numberOfBytes": "32",
+              "value": "t_struct(Gateway)127_storage"
+            },
+            "t_mapping(t_enum(MessageKey)82,t_struct(Message)121_storage)": {
+              "encoding": "mapping",
+              "key": "t_enum(MessageKey)82",
+              "label": "mapping(enum GethBrtTiming1102025258.MessageKey => struct GethBrtTiming1102025258.Message)",
+              "numberOfBytes": "32",
+              "value": "t_struct(Message)121_storage"
+            },
+            "t_mapping(t_enum(ParticipantKey)80,t_struct(Participant)107_storage)": {
+              "encoding": "mapping",
+              "key": "t_enum(ParticipantKey)80",
+              "label": "mapping(enum GethBrtTiming1102025258.ParticipantKey => struct GethBrtTiming1102025258.Participant)",
+              "numberOfBytes": "32",
+              "value": "t_struct(Participant)107_storage"
+            },
+            "t_mapping(t_uint256,t_struct(Instance)214_storage)": {
+              "encoding": "mapping",
+              "key": "t_uint256",
+              "label": "mapping(uint256 => struct GethBrtTiming1102025258.Instance)",
+              "numberOfBytes": "32",
+              "value": "t_struct(Instance)214_storage"
+            },
+            "t_string_storage": {
+              "encoding": "bytes",
+              "label": "string",
+              "numberOfBytes": "32"
+            },
+            "t_struct(ActionEvent)133_storage": {
+              "encoding": "inplace",
+              "label": "struct GethBrtTiming1102025258.ActionEvent",
+              "members": [
+                {
+                  "astId": 129,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "exists",
+                  "offset": 0,
+                  "slot": "0",
+                  "type": "t_bool"
+                },
+                {
+                  "astId": 132,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "state",
+                  "offset": 1,
+                  "slot": "0",
+                  "type": "t_enum(ElementState)77"
+                }
+              ],
+              "numberOfBytes": "32"
+            },
+            "t_struct(BusinessRule)168_storage": {
+              "encoding": "inplace",
+              "label": "struct GethBrtTiming1102025258.BusinessRule",
+              "members": [
+                {
+                  "astId": 146,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "exists",
+                  "offset": 0,
+                  "slot": "0",
+                  "type": "t_bool"
+                },
+                {
+                  "astId": 148,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "dmnCid",
+                  "offset": 0,
+                  "slot": "1",
+                  "type": "t_string_storage"
+                },
+                {
+                  "astId": 150,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "hashOfDmn",
+                  "offset": 0,
+                  "slot": "2",
+                  "type": "t_bytes32"
+                },
+                {
+                  "astId": 152,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "decisionId",
+                  "offset": 0,
+                  "slot": "3",
+                  "type": "t_string_storage"
+                },
+                {
+                  "astId": 154,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "callerRestricted",
+                  "offset": 0,
+                  "slot": "4",
+                  "type": "t_bool"
+                },
+                {
+                  "astId": 156,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "allowedCaller",
+                  "offset": 1,
+                  "slot": "4",
+                  "type": "t_address"
+                },
+                {
+                  "astId": 159,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "state",
+                  "offset": 21,
+                  "slot": "4",
+                  "type": "t_enum(ElementState)77"
+                },
+                {
+                  "astId": 161,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "requestId",
+                  "offset": 0,
+                  "slot": "5",
+                  "type": "t_bytes32"
+                },
+                {
+                  "astId": 163,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "requestedAt",
+                  "offset": 0,
+                  "slot": "6",
+                  "type": "t_uint256"
+                },
+                {
+                  "astId": 165,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "fulfilledAt",
+                  "offset": 0,
+                  "slot": "7",
+                  "type": "t_uint256"
+                },
+                {
+                  "astId": 167,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "lastRawResult",
+                  "offset": 0,
+                  "slot": "8",
+                  "type": "t_string_storage"
+                }
+              ],
+              "numberOfBytes": "288"
+            },
+            "t_struct(Gateway)127_storage": {
+              "encoding": "inplace",
+              "label": "struct GethBrtTiming1102025258.Gateway",
+              "members": [
+                {
+                  "astId": 123,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "exists",
+                  "offset": 0,
+                  "slot": "0",
+                  "type": "t_bool"
+                },
+                {
+                  "astId": 126,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "state",
+                  "offset": 1,
+                  "slot": "0",
+                  "type": "t_enum(ElementState)77"
+                }
+              ],
+              "numberOfBytes": "32"
+            },
+            "t_struct(Instance)214_storage": {
+              "encoding": "inplace",
+              "label": "struct GethBrtTiming1102025258.Instance",
+              "members": [
+                {
+                  "astId": 170,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "exists",
+                  "offset": 0,
+                  "slot": "0",
+                  "type": "t_bool"
+                },
+                {
+                  "astId": 172,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "instanceId",
+                  "offset": 0,
+                  "slot": "1",
+                  "type": "t_uint256"
+                },
+                {
+                  "astId": 174,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "identityContractAddress",
+                  "offset": 0,
+                  "slot": "2",
+                  "type": "t_address"
+                },
+                {
+                  "astId": 176,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "dmnLiteAddress",
+                  "offset": 0,
+                  "slot": "3",
+                  "type": "t_address"
+                },
+                {
+                  "astId": 178,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "dmnEvalUrl",
+                  "offset": 0,
+                  "slot": "4",
+                  "type": "t_string_storage"
+                },
+                {
+                  "astId": 180,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "enforceBusinessRuleCaller",
+                  "offset": 0,
+                  "slot": "5",
+                  "type": "t_bool"
+                },
+                {
+                  "astId": 183,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "stateMemory",
+                  "offset": 0,
+                  "slot": "6",
+                  "type": "t_struct(StateMemory)94_storage"
+                },
+                {
+                  "astId": 189,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "messages",
+                  "offset": 0,
+                  "slot": "8",
+                  "type": "t_mapping(t_enum(MessageKey)82,t_struct(Message)121_storage)"
+                },
+                {
+                  "astId": 195,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "gateways",
+                  "offset": 0,
+                  "slot": "9",
+                  "type": "t_mapping(t_enum(GatewayKey)84,t_struct(Gateway)127_storage)"
+                },
+                {
+                  "astId": 201,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "events",
+                  "offset": 0,
+                  "slot": "10",
+                  "type": "t_mapping(t_enum(EventKey)87,t_struct(ActionEvent)133_storage)"
+                },
+                {
+                  "astId": 207,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "participants",
+                  "offset": 0,
+                  "slot": "11",
+                  "type": "t_mapping(t_enum(ParticipantKey)80,t_struct(Participant)107_storage)"
+                },
+                {
+                  "astId": 213,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "businessRules",
+                  "offset": 0,
+                  "slot": "12",
+                  "type": "t_mapping(t_enum(BusinessRuleKey)89,t_struct(BusinessRule)168_storage)"
+                }
+              ],
+              "numberOfBytes": "416"
+            },
+            "t_struct(Message)121_storage": {
+              "encoding": "inplace",
+              "label": "struct GethBrtTiming1102025258.Message",
+              "members": [
+                {
+                  "astId": 109,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "exists",
+                  "offset": 0,
+                  "slot": "0",
+                  "type": "t_bool"
+                },
+                {
+                  "astId": 112,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "sendParticipant",
+                  "offset": 1,
+                  "slot": "0",
+                  "type": "t_enum(ParticipantKey)80"
+                },
+                {
+                  "astId": 115,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "receiveParticipant",
+                  "offset": 2,
+                  "slot": "0",
+                  "type": "t_enum(ParticipantKey)80"
+                },
+                {
+                  "astId": 117,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "fireflyTranId",
+                  "offset": 0,
+                  "slot": "1",
+                  "type": "t_string_storage"
+                },
+                {
+                  "astId": 120,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "state",
+                  "offset": 0,
+                  "slot": "2",
+                  "type": "t_enum(ElementState)77"
+                }
+              ],
+              "numberOfBytes": "96"
+            },
+            "t_struct(Participant)107_storage": {
+              "encoding": "inplace",
+              "label": "struct GethBrtTiming1102025258.Participant",
+              "members": [
+                {
+                  "astId": 96,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "exists",
+                  "offset": 0,
+                  "slot": "0",
+                  "type": "t_bool"
+                },
+                {
+                  "astId": 98,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "account",
+                  "offset": 1,
+                  "slot": "0",
+                  "type": "t_address"
+                },
+                {
+                  "astId": 100,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "org",
+                  "offset": 0,
+                  "slot": "1",
+                  "type": "t_string_storage"
+                },
+                {
+                  "astId": 102,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "isMulti",
+                  "offset": 0,
+                  "slot": "2",
+                  "type": "t_bool"
+                },
+                {
+                  "astId": 104,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "multiMaximum",
+                  "offset": 1,
+                  "slot": "2",
+                  "type": "t_uint8"
+                },
+                {
+                  "astId": 106,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "multiMinimum",
+                  "offset": 2,
+                  "slot": "2",
+                  "type": "t_uint8"
+                }
+              ],
+              "numberOfBytes": "96"
+            },
+            "t_struct(StateMemory)94_storage": {
+              "encoding": "inplace",
+              "label": "struct GethBrtTiming1102025258.StateMemory",
+              "members": [
+                {
+                  "astId": 91,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "Approved",
+                  "offset": 0,
+                  "slot": "0",
+                  "type": "t_bool"
+                },
+                {
+                  "astId": 93,
+                  "contract": "contract.sol:GethBrtTiming1102025258",
+                  "label": "Score",
+                  "offset": 0,
+                  "slot": "1",
+                  "type": "t_string_storage"
+                }
+              ],
+              "numberOfBytes": "64"
+            },
+            "t_uint256": {
+              "encoding": "inplace",
+              "label": "uint256",
+              "numberOfBytes": "32"
+            },
+            "t_uint8": {
+              "encoding": "inplace",
+              "label": "uint8",
+              "numberOfBytes": "1"
+            }
+          }
+        }
+      },
+      "IDmnLite": {
+        "storageLayout": {
+          "storage": [],
+          "types": null
+        }
+      },
+      "IIdentityRegistry": {
+        "storageLayout": {
+          "storage": [],
+          "types": null
+        }
+      },
+      "IOracle": {
+        "storageLayout": {
+          "storage": [],
+          "types": null
+        }
+      }
+    }
+  },
+  "sources": {
+    "contract.sol": {
+      "id": 0
+    }
+  }
+}

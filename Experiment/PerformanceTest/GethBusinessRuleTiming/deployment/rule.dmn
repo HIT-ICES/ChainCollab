@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" id="Definitions_timing" name="Score decision" namespace="http://chaincollab.io/experiment">
+ <decision id="Decision_timing" name="Approve nonnegative score">
+  <decisionTable id="Table_timing" hitPolicy="UNIQUE">
+   <input id="Input_score" label="score"><inputExpression id="Expression_score" typeRef="string"><text>score</text></inputExpression></input>
+   <output id="Output_approved" name="approved" typeRef="boolean"/>
+   <rule id="Rule_nonnegative"><inputEntry id="Test_nonnegative"><text>""</text></inputEntry><outputEntry id="Result_true"><text>true</text></outputEntry></rule>
+   <rule id="Rule_negative"><inputEntry id="Test_negative"><text>not("")</text></inputEntry><outputEntry id="Result_false"><text>false</text></outputEntry></rule>
+  </decisionTable>
+ </decision>
+</definitions>

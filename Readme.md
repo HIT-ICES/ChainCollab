@@ -6,6 +6,8 @@ The `release-MultiBlockchain` branch contains application source, generation tem
 
 ## 1. Branches and existing installations
 
+For the paper's Section V, start with the [experiment and evidence index](Experiment/README.md). It maps RQ1A–RQ5 to inputs, verification code, archived results, and reproduction prerequisites.
+
 The complete pre-cleanup implementation is preserved on `dev-MultiBlockchain` and `dev-MultiBlockChain-fork`. Both preserve the same runnable baseline based on release commit `eaea6028`, including the existing frontend lockfile and database migration previously excluded by ignore rules. Their earlier histories are retained. These development branches also retain manuscript evidence archives and the editor development project. Release retains `Experiment/` with its original layout and contents.
 
 Before switching from release to a development branch, run `python3 scripts/chaincollab.py down`, switch branches, and follow that branch's startup instructions. Existing databases and dependency environments remain on the machine.
@@ -140,6 +142,8 @@ Import `examples/bpmn-dmn/SupplyChainPaper.bpmn` and its companion `supplyChainP
 
 Code generation does not establish a runtime DMN service binding. Configure bindings using the decision IDs in the actual DMN file. Messages follow Send → wait for receipt confirmation → Complete → completion. BusinessRule tasks follow Request → wait for a result → Continue → output writeback and completion. See the [message confirmation protocol](docs/Solidity_Message_Confirmation.md).
 
+For file messages, the Geth execution page uploads attachments and submits a private FireFly message before invoking the generated `Send` function with the returned FireFly message ID. Configure participants and their FireFly identities before using this path.
+
 Oracle, DMN/OCR, and Relayer services are separate components required for decision execution or cross-chain calls. Their commands, external prerequisites, and active paths are documented in the [Oracle and Relayer setup guide](docs/ORACLE_RELAYER_SETUP.md). Provision the required blockchain environment before using them.
 
 ## 6. Standalone BPMN → PIM → Go / Solidity generation
@@ -183,7 +187,7 @@ src/geth_identity_contract/      Participant identity contract for Geth instance
 docs/                           Release scope, operating guides, and verification records
 ```
 
-`Experiment/` retains all 3,631 files from the pre-cleanup release under `BPMNwithDMNcase/`, `NoiseExperiment/`, `PerformanceTest/`, and `new/`. The structured SupplyChainPaper model is at `Experiment/BPMNwithDMNcase/new/SupplyChainPaper.bpmn`. Use `examples/bpmn-dmn/` for the standalone generation walkthrough; the original experiment layout and recorded data remain under `Experiment/`. Repository cleanup did not rerun experiments or rewrite their results.
+`Experiment/` retains the original release layout and includes the four timing experiments used in the paper. The structured SupplyChainPaper model is at `Experiment/BPMNwithDMNcase/new/SupplyChainPaper.bpmn`. Use `examples/bpmn-dmn/` for standalone generation and the [experiment index](Experiment/README.md) for the paper's workloads and recorded evidence.
 
 The [release scope record](docs/RELEASE_LAYOUT.md) explains which development materials remain on development branches. `.gitignore` excludes retained local development directories, virtual environments, `node_modules`, configuration, and runtime data from new release checkouts.
 

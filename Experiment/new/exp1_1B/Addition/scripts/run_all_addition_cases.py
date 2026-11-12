@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 
-ROOT = Path("/root/code/ChainCollab")
+ROOT = Path(__file__).resolve().parents[5]
 EXP1B_DIR = ROOT / "Experiment/new/exp1_1B"
 ADDITION_DIR = EXP1B_DIR / "Addition"
 EXP3_CASES_DIR = ROOT / "Experiment/new/exp3/cases"

@@ -1,0 +1,885 @@
+{
+  "namespace": "default",
+  "name": "GethBrtTiming1102025258-9b56f6",
+  "description": "",
+  "version": "1.0",
+  "methods": [
+    {
+      "name": "currentInstanceId",
+      "pathname": "",
+      "description": "",
+      "params": [],
+      "returns": [
+        {
+          "name": "",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "details": {
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum."
+          }
+        }
+      ],
+      "details": {
+        "stateMutability": "view"
+      }
+    },
+    {
+      "name": "initLedger",
+      "pathname": "",
+      "description": "",
+      "params": [],
+      "returns": [],
+      "details": {
+        "stateMutability": "nonpayable"
+      }
+    },
+    {
+      "name": "oracle",
+      "pathname": "",
+      "description": "",
+      "params": [],
+      "returns": [
+        {
+          "name": "",
+          "schema": {
+            "type": "string",
+            "details": {
+              "type": "address",
+              "internalType": "contract IOracle"
+            },
+            "description": "A hex encoded set of bytes, with an optional '0x' prefix"
+          }
+        }
+      ],
+      "details": {
+        "stateMutability": "view"
+      }
+    },
+    {
+      "name": "setOracle",
+      "pathname": "",
+      "description": "",
+      "params": [
+        {
+          "name": "oracleAddress",
+          "schema": {
+            "type": "string",
+            "details": {
+              "type": "address",
+              "internalType": "address"
+            },
+            "description": "A hex encoded set of bytes, with an optional '0x' prefix"
+          }
+        }
+      ],
+      "returns": [],
+      "details": {
+        "stateMutability": "nonpayable"
+      }
+    },
+    {
+      "name": "Activity_timingbrt",
+      "pathname": "",
+      "description": "",
+      "params": [
+        {
+          "name": "instanceId",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "details": {
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum."
+          }
+        }
+      ],
+      "returns": [],
+      "details": {
+        "stateMutability": "nonpayable"
+      }
+    },
+    {
+      "name": "Event_brtEnd",
+      "pathname": "",
+      "description": "",
+      "params": [
+        {
+          "name": "instanceId",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "details": {
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum."
+          }
+        }
+      ],
+      "returns": [],
+      "details": {
+        "stateMutability": "nonpayable"
+      }
+    },
+    {
+      "name": "createInstance",
+      "pathname": "",
+      "description": "",
+      "params": [
+        {
+          "name": "params",
+          "schema": {
+            "type": "object",
+            "details": {
+              "type": "tuple",
+              "internalType": "struct GethBrtTiming1102025258.InitParameters"
+            },
+            "properties": {
+              "Activity_timingbrt": {
+                "type": "object",
+                "details": {
+                  "type": "tuple",
+                  "internalType": "struct GethBrtTiming1102025258.BusinessRuleInit",
+                  "index": 8
+                },
+                "properties": {
+                  "allowedCaller": {
+                    "type": "string",
+                    "details": {
+                      "type": "address",
+                      "internalType": "address",
+                      "index": 4
+                    },
+                    "description": "A hex encoded set of bytes, with an optional '0x' prefix"
+                  },
+                  "callerRestricted": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "boolean"
+                      }
+                    ],
+                    "details": {
+                      "type": "bool",
+                      "internalType": "bool",
+                      "index": 3
+                    },
+                    "description": "A boolean. You can use a boolean or a string true/false as input"
+                  },
+                  "decisionId": {
+                    "type": "string",
+                    "details": {
+                      "type": "string",
+                      "internalType": "string",
+                      "index": 2
+                    }
+                  },
+                  "dmnCid": {
+                    "type": "string",
+                    "details": {
+                      "type": "string",
+                      "internalType": "string",
+                      "index": 0
+                    }
+                  },
+                  "dmnHash": {
+                    "type": "string",
+                    "details": {
+                      "type": "bytes32",
+                      "internalType": "bytes32",
+                      "index": 1
+                    },
+                    "description": "A hex encoded set of bytes, with an optional '0x' prefix"
+                  }
+                }
+              },
+              "Participant_A_account": {
+                "type": "string",
+                "details": {
+                  "type": "address",
+                  "internalType": "address",
+                  "index": 4
+                },
+                "description": "A hex encoded set of bytes, with an optional '0x' prefix"
+              },
+              "Participant_A_org": {
+                "type": "string",
+                "details": {
+                  "type": "string",
+                  "internalType": "string",
+                  "index": 5
+                }
+              },
+              "Participant_B_account": {
+                "type": "string",
+                "details": {
+                  "type": "address",
+                  "internalType": "address",
+                  "index": 6
+                },
+                "description": "A hex encoded set of bytes, with an optional '0x' prefix"
+              },
+              "Participant_B_org": {
+                "type": "string",
+                "details": {
+                  "type": "string",
+                  "internalType": "string",
+                  "index": 7
+                }
+              },
+              "dmnEvalUrl": {
+                "type": "string",
+                "details": {
+                  "type": "string",
+                  "internalType": "string",
+                  "index": 2
+                }
+              },
+              "dmnLiteAddress": {
+                "type": "string",
+                "details": {
+                  "type": "address",
+                  "internalType": "address",
+                  "index": 1
+                },
+                "description": "A hex encoded set of bytes, with an optional '0x' prefix"
+              },
+              "enforceBusinessRuleCaller": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "boolean"
+                  }
+                ],
+                "details": {
+                  "type": "bool",
+                  "internalType": "bool",
+                  "index": 3
+                },
+                "description": "A boolean. You can use a boolean or a string true/false as input"
+              },
+              "identityContractAddress": {
+                "type": "string",
+                "details": {
+                  "type": "address",
+                  "internalType": "address",
+                  "index": 0
+                },
+                "description": "A hex encoded set of bytes, with an optional '0x' prefix"
+              }
+            }
+          }
+        }
+      ],
+      "returns": [
+        {
+          "name": "instanceId",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "details": {
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum."
+          }
+        }
+      ],
+      "details": {
+        "stateMutability": "nonpayable"
+      }
+    },
+    {
+      "name": "getExecutionSnapshot",
+      "pathname": "",
+      "description": "",
+      "params": [
+        {
+          "name": "instanceId",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "details": {
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum."
+          }
+        }
+      ],
+      "returns": [
+        {
+          "name": "messageStates",
+          "schema": {
+            "type": "array",
+            "details": {
+              "type": "uint8[]",
+              "internalType": "uint8[]"
+            },
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum."
+            }
+          }
+        },
+        {
+          "name": "messageFireflyTranIds",
+          "schema": {
+            "type": "array",
+            "details": {
+              "type": "string[]",
+              "internalType": "string[]"
+            },
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "name": "gatewayStates",
+          "schema": {
+            "type": "array",
+            "details": {
+              "type": "uint8[]",
+              "internalType": "uint8[]"
+            },
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum."
+            }
+          }
+        },
+        {
+          "name": "eventStates",
+          "schema": {
+            "type": "array",
+            "details": {
+              "type": "uint8[]",
+              "internalType": "uint8[]"
+            },
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum."
+            }
+          }
+        },
+        {
+          "name": "businessRuleStates",
+          "schema": {
+            "type": "array",
+            "details": {
+              "type": "uint8[]",
+              "internalType": "uint8[]"
+            },
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum."
+            }
+          }
+        },
+        {
+          "name": "businessRuleRequestIds",
+          "schema": {
+            "type": "array",
+            "details": {
+              "type": "bytes32[]",
+              "internalType": "bytes32[]"
+            },
+            "items": {
+              "type": "string",
+              "description": "A hex encoded set of bytes, with an optional '0x' prefix"
+            }
+          }
+        }
+      ],
+      "details": {
+        "stateMutability": "view"
+      }
+    },
+    {
+      "name": "isInited",
+      "pathname": "",
+      "description": "",
+      "params": [],
+      "returns": [
+        {
+          "name": "",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              }
+            ],
+            "details": {
+              "type": "bool",
+              "internalType": "bool"
+            },
+            "description": "A boolean. You can use a boolean or a string true/false as input"
+          }
+        }
+      ],
+      "details": {
+        "stateMutability": "view"
+      }
+    },
+    {
+      "name": "owner",
+      "pathname": "",
+      "description": "",
+      "params": [],
+      "returns": [
+        {
+          "name": "",
+          "schema": {
+            "type": "string",
+            "details": {
+              "type": "address",
+              "internalType": "address"
+            },
+            "description": "A hex encoded set of bytes, with an optional '0x' prefix"
+          }
+        }
+      ],
+      "details": {
+        "stateMutability": "view"
+      }
+    },
+    {
+      "name": "Activity_timingbrt_Continue",
+      "pathname": "",
+      "description": "",
+      "params": [
+        {
+          "name": "instanceId",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "details": {
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum."
+          }
+        }
+      ],
+      "returns": [],
+      "details": {
+        "stateMutability": "nonpayable"
+      }
+    },
+    {
+      "name": "Event_brtStart",
+      "pathname": "",
+      "description": "",
+      "params": [
+        {
+          "name": "instanceId",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "details": {
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum."
+          }
+        }
+      ],
+      "returns": [],
+      "details": {
+        "stateMutability": "nonpayable"
+      }
+    }
+  ],
+  "events": [
+    {
+      "signature": "",
+      "name": "MessageSent",
+      "description": "",
+      "params": [
+        {
+          "name": "instanceId",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "details": {
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum."
+          }
+        },
+        {
+          "name": "messageKey",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "details": {
+              "type": "uint8",
+              "internalType": "enum GethBrtTiming1102025258.MessageKey"
+            },
+            "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum."
+          }
+        },
+        {
+          "name": "fireflyTranId",
+          "schema": {
+            "type": "string",
+            "details": {
+              "type": "string",
+              "internalType": "string"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "signature": "",
+      "name": "ActionEventDone",
+      "description": "",
+      "params": [
+        {
+          "name": "instanceId",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "details": {
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum."
+          }
+        },
+        {
+          "name": "eventKey",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "details": {
+              "type": "uint8",
+              "internalType": "enum GethBrtTiming1102025258.EventKey"
+            },
+            "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum."
+          }
+        }
+      ]
+    },
+    {
+      "signature": "",
+      "name": "BusinessRuleCompleted",
+      "description": "",
+      "params": [
+        {
+          "name": "instanceId",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "details": {
+              "type": "uint256",
+              "internalType": "uint256",
+              "indexed": true
+            },
+            "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum."
+          }
+        },
+        {
+          "name": "ruleKey",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "details": {
+              "type": "uint8",
+              "internalType": "enum GethBrtTiming1102025258.BusinessRuleKey",
+              "indexed": true
+            },
+            "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum."
+          }
+        },
+        {
+          "name": "requestId",
+          "schema": {
+            "type": "string",
+            "details": {
+              "type": "bytes32",
+              "internalType": "bytes32",
+              "indexed": true
+            },
+            "description": "A hex encoded set of bytes, with an optional '0x' prefix"
+          }
+        }
+      ]
+    },
+    {
+      "signature": "",
+      "name": "BusinessRuleRequested",
+      "description": "",
+      "params": [
+        {
+          "name": "instanceId",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "details": {
+              "type": "uint256",
+              "internalType": "uint256",
+              "indexed": true
+            },
+            "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum."
+          }
+        },
+        {
+          "name": "ruleKey",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "details": {
+              "type": "uint8",
+              "internalType": "enum GethBrtTiming1102025258.BusinessRuleKey",
+              "indexed": true
+            },
+            "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum."
+          }
+        },
+        {
+          "name": "requestId",
+          "schema": {
+            "type": "string",
+            "details": {
+              "type": "bytes32",
+              "internalType": "bytes32",
+              "indexed": true
+            },
+            "description": "A hex encoded set of bytes, with an optional '0x' prefix"
+          }
+        }
+      ]
+    },
+    {
+      "signature": "",
+      "name": "GatewayDone",
+      "description": "",
+      "params": [
+        {
+          "name": "instanceId",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "details": {
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum."
+          }
+        },
+        {
+          "name": "gatewayKey",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "details": {
+              "type": "uint8",
+              "internalType": "enum GethBrtTiming1102025258.GatewayKey"
+            },
+            "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum."
+          }
+        }
+      ]
+    },
+    {
+      "signature": "",
+      "name": "MessageCompleted",
+      "description": "",
+      "params": [
+        {
+          "name": "instanceId",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "details": {
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum."
+          }
+        },
+        {
+          "name": "messageKey",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "details": {
+              "type": "uint8",
+              "internalType": "enum GethBrtTiming1102025258.MessageKey"
+            },
+            "description": "An integer. You are recommended to use a JSON string. A JSON number can be used for values up to the safe maximum."
+          }
+        },
+        {
+          "name": "fireflyTranId",
+          "schema": {
+            "type": "string",
+            "details": {
+              "type": "string",
+              "internalType": "string"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
